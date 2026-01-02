@@ -1,0 +1,32 @@
+name: Deploy Database Migrations
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-prod-database
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply Prisma migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run database migrations
+        env:
+          TURBO_TELEMETRY_DISABLED: "1"
+        run: pnpm db:migrate:deploy

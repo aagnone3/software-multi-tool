@@ -1,0 +1,15 @@
+{
+	"devDependencies": {
+		"@repo/tsconfig": "workspace:*",
+		"@vitest/coverage-v8": "4.0.7",
+		"vitest": "4.0.7"
+	},
+	"name": "@repo/config",
+	"private": true,
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"test": "vitest --config ./vitest.config.ts --run",
+		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest --config ./vitest.config.ts --run"
+	},
+	"version": "0.0.0"
+}

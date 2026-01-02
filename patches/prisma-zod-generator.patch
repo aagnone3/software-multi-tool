@@ -1,0 +1,13 @@
+diff --git a/lib/transformer.js b/lib/transformer.js
+index 3673a89f7612bb2c16e380c11b348c201c08137f..a07ccc2e3cf7d944ec122bfafb029f7e924044af 100644
+--- a/lib/transformer.js
++++ b/lib/transformer.js
+@@ -805,7 +805,7 @@ class Transformer {
+                 enumName);
+                 await (0, writeFileSafely_1.writeFileSafely)(path_1.default.join(Transformer.getSchemasPath(), `enums/${fileName}`), `${this.generateImportZodStatement()}\n` +
+                     `export const ${schemaExportName} = z.enum([${values.map((v) => `'${v}'`).join(', ')}])\n\n` +
+-                    `export type ${enumName} = z.infer<typeof ${schemaExportName}>;`);
++                    `export type ${enumName}Enum = z.infer<typeof ${schemaExportName}>;`);
+             }
+         }
+     }

@@ -1,0 +1,58 @@
+name: Run Codex
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: >
+          Instructions passed to Codex. Update this message to describe the work
+          you want Codex to perform in the Software Multitool repository.
+        required: false
+        default: >
+          You are Codex running inside a GitHub Actions workflow for the
+          Software Multitool monorepo. Review AGENTS.md for repository conventions, run
+          any necessary checks, and summarize the work you perform.
+
+jobs:
+  codex:
+    name: Execute Codex CLI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TURBO_TELEMETRY_DISABLED: "1"
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
+      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+
+      - name: Pull Vercel environment variables
+        run: pnpm env:pull
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Codex
+        id: run_codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          sandbox: workspace-write
+          prompt: ${{ inputs.prompt }}
+
+      - name: Show Codex response
+        if: ${{ steps.run_codex.outputs.final-message != '' }}
+        run: |
+          printf 'Codex final message:\n\n%s\n' "${{ steps.run_codex.outputs.final-message }}"

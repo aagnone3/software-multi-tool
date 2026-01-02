@@ -1,0 +1,62 @@
+name: Run Codex For Linear Issue
+
+on:
+    workflow_dispatch:
+        inputs:
+            issue_number:
+                description: Linear issue number to substitute into PRA-{ISSUE_NUM}
+                required: true
+                type: string
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    codex:
+        name: Execute Codex For PRA Issue
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: read
+            issues: read
+            id-token: write
+            actions: read
+        env:
+            TURBO_TELEMETRY_DISABLED: "1"
+            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+            VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
+            VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.14.0
+
+            - name: Pull Vercel environment variables
+              run: pnpm env:pull
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Run Codex
+              id: run_codex
+              uses: openai/codex-action@v1
+              with:
+                  openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+                  sandbox: workspace-write
+                  prompt: |
+                      Work on PRA-${{ inputs.issue_number }} from Linear. When you are done, push your code and submit a PR.
+
+            - name: Show Codex response
+              if: ${{ steps.run_codex.outputs.final-message != '' }}
+              run: |
+                  printf 'Codex final message:\n\n%s\n' "${{ steps.run_codex.outputs.final-message }}"

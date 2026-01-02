@@ -1,0 +1,17 @@
+{
+	"devDependencies": {
+		"@biomejs/biome": "2.3.4",
+		"tailwindcss": "^4.1.16",
+		"@vitest/coverage-v8": "4.0.7",
+		"vitest": "4.0.7"
+	},
+	"main": "theme.css",
+	"name": "@repo/tailwind-config",
+	"private": true,
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"test": "vitest --config ./vitest.config.ts --run",
+		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest --config ./vitest.config.ts --run"
+	},
+	"version": "0.0.0"
+}

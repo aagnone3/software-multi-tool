@@ -1,0 +1,11 @@
+{
+	"mcpServers": {
+		"postgres-ro-local-dev": {
+			"command": "uvx",
+			"args": ["postgres-mcp", "--access-mode=restricted"],
+			"env": {
+				"DATABASE_URI": "postgresql://postgres:postgres@127.0.0.1:5454/localdb_5454"
+			}
+		}
+	}
+}

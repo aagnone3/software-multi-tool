@@ -1,0 +1,20 @@
+{
+	"permissions": {
+		"allow": [],
+		"deny": [],
+		"ask": []
+	},
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/block-no-verify.py"
+					}
+				]
+			}
+		]
+	}
+}

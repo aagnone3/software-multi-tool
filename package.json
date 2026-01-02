@@ -1,0 +1,66 @@
+{
+	"name": "software-multi-tool",
+	"description": "Software Multitool monorepo for building SaaS with Next.js 15",
+	"private": true,
+	"scripts": {
+		"build": "dotenv -c -- turbo build",
+		"dev": "dotenv -c -- turbo dev --concurrency 15",
+		"web:env:list": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:list --app apps/web",
+		"web:env:pull": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:pull --app apps/web",
+		"web:env:set": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:set --app apps/web",
+		"web:env:unset": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:unset --app apps/web",
+		"start": "dotenv -c -- turbo start",
+		"lint": "biome lint . ",
+		"check": "biome check",
+		"clean": "turbo clean",
+		"format": "biome format . --write",
+		"metrics:collect": "TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=0 pnpm test && pnpm --filter @repo/scripts exec tsx src/testing-metrics.ts",
+		"metrics:weekly": "pnpm --filter @repo/scripts exec tsx src/weekly-test-summary.ts",
+		"test": "dotenv -c -- turbo run test",
+		"test:ci": "dotenv -c -- env TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
+		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.14.0",
+	"optionalDependencies": {
+		"@rollup/rollup-darwin-arm64": "4.52.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.4",
+		"@repo/tsconfig": "workspace:*",
+		"@testing-library/dom": "10.4.1",
+		"@testing-library/jest-dom": "6.9.1",
+		"@testing-library/react": "16.3.0",
+		"@testing-library/user-event": "14.6.1",
+		"@types/jsdom": "27.0.0",
+		"@types/node": "^24.10.0",
+		"@vitest/coverage-v8": "4.0.7",
+		"dotenv-cli": "^11.0.0",
+		"happy-dom": "20.0.10",
+		"jsdom": "27.1.0",
+		"markdownlint-cli2": "^0.18.1",
+		"postcss": "8.5.6",
+		"turbo": "^2.6.0",
+		"typescript": "5.9.3",
+		"vitest": "4.0.7"
+	},
+	"pnpm": {
+		"overrides": {
+			"@types/react": "19.0.0",
+			"@types/react-dom": "19.0.0"
+		},
+		"patchedDependencies": {
+			"prisma-zod-generator@1.29.1": "patches/prisma-zod-generator@1.29.1.patch"
+		},
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"@prisma/client",
+			"@prisma/engines",
+			"prisma",
+			"prisma-zod-generator",
+			"sharp"
+		]
+	}
+}

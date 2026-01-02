@@ -1,0 +1,36 @@
+{
+	"dependencies": {
+		"@linear/sdk": "^60.0.0",
+		"@repo/auth": "workspace:*",
+		"@repo/database": "workspace:*",
+		"@repo/logs": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"stripe": "^18.5.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.4",
+		"@repo/tsconfig": "workspace:*",
+		"@types/node": "^24.10.0",
+		"@vitest/coverage-v8": "4.0.7",
+		"nanoid": "^5.1.5",
+		"tsx": "^4.20.6",
+		"vitest": "4.0.7"
+	},
+	"name": "@repo/scripts",
+	"private": true,
+	"scripts": {
+		"env:pull": "pnpm dlx tsx ./src/env/pull-vercel-env.ts",
+		"env:list": "tsx ./src/env/manage-vercel-env.ts list",
+		"env:set": "tsx ./src/env/manage-vercel-env.ts set",
+		"env:unset": "tsx ./src/env/manage-vercel-env.ts unset",
+		"create:user": "dotenv -c -e ../../apps/web/.env -- tsx ./src/create-user.ts",
+		"linear": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/linear/index.mjs",
+		"prisma:validate": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/validate-migration.mjs",
+		"prisma:stage": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/stage-migration.mjs",
+		"stripe:validate": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/stripe/validate-webhooks.mjs",
+		"type-check": "tsc --noEmit",
+		"test": "vitest --config ./vitest.config.ts --run",
+		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest --config ./vitest.config.ts --run"
+	},
+	"version": "0.0.0"
+}

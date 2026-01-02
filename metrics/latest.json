@@ -1,0 +1,438 @@
+{
+	"timestamp": "2025-10-10T18:40:40.966Z",
+	"coverage": {
+		"statements": {
+			"total": 18066,
+			"covered": 5,
+			"pct": 0.03
+		},
+		"branches": {
+			"total": 341,
+			"covered": 141,
+			"pct": 41.35
+		},
+		"lines": {
+			"total": 18066,
+			"covered": 5,
+			"pct": 0.03
+		},
+		"functions": {
+			"total": 341,
+			"covered": 141,
+			"pct": 41.35
+		}
+	},
+	"testDurationMs": 19.09,
+	"flakyTests": 0,
+	"totals": {
+		"testSuites": 2,
+		"tests": 1
+	},
+	"workspaces": [
+		{
+			"workspace": "apps/web",
+			"statements": {
+				"total": 11111,
+				"covered": 5,
+				"pct": 0.05
+			},
+			"branches": {
+				"total": 213,
+				"covered": 115,
+				"pct": 53.99
+			},
+			"lines": {
+				"total": 11111,
+				"covered": 5,
+				"pct": 0.05
+			},
+			"functions": {
+				"total": 213,
+				"covered": 115,
+				"pct": 53.99
+			},
+			"totalTests": 1,
+			"totalSuites": 2,
+			"durationMs": 19.09,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "config",
+			"statements": {
+				"total": 118,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 2,
+				"covered": 2,
+				"pct": 100
+			},
+			"lines": {
+				"total": 118,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 2,
+				"covered": 2,
+				"pct": 100
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/ai",
+			"statements": {
+				"total": 11,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 4,
+				"covered": 1,
+				"pct": 25
+			},
+			"lines": {
+				"total": 11,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 4,
+				"covered": 1,
+				"pct": 25
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/api",
+			"statements": {
+				"total": 975,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 34,
+				"covered": 1,
+				"pct": 2.94
+			},
+			"lines": {
+				"total": 975,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 34,
+				"covered": 1,
+				"pct": 2.94
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/auth",
+			"statements": {
+				"total": 311,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 6,
+				"covered": 1,
+				"pct": 16.67
+			},
+			"lines": {
+				"total": 311,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 6,
+				"covered": 1,
+				"pct": 16.67
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/database",
+			"statements": {
+				"total": 3138,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 35,
+				"covered": 17,
+				"pct": 48.57
+			},
+			"lines": {
+				"total": 3138,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 35,
+				"covered": 17,
+				"pct": 48.57
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/i18n",
+			"statements": {
+				"total": 17,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 3,
+				"covered": 1,
+				"pct": 33.33
+			},
+			"lines": {
+				"total": 17,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 3,
+				"covered": 1,
+				"pct": 33.33
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/logs",
+			"statements": {
+				"total": 7,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 2,
+				"covered": 0,
+				"pct": 0
+			},
+			"lines": {
+				"total": 7,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 2,
+				"covered": 0,
+				"pct": 0
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/mail",
+			"statements": {
+				"total": 518,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 23,
+				"covered": 1,
+				"pct": 4.35
+			},
+			"lines": {
+				"total": 518,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 23,
+				"covered": 1,
+				"pct": 4.35
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/payments",
+			"statements": {
+				"total": 1039,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 10,
+				"covered": 1,
+				"pct": 10
+			},
+			"lines": {
+				"total": 1039,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 10,
+				"covered": 1,
+				"pct": 10
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/storage",
+			"statements": {
+				"total": 72,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 4,
+				"covered": 1,
+				"pct": 25
+			},
+			"lines": {
+				"total": 72,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 4,
+				"covered": 1,
+				"pct": 25
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "packages/utils",
+			"statements": {
+				"total": 10,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 2,
+				"covered": 0,
+				"pct": 0
+			},
+			"lines": {
+				"total": 10,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 2,
+				"covered": 0,
+				"pct": 0
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "tooling/scripts",
+			"statements": {
+				"total": 739,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 3,
+				"covered": 0,
+				"pct": 0
+			},
+			"lines": {
+				"total": 739,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 3,
+				"covered": 0,
+				"pct": 0
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "tooling/tailwind",
+			"statements": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"lines": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		},
+		{
+			"workspace": "tooling/typescript",
+			"statements": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"branches": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"lines": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"functions": {
+				"total": 0,
+				"covered": 0,
+				"pct": 0
+			},
+			"totalTests": 0,
+			"totalSuites": 0,
+			"durationMs": 0,
+			"flakyTests": 0
+		}
+	]
+}

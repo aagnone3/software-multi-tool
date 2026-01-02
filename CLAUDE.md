@@ -1,0 +1,241 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Core Commands
+
+### Development
+
+- `pnpm dev` - Start the hot-reloading development server (concurrency limited to 15)
+- `pnpm build` - Compile all apps and packages for production
+- `pnpm start` - Serve the production build locally
+
+### Testing
+
+- `pnpm test` - Run Vitest workspace pipeline (Turbo-scoped to affected packages)
+- `pnpm test -- --runInBand` - Run tests serially (for noisy environments/pre-commit)
+- `pnpm test:ci` - Run tests with coverage thresholds enforced (CI parity)
+- `pnpm --filter <workspace> test` - Test a single workspace (e.g., `pnpm --filter @repo/api test`)
+- `pnpm --filter web run e2e` - Run Playwright E2E tests with UI
+- `pnpm --filter web run e2e:ci` - Run E2E tests headlessly (installs browsers first)
+- `pnpm --filter web run type-check` - Run TypeScript project reference checks for web app
+- Add `-- --grep "test name"` to target individual Playwright tests
+- Database integration tests use Testcontainers (requires Docker running)
+- Coverage reports written to each workspace's `coverage/` directory
+- Coverage thresholds configured in `tooling/test/coverage-thresholds.ts`
+
+#### Metrics & Reporting
+
+- `pnpm metrics:collect` - Run full test suite with coverage and collect metrics to `metrics/` directory
+- `pnpm metrics:weekly` - Generate weekly test-readiness summary with trends and blockers
+- `pnpm metrics:weekly --days 14` - Generate summary comparing to 14 days ago
+- `pnpm metrics:weekly --format json` - Output summary as JSON
+- Weekly summaries are automated via GitHub Actions every Monday at 9 AM UTC
+
+### Code Quality
+
+- `pnpm lint` - Run Biome linting across workspace
+- `pnpm check` - Run Biome validation
+- `pnpm format` - Format with Biome (writes changes)
+- `pre-commit run --all-files` - Run git hooks manually across entire tree
+
+### Database
+
+- `pnpm --filter @repo/database generate` - Generate Prisma client and Zod schemas
+- `pnpm --filter @repo/database push` - Push schema changes to database (skips generation)
+- `pnpm --filter @repo/database migrate` - Create and apply migrations
+- `pnpm --filter @repo/database studio` - Open Prisma Studio GUI
+- `pnpm --filter @repo/database run test:integration` - Run Postgres integration tests (requires Docker)
+- Prisma schema is in `packages/database/prisma/schema.prisma`
+- Generated types are in `packages/database/prisma/generated/`
+
+### Stripe Webhooks
+
+- `pnpm --filter @repo/scripts stripe:validate` - Validate Stripe webhook configuration and test integration
+- Webhook endpoint: `POST /api/webhooks/payments`
+- Supported events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`
+- Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in `apps/web/.env.local`
+- For local testing:
+  1. Install Stripe CLI: `brew install stripe/stripe-cli/stripe`
+  2. Login: `stripe login`
+  3. Forward webhooks: `stripe listen --forward-to http://localhost:3500/api/webhooks/payments`
+  4. Copy webhook signing secret (starts with `whsec_`) to `.env.local`
+  5. Trigger test events: `stripe trigger checkout.session.completed`, etc.
+
+## Git Workflow
+
+> **🚨 CRITICAL: NEVER push directly to the main branch unless explicitly directed by the user. 🚨**
+
+All changes MUST go through pull requests.
+
+### Standard Workflow
+
+1. **Create feature branch FIRST** before any commits:
+
+   ```bash
+   git checkout -b <type>/pra-<issue>-<description>
+   ```
+
+   Branch naming conventions:
+   - Bug fixes: `fix/pra-XX-short-description`
+   - Features: `feat/pra-XX-short-description`
+   - Chores: `chore/pra-XX-short-description`
+   - Documentation: `docs/pra-XX-short-description`
+
+2. **Verify current branch** before committing:
+
+   ```bash
+   git branch --show-current  # MUST NOT be "main"
+   ```
+
+3. **Make changes and commit**:
+
+   ```bash
+   git add .
+   git commit -m "type: description
+
+   Detailed explanation.
+
+   Closes PRA-XX
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   ```
+
+4. **Push to feature branch**:
+
+   ```bash
+   git push -u origin HEAD
+   ```
+
+5. **Create pull request** targeting main:
+
+   ```bash
+   gh pr create --base main --head <feature-branch> --title "..." --body "..."
+   ```
+
+### Automated Protection
+
+A git pre-commit hook (`.git/hooks/pre-commit`) automatically blocks commits to the main branch. This provides an additional safety layer beyond the `.claude/hooks/prevent-main-commit.sh` template.
+
+To bypass (ONLY with explicit user approval):
+
+```bash
+git commit --no-verify -m "..."
+```
+
+### Exception Handling
+
+**ONLY push to main if:**
+
+- The user explicitly directs you to do so
+- You have confirmed with the user first
+- The repository has no branch protection requirements
+
+In all other cases, create a feature branch and submit a PR.
+
+## Architecture
+
+**Claude Skill Available**: Use the `architecture` skill (`.claude/skills/architecture/`) for comprehensive codebase documentation.
+
+This is a **pnpm + Turbo monorepo**:
+
+- `apps/web` - Next.js 15 App Router application
+- `packages/` - Backend logic (`@repo/api`, `@repo/auth`, `@repo/database`, `@repo/payments`, `@repo/mail`, `@repo/storage`, `@repo/ai`, `@repo/i18n`, `@repo/logs`, `@repo/utils`)
+- `config/` - Application configuration (feature flags, branding, payments, i18n)
+- `tooling/` - Build infrastructure (TypeScript, Tailwind, scripts)
+
+See `.claude/skills/architecture/` for detailed documentation including:
+
+- API layer (Hono + oRPC) and request flow
+- Frontend architecture (React 19, TanStack Query, nuqs)
+- Data layer (Prisma, Zod schemas)
+- All integrations (payments, email, storage, AI)
+- Deployment infrastructure (Vercel, GitHub Actions CI/CD)
+- How-to guides for adding modules and packages
+
+### Analytics
+
+- **Skill available**: Use the `analytics` skill (`.claude/skills/analytics/`) for PostHog and analytics provider guidance
+- Pluggable provider system at `apps/web/modules/analytics/`
+- Default provider: PostHog (`provider/posthog/`)
+- Import via `@analytics` alias: `import { useAnalytics } from "@analytics"`
+- Set `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` in `apps/web/.env.local`
+
+### Pre-commit Hooks
+
+The repository enforces quality gates via `pre-commit`. Install with `pre-commit install`. Each commit runs:
+
+1. `pnpm exec biome check --write` - Format + lint staged files
+2. `pnpm lint` - Workspace-wide Biome lint
+3. `pnpm --filter web run type-check` - TypeScript checks for web app
+4. Targeted tests on affected workspaces
+
+## Code Style & Patterns
+
+### TypeScript
+
+- Use TypeScript for all code
+- Prefer **interfaces** over types
+- Avoid **enums**; use maps or const objects instead
+- Use functional components with TypeScript interfaces
+
+### React/Next.js
+
+- Prefer **React Server Components** (default in Next.js 15 App Router)
+- Use client components (`"use client"`) only when required (interactivity, hooks, browser APIs)
+- Functional and declarative programming patterns; avoid classes
+- Structure files: exported component, subcomponents, helpers, static content, types
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`)
+- Follow Next.js docs for Data Fetching, Rendering, and Routing
+
+### UI/Styling
+
+- Use **Shadcn UI**, **Radix**, and **Tailwind** for components
+- Mobile-first responsive design with Tailwind CSS
+- Use `cn()` utility for class name composition (Tailwind class merging)
+- Global theme variables defined in `tooling/tailwind/theme.css`
+
+### Workspace References
+
+- Reference internal packages via `@repo/*` workspace alias (e.g., `@repo/api`, `@repo/auth`)
+- Follow `apps/web/.env.local.example` pattern when adding environment variables
+
+## Linear Integration
+
+- **Claude Skill Available**: Use the `linear` skill (`.claude/skills/linear/`) for comprehensive Linear project management
+  - Automatically invoked when working with Linear projects, milestones, or issues
+  - Provides guided workflows and examples
+  - See `SKILL.md` and `examples.md` in the skill directory for detailed usage
+- MCP linear tool handles standard CRUD; for gaps use helper CLI in `tooling/scripts/src/linear/index.mjs`
+- Set `LINEAR_API_KEY` in `apps/web/.env.local`
+- Run commands via `pnpm --filter @repo/scripts linear <resource> <action>`
+  - `projects list [--query]`
+  - `projects dependency --blocking <ref> --blocked <ref> [--anchor] [--related-anchor] [--type]`
+  - `projects dependency --remove --id <relationId>`
+  - `milestones list --project <ref>`
+  - `milestones create --project <ref> --name <text> [--description] [--target] [--sort]`
+  - `issues set-milestone --issue <key> --project <ref> --milestone <ref>`
+  - `issues dependency --blocked <key> --blocking <key>`
+  - `issues close --issue <key>`
+
+## Environment & Setup
+
+- Copy `apps/web/.env.local.example` to `apps/web/.env.local` for local development
+- `pnpm web:env:list` / `pnpm web:env:set` / `pnpm web:env:unset` - Inspect and manage Vercel environment variables (use `--target` to scope per environment)
+- `pnpm web:env:pull` - Pull environment variables from Vercel into `apps/web/.env.local` (requires Vercel CLI auth or `VERCEL_TOKEN`/`VERCEL_PROJECT`/`VERCEL_SCOPE`)
+- All commands use `dotenv -c` to auto-load `apps/web/.env.local` variables
+- Turbo tracks `.env.*local` files as global dependencies
+
+## Additional Resources
+
+- **Architecture skill**: `.claude/skills/architecture/` (codebase structure, integrations, how-to guides)
+- **Analytics skill**: `.claude/skills/analytics/` (PostHog, event tracking, provider system)
+- **Auth skill**: `.claude/skills/better-auth/` (authentication implementation)
+- **Prisma skill**: `.claude/skills/prisma-migrate/` (database migrations)
+- In-app docs: `apps/web/content/docs`
+- Agent guidance: `AGENTS.md`
+- Contributor workflow: `CONTRIBUTING.md`
+- Testing documentation: `docs/postgres-integration-testing.md`
+- Cursor rules: `.cursor/rules/` (key principles, project structure, TypeScript usage, UI/styling)
