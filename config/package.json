@@ -1,8 +1,8 @@
 {
 	"devDependencies": {
 		"@repo/tsconfig": "workspace:*",
-		"@vitest/coverage-v8": "4.0.7",
-		"vitest": "4.0.7"
+		"@vitest/coverage-v8": "4.0.16",
+		"vitest": "4.0.16"
 	},
 	"name": "@repo/config",
 	"private": true,
