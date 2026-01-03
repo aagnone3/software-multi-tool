@@ -17,6 +17,28 @@ This skill provides comprehensive Prisma migration support with safety checks, a
 - Prisma schema located at `packages/database/prisma/schema.prisma`
 - Docker running (for shadow database in development)
 
+### Local Database Setup
+
+Local PostgreSQL runs on Homebrew installation:
+
+| Setting | Value |
+|---------|-------|
+| Host | localhost |
+| Port | 5432 |
+| Database | local_softwaremultitool |
+| User | postgres |
+| Password | postgres |
+
+**Connection string for `.env.local`:**
+```
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+```
+
+**Create database (if needed):**
+```bash
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+```
+
 ## Core Command Patterns
 
 All Prisma operations use pnpm workspace filtering:

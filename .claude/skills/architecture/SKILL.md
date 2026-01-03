@@ -319,9 +319,32 @@ Located in `.github/workflows/`:
 - Applies Prisma migrations via `pnpm db:migrate:deploy`
 - Uses concurrency control (no cancel in progress)
 
-### Database: Supabase
+### Database: Supabase (Production)
 
 PostgreSQL hosted on **Supabase** with connection pooling (pgbouncer).
+
+### Database: Local Development
+
+Local PostgreSQL for development runs on the default Homebrew installation:
+
+| Setting | Value |
+|---------|-------|
+| Host | localhost |
+| Port | 5432 |
+| Database | local_softwaremultitool |
+| User | postgres |
+| Password | postgres |
+
+**Connection string:**
+```
+postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+```
+
+**Setup (if needed):**
+```bash
+# Create the database (using template1 since default postgres db may not exist)
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+```
 
 ### Environment Management
 

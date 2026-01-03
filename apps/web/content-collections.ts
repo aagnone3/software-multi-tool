@@ -86,7 +86,6 @@ const docs = defineCollection({
 	directory: "content/docs",
 	include: "**/*.mdx",
 	schema: z.object(createDocSchema(z)),
-	// biome-ignore lint/suspicious/noExplicitAny: fumadocs context type compatibility
 	transform: async (document, context: any) =>
 		transformMDX(document, context, {
 			remarkPlugins: [

@@ -75,7 +75,7 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install && pnpm --filter database generate
       - name: Run unit tests
         env:
           TURBO_TELEMETRY_DISABLED: "1"

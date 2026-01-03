@@ -16,8 +16,8 @@ export function Hero() {
 
 				<p className="mx-auto mt-4 max-w-lg text-balance text-foreground/60 text-lg">
 					Boost your productivity and streamline your workflows with
-					our Software Multitools. Let us know what is missing and we will
-					build it. Simple as that.
+					our Software Multitools. Let us know what is missing and we
+					will build it. Simple as that.
 				</p>
 
 				<div className="mt-6 flex flex-col items-center justify-center gap-3 md:flex-row">

@@ -1,6 +1,5 @@
 import { ContactForm } from "@marketing/home/components/ContactForm";
 import { config } from "@repo/config";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 

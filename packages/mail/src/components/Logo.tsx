@@ -22,7 +22,9 @@ export function Logo({ withLabel = true }: { withLabel?: boolean }) {
 					fill="currentColor"
 				/>
 			</svg>
-			{withLabel && <span className="ml-3 text-xl">Software Multitool</span>}
+			{withLabel && (
+				<span className="ml-3 text-xl">Software Multitool</span>
+			)}
 		</span>
 	);
 }

@@ -23,7 +23,9 @@ export function Logo({
 				className="size-10"
 			/>
 			{withLabel && (
-				<span className="ml-3 hidden text-lg md:block">Software Multitool</span>
+				<span className="ml-3 hidden text-lg md:block">
+					Software Multitool
+				</span>
 			)}
 		</span>
 	);
