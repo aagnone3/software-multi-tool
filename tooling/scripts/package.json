@@ -1,18 +1,18 @@
 {
 	"dependencies": {
-		"@linear/sdk": "^60.0.0",
+		"@linear/sdk": "^68.1.0",
 		"@repo/auth": "workspace:*",
 		"@repo/database": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"stripe": "^18.5.0"
+		"stripe": "^20.1.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.4",
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "^24.10.0",
 		"@vitest/coverage-v8": "4.0.7",
-		"nanoid": "^5.1.5",
+		"nanoid": "^5.1.6",
 		"tsx": "^4.20.6",
 		"vitest": "4.0.7"
 	},
