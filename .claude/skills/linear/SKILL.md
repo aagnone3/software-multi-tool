@@ -36,6 +36,20 @@ pnpm --filter @repo/scripts linear projects list [--query <text>]
 - Optional `--query` flag filters by name, slug, or ID
 - Output: ID, SLUG, NAME columns
 
+#### Create Project
+
+```bash
+pnpm --filter @repo/scripts linear projects create --name <text> [options]
+```
+
+- Creates a new project in Linear
+- Required: `--name`
+- Optional flags:
+  - `--description <markdown>` - Project description
+  - `--target <YYYY-MM-DD>` - Target completion date
+  - `--color <hex>` - Project color (hex format)
+- Returns: Project ID, slug, and URL
+
 #### Create Project Dependency
 
 ```bash

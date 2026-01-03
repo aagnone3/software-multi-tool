@@ -8,6 +8,7 @@ import { IssueRelationType, LinearClient } from "@linear/sdk";
 const commands = {
 	help: handleHelp,
 	"projects:list": handleProjectsList,
+	"projects:create": handleProjectsCreate,
 	"projects:dependency": handleProjectsDependency,
 	"milestones:list": handleMilestonesList,
 	"milestones:create": handleMilestonesCreate,
@@ -106,6 +107,8 @@ Usage:
 
 Resources & actions:
   projects list [--query <text>]                           List projects (filter by name or slug).
+  projects create --name <text> [flags]                    Create a new project.
+     Optional flags: --description <markdown>, --target <YYYY-MM-DD>, --color <hex>
   projects dependency --blocked <ref> --blocking <ref>     Link projects with a blocking dependency.
                          [--remove --id <relationId>]      Remove a dependency by id.
   milestones list --project <id|slug|name>                 List milestones for a project.
@@ -122,6 +125,7 @@ Resources & actions:
 
 Examples:
   pnpm --filter @repo/scripts linear projects list
+  pnpm --filter @repo/scripts linear projects create --name "My New Project" --description "Project description"
   pnpm --filter @repo/scripts linear milestones create --project "Testing Initiative" --name "Epic 1"
   pnpm --filter @repo/scripts linear issues create --title "Bug title" --project Integrations --priority 1
   pnpm --filter @repo/scripts linear issues start --issue PRA-10
@@ -159,6 +163,45 @@ async function handleProjectsList(context) {
 	for (const project of projects) {
 		console.log(`${project.id}\t${project.slugId ?? "-"}\t${project.name}`);
 	}
+}
+
+/** @param {CommandContext} context */
+async function handleProjectsCreate(context) {
+	const client = requireClient(context);
+	const { flags } = context;
+	const name = requireFlag(flags, "name");
+	const description = flags.description;
+	const targetDate = flags.target;
+	const color = flags.color;
+
+	// Get the first team to associate the project with
+	const teams = await client.teams({ first: 1 });
+	if (teams.nodes.length === 0) {
+		throw new Error("No teams found in workspace. Projects require a team.");
+	}
+	const team = teams.nodes[0];
+
+	const payload = await client.createProject({
+		name,
+		description,
+		targetDate,
+		color,
+		teamIds: [team.id],
+	});
+
+	if (!payload.success) {
+		throw new Error("Linear API reported failure when creating project.");
+	}
+
+	const project = await payload.project;
+	if (!project) {
+		throw new Error("Project creation succeeded but no project was returned.");
+	}
+
+	console.log(
+		`Created project "${project.name}" (${project.id}) with slug ${project.slugId ?? "-"}.`,
+	);
+	console.log(`URL: ${project.url}`);
 }
 
 /** @param {CommandContext} context */
