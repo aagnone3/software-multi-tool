@@ -12,6 +12,21 @@ updates:
       # Re-enable once upstream compatibility issues are resolved
       - dependency-name: "prisma"
       - dependency-name: "@prisma/client"
+      # Next.js 16 has breaking changes - handle manually when ready
+      - dependency-name: "next"
+        versions: [">=16.0.0"]
+      # Fumadocs 16 has breaking import path changes
+      - dependency-name: "fumadocs-core"
+        versions: [">=16.0.0"]
+      - dependency-name: "fumadocs-ui"
+        versions: [">=16.0.0"]
+      - dependency-name: "@fumadocs/*"
+        versions: [">=2.0.0"]
+      # AI SDK v6 / @ai-sdk v3 have breaking API changes
+      - dependency-name: "ai"
+        versions: [">=6.0.0"]
+      - dependency-name: "@ai-sdk/*"
+        versions: [">=3.0.0"]
     groups:
       production-dependencies:
         dependency-type: "production"
