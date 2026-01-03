@@ -16,7 +16,7 @@ export function Logo({
 			)}
 		>
 			<Image
-				src="/images/logo.png"
+				src="/images/icon-sd.png"
 				alt="Software Multitool"
 				width={40}
 				height={40}
