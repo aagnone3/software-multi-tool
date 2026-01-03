@@ -232,6 +232,7 @@ The repository enforces quality gates via `pre-commit`. Install with `pre-commit
 - Set `LINEAR_API_KEY` in `apps/web/.env.local`
 - Run commands via `pnpm --filter @repo/scripts linear <resource> <action>`
   - `projects list [--query]`
+  - `projects create --name <text> [--description] [--target] [--color]`
   - `projects dependency --blocking <ref> --blocked <ref> [--anchor] [--related-anchor] [--type]`
   - `projects dependency --remove --id <relationId>`
   - `milestones list --project <ref>`
