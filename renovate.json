@@ -1,0 +1,90 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 9am on monday"],
+  "timezone": "America/New_York",
+  "prHourlyLimit": 3,
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies"],
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on the first day of the month"]
+  },
+  "packageRules": [
+    {
+      "description": "Automerge patch updates",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group minor updates weekly",
+      "matchUpdateTypes": ["minor"],
+      "groupName": "minor updates",
+      "schedule": ["before 9am on monday"]
+    },
+    {
+      "description": "Major updates - individual PRs, manual review required",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "labels": ["dependencies", "breaking-change"]
+    },
+    {
+      "description": "Group Radix UI updates",
+      "matchPackagePatterns": ["^@radix-ui/"],
+      "groupName": "radix-ui"
+    },
+    {
+      "description": "Group TanStack updates",
+      "matchPackagePatterns": ["^@tanstack/"],
+      "groupName": "tanstack"
+    },
+    {
+      "description": "Group AWS SDK updates",
+      "matchPackagePatterns": ["^@aws-sdk/"],
+      "groupName": "aws-sdk"
+    },
+    {
+      "description": "Group oRPC updates",
+      "matchPackagePatterns": ["^@orpc/"],
+      "groupName": "orpc"
+    },
+    {
+      "description": "Disable Prisma - breaking changes in client generation",
+      "matchPackagePatterns": ["^prisma$", "^@prisma/"],
+      "enabled": false
+    },
+    {
+      "description": "Block Next.js 16+ - handle manually",
+      "matchPackagePatterns": ["^next$", "^@next/"],
+      "allowedVersions": "<16.0.0"
+    },
+    {
+      "description": "Block Fumadocs 16+ - breaking import changes",
+      "matchPackagePatterns": ["^fumadocs-", "^@fumadocs/"],
+      "allowedVersions": "<16.0.0"
+    },
+    {
+      "description": "Block AI SDK major updates - breaking API changes",
+      "matchPackagePatterns": ["^ai$"],
+      "allowedVersions": "<6.0.0"
+    },
+    {
+      "description": "Block @ai-sdk major updates",
+      "matchPackagePatterns": ["^@ai-sdk/"],
+      "allowedVersions": "<3.0.0"
+    },
+    {
+      "description": "Block OpenAI 6+ - breaking changes",
+      "matchPackageNames": ["openai"],
+      "allowedVersions": "<6.0.0"
+    },
+    {
+      "description": "Block cropperjs updates",
+      "matchPackageNames": ["cropperjs"],
+      "allowedVersions": "<=1.6.2"
+    }
+  ]
+}
