@@ -8,6 +8,10 @@ updates:
     ignore:
       - dependency-name: "cropperjs"
         versions: [">1.6.2"]
+      # Prisma 6.x/7.x has breaking changes in client generation
+      # Re-enable once upstream compatibility issues are resolved
+      - dependency-name: "prisma"
+      - dependency-name: "@prisma/client"
     groups:
       production-dependencies:
         dependency-type: "production"
