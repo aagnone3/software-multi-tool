@@ -177,7 +177,9 @@ async function handleProjectsCreate(context) {
 	// Get the first team to associate the project with
 	const teams = await client.teams({ first: 1 });
 	if (teams.nodes.length === 0) {
-		throw new Error("No teams found in workspace. Projects require a team.");
+		throw new Error(
+			"No teams found in workspace. Projects require a team.",
+		);
 	}
 	const team = teams.nodes[0];
 
@@ -195,7 +197,9 @@ async function handleProjectsCreate(context) {
 
 	const project = await payload.project;
 	if (!project) {
-		throw new Error("Project creation succeeded but no project was returned.");
+		throw new Error(
+			"Project creation succeeded but no project was returned.",
+		);
 	}
 
 	console.log(
