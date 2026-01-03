@@ -49,6 +49,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
 
+#### Local Development Database
+
+Local PostgreSQL (Homebrew) on port 5432:
+
+| Setting | Value |
+|---------|-------|
+| Database | local_softwaremultitool |
+| User | postgres |
+| Password | postgres |
+
+**Connection string:**
+```
+postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+```
+
+**Create database (if needed):**
+```bash
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+```
+
 ### Stripe Webhooks
 
 - `pnpm --filter @repo/scripts stripe:validate` - Validate Stripe webhook configuration and test integration
