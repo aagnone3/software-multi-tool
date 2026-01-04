@@ -1,3 +1,4 @@
+import { passkey } from "@better-auth/passkey";
 import { config } from "@repo/config";
 import {
 	db,
@@ -22,7 +23,6 @@ import {
 	twoFactor,
 	username,
 } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 import { parse as parseCookies } from "cookie";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
@@ -215,8 +215,8 @@ export const auth = betterAuth({
 		passkey(),
 		magicLink({
 			disableSignUp: false,
-			sendMagicLink: async ({ email, url }, request) => {
-				const locale = getLocaleFromRequest(request);
+			sendMagicLink: async ({ email, url }, ctx) => {
+				const locale = getLocaleFromRequest(ctx?.request);
 				await sendEmail({
 					to: email,
 					templateId: "magicLink",
