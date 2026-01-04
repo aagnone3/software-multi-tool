@@ -1,6 +1,6 @@
-# LGTM - Merge PR and Close Linear Issue
+# Merge Pull Request and Close Linear Issue
 
-When the user says "LGTM" (Looks Good To Me), they are approving the current work and asking you to complete the workflow by merging the PR and closing the Linear issue.
+When the user runs this command, they are approving the current work and asking you to complete the workflow by merging the PR and closing the Linear issue.
 
 ## Required Steps (IN THIS ORDER)
 
@@ -70,10 +70,10 @@ This ensures your local main branch is up to date with the merged changes.
 
 Report to user:
 
-- ✅ PR #XX merged to main
-- ✅ Linear issue PRA-XX closed
-- ✅ Switched to main branch and pulled latest changes
-- 🔗 PR URL
+- PR #XX merged to main
+- Linear issue PRA-XX closed
+- Switched to main branch and pulled latest changes
+- PR URL
 
 ## Error Handling
 
@@ -101,9 +101,9 @@ pnpm --filter @repo/scripts linear issues close --issue PRA-28
 git checkout main && git pull origin main
 
 # 6. Report
-# ✅ PR #47 merged: https://github.com/org/repo/pull/47
-# ✅ Linear issue PRA-28 closed
-# ✅ Switched to main branch and pulled latest changes
+# PR #47 merged: https://github.com/org/repo/pull/47
+# Linear issue PRA-28 closed
+# Switched to main branch and pulled latest changes
 ```
 
 ## Critical Rules
@@ -111,4 +111,4 @@ git checkout main && git pull origin main
 1. **NEVER** close the Linear issue before verifying the PR is merged
 2. **ALWAYS** verify merge succeeded before closing Linear issue
 3. **STOP** if any step fails - do not proceed to next step
-4. If user says "LGTM" but no PR exists, this is an error - ask user what they want to do
+4. If user runs this command but no PR exists, this is an error - ask user what they want to do
