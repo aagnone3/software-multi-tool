@@ -340,7 +340,9 @@ async function handleIssuesList(context) {
 	const filteredIssues = [];
 	for (const issue of issues.nodes) {
 		const state = await issue.state;
-		if (!state) continue;
+		if (!state) {
+			continue;
+		}
 
 		const stateType = state.type;
 		const shouldInclude =
@@ -359,7 +361,7 @@ async function handleIssuesList(context) {
 
 	if (filteredIssues.length === 0) {
 		console.log(
-			`No ${statusFilter === "all" ? "" : statusFilter + " "}issues found for project "${project.name}".`,
+			`No ${statusFilter === "all" ? "" : `${statusFilter} `}issues found for project "${project.name}".`,
 		);
 		return;
 	}
@@ -383,9 +385,11 @@ async function handleIssuesList(context) {
 		const priority = priorityLabels[issue.priority ?? 0];
 		const title =
 			issue.title.length > 50
-				? issue.title.slice(0, 47) + "..."
+				? `${issue.title.slice(0, 47)}...`
 				: issue.title;
-		console.log(`${issue.identifier}\t${state.name}\t${priority}\t${title}`);
+		console.log(
+			`${issue.identifier}\t${state.name}\t${priority}\t${title}`,
+		);
 	}
 }
 
