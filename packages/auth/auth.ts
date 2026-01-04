@@ -215,8 +215,8 @@ export const auth = betterAuth({
 		passkey(),
 		magicLink({
 			disableSignUp: false,
-			sendMagicLink: async ({ email, url }, request) => {
-				const locale = getLocaleFromRequest(request);
+			sendMagicLink: async ({ email, url }, ctx) => {
+				const locale = getLocaleFromRequest(ctx?.request);
 				await sendEmail({
 					to: email,
 					templateId: "magicLink",
