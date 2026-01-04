@@ -12,8 +12,10 @@ const commands = {
 	"projects:dependency": handleProjectsDependency,
 	"milestones:list": handleMilestonesList,
 	"milestones:create": handleMilestonesCreate,
+	"issues:list": handleIssuesList,
 	"issues:create": handleIssuesCreate,
 	"issues:view": handleIssuesView,
+	"issues:update": handleIssuesUpdate,
 	"issues:set-milestone": handleIssuesSetMilestone,
 	"issues:start": handleIssuesStart,
 	"issues:close": handleIssuesClose,
@@ -114,9 +116,13 @@ Resources & actions:
   milestones list --project <id|slug|name>                 List milestones for a project.
   milestones create --project <ref> --name <text> [flags]  Create a milestone for a project.
      Optional flags: --description <markdown>, --target <YYYY-MM-DD>, --sort <number>
+  issues list --project <ref> [--status <filter>]         List issues for a project.
+     Status filters: all, active, backlog, done (default: active)
   issues create --title <text> --project <ref> [flags]    Create a new issue.
      Optional flags: --description <markdown>, --priority <0-4>, --labels <comma-separated>
   issues view --issue <key>                               View issue details.
+  issues update --issue <key> [flags]                    Update issue properties.
+     Optional flags: --title <text>, --description <markdown>, --priority <0-4>
   issues set-milestone --issue <key> --project <ref> --milestone <name|id>
                                                           Attach an issue to a project milestone.
   issues start --issue <key>                              Mark an issue as In Progress.
@@ -320,6 +326,74 @@ async function handleMilestonesCreate(context) {
 }
 
 /** @param {CommandContext} context */
+async function handleIssuesList(context) {
+	const client = requireClient(context);
+	const { flags } = context;
+	const projectRef = requireFlag(flags, "project");
+	const statusFilter = (flags.status ?? "active").toLowerCase();
+	const project = await resolveProject(client, projectRef);
+
+	// Get issues for this project
+	const issues = await project.issues({ first: 100 });
+
+	// Filter by status
+	const filteredIssues = [];
+	for (const issue of issues.nodes) {
+		const state = await issue.state;
+		if (!state) {
+			continue;
+		}
+
+		const stateType = state.type;
+		const shouldInclude =
+			statusFilter === "all" ||
+			(statusFilter === "active" &&
+				(stateType === "started" ||
+					stateType === "unstarted" ||
+					stateType === "backlog")) ||
+			(statusFilter === "backlog" && stateType === "backlog") ||
+			(statusFilter === "done" && stateType === "completed");
+
+		if (shouldInclude) {
+			filteredIssues.push({ issue, state });
+		}
+	}
+
+	if (filteredIssues.length === 0) {
+		console.log(
+			`No ${statusFilter === "all" ? "" : `${statusFilter} `}issues found for project "${project.name}".`,
+		);
+		return;
+	}
+
+	console.log(
+		`Issues for ${project.name} (${statusFilter === "all" ? "all statuses" : statusFilter}):\n`,
+	);
+	console.log("KEY\tSTATUS\tPRIORITY\tTITLE");
+	console.log("---\t------\t--------\t-----");
+
+	// Sort: started first, then unstarted, then backlog, then done
+	const stateOrder = { started: 0, unstarted: 1, backlog: 2, completed: 3 };
+	filteredIssues.sort(
+		(a, b) =>
+			(stateOrder[a.state.type] ?? 99) - (stateOrder[b.state.type] ?? 99),
+	);
+
+	const priorityLabels = ["None", "Urgent", "High", "Medium", "Low"];
+
+	for (const { issue, state } of filteredIssues) {
+		const priority = priorityLabels[issue.priority ?? 0];
+		const title =
+			issue.title.length > 50
+				? `${issue.title.slice(0, 47)}...`
+				: issue.title;
+		console.log(
+			`${issue.identifier}\t${state.name}\t${priority}\t${title}`,
+		);
+	}
+}
+
+/** @param {CommandContext} context */
 async function handleIssuesCreate(context) {
 	const client = requireClient(context);
 	const { flags } = context;
@@ -417,6 +491,44 @@ async function handleIssuesView(context) {
 	if (issue.description) {
 		console.log(`\nDescription:\n${issue.description}`);
 	}
+}
+
+/** @param {CommandContext} context */
+async function handleIssuesUpdate(context) {
+	const client = requireClient(context);
+	const { flags } = context;
+	const issueRef = requireFlag(flags, "issue");
+	const issue = await resolveIssue(client, issueRef);
+
+	const updates = {};
+	if (flags.title) {
+		updates.title = flags.title;
+	}
+	if (flags.description) {
+		updates.description = flags.description;
+	}
+	if (flags.priority !== undefined) {
+		const priority = Number.parseInt(flags.priority, 10);
+		if (Number.isNaN(priority) || priority < 0 || priority > 4) {
+			throw new Error("Priority must be a number between 0 and 4.");
+		}
+		updates.priority = priority;
+	}
+
+	if (Object.keys(updates).length === 0) {
+		throw new Error(
+			"No updates specified. Use --title, --description, or --priority.",
+		);
+	}
+
+	const payload = await client.updateIssue(issue.id, updates);
+
+	if (!payload.success) {
+		throw new Error(`Failed to update ${issue.identifier}.`);
+	}
+
+	const updatedFields = Object.keys(updates).join(", ");
+	console.log(`Updated ${issue.identifier}: ${updatedFields}`);
 }
 
 /** @param {CommandContext} context */
