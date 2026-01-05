@@ -85,8 +85,8 @@ importers:
         specifier: 3.2.12
         version: 3.2.12(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@fumadocs/content-collections':
-        specifier: 1.2.2
-        version: 1.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(@content-collections/mdx@0.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(fumadocs-core@15.8.5(@types/react@19.2.7)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+        specifier: 1.2.5
+        version: 1.2.5(@content-collections/core@0.13.1(typescript@5.9.3))(@content-collections/mdx@0.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(fumadocs-core@15.8.5(@types/react@19.2.7)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       '@hookform/resolvers':
         specifier: 5.2.1
         version: 5.2.1(react-hook-form@7.70.0(react@19.2.3))
@@ -2026,12 +2026,12 @@ packages:
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
 
-  '@fumadocs/content-collections@1.2.2':
-    resolution: {integrity: sha512-WpWkXSH4R7IkFpYt1u+drM0xlZvrkc+WOnLCigXn/LmZXVWFyss1CYpZnxrIEFA6Iq/qJNkAFFVGcLdb3ci8dg==}
+  '@fumadocs/content-collections@1.2.5':
+    resolution: {integrity: sha512-waqfdjZfz8uDOfGCrZ1JFITfflSMwhU39jPn5bxwEsE0GpGM/F4abCw8E82eUfbM+NUk61ORdz9FeNNe+XQlMg==}
     peerDependencies:
       '@content-collections/core': 0.x.x
       '@content-collections/mdx': 0.x.x
-      fumadocs-core: ^14.0.0 || ^15.0.0
+      fumadocs-core: 15.x.x || 16.x.x
 
   '@graphql-typed-document-node/core@3.2.0':
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
@@ -9509,11 +9509,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fumadocs/content-collections@1.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(@content-collections/mdx@0.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(fumadocs-core@15.8.5(@types/react@19.2.7)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
+  '@fumadocs/content-collections@1.2.5(@content-collections/core@0.13.1(typescript@5.9.3))(@content-collections/mdx@0.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(fumadocs-core@15.8.5(@types/react@19.2.7)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
     dependencies:
       '@content-collections/core': 0.13.1(typescript@5.9.3)
       '@content-collections/mdx': 0.2.2(@content-collections/core@0.13.1(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       fumadocs-core: 15.8.5(@types/react@19.2.7)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      zod: 4.3.5
 
   '@graphql-typed-document-node/core@3.2.0(graphql@15.10.1)':
     dependencies:
