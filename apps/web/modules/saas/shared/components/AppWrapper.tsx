@@ -1,3 +1,5 @@
+"use client";
+
 import { config } from "@repo/config";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { cn } from "@ui/lib";

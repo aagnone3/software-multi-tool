@@ -87,16 +87,36 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABA
 ## Git Workflow
 
 > **🚨 CRITICAL: NEVER push directly to the main branch unless explicitly directed by the user. 🚨**
+>
+> **🚨 MANDATORY: ALWAYS use git worktrees for feature work 🚨**
 
-All changes MUST go through pull requests.
+All changes MUST go through pull requests, and all feature work MUST use git worktrees.
+
+### Why Worktrees Are Mandatory
+
+This repository supports **parallel development** with multiple Claude Code instances working on different tickets simultaneously. Worktrees provide:
+
+- **Pure main branch**: Main stays clean as a reference point, never blocked by WIP
+- **Complete isolation**: Multiple agents can work without interfering with each other
+- **User freedom**: You can experiment on main without disrupting agent work
+- **Scalability**: Add more parallel work without coordination overhead
 
 ### Standard Workflow
 
-1. **Create feature branch FIRST** before any commits:
+1. **Create worktree FIRST** before any commits:
+
+   **Use the git-worktrees skill** (see `.claude/skills/git-worktrees/SKILL.md`):
 
    ```bash
-   git checkout -b <type>/pra-<issue>-<description>
+   # Invoke via Claude Code skill system
+   Use Skill tool with skill: "git-worktrees"
    ```
+
+   The skill will:
+   - Create `.worktrees/<type>-pra-XX-<description>/` directory
+   - Set up isolated environment with unique PORT
+   - Configure `.env.local` for parallel dev servers
+   - Run baseline verification tests
 
    Branch naming conventions:
    - Bug fixes: `fix/pra-XX-short-description`
@@ -104,13 +124,13 @@ All changes MUST go through pull requests.
    - Chores: `chore/pra-XX-short-description`
    - Documentation: `docs/pra-XX-short-description`
 
-2. **Verify current branch** before committing:
+2. **Navigate to worktree** and make changes:
 
    ```bash
-   git branch --show-current  # MUST NOT be "main"
+   cd .worktrees/<type>-pra-XX-<description>
    ```
 
-3. **Make changes and commit**:
+3. **Commit changes**:
 
    ```bash
    git add .
@@ -122,7 +142,7 @@ All changes MUST go through pull requests.
 
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-   Co-Authored-By: Claude <noreply@anthropic.com>"
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
    ```
 
 4. **Push to feature branch**:
@@ -137,6 +157,14 @@ All changes MUST go through pull requests.
    gh pr create --base main --head <feature-branch> --title "..." --body "..."
    ```
 
+6. **Clean up worktree** after PR is merged:
+
+   ```bash
+   cd ../..  # Return to main repo
+   git worktree remove .worktrees/<type>-pra-XX-<description>
+   git worktree prune
+   ```
+
 ### Automated Protection
 
 A git pre-commit hook (`.git/hooks/pre-commit`) automatically blocks commits to the main branch. This provides an additional safety layer beyond the `.claude/hooks/prevent-main-commit.sh` template.
@@ -147,6 +175,14 @@ To bypass (ONLY with explicit user approval):
 git commit --no-verify -m "..."
 ```
 
+### DO NOT Use Standard Branches
+
+**DO NOT use `git checkout -b`** - this violates the parallel development architecture. All feature work must use worktrees to support:
+
+- Multiple Claude Code instances working in parallel
+- User experimentation on main without disrupting agents
+- Complete isolation between concurrent tasks
+
 ### Exception Handling
 
 **ONLY push to main if:**
@@ -155,7 +191,7 @@ git commit --no-verify -m "..."
 - You have confirmed with the user first
 - The repository has no branch protection requirements
 
-In all other cases, create a feature branch and submit a PR.
+In all other cases, create a worktree and submit a PR.
 
 ## Architecture
 

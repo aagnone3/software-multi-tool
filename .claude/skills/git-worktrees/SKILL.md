@@ -1,6 +1,6 @@
 ---
 name: git-worktrees
-description: Use this skill when working on multiple features in parallel, need isolated development environments, want to review PRs locally without switching branches, or need to hotfix main while preserving in-progress work. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo.
+description: MANDATORY skill for ALL feature work. This system requires worktrees to support parallel development with multiple Claude Code instances working simultaneously. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. DO NOT use git checkout -b - always use worktrees.
 allowed-tools:
   - Bash
   - Read
@@ -11,7 +11,22 @@ allowed-tools:
 
 # Git Worktrees Skill
 
+> **🚨 MANDATORY: This system requires worktrees for ALL feature work 🚨**
+
 Enable parallel development with isolated git worktrees for concurrent features, testing, and code review.
+
+## System Architecture: Why Worktrees Are Mandatory
+
+**This repository is designed for parallel development** with multiple Claude Code instances working simultaneously.
+
+**Core principles:**
+
+- **Pure main branch**: Main stays clean as a reference point, never blocked by WIP
+- **Complete isolation**: Multiple agents can work without interfering with each other
+- **User freedom**: You can experiment on main without disrupting agent work
+- **Zero coordination overhead**: Add more parallel work without conflicts
+
+**DO NOT use `git checkout -b`** - standard branching violates this architecture. ALL feature work must use isolated worktrees.
 
 ## Quick Reference
 

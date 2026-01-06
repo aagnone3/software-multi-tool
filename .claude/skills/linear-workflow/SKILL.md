@@ -27,22 +27,39 @@ When the user wants to work on a Linear issue:
 4. **Understand requirements** - Read issue description, acceptance criteria, and related context
 5. **Ask clarifying questions** if requirements are unclear
 
-### 2. Branch Creation
+### 2. Worktree Creation
 
-**Always work on a feature branch, never on main.**
+> **🚨 MANDATORY: ALWAYS use git worktrees for feature work 🚨**
 
-**IMPORTANT:** All feature branches should be created from and target `main` for pull requests.
+**Never work on main. Always use isolated worktrees.**
 
-Branch naming convention: `{ISSUE-KEY}/{short-description}`
+**Why worktrees are mandatory:**
+
+- Multiple Claude Code instances work on tickets in parallel
+- Main branch stays pure and clean as a reference point
+- Complete isolation between concurrent development efforts
+- You (the user) can freely experiment on main without affecting agent work
+- Zero interference between parallel tasks
+
+**You MUST use the git-worktrees skill** to create an isolated worktree:
+
+```text
+Use Skill tool with skill: "git-worktrees"
+```
+
+The git-worktrees skill will handle:
+
+- Creating worktree directory (`.worktrees/{ISSUE-KEY}-...`)
+- Setting up isolated environment with unique PORT
+- Configuring `.env.local` for parallel development
+- Running baseline verification tests
+- Ensuring gitignore is configured correctly
+
+Branch naming convention (skill handles this): `{ISSUE-KEY}/{short-description}`
 
 Example: `PRA-19/seed-utilities`
 
-Steps:
-
-1. Check current git status
-2. Ensure working directory is clean (stash or commit WIP if needed)
-3. Checkout `main` and pull latest changes: `git checkout main && git pull`
-4. Create new feature branch: `git checkout -b {ISSUE-KEY}/{description}`
+**DO NOT use `git checkout -b`** - this violates the parallel development architecture.
 
 ### 3. Implementation
 
@@ -121,7 +138,7 @@ Before submitting a PR:
 
 When BOTH conditions above are met, you MUST immediately proceed to:
 
-1. [ ] Verify feature branch exists (create if needed)
+1. [ ] Verify you're in a worktree (NOT main branch)
 2. [ ] Commit all changes with proper format
 3. [ ] Push branch to remote
 4. [ ] Create pull request against main
@@ -204,14 +221,18 @@ When the user says the PR is ready to merge (e.g., "ready to merge PR #39"), fol
    - Note: GitHub may auto-close via "Closes {ISSUE-KEY}" in PR description
    - Always verify the issue is closed
 
-3. **Update local git state**:
+3. **Clean up worktree** (optional):
+
+   After PR is merged, you can optionally clean up the worktree:
 
    ```bash
-   git checkout main && git pull upstream main
+   cd ../..  # Return to main repo
+   git worktree remove .worktrees/{issue-worktree-name}
+   git worktree prune
    ```
 
-   - Switch back to main branch
-   - Pull latest changes including the merged PR
+   - Main branch automatically stays up to date
+   - Worktree cleanup is optional; you can keep it for follow-up work
 
 4. **Confirm completion** to user with:
    - PR merge status
@@ -230,15 +251,16 @@ When the user says the PR is ready to merge (e.g., "ready to merge PR #39"), fol
 ### What NOT to Do
 
 - ❌ **Never** commit directly to main
+- ❌ **Never** use `git checkout -b` (always use worktrees)
 - ❌ **Never** create a PR without running tests first
-- ❌ **Never** skip the feature branch workflow
+- ❌ **Never** skip the worktree workflow
 - ❌ **Never** force push to shared branches
 - ❌ **Never** commit without issue context
 - ❌ **Never** consider code "ready for review" without an open PR against main
 
 ### What TO Do
 
-- ✅ **Always** create a feature branch from main
+- ✅ **Always** use git worktrees for feature work (never `git checkout -b`)
 - ✅ **Always** run tests before creating PR
 - ✅ **Always** create PR against main (use `--base main`)
 - ✅ **Always** include issue key in commits and PR title
@@ -259,7 +281,7 @@ Actions:
 3. **Move issue to "In Progress"** using `linear issues start`
 4. Present issue summary to user
 5. Ask if they want to proceed
-6. Create feature branch
+6. **Create worktree** using git-worktrees skill
 7. Create todo list for implementation
 
 ### State 2: Implementing
@@ -283,7 +305,7 @@ Actions:
 
 **Required Actions (DO NOT ASK USER):**
 
-1. Verify feature branch exists (create if working on main)
+1. Verify you're in a worktree (NOT main branch)
 2. Commit all changes with proper format
 3. Push branch to remote
 4. Create PR against main
@@ -345,8 +367,8 @@ The issue requires:
 - Create deterministic test fixtures
 - Add documentation
 
-I'll create a feature branch and start implementation.
+I'll create a worktree and start implementation.
 
-[Creates branch PRA-19/seed-utilities]
+[Creates worktree using git-worktrees skill]
 [Creates todo list]
 [Begins implementation]
