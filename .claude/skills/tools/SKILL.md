@@ -16,16 +16,16 @@ This skill provides comprehensive guidance for working with the multi-app tools 
 
 ## Quick Reference
 
-| Component | Location |
-|-----------|----------|
-| Tool Registry Config | `config/index.ts` (tools.registry) |
-| Tool Type Definition | `config/types.ts` (ToolConfig) |
-| Tools Route Layout | `apps/web/app/(saas)/app/tools/layout.tsx` |
-| Tools Listing Page | `apps/web/app/(saas)/app/tools/page.tsx` |
-| Dynamic Tool Route | `apps/web/app/(saas)/app/tools/[toolSlug]/page.tsx` |
-| ToolsNavBar Component | `apps/web/modules/saas/tools/components/ToolsNavBar.tsx` |
-| ToolCard Component | `apps/web/modules/saas/tools/components/ToolCard.tsx` |
-| Middleware (public access) | `apps/web/middleware.ts` |
+| Component                  | Location                                                 |
+| -------------------------- | -------------------------------------------------------- |
+| Tool Registry Config       | `config/index.ts` (tools.registry)                       |
+| Tool Type Definition       | `config/types.ts` (ToolConfig)                           |
+| Tools Route Layout         | `apps/web/app/(saas)/app/tools/layout.tsx`               |
+| Tools Listing Page         | `apps/web/app/(saas)/app/tools/page.tsx`                 |
+| Dynamic Tool Route         | `apps/web/app/(saas)/app/tools/[toolSlug]/page.tsx`      |
+| ToolsNavBar Component      | `apps/web/modules/saas/tools/components/ToolsNavBar.tsx` |
+| ToolCard Component         | `apps/web/modules/saas/tools/components/ToolCard.tsx`    |
+| Middleware (public access) | `apps/web/middleware.ts`                                 |
 
 ## Architecture Overview
 
@@ -64,7 +64,7 @@ interface ToolConfig {
 
 ### Route Structure
 
-```
+```text
 /app/tools                    # Tool listing page
 /app/tools/[toolSlug]         # Individual tool page
 /app/tools/bg-remover         # Example: Background Remover
@@ -97,7 +97,7 @@ tools: {
 
 For custom tool UI, create a dedicated page:
 
-```
+```text
 apps/web/app/(saas)/app/tools/[toolSlug]/my-tool/page.tsx
 ```
 
@@ -196,16 +196,16 @@ The `ToolsNavBar` component provides:
 
 Tools use Lucide React icons. Common tool icons:
 
-| Icon Name | Use Case |
-|-----------|----------|
+| Icon Name     | Use Case                      |
+| ------------- | ----------------------------- |
 | `image-minus` | Image processing (bg removal) |
-| `users` | Multi-user/voice analysis |
-| `newspaper` | News/content analysis |
-| `wand-2` | AI/magic operations |
-| `file-text` | Document processing |
-| `mic` | Audio processing |
-| `video` | Video processing |
-| `globe` | Web/translation tools |
+| `users`       | Multi-user/voice analysis     |
+| `newspaper`   | News/content analysis         |
+| `wand-2`      | AI/magic operations           |
+| `file-text`   | Document processing           |
+| `mic`         | Audio processing              |
+| `video`       | Video processing              |
+| `globe`       | Web/translation tools         |
 
 ## Translation Keys
 

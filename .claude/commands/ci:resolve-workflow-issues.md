@@ -48,14 +48,14 @@ gh run view <run-id>
 
 Common CI failure categories:
 
-| Failure Type | Indicators | Resolution |
-|--------------|------------|------------|
-| **Lint errors** | `biome`, `eslint`, formatting errors | Run `pnpm lint` or `pnpm format` locally |
-| **Type errors** | `tsc`, `type-check`, TypeScript errors | Run `pnpm --filter web run type-check` |
-| **Test failures** | `vitest`, `jest`, assertion errors | Run `pnpm test` locally |
-| **E2E failures** | `playwright`, browser test failures | Run `pnpm --filter web run e2e` locally |
-| **Build failures** | `next build`, compilation errors | Run `pnpm build` locally |
-| **Dependency issues** | `pnpm install`, lockfile conflicts | Run `pnpm install` and commit lockfile |
+| Failure Type          | Indicators                             | Resolution                                 |
+| --------------------- | -------------------------------------- | ------------------------------------------ |
+| **Lint errors**       | `biome`, `eslint`, formatting errors   | Run `pnpm lint` or `pnpm format` locally   |
+| **Type errors**       | `tsc`, `type-check`, TypeScript errors | Run `pnpm --filter web run type-check`     |
+| **Test failures**     | `vitest`, `jest`, assertion errors     | Run `pnpm test` locally                    |
+| **E2E failures**      | `playwright`, browser test failures    | Run `pnpm --filter web run e2e` locally    |
+| **Build failures**    | `next build`, compilation errors       | Run `pnpm build` locally                   |
+| **Dependency issues** | `pnpm install`, lockfile conflicts     | Run `pnpm install` and commit lockfile     |
 
 ### 5. Reproduce Locally
 
@@ -83,22 +83,26 @@ pnpm build
 Based on the failure type:
 
 #### Lint/Format Errors
+
 ```bash
 pnpm format
 pnpm lint
 ```
 
 #### Type Errors
+
 - Read the error messages carefully
 - Fix type issues in the indicated files
 - Run type-check again to verify
 
 #### Test Failures
+
 - Read test output to understand what's failing
 - Fix the code or update tests as appropriate
 - Run specific test file: `pnpm test -- <path-to-test>`
 
 #### Build Failures
+
 - Check for missing imports/exports
 - Verify environment variables are set
 - Check for syntax errors
@@ -149,11 +153,13 @@ gh pr checks
 Once CI passes (or if issues persist), report to user:
 
 **Success:**
+
 - ✅ Fixed: [list of issues fixed]
 - ✅ CI checks now passing
 - 🔗 PR URL
 
 **Persistent Issues:**
+
 - ❌ Remaining issues: [describe]
 - 📋 Next steps: [recommendations]
 
@@ -180,32 +186,36 @@ gh run rerun <run-id> --failed
 
 This project uses GitHub Actions with the following workflows:
 
-| Workflow | Trigger | Checks |
-|----------|---------|--------|
-| `validate-prs.yml` | Pull requests | Biome lint, E2E tests, unit tests |
-| `db-migrate-deploy.yml` | Push to main | Prisma migrations |
+| Workflow                | Trigger       | Checks                            |
+| ----------------------- | ------------- | --------------------------------- |
+| `validate-prs.yml`      | Pull requests | Biome lint, E2E tests, unit tests |
+| `db-migrate-deploy.yml` | Push to main  | Prisma migrations                 |
 
 ## Common Fixes
 
 ### "Biome found X issues"
+
 ```bash
 pnpm format
 git add . && git commit -m "fix: format code with biome"
 ```
 
 ### "Type error: ..."
+
 ```bash
 pnpm --filter web run type-check
 # Fix errors shown, then commit
 ```
 
 ### "Test failed: ..."
+
 ```bash
 pnpm test
 # Read output, fix code/tests, then commit
 ```
 
 ### "E2E test failed"
+
 ```bash
 pnpm --filter web run e2e
 # Check screenshots/traces in test-results/, fix, then commit

@@ -53,18 +53,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Local PostgreSQL (Homebrew) on port 5432:
 
-| Setting | Value |
-|---------|-------|
+| Setting  | Value                   |
+| -------- | ----------------------- |
 | Database | local_softwaremultitool |
-| User | postgres |
-| Password | postgres |
+| User     | postgres                |
+| Password | postgres                |
 
 **Connection string:**
-```
+
+```text
 postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
 ```
 
 **Create database (if needed):**
+
 ```bash
 PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
 ```

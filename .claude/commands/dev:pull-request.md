@@ -24,11 +24,13 @@ CURRENT_BRANCH=$(git branch --show-current)
    - `docs/` for documentation
    - `refactor/` for refactoring
 3. Create and switch to the new branch:
+
    ```bash
    git checkout -b <type>/<short-description>
    ```
 
 **Branch naming examples based on changes:**
+
 - Renamed command files → `chore/rename-commands`
 - Added new API endpoint → `feat/add-user-api`
 - Fixed validation bug → `fix/form-validation`
@@ -47,6 +49,7 @@ git status --porcelain
 ```
 
 Categorize changes into:
+
 - **Staged**: Ready to commit
 - **Unstaged**: Modified but not staged
 - **Untracked**: New files not yet tracked
@@ -58,12 +61,14 @@ If no uncommitted changes exist, skip to Step 3.
 Use AI judgment to group related changes into logical commits:
 
 **Grouping criteria (in order of priority):**
+
 1. **By nature of change**: Separate refactors from features from fixes
 2. **By area of codebase**: Group related files together
 3. **By file type**: Tests separate from implementation, config separate from code
 
 **Commit message format:**
-```
+
+```text
 <type>: <brief description>
 
 <detailed explanation if needed>
@@ -76,6 +81,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 **Valid types:** `feat`, `fix`, `chore`, `test`, `docs`, `refactor`, `style`
 
 **Example commit sequence:**
+
 ```bash
 # Commit 1: Implementation changes
 git add src/components/Button.tsx src/components/Button.test.tsx
@@ -103,6 +109,7 @@ git push -u origin HEAD
 ```
 
 If the push fails due to upstream changes, inform the user and suggest:
+
 ```bash
 git pull --rebase origin <branch-name>
 ```
@@ -140,6 +147,7 @@ EOF
 ### Step 5: Report Results
 
 Display to user:
+
 - PR URL (new or existing)
 - Number of commits created (if any)
 - Summary of changes pushed
@@ -148,7 +156,7 @@ Display to user:
 
 ### Scenario A: On main with uncommitted changes
 
-```
+```text
 📍 Currently on main branch with uncommitted changes
 📝 Analyzing changes to determine branch name...
   - Renamed command files
@@ -169,7 +177,7 @@ Creating pull request...
 
 ### Scenario B: Clean working directory, PR exists
 
-```
+```text
 ✅ Working directory is clean
 ✅ PR already exists: https://github.com/org/repo/pull/123
 No changes to push.
@@ -177,7 +185,7 @@ No changes to push.
 
 ### Scenario C: On feature branch with uncommitted changes, no PR
 
-```
+```text
 📝 Found uncommitted changes:
   - 3 modified files
   - 1 new file
@@ -196,7 +204,7 @@ Creating pull request...
 
 ### Scenario D: On feature branch with uncommitted changes, PR exists
 
-```
+```text
 📝 Found uncommitted changes:
   - 2 modified files
 
@@ -212,13 +220,15 @@ Pushing to remote...
 ## Error Handling
 
 ### On main branch with no changes
-```
+
+```text
 ℹ️ On main branch with no uncommitted changes.
 Nothing to create a PR for.
 ```
 
 ### Push rejected (upstream changes)
-```
+
+```text
 ❌ Push failed - remote has changes not in local branch.
 Please pull and rebase:
   git pull --rebase origin <branch-name>
@@ -226,7 +236,8 @@ Then run /dev:pull-request again.
 ```
 
 ### No GitHub CLI
-```
+
+```text
 ❌ GitHub CLI (gh) not found or not authenticated.
 Please install and authenticate:
   brew install gh

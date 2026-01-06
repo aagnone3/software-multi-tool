@@ -27,24 +27,25 @@ Collect a structured bug report from the user and create a bug ticket in Linear.
 ## Context Gathering
 
 Check these locations:
+
 - Browser console for client errors
 - Server logs (`pnpm dev` output)
 - Network tab for failed requests
 
 ## Severity Guidelines
 
-| Severity | Criteria |
-|----------|----------|
+| Severity | Criteria                               |
+| -------- | -------------------------------------- |
 | Critical | App crashes, data loss, security issue |
-| High | Feature broken, no workaround |
-| Medium | Feature broken, has workaround |
-| Low | Cosmetic, minor inconvenience |
+| High     | Feature broken, no workaround          |
+| Medium   | Feature broken, has workaround         |
+| Low      | Cosmetic, minor inconvenience          |
 
 ## Issue Description Template
 
 Use this format when creating the Linear issue:
 
-```
+```markdown
 ## Summary
 [One sentence description]
 

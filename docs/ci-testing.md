@@ -68,21 +68,21 @@ The CI pipeline runs comprehensive tests on all pull requests to ensure code qua
 
 Coverage thresholds are defined per-workspace in `tooling/test/coverage-thresholds.ts`:
 
-| Workspace | Statements | Branches |
-|-----------|------------|----------|
-| apps/web | 90% | 90% |
-| packages/api | 70% | 85% |
-| packages/auth | 90% | 85% |
-| packages/database | 65% | 85% |
-| packages/ai | 90% | 75% |
-| packages/utils | 90% | 85% |
-| packages/logs | 90% | 85% |
-| packages/mail | 85% | 70% |
-| packages/payments | 90% | 85% |
-| packages/storage | 80% | 55% |
-| packages/i18n | 65% | 60% |
-| config | 90% | 90% |
-| tooling/scripts | 75% | 55% |
+| Workspace         | Statements | Branches |
+| ----------------- | ---------- | -------- |
+| apps/web          | 90%        | 90%      |
+| packages/api      | 70%        | 85%      |
+| packages/auth     | 90%        | 85%      |
+| packages/database | 65%        | 85%      |
+| packages/ai       | 90%        | 75%      |
+| packages/utils    | 90%        | 85%      |
+| packages/logs     | 90%        | 85%      |
+| packages/mail     | 85%        | 70%      |
+| packages/payments | 90%        | 85%      |
+| packages/storage  | 80%        | 55%      |
+| packages/i18n     | 65%        | 60%      |
+| config            | 90%        | 90%      |
+| tooling/scripts   | 75%        | 55%      |
 
 ## How Coverage Enforcement Works
 
