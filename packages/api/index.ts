@@ -13,6 +13,10 @@ import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
 
+// Export rate limiting utilities
+export * from "./lib/rate-limit";
+export * from "./lib/rate-limit-middleware";
+
 export const app = new Hono()
 	.basePath("/api")
 	// Logger middleware

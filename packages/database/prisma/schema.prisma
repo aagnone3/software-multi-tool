@@ -250,3 +250,19 @@ model ToolJob {
     @@index([expiresAt])
     @@map("tool_job")
 }
+
+model RateLimitEntry {
+    id          String   @id @default(cuid())
+    identifier  String   // 'anon:sessionId:ip' or 'user:userId' or 'org:orgId'
+    toolSlug    String
+    windowStart DateTime
+    windowEnd   DateTime
+    count       Int      @default(0)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([identifier, toolSlug, windowStart])
+    @@index([identifier, toolSlug])
+    @@index([windowEnd])
+    @@map("rate_limit_entry")
+}

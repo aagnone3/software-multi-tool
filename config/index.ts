@@ -12,6 +12,10 @@ export const config = {
 				icon: "image-minus",
 				public: true,
 				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 5, window: "1d" },
+					authenticated: { requests: 60, window: "1h" },
+				},
 			},
 			{
 				slug: "diarization",
@@ -20,6 +24,10 @@ export const config = {
 				icon: "users",
 				public: true,
 				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 3, window: "1d" },
+					authenticated: { requests: 30, window: "1h" },
+				},
 			},
 			{
 				slug: "news-analyzer",
@@ -28,6 +36,10 @@ export const config = {
 				icon: "newspaper",
 				public: true,
 				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 10, window: "1d" },
+					authenticated: { requests: 100, window: "1h" },
+				},
 			},
 		],
 	},
