@@ -11,7 +11,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -61,11 +61,22 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 	const router = useRouter();
 	const [search, setSearch] = useState("");
 	const [recentToolSlugs, setRecentToolSlugs] = useState<string[]>([]);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	// Load recent tools on mount
 	useEffect(() => {
 		setRecentToolSlugs(getRecentTools());
 	}, []);
+
+	// Auto-focus input when palette opens
+	useEffect(() => {
+		if (isOpen && inputRef.current) {
+			// Small timeout to ensure the component is fully rendered
+			setTimeout(() => {
+				inputRef.current?.focus();
+			}, 0);
+		}
+	}, [isOpen]);
 
 	// Handle keyboard shortcuts
 	useEffect(() => {
@@ -129,6 +140,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 					<div className="flex items-center border-b px-3">
 						<SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
 						<Command.Input
+							ref={inputRef}
 							value={search}
 							onValueChange={setSearch}
 							placeholder="Search tools..."
