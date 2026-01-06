@@ -75,7 +75,8 @@
 			"admin": "Administration",
 			"aiChatbot": "AI Chatbot",
 			"organizationSettings": "Organisationseinstellungen",
-			"start": "Start"
+			"start": "Start",
+			"tools": "Werkzeuge"
 		},
 		"userMenu": {
 			"accountSettings": "Kontoeinstellungen",

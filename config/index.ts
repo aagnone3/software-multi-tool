@@ -2,6 +2,35 @@ import type { Config } from "./types";
 
 export const config = {
 	appName: "Software Multitool",
+	// Tools/Sub-apps registry
+	tools: {
+		registry: [
+			{
+				slug: "bg-remover",
+				name: "Background Remover",
+				description: "Remove backgrounds from images with AI",
+				icon: "image-minus",
+				public: true,
+				enabled: true,
+			},
+			{
+				slug: "diarization",
+				name: "Speaker Diarization",
+				description: "Analyze audio to identify different speakers",
+				icon: "users",
+				public: true,
+				enabled: true,
+			},
+			{
+				slug: "news-analyzer",
+				name: "News Analyzer",
+				description: "Analyze news articles for bias and sentiment",
+				icon: "newspaper",
+				public: true,
+				enabled: true,
+			},
+		],
+	},
 	// Internationalization
 	i18n: {
 		// Whether internationalization should be enabled (if disabled, you still need to define the locale you want to use below and set it as the default locale)

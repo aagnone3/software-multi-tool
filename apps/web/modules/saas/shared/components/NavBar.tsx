@@ -12,6 +12,7 @@ import {
 	SettingsIcon,
 	UserCog2Icon,
 	UserCogIcon,
+	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +37,12 @@ export function NavBar() {
 			href: basePath,
 			icon: HomeIcon,
 			isActive: pathname === basePath,
+		},
+		{
+			label: t("app.menu.tools"),
+			href: "/app/tools",
+			icon: WrenchIcon,
+			isActive: pathname.startsWith("/app/tools"),
 		},
 		{
 			label: t("app.menu.aiChatbot"),
