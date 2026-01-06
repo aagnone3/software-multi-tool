@@ -2,7 +2,7 @@
 
 /**
  * Stages a Prisma migration with advisory lock wrapping.
- * This script automates the workflow from the original .claude/commands/migrate.md
+ * This script automates the workflow from the original .claude/commands/dev:migrate-database.md
  *
  * Usage: pnpm --filter @repo/scripts prisma:stage --name <migration-name>
  */
