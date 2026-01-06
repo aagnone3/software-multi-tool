@@ -9,6 +9,36 @@ vi.mock("next/navigation", () => ({
 	useRouter: vi.fn(),
 }));
 
+// Mock next-intl
+vi.mock("next-intl", () => ({
+	useTranslations: vi.fn(() => (key: string) => {
+		const translations: Record<string, string> = {
+			"app.menu.start": "Home",
+			"app.menu.aiChatbot": "AI Chatbot",
+			"app.menu.accountSettings": "Account Settings",
+			"app.menu.organizationSettings": "Organization Settings",
+			"app.menu.admin": "Admin",
+			"app.menu.tools": "Tools",
+		};
+		return translations[key] || key;
+	}),
+}));
+
+// Mock auth hooks
+vi.mock("@saas/auth/hooks/use-session", () => ({
+	useSession: vi.fn(() => ({
+		user: null,
+		session: null,
+	})),
+}));
+
+// Mock organization hooks
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({
+		activeOrganization: null,
+	})),
+}));
+
 // Mock config
 vi.mock("@repo/config", () => ({
 	config: {
@@ -39,6 +69,9 @@ vi.mock("@repo/config", () => ({
 					public: true,
 				},
 			],
+		},
+		organizations: {
+			hideOrganization: false,
 		},
 	},
 }));
@@ -74,7 +107,7 @@ describe("CommandPalette", () => {
 	it("renders command palette when open", () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 		expect(
-			screen.getByPlaceholderText("Search tools..."),
+			screen.getByPlaceholderText("Search pages and tools..."),
 		).toBeInTheDocument();
 	});
 
@@ -88,7 +121,9 @@ describe("CommandPalette", () => {
 	it("filters tools based on search input", async () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
-		const searchInput = screen.getByPlaceholderText("Search tools...");
+		const searchInput = screen.getByPlaceholderText(
+			"Search pages and tools...",
+		);
 		fireEvent.change(searchInput, { target: { value: "Test Tool 1" } });
 
 		await waitFor(() => {
@@ -109,27 +144,34 @@ describe("CommandPalette", () => {
 		});
 	});
 
-	it("stores recently used tools in localStorage", async () => {
+	it("stores recently used items in localStorage", async () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
 		const tool = screen.getByText("Test Tool 1");
 		fireEvent.click(tool);
 
 		await waitFor(() => {
-			const stored = localStorage.getItem("command-palette:recent-tools");
+			const stored = localStorage.getItem("command-palette:recent-items");
 			expect(stored).toBeTruthy();
 			if (stored) {
 				const recent = JSON.parse(stored);
-				expect(recent).toContain("test-tool-1");
+				expect(recent).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							id: "test-tool-1",
+							type: "tool",
+						}),
+					]),
+				);
 			}
 		});
 	});
 
-	it("displays recently used tools section", async () => {
-		// Pre-populate recent tools
+	it("displays recently used items section", async () => {
+		// Pre-populate recent items
 		localStorage.setItem(
-			"command-palette:recent-tools",
-			JSON.stringify(["test-tool-2"]),
+			"command-palette:recent-items",
+			JSON.stringify([{ id: "test-tool-2", type: "tool" }]),
 		);
 
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
@@ -143,7 +185,7 @@ describe("CommandPalette", () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
 		const backdrop = screen
-			.getByPlaceholderText("Search tools...")
+			.getByPlaceholderText("Search pages and tools...")
 			.closest("div")?.parentElement?.parentElement;
 
 		if (backdrop) {
@@ -160,38 +202,60 @@ describe("CommandPalette", () => {
 		expect(mockClose).toHaveBeenCalled();
 	});
 
-	it("limits recent tools to maximum of 5", async () => {
-		// Manually simulate adding 6 tools to localStorage
-		const slugs = [
-			"test-tool-1",
-			"test-tool-2",
-			"test-tool-1",
-			"test-tool-2",
-			"test-tool-1",
-			"test-tool-2",
+	it("limits recent items to maximum of 5", async () => {
+		// Manually simulate adding 6 items to localStorage
+		const items = [
+			{ id: "test-tool-1", type: "tool" as const },
+			{ id: "test-tool-2", type: "tool" as const },
+			{ id: "home", type: "page" as const },
+			{ id: "test-tool-1", type: "tool" as const },
+			{ id: "chatbot", type: "page" as const },
+			{ id: "test-tool-2", type: "tool" as const },
 		];
 
-		// Add each slug to recent tools
-		for (const slug of slugs) {
+		// Add each item to recent items
+		for (const item of items) {
 			const current = localStorage.getItem(
-				"command-palette:recent-tools",
+				"command-palette:recent-items",
 			);
 			const recent = current ? JSON.parse(current) : [];
-			const filtered = recent.filter((s: string) => s !== slug);
-			filtered.unshift(slug);
+			const filtered = recent.filter(
+				(i: { id: string; type: string }) => i.id !== item.id,
+			);
+			filtered.unshift(item);
 			const trimmed = filtered.slice(0, 5);
 			localStorage.setItem(
-				"command-palette:recent-tools",
+				"command-palette:recent-items",
 				JSON.stringify(trimmed),
 			);
 		}
 
-		const stored = localStorage.getItem("command-palette:recent-tools");
+		const stored = localStorage.getItem("command-palette:recent-items");
 		expect(stored).toBeTruthy();
 		if (stored) {
 			const recent = JSON.parse(stored);
 			expect(recent.length).toBeLessThanOrEqual(5);
 		}
+	});
+
+	it("displays navigation pages", () => {
+		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+
+		expect(screen.getByText("Home")).toBeInTheDocument();
+		expect(screen.getByText("AI Chatbot")).toBeInTheDocument();
+		expect(screen.getByText("Account Settings")).toBeInTheDocument();
+	});
+
+	it("navigates to page when selected", async () => {
+		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+
+		const page = screen.getByText("AI Chatbot");
+		fireEvent.click(page);
+
+		await waitFor(() => {
+			expect(mockPush).toHaveBeenCalledWith("/app/chatbot");
+			expect(mockClose).toHaveBeenCalled();
+		});
 	});
 
 	it("shows keyboard navigation hints", () => {
