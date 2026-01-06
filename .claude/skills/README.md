@@ -1,169 +1,199 @@
-# n8n-mcp Skills - Distribution Packages
+# Claude Skills
 
-This folder contains distribution packages for different Claude platforms.
+This directory contains Claude skills that provide specialized guidance for working with this codebase.
 
-## 📦 Available Packages
+## Available Skills
 
-### Complete Bundle (Recommended)
+### analytics
 
-- **`n8n-mcp-skills-v1.0.0.zip`** (168 KB) - All 7 skills in one package
+**Description**: Use this skill when implementing event tracking, working with PostHog analytics, swapping analytics providers, or adding analytics to new features. Provides guidance on the pluggable analytics system and PostHog configuration.
 
-**Includes:**
+**Location**: `.claude/skills/analytics/`
 
-- Skill #1: n8n Expression Syntax
-- Skill #2: n8n MCP Tools Expert
-- Skill #3: n8n Workflow Patterns
-- Skill #4: n8n Validation Expert
-- Skill #5: n8n Node Configuration
-- Skill #6: n8n Code JavaScript
-- Skill #7: n8n Code Python
+**When to Use**:
 
-**Installation:**
+- Implementing event tracking
+- Working with PostHog analytics
+- Swapping analytics providers
+- Adding analytics to new features
 
-```bash
-# Claude Code plugin installation
-/plugin install czlonkowski/n8n-skills
-
-# Or install from local file
-/plugin install /path/to/n8n-mcp-skills-v1.0.0.zip
-```
-
-### For Claude.ai Users (Individual Skills)
-
-Upload each skill separately via Settings → Capabilities → Skills (bottom of page):
-
-- `n8n-expression-syntax-v1.0.0.zip` - n8n expression syntax and common patterns
-- `n8n-mcp-tools-expert-v1.0.0.zip` - Expert guide for using n8n-mcp tools (recommended to install first)
-- `n8n-workflow-patterns-v1.0.0.zip` - 5 proven workflow architectural patterns
-- `n8n-validation-expert-v1.0.0.zip` - Validation error interpretation and fixing
-- `n8n-node-configuration-v1.0.0.zip` - Operation-aware node configuration
-
-**Installation:**
-
-1. Go to Settings → Capabilities → Skills (bottom of page)
-2. Click "Upload Skill"
-3. Select one of the skill zip files above
-4. Repeat for each skill you want to install
-
-**Note:** JavaScript and Python Code skills are only available in the complete bundle (not as individual skills).
-
-## 🎯 Which Package Should I Use?
-
-| Platform        | Package                                     | What You Get                          |
-| --------------- | ------------------------------------------- | ------------------------------------- |
-| **Claude.ai**   | Individual zips                             | 5 core skills (upload separately)     |
-| **Claude Code** | Complete bundle (n8n-mcp-skills-v1.0.0.zip) | All 7 skills at once                  |
-| **Claude API**  | Complete bundle                             | All 7 skills (extract skills/ folder) |
-
-**Note:** Code skills (#6 JavaScript, #7 Python) are only in the complete bundle.
+**Related Skills**: architecture, tools
 
 ---
 
-## 📁 Files in This Directory
+### architecture
 
-```text
-dist/
-├── n8n-mcp-skills-v1.0.0.zip              (168 KB) ★ RECOMMENDED
-├── n8n-expression-syntax-v1.0.0.zip       (11 KB)
-├── n8n-mcp-tools-expert-v1.0.0.zip        (15 KB)
-├── n8n-workflow-patterns-v1.0.0.zip       (35 KB)
-├── n8n-validation-expert-v1.0.0.zip       (18 KB)
-├── n8n-node-configuration-v1.0.0.zip      (17 KB)
-└── README.md                               (this file)
-```
+**Description**: Use this skill when exploring the codebase structure, understanding integrations, or navigating the monorepo. Provides comprehensive architecture overview including API layer, frontend, database, and external integrations.
+
+**Location**: `.claude/skills/architecture/`
+
+**When to Use**:
+
+- Exploring codebase structure
+- Understanding integrations
+- Navigating the monorepo
+- Learning about system architecture
+
+**Related Skills**: tools, better-auth, analytics
 
 ---
 
-## 📋 What's Included in Each Package
+### better-auth
 
-### Individual Skill Packages (Claude.ai)
+**Description**: Use this skill when working with authentication, user management, sessions, organizations, or any auth-related features. Provides context on Better Auth configuration, plugins, and patterns used in this project.
 
-Each zip contains:
+**Location**: `.claude/skills/better-auth/`
 
-```text
-SKILL.md              # Main skill instructions with YAML frontmatter
-[Reference files]     # Additional documentation and guides
-README.md             # Skill metadata and statistics
-```
+**When to Use**:
 
-### Bundle Package (Claude Code)
+- Working with authentication
+- User management
+- Sessions and organizations
+- Auth-related features
 
-```text
-.claude-plugin/
-  ├── plugin.json      # Claude Code plugin metadata
-  └── marketplace.json # Marketplace listing metadata
-README.md              # Project overview and documentation
-LICENSE                # MIT License
-skills/                # All 7 skills in subfolders
-  ├── n8n-expression-syntax/
-  ├── n8n-mcp-tools-expert/
-  ├── n8n-workflow-patterns/
-  ├── n8n-validation-expert/
-  ├── n8n-node-configuration/
-  ├── n8n-code-javascript/
-  └── n8n-code-python/
-```
+**Related Skills**: architecture, tools
 
-## ✅ Verification
+---
 
-After installation, test skills by asking:
+### git-worktrees
 
-```text
-"How do I write n8n expressions?"
-→ Should activate: n8n Expression Syntax
+**Description**: Use this skill when working on multiple features in parallel, need isolated development environments, or want to review PRs locally. Provides git worktree patterns optimized for pnpm monorepos.
 
-"Find me a Slack node"
-→ Should activate: n8n MCP Tools Expert
+**Location**: `.claude/skills/git-worktrees/`
 
-"Build a webhook workflow"
-→ Should activate: n8n Workflow Patterns
+**When to Use**:
 
-"How do I access webhook data in a Code node?"
-→ Should activate: n8n Code JavaScript
+- Parallel development on multiple features
+- Local PR review without branch switching
+- Hotfix main while preserving in-progress work
+- Isolated testing environments
 
-"Can I use pandas in Python Code node?"
-→ Should activate: n8n Code Python
-```
+**Related Skills**: linear, github-cli, linear-workflow
 
-## 🔧 Requirements
+---
 
-- **n8n-mcp MCP server** installed and configured ([Installation Guide](https://github.com/czlonkowski/n8n-mcp))
-- **Claude Pro, Max, Team, or Enterprise** plan (for Claude.ai skills)
-- **.mcp.json** configured with n8n-mcp server
+### github-cli
 
-## 📖 Documentation
+**Description**: Use this skill for all GitHub operations including creating pull requests, managing issues, and using the GitHub API. This skill enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
 
-For detailed installation instructions, see:
+**Location**: `.claude/skills/github-cli/`
 
-- Main README: `../README.md`
-- Installation Guide: `../docs/INSTALLATION.md`
-- Usage Guide: `../docs/USAGE.md`
+**When to Use**:
 
-## 🐛 Troubleshooting
+- Creating pull requests
+- Managing GitHub issues
+- Using the GitHub API
+- GitHub operations
 
-### Claude.ai Error: "Zip must contain exactly one SKILL.md file"
+**Related Skills**: linear, linear-workflow, git-worktrees
 
-- Use the individual skill zips, not the bundle
-- Each skill must be uploaded separately
+---
 
-### Claude Code: Skills not activating
+### linear
 
-- Verify skills are in `~/.claude/skills/` directory
-- Check that n8n-mcp MCP server is running
-- Reload Claude Code
+**Description**: Use this skill when the user needs to interact with Linear for project management tasks including listing/managing projects, creating/listing milestones, managing issue dependencies, closing issues, or assigning issues to milestones. This skill wraps the Linear CLI helpers and provides comprehensive Linear workflow support.
 
-### Skills not triggering
+**Location**: `.claude/skills/linear/`
 
-- Skills activate based on keywords in your queries
-- Try more specific questions matching skill descriptions
-- Check that SKILL.md files have correct frontmatter
+**When to Use**:
 
-## 📝 License
+- Linear project management
+- Creating/managing milestones
+- Managing issue dependencies
+- Closing issues
+- Assigning issues to milestones
 
-MIT License - see `../LICENSE` file
+**Related Skills**: linear-workflow, github-cli, git-worktrees
 
-## 🙏 Credits
+---
 
-Conceived by Romuald Członkowski - https://www.aiadvisors.pl/en
+### linear-workflow
 
-Part of the [n8n-mcp project](https://github.com/czlonkowski/n8n-mcp).
+**Description**: Complete Linear-based development workflow for planning, implementing, and shipping features.
+
+**Location**: `.claude/skills/linear-workflow/`
+
+**When to Use**:
+
+- Following the complete development workflow
+- Planning feature implementation
+- Shipping features end-to-end
+
+**Related Skills**: linear, github-cli, git-worktrees
+
+---
+
+### prisma-migrate
+
+**Description**: Use this skill for Prisma database migration workflows including validation, staging, review, and execution. This skill wraps the Prisma CLI and custom migration helpers.
+
+**Location**: `.claude/skills/prisma-migrate/`
+
+**When to Use**:
+
+- Creating database migrations
+- Validating Prisma schemas
+- Staging and reviewing migrations
+- Executing migrations
+- Database schema changes
+
+**Related Skills**: architecture, git-worktrees
+
+---
+
+### tools
+
+**Description**: Use this skill when adding new tools/sub-apps to the application, understanding the multi-app architecture, or modifying existing tools. Provides guidance on the tool registry, routing structure, and shared layouts.
+
+**Location**: `.claude/skills/tools/`
+
+**When to Use**:
+
+- Adding new tools or sub-apps
+- Understanding multi-app architecture
+- Modifying existing tools
+- Tool registry and routing
+
+**Related Skills**: architecture, analytics, better-auth
+
+---
+
+## Skill Structure
+
+Each skill typically contains:
+
+- **SKILL.md**: Main documentation with YAML frontmatter
+- **examples.md** (optional): Real-world usage examples
+- **README.md** (optional): Quick reference guide
+
+## Adding a New Skill
+
+1. Create a new directory in `.claude/skills/<skill-name>/`
+2. Add `SKILL.md` with proper YAML frontmatter:
+
+   ```yaml
+   ---
+   name: skill-name
+   description: Use this skill when... [activation triggers and description]
+   allowed-tools:
+     - Bash
+     - Read
+     - Edit
+     - Write
+     - Grep
+     - Glob
+   ---
+   ```
+
+3. Optionally add `examples.md` and `README.md`
+4. Update this index with the new skill entry
+
+## Skill Activation
+
+Skills activate based on keywords and patterns in user queries. The `description` field in each skill's YAML frontmatter determines when it's triggered.
+
+**Example**:
+
+- Query: "How do I add analytics to a new feature?"
+- Activates: `analytics` skill
+- Reason: Matches "add analytics" in description
