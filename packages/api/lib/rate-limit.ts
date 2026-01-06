@@ -75,6 +75,16 @@ export function getOrgIdentifier(orgId: string): string {
 }
 
 /**
+ * Aligns a timestamp to a fixed window boundary
+ * For example, for a 1-hour window, aligns to the start of the current hour
+ */
+function alignToWindowStart(now: Date, windowMs: number): Date {
+	const timestamp = now.getTime();
+	const alignedTimestamp = Math.floor(timestamp / windowMs) * windowMs;
+	return new Date(alignedTimestamp);
+}
+
+/**
  * Check if a rate limit allows the request
  * Returns information about whether the request is allowed and remaining quota
  */
@@ -84,18 +94,17 @@ export async function checkRateLimit(
 	const { identifier, toolSlug, limit, windowMs } = options;
 
 	const now = new Date();
-	const windowEnd = new Date(now.getTime());
+	// Align to the same window boundaries as incrementRateLimit
+	const windowStart = alignToWindowStart(now, windowMs);
+	const windowEnd = new Date(windowStart.getTime() + windowMs);
 
-	// Get the current rate limit entry for this window
-	const entry = await db.rateLimitEntry.findFirst({
+	// Get the current rate limit entry for this exact window
+	const entry = await db.rateLimitEntry.findUnique({
 		where: {
-			identifier,
-			toolSlug,
-			windowStart: {
-				lte: now,
-			},
-			windowEnd: {
-				gte: now,
+			identifier_toolSlug_windowStart: {
+				identifier,
+				toolSlug,
+				windowStart,
 			},
 		},
 	});
@@ -131,8 +140,9 @@ export async function incrementRateLimit(
 	const { identifier, toolSlug, windowMs } = options;
 
 	const now = new Date();
-	const windowStart = new Date(now.getTime() - windowMs);
-	const windowEnd = new Date(now.getTime());
+	// Align window to fixed boundaries (e.g., start of hour, start of day)
+	const windowStart = alignToWindowStart(now, windowMs);
+	const windowEnd = new Date(windowStart.getTime() + windowMs);
 
 	// Use upsert with proper window alignment
 	await db.rateLimitEntry.upsert({
