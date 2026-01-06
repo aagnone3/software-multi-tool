@@ -1,3 +1,10 @@
+export interface RateLimitConfig {
+	/** Maximum number of requests allowed in the time window */
+	requests: number;
+	/** Time window for rate limiting (e.g., '1h', '1d', '1m') */
+	window: string;
+}
+
 export interface ToolConfig {
 	slug: string;
 	name: string;
@@ -7,6 +14,13 @@ export interface ToolConfig {
 	public: boolean;
 	/** Whether the tool is currently enabled */
 	enabled: boolean;
+	/** Rate limit configuration for this tool */
+	rateLimits?: {
+		/** Rate limits for anonymous users */
+		anonymous?: RateLimitConfig;
+		/** Rate limits for authenticated users */
+		authenticated?: RateLimitConfig;
+	};
 }
 
 export type Config = {

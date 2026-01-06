@@ -10,8 +10,13 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
+import { rateLimitMiddleware } from "./lib/rate-limit-middleware";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
+
+// Export rate limiting utilities
+export * from "./lib/rate-limit";
+export * from "./lib/rate-limit-middleware";
 
 export const app = new Hono()
 	.basePath("/api")
@@ -80,6 +85,17 @@ export const app = new Hono()
 	.post("/webhooks/payments", (c) => paymentsWebhookHandler(c.req.raw))
 	// Health check
 	.get("/health", (c) => c.text("OK"))
+	// Test endpoint with rate limiting (for testing bg-remover limits)
+	.get(
+		"/tools/test-rate-limit",
+		rateLimitMiddleware({ toolSlug: "bg-remover", bypassInDev: false }),
+		(c) => {
+			return c.json({
+				message: "Rate limit test successful",
+				timestamp: new Date().toISOString(),
+			});
+		},
+	)
 	// oRPC handlers (for RPC and OpenAPI)
 	.use("*", async (c, next) => {
 		const context = {

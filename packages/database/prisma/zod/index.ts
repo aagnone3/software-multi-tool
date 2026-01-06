@@ -82,6 +82,12 @@ export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
+// File: RateLimitEntryScalarFieldEnum.schema.ts
+
+export const RateLimitEntryScalarFieldEnumSchema = z.enum(['id', 'identifier', 'toolSlug', 'windowStart', 'windowEnd', 'count', 'createdAt', 'updatedAt'])
+
+export type RateLimitEntryScalarFieldEnumEnum = z.infer<typeof RateLimitEntryScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -336,3 +342,19 @@ export const ToolJobSchema = z.object({
 });
 
 export type ToolJobType = z.infer<typeof ToolJobSchema>;
+
+
+// File: RateLimitEntry.schema.ts
+
+export const RateLimitEntrySchema = z.object({
+  id: z.string(),
+  identifier: z.string(),
+  toolSlug: z.string(),
+  windowStart: z.date(),
+  windowEnd: z.date(),
+  count: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type RateLimitEntryType = z.infer<typeof RateLimitEntrySchema>;
