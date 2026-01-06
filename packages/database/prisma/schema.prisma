@@ -41,6 +41,7 @@ model User {
     members            Member[]
     twofactors         TwoFactor[]
     aiChats            AiChat[]
+    toolJobs           ToolJob[]
 
     @@unique([email])
     @@unique([username])
@@ -206,4 +207,46 @@ model AiChat {
     updatedAt      DateTime      @updatedAt
 
     @@map("ai_chat")
+}
+
+enum ToolJobStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+model ToolJob {
+    id          String        @id @default(cuid())
+    toolSlug    String
+    status      ToolJobStatus @default(PENDING)
+    priority    Int           @default(0)
+
+    // Input/Output
+    input       Json          // Tool-specific input data
+    output      Json?         // Tool-specific output data
+    error       String?       // Error message if failed
+
+    // Ownership
+    userId      String?
+    user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    sessionId   String?       // For anonymous users
+
+    // Tracking
+    attempts    Int           @default(0)
+    maxAttempts Int           @default(3)
+    startedAt   DateTime?
+    completedAt DateTime?
+    expiresAt   DateTime      // Cleanup after this time
+
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+
+    @@index([status, priority])
+    @@index([toolSlug, status])
+    @@index([userId])
+    @@index([sessionId])
+    @@index([expiresAt])
+    @@map("tool_job")
 }

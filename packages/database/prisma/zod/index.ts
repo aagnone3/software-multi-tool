@@ -76,6 +76,12 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: ToolJobScalarFieldEnum.schema.ts
+
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt'])
+
+export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -87,6 +93,12 @@ export type SortOrderEnum = z.infer<typeof SortOrderSchema>;
 export const JsonNullValueInputSchema = z.enum(['JsonNull'])
 
 export type JsonNullValueInputEnum = z.infer<typeof JsonNullValueInputSchema>;
+
+// File: NullableJsonNullValueInput.schema.ts
+
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull', 'JsonNull'])
+
+export type NullableJsonNullValueInputEnum = z.infer<typeof NullableJsonNullValueInputSchema>;
 
 // File: QueryMode.schema.ts
 
@@ -111,6 +123,12 @@ export type JsonNullValueFilterEnum = z.infer<typeof JsonNullValueFilterSchema>;
 export const PurchaseTypeSchema = z.enum(['SUBSCRIPTION', 'ONE_TIME'])
 
 export type PurchaseTypeEnum = z.infer<typeof PurchaseTypeSchema>;
+
+// File: ToolJobStatus.schema.ts
+
+export const ToolJobStatusSchema = z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED'])
+
+export type ToolJobStatusEnum = z.infer<typeof ToolJobStatusSchema>;
 
 // File: User.schema.ts
 
@@ -294,3 +312,27 @@ export const AiChatSchema = z.object({
 });
 
 export type AiChatType = z.infer<typeof AiChatSchema>;
+
+
+// File: ToolJob.schema.ts
+
+export const ToolJobSchema = z.object({
+  id: z.string(),
+  toolSlug: z.string(),
+  status: ToolJobStatusSchema.default("PENDING"),
+  priority: z.number().int(),
+  input: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  output: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  error: z.string().nullish(),
+  userId: z.string().nullish(),
+  sessionId: z.string().nullish(),
+  attempts: z.number().int(),
+  maxAttempts: z.number().int().default(3),
+  startedAt: z.date().nullish(),
+  completedAt: z.date().nullish(),
+  expiresAt: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ToolJobType = z.infer<typeof ToolJobSchema>;

@@ -57,6 +57,10 @@ vi.mock("../modules/ai/router", () => ({
 	aiRouter: {},
 }));
 
+vi.mock("../modules/jobs/router", () => ({
+	jobsRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -73,6 +77,7 @@ describe("api router", () => {
 			"users",
 			"payments",
 			"ai",
+			"jobs",
 		]);
 	});
 
