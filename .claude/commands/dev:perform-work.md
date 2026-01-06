@@ -21,7 +21,8 @@ pnpm --filter @repo/scripts linear views list-issues --view ready-for-work-6ec4d
 The view is pre-sorted by priority. Select the **first issue** in the list (highest priority).
 
 Display to user:
-```
+
+```text
 Auto-selected: <ISSUE-KEY> - <title> (Priority: <priority>)
 ```
 
@@ -29,11 +30,12 @@ Auto-selected: <ISSUE-KEY> - <title> (Priority: <priority>)
 
 Once selected, invoke the `dev:work-on-ticket` command to handle the complete development workflow:
 
-```
+```text
 /dev:work-on-ticket <selected-issue-key>
 ```
 
 **IMPORTANT:** Do NOT duplicate the work-on workflow here. The `dev:work-on-ticket.md` command contains the complete, authoritative workflow for:
+
 - Starting the issue (moving to In Progress)
 - Creating a feature branch
 - Creating a todo list
@@ -48,7 +50,7 @@ Once selected, invoke the `dev:work-on-ticket` command to handle the complete de
 
 If the view returns no issues:
 
-```
+```text
 No issues are currently in the "Ready for Work" view.
 
 Options:
@@ -61,7 +63,7 @@ Options:
 
 If the view cannot be resolved:
 
-```
+```text
 Could not find the "Ready for Work" view (ready-for-work-6ec4d06793a6).
 
 Please verify:
@@ -78,7 +80,7 @@ Please verify:
 
 *Runs: `pnpm --filter @repo/scripts linear views list-issues --view ready-for-work-6ec4d06793a6`*
 
-```
+```text
 Issues in view "Ready for Work" (3 issues):
 
 KEY      STATUS     PRIORITY  TITLE

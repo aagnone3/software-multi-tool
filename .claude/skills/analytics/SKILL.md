@@ -16,14 +16,14 @@ This skill provides comprehensive guidance for working with the pluggable analyt
 
 ## Quick Reference
 
-| Component | Location |
-|-----------|----------|
-| Active Provider Export | `apps/web/modules/analytics/index.tsx` |
-| PostHog Provider | `apps/web/modules/analytics/provider/posthog/index.tsx` |
-| Client Instrumentation | `apps/web/instrumentation-client.js` |
-| Provider Integration | `apps/web/modules/shared/components/ClientProviders.tsx` |
-| TypeScript Alias | `@analytics` -> `./modules/analytics` |
-| Package Dependency | `posthog-js` v1.280.1 |
+| Component              | Location                                                 |
+| ---------------------- | -------------------------------------------------------- |
+| Active Provider Export | `apps/web/modules/analytics/index.tsx`                   |
+| PostHog Provider       | `apps/web/modules/analytics/provider/posthog/index.tsx`  |
+| Client Instrumentation | `apps/web/instrumentation-client.js`                     |
+| Provider Integration   | `apps/web/modules/shared/components/ClientProviders.tsx` |
+| TypeScript Alias       | `@analytics` -> `./modules/analytics`                    |
+| Package Dependency     | `posthog-js` v1.280.1                                    |
 
 ## Environment Variables
 
@@ -70,16 +70,16 @@ To switch providers, change this export to another provider directory.
 
 ## Available Providers
 
-| Provider | Directory | Required Env Var |
-|----------|-----------|------------------|
-| **PostHog** (default) | `provider/posthog/` | `NEXT_PUBLIC_POSTHOG_KEY` |
-| Google Analytics | `provider/google/` | `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` |
-| Mixpanel | `provider/mixpanel/` | `NEXT_PUBLIC_MIXPANEL_TOKEN` |
-| Vercel Analytics | `provider/vercel/` | (automatic with Vercel) |
-| Pirsch | `provider/pirsch/` | `NEXT_PUBLIC_PIRSCH_CODE` |
-| Plausible | `provider/plausible/` | `NEXT_PUBLIC_PLAUSIBLE_URL` |
-| Umami | `provider/umami/` | (script URL based) |
-| Custom | `provider/custom/` | (user-defined) |
+| Provider              | Directory             | Required Env Var                  |
+| --------------------- | --------------------- | --------------------------------- |
+| **PostHog** (default) | `provider/posthog/`   | `NEXT_PUBLIC_POSTHOG_KEY`         |
+| Google Analytics      | `provider/google/`    | `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` |
+| Mixpanel              | `provider/mixpanel/`  | `NEXT_PUBLIC_MIXPANEL_TOKEN`      |
+| Vercel Analytics      | `provider/vercel/`    | (automatic with Vercel)           |
+| Pirsch                | `provider/pirsch/`    | `NEXT_PUBLIC_PIRSCH_CODE`         |
+| Plausible             | `provider/plausible/` | `NEXT_PUBLIC_PLAUSIBLE_URL`       |
+| Umami                 | `provider/umami/`     | (script URL based)                |
+| Custom                | `provider/custom/`    | (user-defined)                    |
 
 ## PostHog Configuration
 

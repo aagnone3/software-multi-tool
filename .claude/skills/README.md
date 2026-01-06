@@ -9,6 +9,7 @@ This folder contains distribution packages for different Claude platforms.
 - **`n8n-mcp-skills-v1.0.0.zip`** (168 KB) - All 7 skills in one package
 
 **Includes:**
+
 - Skill #1: n8n Expression Syntax
 - Skill #2: n8n MCP Tools Expert
 - Skill #3: n8n Workflow Patterns
@@ -18,6 +19,7 @@ This folder contains distribution packages for different Claude platforms.
 - Skill #7: n8n Code Python
 
 **Installation:**
+
 ```bash
 # Claude Code plugin installation
 /plugin install czlonkowski/n8n-skills
@@ -37,6 +39,7 @@ Upload each skill separately via Settings → Capabilities → Skills (bottom of
 - `n8n-node-configuration-v1.0.0.zip` - Operation-aware node configuration
 
 **Installation:**
+
 1. Go to Settings → Capabilities → Skills (bottom of page)
 2. Click "Upload Skill"
 3. Select one of the skill zip files above
@@ -46,11 +49,11 @@ Upload each skill separately via Settings → Capabilities → Skills (bottom of
 
 ## 🎯 Which Package Should I Use?
 
-| Platform | Package | What You Get |
-|----------|---------|--------------|
-| **Claude.ai** | Individual zips | 5 core skills (upload separately) |
-| **Claude Code** | Complete bundle (n8n-mcp-skills-v1.0.0.zip) | All 7 skills at once |
-| **Claude API** | Complete bundle | All 7 skills (extract skills/ folder) |
+| Platform        | Package                                     | What You Get                          |
+| --------------- | ------------------------------------------- | ------------------------------------- |
+| **Claude.ai**   | Individual zips                             | 5 core skills (upload separately)     |
+| **Claude Code** | Complete bundle (n8n-mcp-skills-v1.0.0.zip) | All 7 skills at once                  |
+| **Claude API**  | Complete bundle                             | All 7 skills (extract skills/ folder) |
 
 **Note:** Code skills (#6 JavaScript, #7 Python) are only in the complete bundle.
 
@@ -58,7 +61,7 @@ Upload each skill separately via Settings → Capabilities → Skills (bottom of
 
 ## 📁 Files in This Directory
 
-```
+```text
 dist/
 ├── n8n-mcp-skills-v1.0.0.zip              (168 KB) ★ RECOMMENDED
 ├── n8n-expression-syntax-v1.0.0.zip       (11 KB)
@@ -76,7 +79,8 @@ dist/
 ### Individual Skill Packages (Claude.ai)
 
 Each zip contains:
-```
+
+```text
 SKILL.md              # Main skill instructions with YAML frontmatter
 [Reference files]     # Additional documentation and guides
 README.md             # Skill metadata and statistics
@@ -84,7 +88,7 @@ README.md             # Skill metadata and statistics
 
 ### Bundle Package (Claude Code)
 
-```
+```text
 .claude-plugin/
   ├── plugin.json      # Claude Code plugin metadata
   └── marketplace.json # Marketplace listing metadata
@@ -104,7 +108,7 @@ skills/                # All 7 skills in subfolders
 
 After installation, test skills by asking:
 
-```
+```text
 "How do I write n8n expressions?"
 → Should activate: n8n Expression Syntax
 
@@ -130,22 +134,26 @@ After installation, test skills by asking:
 ## 📖 Documentation
 
 For detailed installation instructions, see:
+
 - Main README: `../README.md`
 - Installation Guide: `../docs/INSTALLATION.md`
 - Usage Guide: `../docs/USAGE.md`
 
 ## 🐛 Troubleshooting
 
-**Claude.ai Error: "Zip must contain exactly one SKILL.md file"**
+### Claude.ai Error: "Zip must contain exactly one SKILL.md file"
+
 - Use the individual skill zips, not the bundle
 - Each skill must be uploaded separately
 
-**Claude Code: Skills not activating**
+### Claude Code: Skills not activating
+
 - Verify skills are in `~/.claude/skills/` directory
 - Check that n8n-mcp MCP server is running
 - Reload Claude Code
 
-**Skills not triggering**
+### Skills not triggering
+
 - Skills activate based on keywords in your queries
 - Try more specific questions matching skill descriptions
 - Check that SKILL.md files have correct frontmatter

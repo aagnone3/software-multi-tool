@@ -513,15 +513,15 @@ vercel logs <deployment-url>
 
 ### Where do I put...?
 
-| What | Where |
-|------|-------|
-| New API endpoint | `packages/api/modules/<domain>/` |
-| New React component | `apps/web/components/` |
-| New page | `apps/web/app/` |
-| Shared utility | `packages/utils/` |
-| Database change | `packages/database/prisma/schema.prisma` |
-| Email template | `packages/mail/templates/` |
-| Config option | `config/index.ts` |
+| What                | Where                                    |
+| ------------------- | ---------------------------------------- |
+| New API endpoint    | `packages/api/modules/<domain>/`         |
+| New React component | `apps/web/components/`                   |
+| New page            | `apps/web/app/`                          |
+| Shared utility      | `packages/utils/`                        |
+| Database change     | `packages/database/prisma/schema.prisma` |
+| Email template      | `packages/mail/templates/`               |
+| Config option       | `config/index.ts`                        |
 
 ### How do I find...?
 

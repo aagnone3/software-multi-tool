@@ -13,22 +13,22 @@ This skill provides comprehensive guidance for understanding and navigating the 
 
 ## Quick Reference
 
-| Component | Entry Point |
-|-----------|-------------|
-| Backend API | `packages/api/index.ts` |
-| API Router | `packages/api/orpc/router.ts` |
-| Procedures | `packages/api/orpc/procedures.ts` |
-| Auth | `packages/auth/auth.ts` |
-| Database | `packages/database/prisma/schema.prisma` |
-| Web App | `apps/web/app/` |
-| API Catch-All | `apps/web/app/api/[[...rest]]/route.ts` |
-| Config | `config/index.ts` |
-| Theme | `tooling/tailwind/theme.css` |
-| PR Validation | `.github/workflows/validate-prs.yml` |
-| DB Migrations | `.github/workflows/db-migrate-deploy.yml` |
-| Env Scripts | `tooling/scripts/src/env/` |
-| Next.js Config | `apps/web/next.config.ts` |
-| Turbo Config | `turbo.json` |
+| Component      | Entry Point                               |
+| -------------- | ----------------------------------------- |
+| Backend API    | `packages/api/index.ts`                   |
+| API Router     | `packages/api/orpc/router.ts`             |
+| Procedures     | `packages/api/orpc/procedures.ts`         |
+| Auth           | `packages/auth/auth.ts`                   |
+| Database       | `packages/database/prisma/schema.prisma`  |
+| Web App        | `apps/web/app/`                           |
+| API Catch-All  | `apps/web/app/api/[[...rest]]/route.ts`   |
+| Config         | `config/index.ts`                         |
+| Theme          | `tooling/tailwind/theme.css`              |
+| PR Validation  | `.github/workflows/validate-prs.yml`      |
+| DB Migrations  | `.github/workflows/db-migrate-deploy.yml` |
+| Env Scripts    | `tooling/scripts/src/env/`                |
+| Next.js Config | `apps/web/next.config.ts`                 |
+| Turbo Config   | `turbo.json`                              |
 
 ## Monorepo Structure
 
@@ -67,18 +67,18 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 
 All backend logic lives in `packages/`:
 
-| Package | Purpose | Key Files |
-|---------|---------|-----------|
-| `@repo/api` | Hono + oRPC typed API routes | `index.ts`, `orpc/router.ts`, `modules/` |
-| `@repo/auth` | better-auth with passkeys, magic links, organizations | `auth.ts`, `client.ts` |
-| `@repo/database` | Prisma schema, generated types, Zod schemas | `prisma/schema.prisma` |
-| `@repo/payments` | Multi-provider payment integration | `index.ts`, `providers/` |
-| `@repo/mail` | React Email templates + Nodemailer | `index.ts`, `templates/` |
-| `@repo/storage` | AWS S3 file/image storage | `index.ts` |
-| `@repo/ai` | Vercel AI SDK integration | `index.ts` |
-| `@repo/i18n` | next-intl translations | `index.ts`, `locales/` |
-| `@repo/logs` | Centralized logging (consola) | `index.ts` |
-| `@repo/utils` | Shared utility functions | `index.ts` |
+| Package          | Purpose                                               | Key Files                                |
+| ---------------- | ----------------------------------------------------- | ---------------------------------------- |
+| `@repo/api`      | Hono + oRPC typed API routes                          | `index.ts`, `orpc/router.ts`, `modules/` |
+| `@repo/auth`     | better-auth with passkeys, magic links, organizations | `auth.ts`, `client.ts`                   |
+| `@repo/database` | Prisma schema, generated types, Zod schemas           | `prisma/schema.prisma`                   |
+| `@repo/payments` | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
+| `@repo/mail`     | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
+| `@repo/storage`  | AWS S3 file/image storage                             | `index.ts`                               |
+| `@repo/ai`       | Vercel AI SDK integration                             | `index.ts`                               |
+| `@repo/i18n`     | next-intl translations                                | `index.ts`, `locales/`                   |
+| `@repo/logs`     | Centralized logging (consola)                         | `index.ts`                               |
+| `@repo/utils`    | Shared utility functions                              | `index.ts`                               |
 
 ### Configuration
 
@@ -158,14 +158,14 @@ adminProcedure     → { headers, session, user } + admin check
 
 ### API Endpoints
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/api/rpc/*` | oRPC JSON-RPC calls (type-safe) |
-| `/api/openapi` | Merged OpenAPI schema |
-| `/api/docs` | Scalar API documentation UI |
-| `/api/health` | Health check |
-| `/api/webhooks/payments` | Payment provider webhooks |
-| `/api/auth/**` | better-auth routes |
+| Endpoint                 | Purpose                         |
+| ------------------------ | ------------------------------- |
+| `/api/rpc/*`             | oRPC JSON-RPC calls (type-safe) |
+| `/api/openapi`           | Merged OpenAPI schema           |
+| `/api/docs`              | Scalar API documentation UI     |
+| `/api/health`            | Health check                    |
+| `/api/webhooks/payments` | Payment provider webhooks       |
+| `/api/auth/**`           | better-auth routes              |
 
 ### Type Safety
 
@@ -206,12 +206,12 @@ export type ApiRouterClient = typeof apiRouter;
 
 ### State Management
 
-| Type | Solution |
-|------|----------|
-| URL state | nuqs |
-| Server state | TanStack Query + oRPC |
-| Local component state | React hooks |
-| No Redux/Zustand | Not needed with RSC + TanStack Query |
+| Type                  | Solution                             |
+| --------------------- | ------------------------------------ |
+| URL state             | nuqs                                 |
+| Server state          | TanStack Query + oRPC                |
+| Local component state | React hooks                          |
+| No Redux/Zustand      | Not needed with RSC + TanStack Query |
 
 ### Styling
 
@@ -301,10 +301,10 @@ The application is deployed to **Vercel** (serverless):
 
 Located in `.github/workflows/`:
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `validate-prs.yml` | Pull requests | Lint, E2E tests, unit tests |
-| `db-migrate-deploy.yml` | Push to main | Apply Prisma migrations |
+| Workflow                | Trigger       | Purpose                     |
+| ----------------------- | ------------- | --------------------------- |
+| `validate-prs.yml`      | Pull requests | Lint, E2E tests, unit tests |
+| `db-migrate-deploy.yml` | Push to main  | Apply Prisma migrations     |
 
 **PR Validation Pipeline:**
 
@@ -327,20 +327,22 @@ PostgreSQL hosted on **Supabase** with connection pooling (pgbouncer).
 
 Local PostgreSQL for development runs on the default Homebrew installation:
 
-| Setting | Value |
-|---------|-------|
-| Host | localhost |
-| Port | 5432 |
+| Setting  | Value                   |
+| -------- | ----------------------- |
+| Host     | localhost               |
+| Port     | 5432                    |
 | Database | local_softwaremultitool |
-| User | postgres |
-| Password | postgres |
+| User     | postgres                |
+| Password | postgres                |
 
 **Connection string:**
-```
+
+```text
 postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
 ```
 
 **Setup (if needed):**
+
 ```bash
 # Create the database (using template1 since default postgres db may not exist)
 PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"

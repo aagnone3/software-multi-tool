@@ -420,13 +420,13 @@ console.log("PostHog Host:", process.env.NEXT_PUBLIC_POSTHOG_HOST);
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| Events not appearing | Check `NEXT_PUBLIC_POSTHOG_KEY` is set |
-| Wrong PostHog project | Verify the API key matches your project |
-| Events delayed | PostHog batches events; wait a few seconds |
-| User not identified | Ensure `posthog.identify()` is called after login |
-| Stale user data | Call `posthog.reset()` on logout |
+| Issue                 | Solution                                           |
+| --------------------- | -------------------------------------------------- |
+| Events not appearing  | Check `NEXT_PUBLIC_POSTHOG_KEY` is set             |
+| Wrong PostHog project | Verify the API key matches your project            |
+| Events delayed        | PostHog batches events; wait a few seconds         |
+| User not identified   | Ensure `posthog.identify()` is called after login  |
+| Stale user data       | Call `posthog.reset()` on logout                   |
 
 ### Disable Analytics in Development
 

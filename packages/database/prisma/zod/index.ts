@@ -294,4 +294,3 @@ export const AiChatSchema = z.object({
 });
 
 export type AiChatType = z.infer<typeof AiChatSchema>;
-
