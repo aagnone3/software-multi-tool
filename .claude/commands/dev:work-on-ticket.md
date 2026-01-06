@@ -15,39 +15,41 @@ When working on ANY Linear issue, you MUST complete ALL of these steps in order:
 - Move the ticket to "In Progress" using: `pnpm --filter @repo/scripts linear issues start --issue <key>`
 - Verify the command succeeds - retry if it fails
 
-### 1.5. Create Feature Branch
+### 1.5. Create Worktree for Feature Branch
 
 > **🚨 CRITICAL: NEVER commit directly to main branch 🚨**
+>
+> **🚨 MANDATORY: ALWAYS use git worktrees for feature work 🚨**
 
-Before making any changes, you MUST create a feature branch:
+**Why worktrees are mandatory in this system:**
 
-```bash
-# Verify current branch
-CURRENT_BRANCH=$(git branch --show-current)
+- Multiple Claude Code instances work on tickets in parallel
+- Main branch stays pure and clean as a reference point
+- Complete isolation between concurrent development efforts
+- You (the user) can freely experiment on main without affecting agent work
+- Zero interference between parallel tasks
 
-# If on main, create and switch to feature branch
-if [ "$CURRENT_BRANCH" = "main" ]; then
-  git checkout -b <branch-name>
-fi
+**You MUST use the git-worktrees skill** to create an isolated worktree for your feature branch:
+
+```text
+Use Skill tool with skill: "git-worktrees"
 ```
 
-**Branch naming conventions:**
+The git-worktrees skill will handle:
+
+- Creating worktree directory (`.worktrees/feat-pra-XX-...`)
+- Setting up isolated environment with unique PORT
+- Configuring `.env.local` for parallel development
+- Running baseline verification tests
+- Ensuring gitignore is configured correctly
+
+**Branch naming conventions** (skill handles this):
 
 - Bug fixes: `fix/pra-<issue>-<short-description>`
-  - Example: `fix/pra-35-vercel-deployment`
 - Features: `feat/pra-<issue>-<short-description>`
-  - Example: `feat/pra-40-user-auth`
 - Chores: `chore/pra-<issue>-<short-description>`
-  - Example: `chore/pra-42-update-deps`
 
-**MANDATORY VERIFICATION:**
-
-```bash
-# This MUST NOT output "main"
-git branch --show-current
-```
-
-**Note:** A git pre-commit hook will automatically prevent commits to main, but you should create the branch proactively.
+**DO NOT use `git checkout -b`** - this violates the parallel development architecture and prevents multiple agents from working simultaneously.
 
 ### 2. Create Complete Todo List
 
@@ -202,12 +204,14 @@ pnpm --filter @repo/scripts linear issues close --issue <key>
 # 1. Start the issue
 pnpm --filter @repo/scripts linear issues start --issue PRA-25
 
-# 1.5. Create feature branch (if not already done)
-git checkout -b fix/pra-25-playwright-fixtures
+# 1.5. Create worktree using git-worktrees skill (MANDATORY)
+# Use Skill tool with skill: "git-worktrees"
+# This creates .worktrees/fix-pra-25-playwright-fixtures/ with isolated environment
 
 # 2. [Create TodoWrite list with all steps]
 
-# 3. [Implement changes]
+# 3. [Navigate to worktree and implement changes]
+cd .worktrees/fix-pra-25-playwright-fixtures
 
 # 4. Verify tests pass
 pnpm test
@@ -223,9 +227,9 @@ Closes PRA-25
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
-# 6. Push to remote (feature branch, NOT main)
+# 6. Push to remote
 git push -u origin HEAD
 
 # 7. Create PR
@@ -237,6 +241,7 @@ gh pr create --base main --head fix/pra-25-playwright-fixtures --title "Add Play
 # ========================================
 # Share PR URL with user
 # Linear issue remains "In Progress" until PR is merged
+# Worktree stays active for any follow-up changes
 
 # ========================================
 # AFTER PR IS MERGED (separate step)
@@ -247,6 +252,11 @@ gh pr merge 123 --squash
 
 # 9. Close Linear issue (only after merge)
 pnpm --filter @repo/scripts linear issues close --issue PRA-25
+
+# 10. Clean up worktree (after merge and closure)
+cd ../..  # Return to main repo
+git worktree remove .worktrees/fix-pra-25-playwright-fixtures
+git worktree prune
 ```
 
 Now proceed with the Linear issue following ALL steps above.

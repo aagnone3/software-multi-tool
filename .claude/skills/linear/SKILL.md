@@ -170,23 +170,35 @@ pnpm --filter @repo/scripts linear issues start --issue <key>
 - Moves the ticket to "In Progress"
 - **Verify the command succeeds**
 
-### Step 1.5: Create Feature Branch
+### Step 1.5: Create Worktree for Feature Branch
 
 > **🚨 CRITICAL: NEVER commit directly to main branch 🚨**
+>
+> **🚨 MANDATORY: ALWAYS use git worktrees for feature work 🚨**
 
-Before making any changes, you MUST create a feature branch:
+**Why worktrees are mandatory in this system:**
 
-```bash
-# Verify current branch
-CURRENT_BRANCH=$(git branch --show-current)
+- Multiple Claude Code instances work on tickets in parallel
+- Main branch stays pure and clean as a reference point
+- Complete isolation between concurrent development efforts
+- You (the user) can freely experiment on main without affecting agent work
+- Zero interference between parallel tasks
 
-# If on main, create and switch to feature branch
-if [ "$CURRENT_BRANCH" = "main" ]; then
-  git checkout -b <branch-name>
-fi
+**You MUST use the git-worktrees skill** to create an isolated worktree for your feature branch:
+
+```text
+Use Skill tool with skill: "git-worktrees"
 ```
 
-**Branch naming conventions:**
+The git-worktrees skill will handle:
+
+- Creating worktree directory (`.worktrees/feat-pra-XX-...`)
+- Setting up isolated environment with unique PORT
+- Configuring `.env.local` for parallel development
+- Running baseline verification tests
+- Ensuring gitignore is configured correctly
+
+**Branch naming conventions** (skill handles this):
 
 - Bug fixes: `fix/pra-<issue>-<short-description>`
   - Example: `fix/pra-35-vercel-deployment`
@@ -195,14 +207,7 @@ fi
 - Chores: `chore/pra-<issue>-<short-description>`
   - Example: `chore/pra-42-update-deps`
 
-**MANDATORY VERIFICATION:**
-
-```bash
-# This MUST NOT output "main"
-git branch --show-current
-```
-
-**Note:** A git pre-commit hook will automatically prevent commits to main, but you should create the branch proactively.
+**DO NOT use `git checkout -b`** - this violates the parallel development architecture and prevents multiple agents from working simultaneously.
 
 ### Step 2: Create Complete Todo List
 
@@ -233,14 +238,14 @@ pnpm test
 
 ### Step 5: Create Git Commit
 
-> **CRITICAL: Verify you're NOT on main branch before committing**
+> **CRITICAL: Verify you're in a worktree (NOT main branch) before committing**
 
 ```bash
 # Verify branch first
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" = "main" ]; then
-  echo "❌ ERROR: Cannot commit to main! Create a feature branch first."
-  echo "Run: git checkout -b fix/pra-<issue>-<description>"
+  echo "❌ ERROR: Cannot commit to main! You must use a worktree."
+  echo "Use the git-worktrees skill to create an isolated environment."
   exit 1
 fi
 
@@ -262,13 +267,13 @@ EOF
 
 ### Step 6: Push to Remote
 
-> **CRITICAL: Verify you're on a feature branch before pushing**
+> **CRITICAL: Verify you're in a worktree (NOT main) before pushing**
 
 ```bash
 # Verify you're on a feature branch (NOT main)
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" = "main" ]; then
-  echo "❌ ERROR: Cannot push main directly! You must use a feature branch."
+  echo "❌ ERROR: Cannot push main directly! You must use a worktree."
   exit 1
 fi
 

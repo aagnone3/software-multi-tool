@@ -14,7 +14,7 @@ Before proceeding, check the current branch:
 CURRENT_BRANCH=$(git branch --show-current)
 ```
 
-**If on main branch with uncommitted changes**, automatically create a feature branch:
+**If on main branch with uncommitted changes**, automatically create a worktree:
 
 1. Analyze the uncommitted changes to determine an appropriate branch name
 2. Use the naming convention from CLAUDE.md:
@@ -23,10 +23,11 @@ CURRENT_BRANCH=$(git branch --show-current)
    - `chore/` for maintenance tasks
    - `docs/` for documentation
    - `refactor/` for refactoring
-3. Create and switch to the new branch:
+3. **Use the git-worktrees skill** to create an isolated worktree:
 
    ```bash
-   git checkout -b <type>/<short-description>
+   # Use Skill tool with skill: "git-worktrees"
+   # Pass branch name: <type>/<short-description>
    ```
 
 **Branch naming examples based on changes:**
@@ -37,6 +38,8 @@ CURRENT_BRANCH=$(git branch --show-current)
 - Updated dependencies → `chore/update-deps`
 
 **If on main with no changes**, inform the user there's nothing to do.
+
+**IMPORTANT:** This system mandates worktrees for all feature work to support parallel development. Do NOT use `git checkout -b`.
 
 ## Workflow
 
@@ -162,10 +165,11 @@ Display to user:
   - Renamed command files
   - Updated script reference
 
-Creating feature branch...
-  ✅ Created branch: chore/rename-commands
+Creating worktree for branch: chore/rename-commands...
+  ✅ Using git-worktrees skill
+  ✅ Created worktree: .worktrees/chore-rename-commands/
 
-Creating commits...
+Moving to worktree and creating commits...
   ✅ chore: rename commands and update references (4 files)
 
 Pushing to remote...
