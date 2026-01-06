@@ -240,6 +240,7 @@ The repository enforces quality gates via `pre-commit`. Install with `pre-commit
   - `issues set-milestone --issue <key> --project <ref> --milestone <ref>`
   - `issues dependency --blocked <key> --blocking <key>`
   - `issues close --issue <key>`
+  - `views list-issues --view <id|slug>` - List issues from a custom view
 
 ## Environment & Setup
 

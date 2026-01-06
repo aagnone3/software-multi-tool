@@ -20,6 +20,7 @@ const commands = {
 	"issues:start": handleIssuesStart,
 	"issues:close": handleIssuesClose,
 	"issues:dependency": handleIssuesDependency,
+	"views:list-issues": handleViewsListIssues,
 };
 
 async function main() {
@@ -128,6 +129,7 @@ Resources & actions:
   issues start --issue <key>                              Mark an issue as In Progress.
   issues close --issue <key>                              Mark an issue as Done.
   issues dependency --blocked <key> --blocking <key>      Mark one issue as blocked by another.
+  views list-issues --view <id|slug>                      List issues from a custom view.
 
 Examples:
   pnpm --filter @repo/scripts linear projects list
@@ -137,6 +139,7 @@ Examples:
   pnpm --filter @repo/scripts linear issues start --issue PRA-10
   pnpm --filter @repo/scripts linear issues close --issue PRA-10
   pnpm --filter @repo/scripts linear issues dependency --blocked PRA-8 --blocking PRA-6
+  pnpm --filter @repo/scripts linear views list-issues --view ready-for-work-6ec4d06793a6
 `);
 }
 
@@ -669,6 +672,42 @@ async function handleIssuesDependency(context) {
 	);
 }
 
+/** @param {CommandContext} context */
+async function handleViewsListIssues(context) {
+	const client = requireClient(context);
+	const { flags } = context;
+	const viewRef = requireFlag(flags, "view");
+
+	const view = await resolveCustomView(client, viewRef);
+
+	// Fetch issues from the view
+	const issuesConnection = await view.issues({ first: 50 });
+
+	if (issuesConnection.nodes.length === 0) {
+		console.log(`No issues found in view "${view.name}".`);
+		return;
+	}
+
+	console.log(
+		`Issues in view "${view.name}" (${issuesConnection.nodes.length} issues):\n`,
+	);
+	console.log("KEY\tSTATUS\tPRIORITY\tTITLE");
+	console.log("---\t------\t--------\t-----");
+
+	const priorityLabels = ["None", "Urgent", "High", "Medium", "Low"];
+
+	for (const issue of issuesConnection.nodes) {
+		const state = await issue.state;
+		const stateName = state?.name ?? "Unknown";
+		const priority = priorityLabels[issue.priority ?? 0];
+		const title =
+			issue.title.length > 50
+				? `${issue.title.slice(0, 47)}...`
+				: issue.title;
+		console.log(`${issue.identifier}\t${stateName}\t${priority}\t${title}`);
+	}
+}
+
 /**
  * @param {Record<string, string>} flags
  * @param {string} key
@@ -733,6 +772,35 @@ async function resolveIssue(client, ref) {
 	}
 
 	return issue;
+}
+
+/**
+ * @param {LinearClient} client
+ * @param {string} ref
+ */
+async function resolveCustomView(client, ref) {
+	const trimmed = ref.trim();
+	const normalized = trimmed.toLowerCase();
+
+	// Try by ID first (UUID format)
+	const byId = await tryGet(async () => client.customView(trimmed));
+	if (byId) {
+		return byId;
+	}
+
+	// Try by slugId - fetch all views and match
+	const connection = await client.customViews({ first: 100 });
+	const view = connection.nodes.find(
+		(v) => v.id === trimmed || v.slugId?.toLowerCase() === normalized,
+	);
+
+	if (!view) {
+		throw new Error(
+			`Could not resolve custom view from reference "${ref}". Make sure the view ID or slug is correct.`,
+		);
+	}
+
+	return view;
 }
 
 /**
