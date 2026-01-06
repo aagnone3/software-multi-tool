@@ -106,6 +106,10 @@ async function startContainer(): Promise<StartedPostgreSqlContainer> {
 }
 
 async function preparePrismaClient(connectionString: string) {
+	// Push schema to the test database container
+	// Note: We skip generate here because the Prisma client should already be generated
+	// during the build process. Regenerating it during tests can cause binary corruption
+	// when multiple test processes run concurrently.
 	await execFileAsync(
 		"pnpm",
 		[
@@ -116,27 +120,6 @@ async function preparePrismaClient(connectionString: string) {
 			"--schema",
 			prismaSchemaPath,
 			"--skip-generate",
-		],
-		{
-			cwd: workspaceRoot,
-			env: {
-				...process.env,
-				DATABASE_URL: connectionString,
-				DIRECT_URL: connectionString,
-			},
-		},
-	);
-
-	await execFileAsync(
-		"pnpm",
-		[
-			"exec",
-			"prisma",
-			"generate",
-			"--schema",
-			prismaSchemaPath,
-			"--generator",
-			"client",
 		],
 		{
 			cwd: workspaceRoot,
