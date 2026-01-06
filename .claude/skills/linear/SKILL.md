@@ -144,6 +144,19 @@ pnpm --filter @repo/scripts linear issues dependency --blocked <key> --blocking 
 - Creates a blocking relationship between two issues
 - `<key>` is the issue identifier (e.g., PRA-8, PRA-6)
 
+### Views
+
+#### List Issues from View
+
+```bash
+pnpm --filter @repo/scripts linear views list-issues --view <id|slug>
+```
+
+- Lists issues from a specific custom view
+- `<id|slug>` can be the view's UUID or its slug (e.g., `ready-for-work-6ec4d06793a6`)
+- Output: KEY, STATUS, PRIORITY, TITLE columns
+- Useful for querying curated lists of work-ready issues
+
 ## Complete Development Workflow (MANDATORY)
 
 **When working on a Linear issue, you MUST complete ALL steps. Work is NOT complete until the PR is merged.**
