@@ -1,5 +1,20 @@
+export interface ToolConfig {
+	slug: string;
+	name: string;
+	description: string;
+	icon: string;
+	/** Whether the tool is accessible without authentication */
+	public: boolean;
+	/** Whether the tool is currently enabled */
+	enabled: boolean;
+}
+
 export type Config = {
 	appName: string;
+	tools: {
+		/** Registry of all available tools/sub-apps */
+		registry: ToolConfig[];
+	};
 	i18n: {
 		enabled: boolean;
 		locales: { [locale: string]: { currency: string; label: string } };
