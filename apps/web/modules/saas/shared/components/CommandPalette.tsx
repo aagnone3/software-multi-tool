@@ -316,7 +316,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 						)}
 
 						<Command.Group
-							heading="Pages"
+							heading="Jump to Page"
 							className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
 						>
 							{navigationItems.map((page) => {
@@ -345,7 +345,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 						</Command.Group>
 
 						<Command.Group
-							heading="Tools"
+							heading="Jump to Tool"
 							className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
 						>
 							{enabledTools.map((tool) => {
