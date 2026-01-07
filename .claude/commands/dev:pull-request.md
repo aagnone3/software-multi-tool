@@ -59,6 +59,46 @@ Categorize changes into:
 
 If no uncommitted changes exist, skip to Step 3.
 
+### Step 1.5: Verify Tests Exist for New Functionality
+
+> **🚨 MANDATORY: New functionality requires test coverage 🚨**
+
+Before creating commits, verify that tests were written:
+
+```bash
+# Check for test files in the changes
+git status | grep "test\."
+
+# Check git diff for test files
+git diff --name-only | grep "test\."
+```
+
+**If no test files exist and you added new functionality:**
+
+1. **STOP** - Do not proceed with commits
+2. Write tests for the new functionality:
+   - Unit tests for individual functions/components
+   - Integration tests for module interactions
+   - E2E tests for user workflows (if applicable)
+3. Run tests to verify they pass: `pnpm test`
+4. Then return to Step 2
+
+**If test files exist, verify they test the new functionality:**
+
+```bash
+# Run the new tests
+pnpm test path/to/new.test.ts
+
+# Verify tests provide coverage:
+# - Do tests fail when you comment out your implementation?
+# - Do tests cover happy path, edge cases, and error handling?
+```
+
+**CRITICAL:** Only proceed if:
+
+- ✅ Tests exist for new functionality OR
+- ✅ Changes are purely refactoring/docs with no behavior changes
+
 ### Step 2: Organize and Create Commits
 
 Use AI judgment to group related changes into logical commits:
@@ -104,6 +144,20 @@ git commit -m "chore: add spinner animation dependency
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
+
+### Step 2.5: Verify All Tests Pass
+
+Before pushing, verify the full test suite passes:
+
+```bash
+# Run all tests
+pnpm test
+
+# If tests fail, fix them before proceeding
+# DO NOT push code with failing tests
+```
+
+**CRITICAL:** Only proceed if all tests pass ✅
 
 ### Step 3: Push to Remote
 
