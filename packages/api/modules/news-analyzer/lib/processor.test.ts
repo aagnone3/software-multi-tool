@@ -4,6 +4,18 @@ import { processNewsAnalyzerJob } from "./processor";
 // Mock the agent SDK
 vi.mock("@repo/agent-sdk", () => ({
 	executePrompt: vi.fn(),
+	CLAUDE_MODELS: {
+		HAIKU_3_5: "claude-3-5-haiku-20241022",
+		SONNET_3: "claude-3-sonnet-20240229",
+		SONNET_3_5_V1: "claude-3-5-sonnet-20240620",
+		SONNET_3_5_V2: "claude-3-5-sonnet-20241022",
+		OPUS_3: "claude-3-opus-20240229",
+	},
+	MODEL_RECOMMENDATIONS: {
+		structured: "claude-3-5-haiku-20241022",
+		analysis: "claude-3-5-sonnet-20241022",
+		creative: "claude-3-opus-20240229",
+	},
 }));
 
 // Mock the content extractor

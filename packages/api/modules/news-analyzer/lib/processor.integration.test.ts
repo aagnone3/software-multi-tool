@@ -4,28 +4,25 @@ import { processNewsAnalyzerJob } from "./processor";
 /**
  * Integration tests for the news analyzer processor with real Claude API calls
  *
- * These tests require ANTHROPIC_API_KEY to be set and will be skipped if not available.
+ * IMPORTANT: These tests REQUIRE ANTHROPIC_API_KEY to be set.
+ * Tests will FAIL if the key is missing (not skip).
  */
 describe("News Analyzer Processor (integration)", () => {
 	const TIMEOUT = 60000; // 60 seconds for Claude API calls
 
-	const skipIfNoApiKey = () => {
+	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
-			console.warn(
-				"⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set",
+			throw new Error(
+				"ANTHROPIC_API_KEY is required for integration tests. Set it in apps/web/.env.local",
 			);
-			return true;
 		}
-		return false;
 	};
 
 	describe("processNewsAnalyzerJob - full end-to-end", () => {
 		it(
 			"should process a real article from URL to analysis",
 			async () => {
-				if (skipIfNoApiKey()) {
-					return;
-				}
+				requireApiKey();
 
 				const job = {
 					id: "integration-test-1",
@@ -36,6 +33,11 @@ describe("News Analyzer Processor (integration)", () => {
 				};
 
 				const result = await processNewsAnalyzerJob(job);
+
+				// Log error if failed for debugging
+				if (!result.success) {
+					console.error("❌ Integration test failed:", result.error);
+				}
 
 				// Should succeed
 				expect(result.success).toBe(true);
@@ -82,9 +84,7 @@ describe("News Analyzer Processor (integration)", () => {
 		it(
 			"should handle extraction failures",
 			async () => {
-				if (skipIfNoApiKey()) {
-					return;
-				}
+				requireApiKey();
 
 				const job = {
 					id: "integration-test-2",
@@ -106,9 +106,7 @@ describe("News Analyzer Processor (integration)", () => {
 		it(
 			"should process article from text input",
 			async () => {
-				if (skipIfNoApiKey()) {
-					return;
-				}
+				requireApiKey();
 
 				const job = {
 					id: "integration-test-3",
@@ -126,6 +124,11 @@ describe("News Analyzer Processor (integration)", () => {
 				};
 
 				const result = await processNewsAnalyzerJob(job);
+
+				// Log error if failed for debugging
+				if (!result.success) {
+					console.error("❌ Integration test failed:", result.error);
+				}
 
 				// Should succeed
 				expect(result.success).toBe(true);

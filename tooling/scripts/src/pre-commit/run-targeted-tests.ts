@@ -194,6 +194,8 @@ function runTests(filters: string[], global: boolean) {
 		"exec",
 		"dotenv",
 		"-c",
+		"-e",
+		"apps/web/.env.local",
 		"--",
 		"turbo",
 		"run",

@@ -1,4 +1,4 @@
-import { executePrompt } from "@repo/agent-sdk";
+import { executePrompt, MODEL_RECOMMENDATIONS } from "@repo/agent-sdk";
 import type { Prisma } from "@repo/database/prisma/generated/client";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import {
@@ -193,7 +193,7 @@ Analysis requirements:
 Respond with ONLY the JSON object, no additional text or markdown formatting.`;
 
 	const result = await executePrompt(analysisPrompt, {
-		model: "claude-3-5-sonnet-20241022",
+		model: MODEL_RECOMMENDATIONS.structured, // Haiku is best for structured JSON tasks
 		maxTokens: 2048,
 		temperature: 0.3, // Lower temperature for more consistent structured output
 	});

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { executePrompt } from "./prompt";
+import { CLAUDE_MODELS } from "./src/models";
 
 /**
  * Integration test for Claude Agent SDK.
@@ -7,39 +8,28 @@ import { executePrompt } from "./prompt";
  * This test verifies that the SDK can successfully communicate with the Anthropic API.
  * It uses the Haiku model with a minimal prompt to minimize API costs.
  *
- * IMPORTANT: This test requires ANTHROPIC_API_KEY to be set in the environment.
- * For CI, add ANTHROPIC_API_KEY to GitHub Actions secrets.
+ * IMPORTANT: This test REQUIRES ANTHROPIC_API_KEY to be set.
+ * Tests will FAIL if the key is missing (not skip).
  *
  * The test is intentionally simple and cheap:
- * - Model: claude-3-5-haiku-20241022 (cheapest model)
+ * - Model: CLAUDE_MODELS.HAIKU_3_5 (cheapest model)
  * - Max tokens: 50 (minimal response)
  * - Prompt: Simple greeting (minimal input tokens)
- *
- * Behavior:
- * - CI (CI=true): FAILS if ANTHROPIC_API_KEY is not set (ensures proper configuration)
- * - Local dev: Skips if ANTHROPIC_API_KEY is not set (developer convenience)
- * - Once configured: Tests run and validate SDK integration
  */
 describe("Claude Agent SDK Integration", () => {
-	it("should execute a prompt and return a response", async () => {
-		const isCI = process.env.CI === "true";
-
-		// In CI: fail if API key is missing (configuration error)
-		// In local dev: skip if API key is missing (developer convenience)
+	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
-			if (isCI) {
-				throw new Error(
-					"ANTHROPIC_API_KEY is not set in CI environment. Verify the secret is configured in GitHub Actions.",
-				);
-			}
-			console.warn(
-				"⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
+			throw new Error(
+				"ANTHROPIC_API_KEY is required for integration tests. Set it in apps/web/.env.local",
 			);
-			return;
 		}
+	};
+
+	it("should execute a prompt and return a response", async () => {
+		requireApiKey();
 
 		const result = await executePrompt("Say hello in one word", {
-			model: "claude-3-5-haiku-20241022",
+			model: CLAUDE_MODELS.HAIKU_3_5,
 			maxTokens: 50,
 		});
 
@@ -70,24 +60,10 @@ describe("Claude Agent SDK Integration", () => {
 	});
 
 	it("should handle system prompts correctly", async () => {
-		const isCI = process.env.CI === "true";
-
-		// In CI: fail if API key is missing (configuration error)
-		// In local dev: skip if API key is missing (developer convenience)
-		if (!process.env.ANTHROPIC_API_KEY) {
-			if (isCI) {
-				throw new Error(
-					"ANTHROPIC_API_KEY is not set in CI environment. Verify the secret is configured in GitHub Actions.",
-				);
-			}
-			console.warn(
-				"⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
-			);
-			return;
-		}
+		requireApiKey();
 
 		const result = await executePrompt("What color is the sky?", {
-			model: "claude-3-5-haiku-20241022",
+			model: CLAUDE_MODELS.HAIKU_3_5,
 			maxTokens: 50,
 			system: "You always answer with exactly one word.",
 		});
