@@ -61,9 +61,38 @@ export async function processNewsAnalyzerJob(job: {
 		const result = await extractContentFromUrl(input.articleUrl);
 
 		if (!result.success) {
+			// Provide more user-friendly error messages based on error type
+			let userMessage = result.error;
+
+			switch (result.errorType) {
+				case "INVALID_URL":
+					userMessage =
+						"The URL you provided is not valid. Please check the URL and try again.";
+					break;
+				case "PAYWALL":
+					userMessage =
+						"This article is behind a paywall and cannot be accessed. Try pasting the article text instead.";
+					break;
+				case "FETCH_FAILED":
+					if (result.error.includes("timeout")) {
+						userMessage =
+							"The article took too long to load. Please try again or paste the article text instead.";
+					} else if (result.error.includes("404")) {
+						userMessage =
+							"The article could not be found (404). Please check the URL.";
+					} else {
+						userMessage = `Failed to fetch article: ${result.error}. Try pasting the article text instead.`;
+					}
+					break;
+				case "NO_CONTENT":
+					userMessage =
+						"No article content could be extracted from this page. Try pasting the article text instead.";
+					break;
+			}
+
 			return {
 				success: false,
-				error: result.error,
+				error: userMessage,
 			};
 		}
 
@@ -87,6 +116,25 @@ export async function processNewsAnalyzerJob(job: {
 		};
 	} catch (error) {
 		if (error instanceof Error) {
+			// Check for common configuration errors and provide helpful messages
+			if (error.message.includes("ANTHROPIC_API_KEY")) {
+				return {
+					success: false,
+					error: "AI analysis service is not configured. Please contact support or set up your ANTHROPIC_API_KEY.",
+				};
+			}
+
+			// Check for rate limiting
+			if (
+				error.message.includes("rate") ||
+				error.message.includes("429")
+			) {
+				return {
+					success: false,
+					error: "AI analysis service is currently overloaded. Please try again in a few moments.",
+				};
+			}
+
 			return {
 				success: false,
 				error: `Analysis failed: ${error.message}`,

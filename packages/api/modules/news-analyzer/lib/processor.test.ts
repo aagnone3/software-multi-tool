@@ -190,8 +190,9 @@ describe("News Analyzer Processor", () => {
 
 			expect(result.success).toBe(false);
 			if (!result.success) {
-				expect(result.error).toContain("Analysis failed");
-				expect(result.error).toContain("API rate limit");
+				// Updated to match new user-friendly error message
+				expect(result.error).toContain("AI analysis service");
+				expect(result.error).toContain("overloaded");
 			}
 		});
 
