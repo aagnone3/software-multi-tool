@@ -154,8 +154,112 @@ EOF
 )"
 ```
 
-- **Capture and display the PR URL**
-- **Share the PR URL with the user**
+- **Capture the PR number from the URL** (e.g., `35` from `https://github.com/org/repo/pull/35`)
+- **DO NOT stop here - CI monitoring is mandatory**
+
+### 7.5. Monitor CI and Fix Failures
+
+> **🚨 MANDATORY: Always monitor CI after PR creation 🚨**
+
+**NEVER skip this step.** CI failures must be detected and fixed before work is complete.
+
+```bash
+# Extract PR number from URL
+PR_NUMBER=<number>  # e.g., 35
+
+# Wait for CI to start (GitHub needs time to trigger workflows)
+echo "⏳ Waiting for CI checks to start..."
+sleep 30
+
+# Monitor CI status
+echo "🔍 Monitoring CI checks..."
+CHECKS=$(gh pr checks $PR_NUMBER --json bucket,state,name,workflow)
+
+# Check for failures
+FAILURES=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "fail")] | length')
+PENDING=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "pending")] | length')
+
+if [ "$FAILURES" -gt 0 ]; then
+  echo "❌ CI failures detected!"
+  echo "$CHECKS" | jq -r '.[] | select(.bucket == "fail") | "  - \(.name) in \(.workflow): \(.state)"'
+
+  # Get the failed workflow run
+  BRANCH=$(git branch --show-current)
+  RUN_ID=$(gh run list --branch "$BRANCH" --limit 1 --json databaseId --jq '.[0].databaseId')
+
+  # Fetch and analyze logs
+  echo "📋 Fetching failure logs..."
+  gh run view $RUN_ID --log-failed > /tmp/ci-failure.log
+
+  # Analyze the failure and fix if possible
+  # (Implementation continues below)
+fi
+```
+
+**Common CI Failures and How to Fix:**
+
+1. **Integration test failures (missing API key)**
+   - Error: `ANTHROPIC_API_KEY is not set in CI environment`
+   - Decision: If the tests can skip gracefully, update them to skip in CI with warnings
+   - If tests must run: Inform user to add secret to GitHub Actions
+
+2. **Type errors**
+   - Error: TypeScript compilation failures
+   - Fix: Run `pnpm type-check` locally, fix errors, commit and push
+   - Resume monitoring
+
+3. **Linting failures**
+   - Error: Biome/ESLint violations
+   - Fix: Run `pnpm lint --write`, commit formatted code, push
+   - Resume monitoring
+
+4. **Test failures**
+   - Error: Unit/integration test failures
+   - Fix: Run `pnpm test`, fix failing tests, commit and push
+   - Resume monitoring
+
+5. **Build failures**
+   - Error: Build process fails
+   - Fix: Run `pnpm build`, fix errors, commit and push
+   - Resume monitoring
+
+**Monitoring Loop Pattern:**
+
+```bash
+# Monitor until all checks pass or timeout
+MAX_ATTEMPTS=20  # 10 minutes with 30s intervals
+ATTEMPT=0
+
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  CHECKS=$(gh pr checks $PR_NUMBER --json bucket,state,name,workflow)
+  FAILURES=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "fail")] | length')
+  PENDING=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "pending")] | length')
+
+  if [ "$FAILURES" -gt 0 ]; then
+    echo "❌ CI failure detected - analyzing and fixing..."
+    # Fetch logs, identify issue, fix, push, continue
+    break
+  elif [ "$PENDING" -eq 0 ]; then
+    echo "✅ All CI checks passed!"
+    break
+  else
+    echo "⏳ CI in progress ($PENDING pending)... check $((ATTEMPT + 1))/$MAX_ATTEMPTS"
+    sleep 30
+    ATTEMPT=$((ATTEMPT + 1))
+  fi
+done
+```
+
+**Actions to Take:**
+
+1. **If all checks pass:** Report success to user and proceed to "DEVELOPMENT WORK COMPLETE"
+2. **If failures can be fixed:** Analyze logs, fix issue, commit, push, resume monitoring
+3. **If failures require manual intervention:** Report to user with logs and stop
+
+**CRITICAL:** Do not mark work as complete until either:
+
+- All CI checks pass ✅
+- OR you've reported failures you cannot fix to the user and await guidance
 
 ## ✅ DEVELOPMENT WORK COMPLETE
 
@@ -164,9 +268,11 @@ EOF
 1. All tests pass locally
 2. Changes are committed
 3. Changes are pushed to remote
-4. Pull request is created and URL is available
+4. Pull request is created
+5. **CI checks are monitored**
+6. **CI checks all pass OR unfixable failures are reported to user**
 
-**The PR URL marks the completion of development work.**
+**Work is NOT complete until CI is green or user is informed of issues.**
 
 ---
 
@@ -233,12 +339,43 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 git push -u origin HEAD
 
 # 7. Create PR
-gh pr create --base main --head fix/pra-25-playwright-fixtures --title "Add Playwright shared fixtures and CI artifacts" --body "..."
-# Capture PR URL: https://github.com/org/repo/pull/123
+PR_URL=$(gh pr create --base main --head fix/pra-25-playwright-fixtures --title "Add Playwright shared fixtures and CI artifacts" --body "...")
+# Example: https://github.com/org/repo/pull/123
+PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+
+# 7.5. Monitor CI (MANDATORY - DO NOT SKIP)
+echo "⏳ Waiting for CI checks to start..."
+sleep 30
+
+# Monitor loop
+MAX_ATTEMPTS=20
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  CHECKS=$(gh pr checks $PR_NUMBER --json bucket,state,name)
+  FAILURES=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "fail")] | length')
+  PENDING=$(echo "$CHECKS" | jq '[.[] | select(.bucket == "pending")] | length')
+
+  if [ "$FAILURES" -gt 0 ]; then
+    echo "❌ CI failures detected - fetching logs..."
+    BRANCH=$(git branch --show-current)
+    RUN_ID=$(gh run list --branch "$BRANCH" --limit 1 --json databaseId --jq '.[0].databaseId')
+    gh run view $RUN_ID --log-failed
+    # Analyze, fix, push, resume monitoring
+    break
+  elif [ "$PENDING" -eq 0 ]; then
+    echo "✅ All CI checks passed!"
+    break
+  else
+    echo "⏳ CI in progress ($PENDING pending)... check $((ATTEMPT + 1))/$MAX_ATTEMPTS"
+    sleep 30
+    ATTEMPT=$((ATTEMPT + 1))
+  fi
+done
 
 # ========================================
 # ✅ DEVELOPMENT WORK COMPLETE
 # ========================================
+# Only reached after CI passes or failures are addressed
 # Share PR URL with user
 # Linear issue remains "In Progress" until PR is merged
 # Worktree stays active for any follow-up changes
