@@ -16,25 +16,25 @@ import { executePrompt } from "./prompt";
  * - Prompt: Simple greeting (minimal input tokens)
  *
  * Behavior:
- * - Both CI and local dev: Skips if ANTHROPIC_API_KEY is not set (with informative warnings)
- * - CI: Shows additional message about configuring GitHub Actions secrets
- * - Once configured: Tests run automatically and validate SDK integration
+ * - CI (CI=true): FAILS if ANTHROPIC_API_KEY is not set (ensures proper configuration)
+ * - Local dev: Skips if ANTHROPIC_API_KEY is not set (developer convenience)
+ * - Once configured: Tests run and validate SDK integration
  */
 describe("Claude Agent SDK Integration", () => {
 	it("should execute a prompt and return a response", async () => {
-		// Skip if API key is not set (both CI and local dev)
-		// This allows the PR to merge before API key is configured
+		const isCI = process.env.CI === "true";
+
+		// In CI: fail if API key is missing (configuration error)
+		// In local dev: skip if API key is missing (developer convenience)
 		if (!process.env.ANTHROPIC_API_KEY) {
-			const isCI = process.env.CI === "true";
-			const envType = isCI ? "CI" : "local dev";
-			console.warn(
-				`⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (${envType})`,
-			);
 			if (isCI) {
-				console.warn(
-					"ℹ️  To enable integration tests, add ANTHROPIC_API_KEY to GitHub Actions secrets",
+				throw new Error(
+					"ANTHROPIC_API_KEY is not set in CI environment. Verify the secret is configured in GitHub Actions.",
 				);
 			}
+			console.warn(
+				"⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
+			);
 			return;
 		}
 
@@ -70,18 +70,19 @@ describe("Claude Agent SDK Integration", () => {
 	});
 
 	it("should handle system prompts correctly", async () => {
-		// Skip if API key is not set (both CI and local dev)
+		const isCI = process.env.CI === "true";
+
+		// In CI: fail if API key is missing (configuration error)
+		// In local dev: skip if API key is missing (developer convenience)
 		if (!process.env.ANTHROPIC_API_KEY) {
-			const isCI = process.env.CI === "true";
-			const envType = isCI ? "CI" : "local dev";
-			console.warn(
-				`⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (${envType})`,
-			);
 			if (isCI) {
-				console.warn(
-					"ℹ️  To enable integration tests, add ANTHROPIC_API_KEY to GitHub Actions secrets",
+				throw new Error(
+					"ANTHROPIC_API_KEY is not set in CI environment. Verify the secret is configured in GitHub Actions.",
 				);
 			}
+			console.warn(
+				"⚠️  Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
+			);
 			return;
 		}
 
