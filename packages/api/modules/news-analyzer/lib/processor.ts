@@ -1,5 +1,5 @@
 import { executePrompt, MODEL_RECOMMENDATIONS } from "@repo/agent-sdk";
-import type { Prisma } from "@repo/database/prisma/generated/client";
+import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import {
 	type ExtractedContent,
@@ -40,10 +40,7 @@ interface NewsAnalyzerOutput {
 /**
  * Process a news analyzer job using Claude to analyze article content
  */
-export async function processNewsAnalyzerJob(job: {
-	id: string;
-	input: unknown;
-}): Promise<JobResult> {
+export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 	const input = job.input as NewsAnalyzerInput;
 
 	// Validate input
