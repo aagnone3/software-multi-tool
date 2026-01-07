@@ -49,3 +49,6 @@ dist/
 .react-email/
 .content-collections/
 .vercel
+
+# worktrees
+.worktrees/
