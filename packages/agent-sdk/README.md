@@ -195,7 +195,12 @@ pnpm --filter @repo/agent-sdk type-check
 
 Integration tests require `ANTHROPIC_API_KEY` to be set. Tests use the Haiku model with minimal prompts to minimize API costs.
 
-If the API key is not set, integration tests will be skipped with a warning.
+**Behavior:**
+
+- **CI environments** (`CI=true`): Tests **fail** if `ANTHROPIC_API_KEY` is not set, ensuring proper configuration
+- **Local development**: Tests **skip** if `ANTHROPIC_API_KEY` is not set, for developer convenience
+
+This ensures CI properly validates the SDK integration while allowing local development without requiring an API key.
 
 ## Architecture
 

@@ -14,13 +14,25 @@ import { executePrompt } from "./prompt";
  * - Model: claude-3-5-haiku-20241022 (cheapest model)
  * - Max tokens: 50 (minimal response)
  * - Prompt: Simple greeting (minimal input tokens)
+ *
+ * Behavior:
+ * - CI (CI=true): FAILS if ANTHROPIC_API_KEY is not set (ensures proper configuration)
+ * - Local dev (CI not set): Skips if ANTHROPIC_API_KEY is not set (developer convenience)
  */
 describe("Claude Agent SDK Integration", () => {
 	it("should execute a prompt and return a response", async () => {
-		// Skip test if API key is not set (e.g., local dev without key)
+		const isCI = process.env.CI === "true";
+
+		// In CI: fail if API key is missing (configuration error)
+		// In local dev: skip if API key is missing (convenience)
 		if (!process.env.ANTHROPIC_API_KEY) {
+			if (isCI) {
+				throw new Error(
+					"ANTHROPIC_API_KEY is not set in CI environment. Add it to GitHub Actions secrets.",
+				);
+			}
 			console.warn(
-				"Skipping integration test: ANTHROPIC_API_KEY is not set",
+				"Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
 			);
 			return;
 		}
@@ -57,10 +69,18 @@ describe("Claude Agent SDK Integration", () => {
 	});
 
 	it("should handle system prompts correctly", async () => {
-		// Skip test if API key is not set
+		const isCI = process.env.CI === "true";
+
+		// In CI: fail if API key is missing (configuration error)
+		// In local dev: skip if API key is missing (convenience)
 		if (!process.env.ANTHROPIC_API_KEY) {
+			if (isCI) {
+				throw new Error(
+					"ANTHROPIC_API_KEY is not set in CI environment. Add it to GitHub Actions secrets.",
+				);
+			}
 			console.warn(
-				"Skipping integration test: ANTHROPIC_API_KEY is not set",
+				"Skipping integration test: ANTHROPIC_API_KEY is not set (local dev)",
 			);
 			return;
 		}
