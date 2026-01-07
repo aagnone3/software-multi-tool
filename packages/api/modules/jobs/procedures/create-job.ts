@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/client";
 import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
+import { logger } from "@repo/logs";
 import { publicProcedure } from "../../../orpc/procedures";
 import { CreateJobInputSchema } from "../types";
 
@@ -19,6 +20,12 @@ export const createJob = publicProcedure
 	.handler(async ({ input, context }) => {
 		const { toolSlug, input: jobInput, priority, sessionId } = input;
 
+		logger.info(`[CreateJob] Starting job creation for tool: ${toolSlug}`, {
+			hasSessionId: !!sessionId,
+			priority,
+			inputKeys: Object.keys(jobInput || {}),
+		});
+
 		// Try to get user from session if authenticated
 		let userId: string | undefined;
 		try {
@@ -27,12 +34,19 @@ export const createJob = publicProcedure
 				headers: context.headers,
 			});
 			userId = session?.user?.id;
-		} catch {
+			if (userId) {
+				logger.debug(`[CreateJob] Authenticated user found: ${userId}`);
+			}
+		} catch (error) {
+			logger.debug(
+				`[CreateJob] No authenticated session: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 			// Not authenticated, continue without userId
 		}
 
 		// Require either userId or sessionId for job ownership
 		if (!userId && !sessionId) {
+			logger.error("[CreateJob] Neither userId nor sessionId provided");
 			throw new ORPCError("BAD_REQUEST", {
 				message: "Either authentication or sessionId is required",
 			});
@@ -40,6 +54,7 @@ export const createJob = publicProcedure
 
 		// Check for cached results for cacheable tools
 		if (CACHEABLE_TOOLS.has(toolSlug)) {
+			logger.debug(`[CreateJob] Checking cache for tool: ${toolSlug}`);
 			const cachedJob = await findCachedJob(
 				toolSlug,
 				jobInput as Prisma.InputJsonValue,
@@ -47,11 +62,16 @@ export const createJob = publicProcedure
 			);
 
 			if (cachedJob) {
+				logger.info(
+					`[CreateJob] Returning cached job: ${cachedJob.id} (status: ${cachedJob.status})`,
+				);
 				// Return the cached job (already completed)
 				return { job: cachedJob };
 			}
+			logger.debug("[CreateJob] No cached job found");
 		}
 
+		logger.info(`[CreateJob] Creating new job for tool: ${toolSlug}`);
 		const job = await createToolJob({
 			toolSlug,
 			input: jobInput as Prisma.InputJsonValue,
@@ -61,10 +81,16 @@ export const createJob = publicProcedure
 		});
 
 		if (!job) {
+			logger.error(
+				`[CreateJob] Failed to create job for tool: ${toolSlug}`,
+			);
 			throw new ORPCError("INTERNAL_SERVER_ERROR", {
 				message: "Failed to create job",
 			});
 		}
 
+		logger.info(
+			`[CreateJob] Job created successfully: ${job.id} (status: ${job.status})`,
+		);
 		return { job };
 	});

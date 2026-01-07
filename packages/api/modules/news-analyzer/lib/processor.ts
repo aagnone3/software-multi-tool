@@ -1,5 +1,6 @@
 import { executePrompt, MODEL_RECOMMENDATIONS } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
+import { logger } from "@repo/logs";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import {
 	type ExtractedContent,
@@ -43,8 +44,16 @@ interface NewsAnalyzerOutput {
 export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 	const input = job.input as NewsAnalyzerInput;
 
+	logger.info(`[NewsAnalyzer] Starting processing for job: ${job.id}`, {
+		hasUrl: !!input.articleUrl,
+		hasText: !!input.articleText,
+	});
+
 	// Validate input
 	if (!input.articleUrl && !input.articleText) {
+		logger.error(
+			`[NewsAnalyzer] Job ${job.id} failed: No article content provided`,
+		);
 		return {
 			success: false,
 			error: "Either articleUrl or articleText must be provided in the job input",
@@ -55,11 +64,25 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 	let extractedContent: ExtractedContent;
 
 	if (input.articleUrl) {
+		logger.info(
+			`[NewsAnalyzer] Job ${job.id}: Extracting content from URL`,
+			{
+				url: input.articleUrl,
+			},
+		);
 		const result = await extractContentFromUrl(input.articleUrl);
 
 		if (!result.success) {
 			// Provide more user-friendly error messages based on error type
 			let userMessage = result.error;
+
+			logger.error(
+				`[NewsAnalyzer] Job ${job.id}: Content extraction failed`,
+				{
+					errorType: result.errorType,
+					error: result.error,
+				},
+			);
 
 			switch (result.errorType) {
 				case "INVALID_URL":
@@ -93,10 +116,23 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 			};
 		}
 
+		logger.info(
+			`[NewsAnalyzer] Job ${job.id}: Content extracted successfully`,
+			{
+				titleLength: result.data.title?.length || 0,
+				contentLength: result.data.textContent?.length || 0,
+			},
+		);
 		extractedContent = result.data;
 	} else if (input.articleText) {
+		logger.info(`[NewsAnalyzer] Job ${job.id}: Processing pasted text`, {
+			textLength: input.articleText.length,
+		});
 		extractedContent = extractContentFromText(input.articleText);
 	} else {
+		logger.error(
+			`[NewsAnalyzer] Job ${job.id}: No article content provided`,
+		);
 		return {
 			success: false,
 			error: "No article content provided",
@@ -105,13 +141,20 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 
 	// Analyze the article using Claude
 	try {
+		logger.info(`[NewsAnalyzer] Job ${job.id}: Starting AI analysis`);
 		const analysisResult = await analyzeArticle(extractedContent);
 
+		logger.info(
+			`[NewsAnalyzer] Job ${job.id}: Analysis completed successfully`,
+		);
 		return {
 			success: true,
 			output: analysisResult as unknown as Prisma.InputJsonValue,
 		};
 	} catch (error) {
+		logger.error(`[NewsAnalyzer] Job ${job.id}: Analysis failed`, {
+			error: error instanceof Error ? error.message : String(error),
+		});
 		if (error instanceof Error) {
 			// Check for common configuration errors and provide helpful messages
 			if (error.message.includes("ANTHROPIC_API_KEY")) {
@@ -189,10 +232,22 @@ Analysis requirements:
 
 Respond with ONLY the JSON object, no additional text or markdown formatting.`;
 
+	logger.debug("[NewsAnalyzer] Executing AI prompt", {
+		model: MODEL_RECOMMENDATIONS.structured,
+		titleLength: content.title?.length || 0,
+		contentLength: content.textContent?.length || 0,
+	});
+
 	const result = await executePrompt(analysisPrompt, {
 		model: MODEL_RECOMMENDATIONS.structured, // Haiku is best for structured JSON tasks
 		maxTokens: 2048,
 		temperature: 0.3, // Lower temperature for more consistent structured output
+	});
+
+	logger.debug("[NewsAnalyzer] Received AI response", {
+		responseLength: result.content.length,
+		startsWithJson: result.content.trim().startsWith("{"),
+		startsWithCodeFence: result.content.trim().startsWith("```"),
 	});
 
 	// Parse the JSON response
@@ -200,12 +255,19 @@ Respond with ONLY the JSON object, no additional text or markdown formatting.`;
 		// Remove markdown code fences if present
 		let jsonText = result.content.trim();
 		if (jsonText.startsWith("```")) {
+			logger.debug(
+				"[NewsAnalyzer] Removing markdown code fences from response",
+			);
 			// Remove ```json or ``` prefix and ``` suffix
 			jsonText = jsonText
 				.replace(/^```(?:json)?\s*/i, "")
 				.replace(/```\s*$/, "")
 				.trim();
 		}
+
+		logger.debug("[NewsAnalyzer] Parsing JSON response", {
+			jsonLength: jsonText.length,
+		});
 
 		const analysis = JSON.parse(jsonText) as NewsAnalyzerOutput;
 
@@ -217,11 +279,25 @@ Respond with ONLY the JSON object, no additional text or markdown formatting.`;
 			!analysis.entities ||
 			!analysis.sentiment
 		) {
+			logger.error("[NewsAnalyzer] Invalid analysis structure received", {
+				hasSummary: !!analysis.summary,
+				summaryIsArray: Array.isArray(analysis.summary),
+				hasBias: !!analysis.bias,
+				hasEntities: !!analysis.entities,
+				hasSentiment: !!analysis.sentiment,
+			});
 			throw new Error("Invalid analysis structure received from Claude");
 		}
 
+		logger.debug(
+			"[NewsAnalyzer] Analysis structure validated successfully",
+		);
 		return analysis;
 	} catch (error) {
+		logger.error("[NewsAnalyzer] Failed to parse AI response", {
+			error: error instanceof Error ? error.message : "Unknown error",
+			responsePreview: result.content.slice(0, 200),
+		});
 		// If JSON parsing fails, return error with the raw content for debugging
 		throw new Error(
 			`Failed to parse Claude response as JSON: ${error instanceof Error ? error.message : "Unknown error"}. Raw response: ${result.content.slice(0, 200)}`,

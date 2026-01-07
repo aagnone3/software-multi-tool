@@ -35,10 +35,25 @@ export function NewsAnalyzer() {
 		}) => {
 			const sessionId = getOrCreateSessionId();
 
+			console.log("[NewsAnalyzer] Creating job", {
+				sessionId,
+				hasUrl: !!input.articleUrl,
+				hasText: !!input.articleText,
+				urlLength: input.articleUrl?.length,
+				textLength: input.articleText?.length,
+			});
+
 			const response = await orpcClient.jobs.create({
 				toolSlug: "news-analyzer",
 				input,
 				sessionId,
+			});
+
+			console.log("[NewsAnalyzer] Job created", {
+				jobId: response.job.id,
+				status: response.job.status,
+				hasOutput: !!response.job.output,
+				hasError: !!response.job.error,
 			});
 
 			return response as CreateJobResponse;
@@ -46,19 +61,35 @@ export function NewsAnalyzer() {
 		onSuccess: (data) => {
 			const job = data.job;
 
+			console.log("[NewsAnalyzer] Job creation successful", {
+				jobId: job.id,
+				status: job.status,
+				hasOutput: !!job.output,
+				error: job.error,
+			});
+
 			// If job is already completed (from cache), show results immediately
 			if (job.status === "COMPLETED" && job.output) {
+				console.log(
+					"[NewsAnalyzer] Showing cached results immediately",
+				);
 				setResult(job.output as unknown as NewsAnalysisOutput);
 				setError(null);
 			} else if (job.status === "FAILED") {
+				console.error(
+					"[NewsAnalyzer] Job failed immediately",
+					job.error,
+				);
 				setError(job.error ?? "Job failed");
 			} else {
+				console.log("[NewsAnalyzer] Starting polling for job", job.id);
 				// Start polling for job completion
 				setJobId(job.id);
 				startPolling(job.id);
 			}
 		},
 		onError: (err) => {
+			console.error("[NewsAnalyzer] Job creation failed", err);
 			setError(
 				err instanceof Error
 					? err.message
@@ -70,19 +101,33 @@ export function NewsAnalyzer() {
 	// Poll job status
 	const pollJobStatus = async (id: string) => {
 		try {
+			console.log("[NewsAnalyzer] Polling job status", { jobId: id });
 			const response = await orpcClient.jobs.get({ jobId: id });
 			const job = response.job;
 
+			console.log("[NewsAnalyzer] Job status received", {
+				jobId: id,
+				status: job.status,
+				hasOutput: !!job.output,
+				hasError: !!job.error,
+			});
+
 			if (job.status === "COMPLETED" && job.output) {
+				console.log("[NewsAnalyzer] Job completed, showing results");
 				setResult(job.output as unknown as NewsAnalysisOutput);
 				setError(null);
 				stopPolling();
 			} else if (job.status === "FAILED") {
+				console.error(
+					"[NewsAnalyzer] Job failed during polling",
+					job.error,
+				);
 				setError(job.error ?? "Analysis failed");
 				stopPolling();
 			}
 			// Continue polling if PENDING or PROCESSING
 		} catch (err) {
+			console.error("[NewsAnalyzer] Polling error", err);
 			setError(
 				err instanceof Error
 					? err.message
