@@ -11,8 +11,12 @@ import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { rateLimitMiddleware } from "./lib/rate-limit-middleware";
+import { registerNewsAnalyzerProcessor } from "./modules/news-analyzer/lib/register";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
+
+// Register job processors
+registerNewsAnalyzerProcessor();
 
 // Export rate limiting utilities
 export * from "./lib/rate-limit";

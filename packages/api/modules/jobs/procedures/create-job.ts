@@ -1,7 +1,10 @@
 import { ORPCError } from "@orpc/client";
-import { createToolJob, type Prisma } from "@repo/database";
+import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
 import { publicProcedure } from "../../../orpc/procedures";
 import { CreateJobInputSchema } from "../types";
+
+// Tools that support caching (check for existing completed jobs)
+const CACHEABLE_TOOLS = new Set(["news-analyzer"]);
 
 export const createJob = publicProcedure
 	.route({
@@ -10,7 +13,7 @@ export const createJob = publicProcedure
 		tags: ["Jobs"],
 		summary: "Create job",
 		description:
-			"Create a new async job for a tool. Authenticated users get jobs linked to their account.",
+			"Create a new async job for a tool. Authenticated users get jobs linked to their account. For cacheable tools (e.g., news-analyzer), returns existing results if available.",
 	})
 	.input(CreateJobInputSchema)
 	.handler(async ({ input, context }) => {
@@ -33,6 +36,20 @@ export const createJob = publicProcedure
 			throw new ORPCError("BAD_REQUEST", {
 				message: "Either authentication or sessionId is required",
 			});
+		}
+
+		// Check for cached results for cacheable tools
+		if (CACHEABLE_TOOLS.has(toolSlug)) {
+			const cachedJob = await findCachedJob(
+				toolSlug,
+				jobInput as Prisma.InputJsonValue,
+				24, // 24 hour cache
+			);
+
+			if (cachedJob) {
+				// Return the cached job (already completed)
+				return { job: cachedJob };
+			}
 		}
 
 		const job = await createToolJob({

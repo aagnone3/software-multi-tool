@@ -241,3 +241,36 @@ export async function getJobStats(toolSlug?: string) {
 
 	return { pending, processing, completed, failed, cancelled };
 }
+
+/**
+ * Find a cached completed job for the given tool and input
+ * Used for caching expensive operations (e.g., news analysis)
+ *
+ * @param toolSlug - The tool slug to search for
+ * @param input - The job input to match
+ * @param maxAgeHours - Maximum age in hours (default: 24)
+ * @returns The most recent completed job matching the criteria, or null
+ */
+export async function findCachedJob(
+	toolSlug: string,
+	input: Prisma.InputJsonValue,
+	maxAgeHours = 24,
+) {
+	const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+
+	return await db.toolJob.findFirst({
+		where: {
+			toolSlug,
+			status: "COMPLETED",
+			input: {
+				equals: input,
+			},
+			completedAt: {
+				gte: cutoff,
+			},
+		},
+		orderBy: {
+			completedAt: "desc",
+		},
+	});
+}
