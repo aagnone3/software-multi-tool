@@ -14,14 +14,15 @@ describe("logger", () => {
 	beforeEach(() => {
 		vi.resetModules();
 		createConsola.mockClear();
+		delete process.env.LOG_LEVEL;
 	});
 
-	it("configures consola with Vercel-compatible options", async () => {
+	it("configures consola with default log level when LOG_LEVEL not set", async () => {
 		const { logger } = await import("./logger");
 
 		expect(createConsola).toHaveBeenCalledWith(
 			expect.objectContaining({
-				level: expect.any(Number),
+				level: 3, // Default info level
 				formatOptions: expect.objectContaining({
 					date: false,
 					colors: expect.any(Boolean),
@@ -31,5 +32,25 @@ describe("logger", () => {
 			}),
 		);
 		expect(logger.options.formatOptions.date).toBe(false);
+	});
+
+	it("configures consola with custom log level from LOG_LEVEL env var", async () => {
+		process.env.LOG_LEVEL = "5";
+		vi.resetModules();
+		createConsola.mockClear();
+
+		const { logger } = await import("./logger");
+
+		expect(createConsola).toHaveBeenCalledWith(
+			expect.objectContaining({
+				level: 5, // Custom level from env var
+				formatOptions: expect.objectContaining({
+					date: false,
+					colors: expect.any(Boolean),
+				}),
+				stdout: expect.anything(),
+				stderr: expect.anything(),
+			}),
+		);
 	});
 });
