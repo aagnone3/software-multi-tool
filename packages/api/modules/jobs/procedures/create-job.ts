@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/client";
 import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
 import { publicProcedure } from "../../../orpc/procedures";
+import { processNextJob } from "../lib/job-runner";
 import { CreateJobInputSchema } from "../types";
 
 // Tools that support caching (check for existing completed jobs)
@@ -92,5 +93,26 @@ export const createJob = publicProcedure
 		logger.info(
 			`[CreateJob] Job created successfully: ${job.id} (status: ${job.status})`,
 		);
+
+		// Trigger immediate background processing (non-blocking, best-effort)
+		// Cron will act as safety net for any failures
+		if (process.env.NODE_ENV !== "test") {
+			logger.debug(
+				`[CreateJob] Triggering immediate processing for job: ${job.id}`,
+			);
+			processNextJob(toolSlug).catch((error) => {
+				logger.error(
+					`[CreateJob] Immediate processing failed for job ${job.id}`,
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: String(error),
+					},
+				);
+				// Don't throw - cron will pick it up later
+			});
+		}
+
 		return { job };
 	});
