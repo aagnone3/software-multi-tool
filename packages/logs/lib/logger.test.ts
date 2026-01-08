@@ -16,12 +16,20 @@ describe("logger", () => {
 		createConsola.mockClear();
 	});
 
-	it("configures consola without date prefixing", async () => {
+	it("configures consola with Vercel-compatible options", async () => {
 		const { logger } = await import("./logger");
 
-		expect(createConsola).toHaveBeenCalledWith({
-			formatOptions: { date: false },
-		});
+		expect(createConsola).toHaveBeenCalledWith(
+			expect.objectContaining({
+				level: expect.any(Number),
+				formatOptions: expect.objectContaining({
+					date: false,
+					colors: expect.any(Boolean),
+				}),
+				stdout: expect.anything(),
+				stderr: expect.anything(),
+			}),
+		);
 		expect(logger.options.formatOptions.date).toBe(false);
 	});
 });
