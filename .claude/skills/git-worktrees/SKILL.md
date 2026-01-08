@@ -222,6 +222,11 @@ echo "" >> apps/web/.env.local
 echo "# Worktree-specific port (auto-allocated)" >> apps/web/.env.local
 echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
 
+# Update NEXT_PUBLIC_SITE_URL to match allocated port
+# This prevents Better Auth "Invalid origin" errors
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+rm -f apps/web/.env.local.bak
+
 # Verify port assignment
 echo "Allocated port: $WORKTREE_PORT"
 ```
@@ -444,9 +449,15 @@ echo "" >> apps/web/.env.local
 echo "# Auto-allocated port for this worktree" >> apps/web/.env.local
 echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
 
+# Update NEXT_PUBLIC_SITE_URL to match allocated port
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+rm -f apps/web/.env.local.bak
+
 # Verify
-cat apps/web/.env.local | grep PORT
-# Output: PORT=3518 (or whatever port was allocated)
+cat apps/web/.env.local | grep -E "PORT|NEXT_PUBLIC_SITE_URL"
+# Output:
+# NEXT_PUBLIC_SITE_URL="http://localhost:3518"
+# PORT=3518
 ```
 
 **Why automatic allocation?**
