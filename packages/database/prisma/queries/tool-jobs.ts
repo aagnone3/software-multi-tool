@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { Prisma, type ToolJobStatus } from "../generated/client";
+import type { Prisma, ToolJobStatus } from "../generated/client";
 
 // Default expiration time: 7 days
 const DEFAULT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -97,22 +97,40 @@ export async function cancelToolJob(id: string) {
 export async function claimNextPendingJob(toolSlug?: string) {
 	// Use a transaction with raw SQL for atomic update
 	// This prevents race conditions when multiple workers try to claim the same job
-	const result = await db.$queryRaw<Array<{ id: string }>>`
-		UPDATE "tool_job"
-		SET status = 'PROCESSING',
-		    "startedAt" = NOW(),
-		    attempts = attempts + 1,
-		    "updatedAt" = NOW()
-		WHERE id = (
-			SELECT id FROM "tool_job"
-			WHERE status = 'PENDING'
-			${toolSlug ? Prisma.sql`AND "toolSlug" = ${toolSlug}` : Prisma.empty}
-			ORDER BY priority DESC, "createdAt" ASC
-			FOR UPDATE SKIP LOCKED
-			LIMIT 1
-		)
-		RETURNING id
-	`;
+
+	// Build the query conditionally to avoid Prisma.sql nesting issues
+	const result = toolSlug
+		? await db.$queryRaw<Array<{ id: string }>>`
+			UPDATE "tool_job"
+			SET status = 'PROCESSING',
+				"startedAt" = NOW(),
+				attempts = attempts + 1,
+				"updatedAt" = NOW()
+			WHERE id = (
+				SELECT id FROM "tool_job"
+				WHERE status = 'PENDING'
+				AND "toolSlug" = ${toolSlug}
+				ORDER BY priority DESC, "createdAt" ASC
+				FOR UPDATE SKIP LOCKED
+				LIMIT 1
+			)
+			RETURNING id
+		`
+		: await db.$queryRaw<Array<{ id: string }>>`
+			UPDATE "tool_job"
+			SET status = 'PROCESSING',
+				"startedAt" = NOW(),
+				attempts = attempts + 1,
+				"updatedAt" = NOW()
+			WHERE id = (
+				SELECT id FROM "tool_job"
+				WHERE status = 'PENDING'
+				ORDER BY priority DESC, "createdAt" ASC
+				FOR UPDATE SKIP LOCKED
+				LIMIT 1
+			)
+			RETURNING id
+		`;
 
 	if (result.length === 0) {
 		return null;
