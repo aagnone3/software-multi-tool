@@ -17,7 +17,8 @@ import {
 	Loader2Icon,
 	XCircleIcon,
 } from "lucide-react";
-import { useCancelJob, useJobPolling } from "../hooks/use-job-polling";
+import { useCancelJob } from "../hooks/use-job-polling";
+import { useJobUpdates } from "../hooks/use-job-updates";
 
 type JobStatus =
 	| "PENDING"
@@ -85,7 +86,7 @@ export function JobProgressIndicator({
 	showCancel = true,
 	className,
 }: JobProgressIndicatorProps) {
-	const { job, error } = useJobPolling(jobId);
+	const { job, error } = useJobUpdates(jobId);
 	const cancelMutation = useCancelJob();
 
 	const status = (job?.status ?? "PENDING") as JobStatus;
@@ -214,7 +215,7 @@ export function JobProgressInline({
 	jobId,
 	className,
 }: JobProgressInlineProps) {
-	const { job } = useJobPolling(jobId);
+	const { job } = useJobUpdates(jobId);
 
 	const status = (job?.status ?? "PENDING") as JobStatus;
 	const config = STATUS_CONFIG[status];
