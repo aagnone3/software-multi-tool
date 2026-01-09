@@ -27,6 +27,7 @@
 		"generate": "prisma generate --no-hints --schema=./prisma/schema.prisma",
 		"push": "dotenv -c -e ../../apps/web/.env -- prisma db push --skip-generate --schema=./prisma/schema.prisma",
 		"migrate": "dotenv -c -e ../../apps/web/.env -- prisma migrate dev --schema=./prisma/schema.prisma",
+		"migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
 		"studio": "dotenv -c -e ../../apps/web/.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit",
 		"test": "vitest run --config ./vitest.config.ts",

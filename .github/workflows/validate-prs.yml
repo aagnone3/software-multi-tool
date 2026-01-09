@@ -79,7 +79,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install && pnpm --filter database generate
       - name: Apply database migrations
-        run: pnpm --filter database migrate deploy
+        env:
+          DIRECT_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm --filter database run migrate:deploy
       - name: Run unit tests
         env:
           TURBO_TELEMETRY_DISABLED: "1"
