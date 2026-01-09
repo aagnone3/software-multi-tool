@@ -95,7 +95,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 
 					{tags && (
 						<div className="flex flex-1 flex-wrap gap-2">
-							{tags.map((tag) => (
+							{tags.map((tag: string) => (
 								<span
 									key={tag}
 									className="font-semibold text-primary text-xs uppercase tracking-wider"

@@ -28,7 +28,7 @@ export function PostListItem({ post }: { post: Post }) {
 
 			{tags && (
 				<div className="mb-2 flex flex-wrap gap-2">
-					{tags.map((tag) => (
+					{tags.map((tag: string) => (
 						<span
 							key={tag}
 							className="font-semibold text-primary text-xs uppercase tracking-wider"

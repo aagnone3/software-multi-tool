@@ -14,3 +14,9 @@ declare global {
 declare global {
 	interface IntlMessages extends Messages {}
 }
+
+declare module "*.svg" {
+	import type { StaticImageData } from "next/image";
+	const content: StaticImageData;
+	export default content;
+}

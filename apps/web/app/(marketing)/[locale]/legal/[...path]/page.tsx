@@ -26,9 +26,9 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 	);
 
 	return {
-		title: page?.title,
+		title: (page as any)?.title,
 		openGraph: {
-			title: page?.title,
+			title: (page as any)?.title,
 		},
 	};
 }
@@ -50,7 +50,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 		localeRedirect({ href: "/", locale });
 	}
 
-	const { title, body } = page;
+	const { title, body } = page as any;
 
 	return (
 		<div className="container max-w-6xl pt-32 pb-24">
