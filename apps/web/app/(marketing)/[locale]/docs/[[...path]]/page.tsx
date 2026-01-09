@@ -23,8 +23,8 @@ export default async function DocumentationPage(props: {
 
 	return (
 		<DocsPage
-			toc={page.data.toc}
-			full={page.data.full}
+			toc={(page.data as any).toc}
+			full={(page.data as any).full}
 			breadcrumb={{
 				enabled: true,
 				includePage: true,
@@ -43,7 +43,7 @@ export default async function DocumentationPage(props: {
 				)}
 				<div className="prose dark:prose-invert max-w-full prose-a:text-foreground prose-p:text-foreground/80">
 					<MDXContent
-						code={page.data.body}
+						code={(page.data as any).body}
 						// @ts-expect-error
 						components={{
 							...defaultMdxComponents,

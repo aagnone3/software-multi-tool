@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			url: new URL(`/${post.locale}/blog/${post.path}`, baseUrl).href,
 			lastModified: new Date(),
 		})),
-		...allLegalPages.map((page) => ({
+		...allLegalPages.map((page: any) => ({
 			url: new URL(`/${page.locale}/legal/${page.path}`, baseUrl).href,
 			lastModified: new Date(),
 		})),

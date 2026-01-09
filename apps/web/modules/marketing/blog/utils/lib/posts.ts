@@ -17,7 +17,7 @@ export async function getPostBySlug(
 
 	return Promise.resolve(
 		allPosts.find(
-			(post) =>
+			(post: any) =>
 				post.path === slug &&
 				(!options?.locale || post.locale === options.locale),
 		) ?? null,
