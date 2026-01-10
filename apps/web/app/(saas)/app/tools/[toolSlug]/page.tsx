@@ -42,7 +42,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 	}
 
 	return (
-		<div className="container max-w-4xl px-4 py-8">
+		<div className="max-w-4xl">
 			<div className="rounded-2xl border bg-card p-8">
 				<h1 className="text-2xl font-bold">{tool.name}</h1>
 				<p className="mt-2 text-muted-foreground">{tool.description}</p>
