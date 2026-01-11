@@ -1,5 +1,5 @@
 import { executePrompt } from "@repo/agent-sdk";
-import type { ToolJob } from "@repo/database/prisma/generated/client";
+import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { FeedbackAnalyzerInput, FeedbackAnalyzerOutput } from "../types";
 
@@ -140,7 +140,7 @@ export async function processFeedbackJob(job: ToolJob): Promise<JobResult> {
 
 		return {
 			success: true,
-			output: output as unknown as Record<string, unknown>,
+			output: output as unknown as Prisma.InputJsonValue,
 		};
 	} catch (error) {
 		const errorMessage =
