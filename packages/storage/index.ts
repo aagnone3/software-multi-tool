@@ -7,6 +7,7 @@ import type { StorageProvider, StorageProviderConfig } from "./types";
 
 export * from "./provider";
 export * from "./types";
+export * from "./validation";
 
 // ============================================================================
 // Factory function
