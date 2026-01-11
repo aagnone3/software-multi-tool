@@ -266,3 +266,57 @@ model RateLimitEntry {
     @@index([windowEnd])
     @@map("rate_limit_entry")
 }
+
+// Audit logging for compliance and security tracking
+enum AuditAction {
+    CREATE
+    READ
+    UPDATE
+    DELETE
+    LOGIN
+    LOGOUT
+    PASSWORD_CHANGE
+    MFA_SETUP
+    MFA_DISABLE
+    IMPERSONATE
+    INVITE
+    EXPORT
+    SUBSCRIPTION_CHANGE
+    PAYMENT
+}
+
+model AuditLog {
+    id             String      @id @default(cuid())
+    createdAt      DateTime    @default(now())
+
+    // Actor information
+    userId         String?     // Nullable for anonymous/system actions
+    organizationId String?     // Nullable for personal actions
+
+    // Action details
+    action         AuditAction
+    resource       String      // e.g., "user", "organization", "subscription", "member"
+    resourceId     String?     // ID of the affected resource
+
+    // Request context
+    ipAddress      String?
+    userAgent      String?
+    sessionId      String?     // Reference to session for traceability
+
+    // Result and metadata
+    success        Boolean     @default(true)
+    metadata       Json?       // Additional context (e.g., changed fields, error details)
+
+    // Retention management
+    expiresAt      DateTime?   // For retention policy cleanup
+
+    @@index([userId])
+    @@index([organizationId])
+    @@index([action])
+    @@index([resource])
+    @@index([createdAt])
+    @@index([expiresAt])
+    @@index([userId, createdAt])
+    @@index([organizationId, createdAt])
+    @@map("audit_log")
+}

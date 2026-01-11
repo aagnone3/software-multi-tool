@@ -1,8 +1,61 @@
 {
 	"admin": {
 		"menu": {
+			"auditLogs": "Audit Logs",
 			"organizations": "Organizations",
 			"users": "Users"
+		},
+		"auditLogs": {
+			"title": "Audit Logs",
+			"description": "View system activity and security events",
+			"loading": "Loading audit logs...",
+			"noResults": "No audit logs found",
+			"search": "Search audit logs...",
+			"filters": {
+				"action": "Action",
+				"resource": "Resource",
+				"user": "User",
+				"organization": "Organization",
+				"dateRange": "Date Range",
+				"success": "Status",
+				"allActions": "All Actions",
+				"allResources": "All Resources",
+				"allStatuses": "All Statuses",
+				"successful": "Successful",
+				"failed": "Failed"
+			},
+			"columns": {
+				"timestamp": "Timestamp",
+				"action": "Action",
+				"resource": "Resource",
+				"user": "User",
+				"ipAddress": "IP Address",
+				"status": "Status"
+			},
+			"export": {
+				"title": "Export",
+				"json": "Export as JSON",
+				"csv": "Export as CSV",
+				"exporting": "Exporting...",
+				"success": "Export completed",
+				"error": "Export failed"
+			},
+			"actions": {
+				"CREATE": "Create",
+				"READ": "Read",
+				"UPDATE": "Update",
+				"DELETE": "Delete",
+				"LOGIN": "Login",
+				"LOGOUT": "Logout",
+				"PASSWORD_CHANGE": "Password Change",
+				"MFA_SETUP": "MFA Setup",
+				"MFA_DISABLE": "MFA Disable",
+				"IMPERSONATE": "Impersonate",
+				"INVITE": "Invite",
+				"EXPORT": "Export",
+				"SUBSCRIPTION_CHANGE": "Subscription Change",
+				"PAYMENT": "Payment"
+			}
 		},
 		"organizations": {
 			"backToList": "Back to organizations",
