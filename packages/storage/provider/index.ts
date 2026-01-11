@@ -1,1 +1,2 @@
 export * from "./s3";
+export { S3StorageProvider } from "./s3";

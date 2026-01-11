@@ -182,7 +182,10 @@ function RiskScoreGauge({ score }: { score: number }) {
 	return (
 		<div className="flex items-center gap-4">
 			<div className="relative size-24">
-				<svg className="-rotate-90 size-24" aria-labelledby="risk-score-title">
+				<svg
+					className="-rotate-90 size-24"
+					aria-labelledby="risk-score-title"
+				>
 					<title id="risk-score-title">Risk Score: {score}%</title>
 					<circle
 						cx="48"
