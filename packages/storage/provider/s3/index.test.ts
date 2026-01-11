@@ -295,10 +295,13 @@ describe("s3 provider", () => {
 					secretAccessKey: "secret",
 				});
 
-				const url = await provider.getSignedDownloadUrl("docs/file.pdf", {
-					bucket: "documents",
-					expiresIn: 3600,
-				});
+				const url = await provider.getSignedDownloadUrl(
+					"docs/file.pdf",
+					{
+						bucket: "documents",
+						expiresIn: 3600,
+					},
+				);
 
 				expect(url).toBe("signed-url");
 				expect(getCommandSpy).toHaveBeenCalledWith(
@@ -430,7 +433,10 @@ describe("s3 provider", () => {
 					secretAccessKey: "secret",
 				});
 
-				const result = await provider.exists("test/file.txt", "uploads");
+				const result = await provider.exists(
+					"test/file.txt",
+					"uploads",
+				);
 
 				expect(result).toBe(true);
 				expect(headCommandSpy).toHaveBeenCalledWith(
@@ -443,7 +449,8 @@ describe("s3 provider", () => {
 
 			it("returns false when file does not exist", async () => {
 				const notFoundError = new Error("Not Found");
-				(notFoundError as unknown as { name: string }).name = "NotFound";
+				(notFoundError as unknown as { name: string }).name =
+					"NotFound";
 				sendSpy.mockRejectedValueOnce(notFoundError);
 
 				const { S3StorageProvider } = await import("./index");
@@ -453,7 +460,10 @@ describe("s3 provider", () => {
 					secretAccessKey: "secret",
 				});
 
-				const result = await provider.exists("missing/file.txt", "uploads");
+				const result = await provider.exists(
+					"missing/file.txt",
+					"uploads",
+				);
 
 				expect(result).toBe(false);
 			});
@@ -469,7 +479,9 @@ describe("s3 provider", () => {
 
 				await expect(
 					provider.exists("test/file.txt", "uploads"),
-				).rejects.toThrow("Could not check if file test/file.txt exists");
+				).rejects.toThrow(
+					"Could not check if file test/file.txt exists",
+				);
 				expect(loggerError).toHaveBeenCalled();
 			});
 		});

@@ -1,12 +1,12 @@
-import type { StorageProvider, StorageProviderConfig } from "./types";
 import { S3StorageProvider } from "./provider/s3";
+import type { StorageProvider, StorageProviderConfig } from "./types";
 
 // ============================================================================
 // Re-exports for convenience
 // ============================================================================
 
-export * from "./types";
 export * from "./provider";
+export * from "./types";
 
 // ============================================================================
 // Factory function
@@ -67,5 +67,7 @@ export function createStorageProvider(
 	}
 
 	// This will become reachable when more provider types are added
-	throw new Error(`Unknown storage provider type: ${(config as { type: string }).type}`);
+	throw new Error(
+		`Unknown storage provider type: ${(config as { type: string }).type}`,
+	);
 }

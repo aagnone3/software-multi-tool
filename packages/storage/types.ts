@@ -138,7 +138,10 @@ export interface StorageProvider {
 	 * });
 	 * ```
 	 */
-	getSignedDownloadUrl(key: string, options: SignedUrlOptions): Promise<string>;
+	getSignedDownloadUrl(
+		key: string,
+		options: SignedUrlOptions,
+	): Promise<string>;
 
 	/**
 	 * Delete a file from storage.
