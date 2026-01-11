@@ -13,6 +13,10 @@ import {
 	getProcessor,
 	withTimeout,
 } from "./processor-registry";
+import { registerAllProcessors } from "./register-all-processors";
+
+// Ensure all processors are registered on module load
+registerAllProcessors();
 
 // Exponential backoff calculation: 1min, 4min, 16min
 function calculateBackoffMs(attempts: number): number {
