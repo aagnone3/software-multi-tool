@@ -251,3 +251,166 @@ export type CreateBucketHandler = (
 		public?: boolean;
 	},
 ) => Promise<void>;
+
+// ============================================================================
+// Upload validation types
+// ============================================================================
+
+/**
+ * Error codes returned by upload validation.
+ */
+export type ValidationErrorCode =
+	| "FILE_TOO_LARGE"
+	| "INVALID_MIME_TYPE"
+	| "INVALID_EXTENSION"
+	| "EMPTY_FILE";
+
+/**
+ * Detailed error information from validation failure.
+ */
+export interface ValidationError {
+	/**
+	 * Machine-readable error code for programmatic handling.
+	 */
+	code: ValidationErrorCode;
+
+	/**
+	 * Human-readable error message suitable for display.
+	 */
+	message: string;
+
+	/**
+	 * Additional context about the validation failure.
+	 */
+	details?: {
+		/**
+		 * The actual value that failed validation.
+		 */
+		actual?: string | number;
+
+		/**
+		 * The expected/allowed values.
+		 */
+		expected?: string | number | string[];
+
+		/**
+		 * Maximum allowed value (for size validation).
+		 */
+		maxAllowed?: number;
+	};
+}
+
+/**
+ * Result of validating a file upload.
+ * Uses discriminated union pattern for type-safe error handling.
+ */
+export type ValidationResult =
+	| {
+			success: true;
+			/**
+			 * Detected MIME type from file content (if available).
+			 */
+			detectedMimeType?: string;
+	  }
+	| {
+			success: false;
+			error: ValidationError;
+	  };
+
+/**
+ * File information to validate before upload.
+ */
+export interface FileToValidate {
+	/**
+	 * The file data as a Buffer.
+	 * Required for MIME type detection from content.
+	 */
+	buffer: Buffer;
+
+	/**
+	 * The original filename (used for extension validation).
+	 */
+	filename: string;
+
+	/**
+	 * The claimed MIME type from the client (optional).
+	 * Will be validated against actual file content if MIME validation is enabled.
+	 */
+	mimeType?: string;
+}
+
+/**
+ * Options for configuring upload validation rules.
+ */
+export interface UploadValidatorOptions {
+	/**
+	 * Maximum file size in bytes.
+	 * Files larger than this will fail validation with FILE_TOO_LARGE.
+	 *
+	 * @example
+	 * ```typescript
+	 * maxSize: 5 * 1024 * 1024 // 5MB
+	 * ```
+	 */
+	maxSize?: number;
+
+	/**
+	 * Allowed MIME types.
+	 * Supports wildcards (e.g., "image/*" matches all image types).
+	 * Validates actual file content using magic bytes, not just extension.
+	 *
+	 * @example
+	 * ```typescript
+	 * allowedMimeTypes: ["image/jpeg", "image/png", "image/*"]
+	 * ```
+	 */
+	allowedMimeTypes?: string[];
+
+	/**
+	 * Allowed file extensions (case-insensitive).
+	 * Include the leading dot (e.g., ".jpg" not "jpg").
+	 *
+	 * @example
+	 * ```typescript
+	 * allowedExtensions: [".jpg", ".jpeg", ".png", ".gif"]
+	 * ```
+	 */
+	allowedExtensions?: string[];
+
+	/**
+	 * Whether to allow empty files (0 bytes).
+	 * @default false
+	 */
+	allowEmpty?: boolean;
+}
+
+/**
+ * A configured upload validator instance.
+ */
+export interface UploadValidator {
+	/**
+	 * Validate a file against the configured rules.
+	 *
+	 * @param file - File information to validate
+	 * @returns ValidationResult indicating success or failure with error details
+	 *
+	 * @example
+	 * ```typescript
+	 * const result = await validator.validate({
+	 *   buffer: fileBuffer,
+	 *   filename: "photo.jpg",
+	 *   mimeType: "image/jpeg"
+	 * });
+	 *
+	 * if (!result.success) {
+	 *   console.log(result.error.message);
+	 * }
+	 * ```
+	 */
+	validate(file: FileToValidate): Promise<ValidationResult>;
+
+	/**
+	 * The validation options this validator was created with.
+	 */
+	readonly options: Readonly<UploadValidatorOptions>;
+}
