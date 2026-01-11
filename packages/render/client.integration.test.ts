@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { RenderApiError, createRenderClient } from "./client";
+import { createRenderClient, RenderApiError } from "./client";
 import type { RenderClient, RenderService } from "./index";
 
 /**

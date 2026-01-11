@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	RenderApiError,
 	createRenderClient,
 	createRenderClientFromEnv,
+	RenderApiError,
 } from "./client";
 import type {
 	DeployResponse,
