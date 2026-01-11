@@ -4,7 +4,7 @@ import { SettingsMenu } from "@saas/settings/components/SettingsMenu";
 import { PageHeader } from "@saas/shared/components/PageHeader";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { Logo } from "@shared/components/Logo";
-import { Building2Icon, UsersIcon } from "lucide-react";
+import { Building2Icon, ScrollTextIcon, UsersIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
@@ -60,6 +60,13 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 												},
 											]
 										: []),
+									{
+										title: t("admin.menu.auditLogs"),
+										href: "/app/admin/audit-logs",
+										icon: (
+											<ScrollTextIcon className="size-4 opacity-50" />
+										),
+									},
 								],
 							},
 						]}

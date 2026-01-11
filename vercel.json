@@ -11,6 +11,10 @@
 		{
 			"path": "/api/cron/process-jobs",
 			"schedule": "* * * * *"
+		},
+		{
+			"path": "/api/cron/audit-log-cleanup",
+			"schedule": "0 2 * * *"
 		}
 	]
 }
