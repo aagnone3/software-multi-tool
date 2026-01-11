@@ -167,44 +167,6 @@ const envVars = await client.listEnvVars("srv-xxx");
 await client.deleteEnvVar("srv-xxx", "OLD_VAR");
 ```
 
-## Common Workflows
-
-### Deploy a Service
-
-```bash
-# Trigger a fresh deploy with cache clear
-pnpm --filter @repo/scripts render deploys trigger --service srv-xxx --clear-cache
-
-# Monitor the deploy status
-pnpm --filter @repo/scripts render deploys list --service srv-xxx
-```
-
-### Update Environment Variables
-
-```bash
-# Set a new variable
-pnpm --filter @repo/scripts render env set --service srv-xxx --key DATABASE_URL --value "postgresql://..."
-
-# Verify the change
-pnpm --filter @repo/scripts render env get --service srv-xxx --key DATABASE_URL
-
-# Trigger a deploy to apply changes
-pnpm --filter @repo/scripts render deploys trigger --service srv-xxx
-```
-
-### Debug a Service
-
-```bash
-# Get service info
-pnpm --filter @repo/scripts render services get --service srv-xxx
-
-# Check recent deploys
-pnpm --filter @repo/scripts render deploys list --service srv-xxx
-
-# Get details of a specific deploy
-pnpm --filter @repo/scripts render deploys get --service srv-xxx --deploy dep-xxx
-```
-
 ## Error Handling
 
 The CLI will display error messages in red with the `[render]` prefix:
