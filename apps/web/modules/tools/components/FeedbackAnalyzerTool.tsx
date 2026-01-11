@@ -248,7 +248,10 @@ function NPSGauge({ nps }: { nps: FeedbackOutput["npsIndicator"] }) {
 	return (
 		<div className="flex items-center gap-6">
 			<div className="relative size-28">
-				<svg className="-rotate-90 size-28" aria-labelledby="nps-gauge-title">
+				<svg
+					className="-rotate-90 size-28"
+					aria-labelledby="nps-gauge-title"
+				>
 					<title id="nps-gauge-title">NPS Score: {score}</title>
 					<circle
 						cx="56"

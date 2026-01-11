@@ -53,8 +53,13 @@ function DeductionRing({ percentage }: { percentage: number }) {
 
 	return (
 		<div className="relative flex size-28 items-center justify-center">
-			<svg className="-rotate-90 size-28" aria-labelledby="deduction-ring-title">
-				<title id="deduction-ring-title">Deduction: {Math.round(percentage)}%</title>
+			<svg
+				className="-rotate-90 size-28"
+				aria-labelledby="deduction-ring-title"
+			>
+				<title id="deduction-ring-title">
+					Deduction: {Math.round(percentage)}%
+				</title>
 				<circle
 					cx="56"
 					cy="56"
@@ -382,7 +387,10 @@ export function ExpenseCategorizerTool() {
 						{inputMode === "text" ? (
 							<div className="space-y-4">
 								<div>
-									<label htmlFor="bulk-expenses" className="mb-2 block font-semibold text-sm">
+									<label
+										htmlFor="bulk-expenses"
+										className="mb-2 block font-semibold text-sm"
+									>
 										Paste Expenses
 									</label>
 									<Textarea

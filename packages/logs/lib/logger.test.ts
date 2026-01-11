@@ -39,7 +39,8 @@ describe("logger", () => {
 		vi.resetModules();
 		createConsola.mockClear();
 
-		const { logger } = await import("./logger");
+		// Import triggers logger initialization - logger not used directly
+		await import("./logger");
 
 		expect(createConsola).toHaveBeenCalledWith(
 			expect.objectContaining({

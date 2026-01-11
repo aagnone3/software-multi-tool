@@ -5,7 +5,7 @@ import { cn } from "@ui/lib";
 import { CloudIcon, ComputerIcon, StarIcon, WandIcon } from "lucide-react";
 import Image, { type StaticImageData } from "next/image";
 import { type JSXElementConstructor, type ReactNode, useState } from "react";
-// @ts-ignore
+// @ts-expect-error
 import heroImage from "../../../../public/images/hero.svg";
 
 export const featureTabs: Array<{
