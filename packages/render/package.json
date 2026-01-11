@@ -3,9 +3,6 @@
 	"version": "0.0.0",
 	"main": "./index.ts",
 	"types": "./**/.ts",
-	"dependencies": {
-		"@repo/logs": "workspace:*"
-	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.11",
 		"@repo/tsconfig": "workspace:*",
