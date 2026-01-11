@@ -39,7 +39,14 @@ Gather these essential details through conversation:
    - Technical considerations
    - Out of scope items
 
-3. **Type** - Determine the nature of work:
+3. **Test Requirements** - Define what tests need to be written:
+   - What new functionality needs test coverage?
+   - What test types are needed? (unit, integration, e2e)
+   - What edge cases should be tested?
+   - What existing tests need updates?
+   - Example: "Need unit tests for content extraction, integration tests for Claude API calls, e2e tests for UI flow"
+
+4. **Type** - Determine the nature of work:
    - Bug fix
    - Feature
    - Chore/maintenance
@@ -77,6 +84,8 @@ Ask clarifying questions to ensure scope is well-defined:
 - "What does 'done' look like for this work?"
 - "Is there any existing code or patterns we should follow?"
 - "Are there any risks or unknowns?"
+- **"What tests need to be written to validate this functionality?"**
+- **"What test scenarios should we cover (happy path, edge cases, error handling)?"**
 
 ### Phase 5: Summary & Confirmation
 
@@ -92,6 +101,12 @@ Present a complete summary for user approval:
 
 ### Description
 [full description with acceptance criteria]
+
+### Test Requirements
+- [test types needed: unit/integration/e2e]
+- [key scenarios to test]
+- [edge cases to cover]
+- [existing tests to update]
 
 ### Dependencies
 - Blocked by: [list or "None"]

@@ -106,7 +106,13 @@ describe("s3 provider", () => {
 	});
 
 	it("throws a descriptive error when S3 configuration is missing", async () => {
-		process.env = { ...originalEnv };
+		// Explicitly delete S3 env vars (even if loaded from .env.local)
+		const envWithoutS3 = { ...originalEnv };
+		delete envWithoutS3.S3_ENDPOINT;
+		delete envWithoutS3.S3_REGION;
+		delete envWithoutS3.S3_ACCESS_KEY_ID;
+		delete envWithoutS3.S3_SECRET_ACCESS_KEY;
+		process.env = envWithoutS3;
 		vi.resetModules();
 
 		const { getSignedUrl } = await import("./index");

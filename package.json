@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "dotenv -c -- turbo build",
-		"dev": "dotenv -c -- turbo dev --concurrency 15",
+		"dev": "dotenv -c -e apps/web/.env.local -- turbo dev --concurrency 15",
 		"web:env:list": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:list --app apps/web",
 		"web:env:pull": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:pull --app apps/web",
 		"web:env:set": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:set --app apps/web",

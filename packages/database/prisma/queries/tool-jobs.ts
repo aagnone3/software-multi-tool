@@ -1,5 +1,5 @@
 import { db } from "../client";
-import { Prisma, type ToolJobStatus } from "../generated/client";
+import type { Prisma, ToolJobStatus } from "../generated/client";
 
 // Default expiration time: 7 days
 const DEFAULT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -97,22 +97,40 @@ export async function cancelToolJob(id: string) {
 export async function claimNextPendingJob(toolSlug?: string) {
 	// Use a transaction with raw SQL for atomic update
 	// This prevents race conditions when multiple workers try to claim the same job
-	const result = await db.$queryRaw<Array<{ id: string }>>`
-		UPDATE "tool_job"
-		SET status = 'PROCESSING',
-		    "startedAt" = NOW(),
-		    attempts = attempts + 1,
-		    "updatedAt" = NOW()
-		WHERE id = (
-			SELECT id FROM "tool_job"
-			WHERE status = 'PENDING'
-			${toolSlug ? Prisma.sql`AND "toolSlug" = ${toolSlug}` : Prisma.empty}
-			ORDER BY priority DESC, "createdAt" ASC
-			FOR UPDATE SKIP LOCKED
-			LIMIT 1
-		)
-		RETURNING id
-	`;
+
+	// Build the query conditionally to avoid Prisma.sql nesting issues
+	const result = toolSlug
+		? await db.$queryRaw<Array<{ id: string }>>`
+			UPDATE "tool_job"
+			SET status = 'PROCESSING',
+				"startedAt" = NOW(),
+				attempts = attempts + 1,
+				"updatedAt" = NOW()
+			WHERE id = (
+				SELECT id FROM "tool_job"
+				WHERE status = 'PENDING'
+				AND "toolSlug" = ${toolSlug}
+				ORDER BY priority DESC, "createdAt" ASC
+				FOR UPDATE SKIP LOCKED
+				LIMIT 1
+			)
+			RETURNING id
+		`
+		: await db.$queryRaw<Array<{ id: string }>>`
+			UPDATE "tool_job"
+			SET status = 'PROCESSING',
+				"startedAt" = NOW(),
+				attempts = attempts + 1,
+				"updatedAt" = NOW()
+			WHERE id = (
+				SELECT id FROM "tool_job"
+				WHERE status = 'PENDING'
+				ORDER BY priority DESC, "createdAt" ASC
+				FOR UPDATE SKIP LOCKED
+				LIMIT 1
+			)
+			RETURNING id
+		`;
 
 	if (result.length === 0) {
 		return null;
@@ -240,4 +258,37 @@ export async function getJobStats(toolSlug?: string) {
 		]);
 
 	return { pending, processing, completed, failed, cancelled };
+}
+
+/**
+ * Find a cached completed job for the given tool and input
+ * Used for caching expensive operations (e.g., news analysis)
+ *
+ * @param toolSlug - The tool slug to search for
+ * @param input - The job input to match
+ * @param maxAgeHours - Maximum age in hours (default: 24)
+ * @returns The most recent completed job matching the criteria, or null
+ */
+export async function findCachedJob(
+	toolSlug: string,
+	input: Prisma.InputJsonValue,
+	maxAgeHours = 24,
+) {
+	const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+
+	return await db.toolJob.findFirst({
+		where: {
+			toolSlug,
+			status: "COMPLETED",
+			input: {
+				equals: input,
+			},
+			completedAt: {
+				gte: cutoff,
+			},
+		},
+		orderBy: {
+			completedAt: "desc",
+		},
+	});
 }
