@@ -217,7 +217,9 @@ class RenderClientImpl implements RenderClient {
 			}
 		}
 		if (filters?.env) {
-			const envs = Array.isArray(filters.env) ? filters.env : [filters.env];
+			const envs = Array.isArray(filters.env)
+				? filters.env
+				: [filters.env];
 			for (const e of envs) {
 				params.append("env", e);
 			}
@@ -283,7 +285,10 @@ class RenderClientImpl implements RenderClient {
 		return { items };
 	}
 
-	async getDeploy(serviceId: string, deployId: string): Promise<RenderDeploy> {
+	async getDeploy(
+		serviceId: string,
+		deployId: string,
+	): Promise<RenderDeploy> {
 		const response = await this.request<DeployResponse>(
 			`/services/${serviceId}/deploys/${deployId}`,
 		);
@@ -426,7 +431,9 @@ class RenderClientImpl implements RenderClient {
 		}
 	}
 
-	private async handleErrorResponse(response: Response): Promise<RenderApiError> {
+	private async handleErrorResponse(
+		response: Response,
+	): Promise<RenderApiError> {
 		const status = response.status;
 		let message = `HTTP ${status}`;
 		let details: Record<string, unknown> | undefined;

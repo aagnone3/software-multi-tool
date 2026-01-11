@@ -31,7 +31,15 @@ export type ServiceStatus =
 /**
  * Service runtime environment.
  */
-export type ServiceEnv = "docker" | "elixir" | "go" | "node" | "python" | "ruby" | "rust" | "static";
+export type ServiceEnv =
+	| "docker"
+	| "elixir"
+	| "go"
+	| "node"
+	| "python"
+	| "ruby"
+	| "rust"
+	| "static";
 
 /**
  * Represents a Render service.

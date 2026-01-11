@@ -216,7 +216,8 @@ async function handleServicesList(context) {
 	console.log("--\t----\t----\t------");
 	for (const item of response) {
 		const service = item.service;
-		const suspended = service.suspended === "suspended" ? " (suspended)" : "";
+		const suspended =
+			service.suspended === "suspended" ? " (suspended)" : "";
 		console.log(
 			`${service.id}\t${service.type}\t${service.name}${suspended}`,
 		);
@@ -295,7 +296,9 @@ async function handleDeploysGet(context) {
 	console.log(`Trigger: ${deploy.trigger}`);
 	console.log(`Created: ${new Date(deploy.createdAt).toLocaleString()}`);
 	if (deploy.finishedAt) {
-		console.log(`Finished: ${new Date(deploy.finishedAt).toLocaleString()}`);
+		console.log(
+			`Finished: ${new Date(deploy.finishedAt).toLocaleString()}`,
+		);
 	}
 	if (deploy.commit) {
 		console.log(`Commit: ${deploy.commit.id}`);
@@ -310,10 +313,14 @@ async function handleDeploysTrigger(context) {
 	const clearCache = Object.hasOwn(flags, "clear-cache");
 
 	const body = clearCache ? { clearCache: "clear" } : {};
-	const response = await apiRequest(config, `/services/${serviceId}/deploys`, {
-		method: "POST",
-		body: JSON.stringify(body),
-	});
+	const response = await apiRequest(
+		config,
+		`/services/${serviceId}/deploys`,
+		{
+			method: "POST",
+			body: JSON.stringify(body),
+		},
+	);
 	const deploy = response.deploy;
 
 	console.log(`Triggered deploy ${deploy.id}`);
@@ -350,7 +357,10 @@ async function handleEnvList(context) {
 	const { config, flags } = context;
 	const serviceId = requireFlag(flags, "service");
 
-	const response = await apiRequest(config, `/services/${serviceId}/env-vars`);
+	const response = await apiRequest(
+		config,
+		`/services/${serviceId}/env-vars`,
+	);
 
 	if (!response || response.length === 0) {
 		console.log("No environment variables found.");
@@ -362,7 +372,8 @@ async function handleEnvList(context) {
 	for (const item of response) {
 		const envVar = item.envVar;
 		const value = envVar.value ?? "[secret]";
-		const displayValue = value.length > 50 ? `${value.slice(0, 47)}...` : value;
+		const displayValue =
+			value.length > 50 ? `${value.slice(0, 47)}...` : value;
 		console.log(`${envVar.key}\t${displayValue}`);
 	}
 }
@@ -414,7 +425,9 @@ async function handleEnvDelete(context) {
 		{ method: "DELETE" },
 	);
 
-	console.log(`Deleted environment variable "${key}" from service ${serviceId}`);
+	console.log(
+		`Deleted environment variable "${key}" from service ${serviceId}`,
+	);
 }
 
 // ============================================================================
