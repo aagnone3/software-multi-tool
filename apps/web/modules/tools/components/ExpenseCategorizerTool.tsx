@@ -279,7 +279,7 @@ export function ExpenseCategorizerTool() {
 
 		for (const line of lines) {
 			const match = line.match(
-				/(.+?)\s*[\-:]\s*\$?([\d,]+\.?\d*)/,
+				/(.+?)\s*[-:]\s*\$?([\d,]+\.?\d*)/,
 			);
 			if (match) {
 				expenses.push({

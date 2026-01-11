@@ -150,9 +150,15 @@ const severityConfig = {
 
 function RiskScoreGauge({ score }: { score: number }) {
 	const getColor = () => {
-		if (score <= 25) return { ring: "stroke-emerald-500", text: "text-emerald-600", label: "Low Risk" };
-		if (score <= 50) return { ring: "stroke-amber-500", text: "text-amber-600", label: "Moderate Risk" };
-		if (score <= 75) return { ring: "stroke-orange-500", text: "text-orange-600", label: "High Risk" };
+		if (score <= 25) {
+			return { ring: "stroke-emerald-500", text: "text-emerald-600", label: "Low Risk" };
+		}
+		if (score <= 50) {
+			return { ring: "stroke-amber-500", text: "text-amber-600", label: "Moderate Risk" };
+		}
+		if (score <= 75) {
+			return { ring: "stroke-orange-500", text: "text-orange-600", label: "High Risk" };
+		}
 		return { ring: "stroke-red-500", text: "text-red-600", label: "Critical Risk" };
 	};
 	const { ring, text, label } = getColor();
