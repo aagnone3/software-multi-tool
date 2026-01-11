@@ -14,6 +14,9 @@ const pdfParseMock = vi.hoisted(() => vi.fn());
 const mammothMock = vi.hoisted(() => ({
 	extractRawText: vi.fn(),
 }));
+const loggerMock = vi.hoisted(() => ({
+	warn: vi.fn(),
+}));
 
 vi.mock("pdf-parse", () => ({
 	default: pdfParseMock,
@@ -21,6 +24,10 @@ vi.mock("pdf-parse", () => ({
 
 vi.mock("mammoth", () => ({
 	extractRawText: mammothMock.extractRawText,
+}));
+
+vi.mock("@repo/logs", () => ({
+	logger: loggerMock,
 }));
 
 describe("document-extractor", () => {
@@ -202,9 +209,6 @@ describe("document-extractor", () => {
 		});
 
 		it("should log warnings from mammoth", async () => {
-			const consoleSpy = vi
-				.spyOn(console, "warn")
-				.mockImplementation(() => {});
 			mammothMock.extractRawText.mockResolvedValue({
 				value: "Some text",
 				messages: [{ type: "warning", message: "Some warning" }],
@@ -213,11 +217,10 @@ describe("document-extractor", () => {
 			const buffer = Buffer.from("fake docx content");
 			await extractTextFromDocx(buffer);
 
-			expect(consoleSpy).toHaveBeenCalledWith(
-				"DOCX extraction warnings:",
-				expect.any(Array),
+			expect(loggerMock.warn).toHaveBeenCalledWith(
+				"DOCX extraction warnings",
+				{ messages: expect.any(Array) },
 			);
-			consoleSpy.mockRestore();
 		});
 	});
 

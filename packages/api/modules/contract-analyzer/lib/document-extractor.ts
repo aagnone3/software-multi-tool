@@ -1,3 +1,4 @@
+import { logger } from "@repo/logs";
 import * as mammoth from "mammoth";
 import pdfParse from "pdf-parse";
 
@@ -183,7 +184,7 @@ export async function extractTextFromDocx(
 
 		// Log any warnings (for debugging)
 		if (result.messages.length > 0) {
-			console.warn("DOCX extraction warnings:", result.messages);
+			logger.warn("DOCX extraction warnings", { messages: result.messages });
 		}
 
 		return {
