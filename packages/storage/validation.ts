@@ -1,5 +1,5 @@
-import { fileTypeFromBuffer } from "file-type";
 import { extname } from "node:path";
+import { fileTypeFromBuffer } from "file-type";
 import type {
 	FileToValidate,
 	StorageProvider,

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { StorageProvider } from "./types";
 import {
 	audioUploadRules,
 	avatarUploadRules,
@@ -8,7 +9,6 @@ import {
 	videoUploadRules,
 	withValidation,
 } from "./validation";
-import type { StorageProvider } from "./types";
 
 // Real PNG file header (magic bytes)
 const PNG_HEADER = Buffer.from([
