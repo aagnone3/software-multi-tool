@@ -11,8 +11,7 @@ export const { GET } = createI18nSearchAPI("advanced", {
 		entry.pages.map((page) => ({
 			title: page.data.title ?? "",
 			description: page.data.description ?? "",
-			structuredData: (page.data as { structuredData?: unknown })
-				.structuredData,
+			structuredData: (page.data as any).structuredData,
 			id: page.url,
 			url: page.url,
 			locale: entry.language,
