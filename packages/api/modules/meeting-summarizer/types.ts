@@ -1,0 +1,106 @@
+import { z } from "zod";
+
+export const MeetingSummarizerInputSchema = z.object({
+	meetingNotes: z.string().min(1, "Meeting notes are required"),
+	meetingType: z
+		.enum([
+			"standup",
+			"planning",
+			"retrospective",
+			"one_on_one",
+			"client",
+			"general",
+		])
+		.optional()
+		.default("general"),
+	participants: z.array(z.string()).optional(),
+	meetingDate: z.string().optional(),
+	projectContext: z.string().optional(),
+});
+
+export type MeetingSummarizerInput = z.infer<
+	typeof MeetingSummarizerInputSchema
+>;
+
+export const ActionItemSchema = z.object({
+	id: z.string(),
+	task: z.string(),
+	assignee: z.string().nullable(),
+	dueDate: z.string().nullable(),
+	priority: z.enum(["low", "medium", "high", "urgent"]),
+	status: z.enum(["pending", "in_progress", "completed", "blocked"]),
+	context: z.string().nullable(),
+	dependencies: z.array(z.string()),
+});
+
+export type ActionItem = z.infer<typeof ActionItemSchema>;
+
+export const DecisionSchema = z.object({
+	decision: z.string(),
+	rationale: z.string().nullable(),
+	madeBy: z.string().nullable(),
+	impactAreas: z.array(z.string()),
+	followUpRequired: z.boolean(),
+});
+
+export type Decision = z.infer<typeof DecisionSchema>;
+
+export const DiscussionTopicSchema = z.object({
+	topic: z.string(),
+	summary: z.string(),
+	keyPoints: z.array(z.string()),
+	participants: z.array(z.string()),
+	outcome: z.string().nullable(),
+	openQuestions: z.array(z.string()),
+});
+
+export type DiscussionTopic = z.infer<typeof DiscussionTopicSchema>;
+
+export const MeetingSummarizerOutputSchema = z.object({
+	summary: z.object({
+		title: z.string(),
+		date: z.string().nullable(),
+		duration: z.string().nullable(),
+		attendees: z.array(z.string()),
+		overview: z.string(),
+	}),
+	executiveSummary: z.string(),
+	topics: z.array(DiscussionTopicSchema),
+	actionItems: z.array(ActionItemSchema),
+	decisions: z.array(DecisionSchema),
+	keyTakeaways: z.array(z.string()),
+	followUpMeeting: z.object({
+		recommended: z.boolean(),
+		suggestedAgenda: z.array(z.string()),
+		suggestedDate: z.string().nullable(),
+	}),
+	blockers: z.array(
+		z.object({
+			blocker: z.string(),
+			owner: z.string().nullable(),
+			suggestedResolution: z.string().nullable(),
+		}),
+	),
+	metrics: z.object({
+		actionItemCount: z.number(),
+		decisionsCount: z.number(),
+		openQuestionsCount: z.number(),
+		participantEngagement: z.array(
+			z.object({
+				participant: z.string(),
+				contributionLevel: z.enum(["low", "medium", "high"]),
+				actionItemsAssigned: z.number(),
+			}),
+		),
+	}),
+	exportFormats: z.object({
+		markdown: z.string(),
+		plainText: z.string(),
+		jiraReady: z.boolean(),
+		slackFormatted: z.string(),
+	}),
+});
+
+export type MeetingSummarizerOutput = z.infer<
+	typeof MeetingSummarizerOutputSchema
+>;
