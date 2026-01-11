@@ -130,8 +130,7 @@ export class LocalStorageProvider implements StorageProvider {
 			// Also store metadata in a sidecar file
 			const metadataPath = `${filePath}.meta.json`;
 			const metadata = {
-				contentType:
-					options.contentType ?? "application/octet-stream",
+				contentType: options.contentType ?? "application/octet-stream",
 				metadata: options.metadata ?? {},
 				size: buffer.length,
 				etag: createHash("md5").update(buffer).digest("hex"),

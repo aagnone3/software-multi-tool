@@ -381,7 +381,10 @@ describe("LocalStorageProvider", () => {
 		});
 
 		it("should return false for non-existent file", async () => {
-			const result = await provider.exists("does-not-exist.txt", "uploads");
+			const result = await provider.exists(
+				"does-not-exist.txt",
+				"uploads",
+			);
 			expect(result).toBe(false);
 		});
 	});

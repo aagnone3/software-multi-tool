@@ -49,7 +49,13 @@ export async function PUT(request: Request): Promise<Response> {
 
 	// Verify the signed URL token
 	const provider = createLocalStorageProvider();
-	const isValid = provider.verifyToken(bucket, key, expiresAt, "upload", token);
+	const isValid = provider.verifyToken(
+		bucket,
+		key,
+		expiresAt,
+		"upload",
+		token,
+	);
 
 	if (!isValid) {
 		return NextResponse.json(
