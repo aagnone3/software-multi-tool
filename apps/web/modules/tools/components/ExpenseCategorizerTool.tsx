@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
@@ -41,7 +40,7 @@ import {
 	TrendingUpIcon,
 	WalletIcon,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
@@ -54,7 +53,8 @@ function DeductionRing({ percentage }: { percentage: number }) {
 
 	return (
 		<div className="relative flex size-28 items-center justify-center">
-			<svg className="-rotate-90 size-28">
+			<svg className="-rotate-90 size-28" aria-labelledby="deduction-ring-title">
+				<title id="deduction-ring-title">Deduction: {Math.round(percentage)}%</title>
 				<circle
 					cx="56"
 					cy="56"
@@ -82,7 +82,9 @@ function DeductionRing({ percentage }: { percentage: number }) {
 				<span className="font-bold text-2xl text-emerald-600 dark:text-emerald-400">
 					{Math.round(percentage)}%
 				</span>
-				<span className="text-muted-foreground text-xs">Deductible</span>
+				<span className="text-muted-foreground text-xs">
+					Deductible
+				</span>
 			</div>
 		</div>
 	);
@@ -108,7 +110,10 @@ function CategoryBar({
 			<div className="flex items-center justify-between text-sm">
 				<span className="font-medium">{category}</span>
 				<span className="text-muted-foreground">
-					${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+					$
+					{amount.toLocaleString(undefined, {
+						minimumFractionDigits: 2,
+					})}
 				</span>
 			</div>
 			<div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
@@ -167,7 +172,9 @@ const expenseItemSchema = z.object({
 });
 
 const formSchema = z.object({
-	expenses: z.array(expenseItemSchema).min(1, "At least one expense is required"),
+	expenses: z
+		.array(expenseItemSchema)
+		.min(1, "At least one expense is required"),
 	businessType: z.string().optional(),
 	taxYear: z.number().optional(),
 	country: z.string(),
@@ -278,9 +285,7 @@ export function ExpenseCategorizerTool() {
 		const expenses: Array<{ description: string; amount: number }> = [];
 
 		for (const line of lines) {
-			const match = line.match(
-				/(.+?)\s*[-:]\s*\$?([\d,]+\.?\d*)/,
-			);
+			const match = line.match(/(.+?)\s*[-:]\s*\$?([\d,]+\.?\d*)/);
 			if (match) {
 				expenses.push({
 					description: match[1].trim(),
@@ -333,8 +338,8 @@ export function ExpenseCategorizerTool() {
 									Expense Categorizer
 								</CardTitle>
 								<CardDescription className="mt-1">
-									Automatically categorize business expenses for tax
-									deductions and accounting
+									Automatically categorize business expenses
+									for tax deductions and accounting
 								</CardDescription>
 							</div>
 						</div>
@@ -343,7 +348,9 @@ export function ExpenseCategorizerTool() {
 						<div className="mb-6 inline-flex rounded-xl bg-muted/50 p-1">
 							<Button
 								type="button"
-								variant={inputMode === "form" ? "secondary" : "ghost"}
+								variant={
+									inputMode === "form" ? "secondary" : "ghost"
+								}
 								size="sm"
 								className={cn(
 									"rounded-lg px-4",
@@ -357,7 +364,9 @@ export function ExpenseCategorizerTool() {
 							</Button>
 							<Button
 								type="button"
-								variant={inputMode === "text" ? "secondary" : "ghost"}
+								variant={
+									inputMode === "text" ? "secondary" : "ghost"
+								}
 								size="sm"
 								className={cn(
 									"rounded-lg px-4",
@@ -373,18 +382,21 @@ export function ExpenseCategorizerTool() {
 						{inputMode === "text" ? (
 							<div className="space-y-4">
 								<div>
-									<label className="mb-2 block font-semibold text-sm">
+									<label htmlFor="bulk-expenses" className="mb-2 block font-semibold text-sm">
 										Paste Expenses
 									</label>
 									<Textarea
+										id="bulk-expenses"
 										placeholder="Office supplies - $45.99&#10;Software subscription - $29.99&#10;Client lunch: $85.00"
 										className="min-h-[200px] rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-emerald-500 focus:bg-background"
 										value={bulkText}
-										onChange={(e) => setBulkText(e.target.value)}
+										onChange={(e) =>
+											setBulkText(e.target.value)
+										}
 									/>
 									<p className="mt-2 text-muted-foreground text-sm">
-										Enter one expense per line with amount (e.g.,
-										"Description - $amount")
+										Enter one expense per line with amount
+										(e.g., "Description - $amount")
 									</p>
 								</div>
 								<Button
@@ -446,12 +458,20 @@ export function ExpenseCategorizerTool() {
 																		step="0.01"
 																		placeholder="0.00"
 																		className="rounded-lg border-0 bg-background pl-8 shadow-sm"
-																		value={field.value}
-																		onChange={(e) =>
+																		value={
+																			field.value
+																		}
+																		onChange={(
+																			e,
+																		) =>
 																			field.onChange(
-																				e.target.value
+																				e
+																					.target
+																					.value
 																					? Number.parseFloat(
-																							e.target.value,
+																							e
+																								.target
+																								.value,
 																						)
 																					: 0,
 																			)
@@ -469,7 +489,9 @@ export function ExpenseCategorizerTool() {
 														variant="ghost"
 														size="icon"
 														className="size-10 shrink-0 rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-red-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
-														onClick={() => remove(index)}
+														onClick={() =>
+															remove(index)
+														}
 													>
 														<TrashIcon className="size-4" />
 													</Button>
@@ -528,8 +550,12 @@ export function ExpenseCategorizerTool() {
 														Country
 													</FormLabel>
 													<Select
-														onValueChange={field.onChange}
-														defaultValue={field.value}
+														onValueChange={
+															field.onChange
+														}
+														defaultValue={
+															field.value
+														}
 													>
 														<FormControl>
 															<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background">
@@ -595,8 +621,8 @@ export function ExpenseCategorizerTool() {
 										Expense Summary
 									</h3>
 									<p className="text-muted-foreground text-sm">
-										{result.categorizedExpenses.length} expenses
-										analyzed
+										{result.categorizedExpenses.length}{" "}
+										expenses analyzed
 									</p>
 								</div>
 							</div>
@@ -608,8 +634,10 @@ export function ExpenseCategorizerTool() {
 									<DeductionRing
 										percentage={
 											result.summary.totalAmount > 0
-												? (result.summary.totalDeductible /
-														result.summary.totalAmount) *
+												? (result.summary
+														.totalDeductible /
+														result.summary
+															.totalAmount) *
 													100
 												: 0
 										}
@@ -670,12 +698,18 @@ export function ExpenseCategorizerTool() {
 												<CategoryBar
 													key={cat.category}
 													category={
-														categoryLabels[cat.category] ??
-														cat.category
+														categoryLabels[
+															cat.category
+														] ?? cat.category
 													}
 													amount={cat.amount}
-													total={result.summary.totalAmount}
-													deductible={cat.deductibleAmount}
+													total={
+														result.summary
+															.totalAmount
+													}
+													deductible={
+														cat.deductibleAmount
+													}
 												/>
 											))}
 									</div>
@@ -725,7 +759,9 @@ export function ExpenseCategorizerTool() {
 												>
 													<td className="p-4">
 														<p className="font-medium">
-															{expense.originalDescription}
+															{
+																expense.originalDescription
+															}
 														</p>
 														{expense.vendor && (
 															<p className="text-muted-foreground text-xs">
@@ -734,19 +770,22 @@ export function ExpenseCategorizerTool() {
 														)}
 													</td>
 													<td className="p-4">
-														<Badge
-															className="rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-														>
+														<Badge className="rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
 															{categoryLabels[
 																expense.category
-															] ?? expense.category}
+															] ??
+																expense.category}
 														</Badge>
 													</td>
 													<td className="p-4 text-right font-semibold">
-														${expense.amount.toFixed(2)}
+														$
+														{expense.amount.toFixed(
+															2,
+														)}
 													</td>
 													<td className="p-4 text-center">
-														{expense.taxInfo.isDeductible ? (
+														{expense.taxInfo
+															.isDeductible ? (
 															<div className="mx-auto flex size-7 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
 																<CheckCircleIcon className="size-4 text-emerald-600" />
 															</div>
@@ -758,7 +797,9 @@ export function ExpenseCategorizerTool() {
 													</td>
 													<td className="p-4 text-right">
 														<ConfidenceBadge
-															confidence={expense.confidence}
+															confidence={
+																expense.confidence
+															}
 														/>
 													</td>
 												</tr>
@@ -817,7 +858,9 @@ export function ExpenseCategorizerTool() {
 									<div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
 										<LightbulbIcon className="size-5 text-blue-600 dark:text-blue-400" />
 									</div>
-									<CardTitle>Optimization Suggestions</CardTitle>
+									<CardTitle>
+										Optimization Suggestions
+									</CardTitle>
 								</div>
 							</CardHeader>
 							<CardContent className="p-6">

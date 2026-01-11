@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,7 +44,8 @@ vi.mock("./JobProgressIndicator", () => ({
 
 // Mock the Spinner component to avoid React undefined error
 vi.mock("@shared/components/Spinner", () => ({
-	Spinner: () => React.createElement("span", { "data-testid": "spinner" }, "Loading..."),
+	Spinner: () =>
+		React.createElement("span", { "data-testid": "spinner" }, "Loading..."),
 }));
 
 // Import components after mocks
@@ -90,7 +97,9 @@ describe("InvoiceProcessorTool", () => {
 			"Paste your invoice text here...",
 		);
 		await act(async () => {
-			fireEvent.change(textarea, { target: { value: "Test invoice content" } });
+			fireEvent.change(textarea, {
+				target: { value: "Test invoice content" },
+			});
 		});
 
 		const submitButton = screen.getByRole("button", {
@@ -160,7 +169,9 @@ describe("ContractAnalyzerTool", () => {
 			"Paste your contract text here...",
 		);
 		await act(async () => {
-			fireEvent.change(textarea, { target: { value: "Test contract content" } });
+			fireEvent.change(textarea, {
+				target: { value: "Test contract content" },
+			});
 		});
 
 		const submitButton = screen.getByRole("button", {
@@ -279,7 +290,8 @@ describe("ExpenseCategorizerTool", () => {
 		});
 
 		await waitFor(() => {
-			const afterAddInputs = screen.getAllByPlaceholderText("Office supplies");
+			const afterAddInputs =
+				screen.getAllByPlaceholderText("Office supplies");
 			expect(afterAddInputs).toHaveLength(2);
 		});
 	});
@@ -307,10 +319,14 @@ describe("ExpenseCategorizerTool", () => {
 		render(<ExpenseCategorizerTool />);
 
 		// Initially in form mode
-		expect(screen.getByPlaceholderText("Office supplies")).toBeInTheDocument();
+		expect(
+			screen.getByPlaceholderText("Office supplies"),
+		).toBeInTheDocument();
 
 		// Switch to bulk text mode
-		const bulkTextButton = screen.getByRole("button", { name: "Bulk Text" });
+		const bulkTextButton = screen.getByRole("button", {
+			name: "Bulk Text",
+		});
 		await act(async () => {
 			fireEvent.click(bulkTextButton);
 		});
@@ -363,7 +379,9 @@ describe("MeetingSummarizerTool", () => {
 			"Paste your meeting notes, transcript, or recording summary here...",
 		);
 		await act(async () => {
-			fireEvent.change(textarea, { target: { value: "Meeting notes content" } });
+			fireEvent.change(textarea, {
+				target: { value: "Meeting notes content" },
+			});
 		});
 
 		const submitButton = screen.getByRole("button", {
@@ -389,6 +407,8 @@ describe("MeetingSummarizerTool", () => {
 
 		expect(screen.getByText("Participants (Optional)")).toBeInTheDocument();
 		expect(screen.getByText("Meeting Date (Optional)")).toBeInTheDocument();
-		expect(screen.getByText("Project Context (Optional)")).toBeInTheDocument();
+		expect(
+			screen.getByText("Project Context (Optional)"),
+		).toBeInTheDocument();
 	});
 });

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@ui/components/button";
 import {
@@ -42,7 +41,7 @@ import {
 	RefreshCwIcon,
 	SparklesIcon,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
@@ -115,8 +114,12 @@ const formatLabels = {
 function ConfidenceBadge({ confidence }: { confidence: number }) {
 	const percentage = Math.round(confidence * 100);
 	const getStatus = () => {
-		if (percentage >= 80) return { color: "bg-emerald-500", label: "High" };
-		if (percentage >= 50) return { color: "bg-amber-500", label: "Medium" };
+		if (percentage >= 80) {
+			return { color: "bg-emerald-500", label: "High" };
+		}
+		if (percentage >= 50) {
+			return { color: "bg-amber-500", label: "Medium" };
+		}
 		return { color: "bg-red-500", label: "Low" };
 	};
 	const status = getStatus();
@@ -125,7 +128,9 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 		<div className="flex items-center gap-2 rounded-full bg-muted/50 px-3 py-1.5">
 			<div className={cn("size-2 rounded-full", status.color)} />
 			<span className="font-medium text-sm">{percentage}%</span>
-			<span className="text-muted-foreground text-xs">{status.label} confidence</span>
+			<span className="text-muted-foreground text-xs">
+				{status.label} confidence
+			</span>
 		</div>
 	);
 }
@@ -176,16 +181,22 @@ export function InvoiceProcessorTool() {
 								<ReceiptIcon className="size-7 text-primary-foreground" />
 							</div>
 							<div className="flex-1">
-								<h2 className="font-bold text-2xl tracking-tight">Invoice Processor</h2>
+								<h2 className="font-bold text-2xl tracking-tight">
+									Invoice Processor
+								</h2>
 								<p className="mt-1 text-muted-foreground">
-									Extract structured data from invoices using AI for seamless accounting integration
+									Extract structured data from invoices using
+									AI for seamless accounting integration
 								</p>
 							</div>
 						</div>
 					</div>
 					<CardContent className="p-6 pt-8">
 						<Form {...form}>
-							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className="space-y-6"
+							>
 								<FormField
 									control={form.control}
 									name="invoiceText"
@@ -203,7 +214,9 @@ export function InvoiceProcessorTool() {
 												/>
 											</FormControl>
 											<FormDescription className="text-muted-foreground/80">
-												Paste the text content of your invoice. You can copy from PDFs, emails, or any text source.
+												Paste the text content of your
+												invoice. You can copy from PDFs,
+												emails, or any text source.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -215,18 +228,32 @@ export function InvoiceProcessorTool() {
 									name="outputFormat"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="font-semibold text-base">Output Format</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormLabel className="font-semibold text-base">
+												Output Format
+											</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+											>
 												<FormControl>
 													<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-primary focus:bg-background">
 														<SelectValue placeholder="Select output format" />
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent className="rounded-xl">
-													{Object.entries(formatLabels).map(([value, label]) => {
-														const Icon = formatIcons[value as keyof typeof formatIcons];
+													{Object.entries(
+														formatLabels,
+													).map(([value, label]) => {
+														const Icon =
+															formatIcons[
+																value as keyof typeof formatIcons
+															];
 														return (
-															<SelectItem key={value} value={value} className="rounded-lg">
+															<SelectItem
+																key={value}
+																value={value}
+																className="rounded-lg"
+															>
 																<div className="flex items-center gap-2">
 																	<Icon className="size-4 text-muted-foreground" />
 																	{label}
@@ -237,7 +264,8 @@ export function InvoiceProcessorTool() {
 												</SelectContent>
 											</Select>
 											<FormDescription className="text-muted-foreground/80">
-												Choose the format for exported data
+												Choose the format for exported
+												data
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -280,11 +308,18 @@ export function InvoiceProcessorTool() {
 										<CheckCircle2Icon className="size-6 text-emerald-600" />
 									</div>
 									<div>
-										<h3 className="font-bold text-xl">Invoice Extracted Successfully</h3>
-										<p className="text-muted-foreground">All data has been parsed and structured</p>
+										<h3 className="font-bold text-xl">
+											Invoice Extracted Successfully
+										</h3>
+										<p className="text-muted-foreground">
+											All data has been parsed and
+											structured
+										</p>
 									</div>
 								</div>
-								<ConfidenceBadge confidence={result.confidence} />
+								<ConfidenceBadge
+									confidence={result.confidence}
+								/>
 							</div>
 						</CardContent>
 					</Card>
@@ -300,7 +335,9 @@ export function InvoiceProcessorTool() {
 							</CardHeader>
 							<CardContent className="space-y-3">
 								<div className="rounded-xl bg-muted/50 p-4">
-									<p className="font-semibold text-lg">{result.vendor.name}</p>
+									<p className="font-semibold text-lg">
+										{result.vendor.name}
+									</p>
 									{result.vendor.address && (
 										<p className="mt-2 flex items-start gap-2 text-muted-foreground text-sm">
 											<MapPinIcon className="mt-0.5 size-4 shrink-0" />
@@ -338,7 +375,9 @@ export function InvoiceProcessorTool() {
 												<HashIcon className="size-3" />
 												Invoice Number
 											</p>
-											<p className="mt-1 font-semibold">{result.invoice.number}</p>
+											<p className="mt-1 font-semibold">
+												{result.invoice.number}
+											</p>
 										</div>
 									)}
 									{result.invoice.date && (
@@ -347,7 +386,9 @@ export function InvoiceProcessorTool() {
 												<CalendarIcon className="size-3" />
 												Invoice Date
 											</p>
-											<p className="mt-1 font-semibold">{result.invoice.date}</p>
+											<p className="mt-1 font-semibold">
+												{result.invoice.date}
+											</p>
 										</div>
 									)}
 									{result.invoice.dueDate && (
@@ -356,13 +397,22 @@ export function InvoiceProcessorTool() {
 												<CalendarIcon className="size-3" />
 												Due Date
 											</p>
-											<p className="mt-1 font-semibold text-amber-600">{result.invoice.dueDate}</p>
+											<p className="mt-1 font-semibold text-amber-600">
+												{result.invoice.dueDate}
+											</p>
 										</div>
 									)}
 									{result.invoice.purchaseOrderNumber && (
 										<div className="rounded-xl bg-muted/50 p-3">
-											<p className="text-muted-foreground text-xs">PO Number</p>
-											<p className="mt-1 font-semibold">{result.invoice.purchaseOrderNumber}</p>
+											<p className="text-muted-foreground text-xs">
+												PO Number
+											</p>
+											<p className="mt-1 font-semibold">
+												{
+													result.invoice
+														.purchaseOrderNumber
+												}
+											</p>
 										</div>
 									)}
 								</div>
@@ -374,43 +424,65 @@ export function InvoiceProcessorTool() {
 					{result.lineItems.length > 0 && (
 						<Card className="border-0 shadow-md">
 							<CardHeader className="pb-4">
-								<CardTitle className="text-lg">Line Items</CardTitle>
-								<CardDescription>{result.lineItems.length} items extracted</CardDescription>
+								<CardTitle className="text-lg">
+									Line Items
+								</CardTitle>
+								<CardDescription>
+									{result.lineItems.length} items extracted
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="overflow-hidden rounded-xl border">
 									<table className="w-full">
 										<thead className="border-b bg-muted/50">
 											<tr>
-												<th className="p-4 text-left font-semibold text-sm">Description</th>
-												<th className="p-4 text-right font-semibold text-sm">Qty</th>
-												<th className="p-4 text-right font-semibold text-sm">Unit Price</th>
-												<th className="p-4 text-right font-semibold text-sm">Amount</th>
+												<th className="p-4 text-left font-semibold text-sm">
+													Description
+												</th>
+												<th className="p-4 text-right font-semibold text-sm">
+													Qty
+												</th>
+												<th className="p-4 text-right font-semibold text-sm">
+													Unit Price
+												</th>
+												<th className="p-4 text-right font-semibold text-sm">
+													Amount
+												</th>
 											</tr>
 										</thead>
 										<tbody>
-											{result.lineItems.map((item, index) => (
-												<tr
-													key={index}
-													className={cn(
-														"border-b transition-colors last:border-0 hover:bg-muted/30",
-														index % 2 === 0 ? "bg-transparent" : "bg-muted/20"
-													)}
-												>
-													<td className="p-4 font-medium">{item.description}</td>
-													<td className="p-4 text-right text-muted-foreground">
-														{item.quantity ?? "—"}
-													</td>
-													<td className="p-4 text-right text-muted-foreground">
-														{item.unitPrice
-															? `${result.currency} ${item.unitPrice.toFixed(2)}`
-															: "—"}
-													</td>
-													<td className="p-4 text-right font-semibold">
-														{result.currency} {item.amount.toFixed(2)}
-													</td>
-												</tr>
-											))}
+											{result.lineItems.map(
+												(item, index) => (
+													<tr
+														key={index}
+														className={cn(
+															"border-b transition-colors last:border-0 hover:bg-muted/30",
+															index % 2 === 0
+																? "bg-transparent"
+																: "bg-muted/20",
+														)}
+													>
+														<td className="p-4 font-medium">
+															{item.description}
+														</td>
+														<td className="p-4 text-right text-muted-foreground">
+															{item.quantity ??
+																"—"}
+														</td>
+														<td className="p-4 text-right text-muted-foreground">
+															{item.unitPrice
+																? `${result.currency} ${item.unitPrice.toFixed(2)}`
+																: "—"}
+														</td>
+														<td className="p-4 text-right font-semibold">
+															{result.currency}{" "}
+															{item.amount.toFixed(
+																2,
+															)}
+														</td>
+													</tr>
+												),
+											)}
 										</tbody>
 									</table>
 								</div>
@@ -425,43 +497,65 @@ export function InvoiceProcessorTool() {
 								<div className="w-full max-w-xs space-y-3">
 									{result.totals.subtotal !== null && (
 										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Subtotal</span>
+											<span className="text-muted-foreground">
+												Subtotal
+											</span>
 											<span className="font-medium">
-												{result.currency} {result.totals.subtotal.toFixed(2)}
+												{result.currency}{" "}
+												{result.totals.subtotal.toFixed(
+													2,
+												)}
 											</span>
 										</div>
 									)}
 									{result.totals.discount !== null && (
 										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Discount</span>
+											<span className="text-muted-foreground">
+												Discount
+											</span>
 											<span className="font-medium text-emerald-600">
-												-{result.currency} {result.totals.discount.toFixed(2)}
+												-{result.currency}{" "}
+												{result.totals.discount.toFixed(
+													2,
+												)}
 											</span>
 										</div>
 									)}
 									{result.totals.tax !== null && (
 										<div className="flex justify-between text-sm">
 											<span className="text-muted-foreground">
-												Tax{result.totals.taxRate ? ` (${result.totals.taxRate})` : ""}
+												Tax
+												{result.totals.taxRate
+													? ` (${result.totals.taxRate})`
+													: ""}
 											</span>
 											<span className="font-medium">
-												{result.currency} {result.totals.tax.toFixed(2)}
+												{result.currency}{" "}
+												{result.totals.tax.toFixed(2)}
 											</span>
 										</div>
 									)}
 									{result.totals.shipping !== null && (
 										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Shipping</span>
+											<span className="text-muted-foreground">
+												Shipping
+											</span>
 											<span className="font-medium">
-												{result.currency} {result.totals.shipping.toFixed(2)}
+												{result.currency}{" "}
+												{result.totals.shipping.toFixed(
+													2,
+												)}
 											</span>
 										</div>
 									)}
 									<div className="border-t pt-3">
 										<div className="flex justify-between">
-											<span className="font-semibold text-lg">Total</span>
+											<span className="font-semibold text-lg">
+												Total
+											</span>
 											<span className="font-bold text-2xl text-primary">
-												{result.currency} {result.totals.total.toFixed(2)}
+												{result.currency}{" "}
+												{result.totals.total.toFixed(2)}
 											</span>
 										</div>
 									</div>

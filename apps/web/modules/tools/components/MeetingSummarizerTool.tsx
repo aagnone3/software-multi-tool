@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -45,7 +43,7 @@ import {
 	UsersIcon,
 	VideoIcon,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
@@ -210,14 +208,14 @@ interface MeetingOutput {
 	};
 }
 
-const priorityColors = {
+const _priorityColors = {
 	low: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
 	medium: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
 	high: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
 	urgent: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const meetingTypeLabels = {
+const _meetingTypeLabels = {
 	standup: "Daily Standup",
 	planning: "Planning",
 	retrospective: "Retrospective",
@@ -297,8 +295,9 @@ export function MeetingSummarizerTool() {
 									Meeting Summarizer
 								</CardTitle>
 								<CardDescription className="mt-1">
-									Transform meeting notes into structured summaries
-									with action items and key decisions
+									Transform meeting notes into structured
+									summaries with action items and key
+									decisions
 								</CardDescription>
 							</div>
 						</div>
@@ -325,8 +324,8 @@ export function MeetingSummarizerTool() {
 												/>
 											</FormControl>
 											<FormDescription>
-												Raw notes, transcript, or any text from
-												your meeting
+												Raw notes, transcript, or any
+												text from your meeting
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -343,7 +342,9 @@ export function MeetingSummarizerTool() {
 													Meeting Type
 												</FormLabel>
 												<Select
-													onValueChange={field.onChange}
+													onValueChange={
+														field.onChange
+													}
 													defaultValue={field.value}
 												>
 													<FormControl>
@@ -414,7 +415,8 @@ export function MeetingSummarizerTool() {
 												/>
 											</FormControl>
 											<FormDescription>
-												Comma-separated list of attendees
+												Comma-separated list of
+												attendees
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -437,8 +439,8 @@ export function MeetingSummarizerTool() {
 												/>
 											</FormControl>
 											<FormDescription>
-												Helps provide relevant context for the
-												summary
+												Helps provide relevant context
+												for the summary
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -584,19 +586,21 @@ export function MeetingSummarizerTool() {
 										Key Takeaways
 									</h4>
 									<div className="grid gap-2">
-										{result.keyTakeaways.map((takeaway, index) => (
-											<div
-												key={index}
-												className="flex items-start gap-3 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20"
-											>
-												<div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
-													<CheckCircle2Icon className="size-3 text-white" />
+										{result.keyTakeaways.map(
+											(takeaway, index) => (
+												<div
+													key={index}
+													className="flex items-start gap-3 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20"
+												>
+													<div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+														<CheckCircle2Icon className="size-3 text-white" />
+													</div>
+													<span className="text-sm">
+														{takeaway}
+													</span>
 												</div>
-												<span className="text-sm">
-													{takeaway}
-												</span>
-											</div>
-										))}
+											),
+										)}
 									</div>
 								</div>
 							)}
@@ -612,7 +616,8 @@ export function MeetingSummarizerTool() {
 										<ClipboardListIcon className="size-5 text-indigo-600 dark:text-indigo-400" />
 									</div>
 									<CardTitle>
-										Action Items ({result.actionItems.length})
+										Action Items (
+										{result.actionItems.length})
 									</CardTitle>
 								</div>
 							</CardHeader>
@@ -627,7 +632,9 @@ export function MeetingSummarizerTool() {
 												<div className="space-y-2">
 													<div className="flex flex-wrap items-center gap-2">
 														<PriorityBadge
-															priority={item.priority}
+															priority={
+																item.priority
+															}
 														/>
 														{item.assignee && (
 															<span className="rounded-full bg-background px-2.5 py-1 font-medium text-xs shadow-sm">
@@ -662,7 +669,8 @@ export function MeetingSummarizerTool() {
 										<GavelIcon className="size-5 text-purple-600 dark:text-purple-400" />
 									</div>
 									<CardTitle>
-										Decisions Made ({result.decisions.length})
+										Decisions Made (
+										{result.decisions.length})
 									</CardTitle>
 								</div>
 							</CardHeader>
@@ -732,15 +740,17 @@ export function MeetingSummarizerTool() {
 											</p>
 											{topic.keyPoints.length > 0 && (
 												<ul className="mt-4 space-y-2">
-													{topic.keyPoints.map((point, i) => (
-														<li
-															key={i}
-															className="flex items-start gap-2 text-sm"
-														>
-															<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-indigo-500" />
-															{point}
-														</li>
-													))}
+													{topic.keyPoints.map(
+														(point, i) => (
+															<li
+																key={i}
+																className="flex items-start gap-2 text-sm"
+															>
+																<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-indigo-500" />
+																{point}
+															</li>
+														),
+													)}
 												</ul>
 											)}
 											{topic.openQuestions.length > 0 && (
@@ -783,7 +793,9 @@ export function MeetingSummarizerTool() {
 									<div className="flex size-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
 										<CalendarCheckIcon className="size-5 text-indigo-600 dark:text-indigo-400" />
 									</div>
-									<CardTitle>Follow-up Meeting Recommended</CardTitle>
+									<CardTitle>
+										Follow-up Meeting Recommended
+									</CardTitle>
 								</div>
 							</CardHeader>
 							<CardContent className="p-6">
@@ -792,11 +804,15 @@ export function MeetingSummarizerTool() {
 										<ClockIcon className="size-4" />
 										Suggested date:{" "}
 										<span className="font-medium text-foreground">
-											{result.followUpMeeting.suggestedDate}
+											{
+												result.followUpMeeting
+													.suggestedDate
+											}
 										</span>
 									</p>
 								)}
-								{result.followUpMeeting.suggestedAgenda.length > 0 && (
+								{result.followUpMeeting.suggestedAgenda.length >
+									0 && (
 									<div>
 										<h4 className="mb-3 font-semibold">
 											Suggested Agenda

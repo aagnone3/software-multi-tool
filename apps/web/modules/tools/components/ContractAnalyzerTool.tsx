@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
@@ -30,7 +29,6 @@ import {
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import {
-	AlertTriangleIcon,
 	ArrowRightIcon,
 	CalendarIcon,
 	CheckCircle2Icon,
@@ -45,7 +43,7 @@ import {
 	SparklesIcon,
 	UsersIcon,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
@@ -151,15 +149,31 @@ const severityConfig = {
 function RiskScoreGauge({ score }: { score: number }) {
 	const getColor = () => {
 		if (score <= 25) {
-			return { ring: "stroke-emerald-500", text: "text-emerald-600", label: "Low Risk" };
+			return {
+				ring: "stroke-emerald-500",
+				text: "text-emerald-600",
+				label: "Low Risk",
+			};
 		}
 		if (score <= 50) {
-			return { ring: "stroke-amber-500", text: "text-amber-600", label: "Moderate Risk" };
+			return {
+				ring: "stroke-amber-500",
+				text: "text-amber-600",
+				label: "Moderate Risk",
+			};
 		}
 		if (score <= 75) {
-			return { ring: "stroke-orange-500", text: "text-orange-600", label: "High Risk" };
+			return {
+				ring: "stroke-orange-500",
+				text: "text-orange-600",
+				label: "High Risk",
+			};
 		}
-		return { ring: "stroke-red-500", text: "text-red-600", label: "Critical Risk" };
+		return {
+			ring: "stroke-red-500",
+			text: "text-red-600",
+			label: "Critical Risk",
+		};
 	};
 	const { ring, text, label } = getColor();
 	const circumference = 2 * Math.PI * 45;
@@ -168,7 +182,8 @@ function RiskScoreGauge({ score }: { score: number }) {
 	return (
 		<div className="flex items-center gap-4">
 			<div className="relative size-24">
-				<svg className="-rotate-90 size-24">
+				<svg className="-rotate-90 size-24" aria-labelledby="risk-score-title">
+					<title id="risk-score-title">Risk Score: {score}%</title>
 					<circle
 						cx="48"
 						cy="48"
@@ -193,12 +208,16 @@ function RiskScoreGauge({ score }: { score: number }) {
 					/>
 				</svg>
 				<div className="absolute inset-0 flex flex-col items-center justify-center">
-					<span className={cn("font-bold text-2xl", text)}>{score}</span>
+					<span className={cn("font-bold text-2xl", text)}>
+						{score}
+					</span>
 				</div>
 			</div>
 			<div>
 				<p className={cn("font-semibold", text)}>{label}</p>
-				<p className="text-muted-foreground text-sm">Overall Risk Score</p>
+				<p className="text-muted-foreground text-sm">
+					Overall Risk Score
+				</p>
 			</div>
 		</div>
 	);
@@ -256,16 +275,22 @@ export function ContractAnalyzerTool() {
 								<FileTextIcon className="size-7 text-white" />
 							</div>
 							<div className="flex-1">
-								<h2 className="font-bold text-2xl tracking-tight">Contract Analyzer</h2>
+								<h2 className="font-bold text-2xl tracking-tight">
+									Contract Analyzer
+								</h2>
 								<p className="mt-1 text-muted-foreground">
-									AI-powered analysis to identify risks, obligations, and key terms in your contracts
+									AI-powered analysis to identify risks,
+									obligations, and key terms in your contracts
 								</p>
 							</div>
 						</div>
 					</div>
 					<CardContent className="p-6 pt-8">
 						<Form {...form}>
-							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className="space-y-6"
+							>
 								<FormField
 									control={form.control}
 									name="contractText"
@@ -283,7 +308,9 @@ export function ContractAnalyzerTool() {
 												/>
 											</FormControl>
 											<FormDescription className="text-muted-foreground/80">
-												Paste the full text of your contract for comprehensive AI analysis
+												Paste the full text of your
+												contract for comprehensive AI
+												analysis
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -295,35 +322,61 @@ export function ContractAnalyzerTool() {
 									name="analysisDepth"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel className="font-semibold text-base">Analysis Depth</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormLabel className="font-semibold text-base">
+												Analysis Depth
+											</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+											>
 												<FormControl>
 													<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-violet-500 focus:bg-background">
 														<SelectValue placeholder="Select analysis depth" />
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent className="rounded-xl">
-													<SelectItem value="summary" className="rounded-lg">
+													<SelectItem
+														value="summary"
+														className="rounded-lg"
+													>
 														<div className="flex flex-col items-start">
-															<span className="font-medium">Summary</span>
+															<span className="font-medium">
+																Summary
+															</span>
 															<span className="text-muted-foreground text-xs">
-																{depthDescriptions.summary}
+																{
+																	depthDescriptions.summary
+																}
 															</span>
 														</div>
 													</SelectItem>
-													<SelectItem value="standard" className="rounded-lg">
+													<SelectItem
+														value="standard"
+														className="rounded-lg"
+													>
 														<div className="flex flex-col items-start">
-															<span className="font-medium">Standard</span>
+															<span className="font-medium">
+																Standard
+															</span>
 															<span className="text-muted-foreground text-xs">
-																{depthDescriptions.standard}
+																{
+																	depthDescriptions.standard
+																}
 															</span>
 														</div>
 													</SelectItem>
-													<SelectItem value="detailed" className="rounded-lg">
+													<SelectItem
+														value="detailed"
+														className="rounded-lg"
+													>
 														<div className="flex flex-col items-start">
-															<span className="font-medium">Detailed</span>
+															<span className="font-medium">
+																Detailed
+															</span>
 															<span className="text-muted-foreground text-xs">
-																{depthDescriptions.detailed}
+																{
+																	depthDescriptions.detailed
+																}
 															</span>
 														</div>
 													</SelectItem>
@@ -368,22 +421,39 @@ export function ContractAnalyzerTool() {
 								<div className="flex-1">
 									<div className="flex items-center gap-2">
 										<CheckCircle2Icon className="size-5 text-emerald-600" />
-										<span className="font-medium text-emerald-600">Analysis Complete</span>
+										<span className="font-medium text-emerald-600">
+											Analysis Complete
+										</span>
 									</div>
-									<h3 className="mt-2 font-bold text-2xl">{result.summary.contractType}</h3>
-									<p className="mt-2 text-muted-foreground">{result.summary.overview}</p>
+									<h3 className="mt-2 font-bold text-2xl">
+										{result.summary.contractType}
+									</h3>
+									<p className="mt-2 text-muted-foreground">
+										{result.summary.overview}
+									</p>
 
 									<div className="mt-4 flex flex-wrap items-center gap-4">
-										{result.summary.parties.map((party, index) => (
-											<div key={index} className="flex items-center gap-2 rounded-full bg-muted/50 px-3 py-1.5">
-												<UsersIcon className="size-4 text-muted-foreground" />
-												<span className="font-medium text-sm">{party.name}</span>
-												<span className="text-muted-foreground text-xs">({party.role})</span>
-											</div>
-										))}
+										{result.summary.parties.map(
+											(party, index) => (
+												<div
+													key={index}
+													className="flex items-center gap-2 rounded-full bg-muted/50 px-3 py-1.5"
+												>
+													<UsersIcon className="size-4 text-muted-foreground" />
+													<span className="font-medium text-sm">
+														{party.name}
+													</span>
+													<span className="text-muted-foreground text-xs">
+														({party.role})
+													</span>
+												</div>
+											),
+										)}
 									</div>
 								</div>
-								<RiskScoreGauge score={result.overallRiskScore} />
+								<RiskScoreGauge
+									score={result.overallRiskScore}
+								/>
 							</div>
 						</div>
 						<CardContent className="p-6 pt-0">
@@ -394,7 +464,9 @@ export function ContractAnalyzerTool() {
 											<CalendarIcon className="size-4" />
 											Effective Date
 										</p>
-										<p className="mt-1 font-semibold">{result.summary.effectiveDate}</p>
+										<p className="mt-1 font-semibold">
+											{result.summary.effectiveDate}
+										</p>
 									</div>
 								)}
 								{result.summary.expirationDate && (
@@ -403,7 +475,9 @@ export function ContractAnalyzerTool() {
 											<CalendarIcon className="size-4" />
 											Expiration Date
 										</p>
-										<p className="mt-1 font-semibold">{result.summary.expirationDate}</p>
+										<p className="mt-1 font-semibold">
+											{result.summary.expirationDate}
+										</p>
 									</div>
 								)}
 								{result.summary.governingLaw && (
@@ -412,7 +486,9 @@ export function ContractAnalyzerTool() {
 											<GavelIcon className="size-4" />
 											Governing Law
 										</p>
-										<p className="mt-1 font-semibold">{result.summary.governingLaw}</p>
+										<p className="mt-1 font-semibold">
+											{result.summary.governingLaw}
+										</p>
 									</div>
 								)}
 							</div>
@@ -427,22 +503,29 @@ export function ContractAnalyzerTool() {
 									<ShieldAlertIcon className="size-5 text-orange-500" />
 									Identified Risks
 									<Badge status="warning" className="ml-2">
-										{result.risks.length} {result.risks.length === 1 ? "risk" : "risks"}
+										{result.risks.length}{" "}
+										{result.risks.length === 1
+											? "risk"
+											: "risks"}
 									</Badge>
 								</CardTitle>
-								<CardDescription>Potential concerns identified in this contract</CardDescription>
+								<CardDescription>
+									Potential concerns identified in this
+									contract
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-4">
 									{result.risks.map((risk, index) => {
-										const config = severityConfig[risk.severity];
+										const config =
+											severityConfig[risk.severity];
 										return (
 											<div
 												key={index}
 												className={cn(
 													"rounded-xl border p-4 transition-colors",
 													config.bg,
-													config.border
+													config.border,
 												)}
 											>
 												<div className="flex items-start justify-between gap-3">
@@ -451,21 +534,30 @@ export function ContractAnalyzerTool() {
 															<span
 																className={cn(
 																	"rounded-full px-2.5 py-1 font-medium text-xs",
-																	config.badge
+																	config.badge,
 																)}
 															>
 																{risk.severity.toUpperCase()}
 															</span>
-															<span className="font-semibold">{risk.category}</span>
+															<span className="font-semibold">
+																{risk.category}
+															</span>
 														</div>
-														<p className="text-muted-foreground text-sm">{risk.description}</p>
+														<p className="text-muted-foreground text-sm">
+															{risk.description}
+														</p>
 													</div>
 												</div>
 												{risk.recommendation && (
 													<div className="mt-3 flex items-start gap-2 rounded-lg bg-background/50 p-3">
 														<LightbulbIcon className="mt-0.5 size-4 shrink-0 text-amber-500" />
 														<p className="text-sm">
-															<span className="font-medium">Recommendation:</span> {risk.recommendation}
+															<span className="font-medium">
+																Recommendation:
+															</span>{" "}
+															{
+																risk.recommendation
+															}
 														</p>
 													</div>
 												)}
@@ -485,34 +577,48 @@ export function ContractAnalyzerTool() {
 									<ClipboardCheckIcon className="size-5 text-blue-500" />
 									Key Obligations
 								</CardTitle>
-								<CardDescription>Responsibilities and commitments by party</CardDescription>
+								<CardDescription>
+									Responsibilities and commitments by party
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
-									{result.obligations.map((obligation, index) => (
-										<div
-											key={index}
-											className="flex items-start justify-between gap-4 rounded-xl border bg-muted/30 p-4 transition-colors hover:bg-muted/50"
-										>
-											<div className="flex-1">
-												<div className="flex items-center gap-2">
-													<span className="rounded-full bg-blue-100 px-2.5 py-0.5 font-medium text-blue-700 text-xs dark:bg-blue-900/50 dark:text-blue-400">
-														{obligation.party}
-													</span>
-													{obligation.isRecurring && (
-														<Badge status="info">Recurring</Badge>
-													)}
+									{result.obligations.map(
+										(obligation, index) => (
+											<div
+												key={index}
+												className="flex items-start justify-between gap-4 rounded-xl border bg-muted/30 p-4 transition-colors hover:bg-muted/50"
+											>
+												<div className="flex-1">
+													<div className="flex items-center gap-2">
+														<span className="rounded-full bg-blue-100 px-2.5 py-0.5 font-medium text-blue-700 text-xs dark:bg-blue-900/50 dark:text-blue-400">
+															{obligation.party}
+														</span>
+														{obligation.isRecurring && (
+															<Badge status="info">
+																Recurring
+															</Badge>
+														)}
+													</div>
+													<p className="mt-2 text-sm">
+														{obligation.description}
+													</p>
 												</div>
-												<p className="mt-2 text-sm">{obligation.description}</p>
+												{obligation.deadline && (
+													<div className="shrink-0 text-right">
+														<p className="text-muted-foreground text-xs">
+															Deadline
+														</p>
+														<p className="font-medium text-sm">
+															{
+																obligation.deadline
+															}
+														</p>
+													</div>
+												)}
 											</div>
-											{obligation.deadline && (
-												<div className="shrink-0 text-right">
-													<p className="text-muted-foreground text-xs">Deadline</p>
-													<p className="font-medium text-sm">{obligation.deadline}</p>
-												</div>
-											)}
-										</div>
-									))}
+										),
+									)}
 								</div>
 							</CardContent>
 						</Card>
@@ -526,20 +632,27 @@ export function ContractAnalyzerTool() {
 									<ShieldCheckIcon className="size-5 text-emerald-600" />
 									Recommendations
 								</CardTitle>
-								<CardDescription>Suggested actions based on the analysis</CardDescription>
+								<CardDescription>
+									Suggested actions based on the analysis
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<ul className="space-y-3">
-									{result.recommendations.map((rec, index) => (
-										<li key={index} className="flex items-start gap-3">
-											<div className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-												<span className="font-semibold text-emerald-700 text-xs dark:text-emerald-400">
-													{index + 1}
-												</span>
-											</div>
-											<p className="text-sm">{rec}</p>
-										</li>
-									))}
+									{result.recommendations.map(
+										(rec, index) => (
+											<li
+												key={index}
+												className="flex items-start gap-3"
+											>
+												<div className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+													<span className="font-semibold text-emerald-700 text-xs dark:text-emerald-400">
+														{index + 1}
+													</span>
+												</div>
+												<p className="text-sm">{rec}</p>
+											</li>
+										),
+									)}
 								</ul>
 							</CardContent>
 						</Card>
