@@ -8,9 +8,14 @@ import {
 	CardTitle,
 } from "@ui/components/card";
 import {
+	ClipboardListIcon,
+	FileTextIcon,
 	ImageMinusIcon,
+	MessageSquareTextIcon,
 	NewspaperIcon,
+	ReceiptIcon,
 	UsersIcon,
+	WalletIcon,
 	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -24,6 +29,11 @@ function getToolIcon(iconName: string) {
 		"image-minus": ImageMinusIcon,
 		users: UsersIcon,
 		newspaper: NewspaperIcon,
+		receipt: ReceiptIcon,
+		"file-text": FileTextIcon,
+		"message-square-text": MessageSquareTextIcon,
+		wallet: WalletIcon,
+		"clipboard-list": ClipboardListIcon,
 	};
 
 	return icons[iconName] || WrenchIcon;
