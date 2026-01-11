@@ -1,7 +1,7 @@
 export { ContractAnalyzerTool } from "./ContractAnalyzerTool";
 export {
-	DocumentUpload,
 	type DocumentFileData,
+	DocumentUpload,
 } from "./DocumentUpload";
 export { ExpenseCategorizerTool } from "./ExpenseCategorizerTool";
 export { FeedbackAnalyzerTool } from "./FeedbackAnalyzerTool";

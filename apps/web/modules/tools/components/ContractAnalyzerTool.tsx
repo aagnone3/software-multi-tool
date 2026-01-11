@@ -49,7 +49,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
-import { DocumentUpload, type DocumentFileData } from "./DocumentUpload";
+import { type DocumentFileData, DocumentUpload } from "./DocumentUpload";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
 const fileDataSchema = z.object({

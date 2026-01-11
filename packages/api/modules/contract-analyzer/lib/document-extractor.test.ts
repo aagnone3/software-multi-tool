@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	MAX_CONTRACT_FILE_SIZE,
-	SUPPORTED_EXTENSIONS,
-	SUPPORTED_MIME_TYPES,
 	detectFileType,
 	extractTextFromDocument,
 	extractTextFromDocx,
 	extractTextFromPdf,
 	extractTextFromTxt,
+	MAX_CONTRACT_FILE_SIZE,
+	SUPPORTED_EXTENSIONS,
+	SUPPORTED_MIME_TYPES,
 } from "./document-extractor";
 
 const pdfParseMock = vi.hoisted(() => vi.fn());

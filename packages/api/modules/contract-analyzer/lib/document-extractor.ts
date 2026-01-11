@@ -184,7 +184,9 @@ export async function extractTextFromDocx(
 
 		// Log any warnings (for debugging)
 		if (result.messages.length > 0) {
-			logger.warn("DOCX extraction warnings", { messages: result.messages });
+			logger.warn("DOCX extraction warnings", {
+				messages: result.messages,
+			});
 		}
 
 		return {
