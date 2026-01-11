@@ -34,8 +34,11 @@ import {
 	AlertTriangleIcon,
 	CheckCircleIcon,
 	DollarSignIcon,
+	LightbulbIcon,
 	PlusIcon,
+	ReceiptIcon,
 	TrashIcon,
+	TrendingUpIcon,
 	WalletIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -43,6 +46,118 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+
+// Deduction percentage ring visualization
+function DeductionRing({ percentage }: { percentage: number }) {
+	const circumference = 2 * Math.PI * 40;
+	const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+	return (
+		<div className="relative flex size-28 items-center justify-center">
+			<svg className="-rotate-90 size-28">
+				<circle
+					cx="56"
+					cy="56"
+					r="40"
+					fill="none"
+					strokeWidth="8"
+					className="stroke-muted"
+				/>
+				<circle
+					cx="56"
+					cy="56"
+					r="40"
+					fill="none"
+					strokeWidth="8"
+					strokeLinecap="round"
+					className="stroke-emerald-500"
+					style={{
+						strokeDasharray: circumference,
+						strokeDashoffset,
+						transition: "stroke-dashoffset 0.5s ease-in-out",
+					}}
+				/>
+			</svg>
+			<div className="absolute inset-0 flex flex-col items-center justify-center">
+				<span className="font-bold text-2xl text-emerald-600 dark:text-emerald-400">
+					{Math.round(percentage)}%
+				</span>
+				<span className="text-muted-foreground text-xs">Deductible</span>
+			</div>
+		</div>
+	);
+}
+
+// Category breakdown bar
+function CategoryBar({
+	category,
+	amount,
+	total,
+	deductible,
+}: {
+	category: string;
+	amount: number;
+	total: number;
+	deductible: number;
+}) {
+	const percentage = (amount / total) * 100;
+	const deductiblePercentage = (deductible / amount) * 100;
+
+	return (
+		<div className="space-y-1.5">
+			<div className="flex items-center justify-between text-sm">
+				<span className="font-medium">{category}</span>
+				<span className="text-muted-foreground">
+					${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+				</span>
+			</div>
+			<div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
+				<div
+					className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all"
+					style={{ width: `${percentage}%` }}
+				/>
+			</div>
+			<div className="flex justify-between text-muted-foreground text-xs">
+				<span>{percentage.toFixed(1)}% of total</span>
+				<span className="text-emerald-600 dark:text-emerald-400">
+					{deductiblePercentage.toFixed(0)}% deductible
+				</span>
+			</div>
+		</div>
+	);
+}
+
+// Confidence badge with visual indicator
+function ConfidenceBadge({ confidence }: { confidence: number }) {
+	const percentage = Math.round(confidence * 100);
+	const color =
+		confidence >= 0.8
+			? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+			: confidence >= 0.5
+				? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+				: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+
+	return (
+		<span
+			className={cn(
+				"inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs",
+				color,
+			)}
+		>
+			<span
+				className={cn(
+					"size-1.5 rounded-full",
+					confidence >= 0.8
+						? "bg-emerald-500"
+						: confidence >= 0.5
+							? "bg-amber-500"
+							: "bg-red-500",
+				)}
+			/>
+			{percentage}%
+		</span>
+	);
+}
 
 const expenseItemSchema = z.object({
 	description: z.string().min(1, "Description is required"),
@@ -207,35 +322,48 @@ export function ExpenseCategorizerTool() {
 	return (
 		<div className="space-y-6">
 			{!jobId && (
-				<Card>
-					<CardHeader>
-						<div className="flex items-center gap-3">
-							<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-								<WalletIcon className="size-5 text-primary" />
+				<Card className="overflow-hidden border-0 shadow-lg">
+					<div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 pb-0">
+						<div className="flex items-start gap-4">
+							<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
+								<WalletIcon className="size-7 text-white" />
 							</div>
-							<div>
-								<CardTitle>Expense Categorizer</CardTitle>
-								<CardDescription>
-									Automatically categorize business expenses
-									for tax deductions and accounting
+							<div className="flex-1">
+								<CardTitle className="text-xl">
+									Expense Categorizer
+								</CardTitle>
+								<CardDescription className="mt-1">
+									Automatically categorize business expenses for tax
+									deductions and accounting
 								</CardDescription>
 							</div>
 						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="mb-6 flex gap-2">
+					</div>
+					<CardContent className="p-6">
+						<div className="mb-6 inline-flex rounded-xl bg-muted/50 p-1">
 							<Button
 								type="button"
-								variant={inputMode === "form" ? "primary" : "outline"}
+								variant={inputMode === "form" ? "secondary" : "ghost"}
 								size="sm"
+								className={cn(
+									"rounded-lg px-4",
+									inputMode === "form" &&
+										"bg-background shadow-sm",
+								)}
 								onClick={() => setInputMode("form")}
 							>
+								<ReceiptIcon className="mr-2 size-4" />
 								Form Entry
 							</Button>
 							<Button
 								type="button"
-								variant={inputMode === "text" ? "primary" : "outline"}
+								variant={inputMode === "text" ? "secondary" : "ghost"}
 								size="sm"
+								className={cn(
+									"rounded-lg px-4",
+									inputMode === "text" &&
+										"bg-background shadow-sm",
+								)}
 								onClick={() => setInputMode("text")}
 							>
 								Bulk Text
@@ -245,26 +373,24 @@ export function ExpenseCategorizerTool() {
 						{inputMode === "text" ? (
 							<div className="space-y-4">
 								<div>
-									<label className="mb-2 block font-medium text-sm">
+									<label className="mb-2 block font-semibold text-sm">
 										Paste Expenses
 									</label>
 									<Textarea
 										placeholder="Office supplies - $45.99&#10;Software subscription - $29.99&#10;Client lunch: $85.00"
-										className="min-h-[200px] font-mono text-sm"
+										className="min-h-[200px] rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-emerald-500 focus:bg-background"
 										value={bulkText}
-										onChange={(e) =>
-											setBulkText(e.target.value)
-										}
+										onChange={(e) => setBulkText(e.target.value)}
 									/>
-									<p className="mt-1 text-muted-foreground text-sm">
-										Enter one expense per line with amount
-										(e.g., "Description - $amount")
+									<p className="mt-2 text-muted-foreground text-sm">
+										Enter one expense per line with amount (e.g.,
+										"Description - $amount")
 									</p>
 								</div>
 								<Button
 									type="button"
 									onClick={parseBulkText}
-									className="w-full"
+									className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
 								>
 									Parse Expenses
 								</Button>
@@ -275,11 +401,11 @@ export function ExpenseCategorizerTool() {
 									onSubmit={form.handleSubmit(onSubmit)}
 									className="space-y-6"
 								>
-									<div className="space-y-4">
+									<div className="space-y-3">
 										{fields.map((field, index) => (
 											<div
 												key={field.id}
-												className="flex gap-3"
+												className="group flex items-end gap-3 rounded-xl border-2 border-dashed border-muted bg-muted/20 p-3 transition-colors hover:border-emerald-500/30 hover:bg-muted/30"
 											>
 												<FormField
 													control={form.control}
@@ -287,13 +413,14 @@ export function ExpenseCategorizerTool() {
 													render={({ field }) => (
 														<FormItem className="flex-1">
 															{index === 0 && (
-																<FormLabel>
+																<FormLabel className="font-semibold">
 																	Description
 																</FormLabel>
 															)}
 															<FormControl>
 																<Input
 																	placeholder="Office supplies"
+																	className="rounded-lg border-0 bg-background shadow-sm"
 																	{...field}
 																/>
 															</FormControl>
@@ -305,20 +432,20 @@ export function ExpenseCategorizerTool() {
 													control={form.control}
 													name={`expenses.${index}.amount`}
 													render={({ field }) => (
-														<FormItem className="w-32">
+														<FormItem className="w-36">
 															{index === 0 && (
-																<FormLabel>
+																<FormLabel className="font-semibold">
 																	Amount
 																</FormLabel>
 															)}
 															<FormControl>
 																<div className="relative">
-																	<DollarSignIcon className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
+																	<DollarSignIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-emerald-600" />
 																	<Input
 																		type="number"
 																		step="0.01"
 																		placeholder="0.00"
-																		className="pl-7"
+																		className="rounded-lg border-0 bg-background pl-8 shadow-sm"
 																		value={field.value}
 																		onChange={(e) =>
 																			field.onChange(
@@ -341,13 +468,8 @@ export function ExpenseCategorizerTool() {
 														type="button"
 														variant="ghost"
 														size="icon"
-														className={cn(
-															index === 0 &&
-																"mt-8",
-														)}
-														onClick={() =>
-															remove(index)
-														}
+														className="size-10 shrink-0 rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-red-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
+														onClick={() => remove(index)}
 													>
 														<TrashIcon className="size-4" />
 													</Button>
@@ -360,6 +482,7 @@ export function ExpenseCategorizerTool() {
 										type="button"
 										variant="outline"
 										size="sm"
+										className="rounded-lg border-dashed"
 										onClick={() =>
 											append({
 												description: "",
@@ -377,12 +500,13 @@ export function ExpenseCategorizerTool() {
 											name="businessType"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>
+													<FormLabel className="font-semibold">
 														Business Type (Optional)
 													</FormLabel>
 													<FormControl>
 														<Input
 															placeholder="e.g., Consulting, Retail, SaaS"
+															className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background"
 															{...field}
 														/>
 													</FormControl>
@@ -400,17 +524,15 @@ export function ExpenseCategorizerTool() {
 											name="country"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Country</FormLabel>
+													<FormLabel className="font-semibold">
+														Country
+													</FormLabel>
 													<Select
-														onValueChange={
-															field.onChange
-														}
-														defaultValue={
-															field.value
-														}
+														onValueChange={field.onChange}
+														defaultValue={field.value}
 													>
 														<FormControl>
-															<SelectTrigger>
+															<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background">
 																<SelectValue placeholder="Select country" />
 															</SelectTrigger>
 														</FormControl>
@@ -439,7 +561,7 @@ export function ExpenseCategorizerTool() {
 										type="submit"
 										variant="primary"
 										loading={form.formState.isSubmitting}
-										className="w-full"
+										className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
 									>
 										Categorize Expenses
 									</Button>
@@ -461,74 +583,135 @@ export function ExpenseCategorizerTool() {
 
 			{result && (
 				<div className="space-y-6">
-					<Card>
-						<CardHeader>
-							<CardTitle>Summary</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="grid gap-6 md:grid-cols-3">
-								<div className="rounded-lg border p-4 text-center">
-									<p className="text-muted-foreground text-sm">
-										Total Expenses
-									</p>
-									<p className="text-2xl font-bold">
-										$
-										{result.summary.totalAmount.toLocaleString(
-											undefined,
-											{ minimumFractionDigits: 2 },
-										)}
-									</p>
+					{/* Summary Overview */}
+					<Card className="overflow-hidden border-0 shadow-lg">
+						<div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6">
+							<div className="flex items-center gap-3">
+								<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
+									<TrendingUpIcon className="size-6 text-white" />
 								</div>
-								<div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center dark:border-green-800 dark:bg-green-900/20">
+								<div>
+									<h3 className="font-semibold text-lg">
+										Expense Summary
+									</h3>
 									<p className="text-muted-foreground text-sm">
-										Deductible
-									</p>
-									<p className="text-2xl font-bold text-green-600">
-										$
-										{result.summary.totalDeductible.toLocaleString(
-											undefined,
-											{ minimumFractionDigits: 2 },
-										)}
-									</p>
-								</div>
-								<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center dark:border-red-800 dark:bg-red-900/20">
-									<p className="text-muted-foreground text-sm">
-										Non-Deductible
-									</p>
-									<p className="text-2xl font-bold text-red-600">
-										$
-										{result.summary.totalNonDeductible.toLocaleString(
-											undefined,
-											{ minimumFractionDigits: 2 },
-										)}
+										{result.categorizedExpenses.length} expenses
+										analyzed
 									</p>
 								</div>
 							</div>
+						</div>
+						<CardContent className="p-6">
+							<div className="grid gap-6 md:grid-cols-4">
+								{/* Deduction Ring */}
+								<div className="flex justify-center md:col-span-1">
+									<DeductionRing
+										percentage={
+											result.summary.totalAmount > 0
+												? (result.summary.totalDeductible /
+														result.summary.totalAmount) *
+													100
+												: 0
+										}
+									/>
+								</div>
+
+								{/* Stats */}
+								<div className="grid gap-4 md:col-span-3 md:grid-cols-3">
+									<div className="rounded-xl bg-muted/30 p-4 text-center">
+										<p className="mb-1 text-muted-foreground text-sm">
+											Total Expenses
+										</p>
+										<p className="font-bold text-2xl">
+											$
+											{result.summary.totalAmount.toLocaleString(
+												undefined,
+												{ minimumFractionDigits: 2 },
+											)}
+										</p>
+									</div>
+									<div className="rounded-xl bg-emerald-50 p-4 text-center dark:bg-emerald-900/20">
+										<p className="mb-1 text-emerald-600 text-sm dark:text-emerald-400">
+											Deductible
+										</p>
+										<p className="font-bold text-2xl text-emerald-600 dark:text-emerald-400">
+											$
+											{result.summary.totalDeductible.toLocaleString(
+												undefined,
+												{ minimumFractionDigits: 2 },
+											)}
+										</p>
+									</div>
+									<div className="rounded-xl bg-red-50 p-4 text-center dark:bg-red-900/20">
+										<p className="mb-1 text-red-600 text-sm dark:text-red-400">
+											Non-Deductible
+										</p>
+										<p className="font-bold text-2xl text-red-600 dark:text-red-400">
+											$
+											{result.summary.totalNonDeductible.toLocaleString(
+												undefined,
+												{ minimumFractionDigits: 2 },
+											)}
+										</p>
+									</div>
+								</div>
+							</div>
+
+							{/* Category Breakdown */}
+							{result.summary.categoryBreakdown.length > 0 && (
+								<div className="mt-6 border-t pt-6">
+									<h4 className="mb-4 font-semibold text-sm">
+										Category Breakdown
+									</h4>
+									<div className="grid gap-4 md:grid-cols-2">
+										{result.summary.categoryBreakdown
+											.slice(0, 6)
+											.map((cat) => (
+												<CategoryBar
+													key={cat.category}
+													category={
+														categoryLabels[cat.category] ??
+														cat.category
+													}
+													amount={cat.amount}
+													total={result.summary.totalAmount}
+													deductible={cat.deductibleAmount}
+												/>
+											))}
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Categorized Expenses</CardTitle>
+					{/* Categorized Expenses Table */}
+					<Card className="overflow-hidden border-0 shadow-lg">
+						<CardHeader className="border-b bg-muted/30">
+							<div className="flex items-center gap-3">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+									<ReceiptIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
+								<CardTitle>Categorized Expenses</CardTitle>
+							</div>
 						</CardHeader>
-						<CardContent>
-							<div className="rounded-md border">
+						<CardContent className="p-0">
+							<div className="overflow-x-auto">
 								<table className="w-full text-sm">
-									<thead className="border-b bg-muted/50">
+									<thead className="border-b bg-muted/30">
 										<tr>
-											<th className="p-3 text-left">
+											<th className="p-4 text-left font-semibold">
 												Description
 											</th>
-											<th className="p-3 text-left">
+											<th className="p-4 text-left font-semibold">
 												Category
 											</th>
-											<th className="p-3 text-right">
+											<th className="p-4 text-right font-semibold">
 												Amount
 											</th>
-											<th className="p-3 text-center">
+											<th className="p-4 text-center font-semibold">
 												Deductible
 											</th>
-											<th className="p-3 text-right">
+											<th className="p-4 text-right font-semibold">
 												Confidence
 											</th>
 										</tr>
@@ -538,13 +721,11 @@ export function ExpenseCategorizerTool() {
 											(expense, index) => (
 												<tr
 													key={index}
-													className="border-b last:border-0"
+													className="border-b transition-colors last:border-0 hover:bg-muted/30"
 												>
-													<td className="p-3">
+													<td className="p-4">
 														<p className="font-medium">
-															{
-																expense.originalDescription
-															}
+															{expense.originalDescription}
 														</p>
 														{expense.vendor && (
 															<p className="text-muted-foreground text-xs">
@@ -552,48 +733,33 @@ export function ExpenseCategorizerTool() {
 															</p>
 														)}
 													</td>
-													<td className="p-3">
-														<Badge status="info">
+													<td className="p-4">
+														<Badge
+															className="rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+														>
 															{categoryLabels[
 																expense.category
-															] ??
-																expense.category}
+															] ?? expense.category}
 														</Badge>
 													</td>
-													<td className="p-3 text-right font-medium">
-														$
-														{expense.amount.toFixed(
-															2,
-														)}
+													<td className="p-4 text-right font-semibold">
+														${expense.amount.toFixed(2)}
 													</td>
-													<td className="p-3 text-center">
-														{expense.taxInfo
-															.isDeductible ? (
-															<CheckCircleIcon className="mx-auto size-5 text-green-500" />
+													<td className="p-4 text-center">
+														{expense.taxInfo.isDeductible ? (
+															<div className="mx-auto flex size-7 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+																<CheckCircleIcon className="size-4 text-emerald-600" />
+															</div>
 														) : (
 															<span className="text-muted-foreground">
 																—
 															</span>
 														)}
 													</td>
-													<td className="p-3 text-right">
-														<span
-															className={cn(
-																expense.confidence >=
-																	0.8
-																	? "text-green-500"
-																	: expense.confidence >=
-																		  0.5
-																		? "text-yellow-500"
-																		: "text-red-500",
-															)}
-														>
-															{Math.round(
-																expense.confidence *
-																	100,
-															)}
-															%
-														</span>
+													<td className="p-4 text-right">
+														<ConfidenceBadge
+															confidence={expense.confidence}
+														/>
 													</td>
 												</tr>
 											),
@@ -604,34 +770,37 @@ export function ExpenseCategorizerTool() {
 						</CardContent>
 					</Card>
 
+					{/* Red Flags */}
 					{result.taxInsights.potentialRedFlags.length > 0 && (
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<AlertTriangleIcon className="size-5 text-orange-500" />
-									Potential Red Flags
-								</CardTitle>
+						<Card className="overflow-hidden border-0 border-l-4 border-l-amber-500 shadow-lg">
+							<CardHeader className="bg-amber-50/50 dark:bg-amber-900/10">
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+										<AlertTriangleIcon className="size-5 text-amber-600" />
+									</div>
+									<CardTitle>Potential Red Flags</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent>
-								<div className="space-y-3">
+							<CardContent className="p-6">
+								<div className="space-y-4">
 									{result.taxInsights.potentialRedFlags.map(
 										(flag, index) => (
 											<div
 												key={index}
-												className="rounded-lg border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-900/20"
+												className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
 											>
-												<p className="font-medium">
+												<p className="font-semibold">
 													{flag.expense}
 												</p>
-												<p className="text-muted-foreground text-sm">
+												<p className="mt-1 text-muted-foreground text-sm">
 													{flag.reason}
 												</p>
-												<p className="mt-1 text-sm">
-													<span className="font-medium">
-														Recommendation:
-													</span>{" "}
-													{flag.recommendation}
-												</p>
+												<div className="mt-3 flex items-start gap-2 rounded-lg bg-white/50 p-3 dark:bg-white/5">
+													<LightbulbIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
+													<p className="text-sm">
+														{flag.recommendation}
+													</p>
+												</div>
 											</div>
 										),
 									)}
@@ -640,21 +809,29 @@ export function ExpenseCategorizerTool() {
 						</Card>
 					)}
 
+					{/* Optimization Suggestions */}
 					{result.taxInsights.optimizationSuggestions.length > 0 && (
-						<Card>
-							<CardHeader>
-								<CardTitle>Optimization Suggestions</CardTitle>
+						<Card className="overflow-hidden border-0 shadow-lg">
+							<CardHeader className="border-b bg-muted/30">
+								<div className="flex items-center gap-3">
+									<div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+										<LightbulbIcon className="size-5 text-blue-600 dark:text-blue-400" />
+									</div>
+									<CardTitle>Optimization Suggestions</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent>
-								<ul className="space-y-2">
+							<CardContent className="p-6">
+								<ul className="space-y-3">
 									{result.taxInsights.optimizationSuggestions.map(
 										(suggestion, index) => (
 											<li
 												key={index}
-												className="flex items-start gap-2 text-sm"
+												className="flex items-start gap-3 rounded-xl bg-blue-50 p-4 text-sm dark:bg-blue-900/20"
 											>
-												<span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-												{suggestion}
+												<div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-200 font-semibold text-blue-700 text-xs dark:bg-blue-800 dark:text-blue-300">
+													{index + 1}
+												</div>
+												<span>{suggestion}</span>
 											</li>
 										),
 									)}
@@ -663,7 +840,11 @@ export function ExpenseCategorizerTool() {
 						</Card>
 					)}
 
-					<Button onClick={handleNewAnalysis} variant="outline">
+					<Button
+						onClick={handleNewAnalysis}
+						variant="outline"
+						className="rounded-xl"
+					>
 						Categorize More Expenses
 					</Button>
 				</div>
