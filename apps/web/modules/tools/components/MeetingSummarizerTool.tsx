@@ -138,7 +138,7 @@ const transcriptFileSchema = z.object({
 
 const formSchema = z
 	.object({
-		inputMode: z.enum(["text", "file"]).default("text"),
+		inputMode: z.enum(["text", "file"]),
 		meetingNotes: z.string().optional(),
 		transcriptFile: transcriptFileSchema.nullable().optional(),
 		meetingType: z.enum([
