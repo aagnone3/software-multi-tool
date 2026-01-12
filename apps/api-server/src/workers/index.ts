@@ -1,8 +1,3 @@
-import { db } from "@repo/database";
-import { logger } from "../lib/logger.js";
-import { getPgBoss } from "../lib/pg-boss.js";
-import type { JobPayload, WorkerConfig } from "./types.js";
-
 // Import processors from @repo/api
 // Each processor knows how to handle a specific job type
 import {
@@ -10,9 +5,12 @@ import {
 	type JobResult,
 } from "@repo/api/modules/jobs/lib/processor-registry";
 import { registerAllProcessors } from "@repo/api/modules/jobs/lib/register-all-processors";
-
 // Also register the news-analyzer processor which is not in register-all-processors
 import { registerNewsAnalyzerProcessor } from "@repo/api/modules/news-analyzer/lib/register";
+import { db } from "@repo/database";
+import { logger } from "../lib/logger.js";
+import { getPgBoss } from "../lib/pg-boss.js";
+import type { JobPayload, WorkerConfig } from "./types.js";
 
 /**
  * Default worker configuration

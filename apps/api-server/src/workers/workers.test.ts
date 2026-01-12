@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { JobPayload, WorkerConfig, SubmitJobResult } from "./types.js";
+import type { JobPayload, SubmitJobResult, WorkerConfig } from "./types.js";
 
 /**
  * Unit tests for workers module types and exports
