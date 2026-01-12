@@ -3,9 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processContractJob } from "./processor";
 
 const executePromptMock = vi.hoisted(() => vi.fn());
+const extractTextFromDocumentMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/agent-sdk", () => ({
 	executePrompt: executePromptMock,
+}));
+
+vi.mock("./document-extractor", () => ({
+	extractTextFromDocument: extractTextFromDocumentMock,
 }));
 
 describe("Contract Analyzer", () => {
@@ -52,7 +57,6 @@ describe("Contract Analyzer", () => {
 		maxAttempts: 3,
 		startedAt: new Date(),
 		completedAt: null,
-		processAfter: null,
 		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 		createdAt: new Date(),
 		updatedAt: new Date(),
@@ -163,7 +167,7 @@ describe("Contract Analyzer", () => {
 		expect(output.overallRiskScore).toBe(35);
 	});
 
-	it("returns error when contract text is empty", async () => {
+	it("returns error when neither text nor file is provided", async () => {
 		const emptyJob = {
 			...mockJob,
 			input: { contractText: "" },
@@ -172,7 +176,114 @@ describe("Contract Analyzer", () => {
 		const result = await processContractJob(emptyJob);
 
 		expect(result.success).toBe(false);
-		expect(result.error).toBe("Contract text is required");
+		expect(result.error).toBe(
+			"Either contract text or a file upload is required",
+		);
+	});
+
+	describe("file upload", () => {
+		const mockFileJob = {
+			...mockJob,
+			input: {
+				fileData: {
+					content: Buffer.from("PDF content here").toString("base64"),
+					mimeType: "application/pdf",
+					filename: "contract.pdf",
+				},
+				analysisDepth: "standard",
+			},
+		};
+
+		it("successfully processes uploaded PDF file", async () => {
+			extractTextFromDocumentMock.mockResolvedValue({
+				success: true,
+				text: "Extracted contract text from PDF",
+				metadata: {
+					fileType: "pdf",
+					pageCount: 5,
+					characterCount: 32,
+				},
+			});
+
+			executePromptMock.mockResolvedValue({
+				content: JSON.stringify(mockAIResponse),
+				model: "claude-3-5-sonnet-20241022",
+				usage: { inputTokens: 500, outputTokens: 1000 },
+				stopReason: "end_turn",
+			});
+
+			const result = await processContractJob(mockFileJob);
+
+			expect(extractTextFromDocumentMock).toHaveBeenCalledWith(
+				expect.any(Buffer),
+				"application/pdf",
+				"contract.pdf",
+			);
+			expect(result.success).toBe(true);
+		});
+
+		it("returns extraction error when file processing fails", async () => {
+			extractTextFromDocumentMock.mockResolvedValue({
+				success: false,
+				error: {
+					code: "EXTRACTION_FAILED",
+					message: "Failed to extract text from PDF",
+				},
+			});
+
+			const result = await processContractJob(mockFileJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("Failed to extract text from PDF");
+		});
+
+		it("returns error when file is empty", async () => {
+			extractTextFromDocumentMock.mockResolvedValue({
+				success: false,
+				error: {
+					code: "EMPTY_DOCUMENT",
+					message: "The PDF appears to be empty",
+				},
+			});
+
+			const result = await processContractJob(mockFileJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("The PDF appears to be empty");
+		});
+
+		it("prefers file data over contract text when both provided", async () => {
+			const jobWithBoth = {
+				...mockJob,
+				input: {
+					contractText: "Some text",
+					fileData: {
+						content: Buffer.from("PDF content").toString("base64"),
+						mimeType: "application/pdf",
+						filename: "contract.pdf",
+					},
+					analysisDepth: "standard",
+				},
+			};
+
+			extractTextFromDocumentMock.mockResolvedValue({
+				success: true,
+				text: "Text from PDF",
+				metadata: { fileType: "pdf", characterCount: 13 },
+			});
+
+			executePromptMock.mockResolvedValue({
+				content: JSON.stringify(mockAIResponse),
+				model: "claude-3-5-sonnet-20241022",
+				usage: { inputTokens: 500, outputTokens: 1000 },
+				stopReason: "end_turn",
+			});
+
+			await processContractJob(jobWithBoth);
+
+			// Should use file extraction, not the direct text
+			expect(extractTextFromDocumentMock).toHaveBeenCalled();
+		});
 	});
 
 	it("handles AI response parsing errors", async () => {

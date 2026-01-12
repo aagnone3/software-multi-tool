@@ -210,10 +210,34 @@ export interface S3ProviderConfig {
 }
 
 /**
+ * Configuration for creating a local filesystem storage provider.
+ * Useful for development and testing without cloud credentials.
+ */
+export interface LocalProviderConfig {
+	type: "local";
+	/**
+	 * Base directory for storing files.
+	 * @default "/tmp/software-multi-tool-uploads"
+	 */
+	baseDir?: string;
+	/**
+	 * Base URL for generating signed URLs.
+	 * Should point to your local API server.
+	 * @default "http://localhost:3500"
+	 */
+	baseUrl?: string;
+	/**
+	 * Secret key for signing URLs. In development, a simple string is fine.
+	 * @default "dev-secret"
+	 */
+	signingSecret?: string;
+}
+
+/**
  * Union type of all supported provider configurations.
  * Add new provider config types here as they're implemented.
  */
-export type StorageProviderConfig = S3ProviderConfig;
+export type StorageProviderConfig = S3ProviderConfig | LocalProviderConfig;
 
 // ============================================================================
 // Legacy type aliases for backwards compatibility

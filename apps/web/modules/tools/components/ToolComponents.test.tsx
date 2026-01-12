@@ -5,6 +5,7 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -132,64 +133,82 @@ describe("ContractAnalyzerTool", () => {
 		vi.clearAllMocks();
 	});
 
-	it("renders the contract analyzer form", () => {
+	it("renders the contract analyzer form with tabs", () => {
 		render(<ContractAnalyzerTool />);
 
 		expect(screen.getByText("Contract Analyzer")).toBeInTheDocument();
-		expect(screen.getByText("Contract Text")).toBeInTheDocument();
+		// Default tab is Upload File
+		expect(screen.getByText("Upload File")).toBeInTheDocument();
+		expect(screen.getByText("Paste Text")).toBeInTheDocument();
 		expect(screen.getByText("Analysis Depth")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Analyze Contract" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows validation error when contract text is empty", async () => {
+	it("shows validation error when no file or text is provided", async () => {
+		const user = userEvent.setup();
 		render(<ContractAnalyzerTool />);
 
 		const submitButton = screen.getByRole("button", {
 			name: "Analyze Contract",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
+		await user.click(submitButton);
 
 		await waitFor(() => {
 			expect(
-				screen.getByText("Contract text is required"),
+				screen.getByText("Either paste contract text or upload a file"),
 			).toBeInTheDocument();
 		});
 	});
 
-	it("submits form with correct tool slug", async () => {
+	it("submits form with correct tool slug using text input", async () => {
+		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-456" } });
 
 		render(<ContractAnalyzerTool />);
 
+		// Switch to Paste Text tab using userEvent for Radix tabs
+		const pasteTextTab = screen.getByRole("tab", { name: /Paste Text/i });
+		await user.click(pasteTextTab);
+
+		// Wait for the textarea to appear after tab switch
+		await waitFor(() => {
+			expect(
+				screen.getByPlaceholderText("Paste your contract text here..."),
+			).toBeInTheDocument();
+		});
+
 		const textarea = screen.getByPlaceholderText(
 			"Paste your contract text here...",
 		);
-		await act(async () => {
-			fireEvent.change(textarea, {
-				target: { value: "Test contract content" },
-			});
-		});
+		await user.type(textarea, "Test contract content");
 
 		const submitButton = screen.getByRole("button", {
 			name: "Analyze Contract",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
+		await user.click(submitButton);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).toHaveBeenCalledWith({
 				toolSlug: "contract-analyzer",
 				input: {
 					contractText: "Test contract content",
+					fileData: undefined,
 					analysisDepth: "standard",
 				},
 			});
 		});
+	});
+
+	it("shows upload tab by default", () => {
+		render(<ContractAnalyzerTool />);
+
+		// The upload tab should be active by default
+		expect(screen.getByText("Upload Contract")).toBeInTheDocument();
+		expect(
+			screen.getByText(/Upload a PDF, Word document, or text file/i),
+		).toBeInTheDocument();
 	});
 });
 
@@ -346,7 +365,7 @@ describe("MeetingSummarizerTool", () => {
 		render(<MeetingSummarizerTool />);
 
 		expect(screen.getByText("Meeting Summarizer")).toBeInTheDocument();
-		expect(screen.getByText("Meeting Notes")).toBeInTheDocument();
+		expect(screen.getByText("Meeting Transcript")).toBeInTheDocument();
 		expect(screen.getByText("Meeting Type")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Summarize Meeting" }),
@@ -365,7 +384,9 @@ describe("MeetingSummarizerTool", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.getByText("Meeting notes are required"),
+				screen.getByText(
+					"Please provide meeting notes or upload a transcript file",
+				),
 			).toBeInTheDocument();
 		});
 	});

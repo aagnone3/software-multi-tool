@@ -65,6 +65,7 @@ export type Config = {
 	storage: {
 		bucketNames: {
 			avatars: string;
+			contracts: string;
 		};
 	};
 	ui: {

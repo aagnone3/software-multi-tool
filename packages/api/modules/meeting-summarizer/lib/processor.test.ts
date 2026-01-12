@@ -249,7 +249,9 @@ describe("Meeting Summarizer", () => {
 		const result = await processMeetingJob(emptyJob);
 
 		expect(result.success).toBe(false);
-		expect(result.error).toBe("Meeting notes are required");
+		expect(result.error).toBe(
+			"Either meeting notes or a transcript file is required",
+		);
 	});
 
 	it("returns error when meeting notes are whitespace only", async () => {
@@ -261,7 +263,9 @@ describe("Meeting Summarizer", () => {
 		const result = await processMeetingJob(whitespaceJob);
 
 		expect(result.success).toBe(false);
-		expect(result.error).toBe("Meeting notes are required");
+		expect(result.error).toBe(
+			"Either meeting notes or a transcript file is required",
+		);
 	});
 
 	it("includes context info in prompt", async () => {

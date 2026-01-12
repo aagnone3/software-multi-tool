@@ -1,3 +1,4 @@
+import { LocalStorageProvider } from "./provider/local";
 import { S3StorageProvider } from "./provider/s3";
 import type { StorageProvider, StorageProviderConfig } from "./types";
 
@@ -17,7 +18,7 @@ export * from "./validation";
  * Create a storage provider from configuration.
  *
  * This is the main entry point for creating storage providers.
- * Currently supports S3-compatible providers (S3, R2, MinIO).
+ * Supports S3-compatible providers and local filesystem storage.
  *
  * @param config - Provider configuration
  * @returns A configured storage provider instance
@@ -56,18 +57,31 @@ export * from "./validation";
  *   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!
  * });
  * ```
+ *
+ * @example
+ * ```typescript
+ * // Create a local filesystem provider (for development)
+ * const local = createStorageProvider({
+ *   type: "local",
+ *   baseDir: "/tmp/uploads",
+ *   baseUrl: "http://localhost:3500"
+ * });
+ * ```
  */
 export function createStorageProvider(
 	config: StorageProviderConfig,
 ): StorageProvider {
-	// Currently only supports S3 provider type
-	// When adding new providers, add cases here
 	if (config.type === "s3") {
 		const { type: _, ...s3Config } = config;
 		return new S3StorageProvider(s3Config);
 	}
 
-	// This will become reachable when more provider types are added
+	if (config.type === "local") {
+		const { type: _, ...localConfig } = config;
+		return new LocalStorageProvider(localConfig);
+	}
+
+	// Exhaustive check - this should never be reached
 	throw new Error(
 		`Unknown storage provider type: ${(config as { type: string }).type}`,
 	);

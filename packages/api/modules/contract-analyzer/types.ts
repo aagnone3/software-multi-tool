@@ -1,12 +1,49 @@
 import { z } from "zod";
 
-export const ContractAnalyzerInputSchema = z.object({
-	contractText: z.string().min(1, "Contract text is required"),
-	analysisDepth: z
-		.enum(["summary", "standard", "detailed"])
-		.optional()
-		.default("standard"),
+/**
+ * File data schema for uploaded contract documents.
+ * Contains base64-encoded file content and metadata.
+ */
+export const ContractFileDataSchema = z.object({
+	/** Base64-encoded file content */
+	content: z.string().min(1, "File content is required"),
+	/** MIME type of the file */
+	mimeType: z.string().min(1, "MIME type is required"),
+	/** Original filename */
+	filename: z.string().min(1, "Filename is required"),
 });
+
+export type ContractFileData = z.infer<typeof ContractFileDataSchema>;
+
+/**
+ * Contract Analyzer input schema.
+ * Accepts either direct text or a file upload (PDF, DOCX, or TXT).
+ */
+export const ContractAnalyzerInputSchema = z
+	.object({
+		/** Direct contract text input (mutually exclusive with fileData) */
+		contractText: z.string().optional(),
+		/** Uploaded file data (mutually exclusive with contractText) */
+		fileData: ContractFileDataSchema.optional(),
+		/** Analysis depth level */
+		analysisDepth: z
+			.enum(["summary", "standard", "detailed"])
+			.optional()
+			.default("standard"),
+	})
+	.refine(
+		(data) => {
+			// Either contractText or fileData must be provided, but not both
+			const hasText =
+				data.contractText && data.contractText.trim().length > 0;
+			const hasFile = data.fileData !== undefined;
+			return hasText || hasFile;
+		},
+		{
+			message: "Either contract text or a file upload is required",
+			path: ["contractText"],
+		},
+	);
 
 export type ContractAnalyzerInput = z.infer<typeof ContractAnalyzerInputSchema>;
 

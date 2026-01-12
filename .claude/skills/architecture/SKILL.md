@@ -13,22 +13,25 @@ This skill provides comprehensive guidance for understanding and navigating the 
 
 ## Quick Reference
 
-| Component      | Entry Point                               |
-| -------------- | ----------------------------------------- |
-| Backend API    | `packages/api/index.ts`                   |
-| API Router     | `packages/api/orpc/router.ts`             |
-| Procedures     | `packages/api/orpc/procedures.ts`         |
-| Auth           | `packages/auth/auth.ts`                   |
-| Database       | `packages/database/prisma/schema.prisma`  |
-| Web App        | `apps/web/app/`                           |
-| API Catch-All  | `apps/web/app/api/[[...rest]]/route.ts`   |
-| Config         | `config/index.ts`                         |
-| Theme          | `tooling/tailwind/theme.css`              |
-| PR Validation  | `.github/workflows/validate-prs.yml`      |
-| DB Migrations  | `.github/workflows/db-migrate-deploy.yml` |
-| Env Scripts    | `tooling/scripts/src/env/`                |
-| Next.js Config | `apps/web/next.config.ts`                 |
-| Turbo Config   | `turbo.json`                              |
+| Component        | Entry Point                               |
+| ---------------- | ----------------------------------------- |
+| Backend API      | `packages/api/index.ts`                   |
+| API Router       | `packages/api/orpc/router.ts`             |
+| Procedures       | `packages/api/orpc/procedures.ts`         |
+| **API Server**   | **`apps/api-server/src/index.ts`**        |
+| **API Server**   | **`apps/api-server/src/lib/server.ts`**   |
+| Auth             | `packages/auth/auth.ts`                   |
+| Database         | `packages/database/prisma/schema.prisma`  |
+| Web App          | `apps/web/app/`                           |
+| API Catch-All    | `apps/web/app/api/[[...rest]]/route.ts`   |
+| Config           | `config/index.ts`                         |
+| Theme            | `tooling/tailwind/theme.css`              |
+| PR Validation    | `.github/workflows/validate-prs.yml`      |
+| DB Migrations    | `.github/workflows/db-migrate-deploy.yml` |
+| Env Scripts      | `tooling/scripts/src/env/`                |
+| Render Deploy    | `render.yaml`                             |
+| Next.js Config   | `apps/web/next.config.ts`                 |
+| Turbo Config     | `turbo.json`                              |
 
 ## Monorepo Structure
 
@@ -37,7 +40,8 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 ```text
 /
 ├── apps/
-│   └── web/                    # Next.js 15 App Router
+│   ├── web/                    # Next.js 15 App Router (Vercel)
+│   └── api-server/             # Fastify backend (Render)
 ├── packages/                   # Backend/shared logic
 │   ├── api/                    # Hono + oRPC API
 │   ├── auth/                   # better-auth configuration
@@ -50,18 +54,29 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 │   ├── logs/                   # Logging
 │   └── utils/                  # Shared utilities
 ├── config/                     # App configuration
-└── tooling/                    # Build infrastructure
+├── tooling/                    # Build infrastructure
+└── render.yaml                 # Render deployment config
 ```
 
 ### Apps
 
-**`apps/web`** - Next.js 15 App Router application
+**`apps/web`** - Next.js 15 App Router application (deployed to Vercel)
 
 - `app/(marketing)/` - Public marketing pages with locale-based routing
 - `app/(saas)/` - Authenticated SaaS dashboard with organization support
 - `app/api/[[...rest]]/` - Catch-all route that proxies to Hono backend
 - `app/auth/` - Authentication pages (login, signup, etc.)
 - Dev server runs on port 3500
+
+**`apps/api-server`** - Fastify backend service (deployed to Render)
+
+- `src/index.ts` - Main entry point with graceful shutdown
+- `src/lib/server.ts` - Fastify server configuration with oRPC + WebSocket
+- `src/config/env.ts` - Environment validation with Zod
+- Supports long-running jobs beyond Vercel's timeout limits
+- Native WebSocket support for real-time communication
+- Shares database and auth with Next.js app
+- Dev server runs on port 4000
 
 ### Packages
 
@@ -93,6 +108,79 @@ All backend logic lives in `packages/`:
 - `tailwind/` - Shared Tailwind theme with CSS variables in `theme.css`
 - `scripts/` - CLI tooling for env management, Linear integration, metrics
 - `test/` - Vitest coverage thresholds
+
+## Hybrid Backend Architecture
+
+The application uses a **dual-backend hybrid architecture** with complementary strengths:
+
+### Architecture Overview
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                         User/Browser                             │
+└───────────────┬──────────────────────────────┬──────────────────┘
+                │                               │
+                ▼                               ▼
+    ┌──────────────────────┐        ┌──────────────────────┐
+    │   Next.js Frontend   │        │  WebSocket Client    │
+    │     (Vercel)         │        │   (Browser WS)       │
+    │  - SSR/SSG pages     │        └──────────┬───────────┘
+    │  - Light API routes  │                   │
+    │  - TanStack Query    │                   │
+    └──────────┬───────────┘                   │
+               │                               │
+               ▼                               ▼
+    ┌──────────────────────┐        ┌──────────────────────┐
+    │    Hono + oRPC       │        │  Fastify Backend     │
+    │   (Serverless)       │        │     (Render)         │
+    │  - /api/rpc/*        │        │  - /ws (WebSocket)   │
+    │  - 60s timeout       │        │  - /api/rpc/*        │
+    └──────────┬───────────┘        │  - /api/* (OpenAPI)  │
+               │                    │  - No timeout        │
+               │                    │  - Long-running jobs │
+               └────────────────────┴──────────────────────┘
+                                    │
+                                    ▼
+                        ┌──────────────────────┐
+                        │   PostgreSQL (DB)    │
+                        │   Better Auth        │
+                        └──────────────────────┘
+```
+
+### When to Use Each Backend
+
+**Use Next.js/Hono (Vercel)** for:
+
+- Quick API requests (< 60 seconds)
+- Server-side rendering (SSR) and static generation (SSG)
+- Edge functions and CDN-optimized routes
+- Standard CRUD operations
+- Most user-facing API endpoints
+
+**Use Fastify (Render)** for:
+
+- Long-running AI/ML processing jobs
+- WebSocket connections for real-time updates
+- Background job processing
+- Slack/Discord bot integrations
+- Tasks requiring > 60 seconds
+- Persistent connections
+
+### Shared Resources
+
+Both backends share:
+
+- **PostgreSQL database** (same `DATABASE_URL`)
+- **Better Auth sessions** (same `BETTER_AUTH_SECRET`)
+- **oRPC API definitions** (from `@repo/api`)
+- **Prisma ORM** (from `@repo/database`)
+- **Environment configuration**
+
+### Deployment
+
+- **Next.js**: Vercel (serverless, edge functions)
+- **Fastify**: Render (Docker, persistent process)
+- **Database**: Render Postgres or external provider
 
 ## API Architecture (Hono + oRPC)
 

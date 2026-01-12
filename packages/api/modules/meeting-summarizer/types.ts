@@ -1,22 +1,44 @@
 import { z } from "zod";
 
-export const MeetingSummarizerInputSchema = z.object({
-	meetingNotes: z.string().min(1, "Meeting notes are required"),
-	meetingType: z
-		.enum([
-			"standup",
-			"planning",
-			"retrospective",
-			"one_on_one",
-			"client",
-			"general",
-		])
-		.optional()
-		.default("general"),
-	participants: z.array(z.string()).optional(),
-	meetingDate: z.string().optional(),
-	projectContext: z.string().optional(),
+/**
+ * Schema for uploaded transcript file metadata.
+ */
+export const TranscriptFileSchema = z.object({
+	/** Base64-encoded file content */
+	content: z.string(),
+	/** Original filename with extension */
+	filename: z.string(),
+	/** MIME type of the file */
+	mimeType: z.string().optional(),
 });
+
+export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
+
+export const MeetingSummarizerInputSchema = z
+	.object({
+		/** Raw meeting notes text (required if no transcriptFile) */
+		meetingNotes: z.string().optional(),
+		/** Uploaded transcript file (required if no meetingNotes) */
+		transcriptFile: TranscriptFileSchema.optional(),
+		meetingType: z
+			.enum([
+				"standup",
+				"planning",
+				"retrospective",
+				"one_on_one",
+				"client",
+				"general",
+			])
+			.optional()
+			.default("general"),
+		participants: z.array(z.string()).optional(),
+		meetingDate: z.string().optional(),
+		projectContext: z.string().optional(),
+	})
+	.refine((data) => data.meetingNotes || data.transcriptFile, {
+		message: "Either meeting notes or a transcript file is required",
+		path: ["meetingNotes"],
+	});
 
 export type MeetingSummarizerInput = z.infer<
 	typeof MeetingSummarizerInputSchema

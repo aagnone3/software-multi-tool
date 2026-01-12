@@ -2,6 +2,11 @@ import { executePrompt } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { MeetingSummarizerInput, MeetingSummarizerOutput } from "../types";
+import {
+	MAX_TRANSCRIPT_SIZE,
+	parseTranscript,
+	SUPPORTED_TRANSCRIPT_EXTENSIONS,
+} from "./transcript-parser";
 
 const MEETING_SUMMARIZATION_PROMPT = `You are an expert meeting summarizer. Analyze the following meeting notes and extract a structured summary with action items.
 
@@ -95,17 +100,80 @@ Meeting notes to summarize:
 export async function processMeetingJob(job: ToolJob): Promise<JobResult> {
 	const input = job.input as unknown as MeetingSummarizerInput;
 
-	if (!input.meetingNotes || input.meetingNotes.trim().length === 0) {
+	let meetingNotes: string;
+	let additionalParticipants: string[] = [];
+
+	// Handle transcript file if provided
+	if (input.transcriptFile) {
+		try {
+			// Decode base64 content
+			const buffer = Buffer.from(input.transcriptFile.content, "base64");
+
+			// Validate file size
+			if (buffer.length > MAX_TRANSCRIPT_SIZE) {
+				return {
+					success: false,
+					error: "File size exceeds maximum allowed size (5MB)",
+				};
+			}
+
+			// Validate file extension
+			const ext = input.transcriptFile.filename
+				.toLowerCase()
+				.split(".")
+				.pop();
+			const validExtensions = SUPPORTED_TRANSCRIPT_EXTENSIONS.map((e) =>
+				e.replace(".", ""),
+			);
+			if (!ext || !validExtensions.includes(ext)) {
+				return {
+					success: false,
+					error: `Unsupported file format. Supported formats: ${SUPPORTED_TRANSCRIPT_EXTENSIONS.join(", ")}`,
+				};
+			}
+
+			// Parse the transcript
+			const parsed = await parseTranscript(
+				buffer,
+				input.transcriptFile.filename,
+			);
+			meetingNotes = parsed.text;
+
+			// Add extracted speakers to participants if not already provided
+			if (parsed.speakers.length > 0) {
+				additionalParticipants = parsed.speakers;
+			}
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Failed to parse transcript file";
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+	} else if (input.meetingNotes && input.meetingNotes.trim().length > 0) {
+		meetingNotes = input.meetingNotes;
+	} else {
 		return {
 			success: false,
-			error: "Meeting notes are required",
+			error: "Either meeting notes or a transcript file is required",
 		};
 	}
 
+	// Merge provided participants with extracted speakers
+	const allParticipants = [
+		...(input.participants || []),
+		...additionalParticipants.filter(
+			(s) => !input.participants?.includes(s),
+		),
+	];
+
 	const contextInfo = [
 		input.meetingType && `Meeting Type: ${input.meetingType}`,
-		input.participants?.length &&
-			`Participants: ${input.participants.join(", ")}`,
+		allParticipants.length > 0 &&
+			`Participants: ${allParticipants.join(", ")}`,
 		input.meetingDate && `Date: ${input.meetingDate}`,
 		input.projectContext && `Project Context: ${input.projectContext}`,
 	]
@@ -114,7 +182,7 @@ export async function processMeetingJob(job: ToolJob): Promise<JobResult> {
 
 	try {
 		const result = await executePrompt(
-			`${MEETING_SUMMARIZATION_PROMPT}\n\n${contextInfo ? `Context:\n${contextInfo}\n\n` : ""}${input.meetingNotes}`,
+			`${MEETING_SUMMARIZATION_PROMPT}\n\n${contextInfo ? `Context:\n${contextInfo}\n\n` : ""}${meetingNotes}`,
 			{
 				model: "claude-3-5-sonnet-20241022",
 				maxTokens: 8192,
