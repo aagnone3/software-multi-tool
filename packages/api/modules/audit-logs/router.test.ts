@@ -8,17 +8,40 @@ const getAuditLogsMock = vi.hoisted(() => vi.fn());
 const countAuditLogsMock = vi.hoisted(() => vi.fn());
 const getDistinctResourcesMock = vi.hoisted(() => vi.fn());
 const getAuditLogsForExportMock = vi.hoisted(() => vi.fn());
+const createAuditLogMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
 }));
 
-vi.mock("@repo/database", () => ({
-	getAuditLogs: getAuditLogsMock,
-	countAuditLogs: countAuditLogsMock,
-	getDistinctResources: getDistinctResourcesMock,
-	getAuditLogsForExport: getAuditLogsForExportMock,
-}));
+vi.mock("@repo/database", async () => {
+	const { z } = await import("zod");
+	return {
+		getAuditLogs: getAuditLogsMock,
+		countAuditLogs: countAuditLogsMock,
+		getDistinctResources: getDistinctResourcesMock,
+		getAuditLogsForExport: getAuditLogsForExportMock,
+		createAuditLog: createAuditLogMock,
+		zodSchemas: {
+			AuditActionSchema: z.enum([
+				"CREATE",
+				"READ",
+				"UPDATE",
+				"DELETE",
+				"LOGIN",
+				"LOGOUT",
+				"PASSWORD_CHANGE",
+				"MFA_SETUP",
+				"MFA_DISABLE",
+				"IMPERSONATE",
+				"INVITE",
+				"EXPORT",
+				"SUBSCRIPTION_CHANGE",
+				"PAYMENT",
+			]),
+		},
+	};
+});
 
 describe("Audit Logs Router", () => {
 	beforeEach(() => {
@@ -214,7 +237,12 @@ describe("Audit Logs Router", () => {
 		const createClient = (role = "admin") => {
 			getSessionMock.mockResolvedValue({
 				user: { id: "admin-123", role },
-				session: { id: "session-1" },
+				session: {
+					id: "session-1",
+					activeOrganizationId: "org-123",
+					ipAddress: "127.0.0.1",
+					userAgent: "Test/1.0",
+				},
 			});
 
 			return createProcedureClient(auditLogsRouter.export, {
@@ -294,6 +322,31 @@ describe("Audit Logs Router", () => {
 			expect(getAuditLogsForExportMock).toHaveBeenCalledWith({
 				action: "LOGIN",
 				resource: "user",
+			});
+		});
+
+		it("creates an audit log entry for the export action", async () => {
+			const mockLogs = [
+				{ id: "log-1", action: "LOGIN", resource: "user" },
+			];
+			getAuditLogsForExportMock.mockResolvedValue(mockLogs);
+
+			const client = createClient();
+			await client({ format: "json" });
+
+			expect(createAuditLogMock).toHaveBeenCalledWith({
+				userId: "admin-123",
+				organizationId: "org-123",
+				action: "EXPORT",
+				resource: "audit_logs",
+				sessionId: "session-1",
+				ipAddress: "127.0.0.1",
+				userAgent: "Test/1.0",
+				metadata: {
+					format: "json",
+					filters: {},
+					recordCount: 1,
+				},
 			});
 		});
 

@@ -1,23 +1,12 @@
-import { getAuditLogsForExport } from "@repo/database";
+import {
+	createAuditLog,
+	getAuditLogsForExport,
+	zodSchemas,
+} from "@repo/database";
 import { z } from "zod";
 import { adminProcedure } from "../../../orpc/procedures";
 
-const AuditActionEnum = z.enum([
-	"CREATE",
-	"READ",
-	"UPDATE",
-	"DELETE",
-	"LOGIN",
-	"LOGOUT",
-	"PASSWORD_CHANGE",
-	"MFA_SETUP",
-	"MFA_DISABLE",
-	"IMPERSONATE",
-	"INVITE",
-	"EXPORT",
-	"SUBSCRIPTION_CHANGE",
-	"PAYMENT",
-]);
+const { AuditActionSchema } = zodSchemas;
 
 export const exportAuditLogs = adminProcedure
 	.route({
@@ -31,17 +20,33 @@ export const exportAuditLogs = adminProcedure
 			format: z.enum(["json", "csv"]).default("json"),
 			userId: z.string().optional(),
 			organizationId: z.string().optional(),
-			action: AuditActionEnum.optional(),
+			action: AuditActionSchema.optional(),
 			resource: z.string().optional(),
 			success: z.boolean().optional(),
 			startDate: z.coerce.date().optional(),
 			endDate: z.coerce.date().optional(),
 		}),
 	)
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
 		const { format, ...filters } = input;
 
 		const logs = await getAuditLogsForExport(filters);
+
+		// Log the export action itself for audit trail
+		await createAuditLog({
+			userId: context.user.id,
+			organizationId: context.session.activeOrganizationId,
+			action: "EXPORT",
+			resource: "audit_logs",
+			sessionId: context.session.id,
+			ipAddress: context.session.ipAddress,
+			userAgent: context.session.userAgent,
+			metadata: {
+				format,
+				filters,
+				recordCount: logs.length,
+			},
+		});
 
 		if (format === "csv") {
 			const headers = [

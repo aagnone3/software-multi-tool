@@ -2,26 +2,12 @@ import {
 	countAuditLogs,
 	getAuditLogs,
 	getDistinctResources,
+	zodSchemas,
 } from "@repo/database";
 import { z } from "zod";
 import { adminProcedure } from "../../../orpc/procedures";
 
-const AuditActionEnum = z.enum([
-	"CREATE",
-	"READ",
-	"UPDATE",
-	"DELETE",
-	"LOGIN",
-	"LOGOUT",
-	"PASSWORD_CHANGE",
-	"MFA_SETUP",
-	"MFA_DISABLE",
-	"IMPERSONATE",
-	"INVITE",
-	"EXPORT",
-	"SUBSCRIPTION_CHANGE",
-	"PAYMENT",
-]);
+const { AuditActionSchema } = zodSchemas;
 
 export const listAuditLogs = adminProcedure
 	.route({
@@ -36,7 +22,7 @@ export const listAuditLogs = adminProcedure
 			offset: z.number().min(0).default(0),
 			userId: z.string().optional(),
 			organizationId: z.string().optional(),
-			action: AuditActionEnum.optional(),
+			action: AuditActionSchema.optional(),
 			resource: z.string().optional(),
 			success: z.boolean().optional(),
 			startDate: z.coerce.date().optional(),
@@ -69,25 +55,8 @@ export const getAuditLogFilters = adminProcedure
 	.handler(async () => {
 		const resources = await getDistinctResources();
 
-		const actions = [
-			"CREATE",
-			"READ",
-			"UPDATE",
-			"DELETE",
-			"LOGIN",
-			"LOGOUT",
-			"PASSWORD_CHANGE",
-			"MFA_SETUP",
-			"MFA_DISABLE",
-			"IMPERSONATE",
-			"INVITE",
-			"EXPORT",
-			"SUBSCRIPTION_CHANGE",
-			"PAYMENT",
-		] as const;
-
 		return {
-			actions,
+			actions: AuditActionSchema.options,
 			resources,
 		};
 	});
