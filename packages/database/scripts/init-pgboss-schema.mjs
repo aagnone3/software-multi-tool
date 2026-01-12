@@ -34,8 +34,8 @@ async function init() {
     console.log('  - pgboss.queue');
     console.log('  - pgboss.schedule');
     console.log('  - pgboss.subscription');
-    console.log('  - pgboss.job (partitioned)');
-    console.log('  - pgboss.job_common (default partition)');
+    console.log('  - pgboss.job (partitioned - partitions created dynamically per queue)');
+    console.log('  - pgboss.archive');
     console.log('');
     console.log('Now run: pnpm --filter @repo/database prisma db pull --schema=./prisma/schema.prisma');
 

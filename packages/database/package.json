@@ -32,7 +32,7 @@
 		"studio": "dotenv -c -e ../../apps/web/.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit",
 		"test": "vitest run --config ./vitest.config.ts",
-		"test:integration": "vitest run prisma/queries/organizations.integration.test.ts --config ./vitest.config.ts",
+		"test:integration": "vitest run --config ./vitest.config.ts \"**/*.integration.test.ts\"",
 		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest run --config ./vitest.config.ts",
 		"pgboss:init": "dotenv -c -e ../../apps/web/.env -- node scripts/init-pgboss-schema.mjs",
 		"pgboss:verify": "dotenv -c -e ../../apps/web/.env -- node scripts/verify-pgboss-schema.mjs",
