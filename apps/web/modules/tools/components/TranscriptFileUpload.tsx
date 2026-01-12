@@ -3,12 +3,7 @@
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
-import {
-	AlertCircleIcon,
-	FileTextIcon,
-	UploadIcon,
-	XIcon,
-} from "lucide-react";
+import { AlertCircleIcon, FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 
 /**
@@ -50,7 +45,9 @@ interface TranscriptFileUploadProps {
  * Format bytes to human-readable string.
  */
 function formatFileSize(bytes: number): string {
-	if (bytes === 0) return "0 Bytes";
+	if (bytes === 0) {
+		return "0 Bytes";
+	}
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -177,7 +174,9 @@ export function TranscriptFileUpload({
 			e.stopPropagation();
 			setIsDragging(false);
 
-			if (disabled) return;
+			if (disabled) {
+				return;
+			}
 
 			const files = e.dataTransfer.files;
 			if (files.length > 0) {
@@ -227,21 +226,16 @@ export function TranscriptFileUpload({
 
 			{/* Drop zone */}
 			{!selectedFile && !value ? (
-				<div
-					role="button"
+				<button
+					type="button"
 					tabIndex={disabled ? -1 : 0}
 					onClick={handleClick}
-					onKeyDown={(e) => {
-						if (e.key === "Enter" || e.key === " ") {
-							e.preventDefault();
-							handleClick();
-						}
-					}}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
 					onDrop={handleDrop}
+					disabled={disabled}
 					className={cn(
-						"flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all",
+						"flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all",
 						isDragging
 							? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
 							: "border-muted-foreground/25 bg-muted/30 hover:border-indigo-500/50 hover:bg-muted/50",
@@ -269,19 +263,21 @@ export function TranscriptFileUpload({
 						or click to browse
 					</p>
 					<div className="flex flex-wrap justify-center gap-2">
-						{Object.entries(SUPPORTED_FORMATS).map(([ext, name]) => (
-							<span
-								key={ext}
-								className="rounded-full bg-background px-2.5 py-1 text-muted-foreground text-xs shadow-sm"
-							>
-								{ext.toUpperCase().slice(1)}
-							</span>
-						))}
+						{Object.entries(SUPPORTED_FORMATS).map(
+							([ext, _name]) => (
+								<span
+									key={ext}
+									className="rounded-full bg-background px-2.5 py-1 text-muted-foreground text-xs shadow-sm"
+								>
+									{ext.toUpperCase().slice(1)}
+								</span>
+							),
+						)}
 					</div>
 					<p className="mt-3 text-muted-foreground text-xs">
 						Max file size: {formatFileSize(MAX_FILE_SIZE)}
 					</p>
-				</div>
+				</button>
 			) : (
 				/* Selected file display */
 				<div className="flex items-center gap-3 rounded-xl border-2 border-indigo-500/30 bg-indigo-50/50 p-4 dark:bg-indigo-900/20">
@@ -314,7 +310,7 @@ export function TranscriptFileUpload({
 
 			{/* Error message */}
 			{error && (
-				<Alert variant="destructive">
+				<Alert variant="error">
 					<AlertCircleIcon className="size-4" />
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>

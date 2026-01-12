@@ -52,8 +52,8 @@ import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 import {
-	TranscriptFileUpload,
 	type TranscriptFileData,
+	TranscriptFileUpload,
 } from "./TranscriptFileUpload";
 
 // Metrics overview card
@@ -156,15 +156,15 @@ const formSchema = z
 	.refine(
 		(data) => {
 			if (data.inputMode === "text") {
-				return (
-					data.meetingNotes && data.meetingNotes.trim().length > 0
-				);
+				return data.meetingNotes && data.meetingNotes.trim().length > 0;
 			}
-			return data.transcriptFile !== null && data.transcriptFile !== undefined;
+			return (
+				data.transcriptFile !== null &&
+				data.transcriptFile !== undefined
+			);
 		},
 		{
-			message:
-				"Please provide meeting notes or upload a transcript file",
+			message: "Please provide meeting notes or upload a transcript file",
 			path: ["meetingNotes"],
 		},
 	);
