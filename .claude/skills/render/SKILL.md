@@ -171,13 +171,14 @@ await client.deleteEnvVar("srv-xxx", "OLD_VAR");
 
 The CLI will display error messages in red with the `[render]` prefix:
 
-```
+```text
 [render] Missing required flag "--service".
 [render] HTTP 401: Invalid API key
 [render] HTTP 404: Resource not found
 ```
 
 Common errors:
+
 - `Missing RENDER_API_KEY` - Set the API key in `.env.local`
 - `HTTP 401` - Invalid or expired API key
 - `HTTP 404` - Service or deploy not found
@@ -196,14 +197,191 @@ Invoke this skill when:
 ## Scope Limitations
 
 This skill supports:
+
 - Service listing and details (read-only)
 - Deploy triggering, listing, and cancellation
 - Environment variable CRUD
 
 This skill does NOT support:
+
 - Creating or deleting services
 - Suspending or resuming services
 - Scaling operations
 - Render Postgres (database operations)
 
 For these operations, use the Render Dashboard directly.
+
+## API Server Deployment (apps/api-server)
+
+The repository includes a standalone Fastify backend service (`apps/api-server`) designed for deployment on Render. This service provides:
+
+- **WebSocket support** for real-time communication
+- **Long-running jobs** without serverless timeout limits
+- **Full oRPC compatibility** with the Next.js frontend
+- **Shared database and auth** with the main application
+
+### Deployment Configuration
+
+The api-server is configured via `render.yaml` at the repository root:
+
+```yaml
+services:
+  - type: web
+    name: api-server
+    runtime: docker
+    dockerfilePath: ./apps/api-server/Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        sync: false  # Set manually in dashboard
+      - key: CORS_ORIGIN
+        value: https://your-domain.com
+```
+
+### Required Environment Variables
+
+Set these in the Render dashboard for the api-server service:
+
+| Variable             | Description                            | Example                           |
+| -------------------- | -------------------------------------- | --------------------------------- |
+| `PORT`               | Server port (auto-provided by Render)  | `4000`                            |
+| `HOST`               | Bind address                           | `0.0.0.0`                         |
+| `NODE_ENV`           | Environment                            | `production`                      |
+| `DATABASE_URL`       | PostgreSQL connection string           | `postgresql://user:pass@...`      |
+| `BETTER_AUTH_SECRET` | Session secret (shared with Next.js)   | (from Vercel env)                 |
+| `BETTER_AUTH_URL`    | API server public URL                  | `https://api-server.onrender.com` |
+| `CORS_ORIGIN`        | Frontend origin (Next.js URL)          | `https://your-domain.com`         |
+| `LOG_LEVEL`          | Logging level                          | `info`                            |
+
+### Deployment Workflow
+
+1. **Initial Setup**:
+
+   ```bash
+   # Connect Render to your GitHub repository
+   # Render will auto-detect render.yaml and create services
+   ```
+
+2. **Set Environment Variables**:
+
+   ```bash
+   # List current env vars
+   pnpm --filter @repo/scripts render env list --service <service-id>
+
+   # Set required variables
+   pnpm --filter @repo/scripts render env set --service <service-id> \
+     --key BETTER_AUTH_SECRET \
+     --value "your-secret-from-vercel"
+
+   pnpm --filter @repo/scripts render env set --service <service-id> \
+     --key CORS_ORIGIN \
+     --value "https://your-domain.vercel.app"
+   ```
+
+3. **Trigger Deploy**:
+
+   ```bash
+   pnpm --filter @repo/scripts render deploys trigger --service <service-id>
+   ```
+
+4. **Monitor Deploy**:
+
+   ```bash
+   # Get deploy status
+   pnpm --filter @repo/scripts render deploys list --service <service-id>
+
+   # Check service health
+   curl https://your-api-server.onrender.com/health
+   # Should return: OK
+   ```
+
+### Health Monitoring
+
+The api-server exposes a health check endpoint:
+
+```bash
+# Health check
+GET /health
+# Response: OK (200)
+
+# WebSocket endpoint
+WS /ws
+# Requires Bearer token authentication
+```
+
+### Local Development
+
+Run the api-server locally:
+
+```bash
+# From repository root
+pnpm --filter @repo/api-server dev
+
+# Server starts on http://localhost:4000
+# Health check: http://localhost:4000/health
+# WebSocket: ws://localhost:4000/ws
+```
+
+### Troubleshooting
+
+**Service won't start:**
+
+- Check environment variables are set correctly
+- Verify `DATABASE_URL` is accessible from Render
+- Check build logs: `pnpm --filter @repo/scripts render deploys get --service <id> --deploy <id>`
+
+**Health check failing:**
+
+- Ensure port `4000` is exposed in Dockerfile
+- Verify `HOST=0.0.0.0` (not `127.0.0.1`)
+- Check Render dashboard for errors
+
+**CORS errors:**
+
+- Verify `CORS_ORIGIN` matches your frontend URL exactly
+- Include protocol (https://) and no trailing slash
+- For multiple origins, update `apps/api-server/src/lib/server.ts`
+
+**WebSocket connection fails:**
+
+- Check `BETTER_AUTH_SECRET` matches between Vercel and Render
+- Verify authentication token is being sent
+- Check Render logs for connection attempts
+
+### Integration with Next.js Frontend
+
+The Next.js frontend can connect to the api-server for:
+
+1. **WebSocket connections**:
+
+   ```typescript
+   const ws = new WebSocket('wss://your-api-server.onrender.com/ws', {
+     headers: {
+       Authorization: `Bearer ${session.token}`
+     }
+   });
+   ```
+
+2. **Long-running API calls** (fallback to api-server for timeout-prone operations):
+
+   ```typescript
+   // In frontend, detect timeout and retry via api-server
+   const API_SERVER_URL = process.env.NEXT_PUBLIC_API_SERVER_URL;
+   ```
+
+### Auto-Deploy
+
+The api-server is configured to auto-deploy on push to `main` branch. To manually trigger:
+
+```bash
+pnpm --filter @repo/scripts render deploys trigger --service <service-id> --clear-cache
+```
