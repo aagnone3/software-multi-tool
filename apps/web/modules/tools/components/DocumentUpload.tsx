@@ -190,7 +190,7 @@ export function DocumentUpload({
 	);
 
 	const handleDrop = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: React.DragEvent<HTMLElement>) => {
 			e.preventDefault();
 			e.stopPropagation();
 			setIsDragging(false);
@@ -208,7 +208,7 @@ export function DocumentUpload({
 	);
 
 	const handleDragOver = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: React.DragEvent<HTMLElement>) => {
 			e.preventDefault();
 			e.stopPropagation();
 			if (!disabled) {
@@ -219,7 +219,7 @@ export function DocumentUpload({
 	);
 
 	const handleDragLeave = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: React.DragEvent<HTMLElement>) => {
 			e.preventDefault();
 			e.stopPropagation();
 			setIsDragging(false);

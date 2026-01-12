@@ -440,6 +440,13 @@ export function ContractAnalyzerTool() {
 									</TabsContent>
 								</Tabs>
 
+								{/* Show validation error when neither file nor text is provided */}
+								{form.formState.errors.contractText?.message && (
+									<p className="text-destructive text-sm font-medium">
+										{form.formState.errors.contractText.message}
+									</p>
+								)}
+
 								<FormField
 									control={form.control}
 									name="analysisDepth"
