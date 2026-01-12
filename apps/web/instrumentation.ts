@@ -9,19 +9,21 @@
  */
 
 export async function register() {
-	// Skip instrumentation during build to avoid conflicts with static generation
-	if (process.env.NEXT_PHASE === "phase-production-build") {
-		return;
-	}
+	// Skip instrumentation during build
+	// instrumentation.ts runs during Next.js build which conflicts with static page generation
+	// Sentry is still initialized via:
+	// - Client: sentry.client.config.ts (imported automatically)
+	// - Server: withSentryConfig in next.config.ts
+	// - Runtime: Sentry SDK auto-instruments on first request
+	if (typeof window === "undefined") {
+		// Only run on server runtime (not during build)
+		if (process.env.NEXT_RUNTIME === "nodejs") {
+			await import("./sentry.server.config");
+		}
 
-	// Only run on server-side
-	if (process.env.NEXT_RUNTIME === "nodejs") {
-		await import("./sentry.server.config");
-	}
-
-	// Only run on edge runtime
-	if (process.env.NEXT_RUNTIME === "edge") {
-		await import("./sentry.edge.config");
+		if (process.env.NEXT_RUNTIME === "edge") {
+			await import("./sentry.edge.config");
+		}
 	}
 }
 
