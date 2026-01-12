@@ -6,13 +6,14 @@
 		"drizzle-orm": "0.45.1",
 		"drizzle-zod": "0.8.3",
 		"pg": "8.16.3",
+		"pg-boss": "^10.4.0",
 		"zod": "4.3.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.11",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "25.0.6",
 		"@testcontainers/postgresql": "11.11.0",
+		"@types/node": "25.0.6",
 		"@vitest/coverage-v8": "4.0.16",
 		"dotenv-cli": "11.0.0",
 		"drizzle-kit": "0.31.8",
@@ -31,8 +32,11 @@
 		"studio": "dotenv -c -e ../../apps/web/.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit",
 		"test": "vitest run --config ./vitest.config.ts",
-		"test:integration": "vitest run prisma/queries/organizations.integration.test.ts --config ./vitest.config.ts",
-		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest run --config ./vitest.config.ts"
+		"test:integration": "vitest run --config ./vitest.config.ts \"**/*.integration.test.ts\"",
+		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest run --config ./vitest.config.ts",
+		"pgboss:init": "dotenv -c -e ../../apps/web/.env -- node scripts/init-pgboss-schema.mjs",
+		"pgboss:verify": "dotenv -c -e ../../apps/web/.env -- node scripts/verify-pgboss-schema.mjs",
+		"db:pull": "dotenv -c -e ../../apps/web/.env -- prisma db pull --schema=./prisma/schema.prisma"
 	},
 	"types": "./**/.tsx",
 	"version": "0.0.0"
