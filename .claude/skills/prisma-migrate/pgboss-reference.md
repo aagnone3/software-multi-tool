@@ -80,12 +80,14 @@ mkdir -p packages/database/prisma/migrations/<timestamp>_add_pgboss_schema
 
 The migration must include:
 
-1. **Advisory lock** for safe concurrent migrations
+1. **Advisory lock** using `pg_advisory_xact_lock()` (transaction-scoped, NO explicit BEGIN/COMMIT)
 2. **Schema creation**: `CREATE SCHEMA IF NOT EXISTS pgboss`
 3. **Enum types**: `pgboss.job_state`
 4. **Tables**: version, queue, schedule, subscription, job (partitioned), archive
 5. **Functions**: create_queue, delete_queue
 6. **Version record**: INSERT into pgboss.version with correct version number
+
+**CRITICAL**: Do NOT add `BEGIN`/`COMMIT` statements. Prisma Migrate wraps each migration in a transaction automatically. Adding explicit transaction control creates nested transactions which cause the error: `"current transaction is aborted, commands ignored until end of transaction block"`
 
 See `packages/database/prisma/migrations/20260112205243_add_pgboss_schema/migration.sql` for a complete example.
 

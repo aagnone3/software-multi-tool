@@ -10,8 +10,9 @@
 --   migrate: false
 --   createSchema: false
 
--- Wrap in advisory lock for safe concurrent migration
-BEGIN;
+-- Acquire transaction-scoped advisory lock for safe concurrent migration
+-- (Prisma already wraps migrations in a transaction, so we use pg_advisory_xact_lock
+-- which automatically releases when the transaction ends)
 SELECT pg_advisory_xact_lock(728374291);
 
 -- CreateSchema
@@ -229,5 +230,3 @@ CREATE FUNCTION "pgboss"."delete_queue"(queue_name text) RETURNS void
       EXECUTE format('DROP TABLE IF EXISTS pgboss.%I', table_name);
     END;
     $$;
-
-COMMIT;

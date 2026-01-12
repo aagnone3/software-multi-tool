@@ -135,10 +135,13 @@ code packages/database/prisma/migrations/<latest>/migration.sql
 
 **Review for:**
 
-- ✓ Advisory lock wrapping is present (BEGIN/END with pg_advisory_lock)
+- ✓ Advisory lock is present (`SELECT pg_advisory_xact_lock(...)`)
+- ✓ **NO explicit BEGIN/COMMIT statements** (Prisma handles transactions)
 - ✓ SQL statements match your schema changes
 - ✓ No unexpected DROP or destructive operations
 - ⚠ Add data migration queries if needed (see examples below)
+
+**CRITICAL**: Never add `BEGIN`/`COMMIT` statements to migrations. Prisma Migrate automatically wraps each migration in a transaction. Adding explicit transaction control creates nested transactions which fail with: `"current transaction is aborted, commands ignored until end of transaction block"`
 
 **Common data migration scenarios:**
 
@@ -233,8 +236,9 @@ pnpm --filter @repo/scripts prisma:validate
 2. Ignore database reset warnings
 3. Skip manual migration review
 4. Run migrations on production directly (use CI/CD)
-5. Remove the advisory lock wrapping
-6. Commit migrations without testing locally
+5. Remove the advisory lock (`pg_advisory_xact_lock`)
+6. Add explicit `BEGIN`/`COMMIT` statements (Prisma handles transactions)
+7. Commit migrations without testing locally
 
 ### ✅ ALWAYS
 
@@ -242,7 +246,7 @@ pnpm --filter @repo/scripts prisma:validate
 2. Review the generated migration.sql
 3. Add data migrations for non-nullable fields
 4. Test migrations locally before committing
-5. Keep advisory lock transaction wrapping
+5. Keep the `pg_advisory_xact_lock` call (but NOT explicit transactions)
 6. Follow existing naming conventions
 
 ## Debugging

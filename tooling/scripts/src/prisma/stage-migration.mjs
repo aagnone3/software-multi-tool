@@ -151,8 +151,14 @@ function findLatestMigration() {
 }
 
 /**
- * Wrap migration SQL in advisory lock transaction
+ * Add transaction-scoped advisory lock to migration SQL
  * @param {string} migrationDir
+ *
+ * IMPORTANT: We use pg_advisory_xact_lock() (transaction-scoped) WITHOUT explicit
+ * BEGIN/COMMIT because Prisma Migrate already wraps each migration in a transaction.
+ * Adding explicit BEGIN/COMMIT creates nested transactions which cause failures
+ * with the error: "current transaction is aborted, commands ignored until end of
+ * transaction block"
  */
 function wrapWithAdvisoryLock(migrationDir) {
 	try {
@@ -162,7 +168,7 @@ function wrapWithAdvisoryLock(migrationDir) {
 			"migration.sql",
 		);
 
-		logInfo("Wrapping migration in advisory lock transaction...");
+		logInfo("Adding advisory lock to migration...");
 
 		// Generate lock ID from migration file path (matching original bash logic)
 		const hash = createHash("md5");
@@ -174,17 +180,14 @@ function wrapWithAdvisoryLock(migrationDir) {
 		// Read existing migration content
 		const migrationSql = readFileSync(migrationFile, "utf-8");
 
-		// Wrap in advisory lock transaction
-		const wrappedSql = `-- Acquire an advisory lock in a transaction
-BEGIN;
-SELECT pg_advisory_lock(${lockId}::bigint);
+		// Add transaction-scoped advisory lock (NO BEGIN/COMMIT - Prisma handles that)
+		// pg_advisory_xact_lock automatically releases when the transaction ends
+		const wrappedSql = `-- Acquire transaction-scoped advisory lock for safe concurrent migration
+-- (Prisma already wraps migrations in a transaction, so we use pg_advisory_xact_lock
+-- which automatically releases when the transaction ends)
+SELECT pg_advisory_xact_lock(${lockId}::bigint);
 
-${migrationSql}
-
--- Release the advisory lock and commit the transaction
-SELECT pg_advisory_unlock(${lockId}::bigint);
-COMMIT;
-`;
+${migrationSql}`;
 
 		writeFileSync(migrationFile, wrappedSql, "utf-8");
 		logSuccess("Migration wrapped with advisory lock");
