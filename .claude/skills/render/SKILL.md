@@ -15,6 +15,7 @@ This skill provides comprehensive Render integration for managing services, depl
 - Get your API key from the Render Dashboard > Account Settings > API Keys
 - The Render CLI helpers are located at `tooling/scripts/src/render/index.mjs`
 - The typed API client is available at `packages/render`
+- **For initial deployment setup**, see the comprehensive guide: `docs/render-deployment.md`
 
 ## Core Command Pattern
 
@@ -219,6 +220,13 @@ The repository includes a standalone Fastify backend service (`apps/api-server`)
 - **Long-running jobs** without serverless timeout limits
 - **Full oRPC compatibility** with the Next.js frontend
 - **Shared database and auth** with the main application
+
+**For complete deployment instructions**, see `docs/render-deployment.md` which provides:
+
+- Step-by-step Blueprint setup
+- Environment variable configuration
+- Verification and testing procedures
+- Troubleshooting common issues
 
 ### Deployment Configuration
 

@@ -84,6 +84,20 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABA
   4. Copy webhook signing secret (starts with `whsec_`) to `.env.local`
   5. Trigger test events: `stripe trigger checkout.session.completed`, etc.
 
+### Render Deployment
+
+- `pnpm --filter @repo/scripts render <resource> <action>` - Manage Render services, deploys, and environment variables
+- **Claude Skill Available**: Use the `render` skill (`.claude/skills/render/`) for comprehensive Render integration
+- **Deployment Guide**: See `docs/render-deployment.md` for step-by-step Blueprint setup instructions
+- Set `RENDER_API_KEY` in `apps/web/.env.local` for CLI operations
+- The `api-server` (Fastify backend) is deployed to Render with PostgreSQL database
+- Configuration defined in `render.yaml` at repository root
+- Common commands:
+  - `pnpm --filter @repo/scripts render services list` - List all Render services
+  - `pnpm --filter @repo/scripts render deploys trigger --service <id>` - Trigger manual deploy
+  - `pnpm --filter @repo/scripts render env list --service <id>` - List environment variables
+  - `pnpm --filter @repo/scripts render env set --service <id> --key <name> --value <value>` - Set environment variable
+
 ## Git Workflow
 
 > **🚨 CRITICAL: NEVER push directly to the main branch unless explicitly directed by the user. 🚨**
@@ -294,8 +308,10 @@ The repository enforces quality gates via `pre-commit`. Install with `pre-commit
 - **Analytics skill**: `.claude/skills/analytics/` (PostHog, event tracking, provider system)
 - **Auth skill**: `.claude/skills/better-auth/` (authentication implementation)
 - **Prisma skill**: `.claude/skills/prisma-migrate/` (database migrations)
+- **Render skill**: `.claude/skills/render/` (Render API, deployments, environment variables)
 - In-app docs: `apps/web/content/docs`
 - Agent guidance: `AGENTS.md`
 - Contributor workflow: `CONTRIBUTING.md`
+- Deployment guide: `docs/render-deployment.md` (Render Blueprint setup for api-server)
 - Testing documentation: `docs/postgres-integration-testing.md`
 - Cursor rules: `.cursor/rules/` (key principles, project structure, TypeScript usage, UI/styling)
