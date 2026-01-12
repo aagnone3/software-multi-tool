@@ -11,6 +11,8 @@ import { CLAUDE_MODELS } from "./src/models";
  * IMPORTANT: This test REQUIRES ANTHROPIC_API_KEY to be set.
  * Tests will FAIL if the key is missing (not skip).
  *
+ * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
+ *
  * The test is intentionally simple and cheap:
  * - Model: CLAUDE_MODELS.HAIKU_3_5 (cheapest model)
  * - Max tokens: 50 (minimal response)
@@ -20,7 +22,9 @@ describe("Claude Agent SDK Integration", () => {
 	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
 			throw new Error(
-				"ANTHROPIC_API_KEY is required for integration tests. Set it in apps/web/.env.local",
+				"ANTHROPIC_API_KEY is required for integration tests. " +
+					"Set it in apps/web/.env.local. " +
+					"Environment variables are loaded automatically from this file via tests/setup/environment.ts.",
 			);
 		}
 	};
