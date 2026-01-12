@@ -88,6 +88,12 @@ export const RateLimitEntryScalarFieldEnumSchema = z.enum(['id', 'identifier', '
 
 export type RateLimitEntryScalarFieldEnumEnum = z.infer<typeof RateLimitEntryScalarFieldEnumSchema>;
 
+// File: AuditLogScalarFieldEnum.schema.ts
+
+export const AuditLogScalarFieldEnumSchema = z.enum(['id', 'createdAt', 'userId', 'organizationId', 'action', 'resource', 'resourceId', 'ipAddress', 'userAgent', 'sessionId', 'success', 'metadata', 'expiresAt'])
+
+export type AuditLogScalarFieldEnumEnum = z.infer<typeof AuditLogScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -135,6 +141,12 @@ export type PurchaseTypeEnum = z.infer<typeof PurchaseTypeSchema>;
 export const ToolJobStatusSchema = z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED'])
 
 export type ToolJobStatusEnum = z.infer<typeof ToolJobStatusSchema>;
+
+// File: AuditAction.schema.ts
+
+export const AuditActionSchema = z.enum(['CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'MFA_SETUP', 'MFA_DISABLE', 'IMPERSONATE', 'INVITE', 'EXPORT', 'SUBSCRIPTION_CHANGE', 'PAYMENT'])
+
+export type AuditActionEnum = z.infer<typeof AuditActionSchema>;
 
 // File: User.schema.ts
 
@@ -358,4 +370,25 @@ export const RateLimitEntrySchema = z.object({
 });
 
 export type RateLimitEntryType = z.infer<typeof RateLimitEntrySchema>;
+
+
+// File: AuditLog.schema.ts
+
+export const AuditLogSchema = z.object({
+  id: z.string(),
+  createdAt: z.date(),
+  userId: z.string().nullish(),
+  organizationId: z.string().nullish(),
+  action: AuditActionSchema,
+  resource: z.string(),
+  resourceId: z.string().nullish(),
+  ipAddress: z.string().nullish(),
+  userAgent: z.string().nullish(),
+  sessionId: z.string().nullish(),
+  success: z.boolean().default(true),
+  metadata: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  expiresAt: z.date().nullish(),
+});
+
+export type AuditLogType = z.infer<typeof AuditLogSchema>;
 
