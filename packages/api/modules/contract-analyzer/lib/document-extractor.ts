@@ -1,6 +1,5 @@
 import { logger } from "@repo/logs";
 import * as mammoth from "mammoth";
-import pdfParse from "pdf-parse";
 
 /**
  * Maximum file size for contract documents (25MB).
@@ -119,11 +118,15 @@ export function detectFileType(
 
 /**
  * Extract text from a PDF file buffer.
+ * Uses dynamic import to avoid pdf-parse's test file loading at import time.
  */
 export async function extractTextFromPdf(
 	buffer: Buffer,
 ): Promise<DocumentExtractionOutcome> {
 	try {
+		// Dynamic import to avoid pdf-parse loading test files at import time
+		// This is a known issue with the pdf-parse library
+		const pdfParse = (await import("pdf-parse")).default;
 		const data = await pdfParse(buffer);
 
 		const text = data.text.trim();
