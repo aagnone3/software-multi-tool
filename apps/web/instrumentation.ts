@@ -9,6 +9,11 @@
  */
 
 export async function register() {
+	// Skip instrumentation during build to avoid conflicts with static generation
+	if (process.env.NEXT_PHASE === "phase-production-build") {
+		return;
+	}
+
 	// Only run on server-side
 	if (process.env.NEXT_RUNTIME === "nodejs") {
 		await import("./sentry.server.config");
