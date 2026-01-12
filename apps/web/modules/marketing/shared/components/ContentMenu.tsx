@@ -1,5 +1,5 @@
-import { LocaleLink } from "@i18n/routing";
 import type { ContentStructureItem } from "@shared/lib/content";
+import Link from "next/link";
 
 function ContentMenuItem({
 	label,
@@ -11,13 +11,13 @@ function ContentMenuItem({
 	return (
 		<>
 			{isPage ? (
-				<LocaleLink
+				<Link
 					key={path}
 					className={`block rounded-full px-4 py-1 ${path === activePath ? "bg-primary/5 font-bold" : ""}`}
 					href={`/docs/${path}`}
 				>
 					{label}
-				</LocaleLink>
+				</Link>
 			) : (
 				<span key={path} className="block px-4 py-1">
 					{label}

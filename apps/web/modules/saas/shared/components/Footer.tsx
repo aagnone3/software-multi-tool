@@ -1,5 +1,5 @@
-import { LocaleLink } from "@i18n/routing";
 import { cn } from "@ui/lib";
+import Link from "next/link";
 
 export function Footer() {
 	return (
@@ -14,9 +14,9 @@ export function Footer() {
 				</a>
 			</span>
 			<span className="opacity-50"> | </span>
-			<LocaleLink href="/legal/privacy-policy">Privacy policy</LocaleLink>
+			<Link href="/legal/privacy-policy">Privacy policy</Link>
 			<span className="opacity-50"> | </span>
-			<LocaleLink href="/legal/terms">Terms and conditions</LocaleLink>
+			<Link href="/legal/terms">Terms and conditions</Link>
 		</footer>
 	);
 }

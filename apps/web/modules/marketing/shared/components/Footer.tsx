@@ -1,6 +1,6 @@
-import { LocaleLink } from "@i18n/routing";
 import { config } from "@repo/config";
 import { Logo } from "@shared/components/Logo";
+import Link from "next/link";
 
 export function Footer() {
 	return (
@@ -17,9 +17,9 @@ export function Footer() {
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<LocaleLink href="/blog" className="block">
+					<Link href="/blog" className="block">
 						Blog
-					</LocaleLink>
+					</Link>
 
 					<a href="#features" className="block">
 						Features
@@ -31,13 +31,13 @@ export function Footer() {
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<LocaleLink href="/legal/privacy-policy" className="block">
+					<Link href="/legal/privacy-policy" className="block">
 						Privacy policy
-					</LocaleLink>
+					</Link>
 
-					<LocaleLink href="/legal/terms" className="block">
+					<Link href="/legal/terms" className="block">
 						Terms and conditions
-					</LocaleLink>
+					</Link>
 				</div>
 			</div>
 		</footer>

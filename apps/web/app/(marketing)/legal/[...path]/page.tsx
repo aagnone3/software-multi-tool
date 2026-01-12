@@ -1,15 +1,14 @@
-import { localeRedirect } from "@i18n/routing";
 import { PostContent } from "@marketing/blog/components/PostContent";
+import { config } from "@repo/config";
 import {
 	getActivePathFromUrlParam,
 	getLocalizedDocumentWithFallback,
 } from "@shared/lib/content";
 import { allLegalPages } from "content-collections";
-import { getLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 type Params = {
 	path: string;
-	locale: string;
 };
 
 export async function generateMetadata(props: { params: Promise<Params> }) {
@@ -17,7 +16,7 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 
 	const { path } = params;
 
-	const locale = await getLocale();
+	const locale = config.i18n.defaultLocale;
 	const activePath = getActivePathFromUrlParam(path);
 	const page = getLocalizedDocumentWithFallback(
 		allLegalPages,
@@ -33,12 +32,12 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 	};
 }
 
-export default async function BlogPostPage(props: { params: Promise<Params> }) {
+export default async function LegalPage(props: { params: Promise<Params> }) {
 	const params = await props.params;
 
 	const { path } = params;
 
-	const locale = await getLocale();
+	const locale = config.i18n.defaultLocale;
 	const activePath = getActivePathFromUrlParam(path);
 	const page = getLocalizedDocumentWithFallback(
 		allLegalPages,
@@ -47,7 +46,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 	);
 
 	if (!page) {
-		localeRedirect({ href: "/", locale });
+		redirect("/");
 	}
 
 	const { title, body } = page as any;

@@ -7,15 +7,14 @@ import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { DocsBody, DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
-import { docsSource } from "../../../../docs-source";
+import { docsSource } from "../../../docs-source";
 
 export default async function DocumentationPage(props: {
-	params: Promise<{ path?: string[]; locale: string }>;
+	params: Promise<{ path?: string[] }>;
 }) {
 	const params = await props.params;
-	setRequestLocale(params.locale);
-	const page = docsSource.getPage(params.path, params.locale);
+	const locale = config.i18n.defaultLocale;
+	const page = docsSource.getPage(params.path, locale);
 
 	if (!page) {
 		notFound();
@@ -69,17 +68,17 @@ export default async function DocumentationPage(props: {
 }
 
 export async function generateStaticParams() {
-	return docsSource.getPages().flatMap((page) => ({
+	return docsSource.getPages().map((page) => ({
 		path: page.slugs,
-		locale: page.locale ?? config.i18n.defaultLocale,
 	}));
 }
 
 export async function generateMetadata(props: {
-	params: Promise<{ path?: string[]; locale: string }>;
+	params: Promise<{ path?: string[] }>;
 }) {
 	const params = await props.params;
-	const page = docsSource.getPage(params.path, params.locale);
+	const locale = config.i18n.defaultLocale;
+	const page = docsSource.getPage(params.path, locale);
 
 	if (!page) {
 		notFound();

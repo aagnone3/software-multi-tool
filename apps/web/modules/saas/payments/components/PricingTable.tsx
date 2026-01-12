@@ -1,5 +1,5 @@
 "use client";
-import { LocaleLink } from "@i18n/routing";
+
 import { type Config, config } from "@repo/config";
 import { usePlanData } from "@saas/payments/hooks/plan-data";
 import type { PlanId } from "@saas/payments/types";
@@ -17,6 +17,7 @@ import {
 	PhoneIcon,
 	StarIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useFormatter } from "next-intl";
 import { useState } from "react";
 
@@ -257,10 +258,10 @@ export function PricingTable({
 												variant="light"
 												asChild
 											>
-												<LocaleLink href="/contact">
+												<Link href="/contact">
 													<PhoneIcon className="mr-2 size-4" />
 													Contact sales
-												</LocaleLink>
+												</Link>
 											</Button>
 										) : (
 											<Button
