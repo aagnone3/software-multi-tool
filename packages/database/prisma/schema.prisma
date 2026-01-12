@@ -1,13 +1,15 @@
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
     directUrl = env("DIRECT_URL")
+    schemas   = ["public", "pgboss"]
 }
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "./generated/client"
-    binaryTargets = ["native", "darwin-arm64"]
+    provider        = "prisma-client-js"
+    output          = "./generated/client"
+    binaryTargets   = ["native", "darwin-arm64"]
+    previewFeatures = ["multiSchema"]
 }
 
 generator zod {
@@ -46,6 +48,7 @@ model User {
     @@unique([email])
     @@unique([username])
     @@map("user")
+    @@schema("public")
 }
 
 model Session {
@@ -66,6 +69,7 @@ model Session {
 
     @@unique([token])
     @@map("session")
+    @@schema("public")
 }
 
 model Account {
@@ -87,6 +91,7 @@ model Account {
     updatedAt             DateTime
 
     @@map("account")
+    @@schema("public")
 }
 
 model Verification {
@@ -99,6 +104,7 @@ model Verification {
     updatedAt DateTime?
 
     @@map("verification")
+    @@schema("public")
 }
 
 model Passkey {
@@ -115,6 +121,7 @@ model Passkey {
     createdAt    DateTime?
 
     @@map("passkey")
+    @@schema("public")
 }
 
 model TwoFactor {
@@ -125,6 +132,7 @@ model TwoFactor {
     user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("twoFactor")
+    @@schema("public")
 }
 
 model Organization {
@@ -142,6 +150,7 @@ model Organization {
 
     @@unique([slug])
     @@map("organization")
+    @@schema("public")
 }
 
 model Member {
@@ -155,6 +164,7 @@ model Member {
 
     @@unique([organizationId, userId])
     @@map("member")
+    @@schema("public")
 }
 
 model Invitation {
@@ -169,11 +179,14 @@ model Invitation {
     user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
     @@map("invitation")
+    @@schema("public")
 }
 
 enum PurchaseType {
     SUBSCRIPTION
     ONE_TIME
+
+    @@schema("public")
 }
 
 model Purchase {
@@ -192,6 +205,7 @@ model Purchase {
 
     @@index([subscriptionId])
     @@map("purchase")
+    @@schema("public")
 }
 
 model AiChat {
@@ -207,6 +221,7 @@ model AiChat {
     updatedAt      DateTime      @updatedAt
 
     @@map("ai_chat")
+    @@schema("public")
 }
 
 enum ToolJobStatus {
@@ -215,6 +230,8 @@ enum ToolJobStatus {
     COMPLETED
     FAILED
     CANCELLED
+
+    @@schema("public")
 }
 
 model ToolJob {
@@ -249,6 +266,7 @@ model ToolJob {
     @@index([sessionId])
     @@index([expiresAt])
     @@map("tool_job")
+    @@schema("public")
 }
 
 model RateLimitEntry {
@@ -265,6 +283,7 @@ model RateLimitEntry {
     @@index([identifier, toolSlug])
     @@index([windowEnd])
     @@map("rate_limit_entry")
+    @@schema("public")
 }
 
 // Audit logging for compliance and security tracking
@@ -283,6 +302,8 @@ enum AuditAction {
     EXPORT
     SUBSCRIPTION_CHANGE
     PAYMENT
+
+    @@schema("public")
 }
 
 model AuditLog {
@@ -319,4 +340,5 @@ model AuditLog {
     @@index([userId, createdAt])
     @@index([organizationId, createdAt])
     @@map("audit_log")
+    @@schema("public")
 }
