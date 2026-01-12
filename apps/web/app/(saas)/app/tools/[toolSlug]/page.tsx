@@ -1,4 +1,5 @@
 import { config } from "@repo/config";
+import { BgRemoverClient } from "@saas/tools/bg-remover/BgRemoverClient";
 import { notFound } from "next/navigation";
 
 interface ToolPageProps {
@@ -41,6 +42,12 @@ export default async function ToolPage({ params }: ToolPageProps) {
 		notFound();
 	}
 
+	// Render tool-specific component
+	if (toolSlug === "bg-remover") {
+		return <BgRemoverClient />;
+	}
+
+	// Default: Under development
 	return (
 		<div className="container max-w-4xl px-4 py-8">
 			<div className="rounded-2xl border bg-card p-8">

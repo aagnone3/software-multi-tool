@@ -18,6 +18,9 @@ import { router } from "./orpc/router";
 export * from "./lib/rate-limit";
 export * from "./lib/rate-limit-middleware";
 
+// Initialize tool modules (registers processors)
+import "./modules/bg-remover";
+
 export const app = new Hono()
 	.basePath("/api")
 	// Logger middleware
