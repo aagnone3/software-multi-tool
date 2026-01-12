@@ -113,7 +113,7 @@ export async function processMeetingJob(job: ToolJob): Promise<JobResult> {
 			if (buffer.length > MAX_TRANSCRIPT_SIZE) {
 				return {
 					success: false,
-					error: `File size exceeds maximum allowed size (5MB)`,
+					error: "File size exceeds maximum allowed size (5MB)",
 				};
 			}
 

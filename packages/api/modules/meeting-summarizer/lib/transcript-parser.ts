@@ -89,21 +89,24 @@ function extractSpeakers(text: string): string[] {
 
 	// Pattern: "Name:" at start of line (common in transcripts)
 	const colonPattern = /^([A-Z][a-zA-Z\s]+?):\s/gm;
-	let match: RegExpExecArray | null;
-	while ((match = colonPattern.exec(text)) !== null) {
+	let match = colonPattern.exec(text);
+	while (match !== null) {
 		const speaker = match[1].trim();
 		if (speaker.length > 0 && speaker.length < 50) {
 			speakers.add(speaker);
 		}
+		match = colonPattern.exec(text);
 	}
 
 	// Pattern: "[Name]" or "(Name)" at start of line
-	const bracketPattern = /^[\[(]([A-Z][a-zA-Z\s]+?)[\])]\s/gm;
-	while ((match = bracketPattern.exec(text)) !== null) {
+	const bracketPattern = /^[[(]([A-Z][a-zA-Z\s]+?)[\])]\s/gm;
+	match = bracketPattern.exec(text);
+	while (match !== null) {
 		const speaker = match[1].trim();
 		if (speaker.length > 0 && speaker.length < 50) {
 			speakers.add(speaker);
 		}
+		match = bracketPattern.exec(text);
 	}
 
 	return Array.from(speakers);
@@ -286,7 +289,9 @@ export async function parseSrtTranscript(
 			i++;
 		}
 
-		if (i >= lines.length) break;
+		if (i >= lines.length) {
+			break;
+		}
 
 		// Skip cue number
 		const cueNum = lines[i].trim();
@@ -296,7 +301,9 @@ export async function parseSrtTranscript(
 		}
 		i++;
 
-		if (i >= lines.length) break;
+		if (i >= lines.length) {
+			break;
+		}
 
 		// Parse timestamp line: 00:00:00,000 --> 00:00:00,000
 		const timestampLine = lines[i].trim();
