@@ -365,7 +365,7 @@ describe("MeetingSummarizerTool", () => {
 		render(<MeetingSummarizerTool />);
 
 		expect(screen.getByText("Meeting Summarizer")).toBeInTheDocument();
-		expect(screen.getByText("Meeting Notes")).toBeInTheDocument();
+		expect(screen.getByText("Meeting Transcript")).toBeInTheDocument();
 		expect(screen.getByText("Meeting Type")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Summarize Meeting" }),
@@ -384,7 +384,9 @@ describe("MeetingSummarizerTool", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.getByText("Meeting notes are required"),
+				screen.getByText(
+					"Please provide meeting notes or upload a transcript file",
+				),
 			).toBeInTheDocument();
 		});
 	});
