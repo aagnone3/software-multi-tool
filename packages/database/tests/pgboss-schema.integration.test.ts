@@ -76,7 +76,9 @@ describe.sequential("pg-boss schema (integration)", () => {
 				throw new Error("Postgres test harness did not initialize.");
 			}
 
-			const result = await harness.prisma.$queryRaw<{ version: number }[]>`
+			const result = await harness.prisma.$queryRaw<
+				{ version: number }[]
+			>`
 				SELECT version FROM pgboss.version
 			`;
 
@@ -93,7 +95,9 @@ describe.sequential("pg-boss schema (integration)", () => {
 				throw new Error("Postgres test harness did not initialize.");
 			}
 
-			const tables = await harness.prisma.$queryRaw<{ tablename: string }[]>`
+			const tables = await harness.prisma.$queryRaw<
+				{ tablename: string }[]
+			>`
 				SELECT tablename
 				FROM pg_tables
 				WHERE schemaname = 'pgboss'
@@ -119,7 +123,9 @@ describe.sequential("pg-boss schema (integration)", () => {
 				throw new Error("Postgres test harness did not initialize.");
 			}
 
-			const functions = await harness.prisma.$queryRaw<{ proname: string }[]>`
+			const functions = await harness.prisma.$queryRaw<
+				{ proname: string }[]
+			>`
 				SELECT proname
 				FROM pg_proc
 				WHERE pronamespace = 'pgboss'::regnamespace
