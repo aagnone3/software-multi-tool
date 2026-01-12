@@ -26,6 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import {
@@ -36,10 +37,12 @@ import {
 	ClipboardListIcon,
 	ClockIcon,
 	CopyIcon,
+	FileTextIcon,
 	GavelIcon,
 	HelpCircleIcon,
 	MessageSquareIcon,
 	SparklesIcon,
+	TypeIcon,
 	UsersIcon,
 	VideoIcon,
 } from "lucide-react";
@@ -48,6 +51,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+import {
+	TranscriptFileUpload,
+	type TranscriptFileData,
+} from "./TranscriptFileUpload";
 
 // Metrics overview card
 function MetricCard({
@@ -122,20 +129,45 @@ function PriorityBadge({ priority }: { priority: string }) {
 	);
 }
 
-const formSchema = z.object({
-	meetingNotes: z.string().min(1, "Meeting notes are required"),
-	meetingType: z.enum([
-		"standup",
-		"planning",
-		"retrospective",
-		"one_on_one",
-		"client",
-		"general",
-	]),
-	participants: z.string().optional(),
-	meetingDate: z.string().optional(),
-	projectContext: z.string().optional(),
+/** Schema for transcript file data in form. */
+const transcriptFileSchema = z.object({
+	content: z.string(),
+	filename: z.string(),
+	mimeType: z.string().optional(),
 });
+
+const formSchema = z
+	.object({
+		inputMode: z.enum(["text", "file"]).default("text"),
+		meetingNotes: z.string().optional(),
+		transcriptFile: transcriptFileSchema.nullable().optional(),
+		meetingType: z.enum([
+			"standup",
+			"planning",
+			"retrospective",
+			"one_on_one",
+			"client",
+			"general",
+		]),
+		participants: z.string().optional(),
+		meetingDate: z.string().optional(),
+		projectContext: z.string().optional(),
+	})
+	.refine(
+		(data) => {
+			if (data.inputMode === "text") {
+				return (
+					data.meetingNotes && data.meetingNotes.trim().length > 0
+				);
+			}
+			return data.transcriptFile !== null && data.transcriptFile !== undefined;
+		},
+		{
+			message:
+				"Please provide meeting notes or upload a transcript file",
+			path: ["meetingNotes"],
+		},
+	);
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -228,12 +260,16 @@ export function MeetingSummarizerTool() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<MeetingOutput | null>(null);
 	const [copiedField, setCopiedField] = useState<string | null>(null);
+	const [inputMode, setInputMode] = useState<"text" | "file">("text");
+	const [filePreviewText, setFilePreviewText] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
+			inputMode: "text",
 			meetingNotes: "",
+			transcriptFile: null,
 			meetingType: "general",
 			participants: "",
 			meetingDate: "",
@@ -248,12 +284,23 @@ export function MeetingSummarizerTool() {
 			: undefined;
 
 		try {
+			// Build input based on mode
+			const input: Record<string, unknown> = {
+				meetingType: values.meetingType,
+				meetingDate: values.meetingDate,
+				projectContext: values.projectContext,
+				participants,
+			};
+
+			if (values.inputMode === "file" && values.transcriptFile) {
+				input.transcriptFile = values.transcriptFile;
+			} else {
+				input.meetingNotes = values.meetingNotes;
+			}
+
 			const response = await createJobMutation.mutateAsync({
 				toolSlug: "meeting-summarizer",
-				input: {
-					...values,
-					participants,
-				},
+				input,
 			});
 			setJobId(response.job.id);
 		} catch (error) {
@@ -268,7 +315,33 @@ export function MeetingSummarizerTool() {
 	const handleNewMeeting = () => {
 		setJobId(null);
 		setResult(null);
+		setInputMode("text");
+		setFilePreviewText(null);
 		form.reset();
+	};
+
+	const handleInputModeChange = (mode: string) => {
+		const newMode = mode as "text" | "file";
+		setInputMode(newMode);
+		form.setValue("inputMode", newMode);
+		// Clear the other input when switching modes
+		if (newMode === "text") {
+			form.setValue("transcriptFile", null);
+			setFilePreviewText(null);
+		} else {
+			form.setValue("meetingNotes", "");
+		}
+	};
+
+	const handleFileSelect = (file: TranscriptFileData | null) => {
+		form.setValue("transcriptFile", file);
+		if (!file) {
+			setFilePreviewText(null);
+		}
+	};
+
+	const handleTextExtracted = (text: string | null) => {
+		setFilePreviewText(text);
 	};
 
 	const copyToClipboard = async (text: string, field: string) => {
@@ -308,29 +381,131 @@ export function MeetingSummarizerTool() {
 								onSubmit={form.handleSubmit(onSubmit)}
 								className="space-y-6"
 							>
-								<FormField
-									control={form.control}
-									name="meetingNotes"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="font-semibold">
-												Meeting Notes
-											</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Paste your meeting notes, transcript, or recording summary here..."
-													className="min-h-[200px] rounded-xl border-2 bg-muted/30 text-sm transition-colors focus:border-indigo-500 focus:bg-background"
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription>
-												Raw notes, transcript, or any
-												text from your meeting
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								{/* Input Mode Tabs */}
+								<div className="space-y-4">
+									<FormLabel className="font-semibold">
+										Meeting Transcript
+									</FormLabel>
+									<Tabs
+										value={inputMode}
+										onValueChange={handleInputModeChange}
+										className="w-full"
+									>
+										<TabsList className="grid w-full grid-cols-2">
+											<TabsTrigger
+												value="text"
+												className="flex items-center gap-2"
+											>
+												<TypeIcon className="size-4" />
+												Paste Text
+											</TabsTrigger>
+											<TabsTrigger
+												value="file"
+												className="flex items-center gap-2"
+											>
+												<FileTextIcon className="size-4" />
+												Upload File
+											</TabsTrigger>
+										</TabsList>
+
+										{/* Text Input Tab */}
+										<TabsContent
+											value="text"
+											className="mt-4"
+										>
+											<FormField
+												control={form.control}
+												name="meetingNotes"
+												render={({ field }) => (
+													<FormItem>
+														<FormControl>
+															<Textarea
+																placeholder="Paste your meeting notes, transcript, or recording summary here..."
+																className="min-h-[200px] rounded-xl border-2 bg-muted/30 text-sm transition-colors focus:border-indigo-500 focus:bg-background"
+																{...field}
+															/>
+														</FormControl>
+														<FormDescription>
+															Raw notes,
+															transcript, or any
+															text from your
+															meeting
+														</FormDescription>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</TabsContent>
+
+										{/* File Upload Tab */}
+										<TabsContent
+											value="file"
+											className="mt-4"
+										>
+											<FormField
+												control={form.control}
+												name="transcriptFile"
+												render={() => (
+													<FormItem>
+														<FormControl>
+															<TranscriptFileUpload
+																onFileSelect={
+																	handleFileSelect
+																}
+																onTextExtracted={
+																	handleTextExtracted
+																}
+																value={form.watch(
+																	"transcriptFile",
+																)}
+																disabled={
+																	form
+																		.formState
+																		.isSubmitting
+																}
+															/>
+														</FormControl>
+														<FormDescription>
+															Upload a transcript
+															file from Zoom,
+															Teams, Google Meet,
+															Otter.ai, or other
+															transcription tools
+														</FormDescription>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											{/* Text Preview (for TXT files) */}
+											{filePreviewText && (
+												<div className="mt-4 space-y-2">
+													<p className="font-medium text-sm">
+														Preview
+													</p>
+													<div className="max-h-[200px] overflow-auto rounded-xl border-2 bg-muted/30 p-4">
+														<pre className="whitespace-pre-wrap font-mono text-sm">
+															{filePreviewText.slice(
+																0,
+																1000,
+															)}
+															{filePreviewText.length >
+																1000 && (
+																<span className="text-muted-foreground">
+																	... (
+																	{filePreviewText.length -
+																		1000}{" "}
+																	more
+																	characters)
+																</span>
+															)}
+														</pre>
+													</div>
+												</div>
+											)}
+										</TabsContent>
+									</Tabs>
+								</div>
 
 								<div className="grid gap-4 md:grid-cols-2">
 									<FormField
