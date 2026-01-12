@@ -26,6 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import {
@@ -41,18 +42,40 @@ import {
 	ShieldAlertIcon,
 	ShieldCheckIcon,
 	SparklesIcon,
+	UploadIcon,
 	UsersIcon,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
+import { type DocumentFileData, DocumentUpload } from "./DocumentUpload";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
-const formSchema = z.object({
-	contractText: z.string().min(1, "Contract text is required"),
-	analysisDepth: z.enum(["summary", "standard", "detailed"]),
+const fileDataSchema = z.object({
+	content: z.string().min(1),
+	mimeType: z.string().min(1),
+	filename: z.string().min(1),
 });
+
+const formSchema = z
+	.object({
+		contractText: z.string().optional(),
+		fileData: fileDataSchema.optional(),
+		analysisDepth: z.enum(["summary", "standard", "detailed"]),
+	})
+	.refine(
+		(data) => {
+			const hasText =
+				data.contractText && data.contractText.trim().length > 0;
+			const hasFile = data.fileData !== undefined;
+			return hasText || hasFile;
+		},
+		{
+			message: "Either paste contract text or upload a file",
+			path: ["contractText"],
+		},
+	);
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -235,15 +258,43 @@ const depthDescriptions = {
 export function ContractAnalyzerTool() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<ContractOutput | null>(null);
+	const [inputMode, setInputMode] = useState<"text" | "upload">("upload");
+	const [selectedFile, setSelectedFile] = useState<DocumentFileData | null>(
+		null,
+	);
 	const createJobMutation = useCreateJob();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			contractText: "",
+			fileData: undefined,
 			analysisDepth: "standard",
 		},
 	});
+
+	const handleFileSelected = (fileData: DocumentFileData) => {
+		setSelectedFile(fileData);
+		form.setValue("fileData", fileData);
+		form.setValue("contractText", "");
+		form.clearErrors("contractText");
+	};
+
+	const handleFileClear = () => {
+		setSelectedFile(null);
+		form.setValue("fileData", undefined);
+	};
+
+	const handleInputModeChange = (mode: string) => {
+		const newMode = mode as "text" | "upload";
+		setInputMode(newMode);
+		// Clear the other input when switching modes
+		if (newMode === "text") {
+			handleFileClear();
+		} else {
+			form.setValue("contractText", "");
+		}
+	};
 
 	const onSubmit = async (values: FormValues) => {
 		setResult(null);
@@ -265,6 +316,8 @@ export function ContractAnalyzerTool() {
 	const handleNewContract = () => {
 		setJobId(null);
 		setResult(null);
+		setSelectedFile(null);
+		setInputMode("upload");
 		form.reset();
 	};
 
@@ -294,31 +347,109 @@ export function ContractAnalyzerTool() {
 								onSubmit={form.handleSubmit(onSubmit)}
 								className="space-y-6"
 							>
-								<FormField
-									control={form.control}
-									name="contractText"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="flex items-center gap-2 font-semibold text-base">
-												<SparklesIcon className="size-4 text-violet-600" />
-												Contract Text
-											</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Paste your contract text here..."
-													className="min-h-[280px] resize-none rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-violet-500 focus:bg-background"
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription className="text-muted-foreground/80">
-												Paste the full text of your
-												contract for comprehensive AI
-												analysis
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<Tabs
+									value={inputMode}
+									onValueChange={handleInputModeChange}
+									className="w-full"
+								>
+									<TabsList className="mb-4 grid w-full grid-cols-2">
+										<TabsTrigger
+											value="upload"
+											className="flex items-center gap-2"
+										>
+											<UploadIcon className="size-4" />
+											Upload File
+										</TabsTrigger>
+										<TabsTrigger
+											value="text"
+											className="flex items-center gap-2"
+										>
+											<SparklesIcon className="size-4" />
+											Paste Text
+										</TabsTrigger>
+									</TabsList>
+
+									<TabsContent
+										value="upload"
+										className="mt-0"
+									>
+										<FormField
+											control={form.control}
+											name="fileData"
+											render={() => (
+												<FormItem>
+													<FormLabel className="flex items-center gap-2 font-semibold text-base">
+														<UploadIcon className="size-4 text-violet-600" />
+														Upload Contract
+													</FormLabel>
+													<FormControl>
+														<DocumentUpload
+															onFileSelected={
+																handleFileSelected
+															}
+															onFileClear={
+																handleFileClear
+															}
+															selectedFile={
+																selectedFile
+															}
+															disabled={
+																form.formState
+																	.isSubmitting
+															}
+														/>
+													</FormControl>
+													<FormDescription className="text-muted-foreground/80">
+														Upload a PDF, Word
+														document, or text file
+														(up to 25MB)
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</TabsContent>
+
+									<TabsContent value="text" className="mt-0">
+										<FormField
+											control={form.control}
+											name="contractText"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="flex items-center gap-2 font-semibold text-base">
+														<SparklesIcon className="size-4 text-violet-600" />
+														Contract Text
+													</FormLabel>
+													<FormControl>
+														<Textarea
+															placeholder="Paste your contract text here..."
+															className="min-h-[280px] resize-none rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-violet-500 focus:bg-background"
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription className="text-muted-foreground/80">
+														Paste the full text of
+														your contract for
+														comprehensive AI
+														analysis
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</TabsContent>
+								</Tabs>
+
+								{/* Show validation error when neither file nor text is provided */}
+								{form.formState.errors.contractText
+									?.message && (
+									<p className="text-destructive text-sm font-medium">
+										{
+											form.formState.errors.contractText
+												.message
+										}
+									</p>
+								)}
 
 								<FormField
 									control={form.control}
