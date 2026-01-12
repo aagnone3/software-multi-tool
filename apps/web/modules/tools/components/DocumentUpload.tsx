@@ -218,14 +218,11 @@ export function DocumentUpload({
 		[disabled],
 	);
 
-	const handleDragLeave = useCallback(
-		(e: React.DragEvent<HTMLElement>) => {
-			e.preventDefault();
-			e.stopPropagation();
-			setIsDragging(false);
-		},
-		[],
-	);
+	const handleDragLeave = useCallback((e: React.DragEvent<HTMLElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsDragging(false);
+	}, []);
 
 	const handleInputChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
