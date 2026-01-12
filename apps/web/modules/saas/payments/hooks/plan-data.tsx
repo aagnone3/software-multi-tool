@@ -1,12 +1,9 @@
 import type { config } from "@repo/config";
-import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 type ProductReferenceId = keyof (typeof config)["payments"]["plans"];
 
 export function usePlanData() {
-	const t = useTranslations();
-
 	const planData: Record<
 		ProductReferenceId,
 		{
@@ -16,36 +13,24 @@ export function usePlanData() {
 		}
 	> = {
 		free: {
-			title: t("pricing.products.free.title"),
-			description: t("pricing.products.free.description"),
-			features: [
-				t("pricing.products.free.features.anotherFeature"),
-				t("pricing.products.free.features.limitedSupport"),
-			],
+			title: "Free",
+			description: "Start for free",
+			features: ["Another amazing feature", "Limited support"],
 		},
 		pro: {
-			title: t("pricing.products.pro.title"),
-			description: t("pricing.products.pro.description"),
-			features: [
-				t("pricing.products.pro.features.anotherFeature"),
-				t("pricing.products.pro.features.fullSupport"),
-			],
+			title: "Pro",
+			description: "Best for teams",
+			features: ["Another amazing feature", "Full support"],
 		},
 		enterprise: {
-			title: t("pricing.products.enterprise.title"),
-			description: t("pricing.products.enterprise.description"),
-			features: [
-				t("pricing.products.enterprise.features.unlimitedProjects"),
-				t("pricing.products.enterprise.features.enterpriseSupport"),
-			],
+			title: "Enterprise",
+			description: "Custom plan tailored to your requirements",
+			features: ["Unlimited projects", "Enterprise support"],
 		},
 		lifetime: {
-			title: t("pricing.products.lifetime.title"),
-			description: t("pricing.products.lifetime.description"),
-			features: [
-				t("pricing.products.lifetime.features.noRecurringCosts"),
-				t("pricing.products.lifetime.features.extendSupport"),
-			],
+			title: "Lifetime",
+			description: "Buy once. Use forever.",
+			features: ["No recurring costs", "Extended support"],
 		},
 	};
 

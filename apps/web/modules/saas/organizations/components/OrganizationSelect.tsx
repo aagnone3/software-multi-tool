@@ -20,11 +20,9 @@ import {
 } from "@ui/components/dropdown-menu";
 import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { OrganizationLogo } from "./OrganizationLogo";
 
 export function OrganzationSelect({ className }: { className?: string }) {
-	const t = useTranslations();
 	const { user } = useSession();
 	const router = useRouter();
 	const { activeOrganization, setActiveOrganization } =
@@ -64,9 +62,7 @@ export function OrganzationSelect({ className }: { className?: string }) {
 									avatarUrl={user.image}
 								/>
 								<span className="block truncate">
-									{t(
-										"organizations.organizationSelect.personalAccount",
-									)}
+									Personal account
 								</span>
 								{config.users.enableBilling && (
 									<ActivePlanBadge />
@@ -90,9 +86,7 @@ export function OrganzationSelect({ className }: { className?: string }) {
 								}}
 							>
 								<DropdownMenuLabel className="text-foreground/60 text-xs">
-									{t(
-										"organizations.organizationSelect.personalAccount",
-									)}
+									Personal account
 								</DropdownMenuLabel>
 								<DropdownMenuRadioItem
 									value={user.id}
@@ -119,9 +113,7 @@ export function OrganzationSelect({ className }: { className?: string }) {
 						}}
 					>
 						<DropdownMenuLabel className="text-foreground/60 text-xs">
-							{t(
-								"organizations.organizationSelect.organizations",
-							)}
+							Organizations
 						</DropdownMenuLabel>
 						{allOrganizations?.map((organization) => (
 							<DropdownMenuRadioItem
@@ -149,9 +141,7 @@ export function OrganzationSelect({ className }: { className?: string }) {
 							>
 								<Link href="/new-organization">
 									<PlusIcon className="mr-2 size-6 rounded-md bg-primary/20 p-1" />
-									{t(
-										"organizations.organizationSelect.createNewOrganization",
-									)}
+									Create new organization
 								</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>

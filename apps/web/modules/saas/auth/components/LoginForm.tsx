@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -57,7 +56,6 @@ const formSchema = z.union([
 type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm() {
-	const t = useTranslations();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -156,21 +154,20 @@ export function LoginForm() {
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("auth.login.title")}
+				Sign in to your account
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				{t("auth.login.subtitle")}
+				Enter your credentials to sign in
 			</p>
 
 			{form.formState.isSubmitSuccessful &&
 			signinMode === "magic-link" ? (
 				<Alert variant="success">
 					<MailboxIcon />
-					<AlertTitle>
-						{t("auth.login.hints.linkSent.title")}
-					</AlertTitle>
+					<AlertTitle>Check your inbox!</AlertTitle>
 					<AlertDescription>
-						{t("auth.login.hints.linkSent.message")}
+						We have sent an email with a magic sign-in link. The
+						link will expire in 24 hours.
 					</AlertDescription>
 				</Alert>
 			) : (
@@ -212,9 +209,7 @@ export function LoginForm() {
 								name="email"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t("auth.signup.email")}
-										</FormLabel>
+										<FormLabel>Email</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
@@ -234,18 +229,14 @@ export function LoginForm() {
 											<FormItem>
 												<div className="flex justify-between gap-4">
 													<FormLabel>
-														{t(
-															"auth.signup.password",
-														)}
+														Password
 													</FormLabel>
 
 													<Link
 														href="/auth/forgot-password"
 														className="text-foreground/60 text-xs"
 													>
-														{t(
-															"auth.login.forgotPassword",
-														)}
+														Forgot password?
 													</Link>
 												</div>
 												<FormControl>
@@ -289,8 +280,8 @@ export function LoginForm() {
 								loading={form.formState.isSubmitting}
 							>
 								{signinMode === "magic-link"
-									? t("auth.login.sendMagicLink")
-									: t("auth.login.submit")}
+									? "Send magic link"
+									: "Sign in"}
 							</Button>
 						</form>
 					</Form>
@@ -302,7 +293,7 @@ export function LoginForm() {
 							<div className="relative my-6 h-4">
 								<hr className="relative top-2" />
 								<p className="-translate-x-1/2 absolute top-0 left-1/2 mx-auto inline-block h-4 bg-card px-2 text-center font-medium text-foreground/60 text-sm leading-tight">
-									{t("auth.login.continueWith")}
+									or continue with
 								</p>
 							</div>
 
@@ -327,7 +318,7 @@ export function LoginForm() {
 										onClick={() => signInWithPasskey()}
 									>
 										<KeyIcon className="mr-1.5 size-4 text-primary" />
-										{t("auth.login.loginWithPasskey")}
+										Sign in with passkey
 									</Button>
 								)}
 							</div>
@@ -337,7 +328,7 @@ export function LoginForm() {
 					{config.auth.enableSignup && (
 						<div className="mt-6 text-center text-sm">
 							<span className="text-foreground/60">
-								{t("auth.login.dontHaveAnAccount")}{" "}
+								Don't have an account yet?{" "}
 							</span>
 							<Link
 								href={withQuery(
@@ -345,7 +336,7 @@ export function LoginForm() {
 									Object.fromEntries(searchParams.entries()),
 								)}
 							>
-								{t("auth.login.createAnAccount")}
+								Create an account
 								<ArrowRightIcon className="ml-1 inline size-4 align-middle" />
 							</Link>
 						</div>

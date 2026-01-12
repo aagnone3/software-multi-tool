@@ -9,21 +9,6 @@ vi.mock("next/navigation", () => ({
 	useRouter: vi.fn(),
 }));
 
-// Mock next-intl
-vi.mock("next-intl", () => ({
-	useTranslations: vi.fn(() => (key: string) => {
-		const translations: Record<string, string> = {
-			"app.menu.start": "Home",
-			"app.menu.aiChatbot": "AI Chatbot",
-			"app.menu.accountSettings": "Account Settings",
-			"app.menu.organizationSettings": "Organization Settings",
-			"app.menu.admin": "Admin",
-			"app.menu.tools": "Tools",
-		};
-		return translations[key] || key;
-	}),
-}));
-
 // Mock auth hooks
 vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: vi.fn(() => ({
@@ -267,9 +252,9 @@ describe("CommandPalette", () => {
 	it("displays navigation pages", () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
-		expect(screen.getByText("Home")).toBeInTheDocument();
+		expect(screen.getByText("Start")).toBeInTheDocument();
 		expect(screen.getByText("AI Chatbot")).toBeInTheDocument();
-		expect(screen.getByText("Account Settings")).toBeInTheDocument();
+		expect(screen.getByText("Account settings")).toBeInTheDocument();
 	});
 
 	it("navigates to page when selected", async () => {

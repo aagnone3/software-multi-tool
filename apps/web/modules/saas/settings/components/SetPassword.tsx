@@ -3,12 +3,10 @@ import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Button } from "@ui/components/button";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function SetPasswordForm() {
-	const t = useTranslations();
 	const { user } = useSession();
 	const [submitting, setSubmitting] = useState(false);
 
@@ -27,16 +25,12 @@ export function SetPasswordForm() {
 			{
 				onSuccess: () => {
 					toast.success(
-						t(
-							"settings.account.security.setPassword.notifications.success",
-						),
+						"Check your inbox for the link to set your password.",
 					);
 				},
 				onError: () => {
 					toast.error(
-						t(
-							"settings.account.security.setPassword.notifications.error",
-						),
+						"Could not send link to set password. Please try again.",
 					);
 				},
 				onResponse: () => {
@@ -48,12 +42,12 @@ export function SetPasswordForm() {
 
 	return (
 		<SettingsItem
-			title={t("settings.account.security.setPassword.title")}
-			description={t("settings.account.security.setPassword.description")}
+			title="Your password"
+			description="You have not set a password yet. To set one, you need to go through the password reset flow. Click the button below to send an email to reset your password and follow the instructions in the email."
 		>
 			<div className="flex justify-end">
 				<Button type="submit" loading={submitting} onClick={onSubmit}>
-					{t("settings.account.security.setPassword.submit")}
+					Set password
 				</Button>
 			</div>
 		</SettingsItem>

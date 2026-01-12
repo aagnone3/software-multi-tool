@@ -4,11 +4,9 @@ import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { CreditCardIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function CustomerPortalButton({ purchaseId }: { purchaseId: string }) {
-	const t = useTranslations();
 	const createCustomerPortalMutation = useMutation(
 		orpc.payments.createCustomerPortalLink.mutationOptions(),
 	);
@@ -24,9 +22,7 @@ export function CustomerPortalButton({ purchaseId }: { purchaseId: string }) {
 			window.location.href = customerPortalLink;
 		} catch {
 			toast.error(
-				t(
-					"settings.billing.createCustomerPortal.notifications.error.title",
-				),
+				"Could not create a customer portal session. Please try again.",
 			);
 		}
 	};
@@ -39,7 +35,7 @@ export function CustomerPortalButton({ purchaseId }: { purchaseId: string }) {
 			loading={createCustomerPortalMutation.isPending}
 		>
 			<CreditCardIcon className="mr-2 size-4" />
-			{t("settings.billing.createCustomerPortal.label")}
+			Manage billing
 		</Button>
 	);
 }

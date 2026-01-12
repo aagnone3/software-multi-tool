@@ -24,7 +24,6 @@ import {
 	FormMessage,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,7 +39,6 @@ export function OrganizationForm({
 }: {
 	organizationId: string;
 }) {
-	const t = useTranslations();
 	const router = useRouter();
 
 	const { data: organization } = useFullOrganizationQuery(organizationId);
@@ -81,7 +79,7 @@ export function OrganizationForm({
 				queryKey: orpc.admin.organizations.list.key(),
 			});
 
-			toast.success(t("admin.organizations.form.notifications.success"));
+			toast.success("Organization saved successfully.");
 
 			if (!organization) {
 				router.replace(
@@ -89,7 +87,7 @@ export function OrganizationForm({
 				);
 			}
 		} catch {
-			toast.error(t("admin.organizations.form.notifications.error"));
+			toast.error("Failed to save organization.");
 		}
 	});
 
@@ -99,8 +97,8 @@ export function OrganizationForm({
 				<CardHeader>
 					<CardTitle>
 						{organization
-							? t("admin.organizations.form.updateTitle")
-							: t("admin.organizations.form.createTitle")}
+							? "Update organization"
+							: "Create organization"}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -114,9 +112,7 @@ export function OrganizationForm({
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t("admin.organizations.form.name")}
-										</FormLabel>
+										<FormLabel>Name</FormLabel>
 										<FormControl>
 											<Input {...field} />
 										</FormControl>
@@ -133,7 +129,7 @@ export function OrganizationForm({
 										createOrganizationMutation.isPending
 									}
 								>
-									{t("admin.organizations.form.save")}
+									Save
 								</Button>
 							</div>
 						</form>

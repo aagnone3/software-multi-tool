@@ -8,7 +8,6 @@ import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { CheckCircleIcon, KeyIcon } from "lucide-react";
 
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -18,7 +17,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function Newsletter() {
-	const t = useTranslations();
 	const newsletterSignupMutation = useMutation(
 		orpc.newsletter.subscribe.mutationOptions(),
 	);
@@ -32,7 +30,8 @@ export function Newsletter() {
 			await newsletterSignupMutation.mutateAsync({ email });
 		} catch {
 			form.setError("email", {
-				message: t("newsletter.hints.error.message"),
+				message:
+					"Could not subscribe to newsletter. Please try again later.",
 			});
 		}
 	});
@@ -43,10 +42,10 @@ export function Newsletter() {
 				<div className="mb-8 text-center">
 					<KeyIcon className="mx-auto mb-3 size-8 text-primary" />
 					<h1 className="font-bold text-3xl lg:text-4xl">
-						{t("newsletter.title")}
+						Get early access
 					</h1>
 					<p className="mt-3 text-lg opacity-70">
-						{t("newsletter.subtitle")}
+						Be among the first to get access to Software Multitool.
 					</p>
 				</div>
 
@@ -54,11 +53,10 @@ export function Newsletter() {
 					{form.formState.isSubmitSuccessful ? (
 						<Alert variant="success">
 							<CheckCircleIcon />
-							<AlertTitle>
-								{t("newsletter.hints.success.title")}
-							</AlertTitle>
+							<AlertTitle>Subscribed</AlertTitle>
 							<AlertDescription>
-								{t("newsletter.hints.success.message")}
+								Thank you for subscribing to our newsletter. We
+								will keep you posted.
 							</AlertDescription>
 						</Alert>
 					) : (
@@ -67,7 +65,7 @@ export function Newsletter() {
 								<Input
 									type="email"
 									required
-									placeholder={t("newsletter.email")}
+									placeholder="Email"
 									{...form.register("email")}
 								/>
 
@@ -76,7 +74,7 @@ export function Newsletter() {
 									className="ml-4"
 									loading={form.formState.isSubmitting}
 								>
-									{t("newsletter.submit")}
+									Subscribe
 								</Button>
 							</div>
 							{form.formState.errors.email && (

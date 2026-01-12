@@ -23,13 +23,11 @@ import {
 	TabletSmartphoneIcon,
 	XIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
 
 export function TwoFactorBlock() {
-	const t = useTranslations();
 	const { user, reloadSession } = useSession();
 
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -77,9 +75,7 @@ export function TwoFactorBlock() {
 
 		onError: () => {
 			toast.error(
-				t(
-					"settings.account.security.twoFactor.notifications.enable.error.title",
-				),
+				"Could not verify your account with the provided password. Please try again.",
 			);
 		},
 	});
@@ -98,9 +94,7 @@ export function TwoFactorBlock() {
 			setDialogOpen(false);
 
 			toast.success(
-				t(
-					"settings.account.security.twoFactor.notifications.disable.success.title",
-				),
+				"Two-factor authentication has been disabled successfully.",
 			);
 
 			reloadSession();
@@ -108,9 +102,7 @@ export function TwoFactorBlock() {
 
 		onError: () => {
 			toast.error(
-				t(
-					"settings.account.security.twoFactor.notifications.enable.error.title",
-				),
+				"Could not verify your account with the provided password. Please try again.",
 			);
 		},
 	});
@@ -127,9 +119,7 @@ export function TwoFactorBlock() {
 			}
 
 			toast.success(
-				t(
-					"settings.account.security.twoFactor.notifications.verify.success.title",
-				),
+				"Two-factor authentication has been enabled successfully.",
 			);
 
 			reloadSession();
@@ -159,27 +149,28 @@ export function TwoFactorBlock() {
 
 	return (
 		<SettingsItem
-			title={t("settings.account.security.twoFactor.title")}
-			description={t("settings.account.security.twoFactor.description")}
+			title="Two-factor authentication"
+			description="Add an extra layer of security to your account."
 		>
 			{user?.twoFactorEnabled ? (
 				<div className="flex items-start flex-col gap-4">
 					<div className="flex items-center gap-1.5">
 						<ShieldCheckIcon className="size-6 text-green-500" />
 						<p className="text-sm text-foreground">
-							{t("settings.account.security.twoFactor.enabled")}
+							You have two-factor authentication enabled for your
+							account.
 						</p>
 					</div>
 					<Button variant="light" onClick={verifyPassword}>
 						<XIcon className="mr-1.5 size-4" />
-						{t("settings.account.security.twoFactor.disable")}
+						Disable two-factor authentication
 					</Button>
 				</div>
 			) : (
 				<div className="flex justify-start">
 					<Button variant="light" onClick={verifyPassword}>
 						<TabletSmartphoneIcon className="mr-1.5 size-4" />
-						{t("settings.account.security.twoFactor.enable")}
+						Enable two-factor authentication
 					</Button>
 				</div>
 			)}
@@ -189,12 +180,8 @@ export function TwoFactorBlock() {
 					<DialogHeader>
 						<DialogTitle>
 							{dialogView === "password"
-								? t(
-										"settings.account.security.twoFactor.dialog.password.title",
-									)
-								: t(
-										"settings.account.security.twoFactor.dialog.totpUrl.title",
-									)}
+								? "Verify with password"
+								: "Enable two-factor authentication"}
 						</DialogTitle>
 					</DialogHeader>
 
@@ -202,16 +189,13 @@ export function TwoFactorBlock() {
 						<form onSubmit={handleSubmit}>
 							<div className="grid grid-cols-1 gap-4">
 								<p className="text-sm text-foreground/60">
-									{t(
-										"settings.account.security.twoFactor.dialog.password.description",
-									)}
+									Please verify your account by entering your
+									password:
 								</p>
 
 								<FormItem>
 									<Label className="block">
-										{t(
-											"settings.account.security.twoFactor.dialog.password.label",
-										)}
+										Your password:
 									</Label>
 									<PasswordInput
 										value={password}
@@ -229,7 +213,7 @@ export function TwoFactorBlock() {
 										disableTwoFactorMutation.isPending
 									}
 								>
-									{t("common.actions.continue")}
+									Continue
 									<ArrowRightIcon className="ml-1.5 size-4" />
 								</Button>
 							</div>
@@ -238,9 +222,10 @@ export function TwoFactorBlock() {
 						<form onSubmit={handleSubmit}>
 							<div className="grid grid-cols-1 gap-4">
 								<p className="text-sm text-foreground/60">
-									{t(
-										"settings.account.security.twoFactor.dialog.totpUrl.description",
-									)}
+									Use your preferred authenticator app and
+									scan the QR code with it or enter the secret
+									below manually to set up two-factor
+									authentication.
 								</p>
 								<Card className="flex flex-col items-center gap-4 p-6">
 									<QRCode title={totpURI} value={totpURI} />
@@ -257,9 +242,8 @@ export function TwoFactorBlock() {
 								<div className="grid grid-cols-1 gap-4">
 									<FormItem>
 										<Label className="block">
-											{t(
-												"settings.account.security.twoFactor.dialog.totpUrl.code",
-											)}
+											Enter 6-digit code to verify the
+											setup:
 										</Label>
 										<Input
 											value={totpCode}
@@ -278,7 +262,7 @@ export function TwoFactorBlock() {
 									loading={verifyTwoFactorMutation.isPending}
 								>
 									<CheckIcon className="mr-1.5 size-4" />
-									{t("common.actions.verify")}
+									Verify
 								</Button>
 							</div>
 						</form>

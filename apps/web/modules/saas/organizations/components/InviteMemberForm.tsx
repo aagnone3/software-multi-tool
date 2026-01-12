@@ -15,7 +15,6 @@ import {
 	FormLabel,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
-import { useTranslations } from "next-intl";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -33,7 +32,6 @@ export function InviteMemberForm({
 }: {
 	organizationId: string;
 }) {
-	const t = useTranslations();
 	const queryClient = useQueryClient();
 
 	const form = useForm<FormValues>({
@@ -61,26 +59,16 @@ export function InviteMemberForm({
 				queryKey: fullOrganizationQueryKey(organizationId),
 			});
 
-			toast.success(
-				t(
-					"organizations.settings.members.inviteMember.notifications.success.title",
-				),
-			);
+			toast.success("Member invited");
 		} catch {
-			toast.error(
-				t(
-					"organizations.settings.members.inviteMember.notifications.error.title",
-				),
-			);
+			toast.error("Could not invite member");
 		}
 	};
 
 	return (
 		<SettingsItem
-			title={t("organizations.settings.members.inviteMember.title")}
-			description={t(
-				"organizations.settings.members.inviteMember.description",
-			)}
+			title="Invite member"
+			description="To invite a new member, send them an invitation."
 		>
 			<Form {...form}>
 				<form
@@ -94,11 +82,7 @@ export function InviteMemberForm({
 								name="email"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t(
-												"organizations.settings.members.inviteMember.email",
-											)}
-										</FormLabel>
+										<FormLabel>Email</FormLabel>
 										<FormControl>
 											<Input type="email" {...field} />
 										</FormControl>
@@ -113,11 +97,7 @@ export function InviteMemberForm({
 								name="role"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t(
-												"organizations.settings.members.inviteMember.role",
-											)}
-										</FormLabel>
+										<FormLabel>Role</FormLabel>
 										<FormControl>
 											<OrganizationRoleSelect
 												value={field.value}
@@ -135,9 +115,7 @@ export function InviteMemberForm({
 							type="submit"
 							loading={form.formState.isSubmitting}
 						>
-							{t(
-								"organizations.settings.members.inviteMember.submit",
-							)}
+							Invite
 						</Button>
 					</div>
 				</form>

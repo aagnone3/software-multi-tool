@@ -6,11 +6,9 @@ import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayo
 import { Logo } from "@shared/components/Logo";
 import { Building2Icon, ScrollTextIcon, UsersIcon } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
-	const t = await getTranslations();
 	const session = await getSession();
 
 	if (!session) {
@@ -24,8 +22,8 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 	return (
 		<>
 			<PageHeader
-				title={t("admin.title")}
-				subtitle={t("admin.description")}
+				title="Administration"
+				subtitle="Manage your application."
 			/>
 			<SidebarContentLayout
 				sidebar={
@@ -38,10 +36,10 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 										withLabel={false}
 									/>
 								),
-								title: t("admin.title"),
+								title: "Administration",
 								items: [
 									{
-										title: t("admin.menu.users"),
+										title: "Users",
 										href: "/app/admin/users",
 										icon: (
 											<UsersIcon className="size-4 opacity-50" />
@@ -50,9 +48,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 									...(config.organizations.enable
 										? [
 												{
-													title: t(
-														"admin.menu.organizations",
-													),
+													title: "Organizations",
 													href: "/app/admin/organizations",
 													icon: (
 														<Building2Icon className="size-4 opacity-50" />
@@ -61,7 +57,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 											]
 										: []),
 									{
-										title: t("admin.menu.auditLogs"),
+										title: "Audit Logs",
 										href: "/app/admin/audit-logs",
 										icon: (
 											<ScrollTextIcon className="size-4 opacity-50" />

@@ -37,7 +37,6 @@ import {
 	TableRow,
 } from "@ui/components/table";
 import { CheckCircle2Icon, DownloadIcon, XCircleIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -61,6 +60,23 @@ type AuditAction =
 	| "SUBSCRIPTION_CHANGE"
 	| "PAYMENT";
 
+const actionLabels: Record<AuditAction, string> = {
+	CREATE: "Create",
+	READ: "Read",
+	UPDATE: "Update",
+	DELETE: "Delete",
+	LOGIN: "Login",
+	LOGOUT: "Logout",
+	PASSWORD_CHANGE: "Password Change",
+	MFA_SETUP: "MFA Setup",
+	MFA_DISABLE: "MFA Disable",
+	IMPERSONATE: "Impersonate",
+	INVITE: "Invite",
+	EXPORT: "Export",
+	SUBSCRIPTION_CHANGE: "Subscription Change",
+	PAYMENT: "Payment",
+};
+
 interface AuditLog {
 	id: string;
 	createdAt: Date;
@@ -77,7 +93,6 @@ interface AuditLog {
 }
 
 export function AuditLogList() {
-	const t = useTranslations();
 	const [currentPage, setCurrentPage] = useQueryState(
 		"page",
 		parseAsInteger.withDefault(1),
@@ -143,7 +158,7 @@ export function AuditLogList() {
 	]);
 
 	const handleExport = async (format: "json" | "csv") => {
-		const toastId = toast.loading(t("admin.auditLogs.export.exporting"));
+		const toastId = toast.loading("Exporting...");
 
 		try {
 			const response = await orpc.admin.auditLogs.export.call({
@@ -174,9 +189,9 @@ export function AuditLogList() {
 			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
 
-			toast.success(t("admin.auditLogs.export.success"), { id: toastId });
+			toast.success("Export successful.", { id: toastId });
 		} catch {
-			toast.error(t("admin.auditLogs.export.error"), { id: toastId });
+			toast.error("Export failed.", { id: toastId });
 		}
 	};
 
@@ -184,7 +199,7 @@ export function AuditLogList() {
 		() => [
 			{
 				accessorKey: "createdAt",
-				header: t("admin.auditLogs.columns.timestamp"),
+				header: "Timestamp",
 				cell: ({ row }) => (
 					<span className="text-sm text-muted-foreground whitespace-nowrap">
 						{new Date(row.original.createdAt).toLocaleString()}
@@ -193,16 +208,16 @@ export function AuditLogList() {
 			},
 			{
 				accessorKey: "action",
-				header: t("admin.auditLogs.columns.action"),
+				header: "Action",
 				cell: ({ row }) => (
 					<Badge status="info">
-						{t(`admin.auditLogs.actions.${row.original.action}`)}
+						{actionLabels[row.original.action]}
 					</Badge>
 				),
 			},
 			{
 				accessorKey: "resource",
-				header: t("admin.auditLogs.columns.resource"),
+				header: "Resource",
 				cell: ({ row }) => (
 					<span className="font-medium capitalize">
 						{row.original.resource}
@@ -216,7 +231,7 @@ export function AuditLogList() {
 			},
 			{
 				accessorKey: "userId",
-				header: t("admin.auditLogs.columns.user"),
+				header: "User",
 				cell: ({ row }) => (
 					<span className="text-sm">
 						{row.original.userId ? (
@@ -233,7 +248,7 @@ export function AuditLogList() {
 			},
 			{
 				accessorKey: "ipAddress",
-				header: t("admin.auditLogs.columns.ipAddress"),
+				header: "IP Address",
 				cell: ({ row }) => (
 					<span className="font-mono text-sm text-muted-foreground">
 						{row.original.ipAddress || "-"}
@@ -242,7 +257,7 @@ export function AuditLogList() {
 			},
 			{
 				accessorKey: "success",
-				header: t("admin.auditLogs.columns.status"),
+				header: "Status",
 				cell: ({ row }) =>
 					row.original.success ? (
 						<CheckCircle2Icon className="size-4 text-green-500" />
@@ -251,7 +266,7 @@ export function AuditLogList() {
 					),
 			},
 		],
-		[t],
+		[],
 	);
 
 	const logs = useMemo(() => (data?.logs ?? []) as AuditLog[], [data?.logs]);
@@ -267,23 +282,21 @@ export function AuditLogList() {
 	return (
 		<Card className="p-6">
 			<div className="flex items-center justify-between mb-4">
-				<h2 className="font-semibold text-2xl">
-					{t("admin.auditLogs.title")}
-				</h2>
+				<h2 className="font-semibold text-2xl">Audit Logs</h2>
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button variant="outline" size="sm">
 							<DownloadIcon className="size-4 mr-2" />
-							{t("admin.auditLogs.export.title")}
+							Export
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
 						<DropdownMenuItem onClick={() => handleExport("json")}>
-							{t("admin.auditLogs.export.json")}
+							Export as JSON
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={() => handleExport("csv")}>
-							{t("admin.auditLogs.export.csv")}
+							Export as CSV
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -292,7 +305,7 @@ export function AuditLogList() {
 			<div className="flex flex-wrap gap-4 mb-4">
 				<Input
 					type="search"
-					placeholder={t("admin.auditLogs.search")}
+					placeholder="Search..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 					className="max-w-xs"
@@ -305,19 +318,13 @@ export function AuditLogList() {
 					}
 				>
 					<SelectTrigger className="w-[180px]">
-						<SelectValue
-							placeholder={t(
-								"admin.auditLogs.filters.allActions",
-							)}
-						/>
+						<SelectValue placeholder="All Actions" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">
-							{t("admin.auditLogs.filters.allActions")}
-						</SelectItem>
+						<SelectItem value="all">All Actions</SelectItem>
 						{filtersData?.actions.map((action) => (
 							<SelectItem key={action} value={action}>
-								{t(`admin.auditLogs.actions.${action}`)}
+								{actionLabels[action as AuditAction]}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -330,16 +337,10 @@ export function AuditLogList() {
 					}
 				>
 					<SelectTrigger className="w-[180px]">
-						<SelectValue
-							placeholder={t(
-								"admin.auditLogs.filters.allResources",
-							)}
-						/>
+						<SelectValue placeholder="All Resources" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">
-							{t("admin.auditLogs.filters.allResources")}
-						</SelectItem>
+						<SelectItem value="all">All Resources</SelectItem>
 						{filtersData?.resources.map((resource) => (
 							<SelectItem key={resource} value={resource}>
 								{resource}
@@ -355,22 +356,12 @@ export function AuditLogList() {
 					}
 				>
 					<SelectTrigger className="w-[150px]">
-						<SelectValue
-							placeholder={t(
-								"admin.auditLogs.filters.allStatuses",
-							)}
-						/>
+						<SelectValue placeholder="All Statuses" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">
-							{t("admin.auditLogs.filters.allStatuses")}
-						</SelectItem>
-						<SelectItem value="success">
-							{t("admin.auditLogs.filters.successful")}
-						</SelectItem>
-						<SelectItem value="failed">
-							{t("admin.auditLogs.filters.failed")}
-						</SelectItem>
+						<SelectItem value="all">All Statuses</SelectItem>
+						<SelectItem value="success">Successful</SelectItem>
+						<SelectItem value="failed">Failed</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
@@ -422,10 +413,10 @@ export function AuditLogList() {
 									{isLoading ? (
 										<div className="flex h-full items-center justify-center">
 											<Spinner className="mr-2 size-4 text-primary" />
-											{t("admin.auditLogs.loading")}
+											Loading audit logs...
 										</div>
 									) : (
-										<p>{t("admin.auditLogs.noResults")}</p>
+										<p>No results.</p>
 									)}
 								</TableCell>
 							</TableRow>

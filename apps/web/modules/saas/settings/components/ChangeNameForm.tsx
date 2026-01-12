@@ -6,7 +6,6 @@ import { useSession } from "@saas/auth/hooks/use-session";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,7 +18,6 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export function ChangeNameForm() {
 	const { user, reloadSession } = useSession();
-	const t = useTranslations();
 
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
@@ -34,11 +32,11 @@ export function ChangeNameForm() {
 		});
 
 		if (error) {
-			toast.error(t("settings.account.changeName.notifications.error"));
+			toast.error("Could not update name");
 			return;
 		}
 
-		toast.success(t("settings.account.changeName.notifications.success"));
+		toast.success("Name was updated successfully");
 
 		reloadSession();
 
@@ -48,7 +46,7 @@ export function ChangeNameForm() {
 	});
 
 	return (
-		<SettingsItem title={t("settings.account.changeName.title")}>
+		<SettingsItem title="Your name">
 			<form onSubmit={onSubmit}>
 				<Input type="text" {...form.register("name")} />
 
@@ -63,7 +61,7 @@ export function ChangeNameForm() {
 							)
 						}
 					>
-						{t("settings.save")}
+						Save
 					</Button>
 				</div>
 			</form>

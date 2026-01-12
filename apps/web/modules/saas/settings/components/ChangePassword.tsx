@@ -13,7 +13,6 @@ import {
 	FormMessage,
 } from "@ui/components/form";
 import { PasswordInput } from "@ui/components/password-input";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,7 +23,6 @@ const formSchema = z.object({
 });
 
 export function ChangePasswordForm() {
-	const t = useTranslations();
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -42,26 +40,18 @@ export function ChangePasswordForm() {
 		});
 
 		if (error) {
-			toast.error(
-				t(
-					"settings.account.security.changePassword.notifications.error",
-				),
-			);
+			toast.error("Could not update password");
 
 			return;
 		}
 
-		toast.success(
-			t("settings.account.security.changePassword.notifications.success"),
-		);
+		toast.success("Password was updated successfully");
 		form.reset({});
 		router.refresh();
 	});
 
 	return (
-		<SettingsItem
-			title={t("settings.account.security.changePassword.title")}
-		>
+		<SettingsItem title="Your password">
 			<Form {...form}>
 				<form onSubmit={onSubmit}>
 					<div className="grid grid-cols-1 gap-4">
@@ -70,11 +60,7 @@ export function ChangePasswordForm() {
 							name="currentPassword"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t(
-											"settings.account.security.changePassword.currentPassword",
-										)}
-									</FormLabel>
+									<FormLabel>Current password</FormLabel>
 
 									<FormControl>
 										<PasswordInput
@@ -92,11 +78,7 @@ export function ChangePasswordForm() {
 							name="newPassword"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t(
-											"settings.account.security.changePassword.newPassword",
-										)}
-									</FormLabel>
+									<FormLabel>New password</FormLabel>
 									<FormControl>
 										<PasswordInput
 											autoComplete="new-password"
@@ -119,7 +101,7 @@ export function ChangePasswordForm() {
 									)
 								}
 							>
-								{t("settings.save")}
+								Save
 							</Button>
 						</div>
 					</div>

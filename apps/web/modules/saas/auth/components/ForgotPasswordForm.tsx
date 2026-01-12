@@ -16,7 +16,6 @@ import {
 import { Input } from "@ui/components/input";
 import { AlertTriangleIcon, ArrowLeftIcon, MailboxIcon } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -27,7 +26,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ForgotPasswordForm() {
-	const t = useTranslations();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
 
 	const form = useForm<FormValues>({
@@ -65,21 +63,17 @@ export function ForgotPasswordForm() {
 
 	return (
 		<>
-			<h1 className="font-bold text-xl md:text-2xl">
-				{t("auth.forgotPassword.title")}
-			</h1>
+			<h1 className="font-bold text-xl md:text-2xl">Forgot password</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				{t("auth.forgotPassword.message")}{" "}
+				Enter your email to receive a password reset link.{" "}
 			</p>
 
 			{form.formState.isSubmitSuccessful ? (
 				<Alert variant="success">
 					<MailboxIcon />
-					<AlertTitle>
-						{t("auth.forgotPassword.hints.linkSent.title")}
-					</AlertTitle>
+					<AlertTitle>Check your inbox!</AlertTitle>
 					<AlertDescription>
-						{t("auth.forgotPassword.hints.linkSent.message")}
+						We have sent an email with a password reset link.
 					</AlertDescription>
 				</Alert>
 			) : (
@@ -102,9 +96,7 @@ export function ForgotPasswordForm() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t("auth.forgotPassword.email")}
-									</FormLabel>
+									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input
 											{...field}
@@ -117,7 +109,7 @@ export function ForgotPasswordForm() {
 						/>
 
 						<Button loading={form.formState.isSubmitting}>
-							{t("auth.forgotPassword.submit")}
+							Send reset link
 						</Button>
 					</form>
 				</Form>
@@ -126,7 +118,7 @@ export function ForgotPasswordForm() {
 			<div className="mt-6 text-center text-sm">
 				<Link href="/auth/login">
 					<ArrowLeftIcon className="mr-1 inline size-4 align-middle" />
-					{t("auth.forgotPassword.backToSignin")}
+					Back to sign in
 				</Link>
 			</div>
 		</>

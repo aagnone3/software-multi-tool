@@ -1,5 +1,4 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 import { docsSource } from "../../../../docs-source";
 
@@ -9,7 +8,6 @@ export default async function DocumentationLayout({
 }: PropsWithChildren<{
 	params: Promise<{ locale: string }>;
 }>) {
-	const t = await getTranslations();
 	const { locale } = await params;
 
 	return (
@@ -18,7 +16,7 @@ export default async function DocumentationLayout({
 				tree={docsSource.pageTree[locale]}
 				i18n
 				nav={{
-					title: <strong>{t("documentation.title")}</strong>,
+					title: <strong>Documentation</strong>,
 					url: "/docs",
 				}}
 				sidebar={{

@@ -4,12 +4,10 @@ import { InviteMemberForm } from "@saas/organizations/components/InviteMemberFor
 import { OrganizationMembersBlock } from "@saas/organizations/components/OrganizationMembersBlock";
 import { SettingsList } from "@saas/shared/components/SettingsList";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-export async function generateMetadata() {
-	const t = await getTranslations();
 
+export async function generateMetadata() {
 	return {
-		title: t("organizations.settings.title"),
+		title: "Organization",
 	};
 }
 

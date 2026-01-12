@@ -27,7 +27,6 @@ import { Input } from "@ui/components/input";
 import { Table, TableBody, TableCell, TableRow } from "@ui/components/table";
 import { EditIcon, MoreVerticalIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -37,7 +36,6 @@ import { useDebounceValue } from "usehooks-ts";
 const ITEMS_PER_PAGE = 10;
 
 export function OrganizationList() {
-	const t = useTranslations();
 	const { confirm } = useConfirmationAlert();
 	const queryClient = useQueryClient();
 	const [currentPage, setCurrentPage] = useQueryState(
@@ -98,14 +96,14 @@ export function OrganizationList() {
 				}
 			},
 			{
-				loading: t("admin.organizations.deleteOrganization.deleting"),
+				loading: "Deleting organization...",
 				success: () => {
 					queryClient.invalidateQueries({
 						queryKey: orpc.admin.organizations.list.key(),
 					});
-					return t("admin.organizations.deleteOrganization.deleted");
+					return "Organization deleted.";
 				},
-				error: t("admin.organizations.deleteOrganization.notDeleted"),
+				error: "Failed to delete organization.",
 			},
 		);
 	};
@@ -133,9 +131,9 @@ export function OrganizationList() {
 								{name}
 							</Link>
 							<small>
-								{t("admin.organizations.membersCount", {
-									count: membersCount,
-								})}
+								{membersCount === 1
+									? "1 member"
+									: `${membersCount} members`}
 							</small>
 						</div>
 					</div>
@@ -164,21 +162,16 @@ export function OrganizationList() {
 											className="flex items-center"
 										>
 											<EditIcon className="mr-2 size-4" />
-											{t("admin.organizations.edit")}
+											Edit
 										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() =>
 											confirm({
-												title: t(
-													"admin.organizations.confirmDelete.title",
-												),
-												message: t(
-													"admin.organizations.confirmDelete.message",
-												),
-												confirmLabel: t(
-													"admin.organizations.confirmDelete.confirm",
-												),
+												title: "Delete organization",
+												message:
+													"Are you sure you want to delete this organization?",
+												confirmLabel: "Delete",
 												destructive: true,
 												onConfirm: () =>
 													deleteOrganization(id),
@@ -187,7 +180,7 @@ export function OrganizationList() {
 									>
 										<span className="flex items-center text-destructive hover:text-destructive">
 											<TrashIcon className="mr-2 size-4" />
-											{t("admin.organizations.delete")}
+											Delete
 										</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
@@ -216,20 +209,18 @@ export function OrganizationList() {
 	return (
 		<Card className="p-6">
 			<div className="mb-4 flex items-center justify-between gap-6">
-				<h2 className="font-semibold text-2xl">
-					{t("admin.organizations.title")}
-				</h2>
+				<h2 className="font-semibold text-2xl">Organizations</h2>
 
 				<Button asChild>
 					<Link href={getAdminPath("/organizations/new")}>
 						<PlusIcon className="mr-1.5 size-4" />
-						{t("admin.organizations.create")}
+						Create
 					</Link>
 				</Button>
 			</div>
 			<Input
 				type="search"
-				placeholder={t("admin.organizations.search")}
+				placeholder="Search..."
 				value={searchTerm}
 				onChange={(e) => setSearchTerm(e.target.value)}
 				className="mb-4"
@@ -269,7 +260,7 @@ export function OrganizationList() {
 									{isLoading ? (
 										<div className="flex h-full items-center justify-center">
 											<Spinner className="mr-2 size-4 text-primary" />
-											{t("admin.organizations.loading")}
+											Loading organizations...
 										</div>
 									) : (
 										<p>No results.</p>

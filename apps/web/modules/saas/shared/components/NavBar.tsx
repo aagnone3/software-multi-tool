@@ -16,11 +16,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 
 export function NavBar() {
-	const t = useTranslations();
 	const pathname = usePathname();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
@@ -33,19 +31,19 @@ export function NavBar() {
 
 	const menuItems = [
 		{
-			label: t("app.menu.start"),
+			label: "Start",
 			href: basePath,
 			icon: HomeIcon,
 			isActive: pathname === basePath,
 		},
 		{
-			label: t("app.menu.tools"),
+			label: "Tools",
 			href: "/app/tools",
 			icon: WrenchIcon,
 			isActive: pathname.startsWith("/app/tools"),
 		},
 		{
-			label: t("app.menu.aiChatbot"),
+			label: "AI Chatbot",
 			href: activeOrganization
 				? `/app/${activeOrganization.slug}/chatbot`
 				: "/app/chatbot",
@@ -55,7 +53,7 @@ export function NavBar() {
 		...(activeOrganization && !config.organizations.hideOrganization
 			? [
 					{
-						label: t("app.menu.organizationSettings"),
+						label: "Organization settings",
 						href: `${basePath}/settings`,
 						icon: SettingsIcon,
 						isActive: pathname.startsWith(`${basePath}/settings/`),
@@ -63,7 +61,7 @@ export function NavBar() {
 				]
 			: []),
 		{
-			label: t("app.menu.accountSettings"),
+			label: "Account settings",
 			href: "/app/settings",
 			icon: UserCog2Icon,
 			isActive: pathname.startsWith("/app/settings/"),
@@ -71,7 +69,7 @@ export function NavBar() {
 		...(user?.role === "admin"
 			? [
 					{
-						label: t("app.menu.admin"),
+						label: "Admin",
 						href: "/app/admin",
 						icon: UserCogIcon,
 						isActive: pathname.startsWith("/app/admin/"),

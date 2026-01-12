@@ -24,7 +24,6 @@ import {
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -35,7 +34,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function OtpForm() {
-	const t = useTranslations();
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
 	const searchParams = useSearchParams();
@@ -79,10 +77,10 @@ export function OtpForm() {
 	return (
 		<>
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("auth.verify.title")}
+				Two-factor authentication
 			</h1>
 			<p className="mt-1 mb-4 text-foreground/60">
-				{t("auth.verify.message")}
+				Please enter the 6-digit code from your authenticator app.
 			</p>
 
 			<Form {...form}>
@@ -104,7 +102,7 @@ export function OtpForm() {
 						name="code"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>{t("auth.verify.code")}</FormLabel>
+								<FormLabel>Code</FormLabel>
 								<FormControl>
 									<InputOTP
 										maxLength={6}
@@ -152,7 +150,7 @@ export function OtpForm() {
 					/>
 
 					<Button loading={form.formState.isSubmitting}>
-						{t("auth.verify.submit")}
+						Verify
 					</Button>
 				</form>
 			</Form>
@@ -160,7 +158,7 @@ export function OtpForm() {
 			<div className="mt-6 text-center text-sm">
 				<Link href="/auth/login">
 					<ArrowLeftIcon className="mr-1 inline size-4 align-middle" />
-					{t("auth.verify.backToSignin")}
+					Back to sign in
 				</Link>
 			</div>
 		</>

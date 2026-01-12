@@ -4,12 +4,10 @@ import { useRouter } from "@shared/hooks/router";
 import { clearCache } from "@shared/lib/cache";
 import { Progress } from "@ui/components/progress";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
 
 export function OnboardingForm() {
-	const t = useTranslations();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -46,10 +44,10 @@ export function OnboardingForm() {
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("onboarding.title")}
+				Let's get you started
 			</h1>
 			<p className="mt-2 mb-6 text-foreground/60">
-				{t("onboarding.message")}
+				We need some information to set up your account.
 			</p>
 
 			{steps.length > 1 && (
@@ -59,10 +57,7 @@ export function OnboardingForm() {
 						className="h-2"
 					/>
 					<span className="shrink-0 text-foreground/60 text-xs">
-						{t("onboarding.step", {
-							step: onboardingStep,
-							total: steps.length,
-						})}
+						{`Step ${onboardingStep} of ${steps.length}`}
 					</span>
 				</div>
 			)}

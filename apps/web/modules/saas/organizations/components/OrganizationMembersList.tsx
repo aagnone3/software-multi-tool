@@ -32,7 +32,6 @@ import {
 } from "@ui/components/dropdown-menu";
 import { Table, TableBody, TableCell, TableRow } from "@ui/components/table";
 import { LogOutIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
@@ -42,7 +41,6 @@ export function OrganizationMembersList({
 }: {
 	organizationId: string;
 }) {
-	const t = useTranslations();
 	const queryClient = useQueryClient();
 	const { user } = useSession();
 	const { data: organization } = useFullOrganizationQuery(organizationId);
@@ -65,21 +63,15 @@ export function OrganizationMembersList({
 				});
 			},
 			{
-				loading: t(
-					"organizations.settings.members.notifications.updateMembership.loading.description",
-				),
+				loading: "Updating membership...",
 				success: () => {
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
 					});
 
-					return t(
-						"organizations.settings.members.notifications.updateMembership.success.description",
-					);
+					return "Membership was updated successfully";
 				},
-				error: t(
-					"organizations.settings.members.notifications.updateMembership.error.description",
-				),
+				error: "Could not update organization membership. Please try again.",
 			},
 		);
 	};
@@ -93,21 +85,15 @@ export function OrganizationMembersList({
 				});
 			},
 			{
-				loading: t(
-					"organizations.settings.members.notifications.removeMember.loading.description",
-				),
+				loading: "Removing member from organization...",
 				success: () => {
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
 					});
 
-					return t(
-						"organizations.settings.members.notifications.removeMember.success.description",
-					);
+					return "The member has been successfully removed from your organization.";
 				},
-				error: t(
-					"organizations.settings.members.notifications.removeMember.error.description",
-				),
+				error: "Could not remove the member from your organization. Please try again.",
 			},
 		);
 	};
@@ -181,9 +167,7 @@ export function OrganizationMembersList({
 												}
 											>
 												<TrashIcon className="mr-2 size-4" />
-												{t(
-													"organizations.settings.members.removeMember",
-												)}
+												Remove member
 											</DropdownMenuItem>
 										)}
 										{row.original.userId === user?.id && (
@@ -196,9 +180,7 @@ export function OrganizationMembersList({
 												}
 											>
 												<LogOutIcon className="mr-2 size-4" />
-												{t(
-													"organizations.settings.members.leaveOrganization",
-												)}
+												Leave organization
 											</DropdownMenuItem>
 										)}
 									</DropdownMenuContent>

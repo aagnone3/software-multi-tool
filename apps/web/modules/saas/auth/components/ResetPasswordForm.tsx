@@ -20,7 +20,6 @@ import { PasswordInput } from "@ui/components/password-input";
 import { AlertTriangleIcon, ArrowLeftIcon, MailboxIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -31,7 +30,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ResetPasswordForm() {
-	const t = useTranslations();
 	const { user } = useSession();
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
@@ -72,18 +70,17 @@ export function ResetPasswordForm() {
 
 	return (
 		<>
-			<h1 className="font-bold text-xl md:text-2xl">
-				{t("auth.resetPassword.title")}
-			</h1>
+			<h1 className="font-bold text-xl md:text-2xl">Reset password</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				{t("auth.resetPassword.message")}{" "}
+				Enter your new password below.{" "}
 			</p>
 
 			{form.formState.isSubmitSuccessful ? (
 				<Alert variant="success">
 					<MailboxIcon />
 					<AlertTitle>
-						{t("auth.resetPassword.hints.success")}
+						Your password has been updated successfully. You can now
+						sign in with your new password.
 					</AlertTitle>
 				</Alert>
 			) : (
@@ -106,9 +103,7 @@ export function ResetPasswordForm() {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t("auth.resetPassword.newPassword")}
-									</FormLabel>
+									<FormLabel>New password</FormLabel>
 									<FormControl>
 										<PasswordInput
 											autoComplete="new-password"
@@ -121,7 +116,7 @@ export function ResetPasswordForm() {
 						/>
 
 						<Button loading={form.formState.isSubmitting}>
-							{t("auth.resetPassword.submit")}
+							Reset password
 						</Button>
 					</form>
 				</Form>
@@ -130,7 +125,7 @@ export function ResetPasswordForm() {
 			<div className="mt-6 text-center text-sm">
 				<Link href="/auth/login">
 					<ArrowLeftIcon className="mr-1 inline size-4 align-middle" />
-					{t("auth.resetPassword.backToSignin")}
+					Back to sign in
 				</Link>
 			</div>
 		</>

@@ -34,16 +34,23 @@ import {
 	MoreVerticalIcon,
 	XIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter } from "next-intl";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
+
+const invitationStatusLabels: Record<string, string> = {
+	pending: "Pending",
+	accepted: "Accepted",
+	rejected: "Rejected",
+	canceled: "Canceled",
+};
+
 export function OrganizationInvitationsList({
 	organizationId,
 }: {
 	organizationId: string;
 }) {
-	const t = useTranslations();
 	const queryClient = useQueryClient();
 	const { user } = useSession();
 	const formatter = useFormatter();
@@ -76,20 +83,14 @@ export function OrganizationInvitationsList({
 				}
 			},
 			{
-				loading: t(
-					"organizations.settings.members.notifications.revokeInvitation.loading.description",
-				),
+				loading: "Revoking invitation...",
 				success: () => {
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
 					});
-					return t(
-						"organizations.settings.members.notifications.revokeInvitation.success.description",
-					);
+					return "The invitation has been revoked.";
 				},
-				error: t(
-					"organizations.settings.members.notifications.revokeInvitation.error.description",
-				),
+				error: "The invitation could not be revoked. Please try again later.",
 			},
 		);
 	};
@@ -120,24 +121,17 @@ export function OrganizationInvitationsList({
 						<small className="flex flex-wrap gap-1 text-foreground/60">
 							<span className="flex items-center gap-0.5">
 								<InvitationStatusIcon className="size-3" />
-								{t(
-									`organizations.settings.members.invitations.invitationStatus.${row.original.status}`,
-								)}
+								{invitationStatusLabels[row.original.status]}
 							</span>
 							<span>-</span>
 							<span>
-								{t(
-									"organizations.settings.members.invitations.expiresAt",
+								{`Expires at ${formatter.dateTime(
+									new Date(row.original.expiresAt),
 									{
-										date: formatter.dateTime(
-											new Date(row.original.expiresAt),
-											{
-												dateStyle: "medium",
-												timeStyle: "short",
-											},
-										),
+										dateStyle: "medium",
+										timeStyle: "short",
 									},
-								)}
+								)}`}
 							</span>
 						</small>
 					</div>
@@ -174,9 +168,7 @@ export function OrganizationInvitationsList({
 										}
 									>
 										<MailXIcon className="mr-2 size-4" />
-										{t(
-											"organizations.settings.members.invitations.revoke",
-										)}
+										Revoke invitation
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -222,9 +214,7 @@ export function OrganizationInvitationsList({
 								colSpan={columns.length}
 								className="h-24 text-center"
 							>
-								{t(
-									"organizations.settings.members.invitations.empty",
-								)}
+								You have not invited any members yet.
 							</TableCell>
 						</TableRow>
 					)}

@@ -7,18 +7,14 @@ import { useOrganizationListQuery } from "@saas/organizations/lib/api";
 import { Card } from "@ui/components/card";
 import { ChevronRightIcon, PlusCircleIcon } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 
 export function OrganizationsGrid() {
-	const t = useTranslations();
 	const { setActiveOrganization } = useActiveOrganization();
 	const { data: allOrganizations } = useOrganizationListQuery();
 
 	return (
 		<div className="@container">
-			<h2 className="mb-2 font-semibold text-lg">
-				{t("organizations.organizationsGrid.title")}
-			</h2>
+			<h2 className="mb-2 font-semibold text-lg">Your organizations</h2>
 			<div className="grid @2xl:grid-cols-3 @lg:grid-cols-2 grid-cols-1 gap-4">
 				{allOrganizations?.map((organization) => (
 					<Card
@@ -47,9 +43,7 @@ export function OrganizationsGrid() {
 					>
 						<PlusCircleIcon />
 						<span className="font-medium text-sm">
-							{t(
-								"organizations.organizationsGrid.createNewOrganization",
-							)}
+							Create new organization
 						</span>
 					</Link>
 				)}

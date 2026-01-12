@@ -12,7 +12,6 @@ import {
 	Users2Icon,
 } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 
 export default async function SettingsLayout({
@@ -21,7 +20,6 @@ export default async function SettingsLayout({
 }: PropsWithChildren<{
 	params: Promise<{ organizationSlug: string }>;
 }>) {
-	const t = await getTranslations();
 	const session = await getSession();
 	const { organizationSlug } = await params;
 	const organization = await getActiveOrganization(organizationSlug);
@@ -39,7 +37,7 @@ export default async function SettingsLayout({
 
 	const menuItems = [
 		{
-			title: t("settings.menu.organization.title"),
+			title: "Organization",
 			avatar: (
 				<OrganizationLogo
 					name={organization.name}
@@ -48,12 +46,12 @@ export default async function SettingsLayout({
 			),
 			items: [
 				{
-					title: t("settings.menu.organization.general"),
+					title: "General",
 					href: `${organizationSettingsBasePath}/general`,
 					icon: <Settings2Icon className="size-4 opacity-50" />,
 				},
 				{
-					title: t("settings.menu.organization.members"),
+					title: "Members",
 					href: `${organizationSettingsBasePath}/members`,
 					icon: <Users2Icon className="size-4 opacity-50" />,
 				},
@@ -62,7 +60,7 @@ export default async function SettingsLayout({
 				userIsOrganizationAdmin
 					? [
 							{
-								title: t("settings.menu.organization.billing"),
+								title: "Billing",
 								href: `${organizationSettingsBasePath}/billing`,
 								icon: (
 									<CreditCardIcon className="size-4 opacity-50" />
@@ -73,9 +71,7 @@ export default async function SettingsLayout({
 				...(userIsOrganizationAdmin
 					? [
 							{
-								title: t(
-									"settings.menu.organization.dangerZone",
-								),
+								title: "Danger zone",
 								href: `${organizationSettingsBasePath}/danger-zone`,
 								icon: (
 									<TriangleAlertIcon className="size-4 opacity-50" />
@@ -90,8 +86,8 @@ export default async function SettingsLayout({
 	return (
 		<>
 			<PageHeader
-				title={t("organizations.settings.title")}
-				subtitle={t("organizations.settings.subtitle")}
+				title="Organization"
+				subtitle="Manage the settings of the organization."
 			/>
 			<SidebarContentLayout
 				sidebar={<SettingsMenu menuItems={menuItems} />}

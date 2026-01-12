@@ -15,12 +15,10 @@ import {
 import { cn } from "@ui/lib";
 import { MenuIcon } from "lucide-react";
 import NextLink from "next/link";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 export function NavBar() {
-	const t = useTranslations();
 	const { user } = useSession();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const localePathname = useLocalePathname();
@@ -55,27 +53,27 @@ export function NavBar() {
 		href: string;
 	}[] = [
 		{
-			label: t("common.menu.pricing"),
+			label: "Pricing",
 			href: "/#pricing",
 		},
 		{
-			label: t("common.menu.faq"),
+			label: "FAQ",
 			href: "/#faq",
 		},
 		{
-			label: t("common.menu.blog"),
+			label: "Blog",
 			href: "/blog",
 		},
 		...(config.contactForm.enabled
 			? [
 					{
-						label: t("common.menu.contact"),
+						label: "Contact",
 						href: "/contact",
 					},
 				]
 			: []),
 		{
-			label: t("common.menu.docs"),
+			label: "Docs",
 			href: "/docs",
 		},
 	];
@@ -173,9 +171,7 @@ export function NavBar() {
 										className="block px-3 py-2 text-base"
 										prefetch={!user}
 									>
-										{user
-											? t("common.menu.dashboard")
-											: t("common.menu.login")}
+										{user ? "Dashboard" : "Login"}
 									</NextLink>
 								</div>
 							</SheetContent>
@@ -189,9 +185,7 @@ export function NavBar() {
 									asChild
 									variant="secondary"
 								>
-									<NextLink href="/app">
-										{t("common.menu.dashboard")}
-									</NextLink>
+									<NextLink href="/app">Dashboard</NextLink>
 								</Button>
 							) : (
 								<Button
@@ -201,7 +195,7 @@ export function NavBar() {
 									variant="secondary"
 								>
 									<NextLink href="/auth/login" prefetch>
-										{t("common.menu.login")}
+										Login
 									</NextLink>
 								</Button>
 							))}

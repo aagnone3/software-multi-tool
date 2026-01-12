@@ -6,21 +6,17 @@ import { getPurchases } from "@saas/payments/lib/server";
 import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
 import { attemptAsync } from "es-toolkit";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function generateMetadata() {
-	const t = await getTranslations();
-
 	return {
-		title: t("choosePlan.title"),
+		title: "Choose your plan",
 	};
 }
 
 export default async function ChoosePlanPage() {
-	const t = await getTranslations();
 	const session = await getSession();
 
 	if (!session) {
@@ -56,10 +52,10 @@ export default async function ChoosePlanPage() {
 		<AuthWrapper contentClass="max-w-5xl">
 			<div className="mb-4 text-center">
 				<h1 className="text-center font-bold text-2xl lg:text-3xl">
-					{t("choosePlan.title")}
+					Choose your plan
 				</h1>
 				<p className="text-muted-foreground text-sm lg:text-base">
-					{t("choosePlan.description")}
+					To continue, please select a plan.
 				</p>
 			</div>
 

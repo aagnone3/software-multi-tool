@@ -1,9 +1,6 @@
 import { cn } from "@ui/lib";
-import { useTranslations } from "next-intl";
 
 export function FaqSection({ className }: { className?: string }) {
-	const t = useTranslations();
-
 	const items = [
 		{
 			question: "What is the refund policy?",
@@ -35,9 +32,11 @@ export function FaqSection({ className }: { className?: string }) {
 			<div className="container max-w-5xl">
 				<div className="mb-12 lg:text-center">
 					<h1 className="mb-2 font-bold text-4xl lg:text-5xl">
-						{t("faq.title")}
+						Frequently asked questions
 					</h1>
-					<p className="text-lg opacity-50">{t("faq.description")}</p>
+					<p className="text-lg opacity-50">
+						Do you have any questions? We have got you covered.
+					</p>
 				</div>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					{items.map((item, i) => (

@@ -8,13 +8,10 @@ import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { attemptAsync } from "es-toolkit";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
-	const t = await getTranslations();
-
 	return {
-		title: t("settings.billing.title"),
+		title: "Billing",
 	};
 }
 
