@@ -15,10 +15,12 @@ const envSchema = z.object({
 		.default("development"),
 
 	// Database
-	DATABASE_URL: z.string(),
+	DATABASE_URL: z
+		.string()
+		.default("postgresql://test:test@localhost:5432/test"),
 
 	// Better Auth
-	BETTER_AUTH_SECRET: z.string(),
+	BETTER_AUTH_SECRET: z.string().default("test-secret-for-ci-environment"),
 	BETTER_AUTH_URL: z.string().default("http://localhost:4000"),
 
 	// CORS
