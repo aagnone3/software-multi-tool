@@ -7,7 +7,6 @@ import { useRouter } from "@shared/hooks/router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { CheckIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,7 +21,6 @@ export function OrganizationInvitationModal({
 	organizationSlug: string;
 	logoUrl?: string;
 }) {
-	const t = useTranslations();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [submitting, setSubmitting] = useState<false | "accept" | "reject">(
@@ -60,7 +58,9 @@ export function OrganizationInvitationModal({
 				router.replace("/app");
 			}
 		} catch {
-			toast.error(t("organizations.invitationModal.notifications.error"));
+			toast.error(
+				"We couldn't update your invitation right now. Please try again.",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -69,12 +69,10 @@ export function OrganizationInvitationModal({
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("organizations.invitationModal.title")}
+				Join the organization
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				{t("organizations.invitationModal.description", {
-					organizationName,
-				})}
+				{`You have been invited to join the organization ${organizationName}. Do you want to accept the invitation and join the organization?`}
 			</p>
 
 			<div className="mb-6 flex items-center gap-3 rounded-lg border p-2">
@@ -99,7 +97,7 @@ export function OrganizationInvitationModal({
 					loading={submitting === "reject"}
 				>
 					<XIcon className="mr-1.5 size-4" />
-					{t("organizations.invitationModal.decline")}
+					Decline
 				</Button>
 				<Button
 					className="flex-1"
@@ -108,7 +106,7 @@ export function OrganizationInvitationModal({
 					loading={submitting === "accept"}
 				>
 					<CheckIcon className="mr-1.5 size-4" />
-					{t("organizations.invitationModal.accept")}
+					Accept
 				</Button>
 			</div>
 		</div>

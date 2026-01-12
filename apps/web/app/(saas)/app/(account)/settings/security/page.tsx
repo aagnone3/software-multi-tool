@@ -14,13 +14,10 @@ import { TwoFactorBlock } from "@saas/settings/components/TwoFactorBlock";
 import { SettingsList } from "@saas/shared/components/SettingsList";
 import { getServerQueryClient } from "@shared/lib/server";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
-	const t = await getTranslations();
-
 	return {
-		title: t("settings.account.security.title"),
+		title: "Security",
 	};
 }
 

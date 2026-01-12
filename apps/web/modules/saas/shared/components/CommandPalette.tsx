@@ -18,7 +18,6 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 interface CommandPaletteProps {
@@ -82,7 +81,6 @@ function addRecentItem(id: string, type: RecentItemType): void {
 
 export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 	const router = useRouter();
-	const t = useTranslations();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
 	const [search, setSearch] = useState("");
@@ -98,14 +96,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		const items: NavigationItem[] = [
 			{
 				id: "home",
-				label: t("app.menu.start"),
+				label: "Start",
 				href: basePath,
 				icon: HomeIcon,
 				description: "Go to home page",
 			},
 			{
 				id: "chatbot",
-				label: t("app.menu.aiChatbot"),
+				label: "AI Chatbot",
 				href: activeOrganization
 					? `/app/${activeOrganization.slug}/chatbot`
 					: "/app/chatbot",
@@ -114,7 +112,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 			},
 			{
 				id: "account-settings",
-				label: t("app.menu.accountSettings"),
+				label: "Account settings",
 				href: "/app/settings",
 				icon: UserCog2Icon,
 				description: "Manage your account settings",
@@ -124,7 +122,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		if (activeOrganization && !config.organizations.hideOrganization) {
 			items.push({
 				id: "org-settings",
-				label: t("app.menu.organizationSettings"),
+				label: "Organization settings",
 				href: `${basePath}/settings`,
 				icon: SettingsIcon,
 				description: "Manage organization settings",
@@ -134,7 +132,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		if (user?.role === "admin") {
 			items.push({
 				id: "admin",
-				label: t("app.menu.admin"),
+				label: "Admin",
 				href: "/app/admin",
 				icon: UserCogIcon,
 				description: "Admin dashboard",
@@ -142,7 +140,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		}
 
 		return items;
-	}, [t, basePath, activeOrganization, user]);
+	}, [basePath, activeOrganization, user]);
 
 	// Load recent items on mount
 	useEffect(() => {

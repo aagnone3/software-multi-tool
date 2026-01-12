@@ -29,12 +29,10 @@ import {
 	SunIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 
 export function UserMenu({ showUserName }: { showUserName?: boolean }) {
-	const t = useTranslations();
 	const { user } = useSession();
 	const { setTheme: setCurrentTheme, theme: currentTheme } = useTheme();
 	const [theme, setTheme] = useState<string>(currentTheme ?? "system");
@@ -116,7 +114,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger>
 						<SunIcon className="mr-2 size-4" />
-						{t("app.userMenu.colorMode")}
+						Color mode
 					</DropdownMenuSubTrigger>
 					<DropdownMenuPortal>
 						<DropdownMenuSubContent>
@@ -146,27 +144,27 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				<DropdownMenuItem asChild>
 					<Link href="/app/settings/general">
 						<SettingsIcon className="mr-2 size-4" />
-						{t("app.userMenu.accountSettings")}
+						Account settings
 					</Link>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem asChild>
 					<Link href="/docs">
 						<BookIcon className="mr-2 size-4" />
-						{t("app.userMenu.documentation")}
+						Documentation
 					</Link>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem asChild>
 					<Link href="/">
 						<HomeIcon className="mr-2 size-4" />
-						{t("app.userMenu.home")}
+						Home
 					</Link>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem onClick={onLogout}>
 					<LogOutIcon className="mr-2 size-4" />
-					{t("app.userMenu.logout")}
+					Logout
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

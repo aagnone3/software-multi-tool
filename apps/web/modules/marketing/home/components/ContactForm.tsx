@@ -20,11 +20,9 @@ import {
 import { Input } from "@ui/components/input";
 import { Textarea } from "@ui/components/textarea";
 import { MailCheckIcon, MailIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 export function ContactForm() {
-	const t = useTranslations();
 	const contactFormMutation = useMutation(
 		orpc.contact.submit.mutationOptions(),
 	);
@@ -43,7 +41,8 @@ export function ContactForm() {
 			await contactFormMutation.mutateAsync(values);
 		} catch {
 			form.setError("root", {
-				message: t("contact.form.notifications.error"),
+				message:
+					"We are sorry, but we were unable to send your message. Please try again later.",
 			});
 		}
 	});
@@ -54,7 +53,8 @@ export function ContactForm() {
 				<Alert variant="success">
 					<MailCheckIcon />
 					<AlertTitle>
-						{t("contact.form.notifications.success")}
+						Your message has been sent successfully. We will get
+						back to you as soon as possible.
 					</AlertTitle>
 				</Alert>
 			) : (
@@ -77,9 +77,7 @@ export function ContactForm() {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t("contact.form.name")}
-									</FormLabel>
+									<FormLabel>Name</FormLabel>
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
@@ -93,9 +91,7 @@ export function ContactForm() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t("contact.form.email")}
-									</FormLabel>
+									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
@@ -109,9 +105,7 @@ export function ContactForm() {
 							name="message"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										{t("contact.form.message")}
-									</FormLabel>
+									<FormLabel>Message</FormLabel>
 									<FormControl>
 										<Textarea {...field} />
 									</FormControl>
@@ -125,7 +119,7 @@ export function ContactForm() {
 							className="w-full"
 							loading={form.formState.isSubmitting}
 						>
-							{t("contact.form.submit")}
+							Send message
 						</Button>
 					</form>
 				</Form>

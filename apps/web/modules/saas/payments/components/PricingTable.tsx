@@ -17,7 +17,7 @@ import {
 	PhoneIcon,
 	StarIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter } from "next-intl";
 import { useState } from "react";
 
 const plans = config.payments.plans as Config["payments"]["plans"];
@@ -33,7 +33,6 @@ export function PricingTable({
 	organizationId?: string;
 	activePlanId?: string;
 }) {
-	const t = useTranslations();
 	const format = useFormatter();
 	const router = useRouter();
 	const localeCurrency = useLocaleCurrency();
@@ -90,6 +89,13 @@ export function PricingTable({
 		plan.prices?.some((price) => price.type === "recurring"),
 	);
 
+	const formatMonth = (count: number) =>
+		count === 1 ? "month" : `${count} months`;
+	const formatYear = (count: number) =>
+		count === 1 ? "year" : `${count} years`;
+	const formatTrialDays = (days: number) =>
+		`${days} ${days === 1 ? "day" : "days"} free trial`;
+
 	return (
 		<div className={cn("@container", className)}>
 			{hasSubscriptions && (
@@ -102,12 +108,8 @@ export function PricingTable({
 						data-test="price-table-interval-tabs"
 					>
 						<TabsList className="border-foreground/10">
-							<TabsTrigger value="month">
-								{t("pricing.monthly")}
-							</TabsTrigger>
-							<TabsTrigger value="year">
-								{t("pricing.yearly")}
-							</TabsTrigger>
+							<TabsTrigger value="month">Monthly</TabsTrigger>
+							<TabsTrigger value="year">Yearly</TabsTrigger>
 						</TabsList>
 					</Tabs>
 				</div>
@@ -163,7 +165,7 @@ export function PricingTable({
 											<div className="-mt-9 flex justify-center">
 												<div className="mb-2 flex h-6 w-auto items-center gap-1.5 rounded-full bg-primary px-2 py-1 font-semibold text-primary-foreground text-xs">
 													<StarIcon className="size-3" />
-													{t("pricing.recommended")}
+													Recommended
 												</div>
 											</div>
 										)}
@@ -207,9 +209,9 @@ export function PricingTable({
 											price.trialPeriodDays && (
 												<div className="mt-4 flex items-center justify-start font-medium text-primary text-sm opacity-80">
 													<BadgePercentIcon className="mr-2 size-4" />
-													{t("pricing.trialPeriod", {
-														days: price.trialPeriodDays,
-													})}
+													{formatTrialDays(
+														price.trialPeriodDays,
+													)}
 												</div>
 											)}
 									</div>
@@ -228,21 +230,13 @@ export function PricingTable({
 													<span className="font-normal text-xs opacity-60">
 														{" / "}
 														{interval === "month"
-															? t(
-																	"pricing.month",
-																	{
-																		count:
-																			price.intervalCount ??
-																			1,
-																	},
+															? formatMonth(
+																	price.intervalCount ??
+																		1,
 																)
-															: t(
-																	"pricing.year",
-																	{
-																		count:
-																			price.intervalCount ??
-																			1,
-																	},
+															: formatYear(
+																	price.intervalCount ??
+																		1,
 																)}
 													</span>
 												)}
@@ -251,9 +245,7 @@ export function PricingTable({
 													price.seatBased && (
 														<span className="font-normal text-xs opacity-60">
 															{" / "}
-															{t(
-																"pricing.perSeat",
-															)}
+															seat
 														</span>
 													)}
 											</strong>
@@ -267,7 +259,7 @@ export function PricingTable({
 											>
 												<LocaleLink href="/contact">
 													<PhoneIcon className="mr-2 size-4" />
-													{t("pricing.contactSales")}
+													Contact sales
 												</LocaleLink>
 											</Button>
 										) : (
@@ -287,8 +279,8 @@ export function PricingTable({
 												loading={loading === planId}
 											>
 												{userId || organizationId
-													? t("pricing.choosePlan")
-													: t("pricing.getStarted")}
+													? "Choose plan"
+													: "Get started"}
 												<ArrowRightIcon className="ml-2 size-4" />
 											</Button>
 										)}

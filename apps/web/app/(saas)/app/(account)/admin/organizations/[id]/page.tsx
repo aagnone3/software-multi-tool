@@ -8,7 +8,6 @@ import { Button } from "@ui/components/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 
 export default async function OrganizationFormPage({
 	params,
@@ -20,7 +19,6 @@ export default async function OrganizationFormPage({
 	const { id } = await params;
 	const { backTo } = await searchParams;
 
-	const t = await getTranslations();
 	const queryClient = getServerQueryClient();
 
 	await queryClient.prefetchQuery({
@@ -41,7 +39,7 @@ export default async function OrganizationFormPage({
 					<Button variant="link" size="sm" asChild className="px-0">
 						<Link href={backTo ?? getAdminPath("/organizations")}>
 							<ArrowLeftIcon className="mr-1.5 size-4" />
-							{t("admin.organizations.backToList")}
+							Back to organizations
 						</Link>
 					</Button>
 				</div>

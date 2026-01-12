@@ -2,17 +2,14 @@ import { config } from "@repo/config";
 import { SignupForm } from "@saas/auth/components/SignupForm";
 import { getInvitation } from "@saas/auth/lib/server";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { withQuery } from "ufo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function generateMetadata() {
-	const t = await getTranslations();
-
 	return {
-		title: t("auth.signup.title"),
+		title: "Create an account",
 	};
 }
 export default async function SignupPage({

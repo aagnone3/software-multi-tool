@@ -6,11 +6,9 @@ import { useConfirmationAlert } from "@saas/shared/components/ConfirmationAlertP
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
-import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function DeleteAccountForm() {
-	const t = useTranslations();
 	const { reloadSession } = useSession();
 	const { confirm } = useConfirmationAlert();
 
@@ -23,22 +21,18 @@ export function DeleteAccountForm() {
 			}
 		},
 		onSuccess: () => {
-			toast.success(
-				t("settings.account.deleteAccount.notifications.success"),
-			);
+			toast.success("Account was deleted successfully");
 			reloadSession();
 		},
 		onError: () => {
-			toast.error(
-				t("settings.account.deleteAccount.notifications.error"),
-			);
+			toast.error("Could not delete account");
 		},
 	});
 
 	const confirmDelete = () => {
 		confirm({
-			title: t("settings.account.deleteAccount.title"),
-			message: t("settings.account.deleteAccount.confirmation"),
+			title: "Delete account",
+			message: "Are you sure you want to delete your account?",
 			onConfirm: async () => {
 				await deleteUserMutation.mutateAsync();
 			},
@@ -48,12 +42,12 @@ export function DeleteAccountForm() {
 	return (
 		<SettingsItem
 			danger
-			title={t("settings.account.deleteAccount.title")}
-			description={t("settings.account.deleteAccount.description")}
+			title="Delete account"
+			description="Permanently delete your account. Once you delete your account, there is no going back. To confirm, please enter your password below:"
 		>
 			<div className="mt-4 flex justify-end">
 				<Button variant="error" onClick={() => confirmDelete()}>
-					{t("settings.account.deleteAccount.submit")}
+					Delete account
 				</Button>
 			</div>
 		</SettingsItem>

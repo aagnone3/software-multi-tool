@@ -6,11 +6,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Skeleton } from "@ui/components/skeleton";
 import { KeyIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter } from "next-intl";
 import { toast } from "sonner";
 
 export function PasskeysBlock() {
-	const t = useTranslations();
 	const queryClient = useQueryClient();
 	const formatter = useFormatter();
 
@@ -21,18 +20,10 @@ export function PasskeysBlock() {
 			fetchOptions: {
 				onSuccess: () => {
 					queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-					toast.success(
-						t(
-							"settings.account.security.passkeys.notifications.addPasskey.success.title",
-						),
-					);
+					toast.success("Passkey added");
 				},
 				onError: () => {
-					toast.error(
-						t(
-							"settings.account.security.passkeys.notifications.addPasskey.error.title",
-						),
-					);
+					toast.error("Could not add passkey");
 				},
 			},
 		});
@@ -46,23 +37,17 @@ export function PasskeysBlock() {
 				});
 			},
 			{
-				loading: t(
-					"settings.account.security.passkeys.notifications.deletePasskey.loading.title",
-				),
-				success: t(
-					"settings.account.security.passkeys.notifications.deletePasskey.success.title",
-				),
-				error: t(
-					"settings.account.security.passkeys.notifications.deletePasskey.error.title",
-				),
+				loading: "Deleting passkey...",
+				success: "Passkey deleted",
+				error: "Could not delete passkey",
 			},
 		);
 	};
 
 	return (
 		<SettingsItem
-			title={t("settings.account.security.passkeys.title")}
-			description={t("settings.account.security.passkeys.description")}
+			title="Passkeys"
+			description="Use passkeys as a secure alternative to passwords."
 		>
 			<div className="grid grid-cols-1 gap-2">
 				{isPending ? (

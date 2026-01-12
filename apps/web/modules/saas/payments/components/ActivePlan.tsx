@@ -4,7 +4,7 @@ import { usePlanData } from "@saas/payments/hooks/plan-data";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { BadgeCheckIcon, CheckIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter } from "next-intl";
 import { CustomerPortalButton } from "../../settings/components/CustomerPortalButton";
 import { SubscriptionStatusBadge } from "../../settings/components/SubscriptionStatusBadge";
 
@@ -14,7 +14,6 @@ export function ActivePlan({
 	organizationId?: string;
 	seats?: number;
 }) {
-	const t = useTranslations();
 	const format = useFormatter();
 	const { planData } = usePlanData();
 	const { activePlan } = usePurchases(organizationId);
@@ -31,8 +30,13 @@ export function ActivePlan({
 
 	const price = "price" in activePlan ? activePlan.price : null;
 
+	const formatMonth = (count: number) =>
+		count === 1 ? "month" : `${count} months`;
+	const formatYear = (count: number) =>
+		count === 1 ? "year" : `${count} years`;
+
 	return (
-		<SettingsItem title={t("settings.billing.activePlan.title")}>
+		<SettingsItem title="Your plan">
 			<div className="rounded-lg border p-4">
 				<div className="">
 					<div className="flex items-center gap-2">
@@ -74,12 +78,8 @@ export function ActivePlan({
 								<span className="font-normal text-xs opacity-60">
 									{" / "}
 									{price.interval === "month"
-										? t("pricing.month", {
-												count: price.intervalCount ?? 1,
-											})
-										: t("pricing.year", {
-												count: price.intervalCount ?? 1,
-											})}
+										? formatMonth(price.intervalCount ?? 1)
+										: formatYear(price.intervalCount ?? 1)}
 								</span>
 							)}
 							{organizationId &&
@@ -87,7 +87,7 @@ export function ActivePlan({
 								price.seatBased && (
 									<span className="font-normal text-xs opacity-60">
 										{" / "}
-										{t("pricing.perSeat")}
+										seat
 									</span>
 								)}
 						</strong>

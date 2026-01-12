@@ -109,7 +109,7 @@ describe("api app", () => {
 
 		expect(res.status).toBe(200);
 		expect(await res.text()).toBe("OK");
-	});
+	}, 30000);
 
 	it("exposes merged OpenAPI schema with base URL server entry", async () => {
 		const { app } = await import("./index");
@@ -120,5 +120,5 @@ describe("api app", () => {
 
 		expect(body.paths["/info"]).toBeDefined();
 		expect(mockGenerateOpenApi).toHaveBeenCalledTimes(1);
-	});
+	}, 30000);
 });

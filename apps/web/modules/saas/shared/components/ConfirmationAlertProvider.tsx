@@ -10,7 +10,6 @@ import {
 	AlertDialogTitle,
 } from "@ui/components/alert-dialog";
 import { Button } from "@ui/components/button";
-import { useTranslations } from "next-intl";
 import {
 	createContext,
 	type PropsWithChildren,
@@ -33,7 +32,6 @@ const ConfirmationAlertContext = createContext<{
 });
 
 export function ConfirmationAlertProvider({ children }: PropsWithChildren) {
-	const t = useTranslations();
 	const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions | null>(
 		null,
 	);
@@ -64,8 +62,7 @@ export function ConfirmationAlertProvider({ children }: PropsWithChildren) {
 
 					<AlertDialogFooter>
 						<AlertDialogCancel>
-							{confirmOptions?.cancelLabel ??
-								t("common.confirmation.cancel")}
+							{confirmOptions?.cancelLabel ?? "Cancel"}
 						</AlertDialogCancel>
 						<Button
 							variant={
@@ -78,8 +75,7 @@ export function ConfirmationAlertProvider({ children }: PropsWithChildren) {
 								setConfirmOptions(null);
 							}}
 						>
-							{confirmOptions?.confirmLabel ??
-								t("common.confirmation.confirm")}
+							{confirmOptions?.confirmLabel ?? "Confirm"}
 						</Button>
 					</AlertDialogFooter>
 				</AlertDialogContent>

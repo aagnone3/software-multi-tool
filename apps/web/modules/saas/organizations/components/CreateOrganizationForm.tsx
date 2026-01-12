@@ -18,7 +18,6 @@ import {
 	FormMessage,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,7 +33,6 @@ export function CreateOrganizationForm({
 }: {
 	defaultName?: string;
 }) {
-	const t = useTranslations();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { setActiveOrganization } = useActiveOrganization();
@@ -65,17 +63,20 @@ export function CreateOrganizationForm({
 
 			router.replace(`/app/${newOrganization.slug}`);
 		} catch {
-			toast.error(t("organizations.createForm.notifications.error"));
+			toast.error(
+				"We are sorry, but we were unable to create your organization. Please try again later.",
+			);
 		}
 	});
 
 	return (
 		<div className="mx-auto w-full max-w-md">
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("organizations.createForm.title")}
+				Create an organization
 			</h1>
 			<p className="mt-2 mb-6 text-foreground/60">
-				{t("organizations.createForm.subtitle")}
+				Enter a name for your organization to get started. You can
+				change the name later in the organization settings.
 			</p>
 
 			<Form {...form}>
@@ -85,9 +86,7 @@ export function CreateOrganizationForm({
 						name="name"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>
-									{t("organizations.createForm.name")}
-								</FormLabel>
+								<FormLabel>Organization name</FormLabel>
 								<FormControl>
 									<Input {...field} autoComplete="email" />
 								</FormControl>
@@ -101,7 +100,7 @@ export function CreateOrganizationForm({
 						type="submit"
 						loading={form.formState.isSubmitting}
 					>
-						{t("organizations.createForm.submit")}
+						Create organization
 					</Button>
 				</form>
 			</Form>

@@ -6,13 +6,10 @@ import { UserAvatarForm } from "@saas/settings/components/UserAvatarForm";
 import { UserLanguageForm } from "@saas/settings/components/UserLanguageForm";
 import { SettingsList } from "@saas/shared/components/SettingsList";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
-	const t = await getTranslations();
-
 	return {
-		title: t("settings.account.title"),
+		title: "Account settings",
 	};
 }
 

@@ -1,19 +1,20 @@
 import { Alert, AlertDescription, AlertTitle } from "@ui/components/alert";
 import { MailCheckIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export function OrganizationInvitationAlert({
 	className,
 }: {
 	className?: string;
 }) {
-	const t = useTranslations();
 	return (
 		<Alert variant="primary" className={className}>
 			<MailCheckIcon />
-			<AlertTitle>{t("organizations.invitationAlert.title")}</AlertTitle>
+			<AlertTitle>
+				You have been invited to join an organization.
+			</AlertTitle>
 			<AlertDescription>
-				{t("organizations.invitationAlert.description")}
+				You need to sign in or create an account to join the
+				organization.
 			</AlertDescription>
 		</Alert>
 	);

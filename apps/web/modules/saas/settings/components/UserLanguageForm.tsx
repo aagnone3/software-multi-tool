@@ -14,7 +14,7 @@ import {
 	SelectValue,
 } from "@ui/components/select";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,7 +22,6 @@ const { locales } = config.i18n;
 
 export function UserLanguageForm() {
 	const currentLocale = useLocale();
-	const t = useTranslations();
 	const router = useRouter();
 	const [locale, setLocale] = useState<Locale | undefined>(
 		currentLocale as Locale,
@@ -46,16 +45,16 @@ export function UserLanguageForm() {
 		try {
 			await updateLocaleMutation.mutateAsync();
 
-			toast.success(t("settings.account.language.notifications.success"));
+			toast.success("Language was updated successfully");
 		} catch {
-			toast.error(t("settings.account.language.notifications.error"));
+			toast.error("Could not update language");
 		}
 	};
 
 	return (
 		<SettingsItem
-			title={t("settings.account.language.title")}
-			description={t("settings.account.language.description")}
+			title="Your language"
+			description="To change the language of the app for your account, select a language from the list and click save."
 		>
 			<Select
 				value={locale}

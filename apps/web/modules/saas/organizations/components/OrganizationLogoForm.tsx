@@ -8,7 +8,6 @@ import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -17,7 +16,6 @@ import { CropImageDialog } from "../../settings/components/CropImageDialog";
 import { OrganizationLogo } from "./OrganizationLogo";
 
 export function OrganizationLogoForm() {
-	const t = useTranslations();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
@@ -81,14 +79,14 @@ export function OrganizationLogoForm() {
 				throw error;
 			}
 
-			toast.success(t("settings.account.avatar.notifications.success"));
+			toast.success("Avatar was updated successfully");
 
 			refetchActiveOrganization();
 			queryClient.invalidateQueries({
 				queryKey: organizationListQueryKey,
 			});
 		} catch {
-			toast.error(t("settings.account.avatar.notifications.error"));
+			toast.error("Could not update avatar");
 		} finally {
 			setUploading(false);
 		}
@@ -96,8 +94,8 @@ export function OrganizationLogoForm() {
 
 	return (
 		<SettingsItem
-			title={t("organizations.settings.logo.title")}
-			description={t("organizations.settings.logo.description")}
+			title="Organization logo"
+			description="Upload a logo for your organization."
 		>
 			<div className="relative size-24 rounded-full" {...getRootProps()}>
 				<input {...getInputProps()} />

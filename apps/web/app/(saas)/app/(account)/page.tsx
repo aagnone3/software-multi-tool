@@ -3,7 +3,6 @@ import { getOrganizationList, getSession } from "@saas/auth/lib/server";
 import { PageHeader } from "@saas/shared/components/PageHeader";
 import UserStart from "@saas/start/UserStart";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export default async function AppStartPage() {
 	const session = await getSession();
@@ -30,13 +29,11 @@ export default async function AppStartPage() {
 		redirect(`/app/${organization.slug}`);
 	}
 
-	const t = await getTranslations();
-
 	return (
 		<div className="">
 			<PageHeader
-				title={t("start.welcome", { name: session?.user.name })}
-				subtitle={t("start.subtitle")}
+				title={`Welcome ${session?.user.name}!`}
+				subtitle="See the latest stats of your awesome business."
 			/>
 
 			<UserStart />

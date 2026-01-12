@@ -8,7 +8,6 @@ import { useRouter } from "@shared/hooks/router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -20,7 +19,6 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export function ChangeOrganizationNameForm() {
-	const t = useTranslations();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { activeOrganization } = useActiveOrganization();
@@ -49,11 +47,7 @@ export function ChangeOrganizationNameForm() {
 				throw error;
 			}
 
-			toast.success(
-				t(
-					"organizations.settings.notifications.organizationNameUpdated",
-				),
-			);
+			toast.success("Your organization name has been updated.");
 
 			queryClient.invalidateQueries({
 				queryKey: organizationListQueryKey,
@@ -61,15 +55,13 @@ export function ChangeOrganizationNameForm() {
 			router.refresh();
 		} catch {
 			toast.error(
-				t(
-					"organizations.settings.notifications.organizationNameNotUpdated",
-				),
+				"We were unable to update your organization name. Please try again later.",
 			);
 		}
 	});
 
 	return (
-		<SettingsItem title={t("organizations.settings.changeName.title")}>
+		<SettingsItem title="Organization name">
 			<form onSubmit={onSubmit}>
 				<Input {...form.register("name")} />
 
@@ -84,7 +76,7 @@ export function ChangeOrganizationNameForm() {
 						}
 						loading={form.formState.isSubmitting}
 					>
-						{t("settings.save")}
+						Save
 					</Button>
 				</div>
 			</form>

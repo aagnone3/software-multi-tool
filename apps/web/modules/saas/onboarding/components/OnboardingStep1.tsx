@@ -15,7 +15,6 @@ import {
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
 import { ArrowRightIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -28,7 +27,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
-	const t = useTranslations();
 	const { user } = useSession();
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -55,7 +53,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		} catch {
 			form.setError("root", {
 				type: "server",
-				message: t("onboarding.notifications.accountSetupFailed"),
+				message: "Failed to set up your account. Please try again.",
 			});
 		}
 	};
@@ -72,9 +70,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 						name="name"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>
-									{t("onboarding.account.name")}
-								</FormLabel>
+								<FormLabel>Name</FormLabel>
 								<FormControl>
 									<Input {...field} />
 								</FormControl>
@@ -84,12 +80,10 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 
 					<FormItem className="flex items-center justify-between gap-4">
 						<div>
-							<FormLabel>
-								{t("onboarding.account.avatar")}
-							</FormLabel>
+							<FormLabel>Avatar</FormLabel>
 
 							<FormDescription>
-								{t("onboarding.account.avatarDescription")}
+								Upload a profile picture.
 							</FormDescription>
 						</div>
 						<FormControl>
@@ -105,7 +99,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 					</FormItem>
 
 					<Button type="submit" loading={form.formState.isSubmitting}>
-						{t("onboarding.continue")}
+						Continue
 						<ArrowRightIcon className="ml-2 size-4" />
 					</Button>
 				</form>

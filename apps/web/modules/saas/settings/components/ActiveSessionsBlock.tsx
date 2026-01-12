@@ -7,11 +7,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Skeleton } from "@ui/components/skeleton";
 import { ComputerIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function ActiveSessionsBlock() {
-	const t = useTranslations();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { session: currentSession } = useSession();
@@ -36,11 +34,7 @@ export function ActiveSessionsBlock() {
 			},
 			{
 				onSuccess: () => {
-					toast.success(
-						t(
-							"settings.account.security.activeSessions.notifications.revokeSession.success",
-						),
-					);
+					toast.success("Session revoked");
 
 					queryClient.invalidateQueries({
 						queryKey: ["active-sessions"],
@@ -54,10 +48,8 @@ export function ActiveSessionsBlock() {
 
 	return (
 		<SettingsItem
-			title={t("settings.account.security.activeSessions.title")}
-			description={t(
-				"settings.account.security.activeSessions.description",
-			)}
+			title="Active sessions"
+			description="These are all the active sessions of your account. Click the X to end a specifc session."
 		>
 			<div className="grid grid-cols-1 gap-2">
 				{isPending ? (
@@ -80,9 +72,7 @@ export function ActiveSessionsBlock() {
 								<div>
 									<strong className="block text-sm">
 										{session.id === currentSession?.id
-											? t(
-													"settings.account.security.activeSessions.currentSession",
-												)
+											? "Current session"
 											: session.ipAddress}
 									</strong>
 									<small className="block text-foreground/60 text-xs leading-tight">

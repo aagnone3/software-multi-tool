@@ -32,7 +32,6 @@ import {
 	SquareUserRoundIcon,
 	TrashIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -42,7 +41,6 @@ import { EmailVerified } from "../EmailVerified";
 const ITEMS_PER_PAGE = 10;
 
 export function UserList() {
-	const t = useTranslations();
 	const queryClient = useQueryClient();
 	const { confirm } = useConfirmationAlert();
 	const [currentPage, setCurrentPage] = useQueryState(
@@ -84,11 +82,7 @@ export function UserList() {
 		userId: string,
 		{ name }: { name: string },
 	) => {
-		const toastId = toast.loading(
-			t("admin.users.impersonation.impersonating", {
-				name,
-			}),
-		);
+		const toastId = toast.loading(`Impersonating ${name}...`);
 
 		await authClient.admin.impersonateUser({
 			userId,
@@ -113,11 +107,11 @@ export function UserList() {
 				}
 			},
 			{
-				loading: t("admin.users.deleteUser.deleting"),
+				loading: "Deleting user...",
 				success: () => {
-					return t("admin.users.deleteUser.deleted");
+					return "User deleted.";
 				},
-				error: t("admin.users.deleteUser.notDeleted"),
+				error: "Failed to delete user.",
 			},
 		);
 	};
@@ -134,11 +128,11 @@ export function UserList() {
 				}
 			},
 			{
-				loading: t("admin.users.resendVerificationMail.submitting"),
+				loading: "Sending verification email...",
 				success: () => {
-					return t("admin.users.resendVerificationMail.success");
+					return "Verification email sent.";
 				},
-				error: t("admin.users.resendVerificationMail.error"),
+				error: "Failed to send verification email.",
 			},
 		);
 	};
@@ -223,7 +217,7 @@ export function UserList() {
 										}
 									>
 										<SquareUserRoundIcon className="mr-2 size-4" />
-										{t("admin.users.impersonate")}
+										Impersonate
 									</DropdownMenuItem>
 
 									{!row.original.emailVerified && (
@@ -235,9 +229,7 @@ export function UserList() {
 											}
 										>
 											<Repeat1Icon className="mr-2 size-4" />
-											{t(
-												"admin.users.resendVerificationMail.title",
-											)}
+											Resend verification email
 										</DropdownMenuItem>
 									)}
 
@@ -248,7 +240,7 @@ export function UserList() {
 											}
 										>
 											<ShieldCheckIcon className="mr-2 size-4" />
-											{t("admin.users.assignAdminRole")}
+											Assign admin role
 										</DropdownMenuItem>
 									) : (
 										<DropdownMenuItem
@@ -257,22 +249,17 @@ export function UserList() {
 											}
 										>
 											<ShieldXIcon className="mr-2 size-4" />
-											{t("admin.users.removeAdminRole")}
+											Remove admin role
 										</DropdownMenuItem>
 									)}
 
 									<DropdownMenuItem
 										onClick={() =>
 											confirm({
-												title: t(
-													"admin.users.confirmDelete.title",
-												),
-												message: t(
-													"admin.users.confirmDelete.message",
-												),
-												confirmLabel: t(
-													"admin.users.confirmDelete.confirm",
-												),
+												title: "Delete user",
+												message:
+													"Are you sure you want to delete this user?",
+												confirmLabel: "Delete",
 												destructive: true,
 												onConfirm: () =>
 													deleteUser(row.original.id),
@@ -281,7 +268,7 @@ export function UserList() {
 									>
 										<span className="flex items-center text-destructive hover:text-destructive">
 											<TrashIcon className="mr-2 size-4" />
-											{t("admin.users.delete")}
+											Delete
 										</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
@@ -306,12 +293,10 @@ export function UserList() {
 
 	return (
 		<Card className="p-6">
-			<h2 className="mb-4 font-semibold text-2xl">
-				{t("admin.users.title")}
-			</h2>
+			<h2 className="mb-4 font-semibold text-2xl">Users</h2>
 			<Input
 				type="search"
-				placeholder={t("admin.users.search")}
+				placeholder="Search..."
 				value={searchTerm}
 				onChange={(e) => setSearchTerm(e.target.value)}
 				className="mb-4"
@@ -351,7 +336,7 @@ export function UserList() {
 									{isLoading ? (
 										<div className="flex h-full items-center justify-center">
 											<Spinner className="mr-2 size-4 text-primary" />
-											{t("admin.users.loading")}
+											Loading users...
 										</div>
 									) : (
 										<p>No results.</p>

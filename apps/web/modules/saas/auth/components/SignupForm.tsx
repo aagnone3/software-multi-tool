@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { withQuery } from "ufo";
@@ -45,7 +44,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
-	const t = useTranslations();
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
 	const searchParams = useSearchParams();
@@ -115,17 +113,18 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
-				{t("auth.signup.title")}
+				Create your account
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				{t("auth.signup.message")}
+				Enter your details to create an account
 			</p>
 
 			{form.formState.isSubmitSuccessful && !invitationOnlyMode ? (
 				<Alert variant="success">
 					<MailboxIcon />
 					<AlertTitle>
-						{t("auth.signup.hints.verifyEmail")}
+						We have sent you an email to verify your email address.
+						Please check your inbox.
 					</AlertTitle>
 				</Alert>
 			) : (
@@ -154,9 +153,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t("auth.signup.name")}
-										</FormLabel>
+										<FormLabel>Name</FormLabel>
 										<FormControl>
 											<Input {...field} />
 										</FormControl>
@@ -170,9 +167,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								name="email"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											{t("auth.signup.email")}
-										</FormLabel>
+										<FormLabel>Email</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
@@ -191,9 +186,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 									name="password"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>
-												{t("auth.signup.password")}
-											</FormLabel>
+											<FormLabel>Password</FormLabel>
 											<FormControl>
 												<div className="relative">
 													<Input
@@ -230,7 +223,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 							)}
 
 							<Button loading={form.formState.isSubmitting}>
-								{t("auth.signup.submit")}
+								Create account
 							</Button>
 						</form>
 					</Form>
@@ -241,7 +234,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								<div className="relative my-6 h-4">
 									<hr className="relative top-2" />
 									<p className="-translate-x-1/2 absolute top-0 left-1/2 mx-auto inline-block h-4 bg-card px-2 text-center font-medium text-foreground/60 text-sm leading-tight">
-										{t("auth.login.continueWith")}
+										or continue with
 									</p>
 								</div>
 
@@ -264,7 +257,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 
 			<div className="mt-6 text-center text-sm">
 				<span className="text-foreground/60">
-					{t("auth.signup.alreadyHaveAccount")}{" "}
+					Already have an account?{" "}
 				</span>
 				<Link
 					href={withQuery(
@@ -272,7 +265,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 						Object.fromEntries(searchParams.entries()),
 					)}
 				>
-					{t("auth.signup.signIn")}
+					Sign in
 					<ArrowRightIcon className="ml-1 inline size-4 align-middle" />
 				</Link>
 			</div>

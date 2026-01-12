@@ -4,7 +4,7 @@ import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
 import { getBaseUrl } from "@repo/utils";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
 import Image from "next/image";
-import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
+import { getLocale, setRequestLocale } from "next-intl/server";
 
 type Params = {
 	path: string;
@@ -41,8 +41,6 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 	const { path, locale } = await props.params;
 	setRequestLocale(locale);
 
-	const t = await getTranslations();
-
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
@@ -56,9 +54,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 		<div className="container max-w-6xl pt-32 pb-24">
 			<div className="mx-auto max-w-2xl">
 				<div className="mb-12">
-					<LocaleLink href="/blog">
-						&larr; {t("blog.back")}
-					</LocaleLink>
+					<LocaleLink href="/blog">&larr; Back to blog</LocaleLink>
 				</div>
 
 				<h1 className="font-bold text-4xl">{title}</h1>

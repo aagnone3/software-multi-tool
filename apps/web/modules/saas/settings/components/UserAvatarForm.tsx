@@ -1,27 +1,20 @@
 "use client";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
-import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { UserAvatarUpload } from "./UserAvatarUpload";
 
 export function UserAvatarForm() {
-	const t = useTranslations();
-
 	return (
 		<SettingsItem
-			title={t("settings.account.avatar.title")}
-			description={t("settings.account.avatar.description")}
+			title="Your avatar"
+			description="To change your avatar click the picture in this block and select a file from your computer to upload."
 		>
 			<UserAvatarUpload
 				onSuccess={() => {
-					toast.success(
-						t("settings.account.avatar.notifications.success"),
-					);
+					toast.success("Avatar was updated successfully");
 				}}
 				onError={() => {
-					toast.error(
-						t("settings.account.avatar.notifications.error"),
-					);
+					toast.error("Could not update avatar");
 				}}
 			/>
 		</SettingsItem>
