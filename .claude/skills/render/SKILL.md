@@ -222,30 +222,30 @@ The repository includes a standalone Fastify backend service (`apps/api-server`)
 
 ### Deployment Configuration
 
-The api-server is configured via `render.yaml` at the repository root:
+The api-server uses **Render native Node.js** (not Docker). Configure via the Render dashboard:
 
-```yaml
-services:
-  - type: web
-    name: api-server
-    runtime: docker
-    dockerfilePath: ./apps/api-server/Dockerfile
-    healthCheckPath: /health
-    autoDeploy: true
-    envVars:
-      - key: PORT
-        value: 4000
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: postgres-db
-          property: connectionString
-      - key: BETTER_AUTH_SECRET
-        sync: false  # Set manually in dashboard
-      - key: CORS_ORIGIN
-        value: https://your-domain.com
+| Setting           | Value                                                                            |
+| ----------------- | -------------------------------------------------------------------------------- |
+| **Runtime**       | Node                                                                             |
+| **Build Command** | `pnpm install --frozen-lockfile; pnpm turbo run build --filter=@repo/api-server` |
+| **Start Command** | `cd apps/api-server; pnpm run start`                                             |
+| **Health Check**  | `/health`                                                                        |
+| **Auto-Deploy**   | Yes (on push to main or PR branch)                                               |
+
+### Build System
+
+The api-server uses **esbuild** to create a bundled production build:
+
+```bash
+# Build command (in package.json)
+pnpm exec esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs
 ```
+
+**Key design decisions:**
+
+- **CJS format**: Prisma's generated client uses dynamic `require()` calls that are incompatible with ESM bundles. Using `--format=cjs` ensures compatibility.
+- **Turbo orchestration**: The turbo build respects `dependsOn: ["^generate"]`, ensuring Prisma client is generated before bundling.
+- **Bundled output**: Workspace packages (`@repo/*`) are bundled into the output, eliminating runtime resolution issues.
 
 ### Required Environment Variables
 
@@ -253,7 +253,7 @@ Set these in the Render dashboard for the api-server service:
 
 | Variable             | Description                            | Example                           |
 | -------------------- | -------------------------------------- | --------------------------------- |
-| `PORT`               | Server port (auto-provided by Render)  | `4000`                            |
+| `PORT`               | Server port (auto-provided by Render)  | (leave unset - Render provides)   |
 | `HOST`               | Bind address                           | `0.0.0.0`                         |
 | `NODE_ENV`           | Environment                            | `production`                      |
 | `DATABASE_URL`       | PostgreSQL connection string           | `postgresql://user:pass@...`      |
@@ -265,11 +265,10 @@ Set these in the Render dashboard for the api-server service:
 ### Deployment Workflow
 
 1. **Initial Setup**:
-
-   ```bash
-   # Connect Render to your GitHub repository
-   # Render will auto-detect render.yaml and create services
-   ```
+   - Create a new Web Service in Render dashboard
+   - Connect to your GitHub repository
+   - Set runtime to **Node**
+   - Configure build and start commands (see table above)
 
 2. **Set Environment Variables**:
 
@@ -333,6 +332,21 @@ pnpm --filter @repo/api-server dev
 
 ### Troubleshooting
 
+**Build fails with "Cannot find module '@repo/...'**:
+
+- Ensure you're using `pnpm turbo run build --filter=@repo/api-server` (not direct `pnpm build`)
+- Turbo ensures workspace dependencies are built first
+
+**Build fails with Prisma errors**:
+
+- Turbo should handle this via `dependsOn: ["^generate"]`
+- If issues persist, run `pnpm --filter @repo/database generate` before build
+
+**Runtime error "Dynamic require of X is not supported"**:
+
+- Ensure build uses `--format=cjs` (not esm)
+- Prisma requires CommonJS format for dynamic imports
+
 **Service won't start:**
 
 - Check environment variables are set correctly
@@ -341,8 +355,8 @@ pnpm --filter @repo/api-server dev
 
 **Health check failing:**
 
-- Ensure port `4000` is exposed in Dockerfile
 - Verify `HOST=0.0.0.0` (not `127.0.0.1`)
+- Ensure `PORT` is not hardcoded (use Render's auto-provided value)
 - Check Render dashboard for errors
 
 **CORS errors:**
@@ -380,7 +394,7 @@ The Next.js frontend can connect to the api-server for:
 
 ### Auto-Deploy
 
-The api-server is configured to auto-deploy on push to `main` branch. To manually trigger:
+Configure auto-deploy in the Render dashboard to deploy on push to `main` branch. To manually trigger:
 
 ```bash
 pnpm --filter @repo/scripts render deploys trigger --service <service-id> --clear-cache
