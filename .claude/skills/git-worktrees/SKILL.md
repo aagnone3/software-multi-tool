@@ -56,6 +56,7 @@ Use git worktrees when you need to:
 - **Docker**: Required for Testcontainers-based integration tests
 - **pnpm**: Monorepo package manager (worktrees share parent `node_modules`)
 - **Disk space**: Each worktree is a full working directory (~500MB+)
+- **Environment variables**: Integration tests require `apps/web/.env.local` with API credentials (see Environment Variables for Integration Tests section)
 
 ## Core Principle
 
@@ -221,6 +222,11 @@ WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
 echo "" >> apps/web/.env.local
 echo "# Worktree-specific port (auto-allocated)" >> apps/web/.env.local
 echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
+
+# Update NEXT_PUBLIC_SITE_URL to match allocated port
+# This prevents Better Auth "Invalid origin" errors
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+rm -f apps/web/.env.local.bak
 
 # Verify port assignment
 echo "Allocated port: $WORKTREE_PORT"
@@ -444,9 +450,15 @@ echo "" >> apps/web/.env.local
 echo "# Auto-allocated port for this worktree" >> apps/web/.env.local
 echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
 
+# Update NEXT_PUBLIC_SITE_URL to match allocated port
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+rm -f apps/web/.env.local.bak
+
 # Verify
-cat apps/web/.env.local | grep PORT
-# Output: PORT=3518 (or whatever port was allocated)
+cat apps/web/.env.local | grep -E "PORT|NEXT_PUBLIC_SITE_URL"
+# Output:
+# NEXT_PUBLIC_SITE_URL="http://localhost:3518"
+# PORT=3518
 ```
 
 **Why automatic allocation?**
@@ -459,6 +471,94 @@ cat apps/web/.env.local | grep PORT
 ### Git Configuration
 
 **Important**: Per-worktree `.env.local` files are git-ignored by default (`.gitignore` includes `apps/web/.env.local`). This prevents accidentally committing worktree-specific configuration.
+
+## Environment Variables for Integration Tests
+
+### Critical Requirement
+
+**All integration tests require API credentials** to be present in `apps/web/.env.local`.
+
+**IMPORTANT**: Tests will **FAIL** (not skip) when credentials are missing. This ensures:
+
+- Worktrees have consistent environment setup
+- Integration tests are always executed when credentials are available
+- Configuration issues are caught immediately, not silently ignored
+
+### Required Credentials
+
+The following API keys are required for integration tests:
+
+```bash
+# Claude Agent SDK integration tests
+ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# Add other integration test credentials as needed
+```
+
+### How Environment Loading Works
+
+Environment variables are automatically loaded from `apps/web/.env.local` via the test setup:
+
+1. **Test setup file** (`tests/setup/environment.ts`) loads `apps/web/.env.local` at test initialization
+2. **All test files** inherit these environment variables through Vitest's setup system
+3. **Integration tests** check for required credentials and **fail immediately** if missing
+
+**Affected test files:**
+
+- `packages/agent-sdk/integration.test.ts` - Requires `ANTHROPIC_API_KEY`
+- `packages/api/modules/news-analyzer/lib/processor.integration.test.ts` - Requires `ANTHROPIC_API_KEY`
+
+### Worktree Environment Setup
+
+When creating a worktree, you MUST ensure `apps/web/.env.local` contains all required credentials:
+
+```bash
+cd .worktrees/feat-pra-35-auth
+
+# Copy parent .env.local (includes API credentials)
+cp ../../apps/web/.env.local apps/web/.env.local
+
+# Auto-allocate port
+WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
+echo "" >> apps/web/.env.local
+echo "# Auto-allocated port for this worktree" >> apps/web/.env.local
+echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
+
+# Update NEXT_PUBLIC_SITE_URL
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+rm -f apps/web/.env.local.bak
+
+# Verify credentials are present
+grep -q "ANTHROPIC_API_KEY=" apps/web/.env.local && echo "✓ API credentials loaded" || echo "✗ Missing ANTHROPIC_API_KEY"
+```
+
+### Troubleshooting Missing Credentials
+
+**Problem**: Integration tests fail with "ANTHROPIC_API_KEY is required for integration tests"
+
+**Root cause**: The worktree's `apps/web/.env.local` is missing the API key or is outdated.
+
+**Solution**:
+
+```bash
+# Check if .env.local exists in worktree
+ls -la apps/web/.env.local
+
+# If missing, copy from parent
+cp ../../apps/web/.env.local apps/web/.env.local
+
+# If exists but outdated, verify credentials
+grep "ANTHROPIC_API_KEY" apps/web/.env.local
+
+# If empty, update from parent
+cp ../../apps/web/.env.local apps/web/.env.local
+
+# Preserve worktree-specific PORT setting
+WORKTREE_PORT=$(grep "^PORT=" apps/web/.env.local | cut -d'=' -f2)
+if [ -n "$WORKTREE_PORT" ]; then
+  echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
+fi
+```
 
 ## Baseline Verification
 

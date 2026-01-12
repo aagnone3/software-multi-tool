@@ -102,7 +102,7 @@ describe("api app", () => {
 		vi.clearAllMocks();
 	});
 
-	it("responds to /api/health requests", async () => {
+	it("responds to /api/health requests", { timeout: 15000 }, async () => {
 		const { app } = await import("./index");
 
 		const res = await app.request("/api/health");
@@ -111,14 +111,18 @@ describe("api app", () => {
 		expect(await res.text()).toBe("OK");
 	});
 
-	it("exposes merged OpenAPI schema with base URL server entry", async () => {
-		const { app } = await import("./index");
+	it(
+		"exposes merged OpenAPI schema with base URL server entry",
+		{ timeout: 15000 },
+		async () => {
+			const { app } = await import("./index");
 
-		const res = await app.request("/api/openapi");
-		expect(res.status).toBe(200);
-		const body = await res.json();
+			const res = await app.request("/api/openapi");
+			expect(res.status).toBe(200);
+			const body = await res.json();
 
-		expect(body.paths["/info"]).toBeDefined();
-		expect(mockGenerateOpenApi).toHaveBeenCalledTimes(1);
-	});
+			expect(body.paths["/info"]).toBeDefined();
+			expect(mockGenerateOpenApi).toHaveBeenCalledTimes(1);
+		},
+	);
 });

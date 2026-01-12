@@ -10,3 +10,9 @@ export type { PromptOptions, PromptResult } from "./prompt";
 export { executePrompt } from "./prompt";
 export type { SkillDocumentation } from "./skill-docs";
 export { listSkills, readSkillDocs, upsertSkillDocs } from "./skill-docs";
+export type { ClaudeModel } from "./src/models";
+export {
+	CLAUDE_MODELS,
+	DEFAULT_MODEL,
+	MODEL_RECOMMENDATIONS,
+} from "./src/models";

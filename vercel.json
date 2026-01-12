@@ -1,7 +1,16 @@
 {
 	"functions": {
+		"app/api/[[...rest]]/route.ts": {
+			"maxDuration": 60
+		},
 		"api/copilotkit/**/*": {
 			"maxDuration": 60
 		}
-	}
+	},
+	"crons": [
+		{
+			"path": "/api/cron/process-jobs",
+			"schedule": "* * * * *"
+		}
+	]
 }

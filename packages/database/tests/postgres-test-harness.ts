@@ -39,6 +39,8 @@ const generatedClientPath = path.join(
 );
 
 const TABLES_TO_TRUNCATE = [
+	"tool_job",
+	"rate_limit_entry",
 	"ai_chat",
 	"purchase",
 	"invitation",

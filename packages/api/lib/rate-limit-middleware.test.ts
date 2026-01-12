@@ -9,7 +9,9 @@ vi.mock("./rate-limit", () => ({
 	incrementRateLimit: vi.fn(),
 	parseWindow: vi.fn((window: string) => {
 		const match = window.match(/^(\d+)([mhd])$/);
-		if (!match) return 0;
+		if (!match) {
+			return 0;
+		}
 		const value = Number.parseInt(match[1], 10);
 		const unit = match[2];
 		switch (unit) {

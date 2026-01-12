@@ -41,6 +41,71 @@ export const config = {
 					authenticated: { requests: 100, window: "1h" },
 				},
 			},
+			{
+				slug: "invoice-processor",
+				name: "Invoice Processor",
+				description:
+					"Extract data from invoices using AI for easy accounting integration",
+				icon: "receipt",
+				public: true,
+				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 5, window: "1d" },
+					authenticated: { requests: 50, window: "1h" },
+				},
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				description:
+					"Analyze contracts for key terms, risks, and obligations",
+				icon: "file-text",
+				public: true,
+				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 3, window: "1d" },
+					authenticated: { requests: 30, window: "1h" },
+				},
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Customer Feedback Analyzer",
+				description:
+					"Analyze customer reviews and feedback for sentiment and insights",
+				icon: "message-square-text",
+				public: true,
+				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 10, window: "1d" },
+					authenticated: { requests: 100, window: "1h" },
+				},
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				description:
+					"Automatically categorize expenses for tax and accounting purposes",
+				icon: "wallet",
+				public: true,
+				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 10, window: "1d" },
+					authenticated: { requests: 100, window: "1h" },
+				},
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				description:
+					"Summarize meeting notes and extract action items automatically",
+				icon: "clipboard-list",
+				public: true,
+				enabled: true,
+				rateLimits: {
+					anonymous: { requests: 5, window: "1d" },
+					authenticated: { requests: 50, window: "1h" },
+				},
+			},
 		],
 	},
 	// Internationalization
@@ -145,6 +210,9 @@ export const config = {
 		bucketNames: {
 			/* c8 ignore next */
 			avatars: process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME ?? "avatars",
+			/* c8 ignore next */
+			contracts:
+				process.env.NEXT_PUBLIC_CONTRACTS_BUCKET_NAME ?? "contracts",
 		},
 	},
 	contactForm: {

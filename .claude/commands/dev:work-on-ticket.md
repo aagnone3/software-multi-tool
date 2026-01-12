@@ -56,28 +56,136 @@ The git-worktrees skill will handle:
 Use TodoWrite to create a comprehensive task list that MUST include:
 
 - [ ] **Create feature branch (NOT main)**
-- [ ] All implementation tasks (code, tests, documentation)
-- [ ] Run test suite and verify all tests pass
+- [ ] All implementation tasks (code, documentation)
+- [ ] **Write tests for new functionality (unit/integration/e2e as required)**
+- [ ] **Verify new tests pass and provide adequate coverage**
+- [ ] **Run full test suite and verify all tests pass**
 - [ ] **Create git commit with changes**
 - [ ] **Push changes to remote branch**
 - [ ] **Create pull request**
 
-**CRITICAL: DO NOT create a todo list without the git/PR steps. Work is NOT complete without a PR.**
+**CRITICAL: DO NOT create a todo list without test writing and the git/PR steps. Work is NOT complete without tests and a PR.**
 
 **Note: Do NOT include "Close Linear issue" in the todo list. Issues should only be closed AFTER the PR is merged, not when it's created.**
 
 ### 3. Implement Changes
 
 - Write code following repository patterns
-- Write comprehensive tests
 - Update documentation if needed
 
-### 4. Verify All Tests Pass
+### 3.5. Write Tests for New Functionality
 
-- Run `pnpm test` for the full test suite
-- Run specific tests as needed (e.g., `pnpm --filter web test`)
-- Fix any failing tests
+> **🚨 MANDATORY: All new functionality must have test coverage 🚨**
+
+**Before proceeding, you MUST write tests that validate the new functionality:**
+
+1. **Identify what needs testing** (from ticket's Test Requirements section):
+   - What new functions/components were added?
+   - What behavior changed?
+   - What edge cases exist?
+
+2. **Write appropriate test types**:
+   - **Unit tests**: Individual functions/components (e.g., `content-extractor.test.ts`)
+   - **Integration tests**: Module interactions (e.g., `processor.test.ts` testing Claude API calls)
+   - **E2E tests**: User flows (e.g., Playwright tests for UI workflows)
+
+3. **Cover key scenarios**:
+   - Happy path (normal usage)
+   - Edge cases (empty inputs, boundaries)
+   - Error handling (invalid data, network failures)
+   - Integration points (API calls, database queries)
+
+4. **Follow repository test patterns**:
+
+   ```bash
+   # Check existing tests for patterns
+   find . -name "*.test.ts" -o -name "*.test.tsx" | head -5
+
+   # Look at similar test files
+   cat path/to/similar.test.ts
+   ```
+
+**Example test structure:**
+
+```typescript
+// packages/api/modules/news-analyzer/lib/content-extractor.test.ts
+import { describe, it, expect } from 'vitest';
+import { extractContentFromUrl, extractContentFromText } from './content-extractor';
+
+describe('content-extractor', () => {
+  describe('extractContentFromUrl', () => {
+    it('should extract article content from valid URL', async () => {
+      // Test implementation
+    });
+
+    it('should handle paywall errors gracefully', async () => {
+      // Test error handling
+    });
+
+    it('should timeout after 15 seconds', async () => {
+      // Test timeout behavior
+    });
+  });
+
+  describe('extractContentFromText', () => {
+    it('should extract content from plain text', async () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+**CRITICAL:** Do not proceed to step 4 until you have written tests.
+
+### 4. Verify All Tests Pass (Including New Tests)
+
+> **🚨 MANDATORY: Verify NEW tests were written AND all tests pass 🚨**
+
+#### Step 4a: Confirm new tests exist
+
+```bash
+# List test files you created
+git status | grep "test\."
+
+# If no test files appear, STOP and write tests first
+```
+
+#### Step 4b: Run new tests individually
+
+```bash
+# Run your new test file to verify it works
+pnpm test path/to/your.test.ts
+
+# Verify tests cover the new functionality
+# - Do tests fail when you comment out your implementation?
+# - Do tests pass with your implementation?
+```
+
+#### Step 4c: Run full test suite
+
+```bash
+# Run all tests
+pnpm test
+
+# Run workspace-specific tests
+pnpm --filter @repo/api test
+pnpm --filter web test
+
+# Run integration tests (requires Docker)
+pnpm --filter @repo/database run test:integration
+```
+
+#### Step 4d: Fix any failing tests
+
+- If existing tests fail, your changes may have broken something
+- If new tests fail, fix your implementation
 - **DO NOT proceed to commit until all tests pass**
+
+**CRITICAL:** Work is NOT complete without:
+
+- ✅ New tests written for new functionality
+- ✅ New tests passing
+- ✅ All existing tests still passing
 
 ### 5. Create Git Commit
 

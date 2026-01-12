@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "dotenv -c -- turbo build",
-		"dev": "dotenv -c -- turbo dev --concurrency 15",
+		"dev": "dotenv -c -e apps/web/.env.local -- turbo dev --concurrency 15",
 		"web:env:list": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:list --app apps/web",
 		"web:env:pull": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:pull --app apps/web",
 		"web:env:set": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:set --app apps/web",
@@ -34,9 +34,11 @@
 		"@testing-library/jest-dom": "6.9.1",
 		"@testing-library/react": "16.3.1",
 		"@testing-library/user-event": "14.6.1",
+		"@types/dotenv": "8.2.3",
 		"@types/jsdom": "27.0.0",
-		"@types/node": "25.0.3",
+		"@types/node": "25.0.6",
 		"@vitest/coverage-v8": "4.0.16",
+		"dotenv": "17.2.3",
 		"dotenv-cli": "11.0.0",
 		"happy-dom": "20.0.11",
 		"jsdom": "27.4.0",
@@ -48,7 +50,7 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "19.2.7",
+			"@types/react": "19.2.8",
 			"@types/react-dom": "19.2.3"
 		},
 		"patchedDependencies": {
