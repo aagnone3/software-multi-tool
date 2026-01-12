@@ -14,13 +14,40 @@ vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
 }));
 
-vi.mock("@repo/database", () => ({
-	getUsers: getUsersMock,
-	countAllUsers: countAllUsersMock,
-	getOrganizations: getOrganizationsMock,
-	countAllOrganizations: countAllOrganizationsMock,
-	getOrganizationById: getOrganizationByIdMock,
-}));
+vi.mock("@repo/database", async () => {
+	const { z } = await import("zod");
+	return {
+		getUsers: getUsersMock,
+		countAllUsers: countAllUsersMock,
+		getOrganizations: getOrganizationsMock,
+		countAllOrganizations: countAllOrganizationsMock,
+		getOrganizationById: getOrganizationByIdMock,
+		// Required by audit-logs module which is imported by admin router
+		getAuditLogs: vi.fn(),
+		countAuditLogs: vi.fn(),
+		getDistinctResources: vi.fn(),
+		getAuditLogsForExport: vi.fn(),
+		createAuditLog: vi.fn(),
+		zodSchemas: {
+			AuditActionSchema: z.enum([
+				"CREATE",
+				"READ",
+				"UPDATE",
+				"DELETE",
+				"LOGIN",
+				"LOGOUT",
+				"PASSWORD_CHANGE",
+				"MFA_SETUP",
+				"MFA_DISABLE",
+				"IMPERSONATE",
+				"INVITE",
+				"EXPORT",
+				"SUBSCRIPTION_CHANGE",
+				"PAYMENT",
+			]),
+		},
+	};
+});
 
 describe("Admin Router", () => {
 	beforeEach(() => {
