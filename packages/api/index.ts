@@ -9,6 +9,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
+import { validateCorsOrigin } from "./lib/cors";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { rateLimitMiddleware } from "./lib/rate-limit-middleware";
 import { registerNewsAnalyzerProcessor } from "./modules/news-analyzer/lib/register";
@@ -29,7 +30,7 @@ export const app = new Hono()
 	// Cors middleware
 	.use(
 		cors({
-			origin: getBaseUrl(),
+			origin: validateCorsOrigin,
 			allowHeaders: ["Content-Type", "Authorization"],
 			allowMethods: ["POST", "GET", "OPTIONS"],
 			exposeHeaders: ["Content-Length"],
