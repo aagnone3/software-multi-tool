@@ -2,6 +2,7 @@ import { executePrompt } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { ContractAnalyzerInput, ContractAnalyzerOutput } from "../types";
+import { extractTextFromDocument } from "./document-extractor";
 
 const CONTRACT_ANALYSIS_PROMPT = `You are an expert legal contract analyzer. Analyze the following contract text and extract structured information.
 
@@ -82,16 +83,38 @@ Contract text to analyze:
 export async function processContractJob(job: ToolJob): Promise<JobResult> {
 	const input = job.input as unknown as ContractAnalyzerInput;
 
-	if (!input.contractText || input.contractText.trim().length === 0) {
+	let contractText: string;
+
+	// Handle file upload vs direct text input
+	if (input.fileData) {
+		// Extract text from uploaded file
+		const buffer = Buffer.from(input.fileData.content, "base64");
+		const extractionResult = await extractTextFromDocument(
+			buffer,
+			input.fileData.mimeType,
+			input.fileData.filename,
+		);
+
+		if (!extractionResult.success) {
+			return {
+				success: false,
+				error: extractionResult.error.message,
+			};
+		}
+
+		contractText = extractionResult.text;
+	} else if (input.contractText && input.contractText.trim().length > 0) {
+		contractText = input.contractText;
+	} else {
 		return {
 			success: false,
-			error: "Contract text is required",
+			error: "Either contract text or a file upload is required",
 		};
 	}
 
 	try {
 		const result = await executePrompt(
-			`${CONTRACT_ANALYSIS_PROMPT}\n\n${input.contractText}`,
+			`${CONTRACT_ANALYSIS_PROMPT}\n\n${contractText}`,
 			{
 				model: "claude-3-5-sonnet-20241022",
 				maxTokens: 8192,
