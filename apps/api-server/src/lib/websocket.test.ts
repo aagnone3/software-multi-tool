@@ -94,7 +94,7 @@ describe.skip("WebSocket Server", () => {
 			return new Promise<void>((resolve, reject) => {
 				const ws = new WebSocket(`${serverAddress}/ws`);
 				const testMessage = { test: "hello", data: 123 };
-				let welcomeReceived = false;
+				let _welcomeReceived = false;
 
 				ws.on("open", () => {
 					ws.send(JSON.stringify(testMessage));
@@ -105,7 +105,7 @@ describe.skip("WebSocket Server", () => {
 
 					// Skip welcome message
 					if (message.type === "connected") {
-						welcomeReceived = true;
+						_welcomeReceived = true;
 						return;
 					}
 
@@ -131,7 +131,7 @@ describe.skip("WebSocket Server", () => {
 		it("should handle invalid JSON messages", async () => {
 			return new Promise<void>((resolve, reject) => {
 				const ws = new WebSocket(`${serverAddress}/ws`);
-				let welcomeReceived = false;
+				let _welcomeReceived = false;
 
 				ws.on("open", () => {
 					ws.send("invalid json {");
@@ -142,7 +142,7 @@ describe.skip("WebSocket Server", () => {
 
 					// Skip welcome message
 					if (message.type === "connected") {
-						welcomeReceived = true;
+						_welcomeReceived = true;
 						return;
 					}
 

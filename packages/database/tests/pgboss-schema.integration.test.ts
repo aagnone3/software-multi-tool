@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import PgBoss from "pg-boss";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { PostgresTestHarness } from "./postgres-test-harness";
 import { createPostgresTestHarness } from "./postgres-test-harness";

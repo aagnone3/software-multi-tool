@@ -35,7 +35,7 @@ export async function createServer(): Promise<FastifyInstance> {
 	});
 
 	// Health check endpoint
-	server.get("/health", async (request, reply) => {
+	server.get("/health", async (_request, reply) => {
 		return reply.code(200).send("OK");
 	});
 
