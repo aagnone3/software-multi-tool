@@ -19,10 +19,7 @@ export function PostListItem({ post }: { post: Post }) {
 						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 						className="object-cover object-center"
 					/>
-					<Link
-						href={`/blog/${path}`}
-						className="absolute inset-0"
-					/>
+					<Link href={`/blog/${path}`} className="absolute inset-0" />
 				</div>
 			)}
 
@@ -39,10 +36,7 @@ export function PostListItem({ post }: { post: Post }) {
 				</div>
 			)}
 
-			<Link
-				href={`/blog/${path}`}
-				className="font-semibold text-xl"
-			>
+			<Link href={`/blog/${path}`} className="font-semibold text-xl">
 				{title}
 			</Link>
 			{excerpt && <p className="opacity-50">{excerpt}</p>}

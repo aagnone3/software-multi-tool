@@ -7,9 +7,7 @@ import { NextProvider as FumadocsNextProvider } from "fumadocs-core/framework/ne
 import { RootProvider as FumadocsRootProvider } from "fumadocs-ui/provider";
 import type { PropsWithChildren } from "react";
 
-export default async function MarketingLayout({
-	children,
-}: PropsWithChildren) {
+export default async function MarketingLayout({ children }: PropsWithChildren) {
 	const locale = config.i18n.defaultLocale;
 
 	return (
