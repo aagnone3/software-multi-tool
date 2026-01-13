@@ -26,7 +26,7 @@ import React, { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
-import { AudioFileUpload, type AudioFileData } from "./AudioFileUpload";
+import { type AudioFileData, AudioFileUpload } from "./AudioFileUpload";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
 /** Schema for audio file data in form. */

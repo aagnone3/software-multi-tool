@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
 	type AudioFileData,
 	DiarizationInputSchema,
+	isSupportedAudioType,
 	MAX_AUDIO_SIZE_BYTES,
 	SUPPORTED_AUDIO_TYPES,
-	isSupportedAudioType,
 	validateAudioFile,
 } from "./types";
 
