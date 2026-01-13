@@ -4,7 +4,8 @@ import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useToolAnalytics } from "../../../modules/tools/analytics";
 import { NewsAnalyzerForm } from "./news-analyzer-form";
 import {
 	type NewsAnalysisOutput,
@@ -26,6 +27,20 @@ export function NewsAnalyzer() {
 	const [error, setError] = useState<string | null>(null);
 	const [pollingIntervalId, setPollingIntervalId] =
 		useState<NodeJS.Timeout | null>(null);
+
+	// Analytics tracking
+	const {
+		trackToolViewed,
+		trackProcessingStarted,
+		trackProcessingCompleted,
+		trackProcessingFailed,
+	} = useToolAnalytics({ toolName: "news-analyzer" });
+	const processingStartTime = useRef<number | null>(null);
+
+	// Track page view on mount
+	useEffect(() => {
+		trackToolViewed();
+	}, [trackToolViewed]);
 
 	// Create job mutation
 	const createJobMutation = useMutation({
@@ -50,8 +65,30 @@ export function NewsAnalyzer() {
 			if (job.status === "COMPLETED" && job.output) {
 				setResult(job.output as unknown as NewsAnalysisOutput);
 				setError(null);
+
+				// Track completion from cache
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingCompleted({
+					jobId: job.id,
+					processingDurationMs: duration,
+					fromCache: true,
+				});
+				processingStartTime.current = null;
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Job failed");
+
+				// Track failure
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingFailed({
+					jobId: job.id,
+					errorType: "job_failed",
+					processingDurationMs: duration,
+				});
+				processingStartTime.current = null;
 			} else {
 				// Start polling for job completion
 				setJobId(job.id);
@@ -59,11 +96,22 @@ export function NewsAnalyzer() {
 			}
 		},
 		onError: (err) => {
-			setError(
+			const errorMessage =
 				err instanceof Error
 					? err.message
-					: "Failed to create analysis job",
-			);
+					: "Failed to create analysis job";
+			setError(errorMessage);
+
+			// Track failure on job creation
+			const duration = processingStartTime.current
+				? Date.now() - processingStartTime.current
+				: 0;
+			trackProcessingFailed({
+				jobId: "creation_failed",
+				errorType: "job_creation_failed",
+				processingDurationMs: duration,
+			});
+			processingStartTime.current = null;
 		},
 	});
 
@@ -77,9 +125,31 @@ export function NewsAnalyzer() {
 				setResult(job.output as unknown as NewsAnalysisOutput);
 				setError(null);
 				stopPolling();
+
+				// Track completion
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingCompleted({
+					jobId: id,
+					processingDurationMs: duration,
+					fromCache: false,
+				});
+				processingStartTime.current = null;
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Analysis failed");
 				stopPolling();
+
+				// Track failure
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingFailed({
+					jobId: id,
+					errorType: "job_failed",
+					processingDurationMs: duration,
+				});
+				processingStartTime.current = null;
 			}
 			// Continue polling if PENDING or PROCESSING
 		} catch (err) {
@@ -89,6 +159,17 @@ export function NewsAnalyzer() {
 					: "Failed to check job status",
 			);
 			stopPolling();
+
+			// Track polling error
+			const duration = processingStartTime.current
+				? Date.now() - processingStartTime.current
+				: 0;
+			trackProcessingFailed({
+				jobId: id,
+				errorType: "polling_error",
+				processingDurationMs: duration,
+			});
+			processingStartTime.current = null;
 		}
 	};
 
@@ -117,6 +198,11 @@ export function NewsAnalyzer() {
 		setResult(null);
 		setError(null);
 		setJobId(null);
+
+		// Track processing started (client-side timer)
+		processingStartTime.current = Date.now();
+		trackProcessingStarted({ jobId: "pending", fromCache: false });
+
 		createJobMutation.mutate(data);
 	};
 
