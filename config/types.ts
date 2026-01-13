@@ -59,6 +59,7 @@ export type Config = {
 		bucketNames: {
 			avatars: string;
 			contracts: string;
+			audio: string;
 		};
 	};
 	ui: {

@@ -190,6 +190,8 @@ export const config = {
 			/* c8 ignore next */
 			contracts:
 				process.env.NEXT_PUBLIC_CONTRACTS_BUCKET_NAME ?? "contracts",
+			/* c8 ignore next */
+			audio: process.env.NEXT_PUBLIC_AUDIO_BUCKET_NAME ?? "audio",
 		},
 	},
 	contactForm: {

@@ -4,6 +4,7 @@ import { ExpenseCategorizerTool } from "@tools/components/ExpenseCategorizerTool
 import { FeedbackAnalyzerTool } from "@tools/components/FeedbackAnalyzerTool";
 import { InvoiceProcessorTool } from "@tools/components/InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
+import { SpeakerDiarizationTool } from "@tools/components/SpeakerDiarizationTool";
 import { notFound } from "next/navigation";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
 
@@ -44,6 +45,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
 	"feedback-analyzer": FeedbackAnalyzerTool,
 	"expense-categorizer": ExpenseCategorizerTool,
 	"meeting-summarizer": MeetingSummarizerTool,
+	diarization: SpeakerDiarizationTool,
 };
 
 export default async function ToolPage({ params }: ToolPageProps) {
