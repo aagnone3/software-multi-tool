@@ -48,7 +48,9 @@ describe.sequential("createJob integration", () => {
 		"processes job successfully via job runner",
 		async () => {
 			if (!dockerAvailable || !harness) {
-				console.warn("[createJob integration] Skipping test: Docker not available");
+				console.warn(
+					"[createJob integration] Skipping test: Docker not available",
+				);
 				return;
 			}
 
