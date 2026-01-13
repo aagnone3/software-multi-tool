@@ -159,14 +159,51 @@ async function renderRequest(path, options = {}) {
 
 async function findRenderPreviewService(prNumber) {
 	const serviceName = `${RENDER_SERVICE_PREFIX}${prNumber}`;
-	const services = await renderRequest(`/services?name=${serviceName}`);
+
+	// First, try the name filter (exact match)
+	let services = await renderRequest(
+		`/services?name=${encodeURIComponent(serviceName)}`,
+	);
+
+	if (services && services.length > 0) {
+		return services[0]?.service || null;
+	}
+
+	// If name filter doesn't work, list all services and filter manually
+	// This handles cases where the API name filter is case-sensitive or partial
+	console.log(
+		"[Render] Name filter returned no results, listing all services...",
+	);
+	services = await renderRequest("/services?limit=100");
 
 	if (!services || services.length === 0) {
 		return null;
 	}
 
-	// Services are returned as { service: {...} } objects
-	return services[0]?.service || null;
+	// Find by exact name match or by slug (URL pattern)
+	for (const item of services) {
+		const service = item?.service;
+		if (!service) {
+			continue;
+		}
+
+		// Match by name
+		if (service.name === serviceName) {
+			return service;
+		}
+
+		// Match by slug (the URL identifier)
+		if (service.slug === serviceName) {
+			return service;
+		}
+
+		// Match by URL pattern in serviceDetails
+		if (service.serviceDetails?.url?.includes(serviceName)) {
+			return service;
+		}
+	}
+
+	return null;
 }
 
 async function getRenderServiceUrl(service) {
