@@ -183,7 +183,7 @@ export const config = {
 	// Mails
 	mails: {
 		// the from address for mails
-		from: "noreply@lifewithdata.org",
+		from: "noreply@softwaremultitool.com",
 	},
 	// Frontend
 	ui: {
