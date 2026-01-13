@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { JobPayload, WorkerConfig } from "./types.js";
 
 /**
@@ -9,6 +9,48 @@ import type { JobPayload, WorkerConfig } from "./types.js";
  *
  * These tests verify the module exports, types, and configuration values.
  */
+
+// Mock heavy dependencies to avoid slow module initialization in CI
+// The workers/index.ts imports these at the top level, triggering expensive init
+vi.mock("@repo/database", () => ({
+	db: {
+		toolJob: {
+			findUnique: vi.fn(),
+			update: vi.fn(),
+		},
+	},
+}));
+
+vi.mock("@repo/api/modules/jobs/lib/processor-registry", () => ({
+	getProcessor: vi.fn(),
+}));
+
+vi.mock("@repo/api/modules/jobs/lib/register-all-processors", () => ({
+	registerAllProcessors: vi.fn(),
+}));
+
+vi.mock("@repo/api/modules/news-analyzer/lib/register", () => ({
+	registerNewsAnalyzerProcessor: vi.fn(),
+}));
+
+vi.mock("../lib/pg-boss.js", () => ({
+	getPgBoss: vi.fn(() => ({
+		work: vi.fn(),
+		send: vi.fn(),
+		fail: vi.fn(),
+		complete: vi.fn(),
+	})),
+}));
+
+vi.mock("../lib/logger.js", () => ({
+	logger: {
+		info: vi.fn(),
+		error: vi.fn(),
+		warn: vi.fn(),
+		debug: vi.fn(),
+	},
+}));
+
 describe("workers module exports", () => {
 	it("should export registerWorkers function", async () => {
 		const workersModule = await import("./index.js");
