@@ -6,12 +6,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Skeleton } from "@ui/components/skeleton";
 import { KeyIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { useFormatter } from "next-intl";
 import { toast } from "sonner";
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en");
 
 export function PasskeysBlock() {
 	const queryClient = useQueryClient();
-	const formatter = useFormatter();
 
 	const { data: passkeys, isPending } = useUserPasskeysQuery();
 
@@ -68,7 +68,7 @@ export function PasskeysBlock() {
 									{passkey.deviceType} {passkey.name}
 								</strong>
 								<small className="block text-foreground/60 text-xs leading-tight">
-									{formatter.dateTime(
+									{dateTimeFormatter.format(
 										new Date(passkey.createdAt),
 									)}
 								</small>
