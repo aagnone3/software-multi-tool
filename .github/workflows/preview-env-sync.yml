@@ -1,0 +1,130 @@
+name: Preview Environment Sync
+
+# Synchronize environment variables across Supabase, Vercel, and Render
+# preview environments when a PR is opened or updated.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to sync"
+        required: true
+        type: number
+      branch_name:
+        description: "Git branch name (for Supabase branch lookup)"
+        required: false
+        type: string
+
+# Prevent concurrent syncs for the same PR
+concurrency:
+  group: preview-sync-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  sync-preview-environments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Only run if we have the required secrets
+    # Skip if PR is from a fork (secrets not available)
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine PR number and branch
+        id: pr-info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+            echo "branch_name=${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync preview environments
+        run: |
+          pnpm --filter @repo/scripts preview-sync run \
+            --pr ${{ steps.pr-info.outputs.pr_number }} \
+            --branch "${{ steps.pr-info.outputs.branch_name }}" \
+            --timeout 600
+        env:
+          # Supabase Management API
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          # Render API
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          # Vercel API
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+
+      - name: Post status comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
+            const success = '${{ job.status }}' === 'success';
+
+            const body = success
+              ? `## Preview Environment Sync Complete
+
+            Environment variables have been synchronized across all preview services:
+            - **Supabase** branch database credentials synced to Render
+            - **Vercel** preview URL synced to Render (CORS)
+            - **Render** API URL synced to Vercel
+
+            Preview environments should be fully functional within a few minutes.`
+              : `## Preview Environment Sync Failed
+
+            There was an issue synchronizing preview environment variables.
+            Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+            You can manually re-run this workflow from the Actions tab.`;
+
+            // Find existing comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Preview Environment Sync')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }

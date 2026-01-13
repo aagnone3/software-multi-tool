@@ -307,15 +307,95 @@ services:
 
 ### Render Environment Variables
 
-Render preview environments need these env vars configured manually:
+Render preview environments require these environment variables:
 
-| Variable                   | Description                                   |
-| -------------------------- | --------------------------------------------- |
-| `POSTGRES_PRISMA_URL`      | Pooled connection to Supabase branch database |
-| `POSTGRES_URL_NON_POOLING` | Direct connection for Prisma migrations       |
-| `BETTER_AUTH_SECRET`       | Same as production (or preview-specific)      |
+| Variable                   | Description                                   | Source           |
+| -------------------------- | --------------------------------------------- | ---------------- |
+| `POSTGRES_PRISMA_URL`      | Pooled connection to Supabase branch database | Auto-synced      |
+| `POSTGRES_URL_NON_POOLING` | Direct connection for Prisma migrations       | Auto-synced      |
+| `CORS_ORIGIN`              | Vercel preview URL for CORS                   | Auto-synced      |
+| `BETTER_AUTH_SECRET`       | Same as production (or preview-specific)      | Manual           |
 
-**Note**: Unlike Vercel, Render does not have automatic Supabase integration. You must manually copy the branch database connection strings from Supabase Dashboard → Branches → Connect.
+**Note**: Database credentials and CORS origin are automatically synced by the `preview-env-sync` workflow.
+
+## Automated Preview Environment Sync
+
+A GitHub Actions workflow automatically synchronizes environment variables across all three preview services (Supabase, Vercel, Render) when a PR is opened or updated.
+
+### Sync Workflow
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    preview-env-sync Workflow                     │
+│                                                                  │
+│  1. PR Opened/Updated                                           │
+│         │                                                        │
+│         ▼                                                        │
+│  2. Wait for all services (parallel polling)                    │
+│     ├── Supabase branch ready?                                  │
+│     ├── Vercel preview ready?                                   │
+│     └── Render preview ready?                                   │
+│         │                                                        │
+│         ▼                                                        │
+│  3. Sync environment variables                                  │
+│     ├── Render ← Supabase DB credentials                        │
+│     ├── Render ← Vercel preview URL (CORS)                      │
+│     └── Vercel ← Render API URL                                 │
+│         │                                                        │
+│         ▼                                                        │
+│  4. Trigger Render redeploy (if env vars changed)               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Environment Variable Flow
+
+| Target | Variable                     | Source   | Purpose                       |
+| ------ | ---------------------------- | -------- | ----------------------------- |
+| Render | `POSTGRES_PRISMA_URL`        | Supabase | Branch DB pooled connection   |
+| Render | `POSTGRES_URL_NON_POOLING`   | Supabase | Branch DB direct connection   |
+| Render | `CORS_ORIGIN`                | Vercel   | Allow requests from preview   |
+| Vercel | `NEXT_PUBLIC_API_SERVER_URL` | Render   | API endpoint for frontend     |
+
+### Workflow Triggers
+
+The workflow runs automatically on:
+
+- `pull_request: [opened, synchronize, reopened]`
+
+Manual trigger available via:
+
+- `workflow_dispatch` with `pr_number` input
+
+### Required GitHub Secrets
+
+| Secret                   | Purpose                         | Where to Get                           |
+| ------------------------ | ------------------------------- | -------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN`  | Supabase Management API         | Supabase Dashboard → Account → Tokens  |
+| `SUPABASE_PROJECT_REF`   | Project identifier              | `rhcyfnrwgavrtxkiwzyv`                 |
+| `RENDER_API_KEY`         | Render API                      | Render Dashboard → Account Settings    |
+| `VERCEL_TOKEN`           | Vercel API                      | Vercel Dashboard → Settings → Tokens   |
+| `VERCEL_PROJECT`         | Vercel project ID               | Vercel Dashboard → Project Settings    |
+| `VERCEL_SCOPE`           | Vercel team/scope ID            | Vercel Dashboard → Team Settings       |
+
+### Manual Sync
+
+If the workflow fails or you need to re-sync:
+
+```bash
+# Run the sync script locally
+pnpm --filter @repo/scripts preview-sync run --pr <PR_NUMBER> --branch <BRANCH_NAME>
+
+# Or trigger the workflow manually from GitHub Actions tab
+```
+
+### Race Condition Handling
+
+The workflow handles race conditions by:
+
+1. **Parallel polling** - Waits for all 3 services simultaneously
+2. **Exponential backoff** - Starts at 5s, increases to max 30s between attempts
+3. **Idempotency** - Only updates env vars if values differ
+4. **Conditional redeploy** - Only triggers redeploy if env vars changed
 
 ## Troubleshooting
 
