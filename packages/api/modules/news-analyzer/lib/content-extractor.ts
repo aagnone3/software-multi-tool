@@ -99,7 +99,7 @@ export async function extractContentFromUrl(
 		};
 	}
 
-	// Parse and extract content
+	// Parse and extract content using linkedom (bundle-friendly alternative to jsdom)
 	try {
 		const { document } = parseHTML(html);
 		// Set the document URL for Readability (used for resolving relative links)
