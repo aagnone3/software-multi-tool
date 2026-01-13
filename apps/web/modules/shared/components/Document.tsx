@@ -12,16 +12,13 @@ const sansFont = Geist({
 	variable: "--font-sans",
 });
 
-export async function Document({
-	children,
-	locale,
-}: PropsWithChildren<{ locale: string }>) {
+export async function Document({ children }: PropsWithChildren) {
 	const cookieStore = await cookies();
 	const consentCookie = cookieStore.get("consent");
 
 	return (
 		<html
-			lang={locale}
+			lang="en"
 			suppressHydrationWarning
 			className={sansFont.className}
 		>

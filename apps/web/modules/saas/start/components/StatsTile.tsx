@@ -3,7 +3,6 @@
 import { useLocaleCurrency } from "@shared/hooks/locale-currency";
 import { Badge } from "@ui/components/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
-import { useFormatter } from "next-intl";
 import { useMemo } from "react";
 
 type Props = {
@@ -22,35 +21,35 @@ export function StatsTile({
 	trend,
 	valueFormat,
 }: Props) {
-	const format = useFormatter();
 	const localeCurrency = useLocaleCurrency();
 
 	const formattedValue = useMemo(() => {
 		// format currency
 		if (valueFormat === "currency") {
-			return format.number(value, {
+			return new Intl.NumberFormat("en", {
 				style: "currency",
 				currency: localeCurrency,
-			});
+			}).format(value);
 		}
 		// format percentage
 		if (valueFormat === "percentage") {
-			return format.number(value, {
+			return new Intl.NumberFormat("en", {
 				style: "percent",
-			});
+			}).format(value);
 		}
 		// format default number
-		return format.number(value);
-	}, [value, valueFormat, format, localeCurrency]);
+		return new Intl.NumberFormat("en").format(value);
+	}, [value, valueFormat, localeCurrency]);
 
 	const formattedTrend = useMemo(() => {
 		if (!trend) {
 			return null;
 		}
-		return `${trend >= 0 ? "+" : ""}${format.number(trend, {
+		const formatted = new Intl.NumberFormat("en", {
 			style: "percent",
-		})}`;
-	}, [trend, format]);
+		}).format(trend);
+		return `${trend >= 0 ? "+" : ""}${formatted}`;
+	}, [trend]);
 
 	return (
 		<Card>

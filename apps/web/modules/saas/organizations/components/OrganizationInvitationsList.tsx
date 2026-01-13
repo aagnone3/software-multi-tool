@@ -34,7 +34,6 @@ import {
 	MoreVerticalIcon,
 	XIcon,
 } from "lucide-react";
-import { useFormatter } from "next-intl";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
@@ -46,6 +45,11 @@ const invitationStatusLabels: Record<string, string> = {
 	canceled: "Canceled",
 };
 
+const dateTimeFormatter = new Intl.DateTimeFormat("en", {
+	dateStyle: "medium",
+	timeStyle: "short",
+});
+
 export function OrganizationInvitationsList({
 	organizationId,
 }: {
@@ -53,7 +57,6 @@ export function OrganizationInvitationsList({
 }) {
 	const queryClient = useQueryClient();
 	const { user } = useSession();
-	const formatter = useFormatter();
 	const { data: organization } = useFullOrganizationQuery(organizationId);
 
 	const canUserEditInvitations = isOrganizationAdmin(organization, user);
@@ -125,12 +128,8 @@ export function OrganizationInvitationsList({
 							</span>
 							<span>-</span>
 							<span>
-								{`Expires at ${formatter.dateTime(
+								{`Expires at ${dateTimeFormatter.format(
 									new Date(row.original.expiresAt),
-									{
-										dateStyle: "medium",
-										timeStyle: "short",
-									},
 								)}`}
 							</span>
 						</small>
