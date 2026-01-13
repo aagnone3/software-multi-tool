@@ -78,7 +78,7 @@ export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSche
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'pgBossJobId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
@@ -344,6 +344,7 @@ export const ToolJobSchema = z.object({
   error: z.string().nullish(),
   userId: z.string().nullish(),
   sessionId: z.string().nullish(),
+  pgBossJobId: z.string().nullish(),
   attempts: z.number().int(),
   maxAttempts: z.number().int().default(3),
   startedAt: z.date().nullish(),

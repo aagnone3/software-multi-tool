@@ -250,6 +250,9 @@ model ToolJob {
     user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
     sessionId   String?       // For anonymous users
 
+    // pg-boss integration
+    pgBossJobId String?       @unique // Links to pg-boss job ID (UUID)
+
     // Tracking
     attempts    Int           @default(0)
     maxAttempts Int           @default(3)
