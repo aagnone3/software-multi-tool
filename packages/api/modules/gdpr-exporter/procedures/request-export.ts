@@ -10,8 +10,8 @@ import { protectedProcedure } from "../../../orpc/procedures";
 import { processNextJob } from "../../jobs/lib/job-runner";
 import {
 	GDPR_EXPORTER_TOOL_SLUG,
-	GdprExportRequestSchema,
 	type GdprExporterInput,
+	GdprExportRequestSchema,
 } from "../types";
 
 // Rate limit: 1 export request per 24 hours
