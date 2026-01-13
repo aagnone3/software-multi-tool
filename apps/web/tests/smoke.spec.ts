@@ -44,11 +44,10 @@ test.describe("smoke tests - marketing pages", () => {
 		await expect(page.locator("main")).toBeVisible();
 	});
 
-	test("docs page loads successfully @smoke", async ({
-		gotoAndWait,
-		page,
-	}) => {
-		await gotoAndWait("/docs");
+	test("docs page loads successfully @smoke", async ({ page }) => {
+		// Use domcontentloaded instead of networkidle for docs page
+		// because fumadocs search component keeps network connections active
+		await page.goto("/docs", { waitUntil: "domcontentloaded" });
 
 		// Verify docs page renders - use first() to handle multiple main elements
 		await expect(page.locator("main").first()).toBeVisible();
