@@ -54,7 +54,8 @@ function parseArgs(argv) {
 		prNumber: null,
 		branch: null,
 		sha: null,
-		timeout: 600, // 10 minutes default
+		timeout: 600, // 10 minutes default for Render/Vercel
+		supabaseTimeout: 900, // 15 minutes for Supabase (takes longer to provision)
 	};
 
 	for (let i = 1; i < argv.length; i++) {
@@ -71,6 +72,9 @@ function parseArgs(argv) {
 				break;
 			case "--timeout":
 				args.timeout = Number.parseInt(argv[++i], 10);
+				break;
+			case "--supabase-timeout":
+				args.supabaseTimeout = Number.parseInt(argv[++i], 10);
 				break;
 		}
 	}
@@ -484,13 +488,20 @@ async function waitCommand(args) {
 
 	console.log(`PR Number: ${args.prNumber}`);
 	console.log(`Git Branch: ${args.branch || "(will be determined from PR)"}`);
-	console.log(`Timeout: ${args.timeout} seconds\n`);
+	console.log(`Timeout (Render/Vercel): ${args.timeout} seconds`);
+	console.log(`Timeout (Supabase): ${args.supabaseTimeout} seconds\n`);
 
 	const waitOptions = {
 		timeoutMs: args.timeout * 1000, // Convert seconds to milliseconds
 		initialDelay: 5000,
 		maxDelay: 30000,
 		backoffFactor: 1.5,
+	};
+
+	// Supabase gets a longer timeout since branch provisioning takes longer
+	const supabaseWaitOptions = {
+		...waitOptions,
+		timeoutMs: args.supabaseTimeout * 1000,
 	};
 
 	// Wait for all three services in parallel
@@ -505,7 +516,7 @@ async function waitCommand(args) {
 			const supabase = createSupabaseClientFromEnv();
 			const branch = await supabase.waitForBranch(
 				args.branch,
-				waitOptions,
+				supabaseWaitOptions,
 			);
 			const credentials = supabase.getBranchCredentials(branch);
 			return { branch, credentials };
@@ -556,10 +567,26 @@ async function waitCommand(args) {
 			: `READY - ${output.render.url}`,
 	);
 
-	// Check for any failures
-	const failed = results.filter((r) => r.status === "rejected");
-	if (failed.length > 0) {
-		throw new Error(`${failed.length} service(s) failed to become ready`);
+	// Supabase failure is non-fatal - we can still sync Vercel/Render URLs
+	// Database credentials will be missing, but at least CORS and API URLs get synced
+	const supabaseFailed = supabaseResult.status === "rejected";
+	if (supabaseFailed) {
+		console.log(
+			"\n[WARNING] Supabase branch not ready - database credentials will NOT be synced",
+		);
+		console.log(
+			"[WARNING] Re-run this workflow manually once Supabase branch is ready",
+		);
+	}
+
+	// Critical failures: Render and Vercel must be ready for any sync to work
+	const criticalFailed = [vercelResult, renderResult].filter(
+		(r) => r.status === "rejected",
+	);
+	if (criticalFailed.length > 0) {
+		throw new Error(
+			`${criticalFailed.length} critical service(s) failed to become ready (Render/Vercel required)`,
+		);
 	}
 
 	return output;
