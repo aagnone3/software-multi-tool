@@ -10,7 +10,7 @@
  *   pnpm --filter @repo/scripts supabase:validate-seed
  *
  * Environment:
- *   DATABASE_URL - Connection string for the preview database
+ *   POSTGRES_PRISMA_URL - Connection string for the preview database
  *
  * Exit codes:
  *   0 - Seed validated successfully
@@ -28,12 +28,14 @@ const EXPECTED_ORG_SLUG = "preview-test-org";
 const EXPECTED_SEED_MARKER = "preview_seed_marker";
 
 async function validateSeed() {
-	const databaseUrl = process.env.DATABASE_URL;
+	const databaseUrl = process.env.POSTGRES_PRISMA_URL;
 
 	if (!databaseUrl) {
-		console.error("ERROR: DATABASE_URL environment variable is not set");
 		console.error(
-			"Set DATABASE_URL to your preview branch database connection string",
+			"ERROR: POSTGRES_PRISMA_URL environment variable is not set",
+		);
+		console.error(
+			"Set POSTGRES_PRISMA_URL to your preview branch database connection string",
 		);
 		process.exit(1);
 	}

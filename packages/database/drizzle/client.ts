@@ -4,10 +4,10 @@ import * as schema from "./schema/postgres";
 // Check the drizzle documentation for more information on how to connect to your preferred database provider
 // https://orm.drizzle.team/docs/get-started-postgresql
 
-const databaseUrl = process.env.DATABASE_URL as string;
+const databaseUrl = process.env.POSTGRES_PRISMA_URL as string;
 
 if (!databaseUrl) {
-	throw new Error("DATABASE_URL is not set");
+	throw new Error("POSTGRES_PRISMA_URL is not set");
 }
 
 export const db = drizzle(databaseUrl, {

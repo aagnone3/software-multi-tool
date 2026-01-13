@@ -43,18 +43,18 @@ function logError(message) {
 }
 
 /**
- * Check if DATABASE_URL is set and valid
+ * Check if POSTGRES_PRISMA_URL is set and valid
  */
 function validateDatabaseUrl() {
-	const dbUrl = process.env.DATABASE_URL;
+	const dbUrl = process.env.POSTGRES_PRISMA_URL;
 
 	if (!dbUrl) {
 		throw new Error(
-			"DATABASE_URL is not set. Check apps/web/.env.local configuration.",
+			"POSTGRES_PRISMA_URL is not set. Check apps/web/.env.local configuration.",
 		);
 	}
 
-	logSuccess("DATABASE_URL is configured");
+	logSuccess("POSTGRES_PRISMA_URL is configured");
 }
 
 /**
@@ -94,7 +94,7 @@ function checkDatabaseDrift() {
 	try {
 		logInfo("Checking for database drift...");
 		const diff = execSync(
-			`pnpm prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel ${SCHEMA_PATH} --script`,
+			`pnpm prisma migrate diff --from-url "$POSTGRES_PRISMA_URL" --to-schema-datamodel ${SCHEMA_PATH} --script`,
 			{
 				stdio: "pipe",
 				encoding: "utf-8",
@@ -125,15 +125,15 @@ function validateShadowDatabase() {
 	logInfo("Checking shadow database support...");
 
 	// Shadow DB is created automatically by Prisma for local postgres
-	// We just verify the DATABASE_URL uses a supported provider
-	const dbUrl = process.env.DATABASE_URL || "";
+	// We just verify the POSTGRES_PRISMA_URL uses a supported provider
+	const dbUrl = process.env.POSTGRES_PRISMA_URL || "";
 
 	if (
 		!dbUrl.startsWith("postgresql://") &&
 		!dbUrl.startsWith("postgres://")
 	) {
 		logWarning(
-			"DATABASE_URL does not appear to be PostgreSQL. Shadow database may not work correctly.",
+			"POSTGRES_PRISMA_URL does not appear to be PostgreSQL. Shadow database may not work correctly.",
 		);
 	} else {
 		logSuccess("Database provider supports shadow database");

@@ -269,45 +269,14 @@ pnpm web:env:unset VARIABLE_NAME --target preview
 
 ### Connecting to Preview Database (Prisma Configuration)
 
-Supabase branching creates the database but does **not** automatically set `DATABASE_URL` or `DIRECT_URL` environment variables. Since this project uses Prisma, you must configure these manually.
+The Vercel-Supabase integration automatically provides database connection strings for preview branches. The Prisma schema is configured to use these variables directly:
 
-**Prisma requires two connection strings** (from `packages/database/prisma/schema.prisma`):
+| Variable                    | Purpose                         |
+| --------------------------- | ------------------------------- |
+| `POSTGRES_PRISMA_URL`       | Pooled connection (app runtime) |
+| `POSTGRES_URL_NON_POOLING`  | Direct connection (migrations)  |
 
-```prisma
-datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")      # Pooled connection (for app)
-    directUrl = env("DIRECT_URL")        # Direct connection (for migrations)
-}
-```
-
-**For Supabase branch databases**, construct the URLs from the branch connection info:
-
-```bash
-# Pooled connection (Transaction mode via Supavisor)
-DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection (for Prisma migrations)
-DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
-```
-
-**Where to find these values**:
-
-1. Go to Supabase Dashboard → Database → Branches
-2. Select your PR's branch
-3. Click "Connect" to view connection strings
-4. Use "Transaction" mode URL for `DATABASE_URL`
-5. Use "Session" mode URL for `DIRECT_URL`
-
-**Configure in Vercel for preview deployments**:
-
-```bash
-# Set for Preview environment only
-pnpm web:env:set DATABASE_URL "postgresql://..." --target preview
-pnpm web:env:set DIRECT_URL "postgresql://..." --target preview
-```
-
-**Note**: Each Supabase branch has unique credentials. For dynamic preview environments, consider using Supabase's Vercel integration which can auto-inject the correct branch database URL, or set up a GitHub Action to update Vercel env vars when branches are created.
+**No additional configuration needed** - preview deployments automatically connect to the correct branch database.
 
 ## Render Preview Environments
 
@@ -340,22 +309,13 @@ services:
 
 Render preview environments need these env vars configured manually:
 
-| Variable              | Description                                      |
-| --------------------- | ------------------------------------------------ |
-| `DATABASE_URL`        | Pooled connection to Supabase branch database    |
-| `DIRECT_URL`          | Direct connection for Prisma migrations          |
-| `BETTER_AUTH_SECRET`  | Same as production (or preview-specific)         |
+| Variable                   | Description                                   |
+| -------------------------- | --------------------------------------------- |
+| `POSTGRES_PRISMA_URL`      | Pooled connection to Supabase branch database |
+| `POSTGRES_URL_NON_POOLING` | Direct connection for Prisma migrations       |
+| `BETTER_AUTH_SECRET`       | Same as production (or preview-specific)      |
 
-**Important**: Render does not automatically receive Supabase branch database credentials. You must:
-
-1. Get the branch database connection strings from Supabase Dashboard
-2. Configure them in Render Dashboard → Service → Environment
-3. Use the same `DATABASE_URL` and `DIRECT_URL` format as described in the Vercel section above
-
-For truly dynamic preview environments, consider setting up a GitHub Action that:
-
-1. Listens for Supabase branch creation webhook
-2. Updates Render environment variables via Render API
+**Note**: Unlike Vercel, Render does not have automatic Supabase integration. You must manually copy the branch database connection strings from Supabase Dashboard → Branches → Connect.
 
 ## Troubleshooting
 
@@ -392,27 +352,17 @@ For truly dynamic preview environments, consider setting up a GitHub Action that
 
 ### Preview Environment Issues
 
-**Prisma can't connect: "DATABASE_URL not set" or connection errors**:
-
-Supabase branching does NOT automatically set `DATABASE_URL` or `DIRECT_URL`. You must configure them manually.
-
-1. Get connection strings from Supabase Dashboard → Database → Branches → [Your Branch] → Connect
-2. Set both `DATABASE_URL` (pooled/transaction mode) and `DIRECT_URL` (session mode)
-3. For Vercel: `pnpm web:env:set DATABASE_URL "..." --target preview`
-4. For Render: Dashboard → Service → Environment
-
 **Vercel preview not connecting to database**:
 
-1. Verify `DATABASE_URL` AND `DIRECT_URL` are both set for Preview environment
-2. Check the URLs point to the **branch** database, not production
-3. Ensure the branch database was created (check Supabase Dashboard → Branches)
-4. Verify the password in the URL is correct (branch DBs have unique passwords)
+1. Verify Supabase integration is enabled in Vercel project settings
+2. Check that the Supabase branch was created (GitHub check should show status)
+3. Ensure `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` are being populated
 
 **Render preview failing to start**:
 
-1. Check build logs in Render dashboard for Prisma connection errors
-2. Verify both `DATABASE_URL` and `DIRECT_URL` are set
-3. Ensure URLs use the correct branch database credentials
+1. Check build logs for Prisma connection errors
+2. Verify `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` are set manually
+3. Ensure URLs use the correct branch database credentials from Supabase Dashboard
 
 **Supabase branch database not created**:
 
