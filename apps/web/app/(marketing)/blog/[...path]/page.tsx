@@ -1,14 +1,14 @@
-import { LocaleLink, localeRedirect } from "@i18n/routing";
 import { PostContent } from "@marketing/blog/components/PostContent";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
+import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
 import Image from "next/image";
-import { getLocale, setRequestLocale } from "next-intl/server";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type Params = {
 	path: string;
-	locale: string;
 };
 
 export async function generateMetadata(props: { params: Promise<Params> }) {
@@ -16,7 +16,7 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 
 	const { path } = params;
 
-	const locale = await getLocale();
+	const locale = config.i18n.defaultLocale;
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
@@ -38,14 +38,14 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 }
 
 export default async function BlogPostPage(props: { params: Promise<Params> }) {
-	const { path, locale } = await props.params;
-	setRequestLocale(locale);
+	const { path } = await props.params;
+	const locale = config.i18n.defaultLocale;
 
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
 	if (!post) {
-		return localeRedirect({ href: "/blog", locale });
+		return redirect("/blog");
 	}
 
 	const { title, date, authorName, authorImage, tags, image, body } = post;
@@ -54,7 +54,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 		<div className="container max-w-6xl pt-32 pb-24">
 			<div className="mx-auto max-w-2xl">
 				<div className="mb-12">
-					<LocaleLink href="/blog">&larr; Back to blog</LocaleLink>
+					<Link href="/blog">&larr; Back to blog</Link>
 				</div>
 
 				<h1 className="font-bold text-4xl">{title}</h1>

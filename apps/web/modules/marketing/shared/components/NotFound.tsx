@@ -1,8 +1,8 @@
 "use client";
 
-import { LocaleLink } from "@i18n/routing";
 import { Button } from "@ui/components/button";
 import { UndoIcon } from "lucide-react";
+import Link from "next/link";
 
 export function NotFound() {
 	return (
@@ -11,9 +11,9 @@ export function NotFound() {
 			<p className="mt-2 text-2xl">Page not found</p>
 
 			<Button asChild className="mt-4">
-				<LocaleLink href="/">
+				<Link href="/">
 					<UndoIcon className="mr-2 size-4" /> Go to homepage
-				</LocaleLink>
+				</Link>
 			</Button>
 		</div>
 	);

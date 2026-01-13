@@ -1,11 +1,7 @@
-import { routing } from "@i18n/routing";
 import { config as appConfig } from "@repo/config";
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
-import createMiddleware from "next-intl/middleware";
 import { withQuery } from "ufo";
-
-const intlMiddleware = createMiddleware(routing);
 
 /**
  * Check if a tool route is public (accessible without authentication)
@@ -71,22 +67,11 @@ export default async function middleware(req: NextRequest) {
 		return NextResponse.next();
 	}
 
-	const pathsWithoutLocale = [
-		"/onboarding",
-		"/new-organization",
-		"/choose-plan",
-		"/organization-invitation",
-	];
-
-	if (pathsWithoutLocale.some((path) => pathname.startsWith(path))) {
-		return NextResponse.next();
-	}
-
 	if (!appConfig.ui.marketing.enabled) {
 		return NextResponse.redirect(new URL("/app", origin));
 	}
 
-	return intlMiddleware(req);
+	return NextResponse.next();
 }
 
 export const config = {

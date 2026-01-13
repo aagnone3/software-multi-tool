@@ -1,6 +1,5 @@
 "use client";
 
-import { LocaleLink, useLocalePathname } from "@i18n/routing";
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { ColorModeToggle } from "@shared/components/ColorModeToggle";
@@ -14,14 +13,15 @@ import {
 } from "@ui/components/sheet";
 import { cn } from "@ui/lib";
 import { MenuIcon } from "lucide-react";
-import NextLink from "next/link";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
 export function NavBar() {
 	const { user } = useSession();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const localePathname = useLocalePathname();
+	const pathname = usePathname();
 	const [isTop, setIsTop] = useState(true);
 
 	const debouncedScrollHandler = useDebounceCallback(
@@ -44,9 +44,9 @@ export function NavBar() {
 
 	useEffect(() => {
 		setMobileMenuOpen(false);
-	}, [localePathname]);
+	}, [pathname]);
 
-	const isDocsPage = localePathname.startsWith("/docs");
+	const isDocsPage = pathname.startsWith("/docs");
 
 	const menuItems: {
 		label: string;
@@ -78,7 +78,7 @@ export function NavBar() {
 		},
 	];
 
-	const isMenuItemActive = (href: string) => localePathname.startsWith(href);
+	const isMenuItemActive = (href: string) => pathname.startsWith(href);
 
 	return (
 		<nav
@@ -98,17 +98,17 @@ export function NavBar() {
 					)}
 				>
 					<div className="flex flex-1 justify-start">
-						<LocaleLink
+						<Link
 							href="/"
 							className="block hover:no-underline active:no-underline"
 						>
 							<Logo />
-						</LocaleLink>
+						</Link>
 					</div>
 
 					<div className="hidden flex-1 items-center justify-center lg:flex">
 						{menuItems.map((menuItem) => (
-							<LocaleLink
+							<Link
 								key={menuItem.href}
 								href={menuItem.href}
 								className={cn(
@@ -120,17 +120,12 @@ export function NavBar() {
 								prefetch
 							>
 								{menuItem.label}
-							</LocaleLink>
+							</Link>
 						))}
 					</div>
 
 					<div className="flex flex-1 items-center justify-end gap-3">
 						<ColorModeToggle />
-						{/* {config.i18n.enabled && (
-							<Suspense>
-								<LocaleSwitch />
-							</Suspense>
-						)} */}
 
 						<Sheet
 							open={mobileMenuOpen}
@@ -150,7 +145,7 @@ export function NavBar() {
 								<SheetTitle />
 								<div className="flex flex-col items-start justify-center">
 									{menuItems.map((menuItem) => (
-										<LocaleLink
+										<Link
 											key={menuItem.href}
 											href={menuItem.href}
 											className={cn(
@@ -162,17 +157,17 @@ export function NavBar() {
 											prefetch
 										>
 											{menuItem.label}
-										</LocaleLink>
+										</Link>
 									))}
 
-									<NextLink
+									<Link
 										key={user ? "start" : "login"}
 										href={user ? "/app" : "/auth/login"}
 										className="block px-3 py-2 text-base"
 										prefetch={!user}
 									>
 										{user ? "Dashboard" : "Login"}
-									</NextLink>
+									</Link>
 								</div>
 							</SheetContent>
 						</Sheet>
@@ -185,7 +180,7 @@ export function NavBar() {
 									asChild
 									variant="secondary"
 								>
-									<NextLink href="/app">Dashboard</NextLink>
+									<Link href="/app">Dashboard</Link>
 								</Button>
 							) : (
 								<Button
@@ -194,9 +189,9 @@ export function NavBar() {
 									asChild
 									variant="secondary"
 								>
-									<NextLink href="/auth/login" prefetch>
+									<Link href="/auth/login" prefetch>
 										Login
-									</NextLink>
+									</Link>
 								</Button>
 							))}
 					</div>

@@ -1,4 +1,3 @@
-import { LocaleLink } from "@i18n/routing";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +27,7 @@ export function Hero() {
 						</Link>
 					</Button>
 					<Button variant="light" size="lg" asChild>
-						<LocaleLink href="/docs">Documentation</LocaleLink>
+						<Link href="/docs">Documentation</Link>
 					</Button>
 				</div>
 

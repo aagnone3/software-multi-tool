@@ -1,8 +1,8 @@
-import { LocaleLink } from "@i18n/routing";
 import { slugifyHeadline } from "@shared/lib/content";
 import type { MDXComponents } from "mdx/types";
 import type { ImageProps } from "next/image";
 import Image from "next/image";
+import Link from "next/link";
 
 export const mdxComponents = {
 	a: (props) => {
@@ -11,9 +11,9 @@ export const mdxComponents = {
 			href && (href.startsWith("/") || href.startsWith("#"));
 
 		return isInternalLink ? (
-			<LocaleLink href={href} {...rest}>
+			<Link href={href} {...rest}>
 				{children}
-			</LocaleLink>
+			</Link>
 		) : (
 			<a target="_blank" rel="noopener noreferrer" href={href} {...rest}>
 				{children}

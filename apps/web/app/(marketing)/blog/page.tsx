@@ -1,6 +1,6 @@
 import { PostListItem } from "@marketing/blog/components/PostListItem";
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
-import { getLocale } from "next-intl/server";
+import { config } from "@repo/config";
 
 export async function generateMetadata() {
 	return {
@@ -9,7 +9,7 @@ export async function generateMetadata() {
 }
 
 export default async function BlogListPage() {
-	const locale = await getLocale();
+	const locale = config.i18n.defaultLocale;
 
 	const posts = await getAllPosts();
 
