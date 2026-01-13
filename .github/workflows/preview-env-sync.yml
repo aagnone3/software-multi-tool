@@ -66,11 +66,25 @@ jobs:
           fi
 
       - name: Sync preview environments
+        id: sync
         run: |
-          pnpm --filter @repo/scripts preview-sync run \
+          # Capture output to detect if existing Supabase branch was used
+          OUTPUT=$(pnpm --filter @repo/scripts preview-sync run \
             --pr ${{ steps.pr-info.outputs.pr_number }} \
             --branch "${{ steps.pr-info.outputs.branch_name }}" \
-            --timeout 600
+            --timeout 600 2>&1) || EXIT_CODE=$?
+
+          echo "$OUTPUT"
+
+          # Check if existing branch was used (for PR comment)
+          if echo "$OUTPUT" | grep -q "using existing branch"; then
+            echo "used_existing_supabase=true" >> $GITHUB_OUTPUT
+          else
+            echo "used_existing_supabase=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Propagate exit code
+          exit ${EXIT_CODE:-0}
         env:
           # Supabase Management API
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -81,6 +95,8 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
           VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          # GitHub API for check status detection
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post status comment
         if: always()
@@ -89,12 +105,18 @@ jobs:
           script: |
             const prNumber = ${{ steps.pr-info.outputs.pr_number }};
             const success = '${{ job.status }}' === 'success';
+            const usedExistingSupabase = '${{ steps.sync.outputs.used_existing_supabase }}' === 'true';
+
+            // AC4: Update PR comment for SKIPPED scenarios
+            const supabaseNote = usedExistingSupabase
+              ? '- **Supabase** using existing branch database (GitHub check was SKIPPED)'
+              : '- **Supabase** branch database credentials synced to Render';
 
             const body = success
               ? `## Preview Environment Sync Complete
 
             Environment variables have been synchronized across all preview services:
-            - **Supabase** branch database credentials synced to Render
+            ${supabaseNote}
             - **Vercel** preview URL synced to Render (CORS)
             - **Render** API URL synced to Vercel
 

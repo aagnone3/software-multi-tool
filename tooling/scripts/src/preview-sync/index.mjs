@@ -28,6 +28,7 @@ import { createSupabaseClientFromEnv } from "../supabase/api-client.mjs";
 
 const RENDER_API_BASE = "https://api.render.com/v1";
 const VERCEL_API_BASE = "https://api.vercel.com";
+const GITHUB_API_BASE = "https://api.github.com";
 const RENDER_SERVICE_PREFIX = "software-multi-tool-pr-";
 
 // ============================================================================
@@ -460,6 +461,111 @@ async function setVercelEnvVar(key, value, target = "preview") {
 }
 
 // ============================================================================
+// GitHub API Functions
+// ============================================================================
+
+async function githubRequest(path, options = {}) {
+	const token = process.env.GITHUB_TOKEN;
+	if (!token) {
+		// GitHub token is optional - we can still work without check status detection
+		return null;
+	}
+
+	return withRetry(async () => {
+		const url = `${GITHUB_API_BASE}${path}`;
+		const response = await fetch(url, {
+			...options,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: "application/vnd.github+json",
+				"X-GitHub-Api-Version": "2022-11-28",
+				...options.headers,
+			},
+		});
+
+		if (!response.ok) {
+			let errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
+			try {
+				const body = await response.json();
+				if (body.message) {
+					errorMessage = `GitHub API error: ${body.message}`;
+				}
+			} catch {
+				// Ignore JSON parse errors
+			}
+			throw new Error(errorMessage);
+		}
+
+		return response.json();
+	});
+}
+
+/**
+ * Check if the Supabase GitHub check is SKIPPED for a given PR
+ * @param {string} owner - Repository owner
+ * @param {string} repo - Repository name
+ * @param {string} branch - Git branch name
+ * @returns {Promise<{isSkipped: boolean, conclusion: string | null}>}
+ */
+async function getSupabaseCheckStatus(owner, repo, branch) {
+	try {
+		// Get the latest commit SHA for the branch
+		const refResponse = await githubRequest(
+			`/repos/${owner}/${repo}/git/ref/heads/${encodeURIComponent(branch)}`,
+		);
+
+		if (!refResponse) {
+			console.log(
+				"[GitHub] No GITHUB_TOKEN available, cannot check Supabase status",
+			);
+			return { isSkipped: false, conclusion: null };
+		}
+
+		const commitSha = refResponse.object?.sha;
+		if (!commitSha) {
+			console.log("[GitHub] Could not determine commit SHA for branch");
+			return { isSkipped: false, conclusion: null };
+		}
+
+		// Get check runs for the commit
+		const checksResponse = await githubRequest(
+			`/repos/${owner}/${repo}/commits/${commitSha}/check-runs`,
+		);
+
+		if (!checksResponse || !checksResponse.check_runs) {
+			return { isSkipped: false, conclusion: null };
+		}
+
+		// Find the Supabase check (usually named something like "Supabase Preview" or similar)
+		const supabaseCheck = checksResponse.check_runs.find(
+			(check) =>
+				check.name?.toLowerCase().includes("supabase") ||
+				check.app?.slug === "supabase-integration" ||
+				check.app?.name?.toLowerCase().includes("supabase"),
+		);
+
+		if (!supabaseCheck) {
+			console.log("[GitHub] No Supabase check found for this commit");
+			return { isSkipped: false, conclusion: null };
+		}
+
+		console.log(
+			`[GitHub] Supabase check status: ${supabaseCheck.status}, conclusion: ${supabaseCheck.conclusion}`,
+		);
+
+		return {
+			isSkipped: supabaseCheck.conclusion === "skipped",
+			conclusion: supabaseCheck.conclusion,
+		};
+	} catch (error) {
+		console.log(
+			`[GitHub] Could not check Supabase status: ${error.message}`,
+		);
+		return { isSkipped: false, conclusion: null };
+	}
+}
+
+// ============================================================================
 // Main Commands
 // ============================================================================
 
@@ -482,13 +588,69 @@ async function waitCommand(args) {
 	// Wait for all three services in parallel
 	console.log("Starting parallel wait for all services...\n");
 
+	// Extract repo info from GITHUB_REPOSITORY env var (format: owner/repo)
+	const githubRepo = process.env.GITHUB_REPOSITORY || "";
+	const [repoOwner, repoName] = githubRepo.split("/");
+
 	const results = await Promise.allSettled([
 		(async () => {
 			if (!args.branch) {
 				console.log("[Supabase] Skipping - no branch name provided");
 				return { skipped: true };
 			}
+
 			const supabase = createSupabaseClientFromEnv();
+
+			// AC1: Check if Supabase GitHub check is SKIPPED before waiting
+			if (repoOwner && repoName) {
+				const checkStatus = await getSupabaseCheckStatus(
+					repoOwner,
+					repoName,
+					args.branch,
+				);
+
+				if (checkStatus.isSkipped) {
+					console.log(
+						"[Supabase] GitHub check is SKIPPED, looking for existing branch...",
+					);
+
+					// AC2: When SKIPPED, immediately look for existing branch
+					const existingBranch = await supabase.findBranchByGitBranch(
+						args.branch,
+					);
+
+					if (
+						existingBranch &&
+						supabase.isBranchReady(existingBranch)
+					) {
+						console.log(
+							`[Supabase] Using existing branch "${args.branch}" (status: ${existingBranch.status})`,
+						);
+						const credentials =
+							supabase.getBranchCredentials(existingBranch);
+						// AC4: Flag to indicate we're using existing branch (for PR comment)
+						return {
+							branch: existingBranch,
+							credentials,
+							usedExistingBranch: true,
+						};
+					}
+
+					// AC3: SKIPPED but no existing branch found
+					if (!existingBranch) {
+						throw new Error(
+							`Supabase check was SKIPPED but no existing branch found for "${args.branch}". Manual investigation required.`,
+						);
+					}
+
+					// Branch exists but not ready - this is unexpected with SKIPPED state
+					console.log(
+						`[Supabase] Found existing branch but status is "${existingBranch.status}", will wait for it to become ready...`,
+					);
+				}
+			}
+
+			// AC5: Normal flow - wait for branch to be created and become ready
 			const branch = await supabase.waitForBranch(
 				args.branch,
 				waitOptions,
@@ -521,14 +683,15 @@ async function waitCommand(args) {
 				: { error: renderResult.reason?.message },
 	};
 
-	console.log(
-		"Supabase:",
-		output.supabase.skipped
-			? "SKIPPED"
-			: output.supabase.error
-				? `ERROR: ${output.supabase.error}`
-				: "READY",
-	);
+	// AC4: Report if using existing branch (for PR comment awareness)
+	const supabaseStatus = output.supabase.skipped
+		? "SKIPPED"
+		: output.supabase.error
+			? `ERROR: ${output.supabase.error}`
+			: output.supabase.usedExistingBranch
+				? "READY (using existing branch)"
+				: "READY";
+	console.log("Supabase:", supabaseStatus);
 	console.log(
 		"Vercel:",
 		output.vercel.error
