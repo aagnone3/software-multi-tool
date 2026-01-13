@@ -66,6 +66,25 @@ jobs:
           path: apps/web/test-results/**/trace.zip
           retention-days: 7
           if-no-files-found: ignore
+  type-check:
+    name: TypeScript type-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install && pnpm --filter database generate
+      - name: Build content-collections
+        run: pnpm --filter web build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+      - name: Run type-check
+        run: pnpm --filter web run type-check
+
   tests:
     name: Run workspace tests
     runs-on: ubuntu-latest
