@@ -261,6 +261,8 @@ echo "Allocated port: $WORKTREE_PORT"
 # - After updating pnpm-lock.yaml in worktree
 ```
 
+> **Note**: Content-collections types are automatically generated via `postinstall` script when running `pnpm install`. This ensures TypeScript type-checking works in fresh worktrees without requiring a manual build step.
+
 ### Step 5: Baseline Verification
 
 Run tests to ensure clean starting state:
@@ -732,6 +734,22 @@ pnpm clean
 
 # Rebuild
 pnpm build
+```
+
+### Content-Collections Type Errors (Auto-Resolved)
+
+**Problem**: TypeScript errors like `Cannot find module 'content-collections'` in fresh worktrees.
+
+**Note**: This is now automatically handled! The `apps/web` package has a `postinstall` script that runs `content-collections build` to generate types during `pnpm install`.
+
+If you still encounter this error:
+
+```bash
+# Regenerate content-collections types manually
+pnpm --filter @repo/web exec content-collections build
+
+# Or run a full install which triggers postinstall
+pnpm install
 ```
 
 ### Port Already in Use

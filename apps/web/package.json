@@ -74,6 +74,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.11",
+		"@content-collections/cli": "0.1.8",
 		"@content-collections/core": "0.13.1",
 		"@content-collections/mdx": "0.2.2",
 		"@content-collections/next": "0.2.10",
@@ -112,6 +113,7 @@
 	"scripts": {
 		"build": "next build",
 		"dev": "next dev --turbo",
+		"postinstall": "content-collections build",
 		"e2e": "pnpm exec playwright test --ui",
 		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
 		"lint": "next lint",
