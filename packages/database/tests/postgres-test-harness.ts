@@ -1,10 +1,10 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-import type { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
 
@@ -31,12 +31,6 @@ const prismaDir = path.resolve(
 	"prisma",
 );
 const prismaSchemaPath = path.join(prismaDir, "schema.prisma");
-const generatedClientPath = path.join(
-	prismaDir,
-	"generated",
-	"client",
-	"index.js",
-);
 
 const TABLES_TO_TRUNCATE = [
 	"tool_job",
@@ -65,11 +59,6 @@ export async function createPostgresTestHarness(): Promise<PostgresTestHarness> 
 		process.env.POSTGRES_URL_NON_POOLING = connectionString;
 
 		await preparePrismaClient(connectionString);
-		const prismaModule = await import(
-			pathToFileURL(generatedClientPath).href
-		);
-		const { PrismaClient } =
-			prismaModule as typeof import("../prisma/generated/client");
 		const prisma = new PrismaClient({
 			datasources: {
 				db: {

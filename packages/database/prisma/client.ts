@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "./generated/client";
+import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
 	return new PrismaClient();
@@ -15,4 +15,6 @@ if (process.env.NODE_ENV !== "production") {
 	globalThis.prisma = prisma;
 }
 
-export { prisma as db, Prisma };
+// Re-export all Prisma types for convenience
+export * from "@prisma/client";
+export { prisma as db };

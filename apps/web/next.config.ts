@@ -1,4 +1,3 @@
-import path from "node:path";
 import { withContentCollections } from "@content-collections/next";
 // @ts-expect-error - PrismaPlugin is not typed
 import { PrismaPlugin } from "@prisma/nextjs-monorepo-workaround-plugin";
@@ -6,12 +5,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	// Required for Prisma in monorepos - tells Next.js to trace files from the monorepo root
-	outputFileTracingRoot: path.join(__dirname, "../../"),
-	// Explicitly include Prisma engine files in the output bundle
-	outputFileTracingIncludes: {
-		"/*": ["../../packages/database/prisma/generated/**/*"],
-	},
 	transpilePackages: [
 		"@repo/api",
 		"@repo/auth",

@@ -1,4 +1,4 @@
-import type { Prisma } from "../../../prisma/generated/client/index.js";
+import type { Prisma } from "@prisma/client";
 import { generateId, generateName, now } from "../utils.js";
 
 /**

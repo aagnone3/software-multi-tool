@@ -1,4 +1,4 @@
-import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
+import type { Prisma, ToolJob } from "@repo/database";
 
 export interface JobResult {
 	success: boolean;

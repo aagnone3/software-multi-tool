@@ -1,5 +1,5 @@
 import { executePrompt, MODEL_RECOMMENDATIONS } from "@repo/agent-sdk";
-import type { Prisma, ToolJob } from "@repo/database/prisma/generated/client";
+import type { Prisma, ToolJob } from "@repo/database";
 import { logger } from "@repo/logs";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import {
