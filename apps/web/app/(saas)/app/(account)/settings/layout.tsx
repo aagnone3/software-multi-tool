@@ -6,6 +6,7 @@ import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayo
 import { UserAvatar } from "@shared/components/UserAvatar";
 import {
 	CreditCardIcon,
+	DownloadIcon,
 	LockKeyholeIcon,
 	SettingsIcon,
 	TriangleAlertIcon,
@@ -51,6 +52,11 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 							},
 						]
 					: []),
+				{
+					title: "Privacy",
+					href: "/app/settings/privacy",
+					icon: <DownloadIcon className="size-4 opacity-50" />,
+				},
 				{
 					title: "Danger zone",
 					href: "/app/settings/danger-zone",

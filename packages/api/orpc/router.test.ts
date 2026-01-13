@@ -61,6 +61,10 @@ vi.mock("../modules/jobs/router", () => ({
 	jobsRouter: {},
 }));
 
+vi.mock("../modules/gdpr-exporter/router", () => ({
+	gdprRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -78,6 +82,7 @@ describe("api router", () => {
 			"payments",
 			"ai",
 			"jobs",
+			"gdpr",
 		]);
 	});
 
