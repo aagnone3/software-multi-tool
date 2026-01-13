@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { JobPayload, SubmitJobResult, WorkerConfig } from "./types.js";
+import type { JobPayload, WorkerConfig } from "./types.js";
 
 /**
  * Unit tests for workers module types and exports
@@ -57,29 +57,6 @@ describe("WorkerConfig type", () => {
 		};
 		expect(Object.keys(config)).toContain("batchSize");
 		expect(Object.keys(config)).toContain("pollingIntervalSeconds");
-	});
-});
-
-describe("SubmitJobResult type", () => {
-	it("should have correct structure for success case", () => {
-		const result: SubmitJobResult = {
-			pgBossJobId: "job-123",
-			success: true,
-		};
-		expect(result.pgBossJobId).toBe("job-123");
-		expect(result.success).toBe(true);
-		expect(result.error).toBeUndefined();
-	});
-
-	it("should have correct structure for failure case", () => {
-		const result: SubmitJobResult = {
-			pgBossJobId: null,
-			success: false,
-			error: "Failed to submit job",
-		};
-		expect(result.pgBossJobId).toBeNull();
-		expect(result.success).toBe(false);
-		expect(result.error).toBe("Failed to submit job");
 	});
 });
 

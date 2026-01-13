@@ -29,23 +29,3 @@ export interface WorkerConfig {
 	 */
 	pollingIntervalSeconds: number;
 }
-
-/**
- * Result of job submission
- */
-export interface SubmitJobResult {
-	/**
-	 * The pg-boss job ID if submission was successful
-	 */
-	pgBossJobId: string | null;
-
-	/**
-	 * Whether the job was submitted successfully
-	 */
-	success: boolean;
-
-	/**
-	 * Error message if submission failed
-	 */
-	error?: string;
-}

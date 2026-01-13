@@ -64,7 +64,7 @@ async function processSingleJob(
 
 	logger.info(`[Worker:${toolSlug}] Processing job ${toolJobId}`);
 
-	// Fetch the ToolJob from database
+	// Fetch the ToolJob from database with retry info
 	const toolJob = await db.toolJob.findUnique({
 		where: { id: toolJobId },
 	});
@@ -77,13 +77,17 @@ async function processSingleJob(
 		};
 	}
 
+	// Track the new attempt count for retry logic later
+	const newAttemptCount = toolJob.attempts + 1;
+	const maxAttempts = toolJob.maxAttempts;
+
 	// Update ToolJob status to PROCESSING and link to pg-boss job
 	await db.toolJob.update({
 		where: { id: toolJobId },
 		data: {
 			status: "PROCESSING",
 			startedAt: new Date(),
-			attempts: { increment: 1 },
+			attempts: newAttemptCount,
 			pgBossJobId,
 		},
 	});
@@ -146,13 +150,8 @@ async function processSingleJob(
 		const errorMessage =
 			error instanceof Error ? error.message : String(error);
 
-		// Check if this job should be retried
-		const updatedJob = await db.toolJob.findUnique({
-			where: { id: toolJobId },
-			select: { attempts: true, maxAttempts: true },
-		});
-
-		if (updatedJob && updatedJob.attempts < updatedJob.maxAttempts) {
+		// Check if this job should be retried (using values captured before processing)
+		if (newAttemptCount < maxAttempts) {
 			// Job will be retried by pg-boss, keep it in PENDING status
 			await db.toolJob.update({
 				where: { id: toolJobId },
@@ -163,7 +162,7 @@ async function processSingleJob(
 			});
 
 			logger.warn(
-				`[Worker:${toolSlug}] Job ${toolJobId} failed, will retry (attempt ${updatedJob.attempts}/${updatedJob.maxAttempts}): ${errorMessage}`,
+				`[Worker:${toolSlug}] Job ${toolJobId} failed, will retry (attempt ${newAttemptCount}/${maxAttempts}): ${errorMessage}`,
 			);
 
 			// Rethrow to let pg-boss handle the retry
