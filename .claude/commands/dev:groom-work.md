@@ -15,8 +15,6 @@ Interactively flesh out a Linear ticket's scope, dependencies, and metadata.
 > - **DO** explore the codebase to understand the problem
 > - **DO** ask clarifying questions and refine acceptance criteria
 > - **DO** create or update Linear tickets with well-defined scope
->
-> After grooming is complete, use `/dev:work-on-ticket` or `/dev:perform-work` to implement.
 
 ## Input
 
@@ -176,11 +174,6 @@ Once the ticket is created/updated:
 1. Confirm the ticket details with the user
 2. Provide the Linear ticket URL
 3. **End the grooming session**
-
-If the user wants to implement the work, they should run:
-
-- `/dev:work-on-ticket PRA-XXX` - Work on a specific ticket
-- `/dev:perform-work` - Auto-pick from "Ready for Work" view
 
 **Never create worktrees, write code, or create PRs as part of this command.**
 
