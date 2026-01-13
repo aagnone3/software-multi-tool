@@ -17,6 +17,9 @@ vi.mock("../../expense-categorizer", () => ({
 vi.mock("../../meeting-summarizer", () => ({
 	registerMeetingProcessor: vi.fn(),
 }));
+vi.mock("../../gdpr-exporter", () => ({
+	registerGdprExporterProcessor: vi.fn(),
+}));
 
 describe("registerAllProcessors", () => {
 	beforeEach(() => {
@@ -41,12 +44,14 @@ describe("registerAllProcessors", () => {
 		const feedbackAnalyzer = await import("../../feedback-analyzer");
 		const expenseCategorizer = await import("../../expense-categorizer");
 		const meetingSummarizer = await import("../../meeting-summarizer");
+		const gdprExporter = await import("../../gdpr-exporter");
 
 		expect(invoiceProcessor.registerInvoiceProcessor).toHaveBeenCalled();
 		expect(contractAnalyzer.registerContractProcessor).toHaveBeenCalled();
 		expect(feedbackAnalyzer.registerFeedbackProcessor).toHaveBeenCalled();
 		expect(expenseCategorizer.registerExpenseProcessor).toHaveBeenCalled();
 		expect(meetingSummarizer.registerMeetingProcessor).toHaveBeenCalled();
+		expect(gdprExporter.registerGdprExporterProcessor).toHaveBeenCalled();
 
 		registerProcessorSpy.mockRestore();
 	});
