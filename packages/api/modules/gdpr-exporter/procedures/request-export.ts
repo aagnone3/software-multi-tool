@@ -7,7 +7,6 @@ import {
 } from "@repo/database";
 import { logger } from "@repo/logs";
 import { protectedProcedure } from "../../../orpc/procedures";
-import { processNextJob } from "../../jobs/lib/job-runner";
 import {
 	GDPR_EXPORTER_TOOL_SLUG,
 	type GdprExporterInput,
@@ -123,21 +122,9 @@ export const requestExport = protectedProcedure
 			format,
 		});
 
-		// Trigger immediate background processing (non-blocking)
-		if (process.env.NODE_ENV !== "test") {
-			processNextJob(GDPR_EXPORTER_TOOL_SLUG).catch((error) => {
-				logger.error(
-					`[GdprExporter] Immediate processing failed for job ${job.id}`,
-					{
-						error:
-							error instanceof Error
-								? error.message
-								: String(error),
-					},
-				);
-				// Don't throw - cron will pick it up later
-			});
-		}
+		// Job will be processed by the background worker/cron
+		// We don't trigger immediate processing to avoid circular dependency
+		// between request-export.ts and job-runner.ts
 
 		return {
 			job,
