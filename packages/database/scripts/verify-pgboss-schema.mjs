@@ -10,13 +10,13 @@
  *
  * Prerequisites:
  *   - pg-boss schema must be created via Prisma migration
- *   - DATABASE_URL environment variable set
+ *   - POSTGRES_PRISMA_URL environment variable set
  */
 
 import PgBoss from "pg-boss";
 
 const connectionString =
-	process.env.DATABASE_URL ||
+	process.env.POSTGRES_PRISMA_URL ||
 	"postgresql://postgres:postgres@localhost:5432/local_softwaremultitool";
 
 console.log("Verifying pg-boss schema setup...");

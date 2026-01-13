@@ -8,13 +8,13 @@
  *
  * Prerequisites:
  *   - Local PostgreSQL running on port 5432
- *   - DATABASE_URL environment variable set (or using default)
+ *   - POSTGRES_PRISMA_URL environment variable set (or using default)
  */
 
 import PgBoss from "pg-boss";
 
 const connectionString =
-	process.env.DATABASE_URL ||
+	process.env.POSTGRES_PRISMA_URL ||
 	"postgresql://postgres:postgres@localhost:5432/local_softwaremultitool";
 
 console.log("Initializing pg-boss schema...");

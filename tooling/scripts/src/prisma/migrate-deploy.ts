@@ -3,11 +3,11 @@ import process from "node:process";
 
 function resolveDatabaseUrl(): string {
 	const databaseUrl =
-		process.env.DATABASE_URL ?? process.env.PROD_DATABASE_URL ?? "";
+		process.env.POSTGRES_PRISMA_URL ?? process.env.PROD_DATABASE_URL ?? "";
 
 	if (!databaseUrl) {
 		console.error(
-			"[db:migrate:deploy] DATABASE_URL (or PROD_DATABASE_URL) is required.",
+			"[db:migrate:deploy] POSTGRES_PRISMA_URL (or PROD_DATABASE_URL) is required.",
 		);
 		process.exit(1);
 	}
@@ -41,12 +41,12 @@ async function run(command: string, args: string[], env: NodeJS.ProcessEnv) {
 
 async function main() {
 	const databaseUrl = resolveDatabaseUrl();
-	const directUrl = process.env.DIRECT_URL ?? databaseUrl;
+	const directUrl = process.env.POSTGRES_URL_NON_POOLING ?? databaseUrl;
 
 	const env = {
 		...process.env,
-		DATABASE_URL: databaseUrl,
-		DIRECT_URL: directUrl,
+		POSTGRES_PRISMA_URL: databaseUrl,
+		POSTGRES_URL_NON_POOLING: directUrl,
 	};
 
 	console.info("[db:migrate:deploy] Applying Prisma migrations...");
