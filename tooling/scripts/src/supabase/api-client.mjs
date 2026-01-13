@@ -194,17 +194,28 @@ export function createSupabaseClient(config) {
 			const dbName = "postgres";
 
 			// Direct connection (for migrations)
+			// Uses the branch's direct database host
 			const directUrl = `postgresql://${dbUser}:${encodeURIComponent(dbPass)}@${dbHost}:${dbPort}/${dbName}`;
 
 			// Pooler connection (for app runtime)
 			// Supabase uses Supavisor pooler on port 6543
-			// Branch db_host format: db.{branch-ref}.supabase.co
-			// We need the pooler host which varies by region. Extract from db_host pattern.
-			// The pooler format is: {project-ref}.pooler.supabase.com (region-agnostic)
-			// OR aws-0-{region}.pooler.supabase.com with username routing
-			const poolerHost = `${projectRef}.pooler.supabase.com`;
+			//
+			// For branches, we use the branch's own project_ref in the username,
+			// which routes the connection to the correct branch database.
+			//
+			// The pooler host format is: aws-0-{region}.pooler.supabase.com
+			// We extract the region from the db_host pattern: db.{branch-ref}.supabase.co
+			// However, the regional host can vary (aws-0 vs aws-1), so we use the
+			// simpler format: {branch-project-ref}.pooler.supabase.com
+			// which routes based on the username's project_ref.
+			//
+			// IMPORTANT: For branch databases, we must use the branch's project_ref
+			// (from branch.project_ref), NOT the parent project's projectRef.
+			// The branch has its own project reference that identifies it in Supavisor.
+			const branchProjectRef = branch.project_ref;
+			const poolerHost = `${branchProjectRef}.pooler.supabase.com`;
 			const poolerPort = 6543;
-			const poolerUrl = `postgresql://${dbUser}.${projectRef}:${encodeURIComponent(dbPass)}@${poolerHost}:${poolerPort}/${dbName}?pgbouncer=true`;
+			const poolerUrl = `postgresql://${dbUser}.${branchProjectRef}:${encodeURIComponent(dbPass)}@${poolerHost}:${poolerPort}/${dbName}?pgbouncer=true`;
 
 			return { poolerUrl, directUrl };
 		},
