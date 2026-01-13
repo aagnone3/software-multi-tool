@@ -221,16 +221,22 @@ export function createSupabaseClient(config) {
 		},
 
 		/**
-		 * Check if a branch is ready (status is ACTIVE_HEALTHY)
+		 * Check if a branch is ready for database connections.
+		 * A branch is ready when it has database credentials (db_host and db_pass),
+		 * regardless of the exact status string. This handles cases where the status
+		 * is "FUNCTIONS_DEPLOYED" (edge functions deployed) but database is ready.
 		 * @param {SupabaseBranch} branch - Branch object
 		 * @returns {boolean}
 		 */
 		isBranchReady(branch) {
-			return (
-				branch.status === "ACTIVE_HEALTHY" &&
-				!!branch.db_host &&
-				!!branch.db_pass
-			);
+			// Primary check: database credentials must be present
+			const hasCredentials = !!branch.db_host && !!branch.db_pass;
+
+			// Known ready statuses (may expand as Supabase adds new statuses)
+			const readyStatuses = ["ACTIVE_HEALTHY", "FUNCTIONS_DEPLOYED"];
+			const hasReadyStatus = readyStatuses.includes(branch.status);
+
+			return hasCredentials && hasReadyStatus;
 		},
 
 		/**
