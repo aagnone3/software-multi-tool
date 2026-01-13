@@ -65,8 +65,54 @@ function parseArgs(argv) {
 }
 
 function redactUrl(url) {
-	if (!url) return url;
+	if (!url) {
+		return url;
+	}
 	return url.replace(/:([^:@]+)@/, ":****@");
+}
+
+/**
+ * Retry a function with exponential backoff for transient errors
+ * @param {Function} fn - Async function to retry
+ * @param {Object} options - Retry options
+ * @returns {Promise<any>}
+ */
+async function withRetry(fn, options = {}) {
+	const { maxRetries = 3, initialDelay = 1000, maxDelay = 10000 } = options;
+
+	let lastError;
+	let delay = initialDelay;
+
+	for (let attempt = 1; attempt <= maxRetries; attempt++) {
+		try {
+			return await fn();
+		} catch (error) {
+			lastError = error;
+
+			// Check if error is retryable (network errors, 429, 5xx)
+			const isRetryable =
+				error.message?.includes("fetch failed") ||
+				error.message?.includes("network") ||
+				error.message?.includes("ECONNRESET") ||
+				error.message?.includes("429") ||
+				error.message?.includes("500") ||
+				error.message?.includes("502") ||
+				error.message?.includes("503") ||
+				error.message?.includes("504");
+
+			if (!isRetryable || attempt === maxRetries) {
+				throw error;
+			}
+
+			console.log(
+				`  Retry ${attempt}/${maxRetries} after error: ${error.message}`,
+			);
+			await sleep(delay);
+			delay = Math.min(delay * 2, maxDelay);
+		}
+	}
+
+	throw lastError;
 }
 
 // ============================================================================
@@ -79,34 +125,36 @@ async function renderRequest(path, options = {}) {
 		throw new Error("RENDER_API_KEY environment variable is required");
 	}
 
-	const url = `${RENDER_API_BASE}${path}`;
-	const response = await fetch(url, {
-		...options,
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			"Content-Type": "application/json",
-			...options.headers,
-		},
-	});
+	return withRetry(async () => {
+		const url = `${RENDER_API_BASE}${path}`;
+		const response = await fetch(url, {
+			...options,
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				"Content-Type": "application/json",
+				...options.headers,
+			},
+		});
 
-	if (!response.ok) {
-		let errorMessage = `Render API error: ${response.status} ${response.statusText}`;
-		try {
-			const body = await response.json();
-			if (body.message) {
-				errorMessage = `Render API error: ${body.message}`;
+		if (!response.ok) {
+			let errorMessage = `Render API error: ${response.status} ${response.statusText}`;
+			try {
+				const body = await response.json();
+				if (body.message) {
+					errorMessage = `Render API error: ${body.message}`;
+				}
+			} catch {
+				// Ignore JSON parse errors
 			}
-		} catch {
-			// Ignore JSON parse errors
+			throw new Error(errorMessage);
 		}
-		throw new Error(errorMessage);
-	}
 
-	if (response.status === 204) {
-		return null;
-	}
+		if (response.status === 204) {
+			return null;
+		}
 
-	return response.json();
+		return response.json();
+	});
 }
 
 async function findRenderPreviewService(prNumber) {
@@ -122,15 +170,26 @@ async function findRenderPreviewService(prNumber) {
 }
 
 async function getRenderServiceUrl(service) {
-	if (!service) return null;
+	if (!service) {
+		return null;
+	}
 
 	// For web services, the URL is in the service details
 	if (service.serviceDetails?.url) {
 		return service.serviceDetails.url;
 	}
 
-	// Construct URL from service name
-	return `https://${service.slug}.onrender.com`;
+	// Construct URL from service slug (fallback)
+	if (service.slug) {
+		return `https://${service.slug}.onrender.com`;
+	}
+
+	// Last resort: try service name
+	if (service.name) {
+		return `https://${service.name}.onrender.com`;
+	}
+
+	return null;
 }
 
 async function setRenderEnvVar(serviceId, key, value) {
@@ -145,6 +204,9 @@ async function setRenderEnvVar(serviceId, key, value) {
 
 async function listRenderEnvVars(serviceId) {
 	const response = await renderRequest(`/services/${serviceId}/env-vars`);
+	if (!response || !Array.isArray(response)) {
+		return [];
+	}
 	return response.map((r) => r.envVar);
 }
 
@@ -158,25 +220,34 @@ async function triggerRenderDeploy(serviceId) {
 
 async function waitForRenderPreview(prNumber, options = {}) {
 	const {
-		maxAttempts = 60,
+		timeoutMs = 600000, // 10 minutes default
 		initialDelay = 5000,
 		maxDelay = 30000,
 		backoffFactor = 1.5,
 	} = options;
 
+	const startTime = Date.now();
 	let delay = initialDelay;
+	let attempt = 0;
 
-	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+	while (Date.now() - startTime < timeoutMs) {
+		attempt++;
 		const service = await findRenderPreviewService(prNumber);
 
 		if (service) {
 			const url = await getRenderServiceUrl(service);
-			console.log(`[Render] Preview service found: ${url}`);
-			return { service, url };
+			if (url) {
+				console.log(`[Render] Preview service found: ${url}`);
+				return { service, url };
+			}
 		}
 
+		const elapsed = Math.round((Date.now() - startTime) / 1000);
+		const remaining = Math.round(
+			(timeoutMs - (Date.now() - startTime)) / 1000,
+		);
 		console.log(
-			`[Render] Attempt ${attempt}/${maxAttempts}: Preview service not found, waiting ${delay}ms...`,
+			`[Render] Attempt ${attempt}: Preview service not found (${elapsed}s elapsed, ${remaining}s remaining)`,
 		);
 
 		await sleep(delay);
@@ -200,39 +271,41 @@ async function vercelRequest(path, options = {}, query = {}) {
 		throw new Error("VERCEL_TOKEN environment variable is required");
 	}
 
-	const url = new URL(`${VERCEL_API_BASE}${path}`);
-	if (scope) {
-		url.searchParams.set("teamId", scope);
-	}
-	for (const [key, value] of Object.entries(query)) {
-		if (value !== undefined) {
-			url.searchParams.set(key, value);
+	return withRetry(async () => {
+		const url = new URL(`${VERCEL_API_BASE}${path}`);
+		if (scope) {
+			url.searchParams.set("teamId", scope);
 		}
-	}
-
-	const response = await fetch(url, {
-		...options,
-		headers: {
-			Authorization: `Bearer ${token}`,
-			"Content-Type": "application/json",
-			...options.headers,
-		},
-	});
-
-	if (!response.ok) {
-		let errorMessage = `Vercel API error: ${response.status} ${response.statusText}`;
-		try {
-			const body = await response.json();
-			if (body.error?.message) {
-				errorMessage = `Vercel API error: ${body.error.message}`;
+		for (const [key, value] of Object.entries(query)) {
+			if (value !== undefined) {
+				url.searchParams.set(key, value);
 			}
-		} catch {
-			// Ignore JSON parse errors
 		}
-		throw new Error(errorMessage);
-	}
 
-	return response.json();
+		const response = await fetch(url, {
+			...options,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+				...options.headers,
+			},
+		});
+
+		if (!response.ok) {
+			let errorMessage = `Vercel API error: ${response.status} ${response.statusText}`;
+			try {
+				const body = await response.json();
+				if (body.error?.message) {
+					errorMessage = `Vercel API error: ${body.error.message}`;
+				}
+			} catch {
+				// Ignore JSON parse errors
+			}
+			throw new Error(errorMessage);
+		}
+
+		return response.json();
+	});
 }
 
 async function findVercelPreviewDeployment(prNumber) {
@@ -270,15 +343,18 @@ async function findVercelPreviewDeployment(prNumber) {
 
 async function waitForVercelPreview(prNumber, options = {}) {
 	const {
-		maxAttempts = 60,
+		timeoutMs = 600000, // 10 minutes default
 		initialDelay = 5000,
 		maxDelay = 30000,
 		backoffFactor = 1.5,
 	} = options;
 
+	const startTime = Date.now();
 	let delay = initialDelay;
+	let attempt = 0;
 
-	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+	while (Date.now() - startTime < timeoutMs) {
+		attempt++;
 		const deployment = await findVercelPreviewDeployment(prNumber);
 
 		if (deployment && deployment.state === "READY") {
@@ -288,8 +364,12 @@ async function waitForVercelPreview(prNumber, options = {}) {
 		}
 
 		const status = deployment ? deployment.state : "not found";
+		const elapsed = Math.round((Date.now() - startTime) / 1000);
+		const remaining = Math.round(
+			(timeoutMs - (Date.now() - startTime)) / 1000,
+		);
 		console.log(
-			`[Vercel] Attempt ${attempt}/${maxAttempts}: Deployment status is "${status}", waiting ${delay}ms...`,
+			`[Vercel] Attempt ${attempt}: Status "${status}" (${elapsed}s elapsed, ${remaining}s remaining)`,
 		);
 
 		await sleep(delay);
@@ -307,32 +387,39 @@ async function setVercelEnvVar(key, value, target = "preview") {
 		throw new Error("VERCEL_PROJECT environment variable is required");
 	}
 
-	// First, check if the env var exists
+	// First, check if the env var exists and its current value
 	const envVars = await vercelRequest(`/v10/projects/${projectId}/env`);
 	const existing = envVars.envs?.find(
 		(e) => e.key === key && e.target.includes(target) && !e.gitBranch,
 	);
 
 	if (existing) {
+		// Check if value is unchanged (Vercel returns decrypted values for comparison)
+		if (existing.value === value) {
+			console.log(`[Vercel] ${target} env var unchanged: ${key}`);
+			return false;
+		}
 		// Update existing
 		await vercelRequest(`/v10/projects/${projectId}/env/${existing.id}`, {
 			method: "PATCH",
 			body: JSON.stringify({ value }),
 		});
 		console.log(`[Vercel] Updated ${target} env var: ${key}`);
-	} else {
-		// Create new
-		await vercelRequest(`/v10/projects/${projectId}/env`, {
-			method: "POST",
-			body: JSON.stringify({
-				key,
-				value,
-				target: [target],
-				type: target === "development" ? "plain" : "encrypted",
-			}),
-		});
-		console.log(`[Vercel] Created ${target} env var: ${key}`);
+		return true;
 	}
+
+	// Create new
+	await vercelRequest(`/v10/projects/${projectId}/env`, {
+		method: "POST",
+		body: JSON.stringify({
+			key,
+			value,
+			target: [target],
+			type: target === "development" ? "plain" : "encrypted",
+		}),
+	});
+	console.log(`[Vercel] Created ${target} env var: ${key}`);
+	return true;
 }
 
 // ============================================================================
@@ -349,7 +436,7 @@ async function waitCommand(args) {
 	console.log(`Timeout: ${args.timeout} seconds\n`);
 
 	const waitOptions = {
-		maxAttempts: Math.ceil(args.timeout / 10),
+		timeoutMs: args.timeout * 1000, // Convert seconds to milliseconds
 		initialDelay: 5000,
 		maxDelay: 30000,
 		backoffFactor: 1.5,
@@ -447,19 +534,23 @@ async function syncCommand(args) {
 	let renderEnvChanged = false;
 	let vercelEnvChanged = false;
 
+	// Fetch Render env vars once for all checks
+	let currentRenderValues = {};
+	if (renderServiceId) {
+		const currentEnvVars = await listRenderEnvVars(renderServiceId);
+		currentRenderValues = Object.fromEntries(
+			currentEnvVars.map((e) => [e.key, e.value]),
+		);
+	}
+
 	// Update Render with Supabase credentials
 	if (renderServiceId && supabaseCredentials) {
 		console.log("\n[Render] Updating database credentials...");
 
-		// Get current env vars to check for changes
-		const currentEnvVars = await listRenderEnvVars(renderServiceId);
-		const currentValues = Object.fromEntries(
-			currentEnvVars.map((e) => [e.key, e.value]),
-		);
-
 		// Check and update POSTGRES_PRISMA_URL
 		if (
-			currentValues.POSTGRES_PRISMA_URL !== supabaseCredentials.poolerUrl
+			currentRenderValues.POSTGRES_PRISMA_URL !==
+			supabaseCredentials.poolerUrl
 		) {
 			await setRenderEnvVar(
 				renderServiceId,
@@ -476,7 +567,7 @@ async function syncCommand(args) {
 
 		// Check and update POSTGRES_URL_NON_POOLING
 		if (
-			currentValues.POSTGRES_URL_NON_POOLING !==
+			currentRenderValues.POSTGRES_URL_NON_POOLING !==
 			supabaseCredentials.directUrl
 		) {
 			await setRenderEnvVar(
@@ -497,12 +588,7 @@ async function syncCommand(args) {
 	if (renderServiceId && vercelUrl) {
 		console.log("\n[Render] Updating CORS origin...");
 
-		const currentEnvVars = await listRenderEnvVars(renderServiceId);
-		const currentCors = currentEnvVars.find(
-			(e) => e.key === "CORS_ORIGIN",
-		)?.value;
-
-		if (currentCors !== vercelUrl) {
+		if (currentRenderValues.CORS_ORIGIN !== vercelUrl) {
 			await setRenderEnvVar(renderServiceId, "CORS_ORIGIN", vercelUrl);
 			console.log(`  - CORS_ORIGIN: ${vercelUrl}`);
 			renderEnvChanged = true;
@@ -514,13 +600,14 @@ async function syncCommand(args) {
 	// Update Vercel with Render URL
 	if (renderUrl) {
 		console.log("\n[Vercel] Updating API server URL...");
-		await setVercelEnvVar(
+		vercelEnvChanged = await setVercelEnvVar(
 			"NEXT_PUBLIC_API_SERVER_URL",
 			renderUrl,
 			"preview",
 		);
-		console.log(`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl}`);
-		vercelEnvChanged = true;
+		if (vercelEnvChanged) {
+			console.log(`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl}`);
+		}
 	}
 
 	// Trigger redeploys if env vars changed
@@ -567,8 +654,14 @@ async function main() {
 		process.exit(1);
 	}
 
-	if (!args.prNumber) {
-		console.error("Error: --pr <number> is required");
+	if (
+		!args.prNumber ||
+		args.prNumber <= 0 ||
+		!Number.isInteger(args.prNumber)
+	) {
+		console.error(
+			"Error: --pr <number> is required and must be a positive integer",
+		);
 		process.exit(1);
 	}
 

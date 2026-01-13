@@ -60,41 +60,91 @@ export function createSupabaseClient(config) {
 	}
 
 	/**
+	 * Retry a function with exponential backoff for transient errors
+	 * @param {Function} fn - Async function to retry
+	 * @param {Object} retryOptions - Retry options
+	 * @returns {Promise<any>}
+	 */
+	async function withRetry(fn, retryOptions = {}) {
+		const {
+			maxRetries = 3,
+			initialDelay = 1000,
+			maxDelay = 10000,
+		} = retryOptions;
+
+		let lastError;
+		let delay = initialDelay;
+
+		for (let attempt = 1; attempt <= maxRetries; attempt++) {
+			try {
+				return await fn();
+			} catch (error) {
+				lastError = error;
+
+				// Check if error is retryable (network errors, 429, 5xx)
+				const isRetryable =
+					error.message?.includes("fetch failed") ||
+					error.message?.includes("network") ||
+					error.message?.includes("ECONNRESET") ||
+					error.message?.includes("429") ||
+					error.message?.includes("500") ||
+					error.message?.includes("502") ||
+					error.message?.includes("503") ||
+					error.message?.includes("504");
+
+				if (!isRetryable || attempt === maxRetries) {
+					throw error;
+				}
+
+				console.log(
+					`  [Supabase] Retry ${attempt}/${maxRetries} after error: ${error.message}`,
+				);
+				await sleep(delay);
+				delay = Math.min(delay * 2, maxDelay);
+			}
+		}
+
+		throw lastError;
+	}
+
+	/**
 	 * Make an API request to Supabase Management API
 	 * @param {string} path - API path
 	 * @param {RequestInit} [options] - Fetch options
 	 * @returns {Promise<any>}
 	 */
 	async function request(path, options = {}) {
-		const url = `${API_BASE_URL}${path}`;
+		return withRetry(async () => {
+			const url = `${API_BASE_URL}${path}`;
 
-		const response = await fetch(url, {
-			...options,
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				"Content-Type": "application/json",
-				...options.headers,
-			},
-		});
+			const response = await fetch(url, {
+				...options,
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+					...options.headers,
+				},
+			});
 
-		if (!response.ok) {
-			let errorMessage = `Supabase API error: ${response.status} ${response.statusText}`;
-			try {
-				const body = await response.json();
-				if (body.message) {
-					errorMessage = `Supabase API error: ${body.message}`;
+			if (!response.ok) {
+				let errorMessage = `Supabase API error: ${response.status} ${response.statusText}`;
+				try {
+					const body = await response.json();
+					if (body.message) {
+						errorMessage = `Supabase API error: ${body.message}`;
+					}
+				} catch {
+					// Ignore JSON parse errors
 				}
-			} catch {
-				// Ignore JSON parse errors
+				throw new Error(errorMessage);
 			}
-			throw new Error(errorMessage);
-		}
 
-		if (response.status === 204) {
-			return null;
-		}
+			if (response.status === 204) {
+				return null;
+			}
 
-		return response.json();
+			return response.json();
+		});
 	}
 
 	return {
@@ -148,7 +198,11 @@ export function createSupabaseClient(config) {
 
 			// Pooler connection (for app runtime)
 			// Supabase uses Supavisor pooler on port 6543
-			const poolerHost = dbHost.replace("db.", "aws-0-us-east-1.pooler.");
+			// Branch db_host format: db.{branch-ref}.supabase.co
+			// We need the pooler host which varies by region. Extract from db_host pattern.
+			// The pooler format is: {project-ref}.pooler.supabase.com (region-agnostic)
+			// OR aws-0-{region}.pooler.supabase.com with username routing
+			const poolerHost = `${projectRef}.pooler.supabase.com`;
 			const poolerPort = 6543;
 			const poolerUrl = `postgresql://${dbUser}.${projectRef}:${encodeURIComponent(dbPass)}@${poolerHost}:${poolerPort}/${dbName}?pgbouncer=true`;
 
@@ -172,7 +226,7 @@ export function createSupabaseClient(config) {
 		 * Wait for a branch to become ready
 		 * @param {string} gitBranch - Git branch name
 		 * @param {Object} [options] - Wait options
-		 * @param {number} [options.maxAttempts=60] - Maximum number of attempts
+		 * @param {number} [options.timeoutMs=600000] - Timeout in milliseconds (default 10 minutes)
 		 * @param {number} [options.initialDelay=5000] - Initial delay in ms
 		 * @param {number} [options.maxDelay=30000] - Maximum delay in ms
 		 * @param {number} [options.backoffFactor=1.5] - Backoff multiplier
@@ -180,20 +234,28 @@ export function createSupabaseClient(config) {
 		 */
 		async waitForBranch(gitBranch, options = {}) {
 			const {
-				maxAttempts = 60,
+				timeoutMs = 600000, // 10 minutes default
 				initialDelay = 5000,
 				maxDelay = 30000,
 				backoffFactor = 1.5,
 			} = options;
 
+			const startTime = Date.now();
 			let delay = initialDelay;
+			let attempt = 0;
 
-			for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			while (Date.now() - startTime < timeoutMs) {
+				attempt++;
 				const branch = await this.findBranchByGitBranch(gitBranch);
+
+				const elapsed = Math.round((Date.now() - startTime) / 1000);
+				const remaining = Math.round(
+					(timeoutMs - (Date.now() - startTime)) / 1000,
+				);
 
 				if (!branch) {
 					console.log(
-						`[Supabase] Attempt ${attempt}/${maxAttempts}: Branch not found yet, waiting ${delay}ms...`,
+						`[Supabase] Attempt ${attempt}: Branch not found (${elapsed}s elapsed, ${remaining}s remaining)`,
 					);
 				} else if (this.isBranchReady(branch)) {
 					console.log(
@@ -202,7 +264,7 @@ export function createSupabaseClient(config) {
 					return branch;
 				} else {
 					console.log(
-						`[Supabase] Attempt ${attempt}/${maxAttempts}: Branch status is "${branch.status}", waiting ${delay}ms...`,
+						`[Supabase] Attempt ${attempt}: Status "${branch.status}" (${elapsed}s elapsed, ${remaining}s remaining)`,
 					);
 				}
 
