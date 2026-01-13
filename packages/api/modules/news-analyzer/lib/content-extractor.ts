@@ -1,5 +1,5 @@
 import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
+import { parseHTML } from "linkedom";
 
 export interface ExtractedContent {
 	title: string;
@@ -101,8 +101,12 @@ export async function extractContentFromUrl(
 
 	// Parse and extract content
 	try {
-		const dom = new JSDOM(html, { url });
-		const reader = new Readability(dom.window.document);
+		const { document } = parseHTML(html);
+		// Set the document URL for Readability (used for resolving relative links)
+		Object.defineProperty(document, "documentURI", { value: url });
+		// linkedom's document is compatible with Readability at runtime
+		// but has different type definitions - cast to satisfy the type checker
+		const reader = new Readability(document as unknown as Document);
 		const article = reader.parse();
 
 		if (!article) {
