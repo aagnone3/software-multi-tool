@@ -157,22 +157,32 @@ export function createSupabaseClient(config) {
 		},
 
 		/**
-		 * Get a specific branch by ID
+		 * Get a specific branch by ID with full configuration including database credentials.
+		 * Note: The /branches/{id} endpoint returns db_host, db_pass, db_port, db_user
+		 * while the /projects/{ref}/branches endpoint only returns basic info.
 		 * @param {string} branchId - Branch ID
 		 * @returns {Promise<SupabaseBranch>}
 		 */
 		async getBranch(branchId) {
-			return request(`/projects/${projectRef}/branches/${branchId}`);
+			// Use /branches/{id} endpoint to get full configuration including db credentials
+			return request(`/branches/${branchId}`);
 		},
 
 		/**
-		 * Find a branch by git branch name
+		 * Find a branch by git branch name and fetch its full configuration.
+		 * This first lists branches to find the ID, then fetches full details
+		 * including database credentials from the /branches/{id} endpoint.
 		 * @param {string} gitBranch - Git branch name (e.g., "chore/pra-99-supabase-branching")
 		 * @returns {Promise<SupabaseBranch | null>}
 		 */
 		async findBranchByGitBranch(gitBranch) {
 			const branches = await this.listBranches();
-			return branches.find((b) => b.git_branch === gitBranch) || null;
+			const branch = branches.find((b) => b.git_branch === gitBranch);
+			if (!branch) {
+				return null;
+			}
+			// Fetch full branch config including database credentials
+			return this.getBranch(branch.id);
 		},
 
 		/**
