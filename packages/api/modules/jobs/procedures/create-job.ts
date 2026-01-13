@@ -3,7 +3,7 @@ import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
 import { trackToolServerEvent } from "../../../lib/analytics";
 import { publicProcedure } from "../../../orpc/procedures";
-import { processNextJob } from "../lib/job-runner";
+import { submitJobToQueue } from "../lib/queue";
 import { CreateJobInputSchema } from "../types";
 
 // Tools that support caching (check for existing completed jobs)
@@ -119,15 +119,18 @@ export const createJob = publicProcedure
 			// Ignore analytics errors
 		});
 
-		// Trigger immediate background processing (non-blocking, best-effort)
-		// Cron will act as safety net for any failures
+		// Submit job to pg-boss queue for worker processing
+		// Workers in api-server will pick up the job and process it
+		// Cron handles maintenance only (stuck jobs, cleanup)
 		if (process.env.NODE_ENV !== "test") {
 			logger.debug(
-				`[CreateJob] Triggering immediate processing for job: ${job.id}`,
+				`[CreateJob] Submitting job to pg-boss queue: ${job.id}`,
 			);
-			processNextJob(toolSlug).catch((error) => {
+			submitJobToQueue(toolSlug, job.id, {
+				priority: priority ?? 0,
+			}).catch((error) => {
 				logger.error(
-					`[CreateJob] Immediate processing failed for job ${job.id}`,
+					`[CreateJob] Failed to submit job to queue: ${job.id}`,
 					{
 						error:
 							error instanceof Error
@@ -135,7 +138,8 @@ export const createJob = publicProcedure
 								: String(error),
 					},
 				);
-				// Don't throw - cron will pick it up later
+				// Job is still in ToolJob table with PENDING status
+				// Cron can handle stuck jobs that never got submitted
 			});
 		}
 

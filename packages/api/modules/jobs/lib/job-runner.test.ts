@@ -6,24 +6,12 @@ import {
 	retryFailedJobs,
 	runCleanup,
 } from "./job-runner";
-import * as processorRegistry from "./processor-registry";
 
 // Mock database functions
-const claimNextPendingJobMock = vi.hoisted(() => vi.fn());
-const markJobCompletedMock = vi.hoisted(() => vi.fn());
-const markJobFailedMock = vi.hoisted(() => vi.fn());
-const requeueJobMock = vi.hoisted(() => vi.fn());
-const getJobsToRetryMock = vi.hoisted(() => vi.fn());
 const markStuckJobsAsFailedMock = vi.hoisted(() => vi.fn());
 const cleanupExpiredJobsMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/database", () => ({
-	db: {},
-	claimNextPendingJob: claimNextPendingJobMock,
-	markJobCompleted: markJobCompletedMock,
-	markJobFailed: markJobFailedMock,
-	requeueJob: requeueJobMock,
-	getJobsToRetry: getJobsToRetryMock,
 	markStuckJobsAsFailed: markStuckJobsAsFailedMock,
 	cleanupExpiredJobs: cleanupExpiredJobsMock,
 }));
@@ -36,210 +24,127 @@ vi.mock("@repo/logs", () => ({
 	},
 }));
 
-describe("Job Runner", () => {
-	const mockJob = {
-		id: "job-123",
-		toolSlug: "bg-remover",
-		status: "PROCESSING",
-		priority: 0,
-		input: { imageUrl: "https://example.com/image.png" },
-		output: null,
-		error: null,
-		userId: "user-123",
-		sessionId: null,
-		attempts: 1,
-		maxAttempts: 3,
-		startedAt: new Date(),
-		completedAt: null,
-		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
+import { logger } from "@repo/logs";
 
+describe("Job Runner", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	describe("processNextJob", () => {
-		it("returns false when no pending jobs", async () => {
-			claimNextPendingJobMock.mockResolvedValue(null);
+	describe("Maintenance Functions", () => {
+		describe("handleStuckJobs", () => {
+			it("marks stuck jobs as failed", async () => {
+				markStuckJobsAsFailedMock.mockResolvedValue({ count: 3 });
 
-			const result = await processNextJob();
+				const result = await handleStuckJobs(30);
 
-			expect(result).toEqual({ processed: false });
-		});
+				expect(result).toEqual({ count: 3 });
+				expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(30);
+			});
 
-		it("marks job as failed when no processor registered", async () => {
-			claimNextPendingJobMock.mockResolvedValue(mockJob);
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				undefined,
-			);
+			it("uses default timeout of 30 minutes", async () => {
+				markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
 
-			const result = await processNextJob();
+				await handleStuckJobs();
 
-			expect(result).toEqual({ processed: true, jobId: "job-123" });
-			expect(markJobFailedMock).toHaveBeenCalledWith(
-				"job-123",
-				"No processor registered for tool: bg-remover",
-			);
-		});
+				expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(30);
+			});
 
-		it("completes job on successful processing", async () => {
-			claimNextPendingJobMock.mockResolvedValue(mockJob);
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockResolvedValue({
-					success: true,
-					output: { resultUrl: "https://example.com/result.png" },
-				}),
-			);
+			it("logs warning when stuck jobs are found", async () => {
+				markStuckJobsAsFailedMock.mockResolvedValue({ count: 5 });
 
-			const result = await processNextJob();
+				await handleStuckJobs(30);
 
-			expect(result).toEqual({ processed: true, jobId: "job-123" });
-			expect(markJobCompletedMock).toHaveBeenCalledWith("job-123", {
-				resultUrl: "https://example.com/result.png",
+				expect(logger.warn).toHaveBeenCalledWith(
+					expect.stringContaining("5 stuck jobs"),
+				);
+			});
+
+			it("does not log when no stuck jobs found", async () => {
+				markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
+
+				await handleStuckJobs(30);
+
+				expect(logger.warn).not.toHaveBeenCalled();
 			});
 		});
 
-		it("requeues job on failure with remaining attempts", async () => {
-			claimNextPendingJobMock.mockResolvedValue({
-				...mockJob,
-				attempts: 1,
-				maxAttempts: 3,
+		describe("runCleanup", () => {
+			it("cleans up expired jobs", async () => {
+				cleanupExpiredJobsMock.mockResolvedValue({ count: 5 });
+
+				const result = await runCleanup();
+
+				expect(result).toEqual({ deleted: 5 });
 			});
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockResolvedValue({
-					success: false,
-					error: "Processing failed",
-				}),
-			);
 
-			await processNextJob();
+			it("logs info when jobs are cleaned up", async () => {
+				cleanupExpiredJobsMock.mockResolvedValue({ count: 10 });
 
-			expect(requeueJobMock).toHaveBeenCalled();
-			expect(markJobFailedMock).not.toHaveBeenCalled();
-		});
+				await runCleanup();
 
-		it("marks job as failed when max attempts exceeded", async () => {
-			claimNextPendingJobMock.mockResolvedValue({
-				...mockJob,
-				attempts: 3,
-				maxAttempts: 3,
+				expect(logger.info).toHaveBeenCalledWith(
+					expect.stringContaining("10 expired jobs"),
+				);
 			});
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockResolvedValue({
-					success: false,
-					error: "Processing failed",
-				}),
-			);
 
-			await processNextJob();
+			it("does not log when no jobs cleaned up", async () => {
+				cleanupExpiredJobsMock.mockResolvedValue({ count: 0 });
 
-			expect(markJobFailedMock).toHaveBeenCalledWith(
-				"job-123",
-				"Processing failed",
-			);
-			expect(requeueJobMock).not.toHaveBeenCalled();
-		});
+				await runCleanup();
 
-		it("handles processor exceptions", async () => {
-			claimNextPendingJobMock.mockResolvedValue({
-				...mockJob,
-				attempts: 3,
-				maxAttempts: 3,
+				expect(logger.info).not.toHaveBeenCalled();
 			});
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockRejectedValue(new Error("Unexpected error")),
-			);
-
-			await processNextJob();
-
-			expect(markJobFailedMock).toHaveBeenCalledWith(
-				"job-123",
-				"Unexpected error",
-			);
-		});
-
-		it("filters by toolSlug when provided", async () => {
-			claimNextPendingJobMock.mockResolvedValue(null);
-
-			await processNextJob("bg-remover");
-
-			expect(claimNextPendingJobMock).toHaveBeenCalledWith("bg-remover");
 		});
 	});
 
-	describe("processAllPendingJobs", () => {
-		it("processes multiple jobs up to maxJobs limit", async () => {
-			claimNextPendingJobMock
-				.mockResolvedValueOnce(mockJob)
-				.mockResolvedValueOnce({ ...mockJob, id: "job-124" })
-				.mockResolvedValueOnce(null);
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockResolvedValue({ success: true, output: {} }),
-			);
+	describe("Deprecated Functions", () => {
+		describe("processNextJob", () => {
+			it("returns false and logs deprecation warning", async () => {
+				const result = await processNextJob();
 
-			const result = await processAllPendingJobs(undefined, 10);
+				expect(result).toEqual({ processed: false });
+				expect(logger.warn).toHaveBeenCalledWith(
+					expect.stringContaining("DEPRECATED"),
+				);
+			});
 
-			expect(result).toEqual({
-				processed: 2,
-				jobIds: ["job-123", "job-124"],
+			it("returns false regardless of toolSlug", async () => {
+				const result = await processNextJob("news-analyzer");
+
+				expect(result).toEqual({ processed: false });
 			});
 		});
 
-		it("respects maxJobs limit", async () => {
-			claimNextPendingJobMock.mockResolvedValue(mockJob);
-			vi.spyOn(processorRegistry, "getProcessor").mockReturnValue(
-				vi.fn().mockResolvedValue({ success: true, output: {} }),
-			);
+		describe("processAllPendingJobs", () => {
+			it("returns empty result and logs deprecation warning", async () => {
+				const result = await processAllPendingJobs();
 
-			const result = await processAllPendingJobs(undefined, 2);
+				expect(result).toEqual({ processed: 0, jobIds: [] });
+				expect(logger.warn).toHaveBeenCalledWith(
+					expect.stringContaining("DEPRECATED"),
+				);
+			});
 
-			expect(result.processed).toBe(2);
-			expect(claimNextPendingJobMock).toHaveBeenCalledTimes(2);
-		});
-	});
+			it("returns empty result regardless of parameters", async () => {
+				const result = await processAllPendingJobs(
+					"news-analyzer",
+					100,
+				);
 
-	describe("retryFailedJobs", () => {
-		it("requeues failed jobs with backoff", async () => {
-			getJobsToRetryMock.mockResolvedValue([
-				{ ...mockJob, id: "job-1", attempts: 1 },
-				{ ...mockJob, id: "job-2", attempts: 2 },
-			]);
-
-			const result = await retryFailedJobs();
-
-			expect(result).toEqual({ retried: 2 });
-			expect(requeueJobMock).toHaveBeenCalledTimes(2);
+				expect(result).toEqual({ processed: 0, jobIds: [] });
+			});
 		});
 
-		it("returns 0 when no jobs to retry", async () => {
-			getJobsToRetryMock.mockResolvedValue([]);
+		describe("retryFailedJobs", () => {
+			it("returns zero and logs deprecation warning", async () => {
+				const result = await retryFailedJobs();
 
-			const result = await retryFailedJobs();
-
-			expect(result).toEqual({ retried: 0 });
-		});
-	});
-
-	describe("handleStuckJobs", () => {
-		it("marks stuck jobs as failed", async () => {
-			markStuckJobsAsFailedMock.mockResolvedValue({ count: 3 });
-
-			const result = await handleStuckJobs(30);
-
-			expect(result).toEqual({ count: 3 });
-			expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(30);
-		});
-	});
-
-	describe("runCleanup", () => {
-		it("cleans up expired jobs", async () => {
-			cleanupExpiredJobsMock.mockResolvedValue({ count: 5 });
-
-			const result = await runCleanup();
-
-			expect(result).toEqual({ deleted: 5 });
+				expect(result).toEqual({ retried: 0 });
+				expect(logger.warn).toHaveBeenCalledWith(
+					expect.stringContaining("DEPRECATED"),
+				);
+			});
 		});
 	});
 });
