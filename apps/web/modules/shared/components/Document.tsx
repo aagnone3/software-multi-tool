@@ -17,11 +17,7 @@ export async function Document({ children }: PropsWithChildren) {
 	const consentCookie = cookieStore.get("consent");
 
 	return (
-		<html
-			lang="en"
-			suppressHydrationWarning
-			className={sansFont.className}
-		>
+		<html lang="en" suppressHydrationWarning className={sansFont.className}>
 			<body
 				className={cn(
 					"min-h-screen bg-background text-foreground antialiased",
