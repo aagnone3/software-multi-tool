@@ -1,5 +1,5 @@
+import type { Prisma, ToolJobStatus } from "@prisma/client";
 import { db } from "../client";
-import type { Prisma, ToolJobStatus } from "../generated/client";
 
 // Default expiration time: 7 days
 const DEFAULT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;

@@ -1,6 +1,5 @@
 import { ORPCError } from "@orpc/client";
-import { getToolJobById } from "@repo/database";
-import type { JsonValue } from "@repo/database/prisma/generated/client/runtime/library";
+import { getToolJobById, type Prisma } from "@repo/database";
 import { publicProcedure } from "../../../orpc/procedures";
 import { GetJobInputSchema } from "../types";
 
@@ -13,8 +12,8 @@ interface JobData {
 	toolSlug: string;
 	status: string;
 	priority: number;
-	input: JsonValue;
-	output: JsonValue;
+	input: Prisma.JsonValue;
+	output: Prisma.JsonValue;
 	error: string | null;
 	userId: string | null;
 	sessionId: string | null;

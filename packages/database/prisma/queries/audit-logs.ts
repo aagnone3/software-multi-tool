@@ -1,5 +1,5 @@
+import type { AuditAction, Prisma } from "@prisma/client";
 import { db } from "../client";
-import type { AuditAction, Prisma } from "../generated/client";
 
 // Default retention period in days
 const DEFAULT_RETENTION_DAYS = 90;

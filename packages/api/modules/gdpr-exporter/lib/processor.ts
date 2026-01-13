@@ -1,9 +1,9 @@
+import type { ToolJob } from "@repo/database";
 import {
 	collectAllUserDataForExport,
 	createAuditLog,
 	type Prisma,
 } from "@repo/database";
-import type { ToolJob } from "@repo/database/prisma/generated/client";
 import { logger } from "@repo/logs";
 import { sendEmail } from "@repo/mail";
 import { createStorageProvider } from "@repo/storage";

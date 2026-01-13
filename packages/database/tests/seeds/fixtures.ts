@@ -1,5 +1,5 @@
+import type { PrismaClient } from "@prisma/client";
 import { db } from "../../prisma/client.js";
-import type { PrismaClient } from "../../prisma/generated/client/index.js";
 import type { InvitationSeedData } from "./builders/invitation.js";
 import { buildInvitation } from "./builders/invitation.js";
 import type { MemberSeedData } from "./builders/member.js";

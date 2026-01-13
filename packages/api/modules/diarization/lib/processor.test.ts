@@ -1,4 +1,4 @@
-import type { ToolJob } from "@repo/database/prisma/generated/client";
+import type { ToolJob } from "@repo/database";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processDiarizationJob } from "./processor";
 
