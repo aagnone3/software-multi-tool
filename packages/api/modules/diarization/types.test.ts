@@ -114,9 +114,8 @@ describe("diarization types", () => {
 		it("should reject files that exceed maximum size", () => {
 			// Create a base64 string that would decode to > 100MB
 			// Base64 encoding increases size by ~33%, so we need ~133MB of base64
-			const largeContentLength = Math.ceil(
-				(MAX_AUDIO_SIZE_BYTES * 4) / 3,
-			) + 1000;
+			const largeContentLength =
+				Math.ceil((MAX_AUDIO_SIZE_BYTES * 4) / 3) + 1000;
 			const largeFile: AudioFileData = {
 				...validAudioFile,
 				content: "A".repeat(largeContentLength),
@@ -223,8 +222,12 @@ describe("diarization types", () => {
 				},
 				maxSpeakers: 20,
 			};
-			expect(DiarizationInputSchema.safeParse(inputMin).success).toBe(true);
-			expect(DiarizationInputSchema.safeParse(inputMax).success).toBe(true);
+			expect(DiarizationInputSchema.safeParse(inputMin).success).toBe(
+				true,
+			);
+			expect(DiarizationInputSchema.safeParse(inputMax).success).toBe(
+				true,
+			);
 		});
 	});
 

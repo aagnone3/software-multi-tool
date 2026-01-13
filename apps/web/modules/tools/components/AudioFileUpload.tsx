@@ -246,7 +246,8 @@ export function AudioFileUpload({
 				let mimeType = file.type;
 				if (!mimeType || !(mimeType in SUPPORTED_TYPES)) {
 					// Fallback based on extension
-					mimeType = getMimeTypeFromExtension(file.name) ?? "audio/mpeg";
+					mimeType =
+						getMimeTypeFromExtension(file.name) ?? "audio/mpeg";
 				}
 
 				// Create audio URL for preview
@@ -480,7 +481,8 @@ export function AudioFileUpload({
 							</div>
 							<p className="text-muted-foreground text-xs">
 								{fileTypeInfo?.label ?? "Audio"} file
-								{duration > 0 && ` - ${formatDuration(duration)}`}
+								{duration > 0 &&
+									` - ${formatDuration(duration)}`}
 							</p>
 						</div>
 						<Button
@@ -499,7 +501,7 @@ export function AudioFileUpload({
 					{/* Audio preview player */}
 					{audioUrl && (
 						<div className="mt-4 space-y-2">
-	{/* biome-ignore lint/a11y/useMediaCaption: Audio preview for user-uploaded files doesn't require captions */}
+							{/* biome-ignore lint/a11y/useMediaCaption: Audio preview for user-uploaded files doesn't require captions */}
 							<audio
 								ref={audioRef}
 								src={audioUrl}

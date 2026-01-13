@@ -105,14 +105,46 @@ function getSpeakerColor(speakerIndex: number): {
 	bar: string;
 } {
 	const colors = [
-		{ bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300", bar: "bg-blue-500" },
-		{ bg: "bg-emerald-100 dark:bg-emerald-900/30", text: "text-emerald-700 dark:text-emerald-300", bar: "bg-emerald-500" },
-		{ bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-700 dark:text-amber-300", bar: "bg-amber-500" },
-		{ bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-700 dark:text-purple-300", bar: "bg-purple-500" },
-		{ bg: "bg-pink-100 dark:bg-pink-900/30", text: "text-pink-700 dark:text-pink-300", bar: "bg-pink-500" },
-		{ bg: "bg-cyan-100 dark:bg-cyan-900/30", text: "text-cyan-700 dark:text-cyan-300", bar: "bg-cyan-500" },
-		{ bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-300", bar: "bg-orange-500" },
-		{ bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-700 dark:text-indigo-300", bar: "bg-indigo-500" },
+		{
+			bg: "bg-blue-100 dark:bg-blue-900/30",
+			text: "text-blue-700 dark:text-blue-300",
+			bar: "bg-blue-500",
+		},
+		{
+			bg: "bg-emerald-100 dark:bg-emerald-900/30",
+			text: "text-emerald-700 dark:text-emerald-300",
+			bar: "bg-emerald-500",
+		},
+		{
+			bg: "bg-amber-100 dark:bg-amber-900/30",
+			text: "text-amber-700 dark:text-amber-300",
+			bar: "bg-amber-500",
+		},
+		{
+			bg: "bg-purple-100 dark:bg-purple-900/30",
+			text: "text-purple-700 dark:text-purple-300",
+			bar: "bg-purple-500",
+		},
+		{
+			bg: "bg-pink-100 dark:bg-pink-900/30",
+			text: "text-pink-700 dark:text-pink-300",
+			bar: "bg-pink-500",
+		},
+		{
+			bg: "bg-cyan-100 dark:bg-cyan-900/30",
+			text: "text-cyan-700 dark:text-cyan-300",
+			bar: "bg-cyan-500",
+		},
+		{
+			bg: "bg-orange-100 dark:bg-orange-900/30",
+			text: "text-orange-700 dark:text-orange-300",
+			bar: "bg-orange-500",
+		},
+		{
+			bg: "bg-indigo-100 dark:bg-indigo-900/30",
+			text: "text-indigo-700 dark:text-indigo-300",
+			bar: "bg-indigo-500",
+		},
 	];
 	return colors[speakerIndex % colors.length];
 }
@@ -167,10 +199,12 @@ function SpeakerTimeline({
 			</div>
 			<div className="relative h-12 rounded-lg bg-muted/50 overflow-hidden">
 				{segments.map((segment, index) => {
-					const speakerIndex = speakerIndexMap.get(segment.speaker) ?? 0;
+					const speakerIndex =
+						speakerIndexMap.get(segment.speaker) ?? 0;
 					const color = getSpeakerColor(speakerIndex);
 					const left = (segment.start / totalDuration) * 100;
-					const width = ((segment.end - segment.start) / totalDuration) * 100;
+					const width =
+						((segment.end - segment.start) / totalDuration) * 100;
 
 					return (
 						<div
@@ -193,9 +227,14 @@ function SpeakerTimeline({
 				{speakers.map((speaker, index) => {
 					const color = getSpeakerColor(index);
 					return (
-						<div key={speaker} className="flex items-center gap-1.5 text-xs">
+						<div
+							key={speaker}
+							className="flex items-center gap-1.5 text-xs"
+						>
 							<div className={cn("size-3 rounded", color.bar)} />
-							<span className="text-muted-foreground">{speaker}</span>
+							<span className="text-muted-foreground">
+								{speaker}
+							</span>
 						</div>
 					);
 				})}
@@ -268,8 +307,8 @@ export function SpeakerDiarizationTool() {
 									Speaker Diarization
 								</h2>
 								<p className="mt-1 text-muted-foreground">
-									Analyze audio to identify different speakers and
-									visualize speaking patterns
+									Analyze audio to identify different speakers
+									and visualize speaking patterns
 								</p>
 							</div>
 						</div>
@@ -291,15 +330,24 @@ export function SpeakerDiarizationTool() {
 											</FormLabel>
 											<FormControl>
 												<AudioFileUpload
-													onFileSelected={handleFileSelected}
-													onFileClear={handleFileClear}
+													onFileSelected={
+														handleFileSelected
+													}
+													onFileClear={
+														handleFileClear
+													}
 													selectedFile={selectedFile}
-													disabled={form.formState.isSubmitting}
+													disabled={
+														form.formState
+															.isSubmitting
+													}
 												/>
 											</FormControl>
 											<FormDescription className="text-muted-foreground/80">
-												Upload an audio file (MP3, WAV, M4A, OGG, WEBM)
-												up to 100MB. Preview your audio before processing.
+												Upload an audio file (MP3, WAV,
+												M4A, OGG, WEBM) up to 100MB.
+												Preview your audio before
+												processing.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -326,8 +374,10 @@ export function SpeakerDiarizationTool() {
 												/>
 											</FormControl>
 											<FormDescription className="text-muted-foreground/80">
-												Optionally specify the maximum number of speakers
-												to detect (2-20). Leave empty for auto-detection.
+												Optionally specify the maximum
+												number of speakers to detect
+												(2-20). Leave empty for
+												auto-detection.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -375,12 +425,20 @@ export function SpeakerDiarizationTool() {
 											Analysis Complete
 										</h3>
 										<p className="text-muted-foreground">
-											{result.totalSpeakers} speaker{result.totalSpeakers !== 1 ? "s" : ""}{" "}
-											identified in {formatDuration(result.totalDuration)}
+											{result.totalSpeakers} speaker
+											{result.totalSpeakers !== 1
+												? "s"
+												: ""}{" "}
+											identified in{" "}
+											{formatDuration(
+												result.totalDuration,
+											)}
 										</p>
 									</div>
 								</div>
-								<ConfidenceBadge confidence={result.confidence} />
+								<ConfidenceBadge
+									confidence={result.confidence}
+								/>
 							</div>
 						</CardContent>
 					</Card>
@@ -419,26 +477,43 @@ export function SpeakerDiarizationTool() {
 											)}
 										>
 											<div className="flex items-center justify-between mb-2">
-												<span className={cn("font-semibold", color.text)}>
+												<span
+													className={cn(
+														"font-semibold",
+														color.text,
+													)}
+												>
 													{speaker.speaker}
 												</span>
 												<span className="text-muted-foreground text-sm">
-													{speaker.percentageOfTotal.toFixed(1)}% of audio
+													{speaker.percentageOfTotal.toFixed(
+														1,
+													)}
+													% of audio
 												</span>
 											</div>
 											<div className="flex items-center gap-4 text-sm text-muted-foreground">
 												<span>
-													Duration: {formatDuration(speaker.totalDuration)}
+													Duration:{" "}
+													{formatDuration(
+														speaker.totalDuration,
+													)}
 												</span>
 												<span>
-													Segments: {speaker.segmentCount}
+													Segments:{" "}
+													{speaker.segmentCount}
 												</span>
 											</div>
 											{/* Progress bar */}
 											<div className="mt-2 h-2 rounded-full bg-muted/50 overflow-hidden">
 												<div
-													className={cn("h-full rounded-full", color.bar)}
-													style={{ width: `${speaker.percentageOfTotal}%` }}
+													className={cn(
+														"h-full rounded-full",
+														color.bar,
+													)}
+													style={{
+														width: `${speaker.percentageOfTotal}%`,
+													}}
 												/>
 											</div>
 										</div>
@@ -456,9 +531,11 @@ export function SpeakerDiarizationTool() {
 							</h4>
 							<div className="max-h-96 overflow-y-auto space-y-2">
 								{result.segments.map((segment, index) => {
-									const speakerIndex = result.speakers.findIndex(
-										(s) => s.speaker === segment.speaker,
-									);
+									const speakerIndex =
+										result.speakers.findIndex(
+											(s) =>
+												s.speaker === segment.speaker,
+										);
 									const color = getSpeakerColor(speakerIndex);
 									return (
 										<div
@@ -477,10 +554,16 @@ export function SpeakerDiarizationTool() {
 												{segment.speaker}
 											</span>
 											<span className="font-mono text-muted-foreground text-sm">
-												{formatTimeRange(segment.start, segment.end)}
+												{formatTimeRange(
+													segment.start,
+													segment.end,
+												)}
 											</span>
 											<span className="ml-auto text-muted-foreground text-xs">
-												{((segment.end - segment.start)).toFixed(1)}s
+												{(
+													segment.end - segment.start
+												).toFixed(1)}
+												s
 											</span>
 										</div>
 									);

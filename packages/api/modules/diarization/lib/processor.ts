@@ -62,7 +62,8 @@ function calculateSpeakerStats(
 			segmentCount: 0,
 		};
 		speakerMap.set(segment.speaker, {
-			totalDuration: existing.totalDuration + (segment.end - segment.start),
+			totalDuration:
+				existing.totalDuration + (segment.end - segment.start),
 			segmentCount: existing.segmentCount + 1,
 		});
 	}
@@ -74,7 +75,9 @@ function calculateSpeakerStats(
 			totalDuration: data.totalDuration,
 			segmentCount: data.segmentCount,
 			percentageOfTotal:
-				totalDuration > 0 ? (data.totalDuration / totalDuration) * 100 : 0,
+				totalDuration > 0
+					? (data.totalDuration / totalDuration) * 100
+					: 0,
 		});
 	});
 
@@ -126,8 +129,7 @@ Generate a realistic diarization analysis for this audio.`;
 			model: "claude-3-5-haiku-20241022",
 			maxTokens: 8192,
 			temperature: 0.3,
-			system:
-				"You are a precise speaker diarization system. Output only valid JSON.",
+			system: "You are a precise speaker diarization system. Output only valid JSON.",
 		});
 
 		// Parse the response

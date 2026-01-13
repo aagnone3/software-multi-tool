@@ -44,7 +44,12 @@ describe("Diarization Processor", () => {
 			{ speaker: "Speaker 1", start: 35.2, end: 55.0, confidence: 0.95 },
 			{ speaker: "Speaker 2", start: 55.0, end: 80.3, confidence: 0.91 },
 			{ speaker: "Speaker 1", start: 80.3, end: 100.0, confidence: 0.89 },
-			{ speaker: "Speaker 3", start: 100.0, end: 120.0, confidence: 0.85 },
+			{
+				speaker: "Speaker 3",
+				start: 100.0,
+				end: 120.0,
+				confidence: 0.85,
+			},
 		],
 		totalSpeakers: 3,
 		confidence: 0.9,
