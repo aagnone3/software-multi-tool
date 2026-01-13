@@ -31,6 +31,13 @@ These notes outline a repeatable workflow for taking a Linear ticket from intake
 ## 4. Branching & Tracking
 
 - As soon as work starts, update the Linear ticket status to `In Progress` so the team sees ownership.
+
+**Note on ticket readiness:**
+
+- **Backlog** tickets need grooming first (use `/dev:groom-work`)
+- **Ready** tickets are groomed and ready for work
+- Only pick up tickets from **Ready** state, not **Backlog**
+
 - Create a feature branch named after the ticket (`git checkout -b PRA-6-testing-deps`).
 - Copy the initial plan into the Linear issue as a comment to confirm scope and approach.
 - Post a short kickoff update in the ticket describing what landed already and what’s next.

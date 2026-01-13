@@ -4,7 +4,7 @@ description: Groom a Linear ticket by iterating on scope, dependencies, priority
 
 # Groom Work
 
-Interactively flesh out a Linear ticket's scope, dependencies, and metadata.
+Interactively flesh out a Linear ticket's scope, dependencies, and metadata, then mark it as ready for work.
 
 > **⚠️ IMPORTANT: This command is for SCOPING ONLY**
 >
@@ -15,6 +15,14 @@ Interactively flesh out a Linear ticket's scope, dependencies, and metadata.
 > - **DO** explore the codebase to understand the problem
 > - **DO** ask clarifying questions and refine acceptance criteria
 > - **DO** create or update Linear tickets with well-defined scope
+> - **DO** move the ticket from **Backlog** to **Ready** when grooming is complete
+
+## State Convention
+
+- **Backlog** = Needs grooming (not ready for development)
+- **Ready** = Groomed and ready for work (developers can pick these up)
+
+Grooming is complete when the ticket moves from Backlog to Ready.
 
 ## Input
 
@@ -108,6 +116,7 @@ Present a complete summary for user approval:
 **Project:** [project name]
 **Priority:** [priority level]
 **Type:** [bug/feature/chore/docs]
+**Target State:** Ready (Ready for Work)
 
 ### Description
 [full description with acceptance criteria]
@@ -165,15 +174,32 @@ pnpm --filter @repo/scripts linear issues set-milestone \
   --milestone <milestone>
 ```
 
+### Phase 6.5: Move to Ready for Work
+
+After the ticket is created or updated, move it from **Backlog** to **Ready** state to mark it as groomed and ready for development:
+
+```bash
+# Use Linear MCP tool to update the issue state
+mcp__plugin_linear_linear__update_issue with:
+  - id: <issue-id>
+  - state: "Ready"
+```
+
+Or inform the user to manually update the status in Linear if MCP is unavailable.
+
+> **Important:** A ticket is not considered "groomed" until it's in **Ready** state.
+> Issues in **Backlog** will not appear in the "Ready for Work" view.
+
 ### Phase 7: STOP - Grooming Complete
 
 **🛑 STOP HERE. Do not proceed to implementation.**
 
-Once the ticket is created/updated:
+Once the ticket is created/updated and moved to Ready:
 
 1. Confirm the ticket details with the user
-2. Provide the Linear ticket URL
-3. **End the grooming session**
+2. Confirm the ticket is now in **Ready** state (ready for work)
+3. Provide the Linear ticket URL
+4. **End the grooming session**
 
 **Never create worktrees, write code, or create PRs as part of this command.**
 

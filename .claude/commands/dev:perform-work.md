@@ -1,10 +1,13 @@
 ---
-description: Auto-pick the highest priority issue from "Ready for Work" view and start working on it
+description: Auto-pick the highest priority groomed issue from "Ready for Work" view and start working on it
 ---
 
 # Perform Work
 
-Automatically select the highest priority issue from the "Ready for Work" Linear view and begin working on it.
+Automatically select the highest priority groomed issue (in **Ready** state) from the "Ready for Work" Linear view and begin working on it.
+
+> **Note:** Only issues in **Ready** state appear in this view. Issues in **Backlog** need grooming first.
+> Use `/dev:groom-work` to groom Backlog tickets before they can be picked up.
 
 ## Workflow
 
@@ -51,12 +54,12 @@ Once selected, invoke the `dev:work-on-ticket` command to handle the complete de
 If the view returns no issues:
 
 ```text
-No issues are currently in the "Ready for Work" view.
+No groomed issues are currently in the "Ready for Work" view.
 
 Options:
 1. Check the Linear view directly in your browser
-2. Groom a ticket using: /dev:groom-work
-3. Check project backlog: pnpm --filter @repo/scripts linear issues list --project <project-name>
+2. Groom a Backlog ticket using: /dev:groom-work (moves it to Ready)
+3. Check project backlog for tickets needing grooming: pnpm --filter @repo/scripts linear issues list --project <project-name> --state Backlog
 ```
 
 ### View Not Found
@@ -85,10 +88,13 @@ Issues in view "Ready for Work" (3 issues):
 
 KEY      STATUS     PRIORITY  TITLE
 ---      ------     --------  -----
-PRA-45   Backlog    High      Add user profile settings page
-PRA-42   Backlog    Medium    Fix navigation breadcrumb styling
-PRA-38   Backlog    Low       Update README with setup instructions
+PRA-45   Ready       High      Add user profile settings page
+PRA-42   Ready       Medium    Fix navigation breadcrumb styling
+PRA-38   Ready       Low       Update README with setup instructions
 ```
+
+> **Note:** All issues shown are in **Ready** state (groomed and ready for work).
+> Backlog issues are excluded - they need grooming first.
 
 **Auto-selected:** PRA-45 - Add user profile settings page (Priority: High)
 

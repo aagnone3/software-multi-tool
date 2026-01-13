@@ -15,7 +15,7 @@ const query = `
   query {
     issues(
       filter: {
-        state: { type: { in: ["backlog", "unstarted"] } }
+        state: { type: { in: ["unstarted"] } }
         hasBlockedByRelations: { eq: false }
       }
       orderBy: updatedAt
@@ -78,7 +78,9 @@ const req = https.request(options, (res) => {
 		console.log("\n=== Linear Issues Ready for Work ===\n");
 
 		if (issues.length === 0) {
-			console.log("No issues found with ready/todo/backlog status");
+			console.log(
+				"No issues found with Ready status (groomed and ready for work)",
+			);
 			process.exit(0);
 		}
 
