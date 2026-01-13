@@ -73,7 +73,9 @@ export function DataExportForm() {
 				return <XCircleIcon className="size-4 text-red-500" />;
 			case "PENDING":
 			case "PROCESSING":
-				return <Loader2Icon className="size-4 animate-spin text-blue-500" />;
+				return (
+					<Loader2Icon className="size-4 animate-spin text-blue-500" />
+				);
 			default:
 				return <ClockIcon className="size-4 text-gray-500" />;
 		}
@@ -160,7 +162,8 @@ export function DataExportForm() {
 										{exp.status === "COMPLETED" &&
 											exp.downloadUrl &&
 											exp.expiresAt &&
-											new Date(exp.expiresAt) > new Date() && (
+											new Date(exp.expiresAt) >
+												new Date() && (
 												<a
 													href={exp.downloadUrl}
 													className="text-primary hover:underline flex items-center gap-1"
@@ -172,7 +175,8 @@ export function DataExportForm() {
 											)}
 										{exp.status === "COMPLETED" &&
 											exp.expiresAt &&
-											new Date(exp.expiresAt) <= new Date() && (
+											new Date(exp.expiresAt) <=
+												new Date() && (
 												<span className="text-foreground/40">
 													Expired
 												</span>
@@ -197,10 +201,10 @@ export function DataExportForm() {
 
 				{/* Privacy Notice */}
 				<p className="text-xs text-foreground/50 mt-2">
-					Under GDPR Article 20, you have the right to receive your personal
-					data in a portable format. Your export will be ready within a few
-					minutes and you will receive an email notification. The download link
-					is valid for 24 hours.
+					Under GDPR Article 20, you have the right to receive your
+					personal data in a portable format. Your export will be
+					ready within a few minutes and you will receive an email
+					notification. The download link is valid for 24 hours.
 				</p>
 			</div>
 		</SettingsItem>

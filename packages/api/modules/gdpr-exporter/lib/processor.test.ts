@@ -6,7 +6,12 @@ import type { GdprExporterInput } from "../types";
 vi.mock("@repo/database", () => ({
 	db: {
 		user: { findUnique: vi.fn() },
-		toolJob: { findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+		toolJob: {
+			findFirst: vi.fn(),
+			findMany: vi.fn(),
+			create: vi.fn(),
+			update: vi.fn(),
+		},
 		auditLog: { create: vi.fn() },
 	},
 	collectAllUserDataForExport: vi.fn(),
@@ -27,8 +32,12 @@ vi.mock("@repo/mail", () => ({
 
 vi.mock("@repo/storage", () => ({
 	createStorageProvider: vi.fn(() => ({
-		upload: vi.fn().mockResolvedValue({ key: "test-key", bucket: "uploads" }),
-		getSignedDownloadUrl: vi.fn().mockResolvedValue("https://example.com/download"),
+		upload: vi
+			.fn()
+			.mockResolvedValue({ key: "test-key", bucket: "uploads" }),
+		getSignedDownloadUrl: vi
+			.fn()
+			.mockResolvedValue("https://example.com/download"),
 	})),
 }));
 
@@ -236,7 +245,9 @@ describe("processGdprExportJob", () => {
 		// Mock storage to throw error
 		vi.doMock("@repo/storage", () => ({
 			createStorageProvider: vi.fn(() => ({
-				upload: vi.fn().mockRejectedValue(new Error("Storage unavailable")),
+				upload: vi
+					.fn()
+					.mockRejectedValue(new Error("Storage unavailable")),
 				getSignedDownloadUrl: vi.fn(),
 			})),
 		}));
@@ -257,5 +268,4 @@ describe("processGdprExportJob", () => {
 		expect(result.success).toBe(false);
 		expect(result.error).toContain("Storage unavailable");
 	});
-
 });

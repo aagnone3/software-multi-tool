@@ -51,7 +51,8 @@ function getStorageProvider() {
 	// Fall back to local storage for development
 	return createStorageProvider({
 		type: "local",
-		baseDir: process.env.LOCAL_STORAGE_DIR ?? "/tmp/software-multi-tool-uploads",
+		baseDir:
+			process.env.LOCAL_STORAGE_DIR ?? "/tmp/software-multi-tool-uploads",
 		baseUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3500",
 		signingSecret: process.env.LOCAL_STORAGE_SECRET ?? "dev-secret",
 	});
@@ -60,7 +61,9 @@ function getStorageProvider() {
 /**
  * Transform raw database data into export format
  */
-function transformUserData(rawData: Awaited<ReturnType<typeof collectAllUserDataForExport>>): GdprExportPackage["categories"] | null {
+function transformUserData(
+	rawData: Awaited<ReturnType<typeof collectAllUserDataForExport>>,
+): GdprExportPackage["categories"] | null {
 	if (!rawData.profile) {
 		return null;
 	}
@@ -101,13 +104,14 @@ function transformUserData(rawData: Awaited<ReturnType<typeof collectAllUserData
 	}));
 
 	// Transform organization memberships
-	const organizations: ExportedOrganizationMembership[] = rawData.organizations.map((membership) => ({
-		organizationId: membership.organization.id,
-		organizationName: membership.organization.name,
-		organizationSlug: membership.organization.slug,
-		role: membership.role,
-		joinedAt: membership.createdAt.toISOString(),
-	}));
+	const organizations: ExportedOrganizationMembership[] =
+		rawData.organizations.map((membership) => ({
+			organizationId: membership.organization.id,
+			organizationName: membership.organization.name,
+			organizationSlug: membership.organization.slug,
+			role: membership.role,
+			joinedAt: membership.createdAt.toISOString(),
+		}));
 
 	// Transform purchases
 	const purchases: ExportedPurchase[] = rawData.purchases.map((purchase) => ({
@@ -212,7 +216,8 @@ export async function processGdprExportJob(job: ToolJob): Promise<JobResult> {
 				email: userEmail,
 			},
 			format,
-			dataRetentionNotice: "This export contains all personal data associated with your account as required by GDPR Article 20. Data categories include: profile information, linked accounts, sessions, organization memberships, purchases, AI chat history (metadata only), tool usage history, and audit logs. Some sensitive fields (tokens, passwords) are excluded for security. This download link expires in 24 hours.",
+			dataRetentionNotice:
+				"This export contains all personal data associated with your account as required by GDPR Article 20. Data categories include: profile information, linked accounts, sessions, organization memberships, purchases, AI chat history (metadata only), tool usage history, and audit logs. Some sensitive fields (tokens, passwords) are excluded for security. This download link expires in 24 hours.",
 			categories,
 		};
 
@@ -305,8 +310,11 @@ export async function processGdprExportJob(job: ToolJob): Promise<JobResult> {
 			});
 		} catch (emailError) {
 			// Log but don't fail the job if email fails
-			logger.error(`[GdprExporter] Failed to send notification email`, {
-				error: emailError instanceof Error ? emailError.message : String(emailError),
+			logger.error("[GdprExporter] Failed to send notification email", {
+				error:
+					emailError instanceof Error
+						? emailError.message
+						: String(emailError),
 				userId,
 			});
 		}
@@ -327,7 +335,9 @@ export async function processGdprExportJob(job: ToolJob): Promise<JobResult> {
 		};
 	} catch (error) {
 		const errorMessage =
-			error instanceof Error ? error.message : "Failed to generate data export";
+			error instanceof Error
+				? error.message
+				: "Failed to generate data export";
 
 		logger.error(`[GdprExporter] Export failed for user: ${userId}`, {
 			error: errorMessage,

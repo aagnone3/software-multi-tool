@@ -39,11 +39,15 @@ export const listExports = protectedProcedure
 				createdAt: job.createdAt.toISOString(),
 				completedAt: job.completedAt?.toISOString() ?? null,
 				downloadUrl:
-					job.status === "COMPLETED" ? output?.downloadUrl : undefined,
+					job.status === "COMPLETED"
+						? output?.downloadUrl
+						: undefined,
 				expiresAt:
 					job.status === "COMPLETED" ? output?.expiresAt : undefined,
 				totalRecords:
-					job.status === "COMPLETED" ? output?.totalRecords : undefined,
+					job.status === "COMPLETED"
+						? output?.totalRecords
+						: undefined,
 				error: job.status === "FAILED" ? job.error : undefined,
 			};
 		});

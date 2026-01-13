@@ -257,7 +257,7 @@ export async function getLatestCompletedGdprExportJob(userId: string) {
  */
 export async function getRecentGdprExportJobs(
 	userId: string,
-	withinHours: number = 24,
+	withinHours = 24,
 ) {
 	const cutoff = new Date(Date.now() - withinHours * 60 * 60 * 1000);
 

@@ -40,12 +40,16 @@ export const requestExport = protectedProcedure
 		});
 
 		// Check for rate limiting - 1 request per 24 hours
-		const recentJobs = await getRecentGdprExportJobs(userId, RATE_LIMIT_HOURS);
+		const recentJobs = await getRecentGdprExportJobs(
+			userId,
+			RATE_LIMIT_HOURS,
+		);
 
 		if (recentJobs.length > 0) {
 			const mostRecentJob = recentJobs[0];
 			const cooldownEnd = new Date(
-				mostRecentJob.createdAt.getTime() + RATE_LIMIT_HOURS * 60 * 60 * 1000,
+				mostRecentJob.createdAt.getTime() +
+					RATE_LIMIT_HOURS * 60 * 60 * 1000,
 			);
 			const hoursRemaining = Math.ceil(
 				(cooldownEnd.getTime() - Date.now()) / (60 * 60 * 1000),
@@ -106,7 +110,9 @@ export const requestExport = protectedProcedure
 		});
 
 		if (!job) {
-			logger.error(`[GdprExporter] Failed to create export job for user: ${userId}`);
+			logger.error(
+				`[GdprExporter] Failed to create export job for user: ${userId}`,
+			);
 			throw new ORPCError("INTERNAL_SERVER_ERROR", {
 				message: "Failed to create export request. Please try again.",
 			});
@@ -120,9 +126,15 @@ export const requestExport = protectedProcedure
 		// Trigger immediate background processing (non-blocking)
 		if (process.env.NODE_ENV !== "test") {
 			processNextJob(GDPR_EXPORTER_TOOL_SLUG).catch((error) => {
-				logger.error(`[GdprExporter] Immediate processing failed for job ${job.id}`, {
-					error: error instanceof Error ? error.message : String(error),
-				});
+				logger.error(
+					`[GdprExporter] Immediate processing failed for job ${job.id}`,
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: String(error),
+					},
+				);
 				// Don't throw - cron will pick it up later
 			});
 		}
