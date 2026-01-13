@@ -13,7 +13,8 @@ import {
 } from "vitest";
 import { LocalStorageProvider, shouldUseLocalStorage } from "./index";
 
-const TEST_BASE_DIR = "/tmp/storage-provider-test";
+// Use unique directory per test run to avoid conflicts in parallel execution
+const TEST_BASE_DIR = `/tmp/storage-provider-test-${process.pid}-${Date.now()}`;
 const TEST_BASE_URL = "http://localhost:3500";
 const TEST_SIGNING_SECRET = "test-secret";
 
