@@ -246,24 +246,15 @@ export function createSupabaseClient(config) {
 				);
 				const poolerConfig = transactionPooler || poolerConfigs[0];
 
-				if (poolerConfig?.connectionString) {
-					// The API returns the connection string without password, so we need to add it
-					// Format from API: postgres://postgres.{ref}@{host}:{port}/{db}
-					// We need: postgres://postgres.{ref}:{password}@{host}:{port}/{db}?pgbouncer=true
-					const connStr = poolerConfig.connectionString;
-					// Insert password after username
-					poolerUrl = connStr.replace(
-						/^(postgres(?:ql)?:\/\/[^:@]+)(@)/,
-						`$1:${encodeURIComponent(dbPass)}$2`,
-					);
-					// Add pgbouncer param if not present
-					if (!poolerUrl.includes("pgbouncer=")) {
-						poolerUrl += poolerUrl.includes("?")
-							? "&pgbouncer=true"
-							: "?pgbouncer=true";
-					}
+				if (poolerConfig?.db_host) {
+					// Use the regional pooler host from the API response
+					// but construct the URL ourselves with the correct BRANCH ref in the username
+					// (The API's connectionString might have the parent's ref, not the branch's)
+					const poolerHost = poolerConfig.db_host;
+					const poolerPort = poolerConfig.db_port || 6543;
+					poolerUrl = `postgresql://${dbUser}.${branchRef}:${encodeURIComponent(dbPass)}@${poolerHost}:${poolerPort}/${dbName}?pgbouncer=true`;
 					console.log(
-						`  [Supabase] Using pooler URL from API: ${poolerConfig.db_host}:${poolerConfig.db_port}`,
+						`  [Supabase] Using pooler host from API: ${poolerHost}:${poolerPort}`,
 					);
 				}
 			} catch (error) {
