@@ -22,10 +22,11 @@ concurrency:
   group: preview-sync-${{ github.event.pull_request.number || inputs.pr_number }}
   cancel-in-progress: false
 
-# Required for posting PR comments
+# Required for posting PR comments and creating check runs
 permissions:
   pull-requests: write
   contents: read
+  checks: write
 
 jobs:
   sync-preview-environments:
@@ -54,15 +55,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Determine PR number and branch
+      - name: Determine PR number, branch, and SHA
         id: pr-info
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
             echo "branch_name=${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
+            # For workflow_dispatch, get SHA from current checkout
+            echo "head_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
           else
             echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
             echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+            echo "head_sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Sync preview environments
@@ -70,6 +74,7 @@ jobs:
           pnpm --filter @repo/scripts preview-sync run \
             --pr ${{ steps.pr-info.outputs.pr_number }} \
             --branch "${{ steps.pr-info.outputs.branch_name }}" \
+            --sha "${{ steps.pr-info.outputs.head_sha }}" \
             --timeout 600
         env:
           # Supabase Management API
@@ -81,6 +86,9 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
           VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          # GitHub API (for creating check runs)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Post status comment
         if: always()

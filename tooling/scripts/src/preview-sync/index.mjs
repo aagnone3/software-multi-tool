@@ -9,7 +9,7 @@
  * Usage:
  *   pnpm --filter @repo/scripts preview-sync wait --pr <number> [--branch <name>]
  *   pnpm --filter @repo/scripts preview-sync sync --pr <number> [--branch <name>]
- *   pnpm --filter @repo/scripts preview-sync run --pr <number> [--branch <name>]
+ *   pnpm --filter @repo/scripts preview-sync run --pr <number> [--branch <name>] [--sha <commit>]
  *
  * Required environment variables:
  *   SUPABASE_ACCESS_TOKEN - Supabase Management API token
@@ -18,9 +18,19 @@
  *   VERCEL_TOKEN          - Vercel API token
  *   VERCEL_PROJECT        - Vercel project ID
  *   VERCEL_SCOPE          - Vercel team/scope ID
+ *
+ * Optional environment variables (for GitHub Check integration):
+ *   GITHUB_TOKEN          - GitHub API token (for creating/updating checks)
+ *   GITHUB_REPOSITORY     - GitHub repository (owner/repo format)
  */
 
 import { createSupabaseClientFromEnv } from "../supabase/api-client.mjs";
+import {
+	createGitHubCheck,
+	getRenderDashboardUrl,
+	isGitHubCheckEnabled,
+	updateGitHubCheck,
+} from "./github-checks.mjs";
 
 // ============================================================================
 // Configuration
@@ -43,6 +53,7 @@ function parseArgs(argv) {
 		command: argv[0],
 		prNumber: null,
 		branch: null,
+		sha: null,
 		timeout: 600, // 10 minutes default
 	};
 
@@ -54,6 +65,9 @@ function parseArgs(argv) {
 				break;
 			case "--branch":
 				args.branch = argv[++i];
+				break;
+			case "--sha":
+				args.sha = argv[++i];
 				break;
 			case "--timeout":
 				args.timeout = Number.parseInt(argv[++i], 10);
@@ -669,10 +683,90 @@ async function syncCommand(args) {
 	console.log(`\n${"=".repeat(60)}`);
 	console.log("SYNC COMPLETE");
 	console.log(`${"=".repeat(60)}\n`);
+
+	return services;
 }
 
 async function runCommand(args) {
-	await syncCommand(args);
+	let checkRunId = null;
+
+	// Create GitHub Check if enabled (requires sha)
+	if (isGitHubCheckEnabled() && args.sha) {
+		console.log(`\n${"=".repeat(60)}`);
+		console.log("CREATING GITHUB CHECK");
+		console.log(`${"=".repeat(60)}\n`);
+
+		try {
+			const result = await createGitHubCheck(args.sha, "in_progress", {
+				summary:
+					"Render preview deployment is being synchronized with other preview services.",
+			});
+			checkRunId = result.id;
+		} catch (error) {
+			console.log(
+				`[GitHub] Warning: Failed to create check run: ${error.message}`,
+			);
+			// Continue even if check creation fails - don't block the sync
+		}
+	} else if (!args.sha) {
+		console.log(
+			"[GitHub] Skipping check creation - no commit SHA provided (use --sha)",
+		);
+	} else {
+		console.log(
+			"[GitHub] Skipping check creation - GITHUB_TOKEN or GITHUB_REPOSITORY not set",
+		);
+	}
+
+	let renderService = null;
+	let renderUrl = null;
+
+	try {
+		// Run the sync command (which includes waiting for services)
+		const services = await syncCommand(args);
+
+		// Capture Render service info for check update
+		renderService = services?.render?.service;
+		renderUrl = services?.render?.url;
+
+		// Update GitHub Check to success if we have one
+		if (checkRunId && isGitHubCheckEnabled()) {
+			try {
+				await updateGitHubCheck(checkRunId, "completed", {
+					conclusion: "success",
+					detailsUrl:
+						renderUrl || getRenderDashboardUrl(renderService),
+					summary: "Render preview deployment is ready!",
+					text: renderUrl
+						? `Preview URL: ${renderUrl}`
+						: "Preview environment synchronized successfully.",
+				});
+			} catch (error) {
+				console.log(
+					`[GitHub] Warning: Failed to update check run: ${error.message}`,
+				);
+			}
+		}
+	} catch (error) {
+		// Update GitHub Check to failure if we have one
+		if (checkRunId && isGitHubCheckEnabled()) {
+			try {
+				await updateGitHubCheck(checkRunId, "completed", {
+					conclusion: "failure",
+					detailsUrl: getRenderDashboardUrl(renderService),
+					summary: "Render preview deployment failed",
+					text: `Error: ${error.message}`,
+				});
+			} catch (updateError) {
+				console.log(
+					`[GitHub] Warning: Failed to update check run: ${updateError.message}`,
+				);
+			}
+		}
+
+		// Re-throw the original error
+		throw error;
+	}
 }
 
 // ============================================================================
