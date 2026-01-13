@@ -622,10 +622,44 @@ async function syncCommand(args) {
 	}
 
 	// Update Render with Supabase credentials
+	// Note: We update both the standard Prisma variable names (DATABASE_URL, DIRECT_URL)
+	// AND the Vercel-style names (POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING) for compatibility.
 	if (renderServiceId && supabaseCredentials) {
 		console.log("\n[Render] Updating database credentials...");
 
-		// Check and update POSTGRES_PRISMA_URL
+		// Update DATABASE_URL (standard Prisma variable name)
+		if (
+			currentRenderValues.DATABASE_URL !== supabaseCredentials.poolerUrl
+		) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"DATABASE_URL",
+				supabaseCredentials.poolerUrl,
+			);
+			console.log(
+				`  - DATABASE_URL: ${redactUrl(supabaseCredentials.poolerUrl)}`,
+			);
+			renderEnvChanged = true;
+		} else {
+			console.log("  - DATABASE_URL: (unchanged)");
+		}
+
+		// Update DIRECT_URL (standard Prisma variable name for migrations)
+		if (currentRenderValues.DIRECT_URL !== supabaseCredentials.directUrl) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"DIRECT_URL",
+				supabaseCredentials.directUrl,
+			);
+			console.log(
+				`  - DIRECT_URL: ${redactUrl(supabaseCredentials.directUrl)}`,
+			);
+			renderEnvChanged = true;
+		} else {
+			console.log("  - DIRECT_URL: (unchanged)");
+		}
+
+		// Also update POSTGRES_PRISMA_URL for backward compatibility
 		if (
 			currentRenderValues.POSTGRES_PRISMA_URL !==
 			supabaseCredentials.poolerUrl
@@ -643,7 +677,7 @@ async function syncCommand(args) {
 			console.log("  - POSTGRES_PRISMA_URL: (unchanged)");
 		}
 
-		// Check and update POSTGRES_URL_NON_POOLING
+		// Also update POSTGRES_URL_NON_POOLING for backward compatibility
 		if (
 			currentRenderValues.POSTGRES_URL_NON_POOLING !==
 			supabaseCredentials.directUrl
