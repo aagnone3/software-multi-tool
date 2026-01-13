@@ -8,6 +8,7 @@ import {
 	requeueJob,
 } from "@repo/database";
 import { logger } from "@repo/logs";
+import { trackToolServerEvent } from "../../../lib/analytics";
 import {
 	DEFAULT_JOB_TIMEOUT_MS,
 	getProcessor,
@@ -34,6 +35,18 @@ export async function processNextJob(
 	}
 
 	logger.info(`Processing job ${job.id} for tool ${job.toolSlug}`);
+	const startTime = Date.now();
+
+	// Track processing started (non-blocking)
+	trackToolServerEvent("tool_processing_started", {
+		tool_name: job.toolSlug,
+		job_id: job.id,
+		is_authenticated: !!job.userId,
+		session_id: job.sessionId ?? undefined,
+		user_id: job.userId ?? undefined,
+	}).catch(() => {
+		// Ignore analytics errors
+	});
 
 	// 2. Get processor for tool
 	const processor = getProcessor(job.toolSlug);
@@ -57,7 +70,34 @@ export async function processNextJob(
 		if (result.success) {
 			await markJobCompleted(job.id, result.output ?? {});
 			logger.info(`Job ${job.id} completed successfully`);
+
+			// Track processing completed (non-blocking)
+			const processingDurationMs = Date.now() - startTime;
+			trackToolServerEvent("tool_processing_completed", {
+				tool_name: job.toolSlug,
+				job_id: job.id,
+				is_authenticated: !!job.userId,
+				session_id: job.sessionId ?? undefined,
+				user_id: job.userId ?? undefined,
+				processing_duration_ms: processingDurationMs,
+			}).catch(() => {
+				// Ignore analytics errors
+			});
 		} else {
+			// Track processing failed (non-blocking)
+			const processingDurationMs = Date.now() - startTime;
+			trackToolServerEvent("tool_processing_failed", {
+				tool_name: job.toolSlug,
+				job_id: job.id,
+				is_authenticated: !!job.userId,
+				session_id: job.sessionId ?? undefined,
+				user_id: job.userId ?? undefined,
+				processing_duration_ms: processingDurationMs,
+				error_type: categorizeError(result.error ?? "Unknown error"),
+			}).catch(() => {
+				// Ignore analytics errors
+			});
+
 			await handleJobFailure(
 				job.id,
 				job.attempts,
@@ -68,6 +108,21 @@ export async function processNextJob(
 	} catch (error) {
 		const errorMessage =
 			error instanceof Error ? error.message : String(error);
+
+		// Track processing failed (non-blocking)
+		const processingDurationMs = Date.now() - startTime;
+		trackToolServerEvent("tool_processing_failed", {
+			tool_name: job.toolSlug,
+			job_id: job.id,
+			is_authenticated: !!job.userId,
+			session_id: job.sessionId ?? undefined,
+			user_id: job.userId ?? undefined,
+			processing_duration_ms: processingDurationMs,
+			error_type: categorizeError(errorMessage),
+		}).catch(() => {
+			// Ignore analytics errors
+		});
+
 		await handleJobFailure(
 			job.id,
 			job.attempts,
@@ -157,4 +212,49 @@ export async function runCleanup(): Promise<{ deleted: number }> {
 		logger.info(`Cleaned up ${result.count} expired jobs`);
 	}
 	return { deleted: result.count };
+}
+
+/**
+ * Categorize error messages into types for analytics (avoiding PII)
+ */
+function categorizeError(errorMessage: string): string {
+	const lowerMessage = errorMessage.toLowerCase();
+
+	if (lowerMessage.includes("timeout")) {
+		return "timeout";
+	}
+	if (
+		lowerMessage.includes("rate limit") ||
+		lowerMessage.includes("too many requests")
+	) {
+		return "rate_limit";
+	}
+	if (
+		lowerMessage.includes("network") ||
+		lowerMessage.includes("fetch") ||
+		lowerMessage.includes("connection")
+	) {
+		return "network_error";
+	}
+	if (
+		lowerMessage.includes("invalid") ||
+		lowerMessage.includes("validation")
+	) {
+		return "validation_error";
+	}
+	if (lowerMessage.includes("not found") || lowerMessage.includes("404")) {
+		return "not_found";
+	}
+	if (lowerMessage.includes("paywall") || lowerMessage.includes("blocked")) {
+		return "content_blocked";
+	}
+	if (
+		lowerMessage.includes("auth") ||
+		lowerMessage.includes("permission") ||
+		lowerMessage.includes("unauthorized")
+	) {
+		return "auth_error";
+	}
+
+	return "unknown";
 }
