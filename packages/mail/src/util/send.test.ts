@@ -8,15 +8,6 @@ const mocks = vi.hoisted(() => ({
 
 const { sendMock, getTemplateMock, loggerError } = mocks;
 
-vi.mock("@repo/config", () => ({
-	config: {
-		i18n: {
-			defaultLocale: "en",
-			locales: { en: { currency: "USD", label: "English" } },
-		},
-	},
-}));
-
 vi.mock("@repo/logs", () => ({
 	logger: { error: mocks.loggerError },
 }));

@@ -1,7 +1,7 @@
 import { render } from "@react-email/render";
-import type { Locale, Messages } from "@repo/i18n";
-import { getMessagesForLocale } from "@repo/i18n";
 import { mailTemplates } from "../../emails";
+import type { Locale } from "../../types";
+import { defaultTranslations } from "./translations";
 
 export async function getTemplate<T extends TemplateId>({
 	templateId,
@@ -16,7 +16,8 @@ export async function getTemplate<T extends TemplateId>({
 	locale: Locale;
 }) {
 	const template = mailTemplates[templateId];
-	const translations = await getMessagesForLocale(locale);
+	// Always use English translations (i18n removed)
+	const translations = defaultTranslations;
 
 	const email = template({
 		...(context as any),
@@ -24,9 +25,13 @@ export async function getTemplate<T extends TemplateId>({
 		translations,
 	});
 
+	const mailSection = translations.mail as Record<
+		string,
+		{ subject?: string }
+	>;
 	const subject =
-		"subject" in translations.mail[templateId as keyof Messages["mail"]]
-			? translations.mail[templateId].subject
+		templateId in mailSection && "subject" in mailSection[templateId]
+			? (mailSection[templateId].subject ?? "")
 			: "";
 
 	const html = await render(email);

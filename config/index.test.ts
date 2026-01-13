@@ -13,7 +13,6 @@ describe("config", () => {
 
 		const defaults = await import("./index");
 		expect(defaults.config.appName).toBe("Software Multitool");
-		expect(defaults.config.i18n.defaultLocale).toBe("en");
 		expect(defaults.config.storage.bucketNames.avatars).toBe("avatars");
 
 		vi.resetModules();

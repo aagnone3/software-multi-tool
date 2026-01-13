@@ -3,7 +3,6 @@
 		"@better-auth/passkey": "1.4.10",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
-		"@repo/i18n": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"@repo/mail": "workspace:*",
 		"@repo/payments": "workspace:*",

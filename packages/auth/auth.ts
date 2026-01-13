@@ -7,8 +7,8 @@ import {
 	getPurchasesByUserId,
 	getUserByEmail,
 } from "@repo/database";
-import type { Locale } from "@repo/i18n";
 import { logger } from "@repo/logs";
+import type { Locale } from "@repo/mail";
 import { sendEmail } from "@repo/mail";
 import { cancelSubscription } from "@repo/payments";
 import { getBaseUrl } from "@repo/utils";
@@ -23,16 +23,15 @@ import {
 	twoFactor,
 	username,
 } from "better-auth/plugins";
-import { parse as parseCookies } from "cookie";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 
-const getLocaleFromRequest = (request?: Request) => {
-	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
-	return (
-		(cookies[config.i18n.localeCookieName] as Locale) ??
-		config.i18n.defaultLocale
-	);
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE: Locale = "en";
+
+const getLocaleFromRequest = (_request?: Request): Locale => {
+	// Always return English (i18n removed)
+	return DEFAULT_LOCALE;
 };
 
 const appUrl = getBaseUrl();

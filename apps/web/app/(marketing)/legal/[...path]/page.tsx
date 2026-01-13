@@ -1,11 +1,13 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
-import { config } from "@repo/config";
 import {
 	getActivePathFromUrlParam,
 	getLocalizedDocumentWithFallback,
 } from "@shared/lib/content";
 import { allLegalPages } from "content-collections";
 import { redirect } from "next/navigation";
+
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
 
 type Params = {
 	path: string;
@@ -16,7 +18,7 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 
 	const { path } = params;
 
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 	const activePath = getActivePathFromUrlParam(path);
 	const page = getLocalizedDocumentWithFallback(
 		allLegalPages,
@@ -37,7 +39,7 @@ export default async function LegalPage(props: { params: Promise<Params> }) {
 
 	const { path } = params;
 
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 	const activePath = getActivePathFromUrlParam(path);
 	const page = getLocalizedDocumentWithFallback(
 		allLegalPages,

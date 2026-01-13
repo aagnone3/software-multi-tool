@@ -45,7 +45,7 @@ describe("Contact Router", () => {
 			});
 		});
 
-		it("uses locale from cookie", async () => {
+		it("always uses English locale (i18n removed)", async () => {
 			const client = createProcedureClient(contactRouter.submit, {
 				context: {
 					headers: new Headers({
@@ -60,9 +60,10 @@ describe("Contact Router", () => {
 				message: "Message in Spanish context",
 			});
 
+			// i18n removed - always uses "en" regardless of cookie
 			expect(mailFixture.sendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
-					locale: "es",
+					locale: "en",
 				}),
 			);
 		});

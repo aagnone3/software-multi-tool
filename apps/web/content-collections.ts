@@ -8,7 +8,9 @@ import {
 import rehypeShiki from "@shikijs/rehype";
 import { remarkImage } from "fumadocs-core/mdx-plugins";
 import { z } from "zod";
-import { config } from "../../config";
+
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
 
 function sanitizePath(path: string) {
 	return path
@@ -22,7 +24,7 @@ function getLocaleFromFilePath(path: string) {
 	return (
 		path
 			.match(/(\.[a-zA-Z-]{2,5})+\.(md|mdx|json)$/)?.[1]
-			?.replace(".", "") ?? config.i18n.defaultLocale
+			?.replace(".", "") ?? DEFAULT_LOCALE
 	);
 }
 

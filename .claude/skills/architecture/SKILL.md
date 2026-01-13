@@ -91,7 +91,6 @@ All backend logic lives in `packages/`:
 | `@repo/mail`     | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
 | `@repo/storage`  | AWS S3 file/image storage                             | `index.ts`                               |
 | `@repo/ai`       | Vercel AI SDK integration                             | `index.ts`                               |
-| `@repo/i18n`     | next-intl translations                                | `index.ts`, `locales/`                   |
 | `@repo/logs`     | Centralized logging (consola)                         | `index.ts`                               |
 | `@repo/utils`    | Shared utility functions                              | `index.ts`                               |
 
@@ -99,7 +98,7 @@ All backend logic lives in `packages/`:
 
 **`config/`** - Central application configuration
 
-- `index.ts` - Main config export with feature flags, branding, payments, i18n settings
+- `index.ts` - Main config export with feature flags, branding, payments settings
 - Used by packages to determine enabled features
 
 **`tooling/`** - Build infrastructure

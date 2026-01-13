@@ -200,8 +200,8 @@ In all other cases, create a worktree and submit a PR.
 This is a **pnpm + Turbo monorepo**:
 
 - `apps/web` - Next.js 15 App Router application
-- `packages/` - Backend logic (`@repo/api`, `@repo/auth`, `@repo/database`, `@repo/payments`, `@repo/mail`, `@repo/storage`, `@repo/ai`, `@repo/i18n`, `@repo/logs`, `@repo/utils`)
-- `config/` - Application configuration (feature flags, branding, payments, i18n)
+- `packages/` - Backend logic (`@repo/api`, `@repo/auth`, `@repo/database`, `@repo/payments`, `@repo/mail`, `@repo/storage`, `@repo/ai`, `@repo/logs`, `@repo/utils`)
+- `config/` - Application configuration (feature flags, branding, payments)
 - `tooling/` - Build infrastructure (TypeScript, Tailwind, scripts)
 
 See `.claude/skills/architecture/` for detailed documentation including:

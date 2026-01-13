@@ -42,7 +42,7 @@ describe("Newsletter Router", () => {
 			});
 		});
 
-		it("uses locale from cookie", async () => {
+		it("always uses English locale (i18n removed)", async () => {
 			const client = createProcedureClient(newsletterRouter.subscribe, {
 				context: {
 					headers: new Headers({
@@ -55,9 +55,10 @@ describe("Newsletter Router", () => {
 				email: "subscriber@example.com",
 			});
 
+			// i18n removed - always uses "en" regardless of cookie
 			expect(mailFixture.sendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
-					locale: "fr",
+					locale: "en",
 				}),
 			);
 		});

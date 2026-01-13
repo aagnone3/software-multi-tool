@@ -1,15 +1,17 @@
 import { createMDXSource } from "@fumadocs/content-collections";
-import { config } from "@repo/config";
 import { allDocs, allDocsMetas } from "content-collections";
 import { loader } from "fumadocs-core/source";
 import { Home } from "lucide-react";
 import { createElement } from "react";
 
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
+
 export const docsSource = loader({
 	baseUrl: "/docs",
 	i18n: {
-		defaultLanguage: config.i18n.defaultLocale,
-		languages: Object.keys(config.i18n.locales),
+		defaultLanguage: DEFAULT_LOCALE,
+		languages: [DEFAULT_LOCALE],
 	},
 	source: createMDXSource(allDocs, allDocsMetas),
 	icon(icon) {
