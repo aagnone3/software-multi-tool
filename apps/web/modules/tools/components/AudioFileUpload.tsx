@@ -338,7 +338,9 @@ export function AudioFileUpload({
 	}, [audioUrl, onFileClear]);
 
 	const togglePlayPause = useCallback(() => {
-		if (!audioRef.current) return;
+		if (!audioRef.current) {
+			return;
+		}
 
 		if (isPlaying) {
 			audioRef.current.pause();
@@ -497,6 +499,7 @@ export function AudioFileUpload({
 					{/* Audio preview player */}
 					{audioUrl && (
 						<div className="mt-4 space-y-2">
+	{/* biome-ignore lint/a11y/useMediaCaption: Audio preview for user-uploaded files doesn't require captions */}
 							<audio
 								ref={audioRef}
 								src={audioUrl}

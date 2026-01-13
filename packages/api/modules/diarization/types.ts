@@ -106,7 +106,7 @@ export function validateAudioFile(fileData: AudioFileData): {
 	if (estimatedBinarySize > MAX_AUDIO_SIZE_BYTES) {
 		return {
 			valid: false,
-			error: `Audio file too large. Maximum size is 100MB`,
+			error: "Audio file too large. Maximum size is 100MB",
 		};
 	}
 

@@ -220,7 +220,9 @@ export function SpeakerDiarizationTool() {
 
 	const onSubmit: SubmitHandler<FormValues> = async (values) => {
 		setResult(null);
-		if (!values.audioFile) return;
+		if (!values.audioFile) {
+			return;
+		}
 		try {
 			const response = await createJobMutation.mutateAsync({
 				toolSlug: "diarization",
