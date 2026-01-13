@@ -9,7 +9,7 @@
 -- Test User
 -- =====================================================
 -- Email: test@preview.local
--- Password hash is for: "PreviewPassword123!" (bcrypt)
+-- Password: "PreviewPassword123!" (hashed using Better Auth)
 -- This user can be used to test the preview environment
 
 INSERT INTO "public"."user" (
@@ -41,7 +41,7 @@ INSERT INTO "public"."user" (
 ) ON CONFLICT ("id") DO NOTHING;
 
 -- Create account entry for credential-based login
--- Password: "PreviewPassword123!" - bcrypt hashed
+-- Password: "PreviewPassword123!" - hashed using Better Auth's password.hash()
 INSERT INTO "public"."account" (
     "id",
     "accountId",
@@ -63,7 +63,7 @@ INSERT INTO "public"."account" (
     NULL,
     NULL,
     NULL,
-    '$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', -- Placeholder - generate actual hash
+    'c23abb2783a2ac51ed7d399d359a4a4f:24282aad657c2c5e2b295a2205842333ef8a9262fcea3248bba145307d7217d1542ec04bb0cf3527411c58e0e2e1617fe592e0c262f2a3320e6d3bb88d9a804a',
     NOW(),
     NOW()
 ) ON CONFLICT ("id") DO NOTHING;
