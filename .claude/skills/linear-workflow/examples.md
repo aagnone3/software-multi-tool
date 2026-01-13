@@ -48,7 +48,7 @@ All 21 tests passing in the auth package. The PR is ready for review.
 
 ✅ **Automatic status update** - Issue moved to "In Progress" at start
 ✅ **Automatic progression** - Claude doesn't ask "should I create a PR?" when tests pass
-✅ **Todo list includes PR steps** - Ensures the workflow is followed
+✅ **Ready list includes PR steps** - Ensures the workflow is followed
 ✅ **Tests must pass first** - Won't create PR if tests fail
 ✅ **Returns PR URL** - User knows where to find the PR
 
@@ -149,13 +149,14 @@ Note: I created a feature branch since we were working on main.
 ✅ **Creates branch if needed** - Doesn't fail, adapts
 ✅ **Still creates PR** - Workflow continues automatically
 
-## Example 5: Complete Todo List Structure
+## Example 5: Complete Ready List Structure
 
-### Recommended Todo List Format
+### Recommended Ready List Format
 
 When working on any Linear issue, the todo list should look like this:
 
 ```text
+[pending] Verify issue is in "Ready" state (groomed and ready)
 [pending] Move issue to "In Progress" status
 [pending] Understand issue requirements and acceptance criteria
 [pending] Implement feature X
@@ -167,11 +168,12 @@ When working on any Linear issue, the todo list should look like this:
 [pending] Push branch and create PR
 ```
 
-The first item ensures Linear status is updated, and the last 2-3 items ensure you don't forget the PR creation workflow.
+The first item verifies the issue is groomed, the second updates status, and the last items ensure you don't forget the PR creation workflow.
 
 ### During Implementation
 
 ```text
+[completed] Verify issue is in "Ready" state (groomed and ready)
 [completed] Move issue to "In Progress" status
 [completed] Understand issue requirements and acceptance criteria
 [completed] Implement feature X

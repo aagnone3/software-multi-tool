@@ -75,8 +75,12 @@ pnpm --filter @repo/scripts linear projects dependency \
 
 **Scenario**: You're about to begin work on an issue and want to update its status to "In Progress".
 
+> **Important:** Only start work on issues that are in **Ready** state (groomed and ready).
+> Issues in **Backlog** need grooming first - use `/dev:groom-work` to groom them.
+
 ```bash
 # Start work on an issue (moves to "In Progress")
+# Note: Issue should already be in "Ready" state before starting
 pnpm --filter @repo/scripts linear issues start --issue PRA-22
 
 # Output: Moved PRA-22 (issue-id) to In Progress.

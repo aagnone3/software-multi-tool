@@ -8,7 +8,14 @@ Use this skill when:
 
 - The user asks to work on a specific Linear issue (e.g., "work on PRA-19")
 - The user wants to start implementing a feature from Linear
-- The user asks to pick up work from Linear backlog
+- The user asks to pick up groomed issues from Linear (issues in **Ready** state)
+
+> **State Convention:**
+>
+> - **Backlog** = Needs grooming (use `/dev:groom-work` first)
+> - **Ready** = Groomed and ready for development (pick these up)
+> - **In Progress** = Currently being worked on
+> - **Done** = Completed (only after PR is merged)
 
 ## Core Workflow
 
@@ -17,15 +24,18 @@ Use this skill when:
 When the user wants to work on a Linear issue:
 
 1. **Get issue details** from Linear (use existing Linear CLI or MCP tools)
-2. **Verify issue is ready** - Check that it's not blocked by other issues
-3. **Move issue to "In Progress"** - Automatically update Linear status:
+2. **Verify issue is groomed** - Check that the issue is in **Ready** state (not Backlog)
+   - If issue is in **Backlog**, inform user it needs grooming first: `/dev:groom-work`
+   - Only proceed with issues in **Ready** state (groomed and ready)
+3. **Verify issue is not blocked** - Check that it's not blocked by other issues
+4. **Move issue to "In Progress"** - Automatically update Linear status:
 
    ```bash
    pnpm --filter @repo/scripts linear issues start --issue {ISSUE-KEY}
    ```
 
-4. **Understand requirements** - Read issue description, acceptance criteria, and related context
-5. **Ask clarifying questions** if requirements are unclear
+5. **Understand requirements** - Read issue description, acceptance criteria, and related context
+6. **Ask clarifying questions** if requirements are unclear
 
 ### 2. Worktree Creation
 
@@ -71,7 +81,7 @@ Follow this pattern:
 4. **Run tests** after each significant change
 5. **Update todo list** as work progresses
 
-**Required Todo List Structure:**
+**Required Ready List Structure:**
 
 When working on a Linear issue, your todo list MUST include these final steps:
 

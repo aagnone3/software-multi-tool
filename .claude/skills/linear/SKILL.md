@@ -14,6 +14,20 @@ This skill provides comprehensive Linear integration for managing projects, mile
 - `LINEAR_API_KEY` must be set in `apps/web/.env.local`
 - The Linear CLI helpers are located at `tooling/scripts/src/linear/index.mjs`
 
+## Linear State Convention
+
+This repository uses the following state meanings:
+
+| State | Meaning | Action |
+| ----- | ------- | ------ |
+| **Backlog** | Needs grooming - not ready for development | Use `/dev:groom-work` to groom |
+| **Ready** | Groomed and ready for work | Developers can pick these up |
+| **In Progress** | Currently being worked on | Set automatically via `issues start` |
+| **Done** | Completed | Set via `issues close` after PR is merged |
+
+> **Important:** Only start work on issues in **Ready** state.
+> Issues in **Backlog** need grooming first before they can be worked on.
+
 ## Core Command Pattern
 
 All Linear operations use this base command:
@@ -209,7 +223,7 @@ The git-worktrees skill will handle:
 
 **DO NOT use `git checkout -b`** - this violates the parallel development architecture and prevents multiple agents from working simultaneously.
 
-### Step 2: Create Complete Todo List
+### Step 2: Create Complete Ready List
 
 ALWAYS include these tasks:
 
