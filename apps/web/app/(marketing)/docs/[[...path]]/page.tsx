@@ -1,5 +1,4 @@
 import { MDXContent } from "@content-collections/mdx/react";
-import { config } from "@repo/config";
 import { File, Files, Folder } from "fumadocs-ui/components/files";
 import { ImageZoom } from "fumadocs-ui/components/image-zoom";
 import { Step, Steps } from "fumadocs-ui/components/steps";
@@ -9,11 +8,14 @@ import { DocsBody, DocsPage } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { docsSource } from "../../../docs-source";
 
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
+
 export default async function DocumentationPage(props: {
 	params: Promise<{ path?: string[] }>;
 }) {
 	const params = await props.params;
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 	const page = docsSource.getPage(params.path, locale);
 
 	if (!page) {
@@ -77,7 +79,7 @@ export async function generateMetadata(props: {
 	params: Promise<{ path?: string[] }>;
 }) {
 	const params = await props.params;
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 	const page = docsSource.getPage(params.path, locale);
 
 	if (!page) {

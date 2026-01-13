@@ -1,6 +1,8 @@
 import { PostListItem } from "@marketing/blog/components/PostListItem";
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
-import { config } from "@repo/config";
+
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
 
 export async function generateMetadata() {
 	return {
@@ -9,7 +11,7 @@ export async function generateMetadata() {
 }
 
 export default async function BlogListPage() {
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 
 	const posts = await getAllPosts();
 

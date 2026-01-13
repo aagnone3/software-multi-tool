@@ -1,5 +1,3 @@
-import type { Locale } from "@repo/i18n";
-
 export interface SendEmailParams {
 	to: string;
 	subject: string;
@@ -13,7 +11,11 @@ export interface MailProvider {
 	send: SendEmailHandler;
 }
 
+/** Locale type (English only after i18n removal) */
+export type Locale = "en";
+
 export type BaseMailProps = {
 	locale: Locale;
+	// Using any for translations to work with use-intl createTranslator
 	translations: any;
 };

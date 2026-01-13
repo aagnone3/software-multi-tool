@@ -1,14 +1,17 @@
-import { config } from "@repo/config";
 import { logger } from "@repo/logs";
 import type { mailTemplates } from "../../emails";
+import type { Locale } from "../../types";
 import { send } from "../provider";
 import type { TemplateId } from "./templates";
 import { getTemplate } from "./templates";
 
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE: Locale = "en";
+
 export async function sendEmail<T extends TemplateId>(
 	params: {
 		to: string;
-		locale?: keyof typeof config.i18n.locales;
+		locale?: Locale;
 	} & (
 		| {
 				templateId: T;
@@ -24,7 +27,7 @@ export async function sendEmail<T extends TemplateId>(
 		  }
 	),
 ) {
-	const { to, locale = config.i18n.defaultLocale } = params;
+	const { to, locale = DEFAULT_LOCALE } = params;
 
 	let html: string;
 	let text: string;

@@ -29,13 +29,6 @@ export type Config = {
 		/** Registry of all available tools/sub-apps */
 		registry: ToolConfig[];
 	};
-	i18n: {
-		enabled: boolean;
-		locales: { [locale: string]: { currency: string; label: string } };
-		defaultLocale: string;
-		defaultCurrency: string;
-		localeCookieName: string;
-	};
 	organizations: {
 		enable: boolean;
 		enableBilling: boolean;

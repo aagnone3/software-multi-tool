@@ -328,49 +328,51 @@ async function checkPermissions(request: Request) {
 
 ### Adding New Template
 
-**1. Create email template** (`packages/mail/templates/account-locked.tsx`):
+**1. Create email template** (`packages/mail/emails/AccountLocked.tsx`):
 
 ```typescript
-import { getTranslations } from "@repo/i18n";
-import type { Locale } from "@repo/i18n";
+import { Link, Text } from "@react-email/components";
+import React from "react";
+import { createTranslator } from "use-intl/core";
+import PrimaryButton from "../src/components/PrimaryButton";
+import Wrapper from "../src/components/Wrapper";
+import { defaultLocale, defaultTranslations } from "../src/util/translations";
+import type { BaseMailProps } from "../types";
 
-interface AccountLockedEmailProps {
+export function AccountLocked({
+  url,
+  name,
+  locale,
+  translations,
+}: {
+  url: string;
   name: string;
-  unlockUrl: string;
-}
+} & BaseMailProps) {
+  const t = createTranslator({
+    locale,
+    messages: translations,
+  });
 
-export async function AccountLockedEmail(
-  props: AccountLockedEmailProps,
-  locale: Locale
-) {
-  const t = await getTranslations(locale, "mails.accountLocked");
-
-  return {
-    subject: t("subject"),
-    body: `
-      <h1>${t("title")}</h1>
-      <p>${t("greeting", { name: props.name })}</p>
-      <p>${t("message")}</p>
-      <a href="${props.unlockUrl}">${t("unlockButton")}</a>
-    `,
-  };
+  return (
+    <Wrapper>
+      <Text>{t("mail.accountLocked.body", { name })}</Text>
+      <PrimaryButton href={url}>
+        {t("mail.accountLocked.unlock")} &rarr;
+      </PrimaryButton>
+    </Wrapper>
+  );
 }
 ```
 
-**2. Add translations** (`packages/i18n/translations/en.json`):
+**2. Add translations** (update `packages/mail/src/util/translations.ts`):
 
-```json
-{
-  "mails": {
-    "accountLocked": {
-      "subject": "Your account has been locked",
-      "title": "Account Security Alert",
-      "greeting": "Hi {{name}},",
-      "message": "Your account was locked due to suspicious activity.",
-      "unlockButton": "Unlock Account"
-    }
-  }
-}
+```typescript
+// Add to defaultTranslations.mail object:
+accountLocked: {
+  body: "Hi {name}, your account has been locked due to suspicious activity.",
+  unlock: "Unlock Account",
+  subject: "Your account has been locked",
+},
 ```
 
 **3. Use in auth hook**:
@@ -384,9 +386,9 @@ await sendEmail({
   templateId: "accountLocked",
   context: {
     name: user.name,
-    unlockUrl: "https://app.com/unlock",
+    url: "https://app.com/unlock",
   },
-  locale: getLocaleFromRequest(request),
+  locale: "en",
 });
 ```
 

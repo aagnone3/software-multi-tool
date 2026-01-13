@@ -1,12 +1,14 @@
-import { config } from "@repo/config";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { PropsWithChildren } from "react";
 import { docsSource } from "../../../docs-source";
 
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
+
 export default async function DocumentationLayout({
 	children,
 }: PropsWithChildren) {
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 
 	return (
 		<div className="pt-[4.5rem]">

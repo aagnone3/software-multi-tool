@@ -1,11 +1,13 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
-import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE = "en";
 
 type Params = {
 	path: string;
@@ -16,7 +18,7 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 
 	const { path } = params;
 
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
@@ -39,7 +41,7 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 
 export default async function BlogPostPage(props: { params: Promise<Params> }) {
 	const { path } = await props.params;
-	const locale = config.i18n.defaultLocale;
+	const locale = DEFAULT_LOCALE;
 
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });

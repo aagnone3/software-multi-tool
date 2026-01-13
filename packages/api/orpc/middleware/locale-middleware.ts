@@ -1,18 +1,16 @@
 import { os } from "@orpc/server";
-import { getCookie } from "@orpc/server/helpers";
-import { config } from "@repo/config";
-import type { Locale } from "@repo/i18n";
+import type { Locale } from "@repo/mail";
+
+/** Default locale (English only - i18n removed) */
+const DEFAULT_LOCALE: Locale = "en";
 
 export const localeMiddleware = os
 	.$context<{
 		headers: Headers;
 	}>()
-	.middleware(async ({ context, next }) => {
-		const locale =
-			(getCookie(
-				context.headers,
-				config.i18n.localeCookieName,
-			) as Locale) ?? config.i18n.defaultLocale;
+	.middleware(async ({ next }) => {
+		// Always use English (i18n removed)
+		const locale: Locale = DEFAULT_LOCALE;
 
 		return await next({
 			context: {
