@@ -75,7 +75,8 @@ jobs:
             --pr ${{ steps.pr-info.outputs.pr_number }} \
             --branch "${{ steps.pr-info.outputs.branch_name }}" \
             --sha "${{ steps.pr-info.outputs.head_sha }}" \
-            --timeout 600
+            --timeout 600 \
+            --supabase-timeout 900
         env:
           # Supabase Management API
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
