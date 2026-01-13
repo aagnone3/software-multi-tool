@@ -518,7 +518,7 @@ async function waitCommand(args) {
 				args.branch,
 				supabaseWaitOptions,
 			);
-			const credentials = supabase.getBranchCredentials(branch);
+			const credentials = await supabase.getBranchCredentials(branch);
 			return { branch, credentials };
 		})(),
 		waitForVercelPreview(args.prNumber, waitOptions),
