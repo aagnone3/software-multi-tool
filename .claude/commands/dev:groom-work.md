@@ -6,6 +6,18 @@ description: Groom a Linear ticket by iterating on scope, dependencies, priority
 
 Interactively flesh out a Linear ticket's scope, dependencies, and metadata.
 
+> **⚠️ IMPORTANT: This command is for SCOPING ONLY**
+>
+> This command helps define and refine tickets. It does NOT implement the work.
+>
+> - **DO NOT** create git worktrees, write code, or make commits
+> - **DO NOT** create pull requests
+> - **DO** explore the codebase to understand the problem
+> - **DO** ask clarifying questions and refine acceptance criteria
+> - **DO** create or update Linear tickets with well-defined scope
+>
+> After grooming is complete, use `/dev:work-on-ticket` or `/dev:perform-work` to implement.
+
 ## Input
 
 Accepts either:
@@ -154,6 +166,23 @@ pnpm --filter @repo/scripts linear issues set-milestone \
   --project <project> \
   --milestone <milestone>
 ```
+
+### Phase 7: STOP - Grooming Complete
+
+**🛑 STOP HERE. Do not proceed to implementation.**
+
+Once the ticket is created/updated:
+
+1. Confirm the ticket details with the user
+2. Provide the Linear ticket URL
+3. **End the grooming session**
+
+If the user wants to implement the work, they should run:
+
+- `/dev:work-on-ticket PRA-XXX` - Work on a specific ticket
+- `/dev:perform-work` - Auto-pick from "Ready for Work" view
+
+**Never create worktrees, write code, or create PRs as part of this command.**
 
 ## Conversation Guidelines
 
