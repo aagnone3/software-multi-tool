@@ -14,24 +14,27 @@ export default async function MarketingLayout({ children }: PropsWithChildren) {
 
 	return (
 		<Document locale={locale}>
-			<NextIntlClientProvider messages={messages}>
-				<FumadocsNextProvider>
-					<FumadocsRootProvider
-						search={{
-							enabled: true,
-							options: {
-								api: "/api/docs-search",
-							},
-						}}
-					>
+			<FumadocsNextProvider>
+				<FumadocsRootProvider
+					search={{
+						enabled: true,
+						options: {
+							api: "/api/docs-search",
+						},
+					}}
+					i18n={{
+						locale,
+					}}
+				>
+					<NextIntlClientProvider locale={locale} messages={messages}>
 						<SessionProvider>
 							<NavBar />
 							<main className="min-h-screen">{children}</main>
 							<Footer />
 						</SessionProvider>
-					</FumadocsRootProvider>
-				</FumadocsNextProvider>
-			</NextIntlClientProvider>
+					</NextIntlClientProvider>
+				</FumadocsRootProvider>
+			</FumadocsNextProvider>
 		</Document>
 	);
 }
