@@ -50,7 +50,7 @@ function initializeProcessors(): void {
  * Process a single job from pg-boss queue
  *
  * This function:
- * 1. Retrieves the ToolJob from the database
+ * 1. Atomically claims the ToolJob (update status from PENDING to PROCESSING)
  * 2. Gets the appropriate processor
  * 3. Executes the processor
  * 4. Updates the ToolJob with the result
@@ -62,35 +62,78 @@ async function processSingleJob(
 ): Promise<JobResult> {
 	const { toolJobId } = payload;
 
-	logger.info(`[Worker:${toolSlug}] Processing job ${toolJobId}`);
+	logger.info(`[Worker:${toolSlug}] Claiming job ${toolJobId}`);
 
-	// Fetch the ToolJob from database with retry info
+	// Atomically claim the job by updating status from PENDING to PROCESSING
+	// This prevents race conditions if the same job is somehow claimed twice
+	const claimResult = await db.$queryRaw<
+		Array<{
+			id: string;
+			attempts: number;
+			maxAttempts: number;
+		}>
+	>`
+		UPDATE "tool_job"
+		SET status = 'PROCESSING',
+			"startedAt" = NOW(),
+			attempts = attempts + 1,
+			"pgBossJobId" = ${pgBossJobId},
+			"updatedAt" = NOW()
+		WHERE id = ${toolJobId}
+		AND status = 'PENDING'
+		RETURNING id, attempts, "maxAttempts"
+	`;
+
+	if (claimResult.length === 0) {
+		// Job wasn't in PENDING status - could be already processed or cancelled
+		const toolJob = await db.toolJob.findUnique({
+			where: { id: toolJobId },
+			select: { id: true, status: true },
+		});
+
+		if (!toolJob) {
+			logger.error(
+				`[Worker:${toolSlug}] ToolJob not found: ${toolJobId}`,
+			);
+			return {
+				success: false,
+				error: `ToolJob not found: ${toolJobId}`,
+			};
+		}
+
+		logger.warn(
+			`[Worker:${toolSlug}] Job ${toolJobId} not in PENDING status (current: ${toolJob.status}), skipping`,
+		);
+		return {
+			success: true, // Not an error, just already processed
+			output: {
+				skipped: true,
+				reason: `Job status was ${toolJob.status}`,
+			},
+		};
+	}
+
+	// Job was successfully claimed - get the updated values
+	const { attempts: newAttemptCount, maxAttempts } = claimResult[0];
+
+	// Now fetch the full job data for processing
 	const toolJob = await db.toolJob.findUnique({
 		where: { id: toolJobId },
 	});
 
 	if (!toolJob) {
-		logger.error(`[Worker:${toolSlug}] ToolJob not found: ${toolJobId}`);
+		logger.error(
+			`[Worker:${toolSlug}] ToolJob not found after claim: ${toolJobId}`,
+		);
 		return {
 			success: false,
-			error: `ToolJob not found: ${toolJobId}`,
+			error: `ToolJob not found after claim: ${toolJobId}`,
 		};
 	}
 
-	// Track the new attempt count for retry logic later
-	const newAttemptCount = toolJob.attempts + 1;
-	const maxAttempts = toolJob.maxAttempts;
-
-	// Update ToolJob status to PROCESSING and link to pg-boss job
-	await db.toolJob.update({
-		where: { id: toolJobId },
-		data: {
-			status: "PROCESSING",
-			startedAt: new Date(),
-			attempts: newAttemptCount,
-			pgBossJobId,
-		},
-	});
+	logger.info(
+		`[Worker:${toolSlug}] Processing job ${toolJobId} (attempt ${newAttemptCount}/${maxAttempts})`,
+	);
 
 	// Get the processor for this tool
 	const processor = getProcessor(toolSlug);

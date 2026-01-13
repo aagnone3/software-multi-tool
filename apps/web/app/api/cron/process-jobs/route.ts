@@ -1,28 +1,21 @@
 import {
 	handleStuckJobs,
-	processAllPendingJobs,
-	retryFailedJobs,
 	runCleanup,
 } from "@repo/api/modules/jobs/lib/job-runner";
 import { logger } from "@repo/logs";
 import { NextResponse } from "next/server";
 
 /**
- * Cron endpoint to process pending jobs
- * This acts as a safety net for jobs that failed immediate processing
- * and handles retry logic for failed jobs
+ * @deprecated Use /api/cron/job-maintenance instead
  *
- * Can be configured in vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/process-jobs",
- *     "schedule": "* * * * *"
- *   }]
- * }
+ * This endpoint is kept for backwards compatibility during migration.
+ * It now only performs maintenance tasks - pg-boss workers handle actual job processing.
+ *
+ * Migration: Update vercel.json to use /api/cron/job-maintenance
  */
 export async function GET(request: Request) {
 	try {
-		// Verify the request is from a cron job (optional, but recommended for production)
+		// Verify the request is from a cron job
 		const authHeader = request.headers.get("authorization");
 		const cronSecret = process.env.CRON_SECRET;
 
@@ -33,41 +26,29 @@ export async function GET(request: Request) {
 			);
 		}
 
-		logger.info("[Cron] Starting job processing cycle");
-
-		// 1. Mark stuck jobs as failed (stuck for > 30 minutes)
-		const stuckResult = await handleStuckJobs(30);
-		logger.info(`[Cron] Marked ${stuckResult.count} stuck jobs as failed`);
-
-		// 2. Retry failed jobs that are ready for retry
-		const retryResult = await retryFailedJobs();
-		logger.info(`[Cron] Requeued ${retryResult.retried} jobs for retry`);
-
-		// 3. Process pending jobs (limit to 10 per cron run to avoid timeout)
-		const processResult = await processAllPendingJobs(undefined, 10);
 		logger.info(
-			`[Cron] Processed ${processResult.processed} jobs: ${processResult.jobIds.join(", ")}`,
+			"[Cron] DEPRECATED: /api/cron/process-jobs called. Use /api/cron/job-maintenance instead.",
 		);
 
-		// 4. Cleanup expired jobs (older than 7 days)
+		// Only perform maintenance - pg-boss handles job processing now
+		const stuckResult = await handleStuckJobs(30);
 		const cleanupResult = await runCleanup();
-		logger.info(`[Cron] Cleaned up ${cleanupResult.deleted} expired jobs`);
 
 		return NextResponse.json({
 			success: true,
+			deprecated: true,
+			message:
+				"This endpoint is deprecated. Please migrate to /api/cron/job-maintenance",
 			stuckJobsMarkedFailed: stuckResult.count,
-			jobsRequeued: retryResult.retried,
-			jobsProcessed: processResult.processed,
-			jobIds: processResult.jobIds,
 			expiredJobsDeleted: cleanupResult.deleted,
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		logger.error("[Cron] Job processing failed", error);
+		logger.error("[Cron] Job maintenance failed", error);
 
 		return NextResponse.json(
 			{
-				error: "Job processing failed",
+				error: "Job maintenance failed",
 				message:
 					error instanceof Error ? error.message : "Unknown error",
 			},
