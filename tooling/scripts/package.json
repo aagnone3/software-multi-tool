@@ -5,6 +5,7 @@
 		"@repo/database": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"@repo/utils": "workspace:*",
+		"pg": "8.16.0",
 		"stripe": "18.5.0"
 	},
 	"devDependencies": {
@@ -29,6 +30,7 @@
 		"prisma:validate": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/validate-migration.mjs",
 		"prisma:stage": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/stage-migration.mjs",
 		"stripe:validate": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/stripe/validate-webhooks.mjs",
+		"supabase:validate-seed": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/supabase/validate-preview-seed.mjs",
 		"type-check": "tsc --noEmit",
 		"test": "vitest --config ./vitest.config.ts --run",
 		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest --config ./vitest.config.ts --run"
