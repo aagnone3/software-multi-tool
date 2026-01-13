@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { serverAnalytics, trackToolServerEvent } from "./server-analytics";
+import {
+	ServerAnalytics,
+	serverAnalytics,
+	trackToolServerEvent,
+} from "./server-analytics";
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -25,24 +29,24 @@ describe("Server Analytics", () => {
 		vi.resetAllMocks();
 	});
 
-	describe("serverAnalytics.capture", () => {
-		it("should send capture request to PostHog API", async () => {
-			// Note: serverAnalytics is disabled in test mode, so this tests the behavior
-			// when the PostHog key is not set or in test environment
+	describe("ServerAnalytics (disabled - test mode)", () => {
+		it("should be disabled in test environment", () => {
+			expect(serverAnalytics.isEnabled()).toBe(false);
+		});
+
+		it("should not call fetch when disabled", async () => {
 			await serverAnalytics.capture({
 				distinctId: "user-123",
 				event: "test_event",
 				properties: { key: "value" },
 			});
 
-			// In test mode, analytics is disabled so fetch should not be called
 			expect(mockFetch).not.toHaveBeenCalled();
 		});
 
-		it("should not throw when capture fails", async () => {
+		it("should not throw when capture fails on disabled instance", async () => {
 			mockFetch.mockRejectedValue(new Error("Network error"));
 
-			// Should not throw even if fetch fails
 			await expect(
 				serverAnalytics.capture({
 					distinctId: "user-123",
@@ -50,44 +54,202 @@ describe("Server Analytics", () => {
 				}),
 			).resolves.toBeUndefined();
 		});
+	});
 
-		it("should handle missing distinctId gracefully", async () => {
-			await expect(
-				serverAnalytics.capture({
-					distinctId: "",
+	describe("ServerAnalytics (enabled)", () => {
+		let analytics: ServerAnalytics;
+
+		beforeEach(() => {
+			analytics = new ServerAnalytics({
+				apiKey: "test-api-key",
+				host: "https://test.posthog.com",
+				enabled: true,
+			});
+		});
+
+		describe("capture", () => {
+			it("should send capture request to PostHog API", async () => {
+				await analytics.capture({
+					distinctId: "user-123",
 					event: "test_event",
-				}),
-			).resolves.toBeUndefined();
-		});
-	});
+					properties: { key: "value" },
+				});
 
-	describe("serverAnalytics.identify", () => {
-		it("should send identify event", async () => {
-			await serverAnalytics.identify({
-				distinctId: "user-123",
-				properties: { email: "test@example.com" },
+				expect(mockFetch).toHaveBeenCalledWith(
+					"https://test.posthog.com/capture/",
+					expect.objectContaining({
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+					}),
+				);
+
+				const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+				expect(body.api_key).toBe("test-api-key");
+				expect(body.event).toBe("test_event");
+				expect(body.distinct_id).toBe("user-123");
+				expect(body.properties.key).toBe("value");
+				expect(body.properties.$lib).toBe("server-analytics");
 			});
 
-			// In test mode, analytics is disabled
-			expect(mockFetch).not.toHaveBeenCalled();
-		});
-	});
+			it("should include $set and $set_once when provided", async () => {
+				await analytics.capture({
+					distinctId: "user-123",
+					event: "test_event",
+					$set: { name: "Test User" },
+					$set_once: { first_seen: "2024-01-01" },
+				});
 
-	describe("serverAnalytics.alias", () => {
-		it("should send alias event", async () => {
-			await serverAnalytics.alias({
-				distinctId: "user-123",
-				alias: "anonymous-session-456",
+				const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+				expect(body.$set).toEqual({ name: "Test User" });
+				expect(body.$set_once).toEqual({ first_seen: "2024-01-01" });
 			});
 
-			// In test mode, analytics is disabled
-			expect(mockFetch).not.toHaveBeenCalled();
-		});
-	});
+			it("should use custom timestamp when provided", async () => {
+				const customTimestamp = new Date("2024-01-15T10:00:00Z");
+				await analytics.capture({
+					distinctId: "user-123",
+					event: "test_event",
+					timestamp: customTimestamp,
+				});
 
-	describe("serverAnalytics.isEnabled", () => {
-		it("should return false in test environment", () => {
-			expect(serverAnalytics.isEnabled()).toBe(false);
+				const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+				expect(body.timestamp).toBe("2024-01-15T10:00:00.000Z");
+			});
+
+			it("should handle non-ok response gracefully", async () => {
+				mockFetch.mockResolvedValue({
+					ok: false,
+					status: 500,
+					statusText: "Internal Server Error",
+				});
+
+				await expect(
+					analytics.capture({
+						distinctId: "user-123",
+						event: "test_event",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+
+			it("should handle fetch errors gracefully", async () => {
+				mockFetch.mockRejectedValue(new Error("Network error"));
+
+				await expect(
+					analytics.capture({
+						distinctId: "user-123",
+						event: "test_event",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+
+			it("should handle non-Error exceptions gracefully", async () => {
+				mockFetch.mockRejectedValue("String error");
+
+				await expect(
+					analytics.capture({
+						distinctId: "user-123",
+						event: "test_event",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+		});
+
+		describe("identify", () => {
+			it("should send identify event with $set properties", async () => {
+				await analytics.identify({
+					distinctId: "user-123",
+					properties: {
+						email: "test@example.com",
+						name: "Test User",
+					},
+				});
+
+				expect(mockFetch).toHaveBeenCalled();
+				const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+				expect(body.event).toBe("$identify");
+				expect(body.distinct_id).toBe("user-123");
+				expect(body.$set).toEqual({
+					email: "test@example.com",
+					name: "Test User",
+				});
+			});
+		});
+
+		describe("alias", () => {
+			it("should send alias event", async () => {
+				await analytics.alias({
+					distinctId: "user-123",
+					alias: "anonymous-session-456",
+				});
+
+				expect(mockFetch).toHaveBeenCalledWith(
+					"https://test.posthog.com/capture/",
+					expect.objectContaining({
+						method: "POST",
+					}),
+				);
+
+				const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+				expect(body.event).toBe("$create_alias");
+				expect(body.distinct_id).toBe("user-123");
+				expect(body.properties.alias).toBe("anonymous-session-456");
+				expect(body.properties.$lib).toBe("server-analytics");
+			});
+
+			it("should handle non-ok response gracefully", async () => {
+				mockFetch.mockResolvedValue({
+					ok: false,
+					status: 400,
+					statusText: "Bad Request",
+				});
+
+				await expect(
+					analytics.alias({
+						distinctId: "user-123",
+						alias: "session-456",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+
+			it("should handle fetch errors gracefully", async () => {
+				mockFetch.mockRejectedValue(new Error("Network error"));
+
+				await expect(
+					analytics.alias({
+						distinctId: "user-123",
+						alias: "session-456",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+
+			it("should handle non-Error exceptions gracefully", async () => {
+				mockFetch.mockRejectedValue("String error");
+
+				await expect(
+					analytics.alias({
+						distinctId: "user-123",
+						alias: "session-456",
+					}),
+				).resolves.toBeUndefined();
+
+				expect(mockFetch).toHaveBeenCalled();
+			});
+		});
+
+		describe("isEnabled", () => {
+			it("should return true when enabled", () => {
+				expect(analytics.isEnabled()).toBe(true);
+			});
 		});
 	});
 
@@ -101,7 +263,7 @@ describe("Server Analytics", () => {
 				session_id: "session-789",
 			});
 
-			// In test mode, analytics is disabled
+			// In test mode, analytics is disabled so fetch should not be called
 			expect(mockFetch).not.toHaveBeenCalled();
 		});
 

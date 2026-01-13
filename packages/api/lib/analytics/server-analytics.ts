@@ -59,18 +59,26 @@ interface AliasOptions {
 	alias: string;
 }
 
+interface ServerAnalyticsConfig {
+	apiKey?: string;
+	host?: string;
+	enabled?: boolean;
+}
+
 /**
  * Server-side analytics client for PostHog
  */
-class ServerAnalytics {
+export class ServerAnalytics {
 	private apiKey: string | undefined;
 	private host: string;
 	private enabled: boolean;
 
-	constructor() {
-		this.apiKey = POSTHOG_API_KEY;
-		this.host = POSTHOG_HOST;
-		this.enabled = !!this.apiKey && process.env.NODE_ENV !== "test";
+	constructor(config?: ServerAnalyticsConfig) {
+		this.apiKey = config?.apiKey ?? POSTHOG_API_KEY;
+		this.host = config?.host ?? POSTHOG_HOST;
+		this.enabled =
+			config?.enabled ??
+			(!!this.apiKey && process.env.NODE_ENV !== "test");
 
 		if (!this.enabled && process.env.NODE_ENV !== "test") {
 			logger.debug(
