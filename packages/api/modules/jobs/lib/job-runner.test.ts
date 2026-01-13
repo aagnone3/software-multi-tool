@@ -18,6 +18,7 @@ const markStuckJobsAsFailedMock = vi.hoisted(() => vi.fn());
 const cleanupExpiredJobsMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/database", () => ({
+	db: {},
 	claimNextPendingJob: claimNextPendingJobMock,
 	markJobCompleted: markJobCompletedMock,
 	markJobFailed: markJobFailedMock,
