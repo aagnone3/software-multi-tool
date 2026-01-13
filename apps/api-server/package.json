@@ -7,6 +7,7 @@
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
 		"build": "pnpm exec esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs",
+		"build:smoke-test": "pnpm build && node scripts/smoke-test.mjs",
 		"start": "node dist/index.cjs",
 		"type-check": "tsc --noEmit",
 		"test": "vitest --config ./vitest.config.ts --run",
