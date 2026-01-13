@@ -219,10 +219,12 @@ export function createSupabaseClient(config) {
 			// simpler format: {branch-project-ref}.pooler.supabase.com
 			// which routes based on the username's project_ref.
 			//
-			// IMPORTANT: For branch databases, we must use the branch's project_ref
-			// (from branch.project_ref), NOT the parent project's projectRef.
-			// The branch has its own project reference that identifies it in Supavisor.
-			const branchProjectRef = branch.project_ref;
+			// IMPORTANT: For branch databases, we must use the branch's project ref,
+			// NOT the parent project's projectRef. The branch has its own project
+			// reference that identifies it in Supavisor.
+			// Note: The /branches/{id} endpoint returns "ref" while
+			// /projects/{ref}/branches returns "project_ref"
+			const branchProjectRef = branch.ref || branch.project_ref;
 			const poolerHost = `${branchProjectRef}.pooler.supabase.com`;
 			const poolerPort = 6543;
 			const poolerUrl = `postgresql://${dbUser}.${branchProjectRef}:${encodeURIComponent(dbPass)}@${poolerHost}:${poolerPort}/${dbName}?pgbouncer=true`;
