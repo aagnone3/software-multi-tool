@@ -21,7 +21,7 @@
 		"@sindresorhus/slugify": "2.2.1",
 		"cookie": "1.1.1",
 		"hono": "4.11.3",
-		"jsdom": "25.0.1",
+		"linkedom": "0.18.9",
 		"mammoth": "1.11.0",
 		"nanoid": "5.1.5",
 		"openai": "5.23.2",
