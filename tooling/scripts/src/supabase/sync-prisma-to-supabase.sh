@@ -127,6 +127,7 @@ for migration_dir in "$PRISMA_DIR"/*/; do
   # Sync the migration
   if [ "$DRY_RUN" = true ]; then
     echo -e "${GREEN}  → Would sync: $migration_name${NC}"
+    ((synced_count++))
   else
     if cp "$source_file" "$target_file"; then
       echo -e "${GREEN}  ✓ Synced: $migration_name${NC}"
@@ -144,14 +145,15 @@ echo -e "${BLUE}Sync Summary${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 if [ "$DRY_RUN" = true ]; then
-  echo -e "Mode:     ${YELLOW}Dry run (no changes made)${NC}"
+  echo -e "Mode:       ${YELLOW}Dry run (no changes made)${NC}"
+  echo -e "Would sync: ${GREEN}$synced_count${NC}"
 else
-  echo -e "Mode:     ${GREEN}Applied${NC}"
+  echo -e "Mode:       ${GREEN}Applied${NC}"
+  echo -e "Synced:     ${GREEN}$synced_count${NC}"
 fi
 
-echo -e "Synced:   ${GREEN}$synced_count${NC}"
-echo -e "Skipped:  ${BLUE}$skipped_count${NC}"
-echo -e "Errors:   ${RED}$error_count${NC}"
+echo -e "Skipped:    ${BLUE}$skipped_count${NC}"
+echo -e "Errors:     ${RED}$error_count${NC}"
 
 if [ "$error_count" -gt 0 ]; then
   echo ""

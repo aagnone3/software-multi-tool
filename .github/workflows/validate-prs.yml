@@ -60,12 +60,16 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add supabase/migrations/
-          git commit -m "chore: sync Prisma migrations to Supabase format
+          git commit -m "chore(database): sync Prisma migrations to Supabase format
 
           Automatically synced by CI to enable Supabase preview branch validation.
 
           🤖 Generated with GitHub Actions"
-          git push
+          if ! git push; then
+            echo "::warning::Failed to push synced migrations. This may be due to branch protection rules."
+            echo "::warning::Please run './tooling/scripts/src/supabase/sync-prisma-to-supabase.sh' locally and commit the changes."
+            exit 1
+          fi
 
   lint:
     name: Lint code
