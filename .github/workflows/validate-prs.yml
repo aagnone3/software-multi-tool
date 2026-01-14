@@ -8,6 +8,69 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
+  sync-migrations:
+    name: Sync Prisma migrations to Supabase
+    runs-on: ubuntu-latest
+    # Only run if Prisma migrations changed
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Prisma migration changes
+        id: check-migrations
+        run: |
+          # Check if any Prisma migrations were added/modified
+          CHANGED=$(git diff --name-only origin/main...HEAD -- 'packages/database/prisma/migrations/' | wc -l | tr -d ' ')
+          echo "migrations_changed=$CHANGED" >> $GITHUB_OUTPUT
+          if [ "$CHANGED" -gt 0 ]; then
+            echo "Prisma migrations changed: $CHANGED files"
+          else
+            echo "No Prisma migration changes detected"
+          fi
+
+      - name: Sync Prisma migrations to Supabase format
+        if: steps.check-migrations.outputs.migrations_changed != '0'
+        run: |
+          chmod +x ./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh
+          ./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh --verbose
+
+      - name: Check for new Supabase migrations
+        if: steps.check-migrations.outputs.migrations_changed != '0'
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain supabase/migrations/)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "New Supabase migrations to commit:"
+            git status --short supabase/migrations/
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No new Supabase migrations needed"
+          fi
+
+      - name: Commit synced migrations
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add supabase/migrations/
+          git commit -m "chore(database): sync Prisma migrations to Supabase format
+
+          Automatically synced by CI to enable Supabase preview branch validation.
+
+          🤖 Generated with GitHub Actions"
+          if ! git push; then
+            echo "::warning::Failed to push synced migrations. This may be due to branch protection rules."
+            echo "::warning::Please run './tooling/scripts/src/supabase/sync-prisma-to-supabase.sh' locally and commit the changes."
+            exit 1
+          fi
+
   lint:
     name: Lint code
     runs-on: ubuntu-latest

@@ -49,6 +49,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
 
+#### Prisma to Supabase Migration Sync
+
+Supabase preview branches require migrations in Supabase format. A sync script automatically copies Prisma migrations to Supabase format:
+
+- **Script**: `tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
+- **CI Integration**: Runs automatically on PRs with Prisma migration changes
+- **Manual sync**: `./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
+
+| System   | Format                                    |
+| -------- | ----------------------------------------- |
+| Prisma   | `migrations/TIMESTAMP_name/migration.sql` |
+| Supabase | `migrations/TIMESTAMP_name.sql`           |
+
+The sync script:
+
+1. Copies new Prisma migrations to Supabase format
+2. Skips migrations already synced
+3. CI automatically commits synced migrations to the PR branch
+
 #### Local Development Database
 
 Local PostgreSQL (Homebrew) on port 5432:
@@ -236,11 +255,11 @@ The `api-server` uses esbuild to bundle all code into a single `dist/index.cjs` 
 
 ### Packages to Avoid in Bundled Code
 
-| Package | Problem | Alternative |
-|---------|---------|-------------|
-| `jsdom` | Uses worker files (`xhr-sync-worker.js`) that can't be bundled | `linkedom` or `happy-dom` |
-| Packages with native bindings | Binary files not included in bundle | Mark as external or find pure-JS alternative |
-| Packages using `require.resolve()` for runtime file loading | Paths break after bundling | Find alternatives or mark as external |
+| Package                                                      | Problem                                              | Alternative                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------- |
+| `jsdom`                                                      | Uses worker files (`xhr-sync-worker.js`) can't bundle| `linkedom` or `happy-dom`                    |
+| Packages with native bindings                                | Binary files not included in bundle                  | Mark as external or find pure-JS alternative |
+| Packages using `require.resolve()` for runtime file loading  | Paths break after bundling                           | Find alternatives or mark as external        |
 
 ### Bundle Smoke Testing
 

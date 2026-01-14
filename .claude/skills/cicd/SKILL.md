@@ -182,14 +182,40 @@ This project uses **two migration systems** that serve different purposes:
 
 Prisma is the **source of truth** for the application schema. All development work uses Prisma migrations.
 
-### Supabase Migrations (Sync)
+### Supabase Migrations (Derived)
 
 - **Location**: `supabase/migrations/`
 - **Purpose**: Supabase branching and preview environments
-- **When to use**: Synced from production after Prisma migrations are applied
-- **Workflow**: `supabase db pull` after production deploy
+- **When to use**: Automatically synced from Prisma by CI
+- **Workflow**: CI syncs on PRs with migration changes; manual sync also available
 
-Supabase migrations are used by the branching system to create preview databases.
+Supabase migrations are **derived from Prisma migrations** and used by the branching system to create preview databases.
+
+### Automatic Migration Sync
+
+A sync script (`tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`) automatically converts Prisma migrations to Supabase format:
+
+| System | Format |
+| ------ | ------ |
+| Prisma | `migrations/TIMESTAMP_name/migration.sql` |
+| Supabase | `migrations/TIMESTAMP_name.sql` |
+
+**CI Integration**: The `validate-prs.yml` workflow automatically:
+
+1. Detects Prisma migration changes in PRs
+2. Runs the sync script to create Supabase-format migrations
+3. Commits the synced migrations back to the PR branch
+4. Supabase preview branches then apply these migrations
+
+**Manual Sync**:
+
+```bash
+# Preview what would be synced
+./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh --dry-run
+
+# Sync migrations
+./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh
+```
 
 ### Migration Workflow
 
@@ -206,40 +232,36 @@ Supabase migrations are used by the branching system to create preview databases
 │  3. Commit & Create PR                                           │
 │     └── git commit -m "feat: add new table"                      │
 │                                                                   │
-│  4. PR Review & Merge                                            │
+│  4. CI Auto-Syncs Supabase Migrations                            │
+│     └── sync-prisma-to-supabase.sh runs automatically            │
+│     └── Synced migrations committed to PR branch                 │
+│                                                                   │
+│  5. Supabase Preview Branch Created                              │
+│     └── Applies synced migrations to preview database            │
+│     └── Validates migrations BEFORE merge                        │
+│                                                                   │
+│  6. PR Review & Merge                                            │
 │     └── Prisma migration applies to production                   │
-│                                                                   │
-│  5. Sync Supabase Migrations                                     │
-│     └── supabase db pull                                         │
-│                                                                   │
-│  6. Commit Supabase Migrations                                   │
-│     └── git commit -m "chore: sync supabase migrations"          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Why Two Systems?
 
-| Aspect                 | Prisma                 | Supabase                     |
-| ---------------------- | ---------------------- | ---------------------------- |
-| **Primary use**        | Development workflow   | Preview environments         |
-| **Schema changes**     | Yes                    | Sync only                    |
-| **CI/CD integration**  | GitHub Actions deploy  | Automatic branching          |
-| **Local development**  | `pnpm dev`             | `supabase start` (optional)  |
-| **Production deploy**  | Manual/CD pipeline     | Mirrors production           |
+| Aspect                   | Prisma                 | Supabase                     |
+| ------------------------ | ---------------------- | ---------------------------- |
+| **Primary use**          | Development workflow   | Preview environments         |
+| **Schema changes**       | Yes                    | Derived from Prisma          |
+| **CI/CD integration**    | GitHub Actions deploy  | Automatic branching + sync   |
+| **Local development**    | `pnpm dev`             | `supabase start` (optional)  |
+| **Production deploy**    | Manual/CD pipeline     | N/A (uses Prisma)            |
+| **Pre-merge validation** | No                     | Yes (preview branches)       |
 
-### Keeping in Sync
+### Benefits of Automatic Sync
 
-After any Prisma migration is deployed to production:
-
-```bash
-# Pull latest schema from production
-SUPABASE_ACCESS_TOKEN="..." supabase db pull
-
-# This updates supabase/migrations/ with production schema
-# Commit the changes
-git add supabase/migrations/
-git commit -m "chore: sync supabase migrations from production"
-```
+1. **Pre-merge validation**: Migrations are validated on Supabase preview branches before merge
+2. **Single source of truth**: Prisma remains the source; Supabase format is derived
+3. **No manual steps**: CI handles sync automatically
+4. **Fail-fast**: If a migration fails on preview branch, the PR shows the failure
 
 ## Vercel Preview Deployments
 
