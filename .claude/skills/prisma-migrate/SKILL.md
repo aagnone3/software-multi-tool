@@ -1,6 +1,19 @@
 ---
 name: database-migration
 description: Use this skill for Prisma database migration workflows including validation, staging, review, and execution. This skill wraps the Prisma CLI and custom migration helpers.
+activation-keywords:
+  - database
+  - schema
+  - migration
+  - prisma
+  - db push
+  - migrate
+  - schema.prisma
+  - database changes
+  - add column
+  - add table
+  - drop column
+  - alter table
 allowed-tools:
   - Bash
   - Read
@@ -10,6 +23,38 @@ allowed-tools:
 # Prisma Migration Skill
 
 This skill provides comprehensive Prisma migration support with safety checks, advisory locking, and automated workflows.
+
+## ⚠️ CRITICAL: Migration Commands - Know the Difference
+
+> **🚨 NEVER use `prisma db push` for schema changes 🚨**
+>
+> Using `push` causes **schema drift** that breaks integration tests and can corrupt production deployments.
+
+| Command | Purpose | Creates Migration? | Use When |
+| ------- | ------- | ------------------ | -------- |
+| `pnpm --filter @repo/database migrate` | Create and apply migrations | ✅ Yes | **ALWAYS** for schema changes |
+| `pnpm --filter @repo/database push` | ❌ **BLOCKED** | ❌ No | Never use for schema changes |
+| `pnpm --filter @repo/database generate` | Regenerate Prisma client types | ❌ No | After pulling changes, or types are stale |
+
+### Why `push` Is Blocked
+
+When developers use `push` during local development:
+
+1. **Integration tests fail** - Testcontainers applies migrations from scratch, missing pushed-only changes
+2. **Production deployments fail** - CI/CD runs migrations, not push
+3. **Schema confusion** - The database differs from migration history
+
+### The Correct Workflow
+
+```bash
+# 1. Edit schema.prisma
+# 2. Create migration (NEVER use push!)
+pnpm --filter @repo/database migrate dev --name add-user-preferences
+
+# 3. Review the generated migration file
+# 4. Run tests to verify
+pnpm test
+```
 
 ## Prerequisites
 
@@ -50,11 +95,13 @@ All Prisma operations use pnpm workspace filtering:
 pnpm --filter @repo/scripts prisma:validate
 pnpm --filter @repo/scripts prisma:stage --name <migration-name>
 
-# Existing database commands
+# Standard database commands
 pnpm --filter @repo/database generate        # Generate Prisma client and Zod schemas
-pnpm --filter @repo/database push            # Push schema changes (dev only, skips migrations)
 pnpm --filter @repo/database migrate:execute # Execute staged migration
 pnpm --filter @repo/database studio          # Open Prisma Studio GUI
+
+# ❌ BLOCKED - DO NOT USE
+# pnpm --filter @repo/database push          # Causes schema drift - use migrate instead!
 ```
 
 ## Migration Workflow (Step-by-Step)
@@ -354,11 +401,13 @@ When working on features that require database changes:
 This project uses pg-boss for background job processing. The pg-boss schema is managed through Prisma migrations using raw SQL (because pg-boss uses partitioned tables and stored functions that Prisma cannot model).
 
 **Key points:**
+
 - pg-boss schema version **24** is required for pg-boss 10.4.x
 - Always use `migrate: false` in application code
 - See existing migration: `packages/database/prisma/migrations/20260112205243_add_pgboss_schema/`
 
 **Quick commands:**
+
 ```bash
 pnpm --filter @repo/database pgboss:verify  # Verify pg-boss works
 pnpm --filter @repo/database run test:integration  # Run integration tests (requires Docker)

@@ -42,12 +42,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Database
 
 - `pnpm --filter @repo/database generate` - Generate Prisma client and Zod schemas
-- `pnpm --filter @repo/database push` - Push schema changes to database (skips generation)
 - `pnpm --filter @repo/database migrate` - Create and apply migrations
 - `pnpm --filter @repo/database studio` - Open Prisma Studio GUI
 - `pnpm --filter @repo/database run test:integration` - Run Postgres integration tests (requires Docker)
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
+
+> **⚠️ WARNING: Never use `prisma db push`**
+>
+> Using `push` causes schema drift that breaks integration tests and CI. Always use `migrate dev --name <name>` instead.
+> See `.claude/skills/prisma-migrate/SKILL.md` for the complete migration workflow.
 
 #### Prisma to Supabase Migration Sync
 

@@ -20,6 +20,34 @@ This directory contains custom hooks for Claude Code that enforce project best p
 
 **Exception:** If pre-commit hooks themselves are genuinely broken and need urgent fixes, you can temporarily disable this hook by commenting it out in `.claude/settings.local.json`.
 
+## block-db-push.py
+
+**Purpose:** Prevents Claude from using `prisma db push`, which causes schema drift.
+
+**Why:** Using `prisma db push` during development causes the database to get out of sync with migration history. This leads to:
+
+- Integration test failures (Testcontainers applies migrations from scratch)
+- Production deployment issues (CI/CD uses migrations, not push)
+- Confusion about the source of truth for the schema
+
+**What it does:**
+
+- Blocks any command that runs `prisma db push` (including pnpm filter variants)
+- Shows a helpful error message explaining why
+- Directs users to use `pnpm --filter @repo/database migrate dev --name <migration-name>` instead
+
+**Commands blocked:**
+
+- `prisma db push`
+- `npx prisma db push`
+- `pnpm prisma db push`
+- `pnpm --filter @repo/database push`
+- `pnpm --filter database push`
+
+**Correct alternative:** `pnpm --filter @repo/database migrate dev --name <migration-name>`
+
+**Exception:** This hook should NOT be disabled. If you need to sync your local database without migrations, manually reset and re-apply migrations instead.
+
 ## How Hooks Work
 
 Hooks are configured in `.claude/settings.local.json`:
