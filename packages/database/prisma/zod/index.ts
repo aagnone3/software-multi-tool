@@ -94,6 +94,18 @@ export const AuditLogScalarFieldEnumSchema = z.enum(['id', 'createdAt', 'userId'
 
 export type AuditLogScalarFieldEnumEnum = z.infer<typeof AuditLogScalarFieldEnumSchema>;
 
+// File: CreditBalanceScalarFieldEnum.schema.ts
+
+export const CreditBalanceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'periodStart', 'periodEnd', 'included', 'used', 'overage', 'purchasedCredits', 'createdAt', 'updatedAt'])
+
+export type CreditBalanceScalarFieldEnumEnum = z.infer<typeof CreditBalanceScalarFieldEnumSchema>;
+
+// File: CreditTransactionScalarFieldEnum.schema.ts
+
+export const CreditTransactionScalarFieldEnumSchema = z.enum(['id', 'balanceId', 'amount', 'type', 'toolSlug', 'jobId', 'description', 'createdAt'])
+
+export type CreditTransactionScalarFieldEnumEnum = z.infer<typeof CreditTransactionScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -147,6 +159,12 @@ export type ToolJobStatusEnum = z.infer<typeof ToolJobStatusSchema>;
 export const AuditActionSchema = z.enum(['CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'MFA_SETUP', 'MFA_DISABLE', 'IMPERSONATE', 'INVITE', 'EXPORT', 'SUBSCRIPTION_CHANGE', 'PAYMENT'])
 
 export type AuditActionEnum = z.infer<typeof AuditActionSchema>;
+
+// File: CreditTransactionType.schema.ts
+
+export const CreditTransactionTypeSchema = z.enum(['GRANT', 'USAGE', 'OVERAGE', 'REFUND', 'PURCHASE', 'ADJUSTMENT'])
+
+export type CreditTransactionTypeEnum = z.infer<typeof CreditTransactionTypeSchema>;
 
 // File: User.schema.ts
 
@@ -393,3 +411,36 @@ export const AuditLogSchema = z.object({
 
 export type AuditLogType = z.infer<typeof AuditLogSchema>;
 
+
+// File: CreditBalance.schema.ts
+
+export const CreditBalanceSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  periodStart: z.date(),
+  periodEnd: z.date(),
+  included: z.number().int(),
+  used: z.number().int(),
+  overage: z.number().int(),
+  purchasedCredits: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CreditBalanceType = z.infer<typeof CreditBalanceSchema>;
+
+
+// File: CreditTransaction.schema.ts
+
+export const CreditTransactionSchema = z.object({
+  id: z.string(),
+  balanceId: z.string(),
+  amount: z.number().int(),
+  type: CreditTransactionTypeSchema,
+  toolSlug: z.string().nullish(),
+  jobId: z.string().nullish(),
+  description: z.string().nullish(),
+  createdAt: z.date(),
+});
+
+export type CreditTransactionType = z.infer<typeof CreditTransactionSchema>;

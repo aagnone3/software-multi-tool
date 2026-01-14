@@ -33,6 +33,8 @@ const prismaDir = path.resolve(
 const prismaSchemaPath = path.join(prismaDir, "schema.prisma");
 
 const TABLES_TO_TRUNCATE = [
+	"credit_transaction",
+	"credit_balance",
 	"tool_job",
 	"rate_limit_entry",
 	"ai_chat",
