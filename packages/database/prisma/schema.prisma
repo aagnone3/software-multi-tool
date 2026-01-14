@@ -17,7 +17,7 @@ generator zod {
 }
 
 model User {
-    id                 String       @id @default(cuid())
+    id                 String         @id @default(cuid())
     name               String
     email              String
     emailVerified      Boolean
@@ -29,7 +29,7 @@ model User {
     banned             Boolean?
     banReason          String?
     banExpires         DateTime?
-    onboardingComplete Boolean      @default(false)
+    onboardingComplete Boolean        @default(false)
     paymentsCustomerId String?
     locale             String?
     twoFactorEnabled   Boolean?
@@ -42,6 +42,7 @@ model User {
     twofactors         TwoFactor[]
     aiChats            AiChat[]
     toolJobs           ToolJob[]
+    creditBalance      CreditBalance?
 
     @@unique([email])
     @@unique([username])
@@ -134,7 +135,7 @@ model TwoFactor {
 }
 
 model Organization {
-    id                 String       @id @default(cuid())
+    id                 String         @id @default(cuid())
     name               String
     slug               String?
     logo               String?
@@ -145,6 +146,7 @@ model Organization {
     invitations        Invitation[]
     purchases          Purchase[]
     aiChats            AiChat[]
+    creditBalance      CreditBalance?
 
     @@unique([slug])
     @@map("organization")
@@ -341,5 +343,60 @@ model AuditLog {
     @@index([userId, createdAt])
     @@index([organizationId, createdAt])
     @@map("audit_log")
+    @@schema("public")
+}
+
+// Credit system for tracking usage-based billing
+enum CreditTransactionType {
+    GRANT      // Initial subscription allocation
+    USAGE      // Normal credit consumption
+    OVERAGE    // Usage beyond included credits
+    REFUND     // Credit returned (failed job)
+    PURCHASE   // One-time credit pack purchase
+    ADJUSTMENT // Admin adjustment
+
+    @@schema("public")
+}
+
+model CreditBalance {
+    id               String   @id @default(cuid())
+    userId           String?  @unique
+    organizationId   String?  @unique
+    periodStart      DateTime
+    periodEnd        DateTime
+    included         Int // Credits from subscription
+    used             Int      @default(0)
+    overage          Int      @default(0)
+    purchasedCredits Int      @default(0) // From credit packs
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    user         User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+    organization Organization?       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    transactions CreditTransaction[]
+
+    @@index([userId])
+    @@index([organizationId])
+    @@index([periodEnd])
+    @@map("credit_balance")
+    @@schema("public")
+}
+
+model CreditTransaction {
+    id          String                @id @default(cuid())
+    balanceId   String
+    amount      Int // Negative for usage, positive for grants
+    type        CreditTransactionType
+    toolSlug    String? // Which tool consumed credits
+    jobId       String? // Reference to ToolJob
+    description String?
+    createdAt   DateTime              @default(now())
+
+    balance CreditBalance @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+
+    @@index([balanceId])
+    @@index([toolSlug])
+    @@index([createdAt])
+    @@map("credit_transaction")
     @@schema("public")
 }
