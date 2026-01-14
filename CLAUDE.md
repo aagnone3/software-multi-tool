@@ -48,11 +48,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
 
-> **⚠️ WARNING: Never use `prisma db push`**
->
-> Using `push` causes schema drift that breaks integration tests and CI. Always use `migrate dev --name <name>` instead.
-> See `.claude/skills/prisma-migrate/SKILL.md` for the complete migration workflow.
-
 #### Prisma to Supabase Migration Sync
 
 Supabase preview branches require migrations in Supabase format. A sync script automatically copies Prisma migrations to Supabase format:
