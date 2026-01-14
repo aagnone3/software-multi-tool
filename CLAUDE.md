@@ -42,7 +42,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Database
 
 - `pnpm --filter @repo/database generate` - Generate Prisma client and Zod schemas
-- `pnpm --filter @repo/database push` - Push schema changes to database (skips generation)
 - `pnpm --filter @repo/database migrate` - Create and apply migrations
 - `pnpm --filter @repo/database studio` - Open Prisma Studio GUI
 - `pnpm --filter @repo/database run test:integration` - Run Postgres integration tests (requires Docker)

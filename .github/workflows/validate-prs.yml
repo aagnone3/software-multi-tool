@@ -71,6 +71,75 @@ jobs:
             exit 1
           fi
 
+  schema-drift:
+    name: Detect schema drift
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: drift_check
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Schema uses POSTGRES_PRISMA_URL and POSTGRES_URL_NON_POOLING
+      POSTGRES_PRISMA_URL: postgresql://postgres:postgres@localhost:5432/drift_check
+      POSTGRES_URL_NON_POOLING: postgresql://postgres:postgres@localhost:5432/drift_check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install
+      - name: Check for schema drift
+        run: |
+          echo "Checking if schema.prisma matches migration history..."
+          cd packages/database
+
+          # Apply all migrations to the temporary database
+          echo "Applying migrations to temporary database..."
+          pnpm prisma migrate deploy
+
+          # Generate a diff between the current database (after migrations) and the schema
+          # If there's drift, this will output SQL that would be needed to sync
+          echo "Comparing database state to schema.prisma..."
+          DRIFT=$(pnpm prisma migrate diff \
+            --from-schema-datasource prisma/schema.prisma \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script 2>&1) || true
+
+          # Filter out Prisma upgrade notifications (they appear as box-drawing characters)
+          # Only keep lines that look like SQL or the empty migration message
+          DRIFT_CLEAN=$(echo "$DRIFT" | grep -v "^┌\|^│\|^└\|Update available\|pris.ly\|npm i" || true)
+
+          # Check if there's any drift (look for actual SQL statements beyond empty migration comment)
+          # An empty migration only has "-- This is an empty migration."
+          HAS_DRIFT=$(echo "$DRIFT_CLEAN" | grep -v "^--\|^$" | head -1 || true)
+
+          if [ -n "$HAS_DRIFT" ]; then
+            echo "::error::Schema drift detected! The schema.prisma file differs from the migration history."
+            echo ""
+            echo "This typically happens when 'prisma db push' was used instead of 'prisma migrate dev'."
+            echo ""
+            echo "To fix this, create a migration:"
+            echo "  pnpm --filter @repo/database migrate dev --name <migration-name>"
+            echo ""
+            echo "Detected drift:"
+            echo "$DRIFT_CLEAN"
+            exit 1
+          else
+            echo "No schema drift detected. Schema matches migration history."
+          fi
+
   lint:
     name: Lint code
     runs-on: ubuntu-latest

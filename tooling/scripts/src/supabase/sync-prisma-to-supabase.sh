@@ -111,7 +111,7 @@ for migration_dir in "$PRISMA_DIR"/*/; do
   # Check if source migration.sql exists
   if [ ! -f "$source_file" ]; then
     echo -e "${YELLOW}  ⚠ Skipped: $migration_name (no migration.sql found)${NC}"
-    ((skipped_count++))
+    ((++skipped_count)) || true
     continue
   fi
 
@@ -120,7 +120,7 @@ for migration_dir in "$PRISMA_DIR"/*/; do
     if [ "$VERBOSE" = true ]; then
       echo -e "${BLUE}  ✓ Already synced: $migration_name${NC}"
     fi
-    ((skipped_count++))
+    ((++skipped_count)) || true
     continue
   fi
 
@@ -131,10 +131,10 @@ for migration_dir in "$PRISMA_DIR"/*/; do
   else
     if cp "$source_file" "$target_file"; then
       echo -e "${GREEN}  ✓ Synced: $migration_name${NC}"
-      ((synced_count++))
+      ((++synced_count)) || true
     else
       echo -e "${RED}  ✗ Error syncing: $migration_name${NC}"
-      ((error_count++))
+      ((++error_count)) || true
     fi
   fi
 done
