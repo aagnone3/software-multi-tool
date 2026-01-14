@@ -354,6 +354,17 @@ Webhook handler: `POST /api/webhooks/payments`
 
 Configuration: `packages/payments/`
 
+### Credit System
+
+Usage-based consumption model for tools:
+
+- **Credit packs only** (no overage billing) - users have predictable costs
+- Plans include credits per billing period (Free: 10, Pro: 500, Enterprise: 5000)
+- Tools consume credits based on `creditCost` in `config/index.ts`
+- When credits run out, users purchase additional credit packs
+
+See the **tools skill** for detailed credit system documentation.
+
 ### Email
 
 - **React Email** for component-based templates

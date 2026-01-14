@@ -1,4 +1,4 @@
-import type { Config } from "./types";
+import type { Config, PlanCredits } from "./types";
 
 export const config = {
 	appName: "Software Multitool",
@@ -12,6 +12,7 @@ export const config = {
 				icon: "image-minus",
 				public: true,
 				enabled: true,
+				creditCost: 1, // 1 credit per image
 				rateLimits: {
 					anonymous: { requests: 5, window: "1d" },
 					authenticated: { requests: 60, window: "1h" },
@@ -24,6 +25,8 @@ export const config = {
 				icon: "users",
 				public: true,
 				enabled: true,
+				creditCost: 2, // 2 credits per minute of audio
+				creditUnit: "minute",
 				rateLimits: {
 					anonymous: { requests: 3, window: "1d" },
 					authenticated: { requests: 30, window: "1h" },
@@ -36,6 +39,7 @@ export const config = {
 				icon: "newspaper",
 				public: true,
 				enabled: true,
+				creditCost: 1, // 1 credit per article
 				rateLimits: {
 					anonymous: { requests: 10, window: "1d" },
 					authenticated: { requests: 100, window: "1h" },
@@ -49,6 +53,7 @@ export const config = {
 				icon: "receipt",
 				public: true,
 				enabled: true,
+				creditCost: 3, // 3 credits per document
 				rateLimits: {
 					anonymous: { requests: 5, window: "1d" },
 					authenticated: { requests: 50, window: "1h" },
@@ -62,6 +67,8 @@ export const config = {
 				icon: "file-text",
 				public: true,
 				enabled: true,
+				creditCost: 5, // 5 credits per page
+				creditUnit: "page",
 				rateLimits: {
 					anonymous: { requests: 3, window: "1d" },
 					authenticated: { requests: 30, window: "1h" },
@@ -75,6 +82,7 @@ export const config = {
 				icon: "message-square-text",
 				public: true,
 				enabled: true,
+				creditCost: 1, // 1 credit per analysis
 				rateLimits: {
 					anonymous: { requests: 10, window: "1d" },
 					authenticated: { requests: 100, window: "1h" },
@@ -88,6 +96,7 @@ export const config = {
 				icon: "wallet",
 				public: true,
 				enabled: true,
+				creditCost: 1, // 1 credit per expense
 				rateLimits: {
 					anonymous: { requests: 10, window: "1d" },
 					authenticated: { requests: 100, window: "1h" },
@@ -101,6 +110,7 @@ export const config = {
 				icon: "clipboard-list",
 				public: true,
 				enabled: true,
+				creditCost: 2, // 2 credits per summary
 				rateLimits: {
 					anonymous: { requests: 5, window: "1d" },
 					authenticated: { requests: 50, window: "1h" },
@@ -209,9 +219,15 @@ export const config = {
 			// The free plan is treated differently. It will automatically be assigned if the user has no other plan.
 			free: {
 				isFree: true,
+				credits: {
+					included: 10,
+				},
 			},
 			pro: {
 				recommended: true,
+				credits: {
+					included: 500,
+				},
 				prices: [
 					{
 						type: "recurring",
@@ -236,6 +252,9 @@ export const config = {
 				],
 			},
 			lifetime: {
+				credits: {
+					included: 1000,
+				},
 				prices: [
 					{
 						type: "one-time",
@@ -248,9 +267,33 @@ export const config = {
 			},
 			enterprise: {
 				isEnterprise: true,
+				credits: {
+					included: 5000,
+				},
 			},
 		},
 	},
 } as const satisfies Config;
 
-export type { Config };
+/**
+ * Get the credit configuration for a specific plan
+ * @param planId - The plan identifier (e.g., 'free', 'pro', 'enterprise')
+ * @returns The credit configuration for the plan, or undefined if plan doesn't exist
+ */
+export function getPlanCredits(planId: string): PlanCredits | undefined {
+	const plan =
+		config.payments.plans[planId as keyof typeof config.payments.plans];
+	return plan?.credits;
+}
+
+/**
+ * Get the credit cost for a specific tool
+ * @param toolSlug - The tool slug identifier (e.g., 'bg-remover', 'diarization')
+ * @returns The credit cost for the tool, or undefined if tool doesn't exist
+ */
+export function getToolCreditCost(toolSlug: string): number | undefined {
+	const tool = config.tools.registry.find((t) => t.slug === toolSlug);
+	return tool?.creditCost;
+}
+
+export type { Config, PlanCredits };
