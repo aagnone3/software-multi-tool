@@ -5,6 +5,7 @@ vi.mock("@repo/database", () => ({
 	db: {
 		creditBalance: {
 			findUnique: vi.fn(),
+			findMany: vi.fn(),
 			create: vi.fn(),
 			update: vi.fn(),
 			upsert: vi.fn(),
@@ -25,15 +26,18 @@ import {
 	executeAtomicGrant,
 	executeAtomicRefund,
 	executeAtomicReset,
+	findBalancesNeedingUsageReport,
 	findCreditBalanceById,
 	findCreditBalanceByOrgId,
 	findTransactionById,
+	markUsageReported,
 	updateCreditBalance,
 } from "../queries";
 
 const mockDb = db as unknown as {
 	creditBalance: {
 		findUnique: ReturnType<typeof vi.fn>;
+		findMany: ReturnType<typeof vi.fn>;
 		create: ReturnType<typeof vi.fn>;
 		update: ReturnType<typeof vi.fn>;
 		upsert: ReturnType<typeof vi.fn>;
@@ -388,6 +392,79 @@ describe("Credit Queries", () => {
 					periodEnd: new Date("2024-03-01"),
 				}),
 			).rejects.toThrow("Credit balance not found for organization");
+		});
+	});
+
+	describe("findBalancesNeedingUsageReport", () => {
+		it("should find balances with overage that need reporting", async () => {
+			const mockBalances = [
+				{
+					id: "balance-1",
+					organizationId: "org-1",
+					overage: 50,
+					stripeUsageReported: false,
+					periodEnd: new Date("2024-01-31"),
+					organization: {
+						id: "org-1",
+						purchases: [
+							{ id: "purchase-1", subscriptionId: "sub_123" },
+						],
+					},
+				},
+			];
+			mockDb.creditBalance.findMany.mockResolvedValue(mockBalances);
+
+			const result = await findBalancesNeedingUsageReport();
+
+			expect(result).toEqual(mockBalances);
+			expect(mockDb.creditBalance.findMany).toHaveBeenCalledWith({
+				where: {
+					periodEnd: { lte: expect.any(Date) },
+					overage: { gt: 0 },
+					stripeUsageReported: false,
+				},
+				include: {
+					organization: {
+						select: {
+							id: true,
+							purchases: {
+								where: {
+									type: "SUBSCRIPTION",
+									subscriptionId: { not: null },
+								},
+								select: {
+									id: true,
+									subscriptionId: true,
+								},
+							},
+						},
+					},
+				},
+			});
+		});
+
+		it("should return empty array when no balances need reporting", async () => {
+			mockDb.creditBalance.findMany.mockResolvedValue([]);
+
+			const result = await findBalancesNeedingUsageReport();
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe("markUsageReported", () => {
+		it("should mark balance as reported", async () => {
+			mockDb.creditBalance.update.mockResolvedValue({
+				id: "balance-1",
+				stripeUsageReported: true,
+			});
+
+			await markUsageReported("balance-1");
+
+			expect(mockDb.creditBalance.update).toHaveBeenCalledWith({
+				where: { id: "balance-1" },
+				data: { stripeUsageReported: true },
+			});
 		});
 	});
 });

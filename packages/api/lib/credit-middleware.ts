@@ -1,4 +1,4 @@
-import { getToolCreditCost } from "config";
+import { getToolCreditCost } from "@repo/config";
 import type { Context, Next } from "hono";
 import { deductCredits, hasCredits } from "./credits";
 import { rateLimitMiddleware } from "./rate-limit-middleware";

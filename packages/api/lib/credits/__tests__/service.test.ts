@@ -29,11 +29,11 @@ vi.mock("../queries", () => ({
 }));
 
 // Mock the config module
-vi.mock("config", () => ({
+vi.mock("@repo/config", () => ({
 	getPlanCredits: vi.fn(),
 }));
 
-import { getPlanCredits } from "config";
+import { getPlanCredits } from "@repo/config";
 import * as queries from "../queries";
 
 const mockFindCreditBalanceByOrgId =
