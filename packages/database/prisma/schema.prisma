@@ -1,398 +1,496 @@
-datasource db {
-    provider  = "postgresql"
-    url       = env("POSTGRES_PRISMA_URL")
-    directUrl = env("POSTGRES_URL_NON_POOLING")
-    schemas   = ["public", "pgboss"]
-}
-
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["multiSchema"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 generator zod {
-    provider = "prisma-zod-generator"
-    output   = "./zod"
-    config   = "./zod-generator.config.json"
+  provider = "prisma-zod-generator"
+  output   = "./zod"
+  config   = "./zod-generator.config.json"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+  schemas   = ["pgboss", "public"]
 }
 
 model User {
-    id                 String         @id @default(cuid())
-    name               String
-    email              String
-    emailVerified      Boolean
-    image              String?
-    createdAt          DateTime
-    updatedAt          DateTime
-    username           String?
-    role               String?
-    banned             Boolean?
-    banReason          String?
-    banExpires         DateTime?
-    onboardingComplete Boolean        @default(false)
-    paymentsCustomerId String?
-    locale             String?
-    twoFactorEnabled   Boolean?
-    sessions           Session[]
-    accounts           Account[]
-    passkeys           Passkey[]
-    invitations        Invitation[]
-    purchases          Purchase[]
-    members            Member[]
-    twofactors         TwoFactor[]
-    aiChats            AiChat[]
-    toolJobs           ToolJob[]
+  id                 String       @id @default(cuid())
+  name               String
+  email              String       @unique
+  emailVerified      Boolean
+  image              String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  username           String?      @unique
+  role               String?
+  banned             Boolean?
+  banReason          String?
+  banExpires         DateTime?
+  onboardingComplete Boolean      @default(false)
+  paymentsCustomerId String?
+  locale             String?
+  twoFactorEnabled   Boolean?
+  accounts           Account[]
+  aiChats            AiChat[]
+  invitations        Invitation[]
+  members            Member[]
+  passkeys           Passkey[]
+  purchases          Purchase[]
+  sessions           Session[]
+  toolJobs           ToolJob[]
+  twofactors         TwoFactor[]
 
-    @@unique([email])
-    @@unique([username])
-    @@map("user")
-    @@schema("public")
+  @@map("user")
+  @@schema("public")
 }
 
 model Session {
-    id        String   @id @default(cuid())
-    expiresAt DateTime
-    ipAddress String?
-    userAgent String?
-    userId    String
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  impersonatedBy       String?
+  activeOrganizationId String?
+  token                String   @unique
+  createdAt            DateTime
+  updatedAt            DateTime
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    impersonatedBy String?
-
-    activeOrganizationId String?
-
-    token     String
-    createdAt DateTime
-    updatedAt DateTime
-
-    @@unique([token])
-    @@map("session")
-    @@schema("public")
+  @@map("session")
+  @@schema("public")
 }
 
 model Account {
-    id           String    @id @default(cuid())
-    accountId    String
-    providerId   String
-    userId       String
-    user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    accessToken  String?   @db.Text
-    refreshToken String?   @db.Text
-    idToken      String?   @db.Text
-    expiresAt    DateTime?
-    password     String?
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  expiresAt             DateTime?
+  password              String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    accessTokenExpiresAt  DateTime?
-    refreshTokenExpiresAt DateTime?
-    scope                 String?
-    createdAt             DateTime
-    updatedAt             DateTime
-
-    @@map("account")
-    @@schema("public")
+  @@map("account")
+  @@schema("public")
 }
 
 model Verification {
-    id         String   @id @default(cuid())
-    identifier String
-    value      String   @db.Text
-    expiresAt  DateTime
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-
-    @@map("verification")
-    @@schema("public")
+  @@map("verification")
+  @@schema("public")
 }
 
 model Passkey {
-    id           String    @id @default(cuid())
-    name         String?
-    publicKey    String
-    userId       String
-    user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    credentialID String
-    counter      Int
-    deviceType   String
-    backedUp     Boolean
-    transports   String?
-    createdAt    DateTime?
+  id           String    @id @default(cuid())
+  name         String?
+  publicKey    String
+  userId       String
+  credentialID String
+  counter      Int
+  deviceType   String
+  backedUp     Boolean
+  transports   String?
+  createdAt    DateTime?
+  aaguid       String?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("passkey")
-    @@schema("public")
+  @@map("passkey")
+  @@schema("public")
 }
 
 model TwoFactor {
-    id          String @id @default(cuid())
-    secret      String
-    backupCodes String
-    userId      String
-    user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String @id @default(cuid())
+  secret      String
+  backupCodes String
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("twoFactor")
-    @@schema("public")
+  @@map("twoFactor")
+  @@schema("public")
 }
 
 model Organization {
-    id                 String         @id @default(cuid())
-    name               String
-    slug               String?
-    logo               String?
-    createdAt          DateTime
-    metadata           String?
-    paymentsCustomerId String?
-    members            Member[]
-    invitations        Invitation[]
-    purchases          Purchase[]
-    aiChats            AiChat[]
-    creditBalance      CreditBalance?
+  id                 String         @id @default(cuid())
+  name               String
+  slug               String?        @unique
+  logo               String?
+  createdAt          DateTime
+  metadata           String?
+  paymentsCustomerId String?
+  aiChats            AiChat[]
+  creditBalance      CreditBalance?
+  invitations        Invitation[]
+  members            Member[]
+  purchases          Purchase[]
 
-    @@unique([slug])
-    @@map("organization")
-    @@schema("public")
+  @@map("organization")
+  @@schema("public")
 }
 
 model Member {
-    id             String       @id @default(cuid())
-    organizationId String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    userId         String
-    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    role           String
-    createdAt      DateTime
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  role           String
+  createdAt      DateTime
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([organizationId, userId])
-    @@map("member")
-    @@schema("public")
+  @@unique([organizationId, userId])
+  @@map("member")
+  @@schema("public")
 }
 
 model Invitation {
-    id             String       @id @default(cuid())
-    organizationId String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    email          String
-    role           String?
-    status         String
-    expiresAt      DateTime
-    inviterId      String
-    user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-    @@map("invitation")
-    @@schema("public")
-}
-
-enum PurchaseType {
-    SUBSCRIPTION
-    ONE_TIME
-
-    @@schema("public")
+  @@map("invitation")
+  @@schema("public")
 }
 
 model Purchase {
-    id             String        @id @default(cuid())
-    organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId String?
-    user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId         String?
-    type           PurchaseType
-    customerId     String
-    subscriptionId String?       @unique
-    productId      String
-    status         String?
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  type           PurchaseType
+  customerId     String
+  subscriptionId String?       @unique
+  productId      String
+  status         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([subscriptionId])
-    @@map("purchase")
-    @@schema("public")
+  @@index([subscriptionId])
+  @@map("purchase")
+  @@schema("public")
 }
 
 model AiChat {
-    id             String        @id @default(cuid())
-    organizationId String?
-    organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    userId         String?
-    user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    title          String?
-    /// [ChatMessages]
-    messages       Json          @default("[]")
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  title          String?
+  /// [ChatMessages]
+  messages       Json          @default("[]")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("ai_chat")
-    @@schema("public")
-}
-
-enum ToolJobStatus {
-    PENDING
-    PROCESSING
-    COMPLETED
-    FAILED
-    CANCELLED
-
-    @@schema("public")
+  @@map("ai_chat")
+  @@schema("public")
 }
 
 model ToolJob {
-    id          String        @id @default(cuid())
-    toolSlug    String
-    status      ToolJobStatus @default(PENDING)
-    priority    Int           @default(0)
+  id          String        @id @default(cuid())
+  toolSlug    String
+  status      ToolJobStatus @default(PENDING)
+  priority    Int           @default(0)
+  input       Json
+  output      Json?
+  error       String?
+  userId      String?
+  sessionId   String?
+  attempts    Int           @default(0)
+  maxAttempts Int           @default(3)
+  startedAt   DateTime?
+  completedAt DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  pgBossJobId String?       @unique
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    // Input/Output
-    input       Json          // Tool-specific input data
-    output      Json?         // Tool-specific output data
-    error       String?       // Error message if failed
-
-    // Ownership
-    userId      String?
-    user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    sessionId   String?       // For anonymous users
-
-    // pg-boss integration
-    pgBossJobId String?       @unique // Links to pg-boss job ID (UUID)
-
-    // Tracking
-    attempts    Int           @default(0)
-    maxAttempts Int           @default(3)
-    startedAt   DateTime?
-    completedAt DateTime?
-    expiresAt   DateTime      // Cleanup after this time
-
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
-
-    @@index([status, priority])
-    @@index([toolSlug, status])
-    @@index([userId])
-    @@index([sessionId])
-    @@index([expiresAt])
-    @@map("tool_job")
-    @@schema("public")
+  @@index([status, priority])
+  @@index([toolSlug, status])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("tool_job")
+  @@schema("public")
 }
 
 model RateLimitEntry {
-    id          String   @id @default(cuid())
-    identifier  String   // 'anon:sessionId:ip' or 'user:userId' or 'org:orgId'
-    toolSlug    String
-    windowStart DateTime
-    windowEnd   DateTime
-    count       Int      @default(0)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(cuid())
+  identifier  String
+  toolSlug    String
+  windowStart DateTime
+  windowEnd   DateTime
+  count       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    @@unique([identifier, toolSlug, windowStart])
-    @@index([identifier, toolSlug])
-    @@index([windowEnd])
-    @@map("rate_limit_entry")
-    @@schema("public")
-}
-
-// Audit logging for compliance and security tracking
-enum AuditAction {
-    CREATE
-    READ
-    UPDATE
-    DELETE
-    LOGIN
-    LOGOUT
-    PASSWORD_CHANGE
-    MFA_SETUP
-    MFA_DISABLE
-    IMPERSONATE
-    INVITE
-    EXPORT
-    SUBSCRIPTION_CHANGE
-    PAYMENT
-
-    @@schema("public")
-}
-
-model AuditLog {
-    id             String      @id @default(cuid())
-    createdAt      DateTime    @default(now())
-
-    // Actor information
-    userId         String?     // Nullable for anonymous/system actions
-    organizationId String?     // Nullable for personal actions
-
-    // Action details
-    action         AuditAction
-    resource       String      // e.g., "user", "organization", "subscription", "member"
-    resourceId     String?     // ID of the affected resource
-
-    // Request context
-    ipAddress      String?
-    userAgent      String?
-    sessionId      String?     // Reference to session for traceability
-
-    // Result and metadata
-    success        Boolean     @default(true)
-    metadata       Json?       // Additional context (e.g., changed fields, error details)
-
-    // Retention management
-    expiresAt      DateTime?   // For retention policy cleanup
-
-    @@index([userId])
-    @@index([organizationId])
-    @@index([action])
-    @@index([resource])
-    @@index([createdAt])
-    @@index([expiresAt])
-    @@index([userId, createdAt])
-    @@index([organizationId, createdAt])
-    @@map("audit_log")
-    @@schema("public")
-}
-
-// Credit system for tracking usage-based billing
-enum CreditTransactionType {
-    GRANT      // Initial subscription allocation
-    USAGE      // Normal credit consumption
-    OVERAGE    // Usage beyond included credits
-    REFUND     // Credit returned (failed job)
-    PURCHASE   // One-time credit pack purchase
-    ADJUSTMENT // Admin adjustment
-
-    @@schema("public")
+  @@unique([identifier, toolSlug, windowStart])
+  @@index([identifier, toolSlug])
+  @@index([windowEnd])
+  @@map("rate_limit_entry")
+  @@schema("public")
 }
 
 model CreditBalance {
-    id               String   @id @default(cuid())
-    organizationId   String   @unique
-    periodStart      DateTime
-    periodEnd        DateTime
-    included         Int // Credits from subscription
-    used             Int      @default(0)
-    overage          Int      @default(0)
-    purchasedCredits Int      @default(0) // From credit packs
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String              @id @default(cuid())
+  organizationId   String              @unique
+  periodStart      DateTime
+  periodEnd        DateTime
+  included         Int
+  used             Int                 @default(0)
+  overage          Int                 @default(0)
+  purchasedCredits Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions     CreditTransaction[]
 
-    organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    transactions CreditTransaction[]
-
-    @@index([organizationId])
-    @@index([periodEnd])
-    @@map("credit_balance")
-    @@schema("public")
+  @@index([organizationId])
+  @@index([periodEnd])
+  @@map("credit_balance")
+  @@schema("public")
 }
 
 model CreditTransaction {
-    id          String                @id @default(cuid())
-    balanceId   String
-    amount      Int // Negative for usage, positive for grants
-    type        CreditTransactionType
-    toolSlug    String? // Which tool consumed credits
-    jobId       String? // Reference to ToolJob
-    description String?
-    createdAt   DateTime              @default(now())
+  id          String                @id @default(cuid())
+  balanceId   String
+  amount      Int
+  type        CreditTransactionType
+  toolSlug    String?
+  jobId       String?
+  description String?
+  createdAt   DateTime              @default(now())
+  balance     CreditBalance         @relation(fields: [balanceId], references: [id], onDelete: Cascade)
 
-    balance CreditBalance @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  @@index([balanceId])
+  @@index([toolSlug])
+  @@index([createdAt])
+  @@map("credit_transaction")
+  @@schema("public")
+}
 
-    @@index([balanceId])
-    @@index([toolSlug])
-    @@index([createdAt])
-    @@map("credit_transaction")
-    @@schema("public")
+// Audit logging for compliance and security tracking
+model AuditLog {
+  id             String      @id @default(cuid())
+  createdAt      DateTime    @default(now())
+
+  // Actor information
+  userId         String?     // Nullable for anonymous/system actions
+  organizationId String?     // Nullable for personal actions
+
+  // Action details
+  action         AuditAction
+  resource       String      // e.g., "user", "organization", "subscription", "member"
+  resourceId     String?     // ID of the affected resource
+
+  // Request context
+  ipAddress      String?
+  userAgent      String?
+  sessionId      String?
+
+  // Result
+  success        Boolean     @default(true)
+  metadata       Json?       // Additional context (changes made, error details, etc.)
+
+  // Retention
+  expiresAt      DateTime?   // Optional expiry for automatic cleanup
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@index([userId, createdAt])
+  @@index([organizationId, createdAt])
+  @@map("audit_log")
+  @@schema("public")
+}
+
+model archive {
+  id            String                  @db.Uuid
+  name          String
+  priority      Int
+  data          Json?
+  state         job_state
+  retry_limit   Int
+  retry_count   Int
+  retry_delay   Int
+  retry_backoff Boolean
+  start_after   DateTime                @db.Timestamptz(6)
+  started_on    DateTime?               @db.Timestamptz(6)
+  singleton_key String?
+  singleton_on  DateTime?               @db.Timestamp(6)
+  expire_in     Unsupported("interval")
+  created_on    DateTime                @db.Timestamptz(6)
+  completed_on  DateTime?               @db.Timestamptz(6)
+  keep_until    DateTime                @db.Timestamptz(6)
+  output        Json?
+  dead_letter   String?
+  policy        String?
+  archived_on   DateTime                @default(now()) @db.Timestamptz(6)
+
+  @@id([name, id])
+  @@index([archived_on], map: "archive_i1")
+  @@schema("pgboss")
+}
+
+model job {
+  id            String                  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  priority      Int                     @default(0)
+  data          Json?
+  state         job_state               @default(created)
+  retry_limit   Int                     @default(2)
+  retry_count   Int                     @default(0)
+  retry_delay   Int                     @default(0)
+  retry_backoff Boolean                 @default(false)
+  start_after   DateTime                @default(now()) @db.Timestamptz(6)
+  started_on    DateTime?               @db.Timestamptz(6)
+  singleton_key String?
+  singleton_on  DateTime?               @db.Timestamp(6)
+  expire_in     Unsupported("interval") @default(dbgenerated("'00:15:00'::interval"))
+  created_on    DateTime                @default(now()) @db.Timestamptz(6)
+  completed_on  DateTime?               @db.Timestamptz(6)
+  keep_until    DateTime                @default(dbgenerated("(now() + '14 days'::interval)")) @db.Timestamptz(6)
+  output        Json?
+  dead_letter   String?
+  policy        String?
+
+  @@unique([name, id], map: "job_pkey")
+  @@schema("pgboss")
+}
+
+model queue {
+  name              String         @id
+  policy            String?
+  retry_limit       Int?
+  retry_delay       Int?
+  retry_backoff     Boolean?
+  expire_seconds    Int?
+  retention_minutes Int?
+  dead_letter       String?
+  partition_name    String?
+  created_on        DateTime       @default(now()) @db.Timestamptz(6)
+  updated_on        DateTime       @default(now()) @db.Timestamptz(6)
+  queue             queue?         @relation("queueToqueue", fields: [dead_letter], references: [name], onDelete: NoAction, onUpdate: NoAction)
+  other_queue       queue[]        @relation("queueToqueue")
+  schedule          schedule?
+  subscription      subscription[]
+
+  @@schema("pgboss")
+}
+
+model schedule {
+  name       String   @id
+  cron       String
+  timezone   String?
+  data       Json?
+  options    Json?
+  created_on DateTime @default(now()) @db.Timestamptz(6)
+  updated_on DateTime @default(now()) @db.Timestamptz(6)
+  queue      queue    @relation(fields: [name], references: [name], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("pgboss")
+}
+
+model subscription {
+  event      String
+  name       String
+  created_on DateTime @default(now()) @db.Timestamptz(6)
+  updated_on DateTime @default(now()) @db.Timestamptz(6)
+  queue      queue    @relation(fields: [name], references: [name], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([event, name])
+  @@schema("pgboss")
+}
+
+model version {
+  version       Int       @id
+  maintained_on DateTime? @db.Timestamptz(6)
+  cron_on       DateTime? @db.Timestamptz(6)
+  monitored_on  DateTime? @db.Timestamptz(6)
+
+  @@schema("pgboss")
+}
+
+enum PurchaseType {
+  SUBSCRIPTION
+  ONE_TIME
+
+  @@schema("public")
+}
+
+enum ToolJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+
+  @@schema("public")
+}
+
+enum CreditTransactionType {
+  GRANT
+  USAGE
+  OVERAGE
+  REFUND
+  PURCHASE
+  ADJUSTMENT
+
+  @@schema("public")
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  MFA_SETUP
+  MFA_DISABLE
+  IMPERSONATE
+  INVITE
+  EXPORT
+  SUBSCRIPTION_CHANGE
+  PAYMENT
+
+  @@schema("public")
+}
+
+enum job_state {
+  created
+  retry
+  active
+  completed
+  cancelled
+  failed
+
+  @@schema("pgboss")
 }
