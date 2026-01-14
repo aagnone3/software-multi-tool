@@ -1,10 +1,4 @@
 // Service functions
-
-// Query functions for Stripe usage reporting
-export {
-	findBalancesNeedingUsageReport,
-	markUsageReported,
-} from "./queries";
 export {
 	deductCredits,
 	getCreditStatus,

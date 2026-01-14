@@ -225,65 +225,6 @@ export async function executeAtomicGrant(params: {
 }
 
 /**
- * Find credit balances that need Stripe usage reporting.
- *
- * Returns balances where:
- * 1. Period has ended (periodEnd <= now)
- * 2. Has overage > 0
- * 3. Has not been reported yet (stripeUsageReported = false)
- *
- * Includes organization and purchase data needed for Stripe reporting.
- */
-export async function findBalancesNeedingUsageReport(): Promise<
-	Array<
-		CreditBalance & {
-			organization: {
-				id: string;
-				purchases: Array<{
-					id: string;
-					subscriptionId: string | null;
-				}>;
-			};
-		}
-	>
-> {
-	return db.creditBalance.findMany({
-		where: {
-			periodEnd: { lte: new Date() },
-			overage: { gt: 0 },
-			stripeUsageReported: false,
-		},
-		include: {
-			organization: {
-				select: {
-					id: true,
-					purchases: {
-						where: {
-							type: "SUBSCRIPTION",
-							subscriptionId: { not: null },
-						},
-						select: {
-							id: true,
-							subscriptionId: true,
-						},
-					},
-				},
-			},
-		},
-	});
-}
-
-/**
- * Mark a credit balance as having reported usage to Stripe
- */
-export async function markUsageReported(balanceId: string): Promise<void> {
-	await db.creditBalance.update({
-		where: { id: balanceId },
-		data: { stripeUsageReported: true },
-	});
-}
-
-/**
  * Execute an atomic billing period reset
  */
 export async function executeAtomicReset(params: {

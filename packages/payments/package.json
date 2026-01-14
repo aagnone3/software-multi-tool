@@ -26,8 +26,7 @@
 			"default": "./index.ts"
 		},
 		"./types": "./types.ts",
-		"./lib/helper": "./src/lib/helper.ts",
-		"./provider/stripe/usage": "./provider/stripe/usage.ts"
+		"./lib/helper": "./src/lib/helper.ts"
 	},
 	"name": "@repo/payments",
 	"scripts": {
