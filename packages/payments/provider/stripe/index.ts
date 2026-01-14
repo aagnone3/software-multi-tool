@@ -1,4 +1,4 @@
-import { getPlanCredits, getPlanIdFromPriceId } from "@repo/config";
+import { getPlanCredits } from "@repo/config";
 import {
 	adjustCreditsForPlanChange,
 	createPurchase,
@@ -12,6 +12,7 @@ import {
 import { logger } from "@repo/logs";
 import Stripe from "stripe";
 import { setCustomerIdToEntity } from "../../src/lib/customer";
+import { getPlanIdFromPriceId } from "../../src/lib/helper";
 import type {
 	CancelSubscription,
 	CreateCheckoutLink,

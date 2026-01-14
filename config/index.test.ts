@@ -1,10 +1,5 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import {
-	config,
-	getPlanCredits,
-	getPlanIdFromPriceId,
-	getToolCreditCost,
-} from "./index";
+import { config, getPlanCredits, getToolCreditCost } from "./index";
 
 describe("config", () => {
 	const originalEnv = { ...process.env };
@@ -71,44 +66,6 @@ describe("plan credits configuration", () => {
 	it("returns undefined for non-existent plan", () => {
 		const credits = getPlanCredits("nonexistent");
 		expect(credits).toBeUndefined();
-	});
-});
-
-describe("getPlanIdFromPriceId", () => {
-	it("returns plan ID for pro monthly price", () => {
-		const proPriceId = process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY;
-		if (proPriceId) {
-			expect(getPlanIdFromPriceId(proPriceId)).toBe("pro");
-		}
-	});
-
-	it("returns plan ID for pro yearly price", () => {
-		const proPriceId = process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY;
-		if (proPriceId) {
-			expect(getPlanIdFromPriceId(proPriceId)).toBe("pro");
-		}
-	});
-
-	it("returns plan ID for lifetime price", () => {
-		const lifetimePriceId = process.env.NEXT_PUBLIC_PRICE_ID_LIFETIME;
-		if (lifetimePriceId) {
-			expect(getPlanIdFromPriceId(lifetimePriceId)).toBe("lifetime");
-		}
-	});
-
-	it("returns undefined for unknown price ID", () => {
-		expect(getPlanIdFromPriceId("price_unknown_123")).toBeUndefined();
-	});
-
-	it("returns undefined for empty string", () => {
-		expect(getPlanIdFromPriceId("")).toBeUndefined();
-	});
-
-	it("does not match plans without prices (free, enterprise)", () => {
-		// Free and enterprise plans don't have price IDs
-		// This test ensures they don't cause errors
-		expect(getPlanIdFromPriceId("free")).toBeUndefined();
-		expect(getPlanIdFromPriceId("enterprise")).toBeUndefined();
 	});
 });
 

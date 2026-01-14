@@ -17,9 +17,7 @@ const WORKSPACE_THRESHOLDS: Record<string, CoverageThresholds> = {
 	},
 	config: {
 		statements: 90,
-		// Branch coverage lowered to 80% because getPlanIdFromPriceId's "match found"
-		// branch cannot be tested in CI without Stripe price ID env vars
-		branches: 80,
+		branches: 90,
 	},
 	"packages/ai": {
 		statements: 90,

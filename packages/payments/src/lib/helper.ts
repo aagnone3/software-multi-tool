@@ -63,6 +63,33 @@ function getActivePlanFromPurchases(purchases?: PurchaseWithoutTimestamps[]) {
 		: null;
 }
 
+/**
+ * Get the plan ID for a given Stripe price ID.
+ * Searches through all plans to find which one contains the given price ID.
+ *
+ * @param priceId - The Stripe price ID (e.g., 'price_xxx')
+ * @returns The plan ID (e.g., 'pro', 'lifetime') or undefined if not found
+ */
+export function getPlanIdFromPriceId(priceId: string): string | undefined {
+	// Early return for empty or invalid price IDs
+	if (!priceId) {
+		return undefined;
+	}
+
+	for (const [planId, plan] of Object.entries(plans)) {
+		if (plan.prices) {
+			const hasPrice = plan.prices.some(
+				(price) => price.productId && price.productId === priceId,
+			);
+			if (hasPrice) {
+				return planId;
+			}
+		}
+	}
+
+	return undefined;
+}
+
 export function createPurchasesHelper(purchases: PurchaseWithoutTimestamps[]) {
 	const activePlan = getActivePlanFromPurchases(purchases);
 
