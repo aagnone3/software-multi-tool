@@ -296,4 +296,28 @@ export function getToolCreditCost(toolSlug: string): number | undefined {
 	return tool?.creditCost;
 }
 
+/**
+ * Get the plan ID for a given Stripe price ID.
+ * Searches through all plans to find which one contains the given price ID.
+ *
+ * @param priceId - The Stripe price ID (e.g., 'price_xxx')
+ * @returns The plan ID (e.g., 'pro', 'lifetime') or undefined if not found
+ */
+export function getPlanIdFromPriceId(priceId: string): string | undefined {
+	const plans = config.payments.plans;
+
+	for (const [planId, plan] of Object.entries(plans)) {
+		if ("prices" in plan && plan.prices) {
+			const hasPrice = plan.prices.some(
+				(price: { productId: string }) => price.productId === priceId,
+			);
+			if (hasPrice) {
+				return planId;
+			}
+		}
+	}
+
+	return undefined;
+}
+
 export type { Config, PlanCredits };
