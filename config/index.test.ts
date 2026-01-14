@@ -30,38 +30,37 @@ describe("config", () => {
 });
 
 describe("plan credits configuration", () => {
-	it("all plans have credit configuration", () => {
+	it("all plans have credit configuration with included credits", () => {
 		const planIds = Object.keys(config.payments.plans);
 		for (const planId of planIds) {
 			const credits = getPlanCredits(planId);
 			expect(credits).toBeDefined();
 			expect(credits?.included).toBeGreaterThanOrEqual(0);
-			expect(typeof credits?.allowOverage).toBe("boolean");
 		}
 	});
 
-	it("free plan has no overage allowed", () => {
+	it("free plan includes 10 credits", () => {
 		const freeCredits = getPlanCredits("free");
 		expect(freeCredits).toBeDefined();
 		expect(freeCredits?.included).toBe(10);
-		expect(freeCredits?.allowOverage).toBe(false);
-		expect(freeCredits?.overageRate).toBeUndefined();
 	});
 
-	it("pro plan allows overage with rate", () => {
+	it("pro plan includes 500 credits", () => {
 		const proCredits = getPlanCredits("pro");
 		expect(proCredits).toBeDefined();
 		expect(proCredits?.included).toBe(500);
-		expect(proCredits?.allowOverage).toBe(true);
-		expect(proCredits?.overageRate).toBe(0.02);
 	});
 
-	it("enterprise plan has volume discount on overage", () => {
+	it("lifetime plan includes 1000 credits", () => {
+		const lifetimeCredits = getPlanCredits("lifetime");
+		expect(lifetimeCredits).toBeDefined();
+		expect(lifetimeCredits?.included).toBe(1000);
+	});
+
+	it("enterprise plan includes 5000 credits", () => {
 		const enterpriseCredits = getPlanCredits("enterprise");
 		expect(enterpriseCredits).toBeDefined();
 		expect(enterpriseCredits?.included).toBe(5000);
-		expect(enterpriseCredits?.allowOverage).toBe(true);
-		expect(enterpriseCredits?.overageRate).toBe(0.015);
 	});
 
 	it("returns undefined for non-existent plan", () => {

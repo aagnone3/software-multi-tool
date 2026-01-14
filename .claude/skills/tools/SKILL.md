@@ -59,6 +59,8 @@ interface ToolConfig {
   icon: string;           // Lucide icon name (e.g., "image-minus")
   public: boolean;        // Whether accessible without authentication
   enabled: boolean;       // Whether currently active
+  creditCost: number;     // Credits consumed per use
+  creditUnit?: CreditUnit; // Unit for variable-cost tools ("request" | "minute" | "page")
 }
 ```
 
@@ -259,11 +261,72 @@ export default function PdfConverterPage() {
 - **better-auth**: User authentication for private tools
 - **analytics**: Event tracking for tool usage
 
+## Credit System
+
+Tools consume credits when used. The credit system uses a **credit pack model** (no overage billing).
+
+### Design Decision: Credit Packs Only
+
+We chose credit packs over overage billing because:
+
+- **Predictable costs**: Users never get surprise bills
+- **Clear value proposition**: Credit packs have tangible value
+- **Industry standard**: Common pattern in AI tools (Midjourney, stock photos, etc.)
+- **Simpler UX**: No complex billing explanations needed
+
+### How It Works
+
+1. **Plans include credits**: Each subscription plan includes a set number of credits per billing period
+2. **Tools consume credits**: Each tool use deducts credits based on `creditCost`
+3. **Credit packs for more**: When credits run out, users purchase additional credit packs
+4. **No automatic charges**: Service pauses when credits are exhausted (no overage)
+
+### Credit Costs by Tool
+
+| Tool                 | Credits | Unit         |
+| -------------------- | ------- | ------------ |
+| Background Remover   | 1       | per image    |
+| Speaker Diarization  | 2       | per minute   |
+| News Analyzer        | 1       | per article  |
+| Invoice Processor    | 3       | per document |
+| Contract Analyzer    | 5       | per page     |
+| Feedback Analyzer    | 1       | per analysis |
+| Expense Categorizer  | 1       | per expense  |
+| Meeting Summarizer   | 2       | per summary  |
+
+### Helper Functions
+
+```typescript
+import { getPlanCredits, getToolCreditCost } from "@repo/config";
+
+// Get credits included in a plan
+const proCredits = getPlanCredits("pro"); // { included: 500 }
+
+// Get credit cost for a tool
+const cost = getToolCreditCost("bg-remover"); // 1
+```
+
+### Adding Credit Cost to New Tools
+
+When adding a new tool, always specify `creditCost`:
+
+```typescript
+{
+  slug: "my-new-tool",
+  name: "My New Tool",
+  description: "What this tool does",
+  icon: "wrench",
+  public: true,
+  enabled: true,
+  creditCost: 2,  // Required: credits per use
+  creditUnit: "page",  // Optional: for variable-cost tools
+}
+```
+
 ## Future Considerations
 
-These features are planned but out of scope for the initial implementation:
+These features are planned but not yet implemented:
 
 - Rate limiting infrastructure
 - Async job queue for long-running operations
-- Credit/consumption system
-- Plan-based access control
+- Plan-based access control (restrict tools by plan tier)

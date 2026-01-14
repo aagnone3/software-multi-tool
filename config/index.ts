@@ -221,15 +221,12 @@ export const config = {
 				isFree: true,
 				credits: {
 					included: 10,
-					allowOverage: false,
 				},
 			},
 			pro: {
 				recommended: true,
 				credits: {
 					included: 500,
-					allowOverage: true,
-					overageRate: 0.02, // $0.02 per credit
 				},
 				prices: [
 					{
@@ -257,8 +254,6 @@ export const config = {
 			lifetime: {
 				credits: {
 					included: 1000,
-					allowOverage: true,
-					overageRate: 0.02, // $0.02 per credit
 				},
 				prices: [
 					{
@@ -274,8 +269,6 @@ export const config = {
 				isEnterprise: true,
 				credits: {
 					included: 5000,
-					allowOverage: true,
-					overageRate: 0.015, // $0.015 per credit (volume discount)
 				},
 			},
 		},

@@ -5,13 +5,20 @@ export interface RateLimitConfig {
 	window: string;
 }
 
+/**
+ * Credit allocation for a subscription plan.
+ *
+ * Credits are consumed when using tools. When credits run out, users must
+ * purchase additional credit packs to continue using paid tools.
+ *
+ * Design Decision: Credit packs only, no overage billing.
+ * - Users have predictable costs (no surprise bills)
+ * - Clear value proposition for credit pack purchases
+ * - Common pattern in AI tools (Midjourney, stock photos, etc.)
+ */
 export interface PlanCredits {
-	/** Number of credits included in the plan */
+	/** Number of credits included in the plan per billing period */
 	included: number;
-	/** Whether the plan allows overage usage beyond included credits */
-	allowOverage: boolean;
-	/** Cost per credit when using overage (e.g., 0.02 = $0.02 per credit) */
-	overageRate?: number;
 }
 
 /** Unit of measurement for credit costs on variable-cost tools */
