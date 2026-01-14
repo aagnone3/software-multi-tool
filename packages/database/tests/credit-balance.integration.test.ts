@@ -8,7 +8,6 @@ const TEST_TIMEOUT = 30_000;
 
 describe.sequential("CreditBalance and CreditTransaction models (integration)", () => {
 	let harness: PostgresTestHarness | undefined;
-	let testUserId: string;
 	let testOrganizationId: string;
 
 	beforeAll(async () => {
@@ -20,19 +19,6 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 			throw new Error("Postgres test harness did not initialize.");
 		}
 		await harness.resetDatabase();
-
-		// Create a test user
-		const user = await harness.prisma.user.create({
-			data: {
-				id: "test-user-1",
-				name: "Test User",
-				email: "test@example.com",
-				emailVerified: true,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			},
-		});
-		testUserId = user.id;
 
 		// Create a test organization
 		const org = await harness.prisma.organization.create({
@@ -51,32 +37,6 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 	}, HOOK_TIMEOUT);
 
 	describe("CreditBalance", () => {
-		it(
-			"can create a credit balance for a user",
-			async () => {
-				if (!harness) {
-					throw new Error("Harness not initialized");
-				}
-
-				const balance = await harness.prisma.creditBalance.create({
-					data: {
-						userId: testUserId,
-						periodStart: new Date("2026-01-01"),
-						periodEnd: new Date("2026-01-31"),
-						included: 1000,
-					},
-				});
-
-				expect(balance).toBeDefined();
-				expect(balance.userId).toBe(testUserId);
-				expect(balance.included).toBe(1000);
-				expect(balance.used).toBe(0);
-				expect(balance.overage).toBe(0);
-				expect(balance.purchasedCredits).toBe(0);
-			},
-			TEST_TIMEOUT,
-		);
-
 		it(
 			"can create a credit balance for an organization",
 			async () => {
@@ -98,36 +58,8 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 				expect(balance.organizationId).toBe(testOrganizationId);
 				expect(balance.included).toBe(5000);
 				expect(balance.purchasedCredits).toBe(500);
-			},
-			TEST_TIMEOUT,
-		);
-
-		it(
-			"enforces unique constraint on userId",
-			async () => {
-				if (!harness) {
-					throw new Error("Harness not initialized");
-				}
-
-				await harness.prisma.creditBalance.create({
-					data: {
-						userId: testUserId,
-						periodStart: new Date("2026-01-01"),
-						periodEnd: new Date("2026-01-31"),
-						included: 1000,
-					},
-				});
-
-				await expect(
-					harness.prisma.creditBalance.create({
-						data: {
-							userId: testUserId,
-							periodStart: new Date("2026-02-01"),
-							periodEnd: new Date("2026-02-28"),
-							included: 1000,
-						},
-					}),
-				).rejects.toThrow();
+				expect(balance.used).toBe(0);
+				expect(balance.overage).toBe(0);
 			},
 			TEST_TIMEOUT,
 		);
@@ -163,7 +95,7 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 		);
 
 		it(
-			"cascades delete when user is deleted",
+			"cascades delete when organization is deleted",
 			async () => {
 				if (!harness) {
 					throw new Error("Harness not initialized");
@@ -171,15 +103,15 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 
 				const balance = await harness.prisma.creditBalance.create({
 					data: {
-						userId: testUserId,
+						organizationId: testOrganizationId,
 						periodStart: new Date("2026-01-01"),
 						periodEnd: new Date("2026-01-31"),
-						included: 1000,
+						included: 5000,
 					},
 				});
 
-				await harness.prisma.user.delete({
-					where: { id: testUserId },
+				await harness.prisma.organization.delete({
+					where: { id: testOrganizationId },
 				});
 
 				const deletedBalance =
@@ -193,7 +125,7 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 		);
 
 		it(
-			"can be queried by User relation",
+			"can be queried by Organization relation",
 			async () => {
 				if (!harness) {
 					throw new Error("Harness not initialized");
@@ -201,20 +133,21 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 
 				await harness.prisma.creditBalance.create({
 					data: {
-						userId: testUserId,
+						organizationId: testOrganizationId,
 						periodStart: new Date("2026-01-01"),
 						periodEnd: new Date("2026-01-31"),
-						included: 1000,
+						included: 5000,
 					},
 				});
 
-				const userWithBalance = await harness.prisma.user.findUnique({
-					where: { id: testUserId },
-					include: { creditBalance: true },
-				});
+				const orgWithBalance =
+					await harness.prisma.organization.findUnique({
+						where: { id: testOrganizationId },
+						include: { creditBalance: true },
+					});
 
-				expect(userWithBalance?.creditBalance).toBeDefined();
-				expect(userWithBalance?.creditBalance?.included).toBe(1000);
+				expect(orgWithBalance?.creditBalance).toBeDefined();
+				expect(orgWithBalance?.creditBalance?.included).toBe(5000);
 			},
 			TEST_TIMEOUT,
 		);
@@ -230,10 +163,10 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 
 			const balance = await harness.prisma.creditBalance.create({
 				data: {
-					userId: testUserId,
+					organizationId: testOrganizationId,
 					periodStart: new Date("2026-01-01"),
 					periodEnd: new Date("2026-01-31"),
-					included: 1000,
+					included: 5000,
 				},
 			});
 			testBalanceId = balance.id;
@@ -250,14 +183,14 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 					await harness.prisma.creditTransaction.create({
 						data: {
 							balanceId: testBalanceId,
-							amount: 1000,
+							amount: 5000,
 							type: "GRANT",
 							description: "Monthly subscription credits",
 						},
 					});
 
 				expect(transaction).toBeDefined();
-				expect(transaction.amount).toBe(1000);
+				expect(transaction.amount).toBe(5000);
 				expect(transaction.type).toBe("GRANT");
 			},
 			TEST_TIMEOUT,
@@ -366,7 +299,7 @@ describe.sequential("CreditBalance and CreditTransaction models (integration)", 
 					data: [
 						{
 							balanceId: testBalanceId,
-							amount: 1000,
+							amount: 5000,
 							type: "GRANT",
 						},
 						{

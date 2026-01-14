@@ -4,8 +4,7 @@ CREATE TYPE "public"."CreditTransactionType" AS ENUM ('GRANT', 'USAGE', 'OVERAGE
 -- CreateTable
 CREATE TABLE "public"."credit_balance" (
     "id" TEXT NOT NULL,
-    "userId" TEXT,
-    "organizationId" TEXT,
+    "organizationId" TEXT NOT NULL,
     "periodStart" TIMESTAMP(3) NOT NULL,
     "periodEnd" TIMESTAMP(3) NOT NULL,
     "included" INTEGER NOT NULL,
@@ -33,13 +32,7 @@ CREATE TABLE "public"."credit_transaction" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "credit_balance_userId_key" ON "public"."credit_balance"("userId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "credit_balance_organizationId_key" ON "public"."credit_balance"("organizationId");
-
--- CreateIndex
-CREATE INDEX "credit_balance_userId_idx" ON "public"."credit_balance"("userId");
 
 -- CreateIndex
 CREATE INDEX "credit_balance_organizationId_idx" ON "public"."credit_balance"("organizationId");
@@ -55,9 +48,6 @@ CREATE INDEX "credit_transaction_toolSlug_idx" ON "public"."credit_transaction"(
 
 -- CreateIndex
 CREATE INDEX "credit_transaction_createdAt_idx" ON "public"."credit_transaction"("createdAt");
-
--- AddForeignKey
-ALTER TABLE "public"."credit_balance" ADD CONSTRAINT "credit_balance_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."credit_balance" ADD CONSTRAINT "credit_balance_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "public"."organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;

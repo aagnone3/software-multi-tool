@@ -96,7 +96,7 @@ export type AuditLogScalarFieldEnumEnum = z.infer<typeof AuditLogScalarFieldEnum
 
 // File: CreditBalanceScalarFieldEnum.schema.ts
 
-export const CreditBalanceScalarFieldEnumSchema = z.enum(['id', 'userId', 'organizationId', 'periodStart', 'periodEnd', 'included', 'used', 'overage', 'purchasedCredits', 'createdAt', 'updatedAt'])
+export const CreditBalanceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'periodStart', 'periodEnd', 'included', 'used', 'overage', 'purchasedCredits', 'createdAt', 'updatedAt'])
 
 export type CreditBalanceScalarFieldEnumEnum = z.infer<typeof CreditBalanceScalarFieldEnumSchema>;
 
@@ -416,8 +416,7 @@ export type AuditLogType = z.infer<typeof AuditLogSchema>;
 
 export const CreditBalanceSchema = z.object({
   id: z.string(),
-  userId: z.string().nullish(),
-  organizationId: z.string().nullish(),
+  organizationId: z.string(),
   periodStart: z.date(),
   periodEnd: z.date(),
   included: z.number().int(),
