@@ -304,12 +304,18 @@ export function getToolCreditCost(toolSlug: string): number | undefined {
  * @returns The plan ID (e.g., 'pro', 'lifetime') or undefined if not found
  */
 export function getPlanIdFromPriceId(priceId: string): string | undefined {
+	// Early return for empty or invalid price IDs
+	if (!priceId) {
+		return undefined;
+	}
+
 	const plans = config.payments.plans;
 
 	for (const [planId, plan] of Object.entries(plans)) {
 		if ("prices" in plan && plan.prices) {
 			const hasPrice = plan.prices.some(
-				(price: { productId: string }) => price.productId === priceId,
+				(price: { productId: string }) =>
+					price.productId && price.productId === priceId,
 			);
 			if (hasPrice) {
 				return planId;
