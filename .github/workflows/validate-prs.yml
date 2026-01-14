@@ -117,8 +117,15 @@ jobs:
             --to-schema-datamodel prisma/schema.prisma \
             --script 2>&1) || true
 
-          # Check if there's any drift (non-empty output means drift exists)
-          if [ -n "$DRIFT" ] && [ "$DRIFT" != "-- This is an empty migration." ]; then
+          # Filter out Prisma upgrade notifications (they appear as box-drawing characters)
+          # Only keep lines that look like SQL or the empty migration message
+          DRIFT_CLEAN=$(echo "$DRIFT" | grep -v "^┌\|^│\|^└\|Update available\|pris.ly\|npm i" || true)
+
+          # Check if there's any drift (look for actual SQL statements beyond empty migration comment)
+          # An empty migration only has "-- This is an empty migration."
+          HAS_DRIFT=$(echo "$DRIFT_CLEAN" | grep -v "^--\|^$" | head -1 || true)
+
+          if [ -n "$HAS_DRIFT" ]; then
             echo "::error::Schema drift detected! The schema.prisma file differs from the migration history."
             echo ""
             echo "This typically happens when 'prisma db push' was used instead of 'prisma migrate dev'."
@@ -127,7 +134,7 @@ jobs:
             echo "  pnpm --filter @repo/database migrate dev --name <migration-name>"
             echo ""
             echo "Detected drift:"
-            echo "$DRIFT"
+            echo "$DRIFT_CLEAN"
             exit 1
           else
             echo "No schema drift detected. Schema matches migration history."
