@@ -30,6 +30,7 @@
 		"prisma:validate": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/validate-migration.mjs",
 		"prisma:stage": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/stage-migration.mjs",
 		"stripe:validate": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/stripe/validate-webhooks.mjs",
+		"stripe:test-credits": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/stripe/test-credit-webhooks.ts",
 		"supabase:validate-seed": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/supabase/validate-preview-seed.mjs",
 		"preview-sync": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/preview-sync/index.mjs",
 		"type-check": "tsc --noEmit",
