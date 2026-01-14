@@ -5,6 +5,18 @@ export interface RateLimitConfig {
 	window: string;
 }
 
+export interface PlanCredits {
+	/** Number of credits included in the plan */
+	included: number;
+	/** Whether the plan allows overage usage beyond included credits */
+	allowOverage: boolean;
+	/** Cost per credit when using overage (e.g., 0.02 = $0.02 per credit) */
+	overageRate?: number;
+}
+
+/** Unit of measurement for credit costs on variable-cost tools */
+export type CreditUnit = "request" | "minute" | "page";
+
 export interface ToolConfig {
 	slug: string;
 	name: string;
@@ -14,6 +26,10 @@ export interface ToolConfig {
 	public: boolean;
 	/** Whether the tool is currently enabled */
 	enabled: boolean;
+	/** Number of credits consumed per use of this tool */
+	creditCost: number;
+	/** Unit of measurement for variable-cost tools (default: "request") */
+	creditUnit?: CreditUnit;
 	/** Rate limit configuration for this tool */
 	rateLimits?: {
 		/** Rate limits for anonymous users */
@@ -85,6 +101,8 @@ export type Config = {
 				isFree?: boolean;
 				isEnterprise?: boolean;
 				recommended?: boolean;
+				/** Credit allocation for this plan */
+				credits?: PlanCredits;
 				prices?: Array<
 					{
 						productId: string;
