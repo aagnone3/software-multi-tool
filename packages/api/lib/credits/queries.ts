@@ -483,3 +483,74 @@ export async function executeAtomicReset(params: {
 		return updatedBalance;
 	});
 }
+
+/**
+ * Parameters for granting purchased credits
+ */
+export interface GrantPurchasedCreditsParams {
+	organizationId: string;
+	credits: number;
+	packId: string;
+	packName: string;
+	stripeSessionId: string;
+}
+
+/**
+ * Check if a credit pack purchase has already been processed (for idempotency)
+ */
+export async function findPurchaseTransaction(
+	stripeSessionId: string,
+): Promise<CreditTransaction | null> {
+	return db.creditTransaction.findFirst({
+		where: {
+			type: "PURCHASE",
+			description: {
+				contains: stripeSessionId,
+			},
+		},
+	});
+}
+
+/**
+ * Execute an atomic credit pack purchase grant.
+ * Adds credits to the organization's purchasedCredits balance.
+ */
+export async function executeAtomicPurchaseGrant(
+	params: GrantPurchasedCreditsParams,
+): Promise<CreditTransaction> {
+	const { organizationId, credits, packId, packName, stripeSessionId } =
+		params;
+
+	return db.$transaction(async (tx) => {
+		// Upsert the credit balance (in case org doesn't have one yet)
+		const now = new Date();
+		const periodEnd = new Date(now);
+		periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+		const balance = await tx.creditBalance.upsert({
+			where: { organizationId },
+			create: {
+				organization: { connect: { id: organizationId } },
+				included: 0,
+				used: 0,
+				overage: 0,
+				purchasedCredits: credits,
+				periodStart: now,
+				periodEnd,
+			},
+			update: {
+				purchasedCredits: { increment: credits },
+			},
+		});
+
+		// Create transaction record for the purchase
+		return tx.creditTransaction.create({
+			data: {
+				balance: { connect: { id: balance.id } },
+				amount: credits,
+				type: "PURCHASE",
+				description: `Credit pack purchase: ${packName} (${packId}) - ${credits} credits [session: ${stripeSessionId}]`,
+			},
+		});
+	});
+}

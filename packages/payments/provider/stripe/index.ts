@@ -1,4 +1,4 @@
-import { getPlanCredits } from "@repo/config";
+import { getCreditPackByPriceId, getPlanCredits } from "@repo/config";
 import {
 	adjustCreditsForPlanChange,
 	createPurchase,
@@ -20,6 +20,7 @@ import type {
 	SetSubscriptionSeats,
 	WebhookHandler,
 } from "../../types";
+import { grantPurchasedCredits } from "./credit-pack-handler";
 
 let stripeClient: Stripe | null = null;
 
@@ -395,6 +396,40 @@ export const webhookHandler: WebhookHandler = async (req) => {
 					});
 				}
 
+				// Check if this is a credit pack purchase
+				const creditPack = getCreditPackByPriceId(productId);
+
+				if (creditPack) {
+					// This is a credit pack purchase - grant credits
+					const organizationId = metadata?.organization_id;
+
+					if (!organizationId) {
+						logger.error(
+							`Credit pack purchase missing organization_id in metadata for session ${id}`,
+						);
+						return new Response(
+							"Missing organization_id for credit pack purchase.",
+							{ status: 400 },
+						);
+					}
+
+					// Grant credits with idempotency check
+					const result = await grantPurchasedCredits({
+						organizationId,
+						credits: creditPack.credits,
+						packId: creditPack.id,
+						packName: creditPack.name,
+						stripeSessionId: id,
+					});
+
+					if (result.processed) {
+						logger.info(
+							`Credit pack ${creditPack.id} purchased: granted ${creditPack.credits} credits to organization ${organizationId}`,
+						);
+					}
+				}
+
+				// Create purchase record for all one-time payments
 				await createPurchase({
 					organizationId: metadata?.organization_id || null,
 					userId: metadata?.user_id || null,

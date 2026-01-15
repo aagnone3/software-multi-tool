@@ -2,10 +2,13 @@ import { getPlanCredits } from "@repo/config";
 import {
 	executeAtomicDeduction,
 	executeAtomicGrant,
+	executeAtomicPurchaseGrant,
 	executeAtomicRefund,
 	executeAtomicReset,
 	findCreditBalanceByOrgId,
+	findPurchaseTransaction,
 	findTransactionById,
+	type GrantPurchasedCreditsParams,
 } from "./queries";
 import {
 	type CreditBalance,
@@ -248,4 +251,48 @@ export async function resetBillingPeriod(
 		periodStart,
 		periodEnd,
 	});
+}
+
+/**
+ * Result of a credit pack purchase grant operation.
+ */
+export interface GrantPurchasedCreditsResult {
+	/** Whether the purchase was processed (false if already processed) */
+	processed: boolean;
+	/** The transaction record (existing or newly created) */
+	transaction: CreditTransaction;
+}
+
+/**
+ * Grant credits from a credit pack purchase.
+ *
+ * This function is idempotent - if the same stripeSessionId is provided twice,
+ * it will return the existing transaction instead of granting duplicate credits.
+ *
+ * @param params - The purchase parameters including organizationId, credits, packId, packName, and stripeSessionId
+ * @returns Result indicating whether the purchase was processed and the transaction record
+ */
+export async function grantPurchasedCredits(
+	params: GrantPurchasedCreditsParams,
+): Promise<GrantPurchasedCreditsResult> {
+	const { stripeSessionId } = params;
+
+	// Check for idempotency - has this session already been processed?
+	const existingTransaction = await findPurchaseTransaction(stripeSessionId);
+
+	if (existingTransaction) {
+		// Already processed, return existing transaction
+		return {
+			processed: false,
+			transaction: existingTransaction,
+		};
+	}
+
+	// Process the purchase
+	const transaction = await executeAtomicPurchaseGrant(params);
+
+	return {
+		processed: true,
+		transaction,
+	};
 }
