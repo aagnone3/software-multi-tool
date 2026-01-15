@@ -225,6 +225,219 @@ export async function executeAtomicGrant(params: {
 }
 
 /**
+ * Parameters for querying transaction history
+ */
+export interface TransactionHistoryParams {
+	organizationId: string;
+	limit: number;
+	offset: number;
+	toolSlug?: string;
+	type?: CreditTransactionType;
+	startDate?: Date;
+	endDate?: Date;
+}
+
+/**
+ * Result of transaction history query
+ */
+export interface TransactionHistoryResult {
+	transactions: CreditTransaction[];
+	total: number;
+}
+
+/**
+ * Get transaction history for an organization with pagination and filtering
+ */
+export async function getTransactionHistory(
+	params: TransactionHistoryParams,
+): Promise<TransactionHistoryResult> {
+	const {
+		organizationId,
+		limit,
+		offset,
+		toolSlug,
+		type,
+		startDate,
+		endDate,
+	} = params;
+
+	// First get the balance ID for this organization
+	const balance = await db.creditBalance.findUnique({
+		where: { organizationId },
+		select: { id: true },
+	});
+
+	if (!balance) {
+		return { transactions: [], total: 0 };
+	}
+
+	// Build where clause
+	const where: Prisma.CreditTransactionWhereInput = {
+		balanceId: balance.id,
+	};
+
+	if (toolSlug) {
+		where.toolSlug = toolSlug;
+	}
+
+	if (type) {
+		where.type = type;
+	}
+
+	if (startDate || endDate) {
+		where.createdAt = {};
+		if (startDate) {
+			where.createdAt.gte = startDate;
+		}
+		if (endDate) {
+			where.createdAt.lte = endDate;
+		}
+	}
+
+	// Execute query with count
+	const [transactions, total] = await Promise.all([
+		db.creditTransaction.findMany({
+			where,
+			orderBy: { createdAt: "desc" },
+			take: limit,
+			skip: offset,
+		}),
+		db.creditTransaction.count({ where }),
+	]);
+
+	return { transactions, total };
+}
+
+/**
+ * Parameters for usage stats aggregation
+ */
+export interface UsageStatsParams {
+	organizationId: string;
+	startDate?: Date;
+	endDate?: Date;
+}
+
+/**
+ * Tool usage aggregation result
+ */
+export interface ToolUsageAggregation {
+	toolSlug: string;
+	credits: number;
+	count: number;
+}
+
+/**
+ * Daily usage aggregation result
+ */
+export interface DailyUsageAggregation {
+	date: string;
+	credits: number;
+}
+
+/**
+ * Get aggregated usage statistics for an organization
+ */
+export async function getUsageStats(params: UsageStatsParams): Promise<{
+	totalUsed: number;
+	totalOverage: number;
+	byTool: ToolUsageAggregation[];
+	byDay: DailyUsageAggregation[];
+}> {
+	const { organizationId, startDate, endDate } = params;
+
+	// Get the balance ID for this organization
+	const balance = await db.creditBalance.findUnique({
+		where: { organizationId },
+		select: { id: true },
+	});
+
+	if (!balance) {
+		return { totalUsed: 0, totalOverage: 0, byTool: [], byDay: [] };
+	}
+
+	// Build date filter
+	const dateFilter: Prisma.CreditTransactionWhereInput["createdAt"] = {};
+	if (startDate) {
+		dateFilter.gte = startDate;
+	}
+	if (endDate) {
+		dateFilter.lte = endDate;
+	}
+
+	const hasDateFilter = startDate || endDate;
+
+	// Get usage transactions (USAGE and OVERAGE types have negative amounts)
+	const usageTransactions = await db.creditTransaction.findMany({
+		where: {
+			balanceId: balance.id,
+			type: { in: ["USAGE", "OVERAGE"] },
+			...(hasDateFilter ? { createdAt: dateFilter } : {}),
+		},
+		select: {
+			amount: true,
+			type: true,
+			toolSlug: true,
+			createdAt: true,
+		},
+	});
+
+	// Calculate totals
+	let totalUsed = 0;
+	let totalOverage = 0;
+	const toolUsageMap = new Map<string, { credits: number; count: number }>();
+	const dayUsageMap = new Map<string, number>();
+
+	for (const tx of usageTransactions) {
+		const credits = Math.abs(tx.amount);
+
+		if (tx.type === "OVERAGE") {
+			totalOverage += credits;
+		} else {
+			totalUsed += credits;
+		}
+
+		// Aggregate by tool
+		if (tx.toolSlug) {
+			const existing = toolUsageMap.get(tx.toolSlug) ?? {
+				credits: 0,
+				count: 0,
+			};
+			toolUsageMap.set(tx.toolSlug, {
+				credits: existing.credits + credits,
+				count: existing.count + 1,
+			});
+		}
+
+		// Aggregate by day
+		const dateKey = tx.createdAt.toISOString().split("T")[0] as string;
+		const existingDay = dayUsageMap.get(dateKey) ?? 0;
+		dayUsageMap.set(dateKey, existingDay + credits);
+	}
+
+	// Convert maps to arrays
+	const byTool: ToolUsageAggregation[] = Array.from(
+		toolUsageMap.entries(),
+	).map(([toolSlug, data]) => ({
+		toolSlug,
+		credits: data.credits,
+		count: data.count,
+	}));
+
+	const byDay: DailyUsageAggregation[] = Array.from(
+		dayUsageMap.entries(),
+	).map(([date, credits]) => ({
+		date,
+		credits,
+	}));
+
+	// Sort by credits descending for tools, by date descending for days
+	byTool.sort((a, b) => b.credits - a.credits);
+	byDay.sort((a, b) => b.date.localeCompare(a.date));
+
+	return { totalUsed, totalOverage, byTool, byDay };
+}
+
+/**
  * Execute an atomic billing period reset
  */
 export async function executeAtomicReset(params: {

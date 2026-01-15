@@ -65,6 +65,10 @@ vi.mock("../modules/gdpr-exporter/router", () => ({
 	gdprRouter: {},
 }));
 
+vi.mock("../modules/credits/router", () => ({
+	creditsRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -77,6 +81,7 @@ describe("api router", () => {
 			"admin",
 			"newsletter",
 			"contact",
+			"credits",
 			"organizations",
 			"users",
 			"payments",
