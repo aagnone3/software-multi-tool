@@ -1,8 +1,10 @@
 // Import processors from @repo/api
 // Each processor knows how to handle a specific job type
 import {
+	DEFAULT_JOB_TIMEOUT_MS,
 	getProcessor,
 	type JobResult,
+	withTimeout,
 } from "@repo/api/modules/jobs/lib/processor-registry";
 import { registerAllProcessors } from "@repo/api/modules/jobs/lib/register-all-processors";
 // Also register the news-analyzer processor which is not in register-all-processors
@@ -155,8 +157,14 @@ async function processSingleJob(
 	}
 
 	try {
-		// Execute the processor
-		const result = await processor(toolJob);
+		// Execute the processor with timeout to prevent indefinite hangs
+		logger.debug(
+			`[Worker:${toolSlug}] Executing processor with ${DEFAULT_JOB_TIMEOUT_MS}ms timeout`,
+		);
+		const result = await withTimeout(
+			processor(toolJob),
+			DEFAULT_JOB_TIMEOUT_MS,
+		);
 
 		if (result.success) {
 			// Mark job as completed

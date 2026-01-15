@@ -23,6 +23,8 @@ vi.mock("@repo/database", () => ({
 
 vi.mock("@repo/api/modules/jobs/lib/processor-registry", () => ({
 	getProcessor: vi.fn(),
+	withTimeout: vi.fn((promise: Promise<unknown>) => promise),
+	DEFAULT_JOB_TIMEOUT_MS: 300000, // 5 minutes
 }));
 
 vi.mock("@repo/api/modules/jobs/lib/register-all-processors", () => ({
