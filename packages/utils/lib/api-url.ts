@@ -42,10 +42,25 @@ export function shouldUseProxy(isClientSide: boolean): boolean {
 }
 
 /**
+ * Gets the current origin for client-side requests.
+ * Uses window.location.origin to ensure same-origin requests.
+ *
+ * This is critical for Vercel deployments where NEXT_PUBLIC_VERCEL_URL
+ * may differ from the actual URL the user is accessing.
+ */
+function getClientOrigin(): string {
+	if (typeof window !== "undefined") {
+		return window.location.origin;
+	}
+	return getBaseUrl();
+}
+
+/**
  * Gets the API base URL for making requests.
  *
  * For client-side in preview environments:
- *   Returns absolute URL to proxy route (e.g., 'https://preview.vercel.app/api/proxy')
+ *   Returns absolute URL to proxy route using window.location.origin
+ *   (ensures same-origin to avoid CORS issues)
  *
  * For server-side or production:
  *   Returns the appropriate direct URL
@@ -55,10 +70,10 @@ export function shouldUseProxy(isClientSide: boolean): boolean {
 export function getApiBaseUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route with absolute URL
-	// (oRPC RPCLink requires absolute URLs for URL construction)
+	// Client-side in preview: use proxy route with window.location.origin
+	// This ensures same-origin requests even when NEXT_PUBLIC_VERCEL_URL differs
 	if (shouldUseProxy(isClientSide)) {
-		return `${getBaseUrl()}/api/proxy`;
+		return `${getClientOrigin()}/api/proxy`;
 	}
 
 	// Server-side in preview: use direct API server URL if available
@@ -83,10 +98,10 @@ export function getApiBaseUrl(): string {
 export function getOrpcUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route with absolute URL
-	// (oRPC RPCLink requires absolute URLs for URL construction)
+	// Client-side in preview: use proxy route with window.location.origin
+	// This ensures same-origin requests even when NEXT_PUBLIC_VERCEL_URL differs
 	if (shouldUseProxy(isClientSide)) {
-		return `${getBaseUrl()}/api/proxy/rpc`;
+		return `${getClientOrigin()}/api/proxy/rpc`;
 	}
 
 	// Server-side in preview: use direct API server URL if available
