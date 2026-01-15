@@ -69,7 +69,7 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 	return (
 		<>
 			<PageHeader
-				title="Account settings"
+				title="Settings"
 				subtitle="Manage the settings of your personal account."
 			/>
 			<SidebarContentLayout

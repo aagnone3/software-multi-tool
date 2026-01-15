@@ -7,6 +7,7 @@ import { useActiveOrganization } from "@saas/organizations/hooks/use-active-orga
 import { Command } from "cmdk";
 import {
 	BotMessageSquareIcon,
+	CreditCardIcon,
 	HomeIcon,
 	ImageMinusIcon,
 	NewspaperIcon,
@@ -111,11 +112,18 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 				description: "Chat with AI assistant",
 			},
 			{
-				id: "account-settings",
-				label: "Account settings",
+				id: "settings",
+				label: "Settings",
 				href: "/app/settings",
 				icon: UserCog2Icon,
 				description: "Manage your account settings",
+			},
+			{
+				id: "usage",
+				label: "Usage",
+				href: "/app/settings/billing",
+				icon: CreditCardIcon,
+				description: "View your usage and billing",
 			},
 		];
 

@@ -144,7 +144,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				<DropdownMenuItem asChild>
 					<Link href="/app/settings/general">
 						<SettingsIcon className="mr-2 size-4" />
-						Account settings
+						Settings
 					</Link>
 				</DropdownMenuItem>
 

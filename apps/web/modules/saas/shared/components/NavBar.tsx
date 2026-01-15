@@ -12,7 +12,6 @@ import {
 	CoinsIcon,
 	HomeIcon,
 	SettingsIcon,
-	UserCog2Icon,
 	UserCogIcon,
 	WrenchIcon,
 } from "lucide-react";
@@ -70,12 +69,6 @@ export function NavBar() {
 					},
 				]
 			: []),
-		{
-			label: "Account settings",
-			href: "/app/settings/general",
-			icon: UserCog2Icon,
-			isActive: pathname.startsWith("/app/settings/"),
-		},
 		...(user?.role === "admin"
 			? [
 					{
