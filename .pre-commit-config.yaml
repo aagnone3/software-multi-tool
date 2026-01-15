@@ -75,6 +75,20 @@ repos:
         args: ["--filter", "web", "run", "type-check"]
         language: system
         pass_filenames: false
+      - id: prisma-sync-check
+        name: Verify Prisma client is in sync with schema
+        entry: pnpm
+        args:
+          [
+            "--filter",
+            "@repo/scripts",
+            "exec",
+            "tsx",
+            "src/pre-commit/check-prisma-sync.ts",
+          ]
+        language: system
+        pass_filenames: false
+        files: 'packages/database/prisma/(schema\.prisma|migrations/)'
       - id: targeted-tests
         name: Targeted pnpm tests
         entry: pnpm
