@@ -28,6 +28,15 @@ export const HOP_BY_HOP_HEADERS = new Set([
 	"content-length",
 ]);
 
+// Headers that should not be forwarded in responses
+// Content-encoding is stripped because fetch() automatically decompresses responses,
+// so passing the header would cause ERR_CONTENT_DECODING_FAILED in the browser
+export const RESPONSE_HEADERS_TO_STRIP = new Set([
+	...HOP_BY_HOP_HEADERS,
+	"content-encoding",
+	"content-length", // Length changes after decompression
+]);
+
 /**
  * Build target URL from the proxy path and query parameters
  */
@@ -69,14 +78,14 @@ export function prepareForwardHeaders(requestHeaders: Headers): HeadersInit {
 }
 
 /**
- * Forward response headers, filtering hop-by-hop headers
+ * Forward response headers, filtering hop-by-hop and encoding headers
  */
 export function prepareResponseHeaders(responseHeaders: Headers): Headers {
 	const headers = new Headers();
 
 	responseHeaders.forEach((value, key) => {
 		const lowerKey = key.toLowerCase();
-		if (!HOP_BY_HOP_HEADERS.has(lowerKey)) {
+		if (!RESPONSE_HEADERS_TO_STRIP.has(lowerKey)) {
 			headers.set(key, value);
 		}
 	});
