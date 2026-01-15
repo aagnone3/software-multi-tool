@@ -7,6 +7,11 @@ const link = new RPCLink({
 	url: getOrpcUrl(),
 	headers: async () => {
 		if (typeof window !== "undefined") {
+			// In browser context, include x-session-id for anonymous user job ownership
+			const sessionId = localStorage.getItem("news-analyzer-session-id");
+			if (sessionId) {
+				return { "x-session-id": sessionId };
+			}
 			return {};
 		}
 
