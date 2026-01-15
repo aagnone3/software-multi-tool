@@ -1,3 +1,5 @@
+// oRPC + AI SDK streaming integration
+// See: https://orpc.dev/docs/integrations/ai-sdk
 import { ORPCError, streamToEventIterator } from "@orpc/client";
 import { type } from "@orpc/server";
 import {
@@ -60,5 +62,7 @@ export const addMessageToChat = protectedProcedure
 			},
 		});
 
+		// Convert AI SDK stream to oRPC event iterator for streaming over the wire.
+		// Client uses eventIteratorToUnproxiedDataStream to convert back.
 		return streamToEventIterator(response.toUIMessageStream());
 	});
