@@ -1,5 +1,12 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { config, getPlanCredits, getToolCreditCost } from "./index";
+import {
+	config,
+	getCreditPackById,
+	getCreditPackByPriceId,
+	getCreditPacks,
+	getPlanCredits,
+	getToolCreditCost,
+} from "./index";
 
 describe("config", () => {
 	const originalEnv = { ...process.env };
@@ -204,5 +211,106 @@ describe("tool credit costs", () => {
 			(t) => t.slug === "news-analyzer",
 		);
 		expect("creditUnit" in (newsAnalyzer ?? {})).toBe(false);
+	});
+});
+
+describe("credit pack configuration", () => {
+	it("config has exactly three credit packs: boost, bundle, vault", () => {
+		const packs = getCreditPacks();
+		expect(packs).toHaveLength(3);
+
+		const packIds = packs.map((p) => p.id);
+		expect(packIds).toContain("boost");
+		expect(packIds).toContain("bundle");
+		expect(packIds).toContain("vault");
+	});
+
+	it("boost pack has 50 credits at $4.99", () => {
+		const boost = getCreditPackById("boost");
+		expect(boost).toBeDefined();
+		expect(boost?.credits).toBe(50);
+		expect(boost?.amount).toBe(4.99);
+		expect(boost?.currency).toBe("USD");
+		expect(boost?.name).toBe("Boost");
+	});
+
+	it("bundle pack has 200 credits at $14.99", () => {
+		const bundle = getCreditPackById("bundle");
+		expect(bundle).toBeDefined();
+		expect(bundle?.credits).toBe(200);
+		expect(bundle?.amount).toBe(14.99);
+		expect(bundle?.currency).toBe("USD");
+		expect(bundle?.name).toBe("Bundle");
+	});
+
+	it("vault pack has 500 credits at $29.99", () => {
+		const vault = getCreditPackById("vault");
+		expect(vault).toBeDefined();
+		expect(vault?.credits).toBe(500);
+		expect(vault?.amount).toBe(29.99);
+		expect(vault?.currency).toBe("USD");
+		expect(vault?.name).toBe("Vault");
+	});
+
+	it("getCreditPackById returns undefined for non-existent pack", () => {
+		const pack = getCreditPackById("nonexistent");
+		expect(pack).toBeUndefined();
+	});
+
+	it("getCreditPackByPriceId returns correct pack", () => {
+		// Get a pack first to get its priceId
+		const boost = getCreditPackById("boost");
+		expect(boost).toBeDefined();
+		if (!boost) throw new Error("Boost pack should be defined");
+
+		// Look up by priceId
+		const foundPack = getCreditPackByPriceId(boost.priceId);
+		expect(foundPack).toBeDefined();
+		expect(foundPack?.id).toBe("boost");
+	});
+
+	it("getCreditPackByPriceId returns undefined for non-existent priceId", () => {
+		const pack = getCreditPackByPriceId("price_nonexistent");
+		expect(pack).toBeUndefined();
+	});
+
+	it("credit packs offer volume discounts (lower $/credit for larger packs)", () => {
+		const packs = getCreditPacks();
+
+		const costPerCredit = packs.map((p) => ({
+			id: p.id,
+			credits: p.credits,
+			costPerCredit: p.amount / p.credits,
+		}));
+
+		// Sort by credits ascending (boost, bundle, vault)
+		costPerCredit.sort((a, b) => a.credits - b.credits);
+
+		// Verify descending cost per credit (larger packs = better value)
+		expect(costPerCredit[0].id).toBe("boost");
+		expect(costPerCredit[1].id).toBe("bundle");
+		expect(costPerCredit[2].id).toBe("vault");
+
+		// Boost ($0.10/credit) > Bundle ($0.075/credit) > Vault ($0.06/credit)
+		expect(costPerCredit[0].costPerCredit).toBeGreaterThan(
+			costPerCredit[1].costPerCredit,
+		);
+		expect(costPerCredit[1].costPerCredit).toBeGreaterThan(
+			costPerCredit[2].costPerCredit,
+		);
+	});
+
+	it("all credit packs have required fields", () => {
+		const packs = getCreditPacks();
+
+		for (const pack of packs) {
+			expect(pack.id).toBeDefined();
+			expect(pack.name).toBeDefined();
+			expect(pack.credits).toBeGreaterThan(0);
+			expect(pack.amount).toBeGreaterThan(0);
+			expect(pack.currency).toBe("USD");
+			// priceId comes from environment, so it may be undefined in tests
+			expect("priceId" in pack).toBe(true);
+		}
 	});
 });
