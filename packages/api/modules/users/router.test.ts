@@ -7,7 +7,9 @@ const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/storage", () => ({
-	getSignedUploadUrl: getSignedUploadUrlMock,
+	getDefaultSupabaseProvider: () => ({
+		getSignedUploadUrl: getSignedUploadUrlMock,
+	}),
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -43,12 +45,11 @@ describe("Users Router", () => {
 			expect(result).toEqual({
 				signedUploadUrl: "https://storage.test/signed-upload-url",
 			});
-			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"user-123.png",
-				{
-					bucket: expect.any(String),
-				},
-			);
+			expect(getSignedUploadUrlMock).toHaveBeenCalledWith("user-123.png", {
+				bucket: expect.any(String),
+				contentType: "image/png",
+				expiresIn: 60,
+			});
 		});
 
 		it("uses user ID in filename", async () => {
@@ -57,7 +58,11 @@ describe("Users Router", () => {
 
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
 				"different-user-id.png",
-				expect.any(Object),
+				{
+					bucket: expect.any(String),
+					contentType: "image/png",
+					expiresIn: 60,
+				},
 			);
 		});
 

@@ -1,5 +1,5 @@
 import { config } from "@repo/config";
-import { getSignedUploadUrl } from "@repo/storage";
+import { getDefaultSupabaseProvider } from "@repo/storage";
 import { protectedProcedure } from "../../../orpc/procedures";
 
 export const createAvatarUploadUrl = protectedProcedure
@@ -12,9 +12,15 @@ export const createAvatarUploadUrl = protectedProcedure
 			"Create a signed upload URL to upload an avatar image to the storage bucket",
 	})
 	.handler(async ({ context: { user } }) => {
-		const signedUploadUrl = await getSignedUploadUrl(`${user.id}.png`, {
-			bucket: config.storage.bucketNames.avatars,
-		});
+		const provider = getDefaultSupabaseProvider();
+		const signedUploadUrl = await provider.getSignedUploadUrl(
+			`${user.id}.png`,
+			{
+				bucket: config.storage.bucketNames.avatars,
+				contentType: "image/png",
+				expiresIn: 60,
+			},
+		);
 
 		return { signedUploadUrl };
 	});
