@@ -25,6 +25,25 @@ import type { Transaction } from "../hooks/use-credits-history";
 import { useCreditsHistory } from "../hooks/use-credits-history";
 import { formatToolName } from "../lib/format-tool-name";
 
+function getTransactionSource(tx: Transaction): string {
+	// For PURCHASE transactions, extract pack name from description
+	if (tx.type === "PURCHASE" && tx.description) {
+		// Description format: "Credit pack purchase: {packName} ({packId}) - {credits} credits [session: ...]"
+		const match = tx.description.match(/Credit pack purchase: (\w+)/);
+		if (match) {
+			return `${match[1]} Pack`;
+		}
+		return "Credit Pack";
+	}
+
+	// For GRANT transactions, show subscription info
+	if (tx.type === "GRANT" && !tx.toolSlug) {
+		return "Subscription";
+	}
+
+	return formatToolName(tx.toolSlug);
+}
+
 interface TransactionHistoryProps {
 	className?: string;
 }
@@ -107,7 +126,7 @@ export function TransactionHistory({ className }: TransactionHistoryProps) {
 							<TableHeader>
 								<TableRow>
 									<TableHead>Date</TableHead>
-									<TableHead>Tool</TableHead>
+									<TableHead>Source</TableHead>
 									<TableHead>Type</TableHead>
 									<TableHead className="text-right">
 										Credits
@@ -121,7 +140,7 @@ export function TransactionHistory({ className }: TransactionHistoryProps) {
 											{formatDate(tx.createdAt)}
 										</TableCell>
 										<TableCell>
-											{formatToolName(tx.toolSlug)}
+											{getTransactionSource(tx)}
 										</TableCell>
 										<TableCell>
 											<Badge

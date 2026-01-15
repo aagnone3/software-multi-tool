@@ -1,6 +1,7 @@
 import { createPurchasesHelper } from "@repo/payments/lib/helper";
 import { getActiveOrganization } from "@saas/auth/lib/server";
 import { CreditBalanceSection } from "@saas/credits/components/CreditBalanceSection";
+import { CreditPacksSection } from "@saas/credits/components/CreditPacksSection";
 import { ActivePlan } from "@saas/payments/components/ActivePlan";
 import { ChangePlan } from "@saas/payments/components/ChangePlan";
 import { SettingsList } from "@saas/shared/components/SettingsList";
@@ -55,6 +56,7 @@ export default async function BillingSettingsPage({
 	return (
 		<SettingsList>
 			<CreditBalanceSection />
+			<CreditPacksSection />
 			{activePlan && <ActivePlan organizationId={organization.id} />}
 			<ChangePlan
 				organizationId={organization.id}

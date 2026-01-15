@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Alert, AlertDescription, AlertTitle } from "@ui/components/alert";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
@@ -10,15 +11,16 @@ import { useCreditsBalance } from "../hooks/use-credits-balance";
 interface LowCreditsWarningProps {
 	className?: string;
 	threshold?: number;
-	showUpgradeButton?: boolean;
+	showActionButtons?: boolean;
 }
 
 export function LowCreditsWarning({
 	className,
 	threshold = 0.2,
-	showUpgradeButton = true,
+	showActionButtons = true,
 }: LowCreditsWarningProps) {
 	const { balance, isLoading } = useCreditsBalance();
+	const { activeOrganization } = useActiveOrganization();
 
 	if (isLoading || !balance) {
 		return null;
@@ -32,6 +34,10 @@ export function LowCreditsWarning({
 	if (!isLow) {
 		return null;
 	}
+
+	const billingPath = activeOrganization
+		? `/app/${activeOrganization.slug}/settings/billing`
+		: "/app/settings/billing";
 
 	return (
 		<Alert
@@ -54,15 +60,15 @@ export function LowCreditsWarning({
 					)}
 				</AlertDescription>
 			</div>
-			{showUpgradeButton && (
-				<Button
-					asChild
-					variant="primary"
-					size="sm"
-					className="shrink-0"
-				>
-					<Link href="/app/settings/billing">Upgrade Plan</Link>
-				</Button>
+			{showActionButtons && (
+				<div className="flex shrink-0 gap-2">
+					<Button asChild variant="secondary" size="sm">
+						<Link href={billingPath}>Buy Credits</Link>
+					</Button>
+					<Button asChild variant="primary" size="sm">
+						<Link href={billingPath}>Upgrade Plan</Link>
+					</Button>
+				</div>
 			)}
 		</Alert>
 	);
