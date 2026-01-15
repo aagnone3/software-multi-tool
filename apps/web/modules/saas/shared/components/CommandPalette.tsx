@@ -114,14 +114,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 			{
 				id: "settings",
 				label: "Settings",
-				href: "/app/settings",
+				href: "/app/settings/general",
 				icon: UserCog2Icon,
 				description: "Manage your account settings",
 			},
 			{
 				id: "usage",
 				label: "Usage",
-				href: "/app/settings/billing",
+				href: "/app/billing/usage",
 				icon: CreditCardIcon,
 				description: "View your usage and billing",
 			},
