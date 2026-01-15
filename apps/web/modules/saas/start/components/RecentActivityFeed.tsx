@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
-	useCreditsHistory,
 	type Transaction,
+	useCreditsHistory,
 } from "../../credits/hooks/use-credits-history";
 import { formatToolName } from "../../credits/lib/format-tool-name";
 
@@ -99,10 +99,18 @@ function formatTimeAgo(dateString: string): string {
 	const diffHours = Math.floor(diffMs / 3600000);
 	const diffDays = Math.floor(diffMs / 86400000);
 
-	if (diffMins < 1) return "Just now";
-	if (diffMins < 60) return `${diffMins}m ago`;
-	if (diffHours < 24) return `${diffHours}h ago`;
-	if (diffDays < 7) return `${diffDays}d ago`;
+	if (diffMins < 1) {
+		return "Just now";
+	}
+	if (diffMins < 60) {
+		return `${diffMins}m ago`;
+	}
+	if (diffHours < 24) {
+		return `${diffHours}h ago`;
+	}
+	if (diffDays < 7) {
+		return `${diffDays}d ago`;
+	}
 	return date.toLocaleDateString();
 }
 
@@ -124,7 +132,10 @@ export function RecentActivityFeed({
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{Array.from({ length: 3 }).map((_, i) => (
-						<div key={`skeleton-${i}`} className="flex items-center gap-3">
+						<div
+							key={`skeleton-${i}`}
+							className="flex items-center gap-3"
+						>
 							<Skeleton className="size-8 rounded-full" />
 							<div className="flex-1 space-y-1">
 								<Skeleton className="h-4 w-40" />
@@ -170,7 +181,9 @@ export function RecentActivityFeed({
 					<ActivityIcon className="size-5" />
 					Recent Activity
 				</CardTitle>
-				<CardDescription>Your latest credit transactions</CardDescription>
+				<CardDescription>
+					Your latest credit transactions
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-1">
 				{transactions.map((transaction) => {
@@ -189,7 +202,7 @@ export function RecentActivityFeed({
 							<div
 								className={cn(
 									"flex size-8 items-center justify-center rounded-full bg-muted shrink-0",
-									colorClass
+									colorClass,
 								)}
 							>
 								<Icon className="size-4" />
@@ -205,7 +218,9 @@ export function RecentActivityFeed({
 							<span
 								className={cn(
 									"text-sm font-medium tabular-nums shrink-0",
-									isPositive ? "text-green-600" : "text-foreground"
+									isPositive
+										? "text-green-600"
+										: "text-foreground",
 								)}
 							>
 								{isPositive ? "+" : "-"}
@@ -216,7 +231,12 @@ export function RecentActivityFeed({
 				})}
 
 				<div className="pt-2">
-					<Button variant="ghost" size="sm" className="w-full" asChild>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="w-full"
+						asChild
+					>
 						<Link href="/app/settings/billing/usage">
 							View all activity
 							<ChevronRightIcon className="size-4 ml-1" />

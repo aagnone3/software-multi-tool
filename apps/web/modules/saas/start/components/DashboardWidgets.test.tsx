@@ -5,13 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock Next.js Link
 vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-	}: {
-		children: ReactNode;
-		href: string;
-	}) => React.createElement("a", { href }, children),
+	default: ({ children, href }: { children: ReactNode; href: string }) =>
+		React.createElement("a", { href }, children),
 }));
 
 // Mock localStorage
@@ -93,16 +88,22 @@ describe("Dashboard Widgets", () => {
 
 		// Set initial data for queries
 		if (initialData.balance) {
-			queryClient.setQueryData(["credits", "balance"], initialData.balance);
+			queryClient.setQueryData(
+				["credits", "balance"],
+				initialData.balance,
+			);
 		}
 		if (initialData.usageStats) {
 			queryClient.setQueryData(
 				["credits", "usageStats"],
-				initialData.usageStats
+				initialData.usageStats,
 			);
 		}
 		if (initialData.history) {
-			queryClient.setQueryData(["credits", "history"], initialData.history);
+			queryClient.setQueryData(
+				["credits", "history"],
+				initialData.history,
+			);
 		}
 		if (initialData.jobs) {
 			queryClient.setQueryData(["jobs", "list"], initialData.jobs);
@@ -112,7 +113,7 @@ describe("Dashboard Widgets", () => {
 			React.createElement(
 				QueryClientProvider,
 				{ client: queryClient },
-				children
+				children,
 			);
 	};
 
@@ -120,14 +121,16 @@ describe("Dashboard Widgets", () => {
 		it("renders checklist when not dismissed", () => {
 			localStorageMock.getItem.mockReturnValue(null);
 
-			render(
-				React.createElement(GettingStartedChecklist),
-				{
-					wrapper: createWrapper({
-						usageStats: { totalUsed: 0, totalOverage: 0, byTool: [], byPeriod: [] },
-					}),
-				}
-			);
+			render(React.createElement(GettingStartedChecklist), {
+				wrapper: createWrapper({
+					usageStats: {
+						totalUsed: 0,
+						totalOverage: 0,
+						byTool: [],
+						byPeriod: [],
+					},
+				}),
+			});
 
 			expect(screen.getByText("Getting Started")).toBeInTheDocument();
 		});
@@ -135,29 +138,37 @@ describe("Dashboard Widgets", () => {
 		it("does not render when dismissed", () => {
 			localStorageMock.getItem.mockReturnValue("true");
 
-			render(
-				React.createElement(GettingStartedChecklist),
-				{
-					wrapper: createWrapper({
-						usageStats: { totalUsed: 0, totalOverage: 0, byTool: [], byPeriod: [] },
-					}),
-				}
-			);
+			render(React.createElement(GettingStartedChecklist), {
+				wrapper: createWrapper({
+					usageStats: {
+						totalUsed: 0,
+						totalOverage: 0,
+						byTool: [],
+						byPeriod: [],
+					},
+				}),
+			});
 
-			expect(screen.queryByText("Getting Started")).not.toBeInTheDocument();
+			expect(
+				screen.queryByText("Getting Started"),
+			).not.toBeInTheDocument();
 		});
 
 		it("shows complete profile step as complete when user has name", () => {
-			render(
-				React.createElement(GettingStartedChecklist),
-				{
-					wrapper: createWrapper({
-						usageStats: { totalUsed: 0, totalOverage: 0, byTool: [], byPeriod: [] },
-					}),
-				}
-			);
+			render(React.createElement(GettingStartedChecklist), {
+				wrapper: createWrapper({
+					usageStats: {
+						totalUsed: 0,
+						totalOverage: 0,
+						byTool: [],
+						byPeriod: [],
+					},
+				}),
+			});
 
-			expect(screen.getByText("Complete your profile")).toBeInTheDocument();
+			expect(
+				screen.getByText("Complete your profile"),
+			).toBeInTheDocument();
 		});
 	});
 
@@ -175,15 +186,17 @@ describe("Dashboard Widgets", () => {
 				plan: { id: "pro", name: "Pro" },
 			};
 
-			render(
-				React.createElement(CreditsOverview),
-				{
-					wrapper: createWrapper({
-						balance: mockBalance,
-						usageStats: { totalUsed: 25, totalOverage: 0, byTool: [], byPeriod: [] },
-					}),
-				}
-			);
+			render(React.createElement(CreditsOverview), {
+				wrapper: createWrapper({
+					balance: mockBalance,
+					usageStats: {
+						totalUsed: 25,
+						totalOverage: 0,
+						byTool: [],
+						byPeriod: [],
+					},
+				}),
+			});
 
 			expect(screen.getByText("Credits")).toBeInTheDocument();
 			expect(screen.getByText("75")).toBeInTheDocument(); // totalAvailable
@@ -203,15 +216,17 @@ describe("Dashboard Widgets", () => {
 				plan: { id: "pro", name: "Pro" },
 			};
 
-			render(
-				React.createElement(CreditsOverview),
-				{
-					wrapper: createWrapper({
-						balance: mockBalance,
-						usageStats: { totalUsed: 90, totalOverage: 0, byTool: [], byPeriod: [] },
-					}),
-				}
-			);
+			render(React.createElement(CreditsOverview), {
+				wrapper: createWrapper({
+					balance: mockBalance,
+					usageStats: {
+						totalUsed: 90,
+						totalOverage: 0,
+						byTool: [],
+						byPeriod: [],
+					},
+				}),
+			});
 
 			expect(screen.getByText("Low balance")).toBeInTheDocument();
 		});
@@ -219,10 +234,9 @@ describe("Dashboard Widgets", () => {
 
 	describe("RecentlyUsedTools", () => {
 		it("shows empty state when no jobs", () => {
-			render(
-				React.createElement(RecentlyUsedTools),
-				{ wrapper: createWrapper({ jobs: { jobs: [] } }) }
-			);
+			render(React.createElement(RecentlyUsedTools), {
+				wrapper: createWrapper({ jobs: { jobs: [] } }),
+			});
 
 			expect(screen.getByText("Recently Used")).toBeInTheDocument();
 			expect(screen.getByText("No tools used yet")).toBeInTheDocument();
@@ -241,10 +255,9 @@ describe("Dashboard Widgets", () => {
 				],
 			};
 
-			render(
-				React.createElement(RecentlyUsedTools),
-				{ wrapper: createWrapper({ jobs: mockJobs }) }
-			);
+			render(React.createElement(RecentlyUsedTools), {
+				wrapper: createWrapper({ jobs: mockJobs }),
+			});
 
 			expect(screen.getByText("Recently Used")).toBeInTheDocument();
 			expect(screen.getByText("Background Remover")).toBeInTheDocument();
@@ -253,14 +266,19 @@ describe("Dashboard Widgets", () => {
 
 	describe("RecentActivityFeed", () => {
 		it("shows empty state when no transactions", () => {
-			render(
-				React.createElement(RecentActivityFeed),
-				{
-					wrapper: createWrapper({
-						history: { transactions: [], pagination: { total: 0, limit: 5, offset: 0, hasMore: false } },
-					}),
-				}
-			);
+			render(React.createElement(RecentActivityFeed), {
+				wrapper: createWrapper({
+					history: {
+						transactions: [],
+						pagination: {
+							total: 0,
+							limit: 5,
+							offset: 0,
+							hasMore: false,
+						},
+					},
+				}),
+			});
 
 			expect(screen.getByText("Recent Activity")).toBeInTheDocument();
 			expect(screen.getByText("No activity yet")).toBeInTheDocument();
@@ -282,13 +300,14 @@ describe("Dashboard Widgets", () => {
 				pagination: { total: 1, limit: 5, offset: 0, hasMore: false },
 			};
 
-			render(
-				React.createElement(RecentActivityFeed),
-				{ wrapper: createWrapper({ history: mockHistory }) }
-			);
+			render(React.createElement(RecentActivityFeed), {
+				wrapper: createWrapper({ history: mockHistory }),
+			});
 
 			expect(screen.getByText("Recent Activity")).toBeInTheDocument();
-			expect(screen.getByText("Used Background Remover")).toBeInTheDocument();
+			expect(
+				screen.getByText("Used Background Remover"),
+			).toBeInTheDocument();
 		});
 
 		it("shows positive amounts for grants and purchases", () => {
@@ -307,10 +326,9 @@ describe("Dashboard Widgets", () => {
 				pagination: { total: 1, limit: 5, offset: 0, hasMore: false },
 			};
 
-			render(
-				React.createElement(RecentActivityFeed),
-				{ wrapper: createWrapper({ history: mockHistory }) }
-			);
+			render(React.createElement(RecentActivityFeed), {
+				wrapper: createWrapper({ history: mockHistory }),
+			});
 
 			expect(screen.getByText("+100")).toBeInTheDocument();
 		});

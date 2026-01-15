@@ -12,12 +12,7 @@ import {
 } from "@ui/components/card";
 import { Progress } from "@ui/components/progress";
 import { cn } from "@ui/lib";
-import {
-	CheckCircle2Icon,
-	CircleIcon,
-	RocketIcon,
-	XIcon,
-} from "lucide-react";
+import { CheckCircle2Icon, CircleIcon, RocketIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUsageStats } from "../../credits/hooks/use-usage-stats";
@@ -93,9 +88,11 @@ export function GettingStartedChecklist({
 		},
 	];
 
-	const completedCount = checklistItems.filter((item) => item.isComplete).length;
+	const completedCount = checklistItems.filter(
+		(item) => item.isComplete,
+	).length;
 	const progressPercentage = Math.round(
-		(completedCount / checklistItems.length) * 100
+		(completedCount / checklistItems.length) * 100,
 	);
 	const isAllComplete = completedCount === checklistItems.length;
 
@@ -110,7 +107,9 @@ export function GettingStartedChecklist({
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-2">
 						<RocketIcon className="size-5 text-primary" />
-						<CardTitle className="text-lg">Getting Started</CardTitle>
+						<CardTitle className="text-lg">
+							Getting Started
+						</CardTitle>
 					</div>
 					<Button
 						variant="ghost"
@@ -134,7 +133,9 @@ export function GettingStartedChecklist({
 						<span className="text-muted-foreground">
 							{completedCount} of {checklistItems.length} complete
 						</span>
-						<span className="font-medium">{progressPercentage}%</span>
+						<span className="font-medium">
+							{progressPercentage}%
+						</span>
 					</div>
 					<Progress value={progressPercentage} className="h-2" />
 				</div>
@@ -146,7 +147,7 @@ export function GettingStartedChecklist({
 								href={item.href}
 								className={cn(
 									"flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50",
-									item.isComplete && "opacity-60"
+									item.isComplete && "opacity-60",
 								)}
 							>
 								{item.isComplete ? (
@@ -158,7 +159,7 @@ export function GettingStartedChecklist({
 									<p
 										className={cn(
 											"text-sm font-medium",
-											item.isComplete && "line-through"
+											item.isComplete && "line-through",
 										)}
 									>
 										{item.label}

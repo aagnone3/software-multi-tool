@@ -42,7 +42,7 @@ describe("useRecentJobs", () => {
 			React.createElement(
 				QueryClientProvider,
 				{ client: queryClient },
-				children
+				children,
 			);
 	};
 

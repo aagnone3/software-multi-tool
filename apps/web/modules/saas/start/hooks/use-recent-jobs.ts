@@ -17,7 +17,7 @@ interface JobsResponse {
 
 export function useRecentJobs(limit = 5) {
 	const query = useQuery(
-		orpc.jobs.list.queryOptions({ input: { limit, offset: 0 } })
+		orpc.jobs.list.queryOptions({ input: { limit, offset: 0 } }),
 	);
 
 	const data = query.data as JobsResponse | undefined;

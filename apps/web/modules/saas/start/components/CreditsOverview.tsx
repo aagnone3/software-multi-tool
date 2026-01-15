@@ -22,10 +22,13 @@ interface CreditsOverviewProps {
 }
 
 export function CreditsOverview({ className }: CreditsOverviewProps) {
-	const { balance, isLoading: balanceLoading, percentageUsed, isLowCredits } =
-		useCreditsBalance();
-	const { totalUsed, totalOperations, isLoading: usageLoading } =
-		useUsageStats();
+	const {
+		balance,
+		isLoading: balanceLoading,
+		percentageUsed,
+		isLowCredits,
+	} = useCreditsBalance();
+	const { totalUsed, isLoading: usageLoading } = useUsageStats();
 	const { activeOrganization } = useActiveOrganization();
 
 	const isLoading = balanceLoading || usageLoading;
@@ -65,7 +68,8 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 	}
 
 	const daysRemaining = Math.ceil(
-		(new Date(balance.periodEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+		(new Date(balance.periodEnd).getTime() - Date.now()) /
+			(1000 * 60 * 60 * 24),
 	);
 
 	return (
@@ -105,7 +109,10 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 					</div>
 					<Progress
 						value={percentageUsed}
-						className={cn("h-2", isLowCredits && "[&>*]:bg-destructive")}
+						className={cn(
+							"h-2",
+							isLowCredits && "[&>*]:bg-destructive",
+						)}
 					/>
 				</div>
 
@@ -116,8 +123,12 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 							<TrendingUpIcon className="size-3.5" />
 							<span className="text-xs">This month</span>
 						</div>
-						<p className="text-lg font-semibold mt-1">{totalUsed}</p>
-						<p className="text-xs text-muted-foreground">credits used</p>
+						<p className="text-lg font-semibold mt-1">
+							{totalUsed}
+						</p>
+						<p className="text-xs text-muted-foreground">
+							credits used
+						</p>
 					</div>
 					<div className="rounded-lg bg-muted/50 p-3">
 						<div className="flex items-center gap-1.5 text-muted-foreground">
@@ -127,19 +138,31 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 						<p className="text-lg font-semibold mt-1">
 							{daysRemaining > 0 ? daysRemaining : 0}
 						</p>
-						<p className="text-xs text-muted-foreground">days left</p>
+						<p className="text-xs text-muted-foreground">
+							days left
+						</p>
 					</div>
 				</div>
 
 				{/* Actions */}
 				<div className="flex gap-2 pt-1">
-					<Button variant="outline" size="sm" className="flex-1" asChild>
+					<Button
+						variant="outline"
+						size="sm"
+						className="flex-1"
+						asChild
+					>
 						<Link href={usagePath}>
 							View usage
 							<ChevronRightIcon className="size-4 ml-auto" />
 						</Link>
 					</Button>
-					<Button variant="outline" size="sm" className="flex-1" asChild>
+					<Button
+						variant="outline"
+						size="sm"
+						className="flex-1"
+						asChild
+					>
 						<Link href={billingPath}>
 							Buy credits
 							<ChevronRightIcon className="size-4 ml-auto" />
