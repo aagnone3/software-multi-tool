@@ -1,6 +1,6 @@
 import baseConfig from "../../tooling/test/vitest.workspace";
 
-const coverageInclude = ["app/robots.ts"];
+const coverageInclude = ["app/robots.ts", "app/api/proxy/lib.ts"];
 const coverageExclude = ["next.config.ts", "middleware.ts", "tests/**"];
 
 function withCoverageOverrides(config: Record<string, any>) {

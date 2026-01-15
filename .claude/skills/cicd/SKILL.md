@@ -377,6 +377,31 @@ A GitHub Actions workflow automatically synchronizes environment variables acros
 | Render | `POSTGRES_URL_NON_POOLING`   | Supabase | Branch DB direct connection   |
 | Render | `CORS_ORIGIN`                | Vercel   | Allow requests from preview   |
 | Vercel | `NEXT_PUBLIC_API_SERVER_URL` | Render   | API endpoint for frontend     |
+| Vercel | `API_SERVER_URL`             | Render   | API endpoint for proxy route  |
+
+### API Proxy for Session Authentication
+
+**Skill available**: Use the `api-proxy` skill for detailed proxy guidance.
+
+In preview environments, browser requests to the Render API fail to include session cookies (different domains). The Next.js API proxy solves this:
+
+```text
+Browser → /api/proxy/* → Render Preview
+         (same origin)   (cookies forwarded)
+```
+
+**How it works:**
+
+1. CI syncs `NEXT_PUBLIC_API_SERVER_URL` and `API_SERVER_URL` from Render preview URL
+2. oRPC client detects preview environment via `NEXT_PUBLIC_VERCEL_ENV`
+3. Client-side requests go to `/api/proxy/rpc` instead of direct API
+4. Proxy forwards request with cookies to Render preview
+5. Session authentication works seamlessly
+
+**Key files:**
+
+- Proxy route: `apps/web/app/api/proxy/[...path]/route.ts`
+- Environment detection: `packages/utils/lib/api-url.ts`
 
 ### Workflow Triggers
 
@@ -472,6 +497,14 @@ The workflow handles race conditions by:
 2. Check Supabase project settings → Integrations
 3. Look for errors in GitHub check details
 
+**Session authentication not working in preview**:
+
+1. Check browser DevTools Network tab - requests should go to `/api/proxy/*`
+2. Verify `NEXT_PUBLIC_VERCEL_ENV` is set to `preview` in Vercel
+3. Verify `API_SERVER_URL` points to the Render preview URL
+4. Check for "Failed to construct 'URL'" errors - ensure `getOrpcUrl()` returns absolute URL
+5. See the `api-proxy` skill for detailed debugging steps
+
 ### Seed Validation Fails
 
 **Symptom**: `supabase:validate-seed` script fails
@@ -565,6 +598,7 @@ Always wait for all CI checks to pass:
 
 ## Related Skills
 
+- **api-proxy**: Preview environment authentication proxy
 - **prisma-migrate**: Database migration workflows
 - **architecture**: Overall system architecture
 - **render**: Render deployment details
