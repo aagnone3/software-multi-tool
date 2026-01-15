@@ -24,6 +24,8 @@ This skill provides comprehensive guidance for understanding and navigating the 
 | Database         | `packages/database/prisma/schema.prisma`  |
 | Web App          | `apps/web/app/`                           |
 | API Catch-All    | `apps/web/app/api/[[...rest]]/route.ts`   |
+| **API Proxy**    | **`apps/web/app/api/proxy/[...path]/`**   |
+| Environment URLs | `packages/utils/lib/api-url.ts`           |
 | Config           | `config/index.ts`                         |
 | Theme            | `tooling/tailwind/theme.css`              |
 | PR Validation    | `.github/workflows/validate-prs.yml`      |
@@ -265,6 +267,34 @@ export type ApiRouterClient = typeof apiRouter;
 // Frontend uses @orpc/tanstack-query for type-safe calls
 ```
 
+### API Proxy for Preview Environments
+
+**Skill available**: Use the `api-proxy` skill for detailed proxy guidance.
+
+In preview environments, the frontend (Vercel) and backend (Render) are deployed to different domains, which breaks session cookies. The API proxy makes requests appear same-origin:
+
+```text
+Production:  Browser → api.domain.com (direct, cookies work)
+Preview:     Browser → /api/proxy/* → Render preview (cookies forwarded)
+```
+
+**Key components:**
+
+| Component          | Location                                     |
+| ------------------ | -------------------------------------------- |
+| Proxy Route        | `apps/web/app/api/proxy/[...path]/route.ts`  |
+| Proxy Utilities    | `apps/web/app/api/proxy/lib.ts`              |
+| Environment URLs   | `packages/utils/lib/api-url.ts`              |
+
+**Environment detection:**
+
+```typescript
+import { getOrpcUrl, isPreviewEnvironment } from "@repo/utils";
+
+// Returns "/api/proxy/rpc" in preview, "{baseUrl}/api/rpc" in production
+const orpcUrl = getOrpcUrl();
+```
+
 ## Frontend Architecture
 
 ### Technology Stack
@@ -502,7 +532,9 @@ Invoke this skill when:
 
 ## Related Skills
 
+- **api-proxy**: Preview environment authentication proxy
 - **better-auth**: Authentication implementation details
+- **cicd**: CI/CD pipeline and preview environments
 - **prisma-migrate**: Database migration workflows
 - **linear**: Project management integration
 - **github-cli**: GitHub operations
