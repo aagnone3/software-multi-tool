@@ -203,6 +203,25 @@ async function createTestCustomer(
 		},
 	});
 
+	// Create and attach a test payment method using test card token
+	const paymentMethod = await stripe.paymentMethods.create({
+		type: "card",
+		card: {
+			token: "tok_visa", // Test token for Visa card
+		},
+	});
+
+	await stripe.paymentMethods.attach(paymentMethod.id, {
+		customer: customer.id,
+	});
+
+	// Set as default payment method
+	await stripe.customers.update(customer.id, {
+		invoice_settings: {
+			default_payment_method: paymentMethod.id,
+		},
+	});
+
 	// Link customer to organization
 	await db.organization.update({
 		where: { id: organizationId },
@@ -210,7 +229,7 @@ async function createTestCustomer(
 	});
 
 	logSuccess(
-		`Created customer: ${customer.id} and linked to org ${organizationId}`,
+		`Created customer: ${customer.id} with payment method and linked to org ${organizationId}`,
 	);
 	return customer.id;
 }
