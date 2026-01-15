@@ -124,3 +124,15 @@ export async function updateOrganization(
 		data: organization,
 	});
 }
+
+/**
+ * Get an organization by its payments customer ID (e.g., Stripe customer ID).
+ * Used to look up organization from webhook events.
+ */
+export async function getOrganizationByPaymentsCustomerId(
+	paymentsCustomerId: string,
+) {
+	return db.organization.findFirst({
+		where: { paymentsCustomerId },
+	});
+}
