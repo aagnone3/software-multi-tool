@@ -4,6 +4,24 @@ This directory contains Claude skills that provide specialized guidance for work
 
 ## Available Skills
 
+### ai
+
+**Description**: Use this skill when working with AI/LLM features, adding AI processors, configuring AI providers (Anthropic/OpenAI), or understanding the AI architecture. Covers Claude via @repo/agent-sdk and OpenAI via @repo/ai.
+
+**Location**: `.claude/skills/ai/`
+
+**When to Use**:
+
+- Working with AI/LLM features
+- Adding new AI processors
+- Configuring Anthropic or OpenAI
+- Understanding the AI architecture
+- Model selection guidance
+
+**Related Skills**: architecture, tools, async-jobs
+
+---
+
 ### analytics
 
 **Description**: Use this skill when implementing event tracking, working with PostHog analytics, swapping analytics providers, or adding analytics to new features. Provides guidance on the pluggable analytics system and PostHog configuration.
