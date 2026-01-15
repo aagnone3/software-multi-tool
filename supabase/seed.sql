@@ -539,7 +539,7 @@ INSERT INTO "public"."credit_transaction" (
 -- =====================================================
 -- Creates sample tool job records to show job history
 
-INSERT INTO "public"."ToolJob" (
+INSERT INTO "public"."tool_job" (
     "id",
     "toolSlug",
     "status",
