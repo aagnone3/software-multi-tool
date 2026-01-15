@@ -15,22 +15,31 @@ export function usePlanData() {
 		free: {
 			title: "Free",
 			description: "Start for free",
-			features: ["Another amazing feature", "Limited support"],
+			features: [
+				"10 credits/month",
+				"Basic tools access",
+				"Community support",
+			],
+		},
+		starter: {
+			title: "Starter",
+			description: "Great for individuals",
+			features: [
+				"100 credits/month",
+				"All tools access",
+				"Email support",
+				"7-day free trial",
+			],
 		},
 		pro: {
 			title: "Pro",
 			description: "Best for teams",
-			features: ["Another amazing feature", "Full support"],
-		},
-		enterprise: {
-			title: "Enterprise",
-			description: "Custom plan tailored to your requirements",
-			features: ["Unlimited projects", "Enterprise support"],
-		},
-		lifetime: {
-			title: "Lifetime",
-			description: "Buy once. Use forever.",
-			features: ["No recurring costs", "Extended support"],
+			features: [
+				"500 credits/month",
+				"All tools access",
+				"Priority support",
+				"7-day free trial",
+			],
 		},
 	};
 

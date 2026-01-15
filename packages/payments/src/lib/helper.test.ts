@@ -4,21 +4,35 @@ import { getPlanIdFromPriceId } from "./helper";
 
 describe("getPlanIdFromPriceId", () => {
 	// Get actual price IDs from the config to ensure tests work regardless of env vars
+	const starterPlan = config.payments.plans.starter;
 	const proPlan = config.payments.plans.pro;
-	const lifetimePlan = config.payments.plans.lifetime;
 
 	// Extract price IDs - these are from process.env but cast to string in config
 	// In CI without env vars, these will be the string "undefined"
+	const starterMonthlyPriceId =
+		"prices" in starterPlan ? starterPlan.prices[0].productId : undefined;
+	const starterYearlyPriceId =
+		"prices" in starterPlan ? starterPlan.prices[1].productId : undefined;
 	const proMonthlyPriceId =
 		"prices" in proPlan ? proPlan.prices[0].productId : undefined;
 	const proYearlyPriceId =
 		"prices" in proPlan ? proPlan.prices[1].productId : undefined;
-	const lifetimePriceId =
-		"prices" in lifetimePlan ? lifetimePlan.prices[0].productId : undefined;
 
-	it("returns plan ID for pro monthly price", () => {
+	it("returns plan ID for starter monthly price", () => {
 		// productId will be a string (either actual price ID or "undefined" from env)
 		// This ensures the "found match" branch is covered
+		if (starterMonthlyPriceId) {
+			expect(getPlanIdFromPriceId(starterMonthlyPriceId)).toBe("starter");
+		}
+	});
+
+	it("returns plan ID for starter yearly price", () => {
+		if (starterYearlyPriceId) {
+			expect(getPlanIdFromPriceId(starterYearlyPriceId)).toBe("starter");
+		}
+	});
+
+	it("returns plan ID for pro monthly price", () => {
 		if (proMonthlyPriceId) {
 			expect(getPlanIdFromPriceId(proMonthlyPriceId)).toBe("pro");
 		}
@@ -27,12 +41,6 @@ describe("getPlanIdFromPriceId", () => {
 	it("returns plan ID for pro yearly price", () => {
 		if (proYearlyPriceId) {
 			expect(getPlanIdFromPriceId(proYearlyPriceId)).toBe("pro");
-		}
-	});
-
-	it("returns plan ID for lifetime price", () => {
-		if (lifetimePriceId) {
-			expect(getPlanIdFromPriceId(lifetimePriceId)).toBe("lifetime");
 		}
 	});
 
@@ -45,11 +53,10 @@ describe("getPlanIdFromPriceId", () => {
 		expect(getPlanIdFromPriceId("")).toBeUndefined();
 	});
 
-	it("iterates through plans without prices (free, enterprise) safely", () => {
-		// Free and enterprise plans don't have prices array
+	it("iterates through plans without prices (free) safely", () => {
+		// Free plan doesn't have a prices array
 		// This ensures we handle the plan.prices check correctly
 		expect(getPlanIdFromPriceId("free")).toBeUndefined();
-		expect(getPlanIdFromPriceId("enterprise")).toBeUndefined();
 	});
 
 	it("finds plan correctly when price ID matches config", () => {

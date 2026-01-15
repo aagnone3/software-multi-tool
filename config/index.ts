@@ -215,6 +215,7 @@ export const config = {
 	// Payments
 	payments: {
 		// define the products that should be available in the checkout
+		// Plans aligned with Stripe products: Free ($0), Starter ($4.99/$49.99), Pro ($19.99/$199.99)
 		plans: {
 			// The free plan is treated differently. It will automatically be assigned if the user has no other plan.
 			free: {
@@ -222,6 +223,33 @@ export const config = {
 				credits: {
 					included: 10,
 				},
+			},
+			starter: {
+				credits: {
+					included: 100,
+				},
+				prices: [
+					{
+						type: "recurring",
+						productId: process.env
+							.NEXT_PUBLIC_PRICE_ID_STARTER_MONTHLY as string,
+						interval: "month",
+						amount: 4.99,
+						currency: "USD",
+						seatBased: true,
+						trialPeriodDays: 7,
+					},
+					{
+						type: "recurring",
+						productId: process.env
+							.NEXT_PUBLIC_PRICE_ID_STARTER_YEARLY as string,
+						interval: "year",
+						amount: 49.99,
+						currency: "USD",
+						seatBased: true,
+						trialPeriodDays: 7,
+					},
+				],
 			},
 			pro: {
 				recommended: true,
@@ -234,7 +262,7 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY as string,
 						interval: "month",
-						amount: 29,
+						amount: 19.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,
@@ -244,32 +272,12 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY as string,
 						interval: "year",
-						amount: 290,
+						amount: 199.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,
 					},
 				],
-			},
-			lifetime: {
-				credits: {
-					included: 1000,
-				},
-				prices: [
-					{
-						type: "one-time",
-						productId: process.env
-							.NEXT_PUBLIC_PRICE_ID_LIFETIME as string,
-						amount: 799,
-						currency: "USD",
-					},
-				],
-			},
-			enterprise: {
-				isEnterprise: true,
-				credits: {
-					included: 5000,
-				},
 			},
 		},
 	},
