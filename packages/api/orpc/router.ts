@@ -6,6 +6,7 @@ import { creditsRouter } from "../modules/credits/router";
 import { gdprRouter } from "../modules/gdpr-exporter/router";
 import { jobsRouter } from "../modules/jobs/router";
 import { newsletterRouter } from "../modules/newsletter/router";
+import { notificationsRouter } from "../modules/notifications/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
 import { usersRouter } from "../modules/users/router";
@@ -19,6 +20,7 @@ export const router = publicProcedure
 		newsletter: newsletterRouter,
 		contact: contactRouter,
 		credits: creditsRouter,
+		notifications: notificationsRouter,
 		organizations: organizationsRouter,
 		users: usersRouter,
 		payments: paymentsRouter,

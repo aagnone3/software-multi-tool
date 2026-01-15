@@ -106,6 +106,12 @@ export const AuditLogScalarFieldEnumSchema = z.enum(['id', 'createdAt', 'userId'
 
 export type AuditLogScalarFieldEnumEnum = z.infer<typeof AuditLogScalarFieldEnumSchema>;
 
+// File: NotificationScalarFieldEnum.schema.ts
+
+export const NotificationScalarFieldEnumSchema = z.enum(['id', 'createdAt', 'userId', 'type', 'category', 'title', 'body', 'actionUrl', 'read', 'readAt'])
+
+export type NotificationScalarFieldEnumEnum = z.infer<typeof NotificationScalarFieldEnumSchema>;
+
 // File: ArchiveScalarFieldEnum.schema.ts
 
 export const ArchiveScalarFieldEnumSchema = z.enum(['id', 'name', 'priority', 'data', 'state', 'retry_limit', 'retry_count', 'retry_delay', 'retry_backoff', 'start_after', 'started_on', 'singleton_key', 'singleton_on', 'created_on', 'completed_on', 'keep_until', 'output', 'dead_letter', 'policy', 'archived_on'])
@@ -487,6 +493,24 @@ export const AuditLogSchema = z.object({
 });
 
 export type AuditLogType = z.infer<typeof AuditLogSchema>;
+
+
+// File: Notification.schema.ts
+
+export const NotificationSchema = z.object({
+  id: z.string(),
+  createdAt: z.date(),
+  userId: z.string(),
+  type: z.string(),
+  category: z.string(),
+  title: z.string(),
+  body: z.string(),
+  actionUrl: z.string().nullish(),
+  read: z.boolean(),
+  readAt: z.date().nullish(),
+});
+
+export type NotificationType = z.infer<typeof NotificationSchema>;
 
 
 // File: archive.schema.ts
