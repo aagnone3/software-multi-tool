@@ -1,5 +1,6 @@
 import { db } from "@repo/database";
 import { logger } from "@repo/logs";
+import { JOB_EXPIRE_IN_INTERVAL, RETRY_CONFIG } from "./job-config";
 
 /**
  * Job queue abstraction for submitting jobs to pg-boss
@@ -13,6 +14,11 @@ import { logger } from "@repo/logs";
  * - Job is inserted into pgboss.job table
  * - api-server workers poll pgboss.job and process jobs
  * - Vercel Cron handles maintenance (stuck jobs, cleanup)
+ *
+ * Timeout Configuration:
+ * - All timeout values are centralized in job-config.ts
+ * - Job expiration defaults to JOB_EXPIRE_IN_INTERVAL (10 minutes)
+ * - Retry configuration uses RETRY_CONFIG for consistency
  */
 
 interface SubmitJobOptions {
@@ -29,8 +35,9 @@ interface SubmitJobOptions {
 	startAfter?: Date;
 
 	/**
-	 * Job expiration interval
-	 * @default 00:15:00 (15 minutes)
+	 * Job expiration interval (PostgreSQL interval format).
+	 * Jobs are marked "expired" if active longer than this.
+	 * @default JOB_EXPIRE_IN_INTERVAL from job-config.ts (10 minutes)
 	 */
 	expireIn?: string;
 
@@ -56,7 +63,7 @@ export async function submitJobToQueue(
 	const {
 		priority = 0,
 		startAfter,
-		expireIn = "00:15:00",
+		expireIn = JOB_EXPIRE_IN_INTERVAL,
 		singletonKey,
 	} = options;
 
@@ -87,9 +94,9 @@ export async function submitJobToQueue(
 				${startAfter ?? new Date()},
 				${expireIn}::interval,
 				${singletonKey ?? null},
-				3,
-				60,
-				true
+				${RETRY_CONFIG.limit},
+				${RETRY_CONFIG.delay},
+				${RETRY_CONFIG.backoff}
 			)
 			RETURNING id::text
 		`;

@@ -1,7 +1,10 @@
 // Import processors from @repo/api
 // Each processor knows how to handle a specific job type
 import {
-	DEFAULT_JOB_TIMEOUT_MS,
+	JOB_TIMEOUT_MS,
+	WORKER_CONFIG,
+} from "@repo/api/modules/jobs/lib/job-config";
+import {
 	getProcessor,
 	type JobResult,
 	withTimeout,
@@ -11,17 +14,16 @@ import { registerAllProcessors } from "@repo/api/modules/jobs/lib/register-all-p
 import { registerNewsAnalyzerProcessor } from "@repo/api/modules/news-analyzer/lib/register";
 import { db } from "@repo/database";
 import { logger } from "../lib/logger.js";
-import { getPgBoss } from "../lib/pg-boss.js";
+import { getPgBoss, registerExpireHandler } from "../lib/pg-boss.js";
 import type { JobPayload, WorkerConfig } from "./types.js";
 
 /**
- * Default worker configuration
- * - batchSize: Number of jobs to fetch at once
- * - pollingIntervalSeconds: How often to poll for new jobs
+ * Worker configuration imported from centralized job-config.
+ * See job-config.ts for details on batch size and polling intervals.
  */
 const DEFAULT_WORKER_CONFIG: WorkerConfig = {
-	batchSize: 5,
-	pollingIntervalSeconds: 2,
+	batchSize: WORKER_CONFIG.batchSize,
+	pollingIntervalSeconds: WORKER_CONFIG.pollingIntervalSeconds,
 };
 
 /**
@@ -158,13 +160,11 @@ async function processSingleJob(
 
 	try {
 		// Execute the processor with timeout to prevent indefinite hangs
+		// Timeout is configured in job-config.ts (JOB_TIMEOUT_MS)
 		logger.debug(
-			`[Worker:${toolSlug}] Executing processor with ${DEFAULT_JOB_TIMEOUT_MS}ms timeout`,
+			`[Worker:${toolSlug}] Executing processor with ${JOB_TIMEOUT_MS}ms timeout`,
 		);
-		const result = await withTimeout(
-			processor(toolJob),
-			DEFAULT_JOB_TIMEOUT_MS,
-		);
+		const result = await withTimeout(processor(toolJob), JOB_TIMEOUT_MS);
 
 		if (result.success) {
 			// Mark job as completed
@@ -313,6 +313,14 @@ export async function registerWorkers(): Promise<void> {
 	}
 
 	logger.info(`Registered ${TOOL_SLUGS.length} pg-boss workers`);
+
+	// Register expire handlers for each queue
+	// When pg-boss marks a job as expired, this updates the ToolJob status
+	logger.info("Registering expire handlers...");
+	for (const toolSlug of TOOL_SLUGS) {
+		await registerExpireHandler(toolSlug);
+	}
+	logger.info(`Registered ${TOOL_SLUGS.length} expire handlers`);
 }
 
 /**

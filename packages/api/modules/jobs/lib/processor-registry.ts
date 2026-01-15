@@ -1,4 +1,5 @@
 import type { Prisma, ToolJob } from "@repo/database";
+import { JOB_TIMEOUT_MS } from "./job-config";
 
 export interface JobResult {
 	success: boolean;
@@ -26,12 +27,28 @@ export function getRegisteredTools(): string[] {
 	return Array.from(processors.keys());
 }
 
-// Default timeout for job processing (5 minutes)
-export const DEFAULT_JOB_TIMEOUT_MS = 5 * 60 * 1000;
+/**
+ * Default timeout for job processing.
+ *
+ * @deprecated Import JOB_TIMEOUT_MS from './job-config' instead.
+ * This export is kept for backwards compatibility.
+ */
+export const DEFAULT_JOB_TIMEOUT_MS = JOB_TIMEOUT_MS;
 
+/**
+ * Wrap a promise with a timeout.
+ *
+ * If the promise doesn't resolve within the specified timeout,
+ * a TimeoutError is thrown.
+ *
+ * @param promise - The promise to wrap
+ * @param timeoutMs - Timeout in milliseconds (default: JOB_TIMEOUT_MS from job-config)
+ * @returns The resolved value of the promise
+ * @throws Error if the promise times out
+ */
 export async function withTimeout<T>(
 	promise: Promise<T>,
-	timeoutMs: number = DEFAULT_JOB_TIMEOUT_MS,
+	timeoutMs: number = JOB_TIMEOUT_MS,
 ): Promise<T> {
 	const timeoutPromise = new Promise<never>((_, reject) => {
 		setTimeout(() => {

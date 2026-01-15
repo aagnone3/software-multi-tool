@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { JOB_TIMEOUT_MS } from "./job-config";
 import {
 	DEFAULT_JOB_TIMEOUT_MS,
 	getProcessor,
@@ -26,8 +27,10 @@ describe("processor-registry", () => {
 			);
 		});
 
-		it("should use default timeout if none provided", async () => {
-			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(5 * 60 * 1000); // 5 minutes
+		it("should use default timeout from job-config", async () => {
+			// DEFAULT_JOB_TIMEOUT_MS is now an alias for JOB_TIMEOUT_MS
+			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(JOB_TIMEOUT_MS);
+			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(10 * 60 * 1000); // 10 minutes
 		});
 
 		it("should propagate original error if promise rejects before timeout", async () => {
@@ -77,8 +80,9 @@ describe("processor-registry", () => {
 	});
 
 	describe("DEFAULT_JOB_TIMEOUT_MS", () => {
-		it("should be 5 minutes (300000ms)", () => {
-			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(300000);
+		it("should be 10 minutes (600000ms) - aligned with job-config", () => {
+			// Timeout was unified to 10 minutes for consistency with pg-boss expiration
+			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(600000);
 		});
 	});
 });
