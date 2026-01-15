@@ -1,4 +1,4 @@
-import type { Config, PlanCredits } from "./types";
+import type { Config, CreditPack, PlanCredits } from "./types";
 
 export const config = {
 	appName: "Software Multitool",
@@ -291,6 +291,37 @@ export const config = {
 				],
 			},
 		},
+		// One-time purchasable credit packs
+		// Volume discounts: Boost ($0.10/credit), Bundle ($0.075/credit), Vault ($0.06/credit)
+		creditPacks: [
+			{
+				id: "boost",
+				name: "Boost",
+				credits: 50,
+				priceId: process.env
+					.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BOOST as string,
+				amount: 4.99,
+				currency: "USD",
+			},
+			{
+				id: "bundle",
+				name: "Bundle",
+				credits: 200,
+				priceId: process.env
+					.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BUNDLE as string,
+				amount: 14.99,
+				currency: "USD",
+			},
+			{
+				id: "vault",
+				name: "Vault",
+				credits: 500,
+				priceId: process.env
+					.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_VAULT as string,
+				amount: 29.99,
+				currency: "USD",
+			},
+		],
 	},
 } as const satisfies Config;
 
@@ -315,4 +346,34 @@ export function getToolCreditCost(toolSlug: string): number | undefined {
 	return tool?.creditCost;
 }
 
-export type { Config, PlanCredits };
+/**
+ * Get all available credit packs
+ * @returns Array of all credit packs
+ */
+export function getCreditPacks(): readonly CreditPack[] {
+	return config.payments.creditPacks ?? [];
+}
+
+/**
+ * Get a specific credit pack by ID
+ * @param packId - The credit pack identifier (e.g., 'boost', 'bundle', 'vault')
+ * @returns The credit pack configuration, or undefined if not found
+ */
+export function getCreditPackById(packId: string): CreditPack | undefined {
+	return config.payments.creditPacks?.find((pack) => pack.id === packId);
+}
+
+/**
+ * Get a credit pack by its Stripe price ID
+ * @param priceId - The Stripe price ID
+ * @returns The credit pack configuration, or undefined if not found
+ */
+export function getCreditPackByPriceId(
+	priceId: string,
+): CreditPack | undefined {
+	return config.payments.creditPacks?.find(
+		(pack) => pack.priceId === priceId,
+	);
+}
+
+export type { Config, CreditPack, PlanCredits };

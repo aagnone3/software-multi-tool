@@ -24,6 +24,32 @@ export interface PlanCredits {
 /** Unit of measurement for credit costs on variable-cost tools */
 export type CreditUnit = "request" | "minute" | "page";
 
+/**
+ * A one-time purchasable credit pack.
+ *
+ * Credit packs allow users to purchase additional credits when they run out
+ * or need extra capacity beyond their plan's included credits.
+ *
+ * Pricing tiers offer volume discounts:
+ * - Boost: $0.10/credit (smallest pack, no discount)
+ * - Bundle: $0.075/credit (25% discount)
+ * - Vault: $0.06/credit (40% discount)
+ */
+export interface CreditPack {
+	/** Unique identifier for the credit pack (e.g., 'boost', 'bundle', 'vault') */
+	id: string;
+	/** Display name for the credit pack */
+	name: string;
+	/** Number of credits included in this pack */
+	credits: number;
+	/** Stripe price ID for this credit pack (one-time payment) */
+	priceId: string;
+	/** Price in USD (one-time payment) */
+	amount: number;
+	/** Currency code (e.g., 'USD') */
+	currency: string;
+}
+
 export interface ToolConfig {
 	slug: string;
 	name: string;
@@ -131,5 +157,7 @@ export type Config = {
 				>;
 			};
 		};
+		/** One-time purchasable credit packs */
+		creditPacks?: CreditPack[];
 	};
 };
