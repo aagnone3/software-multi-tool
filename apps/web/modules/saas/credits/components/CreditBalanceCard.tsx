@@ -1,5 +1,7 @@
 "use client";
 
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { Button } from "@ui/components/button";
 import {
 	Card,
 	CardContent,
@@ -9,7 +11,8 @@ import {
 } from "@ui/components/card";
 import { Progress } from "@ui/components/progress";
 import { cn } from "@ui/lib";
-import { CoinsIcon } from "lucide-react";
+import { ChevronRightIcon, CoinsIcon } from "lucide-react";
+import Link from "next/link";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 interface CreditBalanceCardProps {
@@ -19,6 +22,11 @@ interface CreditBalanceCardProps {
 export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 	const { balance, isLoading, percentageUsed, isLowCredits } =
 		useCreditsBalance();
+	const { activeOrganization } = useActiveOrganization();
+
+	const usageHistoryPath = activeOrganization
+		? `/app/${activeOrganization.slug}/settings/billing/usage`
+		: "/app/settings/billing/usage";
 
 	if (isLoading) {
 		return (
@@ -138,6 +146,13 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 							: "Billing period ending soon"}
 					</p>
 				</div>
+
+				<Button variant="outline" className="w-full" asChild>
+					<Link href={usageHistoryPath}>
+						View usage history
+						<ChevronRightIcon className="size-4 ml-auto" />
+					</Link>
+				</Button>
 			</CardContent>
 		</Card>
 	);
