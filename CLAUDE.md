@@ -246,7 +246,23 @@ The repository enforces quality gates via `pre-commit`. Install with `pre-commit
 1. `pnpm exec biome check --write` - Format + lint staged files
 2. `pnpm lint` - Workspace-wide Biome lint
 3. `pnpm --filter web run type-check` - TypeScript checks for web app
-4. Targeted tests on affected workspaces
+4. Prisma client sync check (when schema/migrations are staged)
+5. Targeted tests on affected workspaces
+
+#### Prisma Client Sync Check
+
+When committing changes to `packages/database/prisma/schema.prisma` or migrations, the pre-commit hook automatically:
+
+1. Runs `prisma generate` to regenerate the client and Zod schemas
+2. Verifies the generated Zod files in `packages/database/prisma/zod/` are staged
+
+If the generated files differ from what's staged, the commit fails with instructions to stage the updated files:
+
+```bash
+git add packages/database/prisma/zod/
+```
+
+This prevents stale Prisma clients from being committed, catching sync issues before they reach CI or production.
 
 ## Bundling Best Practices (api-server)
 
