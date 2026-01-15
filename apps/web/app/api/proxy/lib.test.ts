@@ -164,6 +164,22 @@ describe("API Proxy lib", () => {
 			expect(result.get("connection")).toBeNull();
 			expect(result.get("transfer-encoding")).toBeNull();
 		});
+
+		it("strips content-encoding to prevent ERR_CONTENT_DECODING_FAILED", () => {
+			// When fetch() auto-decompresses a gzipped response, the body is
+			// decompressed but the Content-Encoding header remains. Forwarding
+			// this header causes browsers to try to decompress already-decompressed content.
+			const headers = new Headers();
+			headers.set("content-type", "application/json");
+			headers.set("content-encoding", "gzip");
+			headers.set("content-length", "1234");
+
+			const result = prepareResponseHeaders(headers);
+
+			expect(result.get("content-type")).toBe("application/json");
+			expect(result.get("content-encoding")).toBeNull();
+			expect(result.get("content-length")).toBeNull();
+		});
 	});
 
 	describe("isStreamingResponse", () => {
@@ -206,6 +222,13 @@ describe("API Proxy lib", () => {
 			expect(HOP_BY_HOP_HEADERS.has("transfer-encoding")).toBe(true);
 			expect(HOP_BY_HOP_HEADERS.has("upgrade")).toBe(true);
 			expect(HOP_BY_HOP_HEADERS.has("host")).toBe(true);
+		});
+
+		it("contains content-encoding to prevent ERR_CONTENT_DECODING_FAILED", () => {
+			// fetch() auto-decompresses responses but leaves the Content-Encoding header.
+			// Forwarding this header causes browsers to try to decompress already-decompressed content.
+			expect(HOP_BY_HOP_HEADERS.has("content-encoding")).toBe(true);
+			expect(HOP_BY_HOP_HEADERS.has("content-length")).toBe(true);
 		});
 
 		it("does not contain regular headers", () => {

@@ -7,6 +7,8 @@
  */
 
 // Headers that should not be forwarded (hop-by-hop headers)
+// Also includes content-encoding and content-length because fetch() auto-decompresses
+// responses, so forwarding these would cause ERR_CONTENT_DECODING_FAILED
 export const HOP_BY_HOP_HEADERS = new Set([
 	"connection",
 	"keep-alive",
@@ -18,6 +20,12 @@ export const HOP_BY_HOP_HEADERS = new Set([
 	"upgrade",
 	// Also exclude host as it should reflect the target
 	"host",
+	// Content-encoding must be stripped because fetch() auto-decompresses
+	// the response body, but leaves the header. Forwarding this header
+	// causes browsers to try to decompress already-decompressed content.
+	"content-encoding",
+	// Content-length is invalid after decompression changes the body size
+	"content-length",
 ]);
 
 /**

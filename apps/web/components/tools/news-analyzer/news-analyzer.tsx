@@ -21,12 +21,19 @@ interface CreateJobResponse {
 	};
 }
 
+// Polling configuration
+const POLL_INTERVAL_MS = 2000; // Poll every 2 seconds
+const MAX_POLL_RETRIES = 3; // Number of consecutive failures before giving up
+const MAX_POLL_DURATION_MS = 5 * 60 * 1000; // 5 minutes max polling duration
+
 export function NewsAnalyzer() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<NewsAnalysisOutput | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [pollingIntervalId, setPollingIntervalId] =
 		useState<NodeJS.Timeout | null>(null);
+	const pollRetryCount = useRef(0);
+	const pollStartTime = useRef<number | null>(null);
 
 	// Analytics tracking
 	const {
@@ -115,11 +122,37 @@ export function NewsAnalyzer() {
 		},
 	});
 
-	// Poll job status
+	// Poll job status with retry logic for transient errors
 	const pollJobStatus = async (id: string) => {
+		// Check if we've exceeded the maximum polling duration
+		if (
+			pollStartTime.current &&
+			Date.now() - pollStartTime.current > MAX_POLL_DURATION_MS
+		) {
+			setError(
+				"Analysis is taking longer than expected. Please try again later.",
+			);
+			stopPolling();
+
+			// Track timeout
+			const duration = processingStartTime.current
+				? Date.now() - processingStartTime.current
+				: 0;
+			trackProcessingFailed({
+				jobId: id,
+				errorType: "polling_timeout",
+				processingDurationMs: duration,
+			});
+			processingStartTime.current = null;
+			return;
+		}
+
 		try {
 			const response = await orpcClient.jobs.get({ jobId: id });
 			const job = response.job;
+
+			// Reset retry count on successful poll
+			pollRetryCount.current = 0;
 
 			if (job.status === "COMPLETED" && job.output) {
 				setResult(job.output as unknown as NewsAnalysisOutput);
@@ -150,34 +183,59 @@ export function NewsAnalyzer() {
 					processingDurationMs: duration,
 				});
 				processingStartTime.current = null;
+			} else if (job.status === "CANCELLED") {
+				setError("Analysis was cancelled");
+				stopPolling();
+
+				// Track cancellation
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingFailed({
+					jobId: id,
+					errorType: "job_cancelled",
+					processingDurationMs: duration,
+				});
+				processingStartTime.current = null;
 			}
 			// Continue polling if PENDING or PROCESSING
 		} catch (err) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to check job status",
-			);
-			stopPolling();
+			// Increment retry count for transient errors
+			pollRetryCount.current += 1;
 
-			// Track polling error
-			const duration = processingStartTime.current
-				? Date.now() - processingStartTime.current
-				: 0;
-			trackProcessingFailed({
-				jobId: id,
-				errorType: "polling_error",
-				processingDurationMs: duration,
-			});
-			processingStartTime.current = null;
+			// Only give up after multiple consecutive failures
+			if (pollRetryCount.current >= MAX_POLL_RETRIES) {
+				setError(
+					err instanceof Error
+						? err.message
+						: "Failed to check job status after multiple attempts",
+				);
+				stopPolling();
+
+				// Track polling error
+				const duration = processingStartTime.current
+					? Date.now() - processingStartTime.current
+					: 0;
+				trackProcessingFailed({
+					jobId: id,
+					errorType: "polling_error",
+					processingDurationMs: duration,
+				});
+				processingStartTime.current = null;
+			}
+			// Otherwise, silently continue polling - the error may be transient
 		}
 	};
 
 	const startPolling = (id: string) => {
-		// Poll every 2 seconds
+		// Reset retry count and start time
+		pollRetryCount.current = 0;
+		pollStartTime.current = Date.now();
+
+		// Poll at configured interval
 		const intervalId = setInterval(() => {
 			pollJobStatus(id);
-		}, 2000);
+		}, POLL_INTERVAL_MS);
 		setPollingIntervalId(intervalId);
 
 		// Also poll immediately
