@@ -28,14 +28,10 @@ export const HOP_BY_HOP_HEADERS = new Set([
 	"content-length",
 ]);
 
-// Headers that should not be forwarded in responses
-// Content-encoding is stripped because fetch() automatically decompresses responses,
-// so passing the header would cause ERR_CONTENT_DECODING_FAILED in the browser
-export const RESPONSE_HEADERS_TO_STRIP = new Set([
-	...HOP_BY_HOP_HEADERS,
-	"content-encoding",
-	"content-length", // Length changes after decompression
-]);
+// RESPONSE_HEADERS_TO_STRIP is now the same as HOP_BY_HOP_HEADERS since
+// content-encoding and content-length are included there.
+// Exported for backwards compatibility with tests.
+export const RESPONSE_HEADERS_TO_STRIP = HOP_BY_HOP_HEADERS;
 
 /**
  * Build target URL from the proxy path and query parameters

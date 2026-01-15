@@ -241,9 +241,10 @@ describe("API Proxy lib", () => {
 
 	describe("RESPONSE_HEADERS_TO_STRIP", () => {
 		it("contains all hop-by-hop headers", () => {
-			for (const header of HOP_BY_HOP_HEADERS) {
+			// Use Array.from to avoid downlevelIteration issues
+			Array.from(HOP_BY_HOP_HEADERS).forEach((header) => {
 				expect(RESPONSE_HEADERS_TO_STRIP.has(header)).toBe(true);
-			}
+			});
 		});
 
 		it("contains content-encoding and content-length", () => {
