@@ -436,7 +436,12 @@ async function waitForVercelPreview(prNumber, options = {}) {
 	);
 }
 
-async function setVercelEnvVar(key, value, target = "preview") {
+async function setVercelEnvVar(
+	key,
+	value,
+	target = "preview",
+	gitBranch = null,
+) {
 	const projectId = process.env.VERCEL_PROJECT;
 	if (!projectId) {
 		throw new Error("VERCEL_PROJECT environment variable is required");
@@ -444,14 +449,28 @@ async function setVercelEnvVar(key, value, target = "preview") {
 
 	// First, check if the env var exists and its current value
 	const envVars = await vercelRequest(`/v10/projects/${projectId}/env`);
-	const existing = envVars.envs?.find(
-		(e) => e.key === key && e.target.includes(target) && !e.gitBranch,
-	);
+
+	// When gitBranch is specified, look for a branch-specific env var
+	// Otherwise look for a global env var (no gitBranch)
+	const existing = envVars.envs?.find((e) => {
+		if (e.key !== key) return false;
+		if (!e.target.includes(target)) return false;
+		if (gitBranch) {
+			// Looking for branch-specific: must match the branch
+			return e.gitBranch === gitBranch;
+		}
+		// Looking for global: must not have a gitBranch
+		return !e.gitBranch;
+	});
+
+	const branchLabel = gitBranch ? ` (branch: ${gitBranch})` : "";
 
 	if (existing) {
 		// Check if value is unchanged (Vercel returns decrypted values for comparison)
 		if (existing.value === value) {
-			console.log(`[Vercel] ${target} env var unchanged: ${key}`);
+			console.log(
+				`[Vercel] ${target} env var unchanged: ${key}${branchLabel}`,
+			);
 			return false;
 		}
 		// Update existing
@@ -459,21 +478,26 @@ async function setVercelEnvVar(key, value, target = "preview") {
 			method: "PATCH",
 			body: JSON.stringify({ value }),
 		});
-		console.log(`[Vercel] Updated ${target} env var: ${key}`);
+		console.log(`[Vercel] Updated ${target} env var: ${key}${branchLabel}`);
 		return true;
 	}
 
-	// Create new
+	// Create new - include gitBranch if specified
+	const envVarPayload = {
+		key,
+		value,
+		target: [target],
+		type: target === "development" ? "plain" : "encrypted",
+	};
+	if (gitBranch) {
+		envVarPayload.gitBranch = gitBranch;
+	}
+
 	await vercelRequest(`/v10/projects/${projectId}/env`, {
 		method: "POST",
-		body: JSON.stringify({
-			key,
-			value,
-			target: [target],
-			type: target === "development" ? "plain" : "encrypted",
-		}),
+		body: JSON.stringify(envVarPayload),
 	});
-	console.log(`[Vercel] Created ${target} env var: ${key}`);
+	console.log(`[Vercel] Created ${target} env var: ${key}${branchLabel}`);
 	return true;
 }
 
@@ -709,9 +733,26 @@ async function syncCommand(args) {
 		}
 	}
 
-	// Update Vercel with Render URL
-	if (renderUrl) {
-		console.log("\n[Vercel] Updating API server URL...");
+	// Update Vercel with Render URL - set as branch-specific so each PR preview
+	// gets its own Render URL (otherwise PRs would overwrite each other's values)
+	if (renderUrl && args.branch) {
+		console.log("\n[Vercel] Updating API server URL (branch-specific)...");
+		vercelEnvChanged = await setVercelEnvVar(
+			"NEXT_PUBLIC_API_SERVER_URL",
+			renderUrl,
+			"preview",
+			args.branch, // Branch-specific env var
+		);
+		if (vercelEnvChanged) {
+			console.log(
+				`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
+			);
+		}
+	} else if (renderUrl) {
+		// Fallback to global preview if no branch specified (shouldn't happen in normal flow)
+		console.log(
+			"\n[Vercel] Updating API server URL (global preview - no branch specified)...",
+		);
 		vercelEnvChanged = await setVercelEnvVar(
 			"NEXT_PUBLIC_API_SERVER_URL",
 			renderUrl,
