@@ -351,3 +351,75 @@ The `sync-preview-environments` workflow automatically:
 2. **Check content-type:**
    - Should be `multipart/form-data`
    - Boundary must be preserved
+
+### Jobs Created But Not In Database (Preview)
+
+**Symptom:** Job creation API returns success, but jobs don't appear in the expected Supabase preview database.
+
+**Root causes:**
+
+1. **Stale Vercel deployment**: Environment variables changed but deployment wasn't redeployed
+2. **Wrong Render service**: Proxy forwarding to a different PR's Render service
+3. **Generic vs branch-specific env vars**: Another PR's preview-sync overwrote the generic preview env var
+
+**Diagnosis:**
+
+1. Check which `NEXT_PUBLIC_API_SERVER_URL` value is being used:
+
+   ```bash
+   vercel env ls preview | grep API_SERVER
+   ```
+
+2. Look for both generic and branch-specific entries:
+   - Generic: `Preview` (no branch)
+   - Branch-specific: `Preview (branch-name)`
+
+3. **Branch-specific should take precedence**, but may require redeployment
+
+**Resolution:**
+
+1. **Trigger a new Vercel deployment** after setting env vars:
+
+   ```bash
+   # Push any commit to trigger redeploy
+   git commit --allow-empty -m "chore: trigger redeploy" && git push
+   ```
+
+2. **Delete stale generic preview env vars** if they conflict:
+
+   ```bash
+   vercel env rm NEXT_PUBLIC_API_SERVER_URL preview
+   ```
+
+3. **Verify the correct Render URL** is being used:
+   - Check Render dashboard for PR-specific service URL
+   - Compare with Vercel env var value
+
+### Environment Variable Precedence
+
+The proxy checks environment variables in this order:
+
+```typescript
+const API_SERVER_URL =
+  process.env.API_SERVER_URL ||           // 1. Server-only (highest priority)
+  process.env.NEXT_PUBLIC_API_SERVER_URL || // 2. Public (set by preview-sync)
+  "http://localhost:3501";                  // 3. Fallback (development only)
+```
+
+**Important:** The `preview-sync` workflow sets `NEXT_PUBLIC_API_SERVER_URL` (not `API_SERVER_URL`), so the proxy must check both.
+
+### Vercel Environment Variable Behavior
+
+**Critical:** Vercel bakes environment variables into deployments at build time.
+
+- Setting/changing an env var does **NOT** automatically update existing deployments
+- A new deployment must be triggered for changes to take effect
+- Branch-specific env vars (set with `gitBranch` parameter) should override generic ones
+
+**Branch-specific env vars** are set by `preview-sync` with:
+
+```javascript
+await setVercelEnvVar("NEXT_PUBLIC_API_SERVER_URL", renderUrl, "preview", branchName);
+```
+
+This ensures each PR's preview deployment uses its own Render service URL.

@@ -424,6 +424,64 @@ WHERE state = 'active'
 AND started_on < NOW() - INTERVAL '1 hour';
 ```
 
+### Preview Environment Jobs Not Working
+
+**Symptom:** Jobs submitted in preview environment return success but never appear in the database or get processed.
+
+**Common causes:**
+
+1. **Wrong database**: Render service pointing to wrong Supabase preview branch
+2. **Wrong Render service**: Vercel proxy forwarding to a different PR's Render
+3. **Stale deployment**: Vercel env vars changed but deployment not redeployed
+
+**Diagnosis checklist:**
+
+1. **Verify Render's DATABASE_URL points to correct Supabase branch:**
+
+   ```bash
+   pnpm --filter @repo/scripts render env list --service <service-id> | grep DATABASE
+   ```
+
+   - The URL should contain the correct Supabase preview project_ref
+
+2. **Verify Vercel proxy is using correct Render URL:**
+
+   ```bash
+   vercel env ls preview | grep API_SERVER
+   ```
+
+   - Look for branch-specific entry matching your PR
+
+3. **Check which database the job landed in:**
+
+   ```sql
+   -- Query each Supabase preview branch to find the job
+   SELECT id, status, "createdAt" FROM tool_job WHERE id = '<job-id>';
+   ```
+
+**Resolution:**
+
+1. **Re-run preview-sync** to ensure all env vars are correctly set:
+
+   ```bash
+   node tooling/scripts/src/preview-sync/index.mjs sync \
+     --branch <branch-name> \
+     --pr <pr-number>
+   ```
+
+2. **Trigger Vercel redeploy** to pick up new env vars:
+
+   ```bash
+   git commit --allow-empty -m "chore: trigger redeploy" && git push
+   ```
+
+3. **Verify all three services are aligned:**
+   - Supabase preview branch → correct DATABASE_URL on Render
+   - Render preview URL → correct NEXT_PUBLIC_API_SERVER_URL on Vercel
+   - All env vars picked up by current deployment
+
+See also: `api-proxy` skill for detailed proxy troubleshooting.
+
 ## Anonymous Job Ownership
 
 Jobs can be created by anonymous users (not logged in). To verify ownership when polling:

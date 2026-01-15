@@ -497,6 +497,36 @@ The workflow handles race conditions by:
 2. Check Supabase project settings → Integrations
 3. Look for errors in GitHub check details
 
+**Preview environment env vars not taking effect**:
+
+Vercel bakes environment variables into deployments at build time. Changing env vars does NOT automatically update existing deployments.
+
+1. **After preview-sync completes**, trigger a Vercel redeploy:
+
+   ```bash
+   git commit --allow-empty -m "chore: trigger redeploy" && git push
+   ```
+
+2. **Check if env var is branch-specific**:
+
+   ```bash
+   vercel env ls preview | grep <VAR_NAME>
+   # Look for entries with (branch-name) suffix
+   ```
+
+3. **Verify branch-specific takes precedence**: Branch-specific env vars should override generic preview vars, but may need a fresh deployment.
+
+**Jobs going to wrong database in preview**:
+
+If jobs are created but appear in a different PR's database:
+
+1. Check `NEXT_PUBLIC_API_SERVER_URL` points to correct Render service
+2. Verify Render's `DATABASE_URL` points to correct Supabase branch
+3. Re-run preview-sync with correct branch/PR arguments
+4. Trigger Vercel redeploy to pick up new env vars
+
+See also: `api-proxy` and `async-jobs` skills for detailed troubleshooting.
+
 **Session authentication not working in preview**:
 
 1. Check browser DevTools Network tab - requests should go to `/api/proxy/*`
