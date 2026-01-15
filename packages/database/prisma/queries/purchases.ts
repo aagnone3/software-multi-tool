@@ -61,7 +61,9 @@ export async function updatePurchase(
 }
 
 export async function deletePurchaseBySubscriptionId(subscriptionId: string) {
-	await db.purchase.delete({
+	// Use deleteMany to safely handle case where no record exists
+	// (e.g., webhook retries or test cleanup scenarios)
+	await db.purchase.deleteMany({
 		where: {
 			subscriptionId,
 		},
