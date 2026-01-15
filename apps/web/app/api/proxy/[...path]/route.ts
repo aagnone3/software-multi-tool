@@ -18,7 +18,11 @@ import {
  * Preview: Browser → Next.js proxy → api-server (proxy makes it same-origin)
  */
 
-const API_SERVER_URL = process.env.API_SERVER_URL || "http://localhost:3501";
+// Check both server-only and public env vars since the preview-sync workflow sets NEXT_PUBLIC_API_SERVER_URL
+const API_SERVER_URL =
+	process.env.API_SERVER_URL ||
+	process.env.NEXT_PUBLIC_API_SERVER_URL ||
+	"http://localhost:3501";
 
 /**
  * Main proxy handler
