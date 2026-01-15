@@ -9,6 +9,7 @@ import { cn } from "@ui/lib";
 import {
 	BotMessageSquareIcon,
 	ChevronRightIcon,
+	CoinsIcon,
 	HomeIcon,
 	SettingsIcon,
 	UserCog2Icon,
@@ -51,6 +52,14 @@ export function NavBar() {
 			icon: BotMessageSquareIcon,
 			isActive: pathname.includes("/chatbot"),
 		},
+		{
+			label: "Usage",
+			href: activeOrganization
+				? `/app/${activeOrganization.slug}/settings/billing/usage`
+				: "/app/settings/billing/usage",
+			icon: CoinsIcon,
+			isActive: pathname.includes("/billing/usage"),
+		},
 		...(activeOrganization && !config.organizations.hideOrganization
 			? [
 					{
@@ -63,7 +72,7 @@ export function NavBar() {
 			: []),
 		{
 			label: "Account settings",
-			href: "/app/settings",
+			href: "/app/settings/general",
 			icon: UserCog2Icon,
 			isActive: pathname.startsWith("/app/settings/"),
 		},
