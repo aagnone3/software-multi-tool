@@ -248,7 +248,9 @@ describe("API Proxy lib", () => {
 		});
 
 		it("contains content-encoding and content-length", () => {
-			expect(RESPONSE_HEADERS_TO_STRIP.has("content-encoding")).toBe(true);
+			expect(RESPONSE_HEADERS_TO_STRIP.has("content-encoding")).toBe(
+				true,
+			);
 			expect(RESPONSE_HEADERS_TO_STRIP.has("content-length")).toBe(true);
 		});
 

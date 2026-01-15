@@ -769,7 +769,9 @@ async function syncCommand(args) {
 			args.branch,
 		);
 		if (apiServerUrlChanged) {
-			console.log(`  - API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`);
+			console.log(
+				`  - API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
+			);
 			vercelEnvChanged = true;
 		}
 
