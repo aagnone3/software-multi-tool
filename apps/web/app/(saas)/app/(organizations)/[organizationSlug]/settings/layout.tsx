@@ -6,6 +6,7 @@ import { SettingsMenu } from "@saas/settings/components/SettingsMenu";
 import { PageHeader } from "@saas/shared/components/PageHeader";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import {
+	CoinsIcon,
 	CreditCardIcon,
 	Settings2Icon,
 	TriangleAlertIcon,
@@ -68,6 +69,11 @@ export default async function SettingsLayout({
 							},
 						]
 					: []),
+				{
+					title: "Usage",
+					href: `${organizationSettingsBasePath}/usage`,
+					icon: <CoinsIcon className="size-4 opacity-50" />,
+				},
 				...(userIsOrganizationAdmin
 					? [
 							{

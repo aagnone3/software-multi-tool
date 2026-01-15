@@ -252,7 +252,7 @@ describe("CommandPalette", () => {
 	it("displays navigation pages", () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
-		expect(screen.getByText("Start")).toBeInTheDocument();
+		expect(screen.getByText("Home")).toBeInTheDocument();
 		expect(screen.getByText("AI Chatbot")).toBeInTheDocument();
 		expect(screen.getByText("Settings")).toBeInTheDocument();
 		expect(screen.getByText("Usage")).toBeInTheDocument();

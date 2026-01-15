@@ -5,6 +5,7 @@ import { PageHeader } from "@saas/shared/components/PageHeader";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import {
+	CoinsIcon,
 	CreditCardIcon,
 	DownloadIcon,
 	LockKeyholeIcon,
@@ -52,6 +53,11 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 							},
 						]
 					: []),
+				{
+					title: "Usage",
+					href: "/app/settings/usage",
+					icon: <CoinsIcon className="size-4 opacity-50" />,
+				},
 				{
 					title: "Privacy",
 					href: "/app/settings/privacy",
