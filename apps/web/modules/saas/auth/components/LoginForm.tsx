@@ -25,6 +25,7 @@ import {
 	EyeOffIcon,
 	KeyIcon,
 	MailboxIcon,
+	ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -38,6 +39,7 @@ import {
 	oAuthProviders,
 } from "../constants/oauth-providers";
 import { useSession } from "../hooks/use-session";
+import { isDevEnvironment } from "../lib/is-dev-environment";
 import { LoginModeSwitch } from "./LoginModeSwitch";
 import { SocialSigninButton } from "./SocialSigninButton";
 
@@ -150,6 +152,50 @@ export function LoginForm() {
 	};
 
 	const signinMode = form.watch("mode");
+
+	// Quick login for non-production environments
+	const isNonProduction = isDevEnvironment();
+	const [isQuickLoggingIn, setIsQuickLoggingIn] = useState(false);
+
+	const handleQuickLogin = async () => {
+		setIsQuickLoggingIn(true);
+		try {
+			const { data, error } = await authClient.signIn.email({
+				email: "test@preview.local",
+				password: "PreviewPassword123!",
+			});
+
+			if (error) {
+				throw error;
+			}
+
+			if ((data as any).twoFactorRedirect) {
+				router.replace(
+					withQuery(
+						"/auth/verify",
+						Object.fromEntries(searchParams.entries()),
+					),
+				);
+				return;
+			}
+
+			queryClient.invalidateQueries({
+				queryKey: sessionQueryKey,
+			});
+
+			router.replace(redirectPath);
+		} catch (e) {
+			form.setError("root", {
+				message: getAuthErrorMessage(
+					e && typeof e === "object" && "code" in e
+						? (e.code as string)
+						: undefined,
+				),
+			});
+		} finally {
+			setIsQuickLoggingIn(false);
+		}
+	};
 
 	return (
 		<div>
@@ -339,6 +385,25 @@ export function LoginForm() {
 								Create an account
 								<ArrowRightIcon className="ml-1 inline size-4 align-middle" />
 							</Link>
+						</div>
+					)}
+
+					{isNonProduction && (
+						<div className="mt-6 border-t pt-4">
+							<Button
+								type="button"
+								variant="outline"
+								className="w-full border-dashed border-amber-500/50 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:border-amber-400/50 dark:text-amber-400 dark:hover:bg-amber-950 dark:hover:text-amber-300"
+								onClick={() => handleQuickLogin()}
+								loading={isQuickLoggingIn}
+								disabled={form.formState.isSubmitting}
+							>
+								<ZapIcon className="mr-1.5 size-4" />
+								Quick Login as Test User
+							</Button>
+							<p className="mt-2 text-center text-muted-foreground text-xs">
+								Dev/Preview only - uses test@preview.local
+							</p>
 						</div>
 					)}
 				</>
