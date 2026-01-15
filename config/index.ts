@@ -216,6 +216,7 @@ export const config = {
 	payments: {
 		// define the products that should be available in the checkout
 		// Plans aligned with Stripe products: Free ($0), Starter ($4.99/$49.99), Pro ($19.99/$199.99)
+		// Pricing amounts can be overridden via NEXT_PUBLIC_PRICE_* environment variables
 		plans: {
 			// The free plan is treated differently. It will automatically be assigned if the user has no other plan.
 			free: {
@@ -234,7 +235,10 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_STARTER_MONTHLY as string,
 						interval: "month",
-						amount: 4.99,
+						amount:
+							Number(
+								process.env.NEXT_PUBLIC_PRICE_STARTER_MONTHLY,
+							) || 4.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,
@@ -244,7 +248,10 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_STARTER_YEARLY as string,
 						interval: "year",
-						amount: 49.99,
+						amount:
+							Number(
+								process.env.NEXT_PUBLIC_PRICE_STARTER_YEARLY,
+							) || 49.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,
@@ -262,7 +269,9 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY as string,
 						interval: "month",
-						amount: 19.99,
+						amount:
+							Number(process.env.NEXT_PUBLIC_PRICE_PRO_MONTHLY) ||
+							19.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,
@@ -272,7 +281,9 @@ export const config = {
 						productId: process.env
 							.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY as string,
 						interval: "year",
-						amount: 199.99,
+						amount:
+							Number(process.env.NEXT_PUBLIC_PRICE_PRO_YEARLY) ||
+							199.99,
 						currency: "USD",
 						seatBased: true,
 						trialPeriodDays: 7,

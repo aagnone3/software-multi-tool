@@ -72,7 +72,13 @@ describe("plan credits configuration", () => {
 });
 
 describe("plan pricing configuration", () => {
-	it("starter plan has correct pricing ($4.99/mo, $49.99/yr)", () => {
+	const originalEnv = { ...process.env };
+
+	afterAll(() => {
+		process.env = originalEnv;
+	});
+
+	it("starter plan has correct default pricing ($4.99/mo, $49.99/yr)", () => {
 		const starterPlan = config.payments.plans.starter;
 		expect(starterPlan.prices).toHaveLength(2);
 
@@ -87,7 +93,7 @@ describe("plan pricing configuration", () => {
 		expect(yearlyPrice?.amount).toBe(49.99);
 	});
 
-	it("pro plan has correct pricing ($19.99/mo, $199.99/yr)", () => {
+	it("pro plan has correct default pricing ($19.99/mo, $199.99/yr)", () => {
 		const proPlan = config.payments.plans.pro;
 		expect(proPlan.prices).toHaveLength(2);
 
@@ -100,6 +106,39 @@ describe("plan pricing configuration", () => {
 
 		expect(monthlyPrice?.amount).toBe(19.99);
 		expect(yearlyPrice?.amount).toBe(199.99);
+	});
+
+	it("pricing amounts can be overridden via environment variables", async () => {
+		vi.resetModules();
+		process.env = {
+			...originalEnv,
+			NEXT_PUBLIC_PRICE_STARTER_MONTHLY: "5.99",
+			NEXT_PUBLIC_PRICE_STARTER_YEARLY: "59.99",
+			NEXT_PUBLIC_PRICE_PRO_MONTHLY: "24.99",
+			NEXT_PUBLIC_PRICE_PRO_YEARLY: "249.99",
+		};
+
+		const overridden = await import("./index");
+
+		const starterMonthly =
+			overridden.config.payments.plans.starter.prices?.find(
+				(p) => p.type === "recurring" && p.interval === "month",
+			);
+		const starterYearly =
+			overridden.config.payments.plans.starter.prices?.find(
+				(p) => p.type === "recurring" && p.interval === "year",
+			);
+		const proMonthly = overridden.config.payments.plans.pro.prices?.find(
+			(p) => p.type === "recurring" && p.interval === "month",
+		);
+		const proYearly = overridden.config.payments.plans.pro.prices?.find(
+			(p) => p.type === "recurring" && p.interval === "year",
+		);
+
+		expect(starterMonthly?.amount).toBe(5.99);
+		expect(starterYearly?.amount).toBe(59.99);
+		expect(proMonthly?.amount).toBe(24.99);
+		expect(proYearly?.amount).toBe(249.99);
 	});
 
 	it("pro plan is marked as recommended", () => {
