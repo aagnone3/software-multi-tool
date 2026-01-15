@@ -45,7 +45,7 @@ export function shouldUseProxy(isClientSide: boolean): boolean {
  * Gets the API base URL for making requests.
  *
  * For client-side in preview environments:
- *   Returns '/api/proxy' to route through the proxy
+ *   Returns absolute URL to proxy route (e.g., 'https://preview.vercel.app/api/proxy')
  *
  * For server-side or production:
  *   Returns the appropriate direct URL
@@ -55,9 +55,10 @@ export function shouldUseProxy(isClientSide: boolean): boolean {
 export function getApiBaseUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route
+	// Client-side in preview: use proxy route with absolute URL
+	// (oRPC RPCLink requires absolute URLs for URL construction)
 	if (shouldUseProxy(isClientSide)) {
-		return "/api/proxy";
+		return `${getBaseUrl()}/api/proxy`;
 	}
 
 	// Server-side in preview: use direct API server URL if available
@@ -77,14 +78,15 @@ export function getApiBaseUrl(): string {
 /**
  * Gets the full URL for the oRPC endpoint.
  *
- * @returns The full URL for oRPC requests
+ * @returns The full URL for oRPC requests (always absolute)
  */
 export function getOrpcUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route
+	// Client-side in preview: use proxy route with absolute URL
+	// (oRPC RPCLink requires absolute URLs for URL construction)
 	if (shouldUseProxy(isClientSide)) {
-		return "/api/proxy/rpc";
+		return `${getBaseUrl()}/api/proxy/rpc`;
 	}
 
 	// Server-side in preview: use direct API server URL if available
