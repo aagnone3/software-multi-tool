@@ -234,10 +234,35 @@ export interface LocalProviderConfig {
 }
 
 /**
+ * Configuration for creating a Supabase storage provider.
+ * Uses native Supabase Storage API with built-in CORS support.
+ *
+ * Unlike the S3 provider (which uses S3-compatible endpoints),
+ * this provider uses Supabase's native Storage API endpoints
+ * that include proper CORS headers for browser uploads.
+ */
+export interface SupabaseProviderConfig {
+	type: "supabase";
+	/**
+	 * The Supabase project URL.
+	 * @example "https://your-project.supabase.co"
+	 */
+	supabaseUrl: string;
+	/**
+	 * The Supabase service role key for server-side operations.
+	 * Use the service role key (not anon key) for full storage access.
+	 */
+	supabaseServiceRoleKey: string;
+}
+
+/**
  * Union type of all supported provider configurations.
  * Add new provider config types here as they're implemented.
  */
-export type StorageProviderConfig = S3ProviderConfig | LocalProviderConfig;
+export type StorageProviderConfig =
+	| S3ProviderConfig
+	| LocalProviderConfig
+	| SupabaseProviderConfig;
 
 // ============================================================================
 // Legacy type aliases for backwards compatibility

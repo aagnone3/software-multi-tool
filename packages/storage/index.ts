@@ -1,5 +1,6 @@
 import { LocalStorageProvider } from "./provider/local";
 import { S3StorageProvider } from "./provider/s3";
+import { SupabaseStorageProvider } from "./provider/supabase";
 import type { StorageProvider, StorageProviderConfig } from "./types";
 
 // ============================================================================
@@ -68,6 +69,16 @@ export * from "./validation";
  *   baseUrl: "http://localhost:3500"
  * });
  * ```
+ *
+ * @example
+ * ```typescript
+ * // Create a Supabase storage provider (with native CORS support)
+ * const supabase = createStorageProvider({
+ *   type: "supabase",
+ *   supabaseUrl: "https://your-project.supabase.co",
+ *   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+ * });
+ * ```
  */
 export function createStorageProvider(
 	config: StorageProviderConfig,
@@ -80,6 +91,11 @@ export function createStorageProvider(
 	if (config.type === "local") {
 		const { type: _, ...localConfig } = config;
 		return new LocalStorageProvider(localConfig);
+	}
+
+	if (config.type === "supabase") {
+		const { type: _, ...supabaseConfig } = config;
+		return new SupabaseStorageProvider(supabaseConfig);
 	}
 
 	// Exhaustive check - this should never be reached
