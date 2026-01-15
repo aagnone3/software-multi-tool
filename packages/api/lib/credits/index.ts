@@ -1,8 +1,15 @@
 // Service functions
+
+// Query parameter types
+export type { GrantPurchasedCreditsParams } from "./queries";
+
+// Service result types
+export type { GrantPurchasedCreditsResult } from "./service";
 export {
 	deductCredits,
 	getCreditStatus,
 	getOrCreateCreditBalance,
+	grantPurchasedCredits,
 	grantSubscriptionCredits,
 	hasCredits,
 	refundCredits,
