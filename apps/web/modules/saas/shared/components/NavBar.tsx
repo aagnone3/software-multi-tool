@@ -32,7 +32,7 @@ export function NavBar() {
 
 	const menuItems = [
 		{
-			label: "Start",
+			label: "Home",
 			href: basePath,
 			icon: HomeIcon,
 			isActive: pathname === basePath,
@@ -52,23 +52,23 @@ export function NavBar() {
 			isActive: pathname.includes("/chatbot"),
 		},
 		{
+			label: "Settings",
+			href: activeOrganization
+				? `${basePath}/settings/general`
+				: "/app/settings/general",
+			icon: SettingsIcon,
+			isActive: activeOrganization
+				? pathname.startsWith(`${basePath}/settings`)
+				: pathname.startsWith("/app/settings"),
+		},
+		{
 			label: "Usage",
 			href: activeOrganization
-				? `/app/${activeOrganization.slug}/settings/billing/usage`
-				: "/app/settings/billing/usage",
+				? `${basePath}/settings/usage`
+				: "/app/settings/usage",
 			icon: CoinsIcon,
 			isActive: pathname.includes("/billing/usage"),
 		},
-		...(activeOrganization && !config.organizations.hideOrganization
-			? [
-					{
-						label: "Organization settings",
-						href: `${basePath}/settings`,
-						icon: SettingsIcon,
-						isActive: pathname.startsWith(`${basePath}/settings/`),
-					},
-				]
-			: []),
 		...(user?.role === "admin"
 			? [
 					{

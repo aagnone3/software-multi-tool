@@ -7,7 +7,7 @@ import { useActiveOrganization } from "@saas/organizations/hooks/use-active-orga
 import { Command } from "cmdk";
 import {
 	BotMessageSquareIcon,
-	CreditCardIcon,
+	CoinsIcon,
 	HomeIcon,
 	ImageMinusIcon,
 	NewspaperIcon,
@@ -97,7 +97,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		const items: NavigationItem[] = [
 			{
 				id: "home",
-				label: "Start",
+				label: "Home",
 				href: basePath,
 				icon: HomeIcon,
 				description: "Go to home page",
@@ -121,9 +121,11 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 			{
 				id: "usage",
 				label: "Usage",
-				href: "/app/billing/usage",
-				icon: CreditCardIcon,
-				description: "View your usage and billing",
+				href: activeOrganization
+					? `${basePath}/settings/usage`
+					: "/app/settings/usage",
+				icon: CoinsIcon,
+				description: "View your usage and credits",
 			},
 		];
 
