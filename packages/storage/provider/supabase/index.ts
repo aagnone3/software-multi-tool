@@ -1,6 +1,6 @@
 import type { Readable } from "node:stream";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@repo/logs";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type {
 	SignedUrlOptions,
 	StorageProvider,
@@ -73,7 +73,8 @@ export class SupabaseStorageProvider implements StorageProvider {
 			const { data: uploadData, error } = await this.client.storage
 				.from(options.bucket)
 				.upload(key, body, {
-					contentType: options.contentType ?? "application/octet-stream",
+					contentType:
+						options.contentType ?? "application/octet-stream",
 					upsert: true,
 					// Custom metadata is not directly supported in the same way as S3
 					// but we can include it in the duplex option if needed
@@ -142,7 +143,9 @@ export class SupabaseStorageProvider implements StorageProvider {
 
 	async delete(key: string, bucket: string): Promise<void> {
 		try {
-			const { error } = await this.client.storage.from(bucket).remove([key]);
+			const { error } = await this.client.storage
+				.from(bucket)
+				.remove([key]);
 
 			if (error) {
 				throw error;

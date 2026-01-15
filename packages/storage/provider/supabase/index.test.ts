@@ -51,14 +51,18 @@ describe("supabase provider", () => {
 		});
 		createSignedUploadUrlMock.mockResolvedValue({
 			data: {
-				signedUrl: "https://test.supabase.co/storage/v1/upload/sign/bucket/test",
+				signedUrl:
+					"https://test.supabase.co/storage/v1/upload/sign/bucket/test",
 				token: "upload-token",
 				path: "test/file.txt",
 			},
 			error: null,
 		});
 		createSignedUrlMock.mockResolvedValue({
-			data: { signedUrl: "https://test.supabase.co/storage/v1/object/sign/bucket/test" },
+			data: {
+				signedUrl:
+					"https://test.supabase.co/storage/v1/object/sign/bucket/test",
+			},
 			error: null,
 		});
 		removeMock.mockResolvedValue({ data: null, error: null });
@@ -219,10 +223,13 @@ describe("supabase provider", () => {
 					supabaseServiceRoleKey: "test-key",
 				});
 
-				const url = await provider.getSignedDownloadUrl("docs/file.pdf", {
-					bucket: "documents",
-					expiresIn: 3600,
-				});
+				const url = await provider.getSignedDownloadUrl(
+					"docs/file.pdf",
+					{
+						bucket: "documents",
+						expiresIn: 3600,
+					},
+				);
 
 				expect(url).toBe(
 					"https://test.supabase.co/storage/v1/object/sign/bucket/test",
@@ -245,7 +252,10 @@ describe("supabase provider", () => {
 					bucket: "uploads",
 				});
 
-				expect(createSignedUrlMock).toHaveBeenCalledWith("file.pdf", 60);
+				expect(createSignedUrlMock).toHaveBeenCalledWith(
+					"file.pdf",
+					60,
+				);
 			});
 
 			it("handles signed download URL errors", async () => {
@@ -315,7 +325,10 @@ describe("supabase provider", () => {
 					supabaseServiceRoleKey: "test-key",
 				});
 
-				const result = await provider.exists("test/file.txt", "uploads");
+				const result = await provider.exists(
+					"test/file.txt",
+					"uploads",
+				);
 
 				expect(result).toBe(true);
 				expect(fromMock).toHaveBeenCalledWith("uploads");
@@ -337,7 +350,10 @@ describe("supabase provider", () => {
 					supabaseServiceRoleKey: "test-key",
 				});
 
-				const result = await provider.exists("missing/file.txt", "uploads");
+				const result = await provider.exists(
+					"missing/file.txt",
+					"uploads",
+				);
 
 				expect(result).toBe(false);
 			});
@@ -354,7 +370,10 @@ describe("supabase provider", () => {
 					supabaseServiceRoleKey: "test-key",
 				});
 
-				const result = await provider.exists("missing/file.txt", "uploads");
+				const result = await provider.exists(
+					"missing/file.txt",
+					"uploads",
+				);
 
 				expect(result).toBe(false);
 			});
@@ -370,7 +389,9 @@ describe("supabase provider", () => {
 
 				await expect(
 					provider.exists("test/file.txt", "uploads"),
-				).rejects.toThrow("Could not check if file test/file.txt exists");
+				).rejects.toThrow(
+					"Could not check if file test/file.txt exists",
+				);
 				expect(loggerError).toHaveBeenCalled();
 			});
 
