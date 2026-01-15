@@ -24,7 +24,7 @@ export function useRecentJobs(limit = 5) {
 
 	// Group by unique tools (most recent first)
 	const recentToolSlugs = data?.jobs
-		? [...new Set(data.jobs.map((job) => job.toolSlug))]
+		? Array.from(new Set(data.jobs.map((job) => job.toolSlug)))
 		: [];
 
 	// Get the most recent job for each tool

@@ -14,7 +14,7 @@ import { Progress } from "@ui/components/progress";
 import { cn } from "@ui/lib";
 import { CheckCircle2Icon, CircleIcon, RocketIcon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUsageStats } from "../../credits/hooks/use-usage-stats";
 
 interface ChecklistItem {

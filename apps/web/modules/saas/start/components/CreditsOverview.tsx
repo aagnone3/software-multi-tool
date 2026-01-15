@@ -14,6 +14,7 @@ import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
 import { ChevronRightIcon, CoinsIcon, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { useCreditsBalance } from "../../credits/hooks/use-credits-balance";
 import { useUsageStats } from "../../credits/hooks/use-usage-stats";
 

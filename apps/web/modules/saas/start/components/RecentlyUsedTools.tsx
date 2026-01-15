@@ -26,6 +26,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface RecentlyUsedToolsProps {
