@@ -17,19 +17,19 @@ datasource db {
 }
 
 model User {
-  id                 String       @id @default(cuid())
+  id                 String         @id @default(cuid())
   name               String
-  email              String       @unique
+  email              String         @unique
   emailVerified      Boolean
   image              String?
   createdAt          DateTime
   updatedAt          DateTime
-  username           String?      @unique
+  username           String?        @unique
   role               String?
   banned             Boolean?
   banReason          String?
   banExpires         DateTime?
-  onboardingComplete Boolean      @default(false)
+  onboardingComplete Boolean        @default(false)
   paymentsCustomerId String?
   locale             String?
   twoFactorEnabled   Boolean?
@@ -37,6 +37,7 @@ model User {
   aiChats            AiChat[]
   invitations        Invitation[]
   members            Member[]
+  notifications      Notification[]
   passkeys           Passkey[]
   purchases          Purchase[]
   sessions           Session[]
@@ -327,6 +328,27 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([organizationId, createdAt])
   @@map("audit_log")
+  @@schema("public")
+}
+
+// User notifications for in-app messaging
+model Notification {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  userId    String
+  type      String    // "info", "success", "warning", "error"
+  category  String    // "billing", "security", "team", "system"
+  title     String
+  body      String
+  actionUrl String?
+  read      Boolean   @default(false)
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notification")
   @@schema("public")
 }
 

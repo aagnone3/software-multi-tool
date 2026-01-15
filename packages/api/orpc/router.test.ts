@@ -69,6 +69,10 @@ vi.mock("../modules/credits/router", () => ({
 	creditsRouter: {},
 }));
 
+vi.mock("../modules/notifications/router", () => ({
+	notificationsRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -82,6 +86,7 @@ describe("api router", () => {
 			"newsletter",
 			"contact",
 			"credits",
+			"notifications",
 			"organizations",
 			"users",
 			"payments",
