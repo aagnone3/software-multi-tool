@@ -1,4 +1,4 @@
-import { getPlanCredits } from "config";
+import { getPlanCredits } from "@repo/config";
 import {
 	executeAtomicDeduction,
 	executeAtomicGrant,
