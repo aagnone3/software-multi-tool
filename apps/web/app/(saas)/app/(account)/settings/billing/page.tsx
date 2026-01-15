@@ -1,5 +1,6 @@
 import { createPurchasesHelper } from "@repo/payments/lib/helper";
 import { getSession } from "@saas/auth/lib/server";
+import { CreditBalanceSection } from "@saas/credits/components/CreditBalanceSection";
 import { ActivePlan } from "@saas/payments/components/ActivePlan";
 import { ChangePlan } from "@saas/payments/components/ChangePlan";
 import { SettingsList } from "@saas/shared/components/SettingsList";
@@ -39,6 +40,7 @@ export default async function BillingSettingsPage() {
 
 	return (
 		<SettingsList>
+			<CreditBalanceSection />
 			{activePlan && <ActivePlan />}
 			<ChangePlan
 				userId={session?.user.id}

@@ -1,6 +1,7 @@
 "use client";
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
+import { CreditBalanceIndicator } from "@saas/credits/components/CreditBalanceIndicator";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UserMenu } from "@saas/shared/components/UserMenu";
 import { Logo } from "@shared/components/Logo";
@@ -134,6 +135,7 @@ export function NavBar() {
 							},
 						)}
 					>
+						<CreditBalanceIndicator />
 						<UserMenu />
 					</div>
 				</div>
@@ -186,6 +188,9 @@ export function NavBar() {
 						},
 					)}
 				>
+					<div className="mb-3">
+						<CreditBalanceIndicator />
+					</div>
 					<UserMenu showUserName />
 				</div>
 			</div>
