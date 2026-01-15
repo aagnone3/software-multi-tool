@@ -254,7 +254,8 @@ describe("CommandPalette", () => {
 
 		expect(screen.getByText("Start")).toBeInTheDocument();
 		expect(screen.getByText("AI Chatbot")).toBeInTheDocument();
-		expect(screen.getByText("Account settings")).toBeInTheDocument();
+		expect(screen.getByText("Settings")).toBeInTheDocument();
+		expect(screen.getByText("Usage")).toBeInTheDocument();
 	});
 
 	it("navigates to page when selected", async () => {
