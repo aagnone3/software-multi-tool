@@ -56,22 +56,60 @@ Then close it:
 pnpm --filter @repo/scripts linear issues close --issue <key>
 ```
 
-### 6. Switch to Main Branch and Pull Latest
+### 6. Clean Up Worktree (if applicable)
 
-After successfully closing the Linear issue, switch back to main branch and pull the latest changes:
+Check if currently working in a worktree:
+
+```bash
+# Check if .git is a file (worktree) or directory (main repo)
+if [ -f .git ]; then
+  echo "In worktree"
+else
+  echo "In main repo"
+fi
+```
+
+If in a worktree:
+
+1. Get the worktree path and parent repo path:
+
+   ```bash
+   WORKTREE_PATH=$(pwd)
+   PARENT_REPO=$(git worktree list | head -1 | awk '{print $1}')
+   WORKTREE_NAME=$(basename "$WORKTREE_PATH")
+   ```
+
+2. Navigate to parent repo and clean up:
+
+   ```bash
+   cd "$PARENT_REPO"
+   git worktree remove ".worktrees/$WORKTREE_NAME"
+   git worktree prune
+   ```
+
+**Note**: Worktrees cannot checkout main directly since main is used by the parent repo. You must navigate to the parent repo first.
+
+### 7. Switch to Main Branch and Pull Latest
+
+After cleanup, ensure you're on main with latest changes:
 
 ```bash
 git checkout main && git pull origin main
 ```
 
-This ensures your local main branch is up to date with the merged changes.
+If already on main (after worktree cleanup), just pull:
 
-### 7. Confirm Completion
+```bash
+git pull origin main
+```
+
+### 8. Confirm Completion
 
 Report to user:
 
 - PR #XX merged to main
 - Linear issue PRA-XX closed
+- Worktree cleaned up (if applicable)
 - Switched to main branch and pulled latest changes
 - PR URL
 
@@ -97,12 +135,18 @@ gh pr view 47 --json state,mergedAt
 # 4. Close Linear issue
 pnpm --filter @repo/scripts linear issues close --issue PRA-28
 
-# 5. Switch to main and pull
+# 5. Clean up worktree (if in worktree)
+cd /path/to/parent/repo
+git worktree remove .worktrees/feat-pra-28-feature-name
+git worktree prune
+
+# 6. Switch to main and pull
 git checkout main && git pull origin main
 
-# 6. Report
+# 7. Report
 # PR #47 merged: https://github.com/org/repo/pull/47
 # Linear issue PRA-28 closed
+# Worktree cleaned up
 # Switched to main branch and pulled latest changes
 ```
 
