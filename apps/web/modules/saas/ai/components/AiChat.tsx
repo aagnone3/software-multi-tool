@@ -1,7 +1,10 @@
 "use client";
 
 import { type UIMessage, useChat } from "@ai-sdk/react";
-import { eventIteratorToStream } from "@orpc/client";
+// IMPORTANT: Use eventIteratorToUnproxiedDataStream (not eventIteratorToStream) for AI SDK.
+// AI SDK internally uses `structuredClone` which doesn't support proxied data from oRPC.
+// See: https://orpc.dev/docs/integrations/ai-sdk
+import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -53,6 +56,10 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 	const chats = data?.chats ?? [];
 	const currentChat = currentChatQuery.data?.chat ?? null;
 
+	// Custom transport for oRPC + AI SDK integration.
+	// Instead of the default fetch to /api/chat, we use oRPC procedures for type-safe streaming.
+	// The server uses streamToEventIterator(result.toUIMessageStream()) to convert AI SDK streams.
+	// See: https://orpc.dev/docs/integrations/ai-sdk
 	const { messages, setMessages, status, sendMessage } = useChat({
 		id: chatId ?? "new",
 		transport: {
@@ -61,7 +68,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 					throw new Error("Chat ID is required");
 				}
 
-				return eventIteratorToStream(
+				return eventIteratorToUnproxiedDataStream(
 					await orpcClient.ai.chats.messages.add(
 						{
 							chatId,
