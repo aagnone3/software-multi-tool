@@ -24,18 +24,55 @@ This skill documents the async job processing architecture using pg-boss as the 
 │  │    queue        │            │ 4. Update result    │                     │
 │  └─────────────────┘            └─────────────────────┘                     │
 │                                                                             │
-│  Maintenance (Vercel Cron)                                                  │
-│  ─────────────────────────                                                  │
+│  Frontend Polling (Browser)      Maintenance (Vercel Cron)                  │
+│  ──────────────────────────      ─────────────────────────                  │
 │                                                                             │
-│  ┌─────────────────────────┐                                                │
-│  │ /api/cron/job-maintenance│                                               │
-│  │                         │                                                │
-│  │ • Mark stuck jobs failed│                                                │
-│  │ • Clean up expired jobs │                                                │
+│  ┌─────────────────────────┐    ┌─────────────────────────┐                 │
+│  │ jobs.get (oRPC)         │    │ /api/cron/job-maintenance│                │
+│  │                         │    │                         │                 │
+│  │ • Poll tool_job status  │    │ • Mark stuck jobs failed│                 │
+│  │ • Requires x-session-id │    │ • Clean up expired jobs │                 │
+│  │   header for ownership  │    └─────────────────────────┘                 │
 │  └─────────────────────────┘                                                │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+## Table Relationships
+
+**CRITICAL**: There are TWO tables involved in job processing:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Table Relationship                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  public.tool_job                          pgboss.job                        │
+│  ────────────────                         ──────────                        │
+│  (Application state)                      (Queue state)                     │
+│                                                                             │
+│  ┌─────────────────────────┐              ┌────────────────────────────┐    │
+│  │ id: "abc123"            │◄─────────────│ data: {toolJobId: "abc123"}│    │
+│  │ status: PENDING/        │              │ name: "news-analyzer"      │    │
+│  │         PROCESSING/     │              │ state: created/active/     │    │
+│  │         COMPLETED/      │              │        completed/failed    │    │
+│  │         FAILED          │              │                            │    │
+│  │ pgBossJobId: "uuid..."  │─────────────►│ id: "uuid..."              │    │
+│  │ output: {...}           │              │ output: {...}              │    │
+│  │ error: "..."            │              │                            │    │
+│  └─────────────────────────┘              └────────────────────────────┘    │
+│                                                                             │
+│  Frontend reads: tool_job                 Worker reads: pgboss.job          │
+│  Worker writes: tool_job                  pg-boss writes: pgboss.job        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Important**:
+
+- `tool_job` is the source of truth for job status displayed to users
+- `pgboss.job` is the queue mechanism for worker coordination
+- Both tables MUST be updated - orphaned records in either table cause bugs
 
 ## Key Components
 
@@ -267,14 +304,19 @@ function initializeProcessors(): void {
 ### Render (api-server)
 
 ```bash
+# CRITICAL: Workers won't run without this!
+USE_PGBOSS_WORKERS=true
+
 # Required
 DATABASE_URL=postgresql://...
-USE_PGBOSS_WORKERS=true
 
 # Optional
 PGBOSS_BATCH_SIZE=5
 PGBOSS_POLLING_INTERVAL=2
 ```
+
+**⚠️ WARNING**: If `USE_PGBOSS_WORKERS` is not set to `true`, workers will NOT start.
+Jobs will be queued but never processed. This is the #1 cause of "stuck" jobs.
 
 ### Vercel (web)
 
@@ -380,6 +422,79 @@ UPDATE pgboss.job
 SET state = 'cancelled'
 WHERE state = 'active'
 AND started_on < NOW() - INTERVAL '1 hour';
+```
+
+## Anonymous Job Ownership
+
+Jobs can be created by anonymous users (not logged in). To verify ownership when polling:
+
+### How It Works
+
+1. **Job Creation**: Frontend generates a `sessionId` and stores in localStorage
+2. **Job Create Request**: `sessionId` is passed in the request body
+3. **Job Polling**: `x-session-id` header must be included for ownership verification
+
+### Frontend Implementation
+
+```typescript
+// apps/web/modules/shared/lib/orpc-client.ts
+const link = new RPCLink({
+  url: getOrpcUrl(),
+  headers: async () => {
+    if (typeof window !== "undefined") {
+      // Include x-session-id for anonymous job ownership
+      const sessionId = localStorage.getItem("news-analyzer-session-id");
+      if (sessionId) {
+        return { "x-session-id": sessionId };
+      }
+      return {};
+    }
+    // Server-side: forward all headers
+    const { headers } = await import("next/headers");
+    return Object.fromEntries(await headers());
+  },
+});
+```
+
+### Backend Verification
+
+```typescript
+// packages/api/modules/jobs/procedures/get-job.ts
+const requestSessionId = context.headers.get("x-session-id");
+
+const isOwner =
+  (userId && job.userId === userId) ||  // Authenticated user owns job
+  (requestSessionId && job.sessionId === requestSessionId);  // Anonymous session match
+
+if (!isOwner) {
+  throw new ORPCError("FORBIDDEN", {
+    message: "You do not have access to this job",
+  });
+}
+```
+
+**⚠️ WARNING**: If `x-session-id` header is missing, anonymous users get 403 Forbidden
+when polling their job status.
+
+## Seed Data Warning
+
+**CRITICAL**: Seeded jobs in `supabase/seed.sql` must ONLY use terminal states:
+
+- `COMPLETED`
+- `FAILED`
+
+**Never seed PENDING or PROCESSING jobs** because:
+
+1. They are not submitted to pg-boss queue
+2. Workers will never process them
+3. Frontend polling will hang indefinitely
+
+```sql
+-- ✅ CORRECT: Terminal state
+INSERT INTO tool_job (id, status, ...) VALUES ('preview_job_001', 'COMPLETED', ...);
+
+-- ❌ WRONG: Non-terminal state (will appear stuck)
+INSERT INTO tool_job (id, status, ...) VALUES ('preview_job_002', 'PENDING', ...);
 ```
 
 ## Related Files

@@ -671,40 +671,43 @@ INSERT INTO "public"."tool_job" (
     NOW() - INTERVAL '3 hours',
     NOW() - INTERVAL '2 hours' - INTERVAL '30 minutes'
 ),
--- Pending job
+-- Completed Meeting Summarizer job (recent)
+-- Note: Seed data should only use terminal states (COMPLETED/FAILED)
+-- because seeded jobs are not submitted to pg-boss for processing.
+-- PENDING/PROCESSING jobs would appear stuck in the UI.
 (
     'preview_job_016',
     'meeting-summarizer',
-    'PENDING',
+    'COMPLETED',
     0,
     '{"meetingDuration": 60, "attendees": 5}',
-    NULL,
-    NULL,
-    'preview_user_001',
-    NULL,
-    0,
-    3,
-    NULL,
-    NULL,
-    NOW() + INTERVAL '7 days',
-    NOW() - INTERVAL '10 minutes',
-    NOW() - INTERVAL '10 minutes'
-),
--- Processing job
-(
-    'preview_job_017',
-    'feedback-analyzer',
-    'PROCESSING',
-    0,
-    '{"reviewCount": 12}',
-    NULL,
+    '{"summary": "Team sync meeting covering Q1 goals", "actionItems": 3, "decisions": 2}',
     NULL,
     'preview_user_001',
     NULL,
     1,
     3,
-    NOW() - INTERVAL '1 minute',
+    NOW() - INTERVAL '10 minutes',
+    NOW() - INTERVAL '9 minutes',
+    NOW() + INTERVAL '7 days',
+    NOW() - INTERVAL '10 minutes',
+    NOW() - INTERVAL '9 minutes'
+),
+-- Completed Feedback Analyzer job (recent)
+(
+    'preview_job_017',
+    'feedback-analyzer',
+    'COMPLETED',
+    0,
+    '{"reviewCount": 12}',
+    '{"sentimentBreakdown": {"positive": 8, "neutral": 3, "negative": 1}, "topThemes": ["quality", "service"]}',
     NULL,
+    'preview_user_001',
+    NULL,
+    1,
+    3,
+    NOW() - INTERVAL '2 minutes',
+    NOW() - INTERVAL '1 minute',
     NOW() + INTERVAL '7 days',
     NOW() - INTERVAL '2 minutes',
     NOW() - INTERVAL '1 minute'
@@ -721,5 +724,5 @@ BEGIN
     RAISE NOTICE 'Test Org: preview-test-org';
     RAISE NOTICE 'Credit Balance: 500 included, 247 used, 100 purchased';
     RAISE NOTICE 'Credit Transactions: 17 transactions over 14 days';
-    RAISE NOTICE 'Tool Jobs: 8 sample jobs (5 completed, 1 failed, 1 pending, 1 processing)';
+    RAISE NOTICE 'Tool Jobs: 8 sample jobs (7 completed, 1 failed) - all terminal states';
 END $$;
