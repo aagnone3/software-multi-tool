@@ -121,7 +121,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 			{
 				id: "usage",
 				label: "Usage",
-				href: "/app/settings/billing/usage",
+				href: "/app/billing/usage",
 				icon: CreditCardIcon,
 				description: "View your usage and billing",
 			},
