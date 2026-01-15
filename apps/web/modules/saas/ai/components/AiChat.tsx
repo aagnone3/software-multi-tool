@@ -1,7 +1,7 @@
 "use client";
 
 import { type UIMessage, useChat } from "@ai-sdk/react";
-import { eventIteratorToStream } from "@orpc/client";
+import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -61,7 +61,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 					throw new Error("Chat ID is required");
 				}
 
-				return eventIteratorToStream(
+				return eventIteratorToUnproxiedDataStream(
 					await orpcClient.ai.chats.messages.add(
 						{
 							chatId,
