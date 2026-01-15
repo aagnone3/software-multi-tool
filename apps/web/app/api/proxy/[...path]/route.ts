@@ -24,15 +24,6 @@ const API_SERVER_URL =
 	process.env.NEXT_PUBLIC_API_SERVER_URL ||
 	"http://localhost:3501";
 
-// Log env var resolution at module load time
-console.log("[API Proxy] Environment variable resolution:", {
-	API_SERVER_URL: process.env.API_SERVER_URL ? "set" : "not set",
-	NEXT_PUBLIC_API_SERVER_URL: process.env.NEXT_PUBLIC_API_SERVER_URL
-		? "set"
-		: "not set",
-	resolved: API_SERVER_URL,
-});
-
 /**
  * Main proxy handler
  */
@@ -46,14 +37,6 @@ async function handler(
 		path,
 		request.nextUrl.searchParams,
 	);
-
-	// Log request details
-	console.log("[API Proxy] Forwarding request:", {
-		method: request.method,
-		path: `/${path.join("/")}`,
-		targetHost: new URL(API_SERVER_URL).host,
-		targetUrl: targetUrl.toString(),
-	});
 
 	try {
 		// Prepare headers for forwarding
@@ -78,13 +61,6 @@ async function handler(
 
 		// Make the proxied request
 		const response = await fetch(targetUrl.toString(), fetchOptions);
-
-		// Log response details
-		console.log("[API Proxy] Response received:", {
-			status: response.status,
-			statusText: response.statusText,
-			contentType: response.headers.get("content-type"),
-		});
 
 		// Prepare response headers
 		const responseHeaders = prepareResponseHeaders(response.headers);
