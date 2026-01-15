@@ -69,7 +69,27 @@ This directory contains Claude skills that provide specialized guidance for work
 - Sessions and organizations
 - Auth-related features
 
-**Related Skills**: architecture, tools
+**Related Skills**: architecture, tools, debugging
+
+---
+
+### debugging
+
+**Description**: Use this skill when debugging applications across platforms (Vercel, Supabase, Render) and environments (local, preview, production). Covers log access, error patterns, connection troubleshooting, and performance monitoring.
+
+**Location**: `.claude/skills/debugging/`
+
+**When to Use**:
+
+- Accessing logs for any platform (Vercel, Supabase, Render)
+- Troubleshooting application errors
+- Debugging database connection issues
+- Investigating session/authentication problems
+- Resolving preview environment issues
+- Performance monitoring and optimization
+- Production incident investigation
+
+**Related Skills**: architecture, api-proxy, cicd, render, better-auth, prisma-migrate
 
 ---
 
