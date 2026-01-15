@@ -1,5 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import {
+	buildTargetUrl,
+	isStreamingResponse,
+	prepareForwardHeaders,
+	prepareResponseHeaders,
+} from "../lib";
 
 /**
  * API Proxy route for preview environments.
@@ -14,83 +20,6 @@ import { NextResponse } from "next/server";
 
 const API_SERVER_URL = process.env.API_SERVER_URL || "http://localhost:3501";
 
-// Headers that should not be forwarded (hop-by-hop headers)
-const HOP_BY_HOP_HEADERS = new Set([
-	"connection",
-	"keep-alive",
-	"proxy-authenticate",
-	"proxy-authorization",
-	"te",
-	"trailers",
-	"transfer-encoding",
-	"upgrade",
-	// Also exclude host as it should reflect the target
-	"host",
-]);
-
-/**
- * Build target URL from the proxy path and query parameters
- */
-export function buildTargetUrl(
-	path: string[],
-	searchParams: URLSearchParams,
-): URL {
-	// Construct the full path
-	const fullPath = `/api/${path.join("/")}`;
-	const url = new URL(fullPath, API_SERVER_URL);
-
-	// Forward query parameters
-	searchParams.forEach((value, key) => {
-		url.searchParams.set(key, value);
-	});
-
-	return url;
-}
-
-/**
- * Filter and prepare headers for forwarding
- */
-function prepareForwardHeaders(requestHeaders: Headers): HeadersInit {
-	const forwardHeaders: Record<string, string> = {};
-
-	requestHeaders.forEach((value, key) => {
-		const lowerKey = key.toLowerCase();
-		if (!HOP_BY_HOP_HEADERS.has(lowerKey)) {
-			forwardHeaders[key] = value;
-		}
-	});
-
-	// Add X-Forwarded headers for proper client identification
-	forwardHeaders["x-forwarded-host"] = requestHeaders.get("host") || "";
-	forwardHeaders["x-forwarded-proto"] = "https";
-
-	return forwardHeaders;
-}
-
-/**
- * Forward response headers, filtering hop-by-hop headers
- */
-function prepareResponseHeaders(responseHeaders: Headers): Headers {
-	const headers = new Headers();
-
-	responseHeaders.forEach((value, key) => {
-		const lowerKey = key.toLowerCase();
-		if (!HOP_BY_HOP_HEADERS.has(lowerKey)) {
-			headers.set(key, value);
-		}
-	});
-
-	return headers;
-}
-
-/**
- * Check if the response is a streaming response (SSE)
- */
-function isStreamingResponse(headers: Headers): boolean {
-	const contentType = headers.get("content-type");
-	return contentType?.includes("text/event-stream") ?? false;
-}
-
 /**
  * Main proxy handler
  */
@@ -99,7 +28,11 @@ async function handler(
 	{ params }: { params: Promise<{ path: string[] }> },
 ) {
 	const { path } = await params;
-	const targetUrl = buildTargetUrl(path, request.nextUrl.searchParams);
+	const targetUrl = buildTargetUrl(
+		API_SERVER_URL,
+		path,
+		request.nextUrl.searchParams,
+	);
 
 	try {
 		// Prepare headers for forwarding
