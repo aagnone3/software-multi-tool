@@ -127,11 +127,26 @@ export function ActiveOrganizationProvider({
 		setHasAttemptedFallback(true);
 		const firstOrg = organizations[0];
 		if (firstOrg?.slug) {
-			authClient.organization.setActive({
-				organizationSlug: firstOrg.slug,
-			});
+			// Use async IIFE to properly await the setActive call and update session cache
+			(async () => {
+				const { data: updatedOrg } =
+					await authClient.organization.setActive({
+						organizationSlug: firstOrg.slug,
+					});
+
+				if (updatedOrg) {
+					// Update the session cache so subsequent API calls see the activeOrganizationId
+					queryClient.setQueryData(sessionQueryKey, (data: any) => ({
+						...data,
+						session: {
+							...data?.session,
+							activeOrganizationId: updatedOrg.id,
+						},
+					}));
+				}
+			})();
 		}
-	}, [session, organizations, hasAttemptedFallback]);
+	}, [session, organizations, hasAttemptedFallback, queryClient]);
 
 	const activeOrganizationUserRole = activeOrganization?.members.find(
 		(member) => member.userId === session?.userId,

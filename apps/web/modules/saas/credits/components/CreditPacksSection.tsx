@@ -3,6 +3,7 @@
 import { getCreditPacks } from "@repo/config";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { cn } from "@ui/lib";
+import { toast } from "sonner";
 import {
 	type PackId,
 	useCreditPackPurchase,
@@ -16,7 +17,11 @@ interface CreditPacksSectionProps {
 export function CreditPacksSection({ className }: CreditPacksSectionProps) {
 	const creditPacks = getCreditPacks();
 	const { purchasePack, isPurchasing, purchasingPackId } =
-		useCreditPackPurchase();
+		useCreditPackPurchase({
+			onError: (error) => {
+				toast.error(error.message || "Failed to create checkout");
+			},
+		});
 
 	if (!creditPacks.length) {
 		return null;
