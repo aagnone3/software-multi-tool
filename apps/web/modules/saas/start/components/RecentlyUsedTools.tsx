@@ -1,7 +1,7 @@
 "use client";
 
-import { config } from "@repo/config";
 import type { ToolConfig } from "@repo/config/types";
+import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -77,11 +77,12 @@ export function RecentlyUsedTools({
 	maxTools = 5,
 }: RecentlyUsedToolsProps) {
 	const { recentToolSlugs, recentToolsMap, isLoading } = useRecentJobs(20);
+	const { enabledTools } = useTools();
 
-	// Get tool configs for recent tools
+	// Get tool configs for recent tools - only show enabled tools
 	const recentTools: Array<{ tool: ToolConfig; lastUsed: string }> = [];
 	for (const slug of recentToolSlugs.slice(0, maxTools)) {
-		const toolConfig = config.tools.registry.find((t) => t.slug === slug);
+		const toolConfig = enabledTools.find((t) => t.slug === slug);
 		const lastJob = recentToolsMap.get(slug);
 		if (toolConfig && lastJob) {
 			recentTools.push({
