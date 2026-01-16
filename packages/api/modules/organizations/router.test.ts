@@ -5,6 +5,8 @@ import { organizationsRouter } from "./router";
 // Mock dependencies
 const getOrganizationBySlugMock = vi.hoisted(() => vi.fn());
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
+const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
+const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/database", () => ({
@@ -13,6 +15,8 @@ vi.mock("@repo/database", () => ({
 
 vi.mock("@repo/storage", () => ({
 	getSignedUploadUrl: getSignedUploadUrlMock,
+	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -25,6 +29,8 @@ describe("Organizations Router", () => {
 		getSignedUploadUrlMock.mockResolvedValue(
 			"https://storage.test/signed-upload-url",
 		);
+		// Default to S3 provider (no Supabase)
+		shouldUseSupabaseStorageMock.mockReturnValue(false);
 	});
 
 	describe("organizations.generateSlug", () => {
@@ -117,25 +123,26 @@ describe("Organizations Router", () => {
 
 		it("creates signed upload URL for authenticated user", async () => {
 			const client = createClient();
-			const result = await client();
+			const result = await client({ organizationId: "org-123" });
 
 			expect(result).toEqual({
 				signedUploadUrl: "https://storage.test/signed-upload-url",
+				path: "organizations/org-123/logo.png",
 			});
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"user-123.png",
+				"organizations/org-123/logo.png",
 				{
 					bucket: expect.any(String),
 				},
 			);
 		});
 
-		it("uses user ID in filename", async () => {
-			const client = createClient("different-user-id");
-			await client();
+		it("uses organization ID in path", async () => {
+			const client = createClient();
+			await client({ organizationId: "different-org-id" });
 
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"different-user-id.png",
+				"organizations/different-org-id/logo.png",
 				{
 					bucket: expect.any(String),
 				},
@@ -154,7 +161,9 @@ describe("Organizations Router", () => {
 				},
 			);
 
-			await expect(client()).rejects.toMatchObject({
+			await expect(
+				client({ organizationId: "org-123" }),
+			).rejects.toMatchObject({
 				code: "UNAUTHORIZED",
 			});
 		});

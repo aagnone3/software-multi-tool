@@ -1,7 +1,6 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
-import { config } from "@repo/config";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
@@ -12,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { v4 as uuid } from "uuid";
 import { CropImageDialog } from "../../settings/components/CropImageDialog";
 import { OrganizationLogo } from "./OrganizationLogo";
 
@@ -51,11 +49,11 @@ export function OrganizationLogoForm() {
 
 		setUploading(true);
 		try {
-			const path = `${activeOrganization.id}-${uuid()}.png`;
-			const { signedUploadUrl } =
+			// Get signed upload URL and path from API
+			// The API determines the path structure (organizations/{orgId}/logo.png)
+			const { signedUploadUrl, path } =
 				await getSignedUploadUrlMutation.mutateAsync({
-					path,
-					bucket: config.storage.bucketNames.avatars,
+					organizationId: activeOrganization.id,
 				});
 
 			const response = await fetch(signedUploadUrl, {
@@ -71,6 +69,7 @@ export function OrganizationLogoForm() {
 				throw new Error("Failed to upload image");
 			}
 
+			// Save the path returned by API to ensure consistency
 			const { error } = await authClient.organization.update({
 				organizationId: activeOrganization.id,
 				data: {
