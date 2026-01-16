@@ -2,6 +2,7 @@ import { passkey } from "@better-auth/passkey";
 import { config } from "@repo/config";
 import {
 	db,
+	getFirstOrganizationForUser,
 	getInvitationById,
 	getPurchasesByOrganizationId,
 	getPurchasesByUserId,
@@ -64,6 +65,30 @@ export const auth = betterAuth({
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["google", "github"],
+		},
+	},
+	// Database hooks to automatically set initial active organization at session creation.
+	// This follows Better Auth's recommended pattern for eliminating race conditions
+	// where API calls could fail before client-side sets the active organization.
+	// See: https://www.better-auth.com/docs/plugins/organization#automatic-initialization
+	databaseHooks: {
+		session: {
+			create: {
+				before: async (session) => {
+					// Get the user's first organization (by membership creation date)
+					// to set as the initial active organization for this session.
+					const organization = await getFirstOrganizationForUser(
+						session.userId,
+					);
+					return {
+						data: {
+							...session,
+							// Set to first org ID if user has orgs, otherwise null
+							activeOrganizationId: organization?.id ?? null,
+						},
+					};
+				},
+			},
 		},
 	},
 	hooks: {

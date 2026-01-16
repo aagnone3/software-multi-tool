@@ -136,3 +136,23 @@ export async function getOrganizationByPaymentsCustomerId(
 		where: { paymentsCustomerId },
 	});
 }
+
+/**
+ * Get the first organization for a user based on their membership.
+ * Used by Better Auth databaseHooks to set initial activeOrganizationId at session creation.
+ *
+ * Returns the oldest organization the user is a member of (by membership createdAt),
+ * providing deterministic behavior for first-login scenarios.
+ *
+ * @param userId - The user ID to find organizations for
+ * @returns The first organization or null if user has no organizations
+ */
+export async function getFirstOrganizationForUser(userId: string) {
+	const membership = await db.member.findFirst({
+		where: { userId },
+		orderBy: { createdAt: "asc" },
+		include: { organization: true },
+	});
+
+	return membership?.organization ?? null;
+}
