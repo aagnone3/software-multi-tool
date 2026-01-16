@@ -4,6 +4,26 @@ This directory contains Claude skills that provide specialized guidance for work
 
 ## Available Skills
 
+### agent-skills
+
+**Description**: Use this skill when creating, reviewing, or improving Claude skills. Provides best practices from Anthropic's official skill authoring guide including conciseness, degrees of freedom, naming conventions, description writing, progressive disclosure, and quality evaluation criteria.
+
+**Location**: `.claude/skills/agent-skills/`
+
+**When to Use**:
+
+- Creating a new skill
+- Reviewing existing skills for improvements
+- Understanding skill best practices
+- Optimizing skill descriptions for discovery
+- Structuring skill content for progressive disclosure
+
+**Related Skills**: architecture, tools
+
+**Related Commands**: `/skills:review` - Automated skill review and improvement
+
+---
+
 ### ai
 
 **Description**: Use this skill when working with AI/LLM features, adding AI processors, configuring AI providers (Anthropic/OpenAI), or understanding the AI architecture. Covers Claude via @repo/agent-sdk and OpenAI via @repo/ai.
