@@ -6,6 +6,7 @@ import { Spinner } from "@shared/components/Spinner";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { CropImageDialog } from "./CropImageDialog";
@@ -17,6 +18,7 @@ export function UserAvatarUpload({
 	onSuccess: () => void;
 	onError: () => void;
 }) {
+	const router = useRouter();
 	const { user, reloadSession } = useSession();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
@@ -76,6 +78,9 @@ export function UserAvatarUpload({
 			}
 
 			await reloadSession();
+
+			// Refresh server components to update sidebar avatar
+			router.refresh();
 
 			onSuccess();
 		} catch {
