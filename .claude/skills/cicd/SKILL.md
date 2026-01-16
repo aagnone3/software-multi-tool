@@ -99,10 +99,51 @@ To find your preview branch database URL:
 
 The `supabase/seed.sql` file provisions test data for preview environments:
 
+- **Storage Buckets**: Required buckets (e.g., `avatars`) - see below
 - **Test User**: `test@preview.local` (id: `preview_user_001`)
 - **Test Org**: `preview-test-org` (id: `preview_org_001`)
 - **Membership**: Test user is an owner of the test org
 - **Seed Marker**: Verification entry for validation script
+
+### Storage Buckets in Preview Environments
+
+**Important**: Supabase Storage buckets are NOT automatically copied to preview branches. Each preview branch has its own isolated storage system that starts empty.
+
+Any storage buckets your application requires must be created in `supabase/seed.sql`:
+
+```sql
+-- Create storage buckets for preview environments
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'avatars',
+    'avatars',
+    true,
+    5242880, -- 5MB
+    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+) ON CONFLICT (id) DO NOTHING;
+```
+
+**When adding a new storage bucket to your application:**
+
+1. Create the bucket in your production Supabase project via dashboard or migration
+2. Add the bucket creation SQL to `supabase/seed.sql`
+3. Commit both changes together
+
+**Bucket configuration options:**
+
+| Field               | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `id`                | Unique bucket identifier (used in API calls)       |
+| `name`              | Display name                                       |
+| `public`            | `true` for public read access, `false` for private |
+| `file_size_limit`   | Max file size in bytes (e.g., 5242880 = 5MB)       |
+| `allowed_mime_types`| Array of allowed MIME types                        |
+
+**Current buckets required:**
+
+| Bucket    | Public | Size Limit | MIME Types                                       |
+| --------- | ------ | ---------- | ------------------------------------------------ |
+| `avatars` | Yes    | 5MB        | image/jpeg, image/png, image/gif, image/webp     |
 
 ### Validating Seed Data
 
@@ -534,6 +575,27 @@ See also: `api-proxy` and `async-jobs` skills for detailed troubleshooting.
 3. Verify `API_SERVER_URL` points to the Render preview URL
 4. Check for "Failed to construct 'URL'" errors - ensure `getOrpcUrl()` returns absolute URL
 5. See the `api-proxy` skill for detailed debugging steps
+
+### Storage Uploads Fail in Preview Environment
+
+**Symptom**: File uploads fail with storage errors or CORS issues in preview environments, but work in production.
+
+**Root cause**: Supabase Storage buckets are NOT copied to preview branches. Each branch starts with an empty storage system.
+
+**Solution**: Add the required bucket to `supabase/seed.sql`:
+
+```sql
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('your-bucket', 'your-bucket', true, 5242880, ARRAY['image/jpeg', 'image/png'])
+ON CONFLICT (id) DO NOTHING;
+```
+
+**For existing preview branches**, create the bucket directly:
+
+```sql
+-- Run via Supabase Dashboard SQL Editor for the preview branch
+INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+```
 
 ### Seed Validation Fails
 
