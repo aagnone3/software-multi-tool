@@ -114,6 +114,22 @@ function hasUnstagedZodChanges(): boolean {
 	return result.status === 0 && result.stdout.trim().length > 0;
 }
 
+function ensureTrailingNewline(filePath: string): void {
+	try {
+		const content = fs.readFileSync(filePath, "utf8");
+		if (content.length > 0 && !content.endsWith("\n")) {
+			fs.writeFileSync(filePath, `${content}\n`);
+			// Stage the file so it matches what's staged
+			spawnSync("git", ["add", filePath], {
+				cwd: REPO_ROOT,
+				encoding: "utf8",
+			});
+		}
+	} catch {
+		// Ignore errors - file may not exist
+	}
+}
+
 function runPrismaGenerate(): { success: boolean; output: string } {
 	const result = spawnSync(
 		"pnpm",
@@ -169,6 +185,11 @@ export function main(_argv: string[]): number {
 		console.error(output);
 		return 1;
 	}
+
+	// Ensure generated files have trailing newlines (for end-of-file-fixer compatibility)
+	// Do this BEFORE computing the "after" hash so we compare consistently
+	const zodIndexPath = path.join(PRISMA_ZOD_DIR, "index.ts");
+	ensureTrailingNewline(zodIndexPath);
 
 	// Compute hash of generated files after
 	const zodHashAfter = computeDirectoryHash(PRISMA_ZOD_DIR);

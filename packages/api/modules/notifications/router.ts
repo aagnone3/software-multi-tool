@@ -1,4 +1,5 @@
 import { deleteNotificationProcedure } from "./procedures/delete-notification";
+import { getPreferencesProcedure } from "./procedures/get-preferences";
 import {
 	getNotificationUnreadCount,
 	listNotifications,
@@ -7,6 +8,7 @@ import {
 	markAllNotificationsAsRead,
 	markNotificationAsRead,
 } from "./procedures/mark-as-read";
+import { updatePreferencesProcedure } from "./procedures/update-preferences";
 
 export const notificationsRouter = {
 	list: listNotifications,
@@ -14,4 +16,6 @@ export const notificationsRouter = {
 	markAsRead: markNotificationAsRead,
 	markAllAsRead: markAllNotificationsAsRead,
 	delete: deleteNotificationProcedure,
+	getPreferences: getPreferencesProcedure,
+	updatePreferences: updatePreferencesProcedure,
 };

@@ -2,6 +2,7 @@ export * from "./ai-chats";
 export * from "./audit-logs";
 export * from "./credit-balance";
 export * from "./gdpr-export";
+export * from "./notification-preferences";
 export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";

@@ -11,6 +11,8 @@ const getNotificationByIdMock = vi.hoisted(() => vi.fn());
 const markAsReadMock = vi.hoisted(() => vi.fn());
 const markAllAsReadMock = vi.hoisted(() => vi.fn());
 const deleteNotificationMock = vi.hoisted(() => vi.fn());
+const getNotificationPreferencesMock = vi.hoisted(() => vi.fn());
+const updateNotificationPreferencesMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
@@ -24,6 +26,8 @@ vi.mock("@repo/database", () => ({
 	markAsRead: markAsReadMock,
 	markAllAsRead: markAllAsReadMock,
 	deleteNotification: deleteNotificationMock,
+	getNotificationPreferences: getNotificationPreferencesMock,
+	updateNotificationPreferences: updateNotificationPreferencesMock,
 }));
 
 describe("Notifications Router", () => {
@@ -385,6 +389,153 @@ describe("Notifications Router", () => {
 			await expect(client({ id: "notif-1" })).rejects.toMatchObject({
 				code: "UNAUTHORIZED",
 			});
+		});
+	});
+
+	describe("notifications.getPreferences", () => {
+		const createClient = () => {
+			getSessionMock.mockResolvedValue({
+				user: { id: "user-123", role: "member" },
+				session: { id: "session-1" },
+			});
+
+			return createProcedureClient(notificationsRouter.getPreferences, {
+				context: {
+					headers: new Headers(),
+				},
+			});
+		};
+
+		it("returns user preferences", async () => {
+			const mockPreferences = {
+				billing: { inApp: true, email: true },
+				security: { inApp: true, email: true },
+				team: { inApp: true, email: false },
+				system: { inApp: true, email: false },
+			};
+			getNotificationPreferencesMock.mockResolvedValue(mockPreferences);
+
+			const client = createClient();
+			const result = await client({});
+
+			expect(result).toEqual({ preferences: mockPreferences });
+			expect(getNotificationPreferencesMock).toHaveBeenCalledWith(
+				"user-123",
+			);
+		});
+
+		it("throws UNAUTHORIZED when not authenticated", async () => {
+			getSessionMock.mockResolvedValue(null);
+
+			const client = createProcedureClient(
+				notificationsRouter.getPreferences,
+				{
+					context: {
+						headers: new Headers(),
+					},
+				},
+			);
+
+			await expect(client({})).rejects.toMatchObject({
+				code: "UNAUTHORIZED",
+			});
+		});
+	});
+
+	describe("notifications.updatePreferences", () => {
+		const createClient = () => {
+			getSessionMock.mockResolvedValue({
+				user: { id: "user-123", role: "member" },
+				session: { id: "session-1" },
+			});
+
+			return createProcedureClient(
+				notificationsRouter.updatePreferences,
+				{
+					context: {
+						headers: new Headers(),
+					},
+				},
+			);
+		};
+
+		it("updates a single category preference", async () => {
+			const mockUpdatedPreferences = {
+				billing: { inApp: false, email: true },
+				security: { inApp: true, email: true },
+				team: { inApp: true, email: true },
+				system: { inApp: true, email: false },
+			};
+			updateNotificationPreferencesMock.mockResolvedValue(
+				mockUpdatedPreferences,
+			);
+
+			const client = createClient();
+			const result = await client({
+				billing: { inApp: false, email: true },
+			});
+
+			expect(result).toEqual({ preferences: mockUpdatedPreferences });
+			expect(updateNotificationPreferencesMock).toHaveBeenCalledWith(
+				"user-123",
+				{ billing: { inApp: false, email: true } },
+			);
+		});
+
+		it("updates multiple category preferences", async () => {
+			const mockUpdatedPreferences = {
+				billing: { inApp: false, email: false },
+				security: { inApp: true, email: false },
+				team: { inApp: true, email: true },
+				system: { inApp: true, email: false },
+			};
+			updateNotificationPreferencesMock.mockResolvedValue(
+				mockUpdatedPreferences,
+			);
+
+			const client = createClient();
+			const result = await client({
+				billing: { inApp: false, email: false },
+				security: { inApp: true, email: false },
+			});
+
+			expect(result).toEqual({ preferences: mockUpdatedPreferences });
+			expect(updateNotificationPreferencesMock).toHaveBeenCalledWith(
+				"user-123",
+				{
+					billing: { inApp: false, email: false },
+					security: { inApp: true, email: false },
+				},
+			);
+		});
+
+		it("throws UNAUTHORIZED when not authenticated", async () => {
+			getSessionMock.mockResolvedValue(null);
+
+			const client = createProcedureClient(
+				notificationsRouter.updatePreferences,
+				{
+					context: {
+						headers: new Headers(),
+					},
+				},
+			);
+
+			await expect(
+				client({ billing: { inApp: true, email: true } }),
+			).rejects.toMatchObject({
+				code: "UNAUTHORIZED",
+			});
+		});
+
+		it("validates input schema - requires boolean values", async () => {
+			const client = createClient();
+
+			await expect(
+				client({
+					billing: { inApp: "yes", email: true } as any,
+				}),
+			).rejects.toThrow();
 		});
 	});
 });
