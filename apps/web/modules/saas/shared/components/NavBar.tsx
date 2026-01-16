@@ -2,6 +2,7 @@
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { CreditBalanceIndicator } from "@saas/credits/components/CreditBalanceIndicator";
+import { NotificationBell } from "@saas/notifications/components/NotificationBell";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UserMenu } from "@saas/shared/components/UserMenu";
 import { Logo } from "@shared/components/Logo";
@@ -138,6 +139,7 @@ export function NavBar() {
 						)}
 					>
 						<CreditBalanceIndicator />
+						<NotificationBell />
 						<UserMenu />
 					</div>
 				</div>
@@ -190,8 +192,9 @@ export function NavBar() {
 						},
 					)}
 				>
-					<div className="mb-3">
+					<div className="mb-3 flex items-center justify-between gap-2">
 						<CreditBalanceIndicator />
+						<NotificationBell />
 					</div>
 					<UserMenu showUserName />
 				</div>
