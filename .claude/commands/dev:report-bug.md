@@ -8,6 +8,9 @@ Collect a structured bug report from the user and create a bug ticket in Linear.
 2. **Verify Details** - Confirm reproduction steps
 3. **Create Issue** - Use Linear skill for ticket creation
 
+> **Note:** New bug tickets are created in **Inbox** status by default.
+> They need grooming via `/dev:groom-work` before they can be worked on.
+
 ## Required Information
 
 - Bug summary (one sentence)

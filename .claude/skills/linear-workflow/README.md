@@ -119,18 +119,22 @@ Closes {ISSUE-KEY}
 - Close Linear issue (verify auto-close or manually close)
 - Update local main branch
 
-**Note:** Issue status flow is: **Backlog → Ready → In Progress → Done**
+**Note:** Issue status flow is: **Inbox → Backlog/Ready → In Progress → Done**
 
 ## Linear State Meanings
 
 | State | Meaning | Action |
 | ----- | ------- | ------ |
-| Backlog | Needs grooming - not ready for work | Use `/dev:groom-work` to groom |
+| Inbox | New ticket (drop zone) | Use `/dev:groom-work` to groom |
+| Backlog | Groomed, not immediately ready | Move to Ready when workable |
 | Ready | Groomed and ready for development | Developers can pick these up |
 | In Progress | Currently being worked on | Set automatically when work starts |
 | Done | Completed (after PR merged) | Set after PR is merged |
 
-> **Important:** Only work on issues in **Ready** state. Issues in **Backlog** need grooming first.
+> **Important:** Only work on issues in **Ready** state.
+>
+> - Issues in **Inbox** need grooming first.
+> - Issues in **Backlog** are groomed but waiting - move to Ready when they're workable.
 
 ## Important Rules
 

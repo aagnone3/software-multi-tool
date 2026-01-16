@@ -6,8 +6,10 @@ description: Auto-pick the highest priority groomed issue from "Ready for Work" 
 
 Automatically select the highest priority groomed issue (in **Ready** state) from the "Ready for Work" Linear view and begin working on it.
 
-> **Note:** Only issues in **Ready** state appear in this view. Issues in **Backlog** need grooming first.
-> Use `/dev:groom-work` to groom Backlog tickets before they can be picked up.
+> **Note:** Only issues in **Ready** state appear in this view.
+>
+> - Issues in **Inbox** need grooming first - use `/dev:groom-work` to groom them.
+> - Issues in **Backlog** are already groomed but not yet ready - move them to Ready when it's time to work on them.
 
 ## Workflow
 
@@ -54,12 +56,13 @@ Once selected, invoke the `dev:work-on-ticket` command to handle the complete de
 If the view returns no issues:
 
 ```text
-No groomed issues are currently in the "Ready for Work" view.
+No issues are currently in the "Ready for Work" view.
 
 Options:
 1. Check the Linear view directly in your browser
-2. Groom a Backlog ticket using: /dev:groom-work (moves it to Ready)
-3. Check project backlog for tickets needing grooming: pnpm --filter @repo/scripts linear issues list --project <project-name> --state Backlog
+2. Groom an Inbox ticket using: /dev:groom-work (then move to Ready)
+3. Move a Backlog ticket to Ready if it's now workable
+4. Check for ungroomed tickets: pnpm --filter @repo/scripts linear issues list --project <project-name> --state Inbox
 ```
 
 ### View Not Found
@@ -93,8 +96,8 @@ PRA-42   Ready       Medium    Fix navigation breadcrumb styling
 PRA-38   Ready       Low       Update README with setup instructions
 ```
 
-> **Note:** All issues shown are in **Ready** state (groomed and ready for work).
-> Backlog issues are excluded - they need grooming first.
+> **Note:** All issues shown are in **Ready** state (groomed and immediately workable).
+> Inbox issues need grooming first. Backlog issues are groomed but not yet ready.
 
 **Auto-selected:** PRA-45 - Add user profile settings page (Priority: High)
 
