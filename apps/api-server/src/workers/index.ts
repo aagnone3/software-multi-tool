@@ -14,7 +14,7 @@ import { registerAllProcessors } from "@repo/api/modules/jobs/lib/register-all-p
 import { registerNewsAnalyzerProcessor } from "@repo/api/modules/news-analyzer/lib/register";
 import { db } from "@repo/database";
 import { logger } from "../lib/logger.js";
-import { getPgBoss, registerExpireHandler } from "../lib/pg-boss.js";
+import { getPgBoss } from "../lib/pg-boss.js";
 import type { JobPayload, WorkerConfig } from "./types.js";
 
 /**
@@ -314,13 +314,10 @@ export async function registerWorkers(): Promise<void> {
 
 	logger.info(`Registered ${TOOL_SLUGS.length} pg-boss workers`);
 
-	// Register expire handlers for each queue
-	// When pg-boss marks a job as expired, this updates the ToolJob status
-	logger.info("Registering expire handlers...");
-	for (const toolSlug of TOOL_SLUGS) {
-		await registerExpireHandler(toolSlug);
-	}
-	logger.info(`Registered ${TOOL_SLUGS.length} expire handlers`);
+	// Note: Expired job handling is done via cron reconciliation.
+	// pg-boss v10.x removed the onExpire() callback API.
+	// The /api/cron/job-maintenance endpoint runs reconcileJobStates()
+	// which syncs pg-boss expired state to ToolJob records.
 }
 
 /**

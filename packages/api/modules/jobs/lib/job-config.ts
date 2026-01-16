@@ -48,14 +48,15 @@
  * pg-boss handles retries with exponential backoff:
  * - `retryLimit: 3` - Maximum 3 retry attempts
  * - `retryDelay: 60` - Initial delay of 60 seconds
- * - `retryBackoff: true` - Exponential backoff (delay² for each retry)
+ * - `retryBackoff: true` - Exponential backoff (delay doubles each retry)
  *
- * Retry timeline for a failing job:
+ * Retry timeline for a failing job (with delay=60s):
  * - Attempt 1: Immediate
- * - Attempt 2: After 60 seconds (1 minute)
- * - Attempt 3: After 3600 seconds (1 hour) - 60²
- * - Attempt 4: After 12960000 seconds (would be ~150 days, but hits retryLimit)
+ * - Retry 1: ~120 seconds (2 minutes) - delay * 2
+ * - Retry 2: ~240 seconds (4 minutes) - delay * 4
+ * - Retry 3: ~480 seconds (8 minutes) - delay * 8
  *
+ * Note: pg-boss adds random jitter to prevent thundering herd.
  * After all retries exhausted, the job is marked permanently failed.
  */
 
@@ -113,13 +114,13 @@ export const RETRY_CONFIG = {
 
 	/**
 	 * Initial retry delay in seconds.
-	 * With exponential backoff: 60s, 3600s (~1hr), etc.
+	 * With exponential backoff: 60s → 120s → 240s → 480s (doubling).
 	 */
 	delay: 60,
 
 	/**
 	 * Enable exponential backoff.
-	 * Each retry delay = previous delay²
+	 * Each retry delay doubles: delay * 2^retryCount (plus jitter).
 	 */
 	backoff: true,
 } as const;

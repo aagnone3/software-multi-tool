@@ -51,7 +51,11 @@ export async function GET(request: Request) {
 		// This syncs pg-boss state with ToolJob records for jobs that have
 		// completed/failed/expired in pg-boss but still show PROCESSING in ToolJob
 		const reconcileResult = await reconcileJobStates();
-		if (reconcileResult.synced > 0) {
+		if (!reconcileResult.success) {
+			logger.error(
+				`[Cron:Maintenance] Job reconciliation failed: ${reconcileResult.error}`,
+			);
+		} else if (reconcileResult.synced > 0) {
 			logger.info(
 				`[Cron:Maintenance] Reconciled ${reconcileResult.synced} jobs (completed: ${reconcileResult.completed}, failed: ${reconcileResult.failed}, expired: ${reconcileResult.expired})`,
 			);
@@ -84,6 +88,8 @@ export async function GET(request: Request) {
 				completed: reconcileResult.completed,
 				failed: reconcileResult.failed,
 				expired: reconcileResult.expired,
+				success: reconcileResult.success,
+				...(reconcileResult.error && { error: reconcileResult.error }),
 			},
 			stuckJobsMarkedFailed: stuckResult.count,
 			expiredJobsDeleted: cleanupResult.deleted,

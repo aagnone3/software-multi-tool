@@ -172,6 +172,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 0,
 				completed: 0,
 				failed: 0,
@@ -203,6 +204,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 1,
 				completed: 1,
 				failed: 0,
@@ -235,6 +237,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 1,
 				completed: 0,
 				failed: 1,
@@ -268,6 +271,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 1,
 				completed: 0,
 				failed: 0,
@@ -301,6 +305,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 1,
 				completed: 0,
 				failed: 0,
@@ -333,6 +338,63 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
+				synced: 0,
+				completed: 0,
+				failed: 0,
+				expired: 0,
+			});
+			expect(dbMock.toolJob.update).not.toHaveBeenCalled();
+		});
+
+		it("does not sync jobs in retry state", async () => {
+			const processingJobs = [
+				{
+					id: "tool-job-1",
+					pgBossJobId: "pg-boss-job-1",
+					toolSlug: "news-analyzer",
+				},
+			];
+
+			dbMock.toolJob.findMany.mockResolvedValue(processingJobs);
+			dbMock.$queryRaw
+				.mockResolvedValueOnce([
+					{ id: "pg-boss-job-1", state: "retry", output: null },
+				])
+				.mockResolvedValueOnce([]);
+
+			const result = await reconcileJobStates();
+
+			expect(result).toEqual({
+				success: true,
+				synced: 0,
+				completed: 0,
+				failed: 0,
+				expired: 0,
+			});
+			expect(dbMock.toolJob.update).not.toHaveBeenCalled();
+		});
+
+		it("does not sync jobs in created state", async () => {
+			const processingJobs = [
+				{
+					id: "tool-job-1",
+					pgBossJobId: "pg-boss-job-1",
+					toolSlug: "news-analyzer",
+				},
+			];
+
+			dbMock.toolJob.findMany.mockResolvedValue(processingJobs);
+			dbMock.$queryRaw
+				.mockResolvedValueOnce([
+					{ id: "pg-boss-job-1", state: "created", output: null },
+				])
+				.mockResolvedValueOnce([]);
+
+			const result = await reconcileJobStates();
+
+			expect(result).toEqual({
+				success: true,
 				synced: 0,
 				completed: 0,
 				failed: 0,
@@ -362,6 +424,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 1,
 				completed: 1,
 				failed: 0,
@@ -400,6 +463,7 @@ describe("Job Runner", () => {
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: true,
 				synced: 2,
 				completed: 1,
 				failed: 1,
@@ -427,16 +491,18 @@ describe("Job Runner", () => {
 			);
 		});
 
-		it("handles database errors gracefully", async () => {
+		it("handles database errors gracefully and returns error info", async () => {
 			dbMock.toolJob.findMany.mockRejectedValue(new Error("DB error"));
 
 			const result = await reconcileJobStates();
 
 			expect(result).toEqual({
+				success: false,
 				synced: 0,
 				completed: 0,
 				failed: 0,
 				expired: 0,
+				error: "DB error",
 			});
 			expect(logger.error).toHaveBeenCalledWith(
 				expect.stringContaining("Failed to reconcile"),

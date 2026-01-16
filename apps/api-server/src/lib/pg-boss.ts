@@ -4,18 +4,9 @@ import {
 	RETRY_CONFIG,
 	WORKER_CONFIG,
 } from "@repo/api/modules/jobs/lib/job-config";
-import { db } from "@repo/database";
 import PgBoss from "pg-boss";
 import { env } from "../config/env.js";
 import { logger } from "./logger.js";
-
-/**
- * Job payload structure for pg-boss jobs.
- * Contains the reference to the ToolJob record in our database.
- */
-interface JobPayload {
-	toolJobId: string;
-}
 
 let boss: PgBoss | null = null;
 
@@ -30,7 +21,7 @@ let boss: PgBoss | null = null;
  * - schema: "pgboss" - Use the schema created by Prisma
  * - retryLimit: 3 - Default retry attempts for jobs
  * - retryDelay: 60 - Initial delay (1 minute) before retrying
- * - retryBackoff: true - Use exponential backoff (delay² per retry)
+ * - retryBackoff: true - Use exponential backoff (delay doubles per retry)
  * - expireInSeconds: 600 - Job timeout (10 minutes)
  *
  * See job-config.ts for detailed documentation on the timeout architecture
@@ -113,74 +104,20 @@ export async function stopPgBoss(): Promise<void> {
 }
 
 /**
- * Handle expired jobs for a specific queue.
+ * Note on job expiration handling:
  *
- * When pg-boss marks a job as "expired" (job stayed in active state longer
- * than expireInSeconds), this handler updates the corresponding ToolJob
- * record to reflect the expiration.
+ * pg-boss v10.x removed the `onExpire` callback API. Expired jobs are now
+ * handled through:
  *
- * This ensures ToolJob status stays in sync with pg-boss state even when
- * workers crash or become unresponsive.
+ * 1. pg-boss maintenance cycle: Automatically marks jobs as "expired" when
+ *    they stay in "active" state longer than `expireInSeconds`.
  *
- * @param queueName - The name of the queue to handle expirations for
+ * 2. Cron reconciliation: The `/api/cron/job-maintenance` endpoint runs
+ *    `reconcileJobStates()` which syncs pg-boss expired state to ToolJob
+ *    records, marking them as FAILED with appropriate error messages.
+ *
+ * This approach is more reliable than callbacks because:
+ * - It handles server restarts gracefully
+ * - It works even if the worker that created the job crashes
+ * - It provides a single source of truth (pg-boss state)
  */
-export async function registerExpireHandler(queueName: string): Promise<void> {
-	const instance = getPgBoss();
-
-	await instance.onExpire<JobPayload>(queueName, async (job) => {
-		const { toolJobId } = job.data;
-
-		logger.warn(
-			`[onExpire:${queueName}] Job expired: pgBossJobId=${job.id}, toolJobId=${toolJobId}`,
-		);
-
-		try {
-			// Update ToolJob status to FAILED with expiration reason
-			// Only update if the job is still in PROCESSING state to avoid
-			// overwriting other terminal states (COMPLETED, CANCELLED)
-			const result = await db.toolJob.updateMany({
-				where: {
-					id: toolJobId,
-					status: "PROCESSING",
-				},
-				data: {
-					status: "FAILED",
-					error: `Job expired after ${JOB_TIMEOUT_SECONDS} seconds (pg-boss expiration)`,
-					completedAt: new Date(),
-				},
-			});
-
-			if (result.count > 0) {
-				logger.info(
-					`[onExpire:${queueName}] Marked ToolJob ${toolJobId} as FAILED (expired)`,
-				);
-			} else {
-				// Job was not in PROCESSING state - check current state for logging
-				const toolJob = await db.toolJob.findUnique({
-					where: { id: toolJobId },
-					select: { status: true },
-				});
-
-				if (toolJob) {
-					logger.debug(
-						`[onExpire:${queueName}] ToolJob ${toolJobId} not updated (current status: ${toolJob.status})`,
-					);
-				} else {
-					logger.warn(
-						`[onExpire:${queueName}] ToolJob ${toolJobId} not found`,
-					);
-				}
-			}
-		} catch (error) {
-			logger.error(
-				`[onExpire:${queueName}] Failed to update ToolJob ${toolJobId}`,
-				{
-					error:
-						error instanceof Error ? error.message : String(error),
-				},
-			);
-		}
-	});
-
-	logger.info(`[onExpire:${queueName}] Expire handler registered`);
-}

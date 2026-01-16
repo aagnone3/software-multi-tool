@@ -105,15 +105,23 @@ type PgBossState =
  * The function only syncs jobs that have a pgBossJobId (jobs submitted to pg-boss).
  * Jobs without pgBossJobId are handled by handleStuckJobs().
  *
- * @returns Object containing counts of synced, completed, failed, and expired jobs
+ * @returns Object containing success status, counts, and optional error message
  */
 export async function reconcileJobStates(): Promise<{
+	success: boolean;
 	synced: number;
 	completed: number;
 	failed: number;
 	expired: number;
+	error?: string;
 }> {
-	const result = { synced: 0, completed: 0, failed: 0, expired: 0 };
+	const result = {
+		success: true,
+		synced: 0,
+		completed: 0,
+		failed: 0,
+		expired: 0,
+	};
 
 	try {
 		// Find ToolJobs in PROCESSING state that have a pgBossJobId
@@ -285,10 +293,19 @@ export async function reconcileJobStates(): Promise<{
 
 		return result;
 	} catch (error) {
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
 		logger.error("[Reconcile] Failed to reconcile job states", {
-			error: error instanceof Error ? error.message : String(error),
+			error: errorMessage,
 		});
-		return result;
+		return {
+			success: false,
+			synced: 0,
+			completed: 0,
+			failed: 0,
+			expired: 0,
+			error: errorMessage,
+		};
 	}
 }
 

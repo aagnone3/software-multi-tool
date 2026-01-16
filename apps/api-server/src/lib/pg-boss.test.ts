@@ -53,7 +53,7 @@ describe("pg-boss configuration values", () => {
  * - migrate: false (Prisma owns schema)
  * - retryLimit: 3 (default retry attempts)
  * - retryDelay: 60 (1 minute initial delay)
- * - retryBackoff: true (exponential: 1m, 4m, 16m)
+ * - retryBackoff: true (exponential backoff, delay doubles each retry)
  * - expireInSeconds: 600 (10 minute timeout)
  * - archiveCompletedAfterSeconds: 604800 (7 days)
  * - archiveFailedAfterSeconds: 1209600 (14 days)
@@ -84,3 +84,20 @@ describe("pg-boss configuration documentation", () => {
 		expect(expectedConfig.expireInSeconds).toBe(600);
 	});
 });
+
+/**
+ * Note on job expiration handling:
+ *
+ * pg-boss v10.x removed the `onExpire()` callback API. Expired jobs are now
+ * handled through:
+ *
+ * 1. pg-boss maintenance cycle: Automatically marks jobs as "expired" when
+ *    they stay in "active" state longer than `expireInSeconds`.
+ *
+ * 2. Cron reconciliation: The `/api/cron/job-maintenance` endpoint runs
+ *    `reconcileJobStates()` which syncs pg-boss expired state to ToolJob
+ *    records, marking them as FAILED with appropriate error messages.
+ *
+ * Tests for the reconciliation logic are in:
+ * - packages/api/modules/jobs/lib/job-runner.test.ts
+ */
