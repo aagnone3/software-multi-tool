@@ -39,6 +39,19 @@ const API_BASE_URL = "https://api.supabase.com/v1";
  */
 
 /**
+ * @typedef {Object} ApiKey
+ * @property {string} name - Key name (e.g., "anon", "service_role")
+ * @property {string} api_key - The actual API key value
+ */
+
+/**
+ * @typedef {Object} BranchApiCredentials
+ * @property {string} supabaseUrl - The Supabase URL for this branch
+ * @property {string} anonKey - The anon (public) key
+ * @property {string} serviceRoleKey - The service role key (admin access)
+ */
+
+/**
  * Create a Supabase Management API client
  *
  * @param {SupabaseClientConfig} config - Client configuration
@@ -276,6 +289,54 @@ export function createSupabaseClient(config) {
 			}
 
 			return { poolerUrl, directUrl };
+		},
+
+		/**
+		 * Get API keys for a project or branch
+		 * @param {string} ref - Project or branch reference ID
+		 * @returns {Promise<ApiKey[]>}
+		 */
+		async getApiKeys(ref) {
+			return request(`/projects/${ref}/api-keys`);
+		},
+
+		/**
+		 * Get API credentials (URL and keys) for a branch
+		 * @param {SupabaseBranch} branch - Branch object with ref
+		 * @returns {Promise<BranchApiCredentials>}
+		 */
+		async getBranchApiCredentials(branch) {
+			const branchRef = branch.ref || branch.project_ref;
+			if (!branchRef) {
+				throw new Error("Branch does not have a ref");
+			}
+
+			// Get API keys for the branch
+			const apiKeys = await this.getApiKeys(branchRef);
+
+			// Find anon and service_role keys
+			const anonKey = apiKeys.find(
+				(k) => k.name === "anon" || k.name === "anon key",
+			);
+			const serviceRoleKey = apiKeys.find(
+				(k) =>
+					k.name === "service_role" || k.name === "service_role key",
+			);
+
+			if (!anonKey || !serviceRoleKey) {
+				throw new Error(
+					`Could not find API keys for branch ${branchRef}. Found keys: ${apiKeys.map((k) => k.name).join(", ")}`,
+				);
+			}
+
+			// Construct the Supabase URL for the branch
+			const supabaseUrl = `https://${branchRef}.supabase.co`;
+
+			return {
+				supabaseUrl,
+				anonKey: anonKey.api_key,
+				serviceRoleKey: serviceRoleKey.api_key,
+			};
 		},
 
 		/**

@@ -547,7 +547,21 @@ async function waitCommand(args) {
 				supabaseWaitOptions,
 			);
 			const credentials = await supabase.getBranchCredentials(branch);
-			return { branch, credentials };
+
+			// Also fetch API credentials (URL, anon key, service role key) for storage
+			let apiCredentials = null;
+			try {
+				apiCredentials = await supabase.getBranchApiCredentials(branch);
+				console.log(
+					`[Supabase] API credentials retrieved for branch ${branch.ref || branch.project_ref}`,
+				);
+			} catch (error) {
+				console.log(
+					`[Supabase] Warning: Could not get API credentials: ${error.message}`,
+				);
+			}
+
+			return { branch, credentials, apiCredentials };
 		})(),
 		waitForVercelPreview(args.prNumber, waitOptions),
 		waitForRenderPreview(args.prNumber, waitOptions),
@@ -636,6 +650,7 @@ async function syncCommand(args) {
 	const vercelUrl = services.vercel?.url;
 	const renderUrl = services.render?.url;
 	const supabaseCredentials = services.supabase?.credentials;
+	const supabaseApiCredentials = services.supabase?.apiCredentials;
 
 	let renderEnvChanged = false;
 	let vercelEnvChanged = false;
@@ -721,6 +736,46 @@ async function syncCommand(args) {
 			renderEnvChanged = true;
 		} else {
 			console.log("  - POSTGRES_URL_NON_POOLING: (unchanged)");
+		}
+	}
+
+	// Update Render with Supabase API credentials for storage
+	// This enables the Supabase storage provider which has native CORS support
+	if (renderServiceId && supabaseApiCredentials) {
+		console.log("\n[Render] Updating Supabase storage credentials...");
+
+		// Update SUPABASE_URL (required for Supabase storage provider)
+		if (
+			currentRenderValues.SUPABASE_URL !==
+			supabaseApiCredentials.supabaseUrl
+		) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"SUPABASE_URL",
+				supabaseApiCredentials.supabaseUrl,
+			);
+			console.log(
+				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl}`,
+			);
+			renderEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_URL: (unchanged)");
+		}
+
+		// Update SUPABASE_SERVICE_ROLE_KEY (required for server-side storage operations)
+		if (
+			currentRenderValues.SUPABASE_SERVICE_ROLE_KEY !==
+			supabaseApiCredentials.serviceRoleKey
+		) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"SUPABASE_SERVICE_ROLE_KEY",
+				supabaseApiCredentials.serviceRoleKey,
+			);
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: ****");
+			renderEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
 		}
 	}
 
