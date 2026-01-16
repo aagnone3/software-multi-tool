@@ -1,5 +1,5 @@
 import { config } from "@repo/config";
-import { getDefaultSupabaseProvider } from "@repo/storage";
+import { getSignedUploadUrl } from "@repo/storage";
 import { protectedProcedure } from "../../../orpc/procedures";
 
 export const createLogoUploadUrl = protectedProcedure
@@ -12,15 +12,10 @@ export const createLogoUploadUrl = protectedProcedure
 			"Create a signed upload URL to upload a logo image to the storage bucket",
 	})
 	.handler(async ({ context: { user } }) => {
-		const provider = getDefaultSupabaseProvider();
-		const signedUploadUrl = await provider.getSignedUploadUrl(
-			`${user.id}.png`,
-			{
-				bucket: config.storage.bucketNames.avatars,
-				contentType: "image/png",
-				expiresIn: 60,
-			},
-		);
+		// Uses auto-detection to choose Supabase or S3 based on environment
+		const signedUploadUrl = await getSignedUploadUrl(`${user.id}.png`, {
+			bucket: config.storage.bucketNames.avatars,
+		});
 
 		return { signedUploadUrl };
 	});

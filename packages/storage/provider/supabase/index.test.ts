@@ -506,7 +506,7 @@ describe("supabase provider", () => {
 			expect(shouldUseSupabaseStorage()).toBe(true);
 		});
 
-		it("returns false when S3 credentials are configured", async () => {
+		it("returns true when both Supabase and S3 credentials are configured (prefers Supabase for CORS)", async () => {
 			delete process.env.SUPABASE_STORAGE_PROVIDER;
 			process.env.S3_ENDPOINT = "https://s3.test";
 			process.env.S3_ACCESS_KEY_ID = "key";
@@ -515,6 +515,21 @@ describe("supabase provider", () => {
 
 			const { shouldUseSupabaseStorage } = await import("./index");
 
+			// Supabase is preferred over S3 when both are configured
+			// because Supabase's native Storage API has built-in CORS support
+			expect(shouldUseSupabaseStorage()).toBe(true);
+		});
+
+		it("returns false when explicitly disabled even with Supabase credentials", async () => {
+			process.env.SUPABASE_STORAGE_PROVIDER = "false";
+			process.env.S3_ENDPOINT = "https://s3.test";
+			process.env.S3_ACCESS_KEY_ID = "key";
+			process.env.S3_SECRET_ACCESS_KEY = "secret";
+			vi.resetModules();
+
+			const { shouldUseSupabaseStorage } = await import("./index");
+
+			// Explicit opt-out allows forcing S3 provider
 			expect(shouldUseSupabaseStorage()).toBe(false);
 		});
 

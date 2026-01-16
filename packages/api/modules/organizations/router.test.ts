@@ -12,9 +12,7 @@ vi.mock("@repo/database", () => ({
 }));
 
 vi.mock("@repo/storage", () => ({
-	getDefaultSupabaseProvider: () => ({
-		getSignedUploadUrl: getSignedUploadUrlMock,
-	}),
+	getSignedUploadUrl: getSignedUploadUrlMock,
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -128,8 +126,6 @@ describe("Organizations Router", () => {
 				"user-123.png",
 				{
 					bucket: expect.any(String),
-					contentType: "image/png",
-					expiresIn: 60,
 				},
 			);
 		});
@@ -142,8 +138,6 @@ describe("Organizations Router", () => {
 				"different-user-id.png",
 				{
 					bucket: expect.any(String),
-					contentType: "image/png",
-					expiresIn: 60,
 				},
 			);
 		});

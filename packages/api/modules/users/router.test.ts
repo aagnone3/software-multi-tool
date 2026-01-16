@@ -7,9 +7,7 @@ const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/storage", () => ({
-	getDefaultSupabaseProvider: () => ({
-		getSignedUploadUrl: getSignedUploadUrlMock,
-	}),
+	getSignedUploadUrl: getSignedUploadUrlMock,
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -49,8 +47,6 @@ describe("Users Router", () => {
 				"user-123.png",
 				{
 					bucket: expect.any(String),
-					contentType: "image/png",
-					expiresIn: 60,
 				},
 			);
 		});
@@ -63,8 +59,6 @@ describe("Users Router", () => {
 				"different-user-id.png",
 				{
 					bucket: expect.any(String),
-					contentType: "image/png",
-					expiresIn: 60,
 				},
 			);
 		});

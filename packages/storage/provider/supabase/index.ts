@@ -247,7 +247,12 @@ export function getDefaultSupabaseProvider(): SupabaseStorageProvider {
 /**
  * Check if Supabase storage provider should be used.
  * Returns true when SUPABASE_STORAGE_PROVIDER is set to "true"
- * or when Supabase credentials are available and S3 credentials are not.
+ * or when Supabase credentials are available.
+ *
+ * Supabase is preferred over S3 when both are configured because:
+ * - Supabase's native Storage API has built-in CORS support
+ * - S3-compatible endpoints in Supabase don't support CORS configuration
+ * - This is critical for browser-based uploads in preview environments
  */
 export function shouldUseSupabaseStorage(): boolean {
 	// Explicit opt-in takes precedence
@@ -260,17 +265,12 @@ export function shouldUseSupabaseStorage(): boolean {
 		return false;
 	}
 
-	// Auto-detect: use Supabase storage when credentials are available
-	// and S3 credentials are not configured
+	// Auto-detect: prefer Supabase storage when credentials are available
+	// This ensures CORS-friendly uploads work in all environments
 	const hasSupabaseCredentials =
 		!!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-	const hasS3Credentials =
-		!!process.env.S3_ENDPOINT &&
-		!!process.env.S3_ACCESS_KEY_ID &&
-		!!process.env.S3_SECRET_ACCESS_KEY;
-
-	return hasSupabaseCredentials && !hasS3Credentials;
+	return hasSupabaseCredentials;
 }
 
 /**
