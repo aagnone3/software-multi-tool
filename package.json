@@ -11,6 +11,7 @@
 		"web:env:unset": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:unset --app apps/web",
 		"start": "dotenv -c -- turbo start",
 		"lint": "biome lint . ",
+		"lint:ci": "biome ci .",
 		"check": "biome check",
 		"clean": "turbo clean",
 		"format": "biome format . --write",

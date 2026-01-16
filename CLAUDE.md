@@ -34,10 +34,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Code Quality
 
-- `pnpm lint` - Run Biome linting across workspace
-- `pnpm check` - Run Biome validation
+- `pnpm lint` - Run Biome linting across workspace (linting rules only)
+- `pnpm lint:ci` - Run Biome CI check (linting + formatting, strict mode, no auto-fix)
+- `pnpm check` - Run Biome validation (linting + formatting with auto-fix)
 - `pnpm format` - Format with Biome (writes changes)
 - `pre-commit run --all-files` - Run git hooks manually across entire tree
+
+#### Biome Command Reference
+
+| Command | Checks | Auto-fix | Use Case |
+| ------- | ------ | -------- | -------- |
+| `pnpm lint` | Linting only | No | Quick lint check |
+| `pnpm check` | Linting + Formatting | Yes (`--write`) | Development workflow |
+| `pnpm lint:ci` | Linting + Formatting | No (strict) | CI parity check |
+
+The pre-commit hook runs `biome ci --staged` to catch issues before they reach CI, ensuring local and CI checks are consistent.
 
 ### Database
 

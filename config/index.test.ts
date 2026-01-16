@@ -261,7 +261,9 @@ describe("credit pack configuration", () => {
 		// Get a pack first to get its priceId
 		const boost = getCreditPackById("boost");
 		expect(boost).toBeDefined();
-		if (!boost) throw new Error("Boost pack should be defined");
+		if (!boost) {
+			throw new Error("Boost pack should be defined");
+		}
 
 		// Look up by priceId
 		const foundPack = getCreditPackByPriceId(boost.priceId);

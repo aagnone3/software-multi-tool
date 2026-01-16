@@ -15,10 +15,10 @@ pg-boss uses PostgreSQL features that Prisma cannot model:
 
 **CRITICAL**: pg-boss checks schema version on startup. The migration must match the pg-boss npm package version.
 
-| pg-boss Package | Schema Version | Notes |
-|-----------------|----------------|-------|
-| 10.4.x          | 24             | Current version in this project |
-| 10.0.x - 10.3.x | 23             | Do not use - version mismatch will cause startup failure |
+| pg-boss Package | Schema Version | Notes                                                     |
+| --------------- | -------------- | --------------------------------------------------------- |
+| 10.4.x          | 24             | Current version in this project                           |
+| 10.0.x - 10.3.x | 23             | Do not use - version mismatch will cause startup failure  |
 
 **Always verify** the expected schema version when upgrading pg-boss:
 
@@ -146,11 +146,11 @@ Tests verify:
 
 ## Helper Scripts
 
-| Script | Command | Purpose |
-|--------|---------|---------|
-| pgboss:init | `pnpm --filter @repo/database pgboss:init` | Create pg-boss tables (for introspection) |
-| pgboss:verify | `pnpm --filter @repo/database pgboss:verify` | Verify pg-boss works with Prisma-managed schema |
-| db:pull | `pnpm --filter @repo/database db:pull` | Pull schema from database into Prisma |
+| Script        | Command                                       | Purpose                                        |
+| ------------- | --------------------------------------------- | ---------------------------------------------- |
+| pgboss:init   | `pnpm --filter @repo/database pgboss:init`    | Create pg-boss tables (for introspection)      |
+| pgboss:verify | `pnpm --filter @repo/database pgboss:verify`  | Verify pg-boss works with Prisma-managed schema|
+| db:pull       | `pnpm --filter @repo/database db:pull`        | Pull schema from database into Prisma          |
 
 ## Troubleshooting
 
@@ -159,6 +159,7 @@ Tests verify:
 The pg-boss package expects a different schema version than what's in the database.
 
 **Solution:**
+
 1. Check pg-boss package version: `pnpm --filter @repo/database list pg-boss`
 2. Check database version: `SELECT version FROM pgboss.version`
 3. Create a migration to update the version if needed
@@ -168,6 +169,7 @@ The pg-boss package expects a different schema version than what's in the databa
 The pg-boss schema migration hasn't been applied.
 
 **Solution:**
+
 1. Run `pnpm --filter @repo/database migrate:execute`
 2. Verify migration is in `_prisma_migrations` table
 

@@ -82,8 +82,9 @@ export function UsageChart({ className }: UsageChartProps) {
 							/>
 							<Tooltip
 								content={({ active, payload }) => {
-									if (!active || !payload?.length)
+									if (!active || !payload?.length) {
 										return null;
+									}
 									const data = payload[0].payload;
 									return (
 										<div className="rounded-lg border bg-background p-2 shadow-sm">

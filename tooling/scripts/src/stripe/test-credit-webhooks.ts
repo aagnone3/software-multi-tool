@@ -60,9 +60,9 @@ function log(message: string, data?: unknown) {
 }
 
 function logSection(title: string) {
-	console.log("\n" + "=".repeat(60));
+	console.log(`\n${"=".repeat(60)}`);
 	console.log(`  ${title}`);
-	console.log("=".repeat(60) + "\n");
+	console.log(`${"=".repeat(60)}\n`);
 }
 
 function logSuccess(message: string) {

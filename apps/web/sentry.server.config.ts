@@ -16,7 +16,7 @@ Sentry.init({
 	release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
 
 	// Configure data scrubbing
-	beforeSend(event, hint) {
+	beforeSend(event, _hint) {
 		// Scrub sensitive environment variables
 		if (event.contexts?.app?.environment) {
 			const env = event.contexts.app.environment as Record<
