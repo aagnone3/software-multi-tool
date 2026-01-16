@@ -1,0 +1,83 @@
+name: Improve Skills
+
+on:
+  schedule:
+    # Run daily at 3 AM UTC
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (analyze without making changes)"
+        required: false
+        default: "false"
+        type: boolean
+      skill_name:
+        description: "Specific skill to review (leave empty for all)"
+        required: false
+        type: string
+
+jobs:
+  improve-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Build command arguments
+        id: args
+        run: |
+          ARGS=""
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            ARGS="--dry-run"
+          else
+            ARGS="--auto-approve"
+          fi
+          if [[ -n "${{ github.event.inputs.skill_name }}" ]]; then
+            ARGS="$ARGS ${{ github.event.inputs.skill_name }}"
+          fi
+          echo "args=$ARGS" >> $GITHUB_OUTPUT
+
+      - name: Run Claude Code to review skills
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          direct_prompt: |
+            Run the /skills:review command to review and improve Claude skills.
+
+            Arguments: ${{ steps.args.outputs.args }}
+
+            Follow the workflow in .claude/commands/skills:review.md exactly:
+            1. Load best practices from agent-skills skill
+            2. Discover all skills in .claude/skills/
+            3. Review each skill against the checklist
+            4. Apply improvements (unless --dry-run)
+            5. Create per-skill commits
+            6. Create a pull request with summary
+
+            If this is a scheduled run (not dry-run), create the PR and report the URL.
+            If this is a dry-run, just output the analysis without making changes.
+
+      - name: Comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Create an issue if the workflow fails
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Skill improvement workflow failed',
+              body: `The scheduled skill improvement workflow failed on ${new Date().toISOString()}.
+
+            Check the [workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
+
+            This is an automated notification.`,
+              labels: ['automation', 'skills']
+            });
