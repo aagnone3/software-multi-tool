@@ -81,7 +81,7 @@ describe("s3 provider", () => {
 	// =========================================================================
 
 	describe("legacy function API", () => {
-		it("creates a client lazily and returns upload URLs", async () => {
+		it("creates a client lazily and returns upload URLs with inferred content type", async () => {
 			const { getSignedUploadUrl } = await import("./index");
 
 			const url = await getSignedUploadUrl("avatars/user.png", {
@@ -98,11 +98,80 @@ describe("s3 provider", () => {
 					},
 				}),
 			);
+			// Content type is now inferred from the file extension
 			expect(putCommandSpy).toHaveBeenCalledWith(
 				expect.objectContaining({
 					Bucket: "uploads",
 					Key: "avatars/user.png",
+					ContentType: "image/png",
+				}),
+			);
+		});
+
+		it("infers JPEG content type for .jpg files", async () => {
+			vi.resetModules();
+			vi.clearAllMocks();
+			getSignedUrlMock.mockResolvedValue("signed-url");
+			const { getSignedUploadUrl } = await import("./index");
+
+			await getSignedUploadUrl("photos/vacation.jpg", {
+				bucket: "uploads",
+			});
+
+			expect(putCommandSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
 					ContentType: "image/jpeg",
+				}),
+			);
+		});
+
+		it("infers WebP content type for .webp files", async () => {
+			vi.resetModules();
+			vi.clearAllMocks();
+			getSignedUrlMock.mockResolvedValue("signed-url");
+			const { getSignedUploadUrl } = await import("./index");
+
+			await getSignedUploadUrl("images/modern.webp", {
+				bucket: "uploads",
+			});
+
+			expect(putCommandSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					ContentType: "image/webp",
+				}),
+			);
+		});
+
+		it("infers GIF content type for .gif files", async () => {
+			vi.resetModules();
+			vi.clearAllMocks();
+			getSignedUrlMock.mockResolvedValue("signed-url");
+			const { getSignedUploadUrl } = await import("./index");
+
+			await getSignedUploadUrl("animations/logo.gif", {
+				bucket: "uploads",
+			});
+
+			expect(putCommandSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					ContentType: "image/gif",
+				}),
+			);
+		});
+
+		it("falls back to application/octet-stream for unknown extensions", async () => {
+			vi.resetModules();
+			vi.clearAllMocks();
+			getSignedUrlMock.mockResolvedValue("signed-url");
+			const { getSignedUploadUrl } = await import("./index");
+
+			await getSignedUploadUrl("data/file.xyz", {
+				bucket: "uploads",
+			});
+
+			expect(putCommandSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					ContentType: "application/octet-stream",
 				}),
 			);
 		});

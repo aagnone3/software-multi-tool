@@ -6,6 +6,7 @@ import type { StorageProvider, StorageProviderConfig } from "./types";
 // Re-exports for convenience
 // ============================================================================
 
+export * from "./mime";
 export * from "./provider";
 export * from "./types";
 export * from "./validation";

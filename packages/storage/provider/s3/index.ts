@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl as getS3SignedUrl } from "@aws-sdk/s3-request-presigner";
 import { logger } from "@repo/logs";
+import { inferMimeType } from "../../mime";
 import type {
 	GetSignedUploadUrlHandler,
 	GetSignedUrlHander,
@@ -239,17 +240,20 @@ function getDefaultProvider(): S3StorageProvider {
 /**
  * @deprecated Use S3StorageProvider.getSignedUploadUrl() instead.
  * This function is maintained for backwards compatibility.
+ *
+ * Content type is now inferred from the file extension when possible,
+ * falling back to "application/octet-stream" for unknown extensions.
+ * Supports common image formats: JPEG, PNG, GIF, WebP, SVG, and more.
  */
 export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (
 	path,
 	{ bucket },
 ) => {
 	const provider = getDefaultProvider();
-	// Note: Original implementation used hardcoded "image/jpeg"
-	// Maintaining that behavior for backwards compatibility
+	const contentType = inferMimeType(path);
 	return provider.getSignedUploadUrl(path, {
 		bucket,
-		contentType: "image/jpeg",
+		contentType,
 		expiresIn: 60,
 	});
 };
