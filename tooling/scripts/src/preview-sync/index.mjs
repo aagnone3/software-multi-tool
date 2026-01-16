@@ -872,6 +872,62 @@ async function syncCommand(args) {
 		}
 	}
 
+	// Sync Supabase storage credentials to Vercel (for image-proxy route)
+	// The image-proxy route runs on Vercel and needs these to generate signed download URLs
+	if (supabaseApiCredentials && args.branch) {
+		console.log(
+			"\n[Vercel] Updating Supabase storage credentials (branch-specific)...",
+		);
+
+		// Server-side SUPABASE_URL for storage provider
+		const supabaseUrlChanged = await setVercelEnvVar(
+			"SUPABASE_URL",
+			supabaseApiCredentials.supabaseUrl,
+			"preview",
+			args.branch,
+		);
+		if (supabaseUrlChanged) {
+			console.log(
+				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_URL: (unchanged)");
+		}
+
+		// Server-side SUPABASE_SERVICE_ROLE_KEY for storage provider
+		const serviceRoleKeyChanged = await setVercelEnvVar(
+			"SUPABASE_SERVICE_ROLE_KEY",
+			supabaseApiCredentials.serviceRoleKey,
+			"preview",
+			args.branch,
+		);
+		if (serviceRoleKeyChanged) {
+			console.log(
+				`  - SUPABASE_SERVICE_ROLE_KEY: **** (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
+		}
+
+		// Public NEXT_PUBLIC_SUPABASE_URL for client-side usage
+		const publicSupabaseUrlChanged = await setVercelEnvVar(
+			"NEXT_PUBLIC_SUPABASE_URL",
+			supabaseApiCredentials.supabaseUrl,
+			"preview",
+			args.branch,
+		);
+		if (publicSupabaseUrlChanged) {
+			console.log(
+				`  - NEXT_PUBLIC_SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - NEXT_PUBLIC_SUPABASE_URL: (unchanged)");
+		}
+	}
+
 	// Trigger redeploys if env vars changed
 	console.log(`\n${"=".repeat(60)}`);
 	console.log("TRIGGERING REDEPLOYS");
