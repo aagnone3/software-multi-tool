@@ -42,21 +42,22 @@ describe("Users Router", () => {
 
 			expect(result).toEqual({
 				signedUploadUrl: "https://storage.test/signed-upload-url",
+				path: "users/user-123/avatar.png",
 			});
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"user-123.png",
+				"users/user-123/avatar.png",
 				{
 					bucket: expect.any(String),
 				},
 			);
 		});
 
-		it("uses user ID in filename", async () => {
+		it("uses user ID in path", async () => {
 			const client = createClient("different-user-id");
 			await client();
 
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"different-user-id.png",
+				"users/different-user-id/avatar.png",
 				{
 					bucket: expect.any(String),
 				},

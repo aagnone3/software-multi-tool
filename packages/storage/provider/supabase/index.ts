@@ -104,7 +104,10 @@ export class SupabaseStorageProvider implements StorageProvider {
 		try {
 			const { data, error } = await this.client.storage
 				.from(options.bucket)
-				.createSignedUploadUrl(key);
+				.createSignedUploadUrl(key, {
+					// Enable upsert to allow overwriting existing files
+					upsert: true,
+				});
 
 			if (error) {
 				throw error;

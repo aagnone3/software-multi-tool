@@ -1,7 +1,6 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
-import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { Spinner } from "@shared/components/Spinner";
 import { UserAvatar } from "@shared/components/UserAvatar";
@@ -9,7 +8,6 @@ import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { v4 as uuid } from "uuid";
 import { CropImageDialog } from "./CropImageDialog";
 
 export function UserAvatarUpload({
@@ -50,12 +48,10 @@ export function UserAvatarUpload({
 
 		setUploading(true);
 		try {
-			const path = `${user.id}-${uuid()}.png`;
-			const { signedUploadUrl } =
-				await getSignedUploadUrlMutation.mutateAsync({
-					path,
-					bucket: config.storage.bucketNames.avatars,
-				});
+			// Get signed upload URL and path from API
+			// The API determines the path structure (users/{userId}/avatar.png)
+			const { signedUploadUrl, path } =
+				await getSignedUploadUrlMutation.mutateAsync({});
 
 			const response = await fetch(signedUploadUrl, {
 				method: "PUT",
@@ -69,6 +65,7 @@ export function UserAvatarUpload({
 				throw new Error("Failed to upload image");
 			}
 
+			// Save the path returned by API to ensure consistency
 			const { error } = await authClient.updateUser({
 				image: path,
 			});

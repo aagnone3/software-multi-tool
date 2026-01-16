@@ -191,6 +191,7 @@ describe("supabase provider", () => {
 				expect(fromMock).toHaveBeenCalledWith("documents");
 				expect(createSignedUploadUrlMock).toHaveBeenCalledWith(
 					"docs/file.pdf",
+					{ upsert: true },
 				);
 			});
 

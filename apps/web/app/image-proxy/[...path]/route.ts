@@ -8,7 +8,9 @@ export const GET = async (
 ) => {
 	const { path } = await params;
 
-	const [bucket, filePath] = path;
+	// First segment is the bucket, rest is the file path
+	const [bucket, ...filePathParts] = path;
+	const filePath = filePathParts.join("/");
 
 	if (!(bucket && filePath)) {
 		return new Response("Invalid path", { status: 400 });
