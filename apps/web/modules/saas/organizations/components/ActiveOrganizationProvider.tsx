@@ -8,6 +8,7 @@ import { sessionQueryKey } from "@saas/auth/lib/api";
 import {
 	activeOrganizationQueryKey,
 	useActiveOrganizationQuery,
+	useOrganizationListQuery,
 } from "@saas/organizations/lib/api";
 import { useRouter } from "@shared/hooks/router";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -92,6 +93,45 @@ export function ActiveOrganizationProvider({
 			setLoaded(true);
 		}
 	}, [activeOrganization]);
+
+	// Defensive fallback: For sessions created before databaseHooks deployment,
+	// the session may have activeOrganizationId = null even though the user has orgs.
+	// This fetches the user's orgs and sets the first one as active if needed.
+	// This can be removed once all legacy sessions have expired.
+	const { data: organizations } = useOrganizationListQuery();
+	const [hasAttemptedFallback, setHasAttemptedFallback] = useState(false);
+
+	useEffect(() => {
+		// Skip if we've already attempted the fallback
+		if (hasAttemptedFallback) {
+			return;
+		}
+
+		// Skip if session doesn't have activeOrganizationId info yet (still loading)
+		if (session === undefined) {
+			return;
+		}
+
+		// Skip if session already has an active organization
+		if (session?.activeOrganizationId) {
+			return;
+		}
+
+		// Skip if organizations haven't loaded yet or user has no organizations
+		if (!organizations || organizations.length === 0) {
+			return;
+		}
+
+		// Session has no active org but user has orgs - apply fallback
+		// Defensive fallback for sessions created before databaseHooks deployment
+		setHasAttemptedFallback(true);
+		const firstOrg = organizations[0];
+		if (firstOrg?.slug) {
+			authClient.organization.setActive({
+				organizationSlug: firstOrg.slug,
+			});
+		}
+	}, [session, organizations, hasAttemptedFallback]);
 
 	const activeOrganizationUserRole = activeOrganization?.members.find(
 		(member) => member.userId === session?.userId,

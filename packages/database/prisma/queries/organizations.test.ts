@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
 	organizationFindUnique: vi.fn(),
 	invitationFindUnique: vi.fn(),
 	memberFindUnique: vi.fn(),
+	memberFindFirst: vi.fn(),
 }));
 
 const {
@@ -12,6 +13,7 @@ const {
 	organizationFindUnique,
 	invitationFindUnique,
 	memberFindUnique,
+	memberFindFirst,
 } = mocks;
 
 vi.mock("../client", () => ({
@@ -25,11 +27,13 @@ vi.mock("../client", () => ({
 		},
 		member: {
 			findUnique: mocks.memberFindUnique,
+			findFirst: mocks.memberFindFirst,
 		},
 	},
 }));
 
 import {
+	getFirstOrganizationForUser,
 	getInvitationById,
 	getOrganizationById,
 	getOrganizationMembership,
@@ -115,5 +119,61 @@ describe("organizations queries", () => {
 				},
 			}),
 		);
+	});
+
+	describe("getFirstOrganizationForUser", () => {
+		it("returns the first organization for a user with memberships", async () => {
+			const mockOrganization = {
+				id: "org1",
+				name: "First Organization",
+				slug: "first-org",
+			};
+			memberFindFirst.mockResolvedValueOnce({
+				id: "member1",
+				userId: "user1",
+				organizationId: "org1",
+				organization: mockOrganization,
+			});
+
+			const result = await getFirstOrganizationForUser("user1");
+
+			expect(result).toEqual(mockOrganization);
+			expect(memberFindFirst).toHaveBeenCalledWith({
+				where: { userId: "user1" },
+				orderBy: { createdAt: "asc" },
+				include: { organization: true },
+			});
+		});
+
+		it("returns null when user has no memberships", async () => {
+			memberFindFirst.mockResolvedValueOnce(null);
+
+			const result = await getFirstOrganizationForUser("user-no-orgs");
+
+			expect(result).toBeNull();
+			expect(memberFindFirst).toHaveBeenCalledWith({
+				where: { userId: "user-no-orgs" },
+				orderBy: { createdAt: "asc" },
+				include: { organization: true },
+			});
+		});
+
+		it("orders by createdAt ascending to get the oldest membership", async () => {
+			memberFindFirst.mockResolvedValueOnce({
+				id: "member1",
+				userId: "user1",
+				organizationId: "oldest-org",
+				organization: { id: "oldest-org", name: "Oldest Org" },
+			});
+
+			await getFirstOrganizationForUser("user1");
+
+			// Verify orderBy is set to ascending (oldest first)
+			expect(memberFindFirst).toHaveBeenCalledWith(
+				expect.objectContaining({
+					orderBy: { createdAt: "asc" },
+				}),
+			);
+		});
 	});
 });
