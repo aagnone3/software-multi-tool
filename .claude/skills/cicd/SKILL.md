@@ -315,6 +315,91 @@ Vercel automatically creates preview deployments for each PR.
 3. **PR Updates** → Preview deployment rebuilds
 4. **PR Merged** → Preview deployment removed
 
+### Vercel Deployment Protection Bypass
+
+Vercel preview deployments are protected by default, requiring Vercel login to access. For automated testing (E2E, CI), you need to bypass this protection.
+
+<details>
+<summary>Setting up Protection Bypass</summary>
+
+#### 1. Get the Bypass Secret
+
+1. Go to **Vercel Dashboard** → Your Project → **Settings**
+2. Navigate to **Deployment Protection**
+3. Scroll to **Protection Bypass for Automation**
+4. Click **Generate** to create a secret (or copy existing)
+5. Save the secret securely - it looks like: `prj_xxxxxxxxxxxxxxxxxxxx`
+
+#### 2. Configure Playwright
+
+Add the bypass header to your Playwright config:
+
+```typescript
+// playwright.config.ts or playwright.external.config.ts
+const extraHTTPHeaders: Record<string, string> = {};
+if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+  extraHTTPHeaders["x-vercel-protection-bypass"] =
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+}
+
+export default defineConfig({
+  use: {
+    extraHTTPHeaders,
+  },
+});
+```
+
+#### 3. Run Tests with Bypass
+
+```bash
+# Local testing against preview URL
+VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
+BASE_URL=https://your-preview.vercel.app \
+pnpm --filter web exec playwright test your-test.spec.ts
+
+# CI environment - add secret to GitHub Actions
+# Settings → Secrets → VERCEL_AUTOMATION_BYPASS_SECRET
+```
+
+#### 4. Verify It's Working
+
+Without bypass: Test shows Vercel login page
+With bypass: Test accesses your actual application
+
+</details>
+
+<details>
+<summary>GitHub Actions Integration</summary>
+
+Add the secret to your workflow:
+
+```yaml
+# .github/workflows/e2e-preview.yml
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run E2E tests against preview
+        env:
+          BASE_URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: pnpm --filter web exec playwright test
+```
+
+</details>
+
+<details>
+<summary>Test Files Reference</summary>
+
+| File | Purpose |
+| ---- | ------- |
+| `apps/web/tests/playwright.external.config.ts` | Config for external URL testing with bypass support |
+| `apps/web/tests/avatar-upload-external.spec.ts` | Example test for preview deployments |
+| `apps/web/tests/avatar-upload.spec.ts` | Local testing with Quick Login |
+
+</details>
+
 ### Vercel Environment Variables
 
 Preview deployments use `Preview` environment in Vercel:
@@ -624,6 +709,27 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', tru
    supabase start
    supabase db reset  # Applies migrations + seed
    ```
+
+### E2E Tests Blocked by Vercel Login Page
+
+**Symptom**: Playwright tests show Vercel login page instead of your application when testing against preview URLs.
+
+**Cause**: Vercel Deployment Protection is blocking unauthenticated requests.
+
+**Solution**:
+
+1. Get bypass secret from Vercel → Project Settings → Deployment Protection → Protection Bypass for Automation
+2. Pass it to your test:
+
+```bash
+VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
+BASE_URL=https://your-preview.vercel.app \
+pnpm --filter web exec playwright test --config=tests/playwright.external.config.ts
+```
+
+1. For CI, add `VERCEL_AUTOMATION_BYPASS_SECRET` to GitHub Actions secrets
+
+**Verify**: Check test screenshots - should show your app, not "Log in to Vercel" page.
 
 ### Local Development Database
 
