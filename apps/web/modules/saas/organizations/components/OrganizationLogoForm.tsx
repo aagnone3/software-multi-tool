@@ -8,6 +8,7 @@ import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import { CropImageDialog } from "../../settings/components/CropImageDialog";
 import { OrganizationLogo } from "./OrganizationLogo";
 
 export function OrganizationLogoForm() {
+	const router = useRouter();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
@@ -61,6 +63,7 @@ export function OrganizationLogoForm() {
 				body: croppedImageData,
 				headers: {
 					"Content-Type": "image/png",
+					"x-upsert": "true",
 				},
 			});
 
@@ -79,14 +82,17 @@ export function OrganizationLogoForm() {
 				throw error;
 			}
 
-			toast.success("Avatar was updated successfully");
+			toast.success("Logo was updated successfully");
 
 			refetchActiveOrganization();
 			queryClient.invalidateQueries({
 				queryKey: organizationListQueryKey,
 			});
+
+			// Refresh server components to update sidebar logo
+			router.refresh();
 		} catch {
-			toast.error("Could not update avatar");
+			toast.error("Could not update logo");
 		} finally {
 			setUploading(false);
 		}
