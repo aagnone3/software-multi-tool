@@ -11,523 +11,323 @@ allowed-tools:
 
 # Debugging Skill
 
-This skill provides comprehensive guidance for debugging applications across all deployment platforms (Vercel, Supabase, Render) and environments (local, preview, production).
+Debug applications across Vercel, Supabase, and Render in local, preview, and production environments.
 
-## Quick Reference
+---
 
-| Platform | Log Access Command | Dashboard URL |
-| -------- | ----------------- | ------------- |
-| Vercel | `vercel logs <deployment-url>` | https://vercel.com/dashboard |
-| Supabase | Supabase MCP or Dashboard | https://supabase.com/dashboard |
-| Render | `pnpm --filter @repo/scripts render deploys list` | https://dashboard.render.com |
+## Quick Fixes
 
-| Environment | Database | API Server | Frontend |
-| ----------- | -------- | ---------- | -------- |
-| Local | `localhost:5432` | `localhost:4000` | `localhost:3500` |
-| Preview | Supabase branch DB | Render preview | Vercel preview |
-| Production | Supabase prod DB | Render prod | Vercel prod |
+**Most common issues and their one-liner solutions.**
 
-## Platform-Specific Debugging
+| Symptom | Fix |
+| ------- | --- |
+| App not loading | `vercel logs <url>` to check for errors |
+| Database connection refused | Resume Supabase project or check `DATABASE_URL` |
+| API returning 502 | `curl https://<api-url>/health` - check if Render is running |
+| Session not persisting (preview) | Verify requests go through `/api/proxy/*` |
+| CORS error | Update `CORS_ORIGIN` on Render to match frontend URL |
+| Prisma client errors | `pnpm --filter @repo/database generate` |
+| Port already in use | `lsof -i :<port>` then `kill -9 <PID>` |
+| Env var not taking effect | Redeploy (Vercel bakes env vars at build time) |
 
-### Vercel (Next.js Frontend)
+---
 
-#### Accessing Logs
+## Common Scenarios
 
-**Runtime Logs (Serverless Functions)**:
+### "The app is broken - where do I start?"
 
 ```bash
-# View recent logs for production
-vercel logs <project-name>.vercel.app
+# 1. Check deployment status
+gh pr checks <pr-number>  # For PRs
+vercel ls                 # For production
 
-# View logs for specific deployment
-vercel logs <deployment-url>
-
-# Stream logs in real-time
+# 2. Check logs for errors
 vercel logs <deployment-url> --follow
 
-# Filter by function
-vercel logs <deployment-url> --filter "api/proxy"
+# 3. Check API health
+curl https://<api-url>/health
 ```
 
-**Build Logs**:
+### "Database queries are failing"
 
 ```bash
-# View build output for latest deployment
-vercel inspect <deployment-url>
+# Test connection directly
+PGPASSWORD=<pass> psql -h <host> -U postgres -d postgres -c "SELECT 1;"
 
-# Or use Vercel Dashboard:
-# Project -> Deployments -> Select deployment -> Build Logs
-```
+# Check connection count (too many = pool exhausted)
+mcp__postgres-ro-local-dev__execute_sql --sql "SELECT count(*) FROM pg_stat_activity;"
 
-**Using Supabase MCP for Vercel Logs** (Alternative):
-
-```bash
-# Get logs via Supabase MCP (if configured)
-mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "api"
-```
-
-#### Common Error Patterns
-
-| Error | Cause | Solution |
-| ----- | ----- | -------- |
-| `FUNCTION_INVOCATION_TIMEOUT` | Function exceeded 60s limit | Move to Render api-server for long operations |
-| `EDGE_FUNCTION_INVOCATION_FAILED` | Edge function crash | Check for Node.js-only APIs in edge routes |
-| `MODULE_NOT_FOUND` | Missing dependency | Check `package.json` and Turbo dependencies |
-| `504 Gateway Timeout` | Upstream timeout | Check API server health, increase timeout |
-| `500 Internal Server Error` | Unhandled exception | Check function logs for stack trace |
-
-#### Environment Variable Debugging
-
-```bash
-# List all environment variables
-pnpm web:env:list
-
-# List for specific target (preview/production)
-pnpm web:env:list --target preview
-pnpm web:env:list --target production
-
-# Verify a specific variable
-vercel env ls | grep DATABASE_URL
-
-# Pull env vars to local
-pnpm web:env:pull
-```
-
-**Common Issues**:
-
-- Variable set but not taking effect: **Redeploy required** (Vercel bakes env vars at build time)
-- Branch-specific vs generic: Branch-specific env vars take precedence
-- Missing `NEXT_PUBLIC_` prefix: Client-side code cannot access server-only vars
-
-#### Connection Troubleshooting
-
-**API Proxy Issues (Preview)**:
-
-```bash
-# Check if proxy route is being hit
-# Browser DevTools -> Network -> Filter "api/proxy"
-
-# Verify proxy environment variables
-vercel env ls preview | grep API_SERVER_URL
-```
-
-**Database Connection**:
-
-```bash
 # Verify DATABASE_URL is set
 vercel env ls | grep POSTGRES
-
-# Test connection from Vercel function (add debug endpoint temporarily)
 ```
 
-### Supabase (PostgreSQL Database)
-
-#### Accessing Supabase Logs
-
-**Via Supabase MCP**:
+### "Authentication isn't working"
 
 ```bash
-# Get postgres logs
-mcp__plugin_supabase_supabase__get_logs --project_id <project-id> --service "postgres"
+# Check session exists
+mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY created_at DESC LIMIT 5;"
 
-# Get auth logs
-mcp__plugin_supabase_supabase__get_logs --project_id <project-id> --service "auth"
+# In preview: verify proxy is used
+# Browser DevTools -> Network -> requests should go to /api/proxy/*
 
-# Get API gateway logs
-mcp__plugin_supabase_supabase__get_logs --project_id <project-id> --service "api"
-
-# Get edge function logs
-mcp__plugin_supabase_supabase__get_logs --project_id <project-id> --service "edge-function"
+# Check BETTER_AUTH_SECRET matches across services
 ```
 
-**Via Supabase Dashboard**:
-
-1. Go to https://supabase.com/dashboard
-2. Select your project
-3. Navigate to: Project Settings -> Logs
-4. Select log type: Postgres, Auth, API, etc.
-
-**Via SQL**:
-
-```sql
--- Check recent Postgres logs (requires pg_stat_statements)
-SELECT * FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;
-
--- Check active connections
-SELECT * FROM pg_stat_activity WHERE state = 'active';
-
--- Check for blocking queries
-SELECT blocked_locks.pid AS blocked_pid,
-       blocking_locks.pid AS blocking_pid,
-       blocked_activity.query AS blocked_query,
-       blocking_activity.query AS blocking_query
-FROM pg_catalog.pg_locks blocked_locks
-JOIN pg_catalog.pg_stat_activity blocked_activity ON blocked_activity.pid = blocked_locks.pid
-JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.locktype = blocked_locks.locktype
-JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid
-WHERE NOT blocked_locks.granted;
-```
-
-#### Supabase Error Patterns
-
-| Error | Cause | Solution |
-| ----- | ----- | -------- |
-| `connection refused` | Database paused or wrong URL | Resume project, verify `DATABASE_URL` |
-| `password authentication failed` | Wrong credentials | Check Supabase Dashboard for correct password |
-| `too many connections` | Connection pool exhausted | Use pooled connection string, check for leaks |
-| `relation does not exist` | Missing table/migration | Run `pnpm --filter @repo/database migrate` |
-| `permission denied` | RLS policy blocking | Check Row Level Security policies |
-| `duplicate key value` | Unique constraint violation | Handle in code or check data |
-
-#### Database Health Checks
+### "Preview environment is misconfigured"
 
 ```bash
-# Using Supabase MCP
+# Check all services deployed
+gh pr checks <pr-number>
+
+# Verify env vars synced
+vercel env ls preview | grep -E "API_SERVER|DATABASE"
+
+# Force redeploy after env changes
+git commit --allow-empty -m "chore: trigger redeploy" && git push
+```
+
+---
+
+## Log Access Quick Reference
+
+| Platform | Command |
+| -------- | ------- |
+| **Vercel** | `vercel logs <url>` or `vercel logs <url> --follow` |
+| **Supabase** | `mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "postgres"` |
+| **Render** | Dashboard → Service → Logs tab, or `pnpm --filter @repo/scripts render deploys list` |
+| **Local** | Check terminal output, or `pnpm dev` logs |
+
+**Supabase log services**: `postgres`, `auth`, `api`, `edge-function`, `storage`, `realtime`
+
+---
+
+## Error Pattern Reference
+
+### Vercel Errors
+
+| Error | Cause | Fix |
+| ----- | ----- | --- |
+| `FUNCTION_INVOCATION_TIMEOUT` | Function >60s | Move to Render api-server |
+| `EDGE_FUNCTION_INVOCATION_FAILED` | Edge crash | Check for Node.js-only APIs |
+| `MODULE_NOT_FOUND` | Missing dep | Check `package.json` |
+| `504 Gateway Timeout` | Upstream timeout | Check API server health |
+
+### Supabase Errors
+
+| Error | Cause | Fix |
+| ----- | ----- | --- |
+| `connection refused` | DB paused/wrong URL | Resume project, check URL |
+| `password authentication failed` | Wrong credentials | Check Dashboard |
+| `too many connections` | Pool exhausted | Use pooled URL, check leaks |
+| `relation does not exist` | Missing migration | Run migrations |
+| `permission denied` | RLS blocking | Check RLS policies |
+
+### Render Errors
+
+| Error | Cause | Fix |
+| ----- | ----- | --- |
+| `Build failed` | Compile error | Check build logs |
+| `Health check failed` | App not responding | Verify `HOST=0.0.0.0` |
+| `502 Bad Gateway` | App crashed | Check runtime logs |
+| `CORS error` | Origin mismatch | Update `CORS_ORIGIN` |
+
+---
+
+## Environment Reference
+
+### Service URLs by Environment
+
+| Environment | Frontend | API Server | Database |
+| ----------- | -------- | ---------- | -------- |
+| Local | `localhost:3500` | `localhost:4000` | `localhost:5432` |
+| Preview | `<branch>.vercel.app` | `<branch>-api.onrender.com` | Supabase branch DB |
+| Production | `your-domain.com` | `api.your-domain.com` | Supabase prod DB |
+
+### Connection Strings
+
+| Use Case | Variable |
+| -------- | -------- |
+| App runtime | `POSTGRES_PRISMA_URL` (pooled) |
+| Migrations | `POSTGRES_URL_NON_POOLING` (direct) |
+| Local dev | `DATABASE_URL` |
+
+---
+
+## Vercel Platform Details
+
+### Vercel Log Commands
+
+```bash
+# Runtime logs
+vercel logs <deployment-url>
+vercel logs <deployment-url> --follow
+vercel logs <deployment-url> --filter "api/proxy"
+
+# Build logs
+vercel inspect <deployment-url>
+# Or: Dashboard → Deployments → Build Logs
+```
+
+### Vercel Environment Variables
+
+```bash
+pnpm web:env:list                    # List all
+pnpm web:env:list --target preview   # Preview only
+pnpm web:env:pull                    # Pull to local
+vercel env ls | grep DATABASE_URL    # Check specific var
+```
+
+**Note**: Vercel bakes env vars at build time. Changes require redeploy.
+
+### Vercel API Proxy (Preview Only)
+
+Preview environments use `/api/proxy/*` to forward requests to Render (different domains can't share cookies).
+
+```bash
+# Verify proxy env vars
+vercel env ls preview | grep API_SERVER_URL
+
+# Check requests in browser DevTools → Network → filter "api/proxy"
+```
+
+---
+
+## Supabase Platform Details
+
+### Supabase Log Commands
+
+```bash
+# Via MCP
+mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "postgres"
+mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "auth"
+
+# Via Dashboard: Project → Settings → Logs
+```
+
+### Supabase Health Checks
+
+```bash
+# Performance advisors
 mcp__plugin_supabase_supabase__get_advisors --project_id <id> --type "performance"
+
+# Security advisors
 mcp__plugin_supabase_supabase__get_advisors --project_id <id> --type "security"
 
-# Using local postgres MCP
+# Database health (local MCP)
 mcp__postgres-ro-local-dev__analyze_db_health --health_type "all"
 ```
 
-#### Supabase Connection Troubleshooting
+### Supabase Useful Queries
 
-**Pooled vs Direct Connections**:
+```sql
+-- Active connections
+SELECT * FROM pg_stat_activity WHERE state = 'active';
 
-| Use Case | Connection String Variable |
-| -------- | -------------------------- |
-| Application runtime | `POSTGRES_PRISMA_URL` (pooled) |
-| Migrations | `POSTGRES_URL_NON_POOLING` (direct) |
-| Local development | `DATABASE_URL` |
+-- Blocking queries
+SELECT blocked_locks.pid AS blocked_pid,
+       blocking_locks.pid AS blocking_pid,
+       blocked_activity.query AS blocked_query
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_stat_activity blocked_activity
+  ON blocked_activity.pid = blocked_locks.pid
+JOIN pg_catalog.pg_locks blocking_locks
+  ON blocking_locks.locktype = blocked_locks.locktype
+JOIN pg_catalog.pg_stat_activity blocking_activity
+  ON blocking_activity.pid = blocking_locks.pid
+WHERE NOT blocked_locks.granted;
 
-**Testing Connection**:
-
-```bash
-# Test from command line
-PGPASSWORD=<password> psql -h <host> -U postgres -d postgres -c "SELECT 1;"
-
-# Check connection count
-mcp__postgres-ro-local-dev__execute_sql --sql "SELECT count(*) FROM pg_stat_activity;"
+-- Slow queries (requires pg_stat_statements)
+SELECT * FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;
 ```
 
-### Render (API Server)
-
-#### Accessing Render Logs
-
-**Via Render CLI**:
-
-```bash
-# List services to get service ID
-pnpm --filter @repo/scripts render services list
-
-# List recent deploys
-pnpm --filter @repo/scripts render deploys list --service <service-id>
-
-# Get deploy details (includes status)
-pnpm --filter @repo/scripts render deploys get --service <service-id> --deploy <deploy-id>
-```
-
-**Via Render Dashboard**:
-
-1. Go to https://dashboard.render.com
-2. Select your service
-3. Click "Logs" tab
-4. Filter by: Build, Deploy, or Runtime
-
-**Streaming Logs** (via Dashboard):
-
-- Click "Live Tail" to stream logs in real-time
-- Use search to filter specific patterns
-
-#### Render Error Patterns
-
-| Error | Cause | Solution |
-| ----- | ----- | -------- |
-| `Build failed` | Dependency/compilation error | Check build logs, fix code errors |
-| `Health check failed` | App not responding on `/health` | Verify `HOST=0.0.0.0`, check startup logs |
-| `502 Bad Gateway` | App crashed or not running | Check runtime logs, verify environment vars |
-| `Dynamic require of X is not supported` | ESM/CJS mismatch | Use `--format=cjs` in esbuild |
-| `CORS error` | `CORS_ORIGIN` mismatch | Update `CORS_ORIGIN` to match frontend URL |
-
-#### Render Environment Variable Debugging
-
-```bash
-# List environment variables
-pnpm --filter @repo/scripts render env list --service <service-id>
-
-# Get specific variable
-pnpm --filter @repo/scripts render env get --service <service-id> --key DATABASE_URL
-
-# Set/update variable (triggers redeploy)
-pnpm --filter @repo/scripts render env set --service <service-id> --key CORS_ORIGIN --value "https://example.com"
-```
-
-#### Render Connection Troubleshooting
-
-**Health Check**:
-
-```bash
-# Check health endpoint
-curl https://<service-url>/health
-# Expected: OK
-
-# Check WebSocket
-wscat -c wss://<service-url>/ws -H "Authorization: Bearer <token>"
-```
-
-**Database Connection**:
-
-```bash
-# Verify DATABASE_URL is accessible from Render
-# Add debug endpoint or check logs for connection errors
-```
-
-## Environment-Specific Debugging
-
-### Local Development
-
-#### Quick Health Check
-
-```bash
-# Check if services are running
-lsof -i :3500  # Next.js frontend
-lsof -i :4000  # API server
-lsof -i :5432  # PostgreSQL
-
-# Check database
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "SELECT 1;"
-```
-
-#### Local Development Issues
-
-**Port Conflicts**:
-
-```bash
-# Find what's using a port
-lsof -i :<port>
-
-# Kill process
-kill -9 <PID>
-
-# Or use different port in worktree
-echo "PORT=3501" >> apps/web/.env.local
-```
-
-**Database Not Running**:
-
-```bash
-# macOS (Homebrew)
-brew services start postgresql@17
-
-# Check if running
-brew services list | grep postgres
-
-# Create database if missing
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
-```
-
-**Missing Environment Variables**:
-
-```bash
-# Copy example file
-cp apps/web/.env.local.example apps/web/.env.local
-
-# Pull from Vercel (if configured)
-pnpm web:env:pull
-```
-
-**Prisma Client Out of Sync**:
-
-```bash
-# Regenerate Prisma client
-pnpm --filter @repo/database generate
-
-# If schema changed, run migrations
-pnpm --filter @repo/database migrate
-```
-
-#### Debug Tools
-
-**Browser DevTools**:
-
-- Network tab: Inspect API requests/responses
-- Console: Check for JavaScript errors
-- Application tab: Inspect cookies, localStorage
-
-**VS Code Debugging**:
-
-```json
-// .vscode/launch.json
-{
-  "configurations": [
-    {
-      "name": "Next.js: debug",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "pnpm dev"
-    }
-  ]
-}
-```
-
-**Console Logging**:
-
-```typescript
-// Structured logging with consola (from @repo/logs)
-import { logger } from "@repo/logs";
-
-logger.info("Operation started", { userId, action });
-logger.error("Operation failed", { error, context });
-```
-
-### Preview Environments
-
-#### Architecture Overview
-
-```text
-PR Branch
-    ↓
-┌─────────────────────────────────────────────────────────┐
-│                   Preview Stack                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │   Vercel    │  │   Render    │  │    Supabase     │  │
-│  │   Preview   │→→│   Preview   │→→│   Branch DB     │  │
-│  │             │  │             │  │                 │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
-
-#### Finding Preview URLs
-
-**Vercel**:
-
-```bash
-# From PR, find deployment URL in GitHub checks
-# Or from Vercel Dashboard: Project -> Deployments
-
-# Pattern: <project>-git-<branch>.vercel.app
-```
-
-**Render**:
-
-```bash
-# List services (includes preview services)
-pnpm --filter @repo/scripts render services list
-
-# Preview service name pattern: <service>-<branch>
-```
-
-**Supabase**:
+### Supabase Branch Databases (Preview)
 
 ```bash
 # List branches
 mcp__plugin_supabase_supabase__list_branches --project_id <id>
 
-# Branch database URL from Supabase Dashboard:
-# Project -> Database -> Branches -> Select branch -> Settings
+# Branch DB URL: Dashboard → Database → Branches → Select branch → Settings
 ```
 
-#### Common Preview Issues
+---
 
-**Session Not Persisting**:
+## Render Platform Details
 
-1. Check requests go through `/api/proxy/*` (Network tab)
-2. Verify `NEXT_PUBLIC_VERCEL_ENV=preview`
-3. Verify `API_SERVER_URL` points to Render preview
-4. Check cookies are being forwarded
-
-**Wrong Database**:
-
-1. Verify `POSTGRES_PRISMA_URL` points to branch DB
-2. Check if env vars were synced after branch creation
-3. Trigger Vercel redeploy if env vars changed
-
-**CORS Errors**:
-
-1. Verify `CORS_ORIGIN` on Render matches Vercel preview URL
-2. Check for trailing slashes (must match exactly)
-3. Update and redeploy if needed
-
-#### Preview Debug Commands
+### Render Log Commands
 
 ```bash
-# Check preview environment sync status
-gh pr checks <pr-number>
+# List services
+pnpm --filter @repo/scripts render services list
 
-# Manually trigger sync (if workflow available)
-gh workflow run sync-preview-environments.yml -f pr_number=<number>
+# List deploys
+pnpm --filter @repo/scripts render deploys list --service <service-id>
 
-# Verify Vercel env vars for branch
-vercel env ls preview | grep -E "API_SERVER|DATABASE"
+# Dashboard: Service → Logs tab → "Live Tail" for streaming
 ```
 
-### Production Environment
-
-#### Safe Debugging Practices
-
-**DO**:
-
-- Use read-only queries
-- Check logs before making changes
-- Test fixes in preview first
-- Use feature flags for rollouts
-- Monitor metrics after changes
-
-**DON'T**:
-
-- Run write queries without backup
-- Deploy untested code
-- Modify env vars without testing
-- Restart services during peak hours
-
-#### Accessing Production Logs
-
-**Vercel**:
+### Render Environment Variables
 
 ```bash
-vercel logs <production-url> --follow
+pnpm --filter @repo/scripts render env list --service <service-id>
+pnpm --filter @repo/scripts render env get --service <service-id> --key DATABASE_URL
+pnpm --filter @repo/scripts render env set --service <service-id> --key CORS_ORIGIN --value "https://..."
 ```
 
-**Supabase**:
+### Render Health Check
 
 ```bash
-mcp__plugin_supabase_supabase__get_logs --project_id <prod-id> --service "postgres"
+curl https://<service-url>/health
+# Expected: OK
 ```
 
-**Render**:
+---
+
+## Local Development Details
+
+### Local Quick Health Check
 
 ```bash
-pnpm --filter @repo/scripts render deploys list --service <prod-service-id>
-# Then check logs in Render Dashboard
+# Check services running
+lsof -i :3500  # Frontend
+lsof -i :4000  # API
+lsof -i :5432  # Database
+
+# Test database
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "SELECT 1;"
 ```
 
-#### Production Health Checks
+### Local Common Fixes
 
 ```bash
-# Check frontend
-curl -I https://your-domain.com/
+# Port conflict
+lsof -i :<port>
+kill -9 <PID>
 
-# Check API health
-curl https://api.your-domain.com/health
+# Database not running (macOS)
+brew services start postgresql@17
+brew services list | grep postgres
 
-# Check database (read-only)
-mcp__postgres-ro-local-dev__analyze_db_health
+# Create database
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 \
+  -c "CREATE DATABASE local_softwaremultitool;"
+
+# Missing env vars
+cp apps/web/.env.local.example apps/web/.env.local
+pnpm web:env:pull
+
+# Prisma out of sync
+pnpm --filter @repo/database generate
+pnpm --filter @repo/database migrate
 ```
 
-#### Incident Response
+### Local Debug Tools
 
-1. **Identify**: Check error rates in logs/monitoring
-2. **Assess**: Determine scope and impact
-3. **Mitigate**: Roll back if needed, communicate status
-4. **Fix**: Develop fix in preview, verify
-5. **Deploy**: Deploy fix with monitoring
-6. **Review**: Post-incident analysis
+- **Browser DevTools**: Network (API), Console (JS errors), Application (cookies)
+- **Structured logging**: `import { logger } from "@repo/logs"`
 
-## Cross-Cutting Concerns
+---
 
-### Database Connection Issues
-
-#### Diagnosis Flow
+## Advanced: Database Connection Diagnosis
 
 ```text
 Connection Error
@@ -545,95 +345,89 @@ Connection pool exhausted? ─Yes→ Increase pool size or fix leaks
 Check Prisma client version
 ```
 
-#### Common Fixes
+---
 
-```bash
-# Test raw connection
-PGPASSWORD=<pass> psql -h <host> -U postgres -d postgres -c "SELECT 1;"
+## Advanced: Authentication/Session Debugging
 
-# Check connection count
-mcp__postgres-ro-local-dev__execute_sql --sql "SELECT count(*) FROM pg_stat_activity;"
-
-# Check for blocked queries
-mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM pg_stat_activity WHERE wait_event_type = 'Lock';"
-```
-
-### Authentication/Session Debugging
-
-#### Session Flow
+### Session Flow
 
 ```text
-Login Request
-    ↓
-Better Auth validates credentials
-    ↓
-Session created in database
-    ↓
-Cookie set (secure, httpOnly, sameSite)
-    ↓
-Subsequent requests include cookie
-    ↓
-Better Auth validates session
+Login Request → Better Auth validates → Session in DB → Cookie set → Requests include cookie → Session validated
 ```
 
-#### Auth Session Issues
+### Auth Session Issues
 
-| Issue | Diagnosis | Solution |
-| ----- | --------- | -------- |
+| Issue | Diagnosis | Fix |
+| ----- | --------- | --- |
 | Session not persisting | Check cookie in DevTools | Verify `BETTER_AUTH_SECRET` matches |
-| Cross-origin session fails | Different domains in preview | Use API proxy (see api-proxy skill) |
-| Session expires too quickly | Check session duration config | Adjust `session.expiresIn` in auth config |
-| "Invalid origin" error | `BETTER_AUTH_URL` mismatch | Update to match actual URL |
+| Cross-origin fails (preview) | Different domains | Use API proxy |
+| Session expires quickly | Check config | Adjust `session.expiresIn` |
+| "Invalid origin" error | URL mismatch | Update `BETTER_AUTH_URL` |
 
-#### Auth Debug Commands
+### Auth Debug Commands
 
 ```bash
-# Check session in database
+# Check sessions
 mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY created_at DESC LIMIT 5;"
 
-# Check user exists
+# Check user
 mcp__postgres-ro-local-dev__execute_sql --sql "SELECT id, email FROM \"user\" WHERE email = 'test@example.com';"
 ```
 
-### API Request Tracing
+---
 
-#### Adding Trace Headers
+## Advanced: API Request Tracing
+
+### Adding Trace Headers
 
 ```typescript
-// Add request ID for tracing
 const requestId = crypto.randomUUID();
 headers.set("x-request-id", requestId);
 logger.info("Request started", { requestId, path, method });
 ```
 
-#### Tracing Through Proxy
+### Trace Through System
 
 ```text
-Browser Request
-    ↓
-x-request-id: abc123
-    ↓
-Vercel API Proxy (logs: [abc123] forwarding...)
-    ↓
-Render API Server (logs: [abc123] processing...)
-    ↓
-Database Query (logs: [abc123] SELECT...)
-    ↓
-Response (logs: [abc123] completed 200)
+Browser → Vercel Proxy [abc123] → Render API [abc123] → Database [abc123] → Response
 ```
 
-#### Log Search
+### Searching Traced Logs
 
 ```bash
-# Search for specific request ID
 vercel logs <url> | grep "abc123"
-
-# In Render Dashboard, use search: "abc123"
+# Render: Dashboard search "abc123"
 ```
 
-### Error Tracking Integration
+---
 
-#### Structured Error Logging
+## Advanced: Performance Monitoring
+
+### Database Query Performance
+
+```bash
+# Slow queries
+mcp__postgres-ro-local-dev__get_top_queries --sort_by "mean_time" --limit 10
+
+# Query plan
+mcp__postgres-ro-local-dev__explain_query --sql "SELECT * FROM users WHERE email = 'x'" --analyze true
+
+# Index recommendations
+mcp__postgres-ro-local-dev__analyze_workload_indexes
+```
+
+### API Response Timing
+
+```typescript
+const start = performance.now();
+// ... operation
+const duration = performance.now() - start;
+logger.info("Request completed", { duration, path });
+```
+
+---
+
+## Advanced: Structured Error Logging
 
 ```typescript
 import { logger } from "@repo/logs";
@@ -650,129 +444,80 @@ try {
 }
 ```
 
-#### Error Categories
+### Error Categories
 
-| Category | Example | Action |
-| -------- | ------- | ------ |
-| User Error | Invalid input | Return 400, log info level |
-| Auth Error | Invalid session | Return 401, log warn level |
-| Not Found | Missing resource | Return 404, log info level |
-| Server Error | Unhandled exception | Return 500, log error level, alert |
-| External Error | API timeout | Return 502/503, log error level, retry |
+| Category | HTTP | Log Level | Action |
+| -------- | ---- | --------- | ------ |
+| User Error | 400 | info | Return message |
+| Auth Error | 401 | warn | Check session |
+| Not Found | 404 | info | - |
+| Server Error | 500 | error | Alert |
+| External Error | 502/503 | error | Retry |
 
-### Log Aggregation Patterns
+---
 
-#### Structured Log Format
+## Advanced: Production Incident Response
 
-```typescript
-// Consistent log structure
-{
-  timestamp: "2024-01-15T10:30:00.000Z",
-  level: "error",
-  message: "Database connection failed",
-  service: "api-server",
-  environment: "production",
-  requestId: "abc123",
-  userId: "user_001",
-  error: {
-    name: "ConnectionError",
-    message: "Connection refused",
-    stack: "..."
-  }
-}
-```
+### Safe Practices
 
-#### Searching Logs
+**DO**: Read-only queries, check logs first, test in preview, use feature flags, monitor after changes
 
-```bash
-# By time range (Vercel)
-vercel logs <url> --since 1h
+**DON'T**: Write queries without backup, deploy untested code, modify env vars without testing, restart during peak hours
 
-# By error level (grep pattern)
-vercel logs <url> | grep '"level":"error"'
+### Response Steps
 
-# By request ID
-vercel logs <url> | grep "abc123"
-```
+1. **Identify**: Check error rates in logs
+2. **Assess**: Scope and impact
+3. **Mitigate**: Roll back if needed, communicate
+4. **Fix**: Develop in preview, verify
+5. **Deploy**: With monitoring
+6. **Review**: Post-incident analysis
 
-### Performance Monitoring
-
-#### Database Query Performance
-
-```bash
-# Get slow queries
-mcp__postgres-ro-local-dev__get_top_queries --sort_by "mean_time" --limit 10
-
-# Explain specific query
-mcp__postgres-ro-local-dev__explain_query --sql "SELECT * FROM users WHERE email = 'test@example.com'" --analyze true
-
-# Get index recommendations
-mcp__postgres-ro-local-dev__analyze_workload_indexes
-```
-
-#### API Response Times
-
-```typescript
-// Measure and log response time
-const start = performance.now();
-// ... operation
-const duration = performance.now() - start;
-logger.info("Request completed", { duration, path });
-```
+---
 
 ## Troubleshooting Checklists
 
-### "App Not Loading" Checklist
+### Checklist: App Not Loading
 
-- [ ] Is the deployment successful? (Check Vercel/Render status)
-- [ ] Are environment variables set? (Check dashboard or CLI)
-- [ ] Is the database accessible? (Test connection)
-- [ ] Are there build errors? (Check build logs)
-- [ ] Is there a runtime error? (Check function/runtime logs)
+- [ ] Deployment successful? (`vercel ls` or `gh pr checks`)
+- [ ] Environment variables set? (Check dashboard/CLI)
+- [ ] Database accessible? (Test connection)
+- [ ] Build errors? (Check build logs)
+- [ ] Runtime errors? (Check function logs)
 
-### "API Not Responding" Checklist
+### Checklist: API Not Responding
 
-- [ ] Is the API server running? (Check health endpoint)
-- [ ] Is CORS configured correctly? (Check `CORS_ORIGIN`)
-- [ ] Is authentication working? (Check session/cookies)
-- [ ] Is the database connected? (Check connection logs)
-- [ ] Are there timeout issues? (Check for long-running operations)
+- [ ] API server running? (`curl <url>/health`)
+- [ ] CORS configured? (Check `CORS_ORIGIN`)
+- [ ] Auth working? (Check session/cookies)
+- [ ] Database connected? (Check logs)
+- [ ] Timeouts? (Long-running operations?)
 
-### "Database Error" Checklist
+### Checklist: Database Error
 
-- [ ] Is `DATABASE_URL` correct? (Check environment)
-- [ ] Is the database running? (Check Supabase status)
-- [ ] Are migrations applied? (Run `prisma migrate status`)
-- [ ] Is connection pool healthy? (Check active connections)
-- [ ] Are RLS policies blocking? (Check Row Level Security)
+- [ ] `DATABASE_URL` correct?
+- [ ] Database running? (Supabase status)
+- [ ] Migrations applied? (`prisma migrate status`)
+- [ ] Connection pool healthy? (Check active connections)
+- [ ] RLS blocking? (Check policies)
 
-### "Preview Environment Issues" Checklist
+### Checklist: Preview Environment Issues
 
-- [ ] Did all services deploy? (Check GitHub PR checks)
-- [ ] Were env vars synced? (Check Vercel/Render env vars)
-- [ ] Is the proxy routing correctly? (Check Network tab)
-- [ ] Is the correct database being used? (Verify branch DB URL)
-- [ ] Was a redeploy triggered after env changes?
+- [ ] All services deployed? (`gh pr checks`)
+- [ ] Env vars synced? (Check Vercel/Render)
+- [ ] Proxy routing correctly? (Network tab)
+- [ ] Correct database? (Verify branch DB URL)
+- [ ] Redeployed after env changes?
+
+---
 
 ## Related Skills
 
-- **api-proxy**: Preview environment authentication proxy details
-- **cicd**: CI/CD pipeline and preview environment setup
-- **architecture**: Overall system architecture and request flow
-- **render**: Render deployment and API server details
-- **better-auth**: Authentication system configuration
-- **prisma-migrate**: Database migration workflows
-
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Application is returning errors or not responding
-- Logs need to be accessed for any platform
-- Environment variables need debugging
-- Database connections are failing
-- Preview environments are not working correctly
-- Performance issues need investigation
-- Session/authentication is not working
-- Cross-origin issues occur in preview
-- Production incidents require investigation
+| Skill | Use For |
+| ----- | ------- |
+| **api-proxy** | Preview authentication proxy details |
+| **cicd** | CI/CD pipeline, preview environment setup |
+| **architecture** | System architecture, request flow |
+| **render** | Render deployment details |
+| **better-auth** | Authentication configuration |
+| **prisma-migrate** | Database migration workflows |
