@@ -64,8 +64,8 @@ vercel env ls | grep POSTGRES
 ### "Authentication isn't working"
 
 ```bash
-# Check session exists
-mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY created_at DESC LIMIT 5;"
+# Check session exists (note: columns use camelCase)
+mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY \"createdAt\" DESC LIMIT 5;"
 
 # In preview: verify proxy is used
 # Browser DevTools -> Network -> requests should go to /api/proxy/*
@@ -367,8 +367,8 @@ Login Request → Better Auth validates → Session in DB → Cookie set → Req
 ### Auth Debug Commands
 
 ```bash
-# Check sessions
-mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY created_at DESC LIMIT 5;"
+# Check sessions (note: columns use camelCase)
+mcp__postgres-ro-local-dev__execute_sql --sql "SELECT id, \"userId\", \"createdAt\", \"expiresAt\" FROM session ORDER BY \"createdAt\" DESC LIMIT 5;"
 
 # Check user
 mcp__postgres-ro-local-dev__execute_sql --sql "SELECT id, email FROM \"user\" WHERE email = 'test@example.com';"
@@ -405,8 +405,11 @@ vercel logs <url> | grep "abc123"
 
 ### Database Query Performance
 
+> **Note**: `get_top_queries` requires the `pg_stat_statements` extension. If not installed, run:
+> `CREATE EXTENSION IF NOT EXISTS pg_stat_statements;`
+
 ```bash
-# Slow queries
+# Slow queries (requires pg_stat_statements extension)
 mcp__postgres-ro-local-dev__get_top_queries --sort_by "mean_time" --limit 10
 
 # Query plan
