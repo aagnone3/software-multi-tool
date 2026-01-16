@@ -1,6 +1,20 @@
 import { LocalStorageProvider } from "./provider/local";
-import { S3StorageProvider } from "./provider/s3";
-import type { StorageProvider, StorageProviderConfig } from "./types";
+import {
+	S3StorageProvider,
+	getSignedUploadUrl as s3GetSignedUploadUrl,
+	getSignedUrl as s3GetSignedUrl,
+} from "./provider/s3";
+import {
+	getDefaultSupabaseProvider,
+	SupabaseStorageProvider,
+	shouldUseSupabaseStorage,
+} from "./provider/supabase";
+import type {
+	GetSignedUploadUrlHandler,
+	GetSignedUrlHander,
+	StorageProvider,
+	StorageProviderConfig,
+} from "./types";
 
 // ============================================================================
 // Re-exports for convenience
@@ -10,6 +24,52 @@ export * from "./mime";
 export * from "./provider";
 export * from "./types";
 export * from "./validation";
+
+// ============================================================================
+// Legacy functions with auto-detection
+// These maintain backwards compatibility while auto-detecting the provider
+// ============================================================================
+
+/**
+ * @deprecated Use StorageProvider.getSignedUploadUrl() directly.
+ * This function auto-detects whether to use Supabase or S3 based on environment.
+ */
+export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (
+	path,
+	{ bucket },
+) => {
+	// Auto-detect storage provider based on environment
+	if (shouldUseSupabaseStorage()) {
+		const provider = getDefaultSupabaseProvider();
+		return provider.getSignedUploadUrl(path, {
+			bucket,
+			contentType: "image/jpeg",
+			expiresIn: 60,
+		});
+	}
+
+	return s3GetSignedUploadUrl(path, { bucket });
+};
+
+/**
+ * @deprecated Use StorageProvider.getSignedDownloadUrl() directly.
+ * This function auto-detects whether to use Supabase or S3 based on environment.
+ */
+export const getSignedUrl: GetSignedUrlHander = async (
+	path,
+	{ bucket, expiresIn },
+) => {
+	// Auto-detect storage provider based on environment
+	if (shouldUseSupabaseStorage()) {
+		const provider = getDefaultSupabaseProvider();
+		return provider.getSignedDownloadUrl(path, {
+			bucket,
+			expiresIn,
+		});
+	}
+
+	return s3GetSignedUrl(path, { bucket, expiresIn });
+};
 
 // ============================================================================
 // Factory function
@@ -68,6 +128,16 @@ export * from "./validation";
  *   baseUrl: "http://localhost:3500"
  * });
  * ```
+ *
+ * @example
+ * ```typescript
+ * // Create a Supabase storage provider (with native CORS support)
+ * const supabase = createStorageProvider({
+ *   type: "supabase",
+ *   supabaseUrl: "https://your-project.supabase.co",
+ *   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+ * });
+ * ```
  */
 export function createStorageProvider(
 	config: StorageProviderConfig,
@@ -80,6 +150,11 @@ export function createStorageProvider(
 	if (config.type === "local") {
 		const { type: _, ...localConfig } = config;
 		return new LocalStorageProvider(localConfig);
+	}
+
+	if (config.type === "supabase") {
+		const { type: _, ...supabaseConfig } = config;
+		return new SupabaseStorageProvider(supabaseConfig);
 	}
 
 	// Exhaustive check - this should never be reached

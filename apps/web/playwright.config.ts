@@ -71,6 +71,8 @@ export default defineConfig({
 		timeout: 180 * 1000,
 		env: {
 			PORT: "3500",
+			// Enable preview mode so Quick Login button appears (for testing)
+			NEXT_PUBLIC_VERCEL_ENV: "preview",
 		},
 	},
 });

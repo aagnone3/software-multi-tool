@@ -547,7 +547,21 @@ async function waitCommand(args) {
 				supabaseWaitOptions,
 			);
 			const credentials = await supabase.getBranchCredentials(branch);
-			return { branch, credentials };
+
+			// Also fetch API credentials (URL, anon key, service role key) for storage
+			let apiCredentials = null;
+			try {
+				apiCredentials = await supabase.getBranchApiCredentials(branch);
+				console.log(
+					`[Supabase] API credentials retrieved for branch ${branch.ref || branch.project_ref}`,
+				);
+			} catch (error) {
+				console.log(
+					`[Supabase] Warning: Could not get API credentials: ${error.message}`,
+				);
+			}
+
+			return { branch, credentials, apiCredentials };
 		})(),
 		waitForVercelPreview(args.prNumber, waitOptions),
 		waitForRenderPreview(args.prNumber, waitOptions),
@@ -636,6 +650,7 @@ async function syncCommand(args) {
 	const vercelUrl = services.vercel?.url;
 	const renderUrl = services.render?.url;
 	const supabaseCredentials = services.supabase?.credentials;
+	const supabaseApiCredentials = services.supabase?.apiCredentials;
 
 	let renderEnvChanged = false;
 	let vercelEnvChanged = false;
@@ -724,6 +739,46 @@ async function syncCommand(args) {
 		}
 	}
 
+	// Update Render with Supabase API credentials for storage
+	// This enables the Supabase storage provider which has native CORS support
+	if (renderServiceId && supabaseApiCredentials) {
+		console.log("\n[Render] Updating Supabase storage credentials...");
+
+		// Update SUPABASE_URL (required for Supabase storage provider)
+		if (
+			currentRenderValues.SUPABASE_URL !==
+			supabaseApiCredentials.supabaseUrl
+		) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"SUPABASE_URL",
+				supabaseApiCredentials.supabaseUrl,
+			);
+			console.log(
+				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl}`,
+			);
+			renderEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_URL: (unchanged)");
+		}
+
+		// Update SUPABASE_SERVICE_ROLE_KEY (required for server-side storage operations)
+		if (
+			currentRenderValues.SUPABASE_SERVICE_ROLE_KEY !==
+			supabaseApiCredentials.serviceRoleKey
+		) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"SUPABASE_SERVICE_ROLE_KEY",
+				supabaseApiCredentials.serviceRoleKey,
+			);
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: ****");
+			renderEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
+		}
+	}
+
 	// Update Render with Vercel URL for CORS
 	if (renderServiceId && vercelUrl) {
 		console.log("\n[Render] Updating CORS origin...");
@@ -756,31 +811,120 @@ async function syncCommand(args) {
 
 	// Update Vercel with Render URL - set as branch-specific so each PR preview
 	// gets its own Render URL (otherwise PRs would overwrite each other's values)
+	// Set both the server-side API_SERVER_URL (for proxy route) and
+	// the public NEXT_PUBLIC_API_SERVER_URL (for client-side fallback)
 	if (renderUrl && args.branch) {
-		console.log("\n[Vercel] Updating API server URL (branch-specific)...");
-		vercelEnvChanged = await setVercelEnvVar(
+		console.log("\n[Vercel] Updating API server URLs (branch-specific)...");
+
+		// Server-side variable for the API proxy route
+		const apiServerUrlChanged = await setVercelEnvVar(
+			"API_SERVER_URL",
+			renderUrl,
+			"preview",
+			args.branch,
+		);
+		if (apiServerUrlChanged) {
+			console.log(
+				`  - API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		}
+
+		// Client-side variable for fallback/SSR detection
+		const publicApiServerUrlChanged = await setVercelEnvVar(
 			"NEXT_PUBLIC_API_SERVER_URL",
 			renderUrl,
 			"preview",
-			args.branch, // Branch-specific env var
+			args.branch,
 		);
-		if (vercelEnvChanged) {
+		if (publicApiServerUrlChanged) {
 			console.log(
 				`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
 			);
+			vercelEnvChanged = true;
 		}
 	} else if (renderUrl) {
 		// Fallback to global preview if no branch specified (shouldn't happen in normal flow)
 		console.log(
-			"\n[Vercel] Updating API server URL (global preview - no branch specified)...",
+			"\n[Vercel] Updating API server URLs (global preview - no branch specified)...",
 		);
-		vercelEnvChanged = await setVercelEnvVar(
+
+		// Server-side variable for the API proxy route
+		const apiServerUrlChanged = await setVercelEnvVar(
+			"API_SERVER_URL",
+			renderUrl,
+			"preview",
+		);
+		if (apiServerUrlChanged) {
+			console.log(`  - API_SERVER_URL: ${renderUrl}`);
+			vercelEnvChanged = true;
+		}
+
+		// Client-side variable for fallback/SSR detection
+		const publicApiServerUrlChanged = await setVercelEnvVar(
 			"NEXT_PUBLIC_API_SERVER_URL",
 			renderUrl,
 			"preview",
 		);
-		if (vercelEnvChanged) {
+		if (publicApiServerUrlChanged) {
 			console.log(`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl}`);
+			vercelEnvChanged = true;
+		}
+	}
+
+	// Sync Supabase storage credentials to Vercel (for image-proxy route)
+	// The image-proxy route runs on Vercel and needs these to generate signed download URLs
+	if (supabaseApiCredentials && args.branch) {
+		console.log(
+			"\n[Vercel] Updating Supabase storage credentials (branch-specific)...",
+		);
+
+		// Server-side SUPABASE_URL for storage provider
+		const supabaseUrlChanged = await setVercelEnvVar(
+			"SUPABASE_URL",
+			supabaseApiCredentials.supabaseUrl,
+			"preview",
+			args.branch,
+		);
+		if (supabaseUrlChanged) {
+			console.log(
+				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_URL: (unchanged)");
+		}
+
+		// Server-side SUPABASE_SERVICE_ROLE_KEY for storage provider
+		const serviceRoleKeyChanged = await setVercelEnvVar(
+			"SUPABASE_SERVICE_ROLE_KEY",
+			supabaseApiCredentials.serviceRoleKey,
+			"preview",
+			args.branch,
+		);
+		if (serviceRoleKeyChanged) {
+			console.log(
+				`  - SUPABASE_SERVICE_ROLE_KEY: **** (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
+		}
+
+		// Public NEXT_PUBLIC_SUPABASE_URL for client-side usage
+		const publicSupabaseUrlChanged = await setVercelEnvVar(
+			"NEXT_PUBLIC_SUPABASE_URL",
+			supabaseApiCredentials.supabaseUrl,
+			"preview",
+			args.branch,
+		);
+		if (publicSupabaseUrlChanged) {
+			console.log(
+				`  - NEXT_PUBLIC_SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
+			);
+			vercelEnvChanged = true;
+		} else {
+			console.log("  - NEXT_PUBLIC_SUPABASE_URL: (unchanged)");
 		}
 	}
 

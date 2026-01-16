@@ -5,6 +5,7 @@ import {
 	isStreamingResponse,
 	prepareForwardHeaders,
 	prepareResponseHeaders,
+	RESPONSE_HEADERS_TO_STRIP,
 } from "./lib";
 
 const mockApiServerUrl = "https://api-preview.onrender.com";
@@ -235,6 +236,28 @@ describe("API Proxy lib", () => {
 			expect(HOP_BY_HOP_HEADERS.has("content-type")).toBe(false);
 			expect(HOP_BY_HOP_HEADERS.has("authorization")).toBe(false);
 			expect(HOP_BY_HOP_HEADERS.has("cookie")).toBe(false);
+		});
+	});
+
+	describe("RESPONSE_HEADERS_TO_STRIP", () => {
+		it("contains all hop-by-hop headers", () => {
+			// Use Array.from to avoid downlevelIteration issues
+			Array.from(HOP_BY_HOP_HEADERS).forEach((header) => {
+				expect(RESPONSE_HEADERS_TO_STRIP.has(header)).toBe(true);
+			});
+		});
+
+		it("contains content-encoding and content-length", () => {
+			expect(RESPONSE_HEADERS_TO_STRIP.has("content-encoding")).toBe(
+				true,
+			);
+			expect(RESPONSE_HEADERS_TO_STRIP.has("content-length")).toBe(true);
+		});
+
+		it("does not contain regular response headers", () => {
+			expect(RESPONSE_HEADERS_TO_STRIP.has("content-type")).toBe(false);
+			expect(RESPONSE_HEADERS_TO_STRIP.has("set-cookie")).toBe(false);
+			expect(RESPONSE_HEADERS_TO_STRIP.has("cache-control")).toBe(false);
 		});
 	});
 });

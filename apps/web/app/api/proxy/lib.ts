@@ -28,6 +28,11 @@ export const HOP_BY_HOP_HEADERS = new Set([
 	"content-length",
 ]);
 
+// RESPONSE_HEADERS_TO_STRIP is now the same as HOP_BY_HOP_HEADERS since
+// content-encoding and content-length are included there.
+// Exported for backwards compatibility with tests.
+export const RESPONSE_HEADERS_TO_STRIP = HOP_BY_HOP_HEADERS;
+
 /**
  * Build target URL from the proxy path and query parameters
  */
@@ -69,14 +74,14 @@ export function prepareForwardHeaders(requestHeaders: Headers): HeadersInit {
 }
 
 /**
- * Forward response headers, filtering hop-by-hop headers
+ * Forward response headers, filtering hop-by-hop and encoding headers
  */
 export function prepareResponseHeaders(responseHeaders: Headers): Headers {
 	const headers = new Headers();
 
 	responseHeaders.forEach((value, key) => {
 		const lowerKey = key.toLowerCase();
-		if (!HOP_BY_HOP_HEADERS.has(lowerKey)) {
+		if (!RESPONSE_HEADERS_TO_STRIP.has(lowerKey)) {
 			headers.set(key, value);
 		}
 	});

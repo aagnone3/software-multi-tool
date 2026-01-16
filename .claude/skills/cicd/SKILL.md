@@ -99,10 +99,51 @@ To find your preview branch database URL:
 
 The `supabase/seed.sql` file provisions test data for preview environments:
 
+- **Storage Buckets**: Required buckets (e.g., `avatars`) - see below
 - **Test User**: `test@preview.local` (id: `preview_user_001`)
 - **Test Org**: `preview-test-org` (id: `preview_org_001`)
 - **Membership**: Test user is an owner of the test org
 - **Seed Marker**: Verification entry for validation script
+
+### Storage Buckets in Preview Environments
+
+**Important**: Supabase Storage buckets are NOT automatically copied to preview branches. Each preview branch has its own isolated storage system that starts empty.
+
+Any storage buckets your application requires must be created in `supabase/seed.sql`:
+
+```sql
+-- Create storage buckets for preview environments
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'avatars',
+    'avatars',
+    true,
+    5242880, -- 5MB
+    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+) ON CONFLICT (id) DO NOTHING;
+```
+
+**When adding a new storage bucket to your application:**
+
+1. Create the bucket in your production Supabase project via dashboard or migration
+2. Add the bucket creation SQL to `supabase/seed.sql`
+3. Commit both changes together
+
+**Bucket configuration options:**
+
+| Field               | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `id`                | Unique bucket identifier (used in API calls)       |
+| `name`              | Display name                                       |
+| `public`            | `true` for public read access, `false` for private |
+| `file_size_limit`   | Max file size in bytes (e.g., 5242880 = 5MB)       |
+| `allowed_mime_types`| Array of allowed MIME types                        |
+
+**Current buckets required:**
+
+| Bucket    | Public | Size Limit | MIME Types                                       |
+| --------- | ------ | ---------- | ------------------------------------------------ |
+| `avatars` | Yes    | 5MB        | image/jpeg, image/png, image/gif, image/webp     |
 
 ### Validating Seed Data
 
@@ -273,6 +314,91 @@ Vercel automatically creates preview deployments for each PR.
 2. **Build Completes** → Preview URL available (e.g., `project-name-git-feature-branch.vercel.app`)
 3. **PR Updates** → Preview deployment rebuilds
 4. **PR Merged** → Preview deployment removed
+
+### Vercel Deployment Protection Bypass
+
+Vercel preview deployments are protected by default, requiring Vercel login to access. For automated testing (E2E, CI), you need to bypass this protection.
+
+<details>
+<summary>Setting up Protection Bypass</summary>
+
+#### 1. Get the Bypass Secret
+
+1. Go to **Vercel Dashboard** → Your Project → **Settings**
+2. Navigate to **Deployment Protection**
+3. Scroll to **Protection Bypass for Automation**
+4. Click **Generate** to create a secret (or copy existing)
+5. Save the secret securely - it looks like: `prj_xxxxxxxxxxxxxxxxxxxx`
+
+#### 2. Configure Playwright
+
+Add the bypass header to your Playwright config:
+
+```typescript
+// playwright.config.ts or playwright.external.config.ts
+const extraHTTPHeaders: Record<string, string> = {};
+if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+  extraHTTPHeaders["x-vercel-protection-bypass"] =
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+}
+
+export default defineConfig({
+  use: {
+    extraHTTPHeaders,
+  },
+});
+```
+
+#### 3. Run Tests with Bypass
+
+```bash
+# Local testing against preview URL
+VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
+BASE_URL=https://your-preview.vercel.app \
+pnpm --filter web exec playwright test your-test.spec.ts
+
+# CI environment - add secret to GitHub Actions
+# Settings → Secrets → VERCEL_AUTOMATION_BYPASS_SECRET
+```
+
+#### 4. Verify It's Working
+
+Without bypass: Test shows Vercel login page
+With bypass: Test accesses your actual application
+
+</details>
+
+<details>
+<summary>GitHub Actions Integration</summary>
+
+Add the secret to your workflow:
+
+```yaml
+# .github/workflows/e2e-preview.yml
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run E2E tests against preview
+        env:
+          BASE_URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: pnpm --filter web exec playwright test
+```
+
+</details>
+
+<details>
+<summary>Test Files Reference</summary>
+
+| File | Purpose |
+| ---- | ------- |
+| `apps/web/tests/playwright.external.config.ts` | Config for external URL testing with bypass support |
+| `apps/web/tests/avatar-upload-external.spec.ts` | Example test for preview deployments |
+| `apps/web/tests/avatar-upload.spec.ts` | Local testing with Quick Login |
+
+</details>
 
 ### Vercel Environment Variables
 
@@ -535,6 +661,27 @@ See also: `api-proxy` and `async-jobs` skills for detailed troubleshooting.
 4. Check for "Failed to construct 'URL'" errors - ensure `getOrpcUrl()` returns absolute URL
 5. See the `api-proxy` skill for detailed debugging steps
 
+### Storage Uploads Fail in Preview Environment
+
+**Symptom**: File uploads fail with storage errors or CORS issues in preview environments, but work in production.
+
+**Root cause**: Supabase Storage buckets are NOT copied to preview branches. Each branch starts with an empty storage system.
+
+**Solution**: Add the required bucket to `supabase/seed.sql`:
+
+```sql
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('your-bucket', 'your-bucket', true, 5242880, ARRAY['image/jpeg', 'image/png'])
+ON CONFLICT (id) DO NOTHING;
+```
+
+**For existing preview branches**, create the bucket directly:
+
+```sql
+-- Run via Supabase Dashboard SQL Editor for the preview branch
+INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+```
+
 ### Seed Validation Fails
 
 **Symptom**: `supabase:validate-seed` script fails
@@ -562,6 +709,27 @@ See also: `api-proxy` and `async-jobs` skills for detailed troubleshooting.
    supabase start
    supabase db reset  # Applies migrations + seed
    ```
+
+### E2E Tests Blocked by Vercel Login Page
+
+**Symptom**: Playwright tests show Vercel login page instead of your application when testing against preview URLs.
+
+**Cause**: Vercel Deployment Protection is blocking unauthenticated requests.
+
+**Solution**:
+
+1. Get bypass secret from Vercel → Project Settings → Deployment Protection → Protection Bypass for Automation
+2. Pass it to your test:
+
+```bash
+VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
+BASE_URL=https://your-preview.vercel.app \
+pnpm --filter web exec playwright test --config=tests/playwright.external.config.ts
+```
+
+1. For CI, add `VERCEL_AUTOMATION_BYPASS_SECRET` to GitHub Actions secrets
+
+**Verify**: Check test screenshots - should show your app, not "Log in to Vercel" page.
 
 ### Local Development Database
 

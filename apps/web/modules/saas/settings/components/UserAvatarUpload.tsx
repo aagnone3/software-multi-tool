@@ -1,15 +1,14 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
-import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { Spinner } from "@shared/components/Spinner";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { v4 as uuid } from "uuid";
 import { CropImageDialog } from "./CropImageDialog";
 
 export function UserAvatarUpload({
@@ -19,6 +18,7 @@ export function UserAvatarUpload({
 	onSuccess: () => void;
 	onError: () => void;
 }) {
+	const router = useRouter();
 	const { user, reloadSession } = useSession();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
@@ -50,18 +50,17 @@ export function UserAvatarUpload({
 
 		setUploading(true);
 		try {
-			const path = `${user.id}-${uuid()}.png`;
-			const { signedUploadUrl } =
-				await getSignedUploadUrlMutation.mutateAsync({
-					path,
-					bucket: config.storage.bucketNames.avatars,
-				});
+			// Get signed upload URL and path from API
+			// The API determines the path structure (users/{userId}/avatar.png)
+			const { signedUploadUrl, path } =
+				await getSignedUploadUrlMutation.mutateAsync({});
 
 			const response = await fetch(signedUploadUrl, {
 				method: "PUT",
 				body: croppedImageData,
 				headers: {
 					"Content-Type": "image/png",
+					"x-upsert": "true",
 				},
 			});
 
@@ -69,6 +68,7 @@ export function UserAvatarUpload({
 				throw new Error("Failed to upload image");
 			}
 
+			// Save the path returned by API to ensure consistency
 			const { error } = await authClient.updateUser({
 				image: path,
 			});
@@ -78,6 +78,9 @@ export function UserAvatarUpload({
 			}
 
 			await reloadSession();
+
+			// Refresh server components to update sidebar avatar
+			router.refresh();
 
 			onSuccess();
 		} catch {

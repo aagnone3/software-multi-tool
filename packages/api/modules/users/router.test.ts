@@ -5,9 +5,17 @@ import { usersRouter } from "./router";
 // Mock dependencies
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
+const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn(() => false));
+const existsMock = vi.hoisted(() => vi.fn(() => Promise.resolve(false)));
+const deleteMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 
 vi.mock("@repo/storage", () => ({
 	getSignedUploadUrl: getSignedUploadUrlMock,
+	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+	getDefaultSupabaseProvider: vi.fn(() => ({
+		exists: existsMock,
+		delete: deleteMock,
+	})),
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -42,22 +50,25 @@ describe("Users Router", () => {
 
 			expect(result).toEqual({
 				signedUploadUrl: "https://storage.test/signed-upload-url",
+				path: "users/user-123/avatar.png",
 			});
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"user-123.png",
+				"users/user-123/avatar.png",
 				{
 					bucket: expect.any(String),
 				},
 			);
 		});
 
-		it("uses user ID in filename", async () => {
+		it("uses user ID in path", async () => {
 			const client = createClient("different-user-id");
 			await client();
 
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"different-user-id.png",
-				expect.any(Object),
+				"users/different-user-id/avatar.png",
+				{
+					bucket: expect.any(String),
+				},
 			);
 		});
 

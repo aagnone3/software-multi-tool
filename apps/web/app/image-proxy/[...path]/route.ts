@@ -8,21 +8,28 @@ export const GET = async (
 ) => {
 	const { path } = await params;
 
-	const [bucket, filePath] = path;
+	// First segment is the bucket, rest is the file path
+	const [bucket, ...filePathParts] = path;
+	const filePath = filePathParts.join("/");
 
 	if (!(bucket && filePath)) {
 		return new Response("Invalid path", { status: 400 });
 	}
 
 	if (bucket === config.storage.bucketNames.avatars) {
-		const signedUrl = await getSignedUrl(filePath, {
-			bucket,
-			expiresIn: 60 * 60,
-		});
+		try {
+			const signedUrl = await getSignedUrl(filePath, {
+				bucket,
+				expiresIn: 60 * 60,
+			});
 
-		return NextResponse.redirect(signedUrl, {
-			headers: { "Cache-Control": "max-age=3600" },
-		});
+			return NextResponse.redirect(signedUrl, {
+				headers: { "Cache-Control": "max-age=3600" },
+			});
+		} catch (error) {
+			console.error("Image proxy error:", { bucket, filePath, error });
+			return new Response("Failed to get signed URL", { status: 500 });
+		}
 	}
 
 	return new Response("Not found", {
