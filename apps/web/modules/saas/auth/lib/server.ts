@@ -73,3 +73,27 @@ export const getInvitation = cache(async (id: string) => {
 		return null;
 	}
 });
+
+/**
+ * Syncs the session's activeOrganizationId with the target organization.
+ * Only makes a database call if there's a mismatch.
+ *
+ * Call this in organization layouts before prefetching queries to ensure
+ * API procedures that rely on session.activeOrganizationId work correctly.
+ *
+ * @param currentActiveOrgId - The session's current activeOrganizationId
+ * @param targetOrgId - The organization ID from the URL
+ */
+export async function syncActiveOrganization(
+	currentActiveOrgId: string | null | undefined,
+	targetOrgId: string,
+): Promise<void> {
+	if (currentActiveOrgId === targetOrgId) {
+		return; // Already in sync
+	}
+
+	await auth.api.setActiveOrganization({
+		body: { organizationId: targetOrgId },
+		headers: await headers(),
+	});
+}

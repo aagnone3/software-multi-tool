@@ -1,5 +1,9 @@
 import { config } from "@repo/config";
-import { getActiveOrganization } from "@saas/auth/lib/server";
+import {
+	getActiveOrganization,
+	getSession,
+	syncActiveOrganization,
+} from "@saas/auth/lib/server";
 import { activeOrganizationQueryKey } from "@saas/organizations/lib/api";
 import { AppWrapper } from "@saas/shared/components/AppWrapper";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -17,11 +21,21 @@ export default async function OrganizationLayout({
 }>) {
 	const { organizationSlug } = await params;
 
-	const organization = await getActiveOrganization(organizationSlug);
+	const [session, organization] = await Promise.all([
+		getSession(),
+		getActiveOrganization(organizationSlug),
+	]);
 
 	if (!organization) {
 		return notFound();
 	}
+
+	// Sync session's activeOrganizationId with the URL organization
+	// This ensures API procedures have access to the correct organization context
+	await syncActiveOrganization(
+		session?.session.activeOrganizationId,
+		organization.id,
+	);
 
 	const queryClient = getServerQueryClient();
 
