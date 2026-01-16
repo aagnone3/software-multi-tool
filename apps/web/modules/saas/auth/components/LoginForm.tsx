@@ -185,13 +185,27 @@ export function LoginForm() {
 
 			router.replace(redirectPath);
 		} catch (e) {
-			form.setError("root", {
-				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
-						: undefined,
-				),
-			});
+			const errorCode =
+				e && typeof e === "object" && "code" in e
+					? (e.code as string)
+					: undefined;
+
+			// Check if error indicates test user doesn't exist
+			const isUserNotFoundError =
+				errorCode === "INVALID_EMAIL_OR_PASSWORD" ||
+				errorCode === "USER_NOT_FOUND" ||
+				errorCode === "CREDENTIAL_ACCOUNT_NOT_FOUND";
+
+			if (isUserNotFoundError) {
+				form.setError("root", {
+					message:
+						"Test user not found. Seed your database using: PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql",
+				});
+			} else {
+				form.setError("root", {
+					message: getAuthErrorMessage(errorCode),
+				});
+			}
 		} finally {
 			setIsQuickLoggingIn(false);
 		}
