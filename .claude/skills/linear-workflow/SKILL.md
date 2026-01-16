@@ -12,7 +12,8 @@ Use this skill when:
 
 > **State Convention:**
 >
-> - **Backlog** = Needs grooming (use `/dev:groom-work` first)
+> - **Inbox** = New ticket (use `/dev:groom-work` to groom)
+> - **Backlog** = Groomed but not immediately ready (waiting for dependencies/priority)
 > - **Ready** = Groomed and ready for development (pick these up)
 > - **In Progress** = Currently being worked on
 > - **Done** = Completed (only after PR is merged)
@@ -24,9 +25,10 @@ Use this skill when:
 When the user wants to work on a Linear issue:
 
 1. **Get issue details** from Linear (use existing Linear CLI or MCP tools)
-2. **Verify issue is groomed** - Check that the issue is in **Ready** state (not Backlog)
-   - If issue is in **Backlog**, inform user it needs grooming first: `/dev:groom-work`
-   - Only proceed with issues in **Ready** state (groomed and ready)
+2. **Verify issue is groomed** - Check that the issue is in **Ready** state
+   - If issue is in **Inbox**, inform user it needs grooming first: `/dev:groom-work`
+   - If issue is in **Backlog**, it's groomed but not ready - ask user to move to Ready or pick a different issue
+   - Only proceed with issues in **Ready** state (groomed and immediately workable)
 3. **Verify issue is not blocked** - Check that it's not blocked by other issues
 4. **Move issue to "In Progress"** - Automatically update Linear status:
 

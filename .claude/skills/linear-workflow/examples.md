@@ -156,7 +156,7 @@ Note: I created a feature branch since we were working on main.
 When working on any Linear issue, the todo list should look like this:
 
 ```text
-[pending] Verify issue is in "Ready" state (groomed and ready)
+[pending] Verify issue is in "Ready" state (not Inbox or Backlog)
 [pending] Move issue to "In Progress" status
 [pending] Understand issue requirements and acceptance criteria
 [pending] Implement feature X
@@ -168,12 +168,12 @@ When working on any Linear issue, the todo list should look like this:
 [pending] Push branch and create PR
 ```
 
-The first item verifies the issue is groomed, the second updates status, and the last items ensure you don't forget the PR creation workflow.
+The first item verifies the issue is groomed (Ready = groomed and immediately workable; Inbox = ungroomed; Backlog = groomed but waiting), the second updates status, and the last items ensure you don't forget the PR creation workflow.
 
 ### During Implementation
 
 ```text
-[completed] Verify issue is in "Ready" state (groomed and ready)
+[completed] Verify issue is in "Ready" state (not Inbox or Backlog)
 [completed] Move issue to "In Progress" status
 [completed] Understand issue requirements and acceptance criteria
 [completed] Implement feature X

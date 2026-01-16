@@ -15,14 +15,19 @@ Interactively flesh out a Linear ticket's scope, dependencies, and metadata, the
 > - **DO** explore the codebase to understand the problem
 > - **DO** ask clarifying questions and refine acceptance criteria
 > - **DO** create or update Linear tickets with well-defined scope
-> - **DO** move the ticket from **Backlog** to **Ready** when grooming is complete
+> - **DO** move the ticket from **Inbox** to **Backlog** or **Ready** when grooming is complete
 
 ## State Convention
 
-- **Backlog** = Needs grooming (not ready for development)
-- **Ready** = Groomed and ready for work (developers can pick these up)
+| State | Meaning | Grooming Target |
+| ----- | ------- | --------------- |
+| **Inbox** | New ticket (drop zone) | Start here - needs grooming |
+| **Backlog** | Groomed, not immediately ready | Groomed but waiting (dependencies, future sprint, low priority) |
+| **Ready** | Groomed and ready for work | Developers can pick these up immediately |
 
-Grooming is complete when the ticket moves from Backlog to Ready.
+**Grooming Flow:** `Inbox → (groom) → Backlog OR Ready`
+
+Grooming is complete when the ticket moves from **Inbox** to either **Backlog** (groomed, waiting) or **Ready** (groomed, immediately workable).
 
 ## Input
 
@@ -116,7 +121,7 @@ Present a complete summary for user approval:
 **Project:** [project name]
 **Priority:** [priority level]
 **Type:** [bug/feature/chore/docs]
-**Target State:** Ready (Ready for Work)
+**Target State:** [Backlog OR Ready - to be determined]
 
 ### Description
 [full description with acceptance criteria]
@@ -174,30 +179,52 @@ pnpm --filter @repo/scripts linear issues set-milestone \
   --milestone <milestone>
 ```
 
-### Phase 6.5: Move to Ready for Work
+### Phase 6.5: Determine Target State and Move
 
-After the ticket is created or updated, move it from **Backlog** to **Ready** state to mark it as groomed and ready for development:
+After the ticket is created or updated, ask the user to determine the appropriate target state:
+
+**Ask:** "Is this ticket ready for immediate work, or should it wait?"
+
+**Decision criteria:**
+
+- **Ready** (immediately workable):
+  - No blocking dependencies
+  - High enough priority to work on now
+  - All requirements are clear
+  - Assigned to current sprint/cycle (if applicable)
+
+- **Backlog** (groomed but waiting):
+  - Has blocking dependencies that need resolution first
+  - Lower priority - other work should be done first
+  - Planned for a future sprint/milestone
+  - Needs external input or resources not yet available
+
+**Move to the chosen state:**
 
 ```bash
 # Use Linear MCP tool to update the issue state
 mcp__plugin_linear_linear__update_issue with:
   - id: <issue-id>
-  - state: "Ready"
+  - state: "Ready"  # OR "Backlog" based on user's answer
 ```
 
 Or inform the user to manually update the status in Linear if MCP is unavailable.
 
-> **Important:** A ticket is not considered "groomed" until it's in **Ready** state.
-> Issues in **Backlog** will not appear in the "Ready for Work" view.
+> **Important:** A ticket is not considered "groomed" until it moves out of **Inbox**.
+>
+> - Issues in **Ready** appear in the "Ready for Work" view and can be picked up immediately.
+> - Issues in **Backlog** are groomed but waiting - they won't appear in "Ready for Work" until moved to Ready.
 
 ### Phase 7: STOP - Grooming Complete
 
 **🛑 STOP HERE. Do not proceed to implementation.**
 
-Once the ticket is created/updated and moved to Ready:
+Once the ticket is created/updated and moved to the target state:
 
 1. Confirm the ticket details with the user
-2. Confirm the ticket is now in **Ready** state (ready for work)
+2. Confirm the ticket's final state:
+   - **Ready** = Appears in "Ready for Work" view, can be picked up immediately
+   - **Backlog** = Groomed and waiting, move to Ready when it's time to work on it
 3. Provide the Linear ticket URL
 4. **End the grooming session**
 

@@ -20,13 +20,18 @@ This repository uses the following state meanings:
 
 | State | Meaning | Action |
 | ----- | ------- | ------ |
-| **Backlog** | Needs grooming - not ready for development | Use `/dev:groom-work` to groom |
+| **Inbox** | New ticket (drop zone) | Use `/dev:groom-work` to groom |
+| **Backlog** | Groomed, not immediately ready | Wait for dependencies/priority, then move to Ready |
 | **Ready** | Groomed and ready for work | Developers can pick these up |
 | **In Progress** | Currently being worked on | Set automatically via `issues start` |
 | **Done** | Completed | Set via `issues close` after PR is merged |
 
+**Grooming Flow:** `Inbox → (groom) → Backlog OR Ready`
+
 > **Important:** Only start work on issues in **Ready** state.
-> Issues in **Backlog** need grooming first before they can be worked on.
+>
+> - Issues in **Inbox** need grooming first - use `/dev:groom-work`.
+> - Issues in **Backlog** are groomed but waiting - move them to Ready when they're workable.
 
 ## Core Command Pattern
 
