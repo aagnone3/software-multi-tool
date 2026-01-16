@@ -133,7 +133,7 @@ function runPrismaGenerate(): { success: boolean; output: string } {
 	};
 }
 
-export function main(argv: string[]): number {
+export function main(_argv: string[]): number {
 	const stagedFiles = getStagedFiles();
 
 	// Only run check if Prisma-related files are staged

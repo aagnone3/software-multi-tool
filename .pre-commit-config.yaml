@@ -44,6 +44,20 @@ repos:
         args: ["lint"]
         language: system
         pass_filenames: false
+      - id: biome-ci-check
+        name: Biome CI parity check (staged files)
+        entry: pnpm
+        args: ["exec", "biome", "ci", "--no-errors-on-unmatched"]
+        language: system
+        pass_filenames: true
+        types_or:
+          - javascript
+          - jsx
+          - ts
+          - tsx
+          - json
+          - markdown
+          - css
       - id: lockfile-check
         name: Check pnpm lockfile is up to date
         entry: bash

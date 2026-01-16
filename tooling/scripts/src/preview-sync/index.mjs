@@ -453,8 +453,12 @@ async function setVercelEnvVar(
 	// When gitBranch is specified, look for a branch-specific env var
 	// Otherwise look for a global env var (no gitBranch)
 	const existing = envVars.envs?.find((e) => {
-		if (e.key !== key) return false;
-		if (!e.target.includes(target)) return false;
+		if (e.key !== key) {
+			return false;
+		}
+		if (!e.target.includes(target)) {
+			return false;
+		}
 		if (gitBranch) {
 			// Looking for branch-specific: must match the branch
 			return e.gitBranch === gitBranch;
