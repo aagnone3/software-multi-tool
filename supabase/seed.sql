@@ -6,6 +6,21 @@
 -- See .claude/skills/better-auth/ for auth implementation details
 
 -- =====================================================
+-- Storage Buckets
+-- =====================================================
+-- Create storage buckets needed for the application
+-- These are not automatically created on preview branches
+
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'avatars',
+    'avatars',
+    true,
+    5242880, -- 5MB
+    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+) ON CONFLICT (id) DO NOTHING;
+
+-- =====================================================
 -- Test User
 -- =====================================================
 -- Email: test@preview.local
@@ -720,6 +735,7 @@ ON CONFLICT ("id") DO NOTHING;
 DO $$
 BEGIN
     RAISE NOTICE 'Preview branch seed completed successfully';
+    RAISE NOTICE 'Storage Bucket: avatars (public, 5MB limit)';
     RAISE NOTICE 'Test User: test@preview.local';
     RAISE NOTICE 'Test Org: preview-test-org';
     RAISE NOTICE 'Credit Balance: 500 included, 247 used, 100 purchased';
