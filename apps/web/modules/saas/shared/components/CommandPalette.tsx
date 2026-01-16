@@ -4,9 +4,11 @@ import { config } from "@repo/config";
 import type { ToolConfig } from "@repo/config/types";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useTools } from "@saas/tools/hooks/use-tools";
 import { Command } from "cmdk";
 import {
 	BotMessageSquareIcon,
+	ClockIcon,
 	CoinsIcon,
 	HomeIcon,
 	ImageMinusIcon,
@@ -84,6 +86,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 	const router = useRouter();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
+	const { enabledTools, visibleTools, isToolEnabled } = useTools();
 	const [search, setSearch] = useState("");
 	const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -213,9 +216,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		return null;
 	}
 
-	const enabledTools = config.tools.registry.filter((tool) => tool.enabled);
-
-	// Build recent items list
+	// Build recent items list - only show enabled tools in recently used
 	const recentList: Array<
 		| { type: "tool"; data: ToolConfig }
 		| { type: "page"; data: NavigationItem }
@@ -356,21 +357,39 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 							heading="Jump to Tool"
 							className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
 						>
-							{enabledTools.map((tool) => {
+							{visibleTools.map((tool) => {
 								const Icon = getToolIcon(tool.icon);
+								const disabled = tool.isComingSoon;
 								return (
 									<Command.Item
 										key={tool.slug}
 										value={`${tool.name} ${tool.description} ${tool.slug}`}
-										onSelect={() => handleSelectTool(tool)}
+										onSelect={() => {
+											if (!disabled) {
+												handleSelectTool(tool);
+											}
+										}}
+										disabled={disabled}
 										className="relative flex cursor-pointer select-none items-center gap-3 rounded-sm px-2 py-2.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground"
 									>
-										<div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+										<div
+											className={`flex size-8 items-center justify-center rounded-md ${
+												disabled
+													? "bg-muted text-muted-foreground"
+													: "bg-primary/10 text-primary"
+											}`}
+										>
 											<Icon className="size-4" />
 										</div>
 										<div className="flex flex-col gap-0.5">
-											<span className="font-medium">
+											<span className="flex items-center gap-2 font-medium">
 												{tool.name}
+												{disabled && (
+													<span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+														<ClockIcon className="size-2.5" />
+														Coming Soon
+													</span>
+												)}
 											</span>
 											<span className="text-xs text-muted-foreground">
 												{tool.description}

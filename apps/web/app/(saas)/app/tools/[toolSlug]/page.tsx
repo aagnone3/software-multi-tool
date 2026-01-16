@@ -1,11 +1,12 @@
 import { config } from "@repo/config";
+import { isToolEnabled } from "@saas/tools/lib/tool-flags";
 import { ContractAnalyzerTool } from "@tools/components/ContractAnalyzerTool";
 import { ExpenseCategorizerTool } from "@tools/components/ExpenseCategorizerTool";
 import { FeedbackAnalyzerTool } from "@tools/components/FeedbackAnalyzerTool";
 import { InvoiceProcessorTool } from "@tools/components/InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
 import { SpeakerDiarizationTool } from "@tools/components/SpeakerDiarizationTool";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
 
 interface ToolPageProps {
@@ -50,12 +51,20 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
 
 export default async function ToolPage({ params }: ToolPageProps) {
 	const { toolSlug } = await params;
+
+	// First check if tool exists in config
 	const tool = config.tools.registry.find(
 		(t) => t.slug === toolSlug && t.enabled,
 	);
 
 	if (!tool) {
 		notFound();
+	}
+
+	// Check if tool is enabled via ENABLED_TOOLS env var
+	// If not enabled, redirect to dashboard
+	if (!isToolEnabled(toolSlug)) {
+		redirect("/app");
 	}
 
 	const ToolComponent = TOOL_COMPONENTS[toolSlug];
