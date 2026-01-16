@@ -100,6 +100,21 @@ postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
 PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
 ```
 
+**Seed test user (for Quick Login button):**
+
+The login page shows a "Quick Login as Test User" button in non-production environments. This requires a test user to exist in the database. In Vercel preview environments, this user is automatically created via Supabase's `seed.sql`. For local development, manually seed the test user:
+
+```bash
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql
+```
+
+Test user credentials:
+
+| Field    | Value                 |
+| -------- | --------------------- |
+| Email    | test@preview.local    |
+| Password | PreviewPassword123!   |
+
 ### Stripe Webhooks
 
 - `pnpm --filter @repo/scripts stripe:validate` - Validate Stripe webhook configuration and test integration
