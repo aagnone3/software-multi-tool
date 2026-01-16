@@ -112,6 +112,12 @@ export const NotificationScalarFieldEnumSchema = z.enum(['id', 'createdAt', 'use
 
 export type NotificationScalarFieldEnumEnum = z.infer<typeof NotificationScalarFieldEnumSchema>;
 
+// File: NotificationPreferenceScalarFieldEnum.schema.ts
+
+export const NotificationPreferenceScalarFieldEnumSchema = z.enum(['id', 'userId', 'createdAt', 'updatedAt', 'billing', 'security', 'team', 'system'])
+
+export type NotificationPreferenceScalarFieldEnumEnum = z.infer<typeof NotificationPreferenceScalarFieldEnumSchema>;
+
 // File: ArchiveScalarFieldEnum.schema.ts
 
 export const ArchiveScalarFieldEnumSchema = z.enum(['id', 'name', 'priority', 'data', 'state', 'retry_limit', 'retry_count', 'retry_delay', 'retry_backoff', 'start_after', 'started_on', 'singleton_key', 'singleton_on', 'created_on', 'completed_on', 'keep_until', 'output', 'dead_letter', 'policy', 'archived_on'])
@@ -511,6 +517,22 @@ export const NotificationSchema = z.object({
 });
 
 export type NotificationType = z.infer<typeof NotificationSchema>;
+
+
+// File: NotificationPreference.schema.ts
+
+export const NotificationPreferenceSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  billing: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("{\"inApp\": true, \"email\": true}"),
+  security: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("{\"inApp\": true, \"email\": true}"),
+  team: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("{\"inApp\": true, \"email\": true}"),
+  system: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("{\"inApp\": true, \"email\": false}"),
+});
+
+export type NotificationPreferenceType = z.infer<typeof NotificationPreferenceSchema>;
 
 
 // File: archive.schema.ts

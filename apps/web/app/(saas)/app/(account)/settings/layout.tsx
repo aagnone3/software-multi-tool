@@ -5,6 +5,7 @@ import { PageHeader } from "@saas/shared/components/PageHeader";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import {
+	BellIcon,
 	CoinsIcon,
 	CreditCardIcon,
 	DownloadIcon,
@@ -41,6 +42,11 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 					title: "Security",
 					href: "/app/settings/security",
 					icon: <LockKeyholeIcon className="size-4 opacity-50" />,
+				},
+				{
+					title: "Notifications",
+					href: "/app/settings/notifications",
+					icon: <BellIcon className="size-4 opacity-50" />,
 				},
 				...(config.users.enableBilling
 					? [

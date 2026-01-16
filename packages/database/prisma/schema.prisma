@@ -17,32 +17,33 @@ datasource db {
 }
 
 model User {
-  id                 String         @id @default(cuid())
-  name               String
-  email              String         @unique
-  emailVerified      Boolean
-  image              String?
-  createdAt          DateTime
-  updatedAt          DateTime
-  username           String?        @unique
-  role               String?
-  banned             Boolean?
-  banReason          String?
-  banExpires         DateTime?
-  onboardingComplete Boolean        @default(false)
-  paymentsCustomerId String?
-  locale             String?
-  twoFactorEnabled   Boolean?
-  accounts           Account[]
-  aiChats            AiChat[]
-  invitations        Invitation[]
-  members            Member[]
-  notifications      Notification[]
-  passkeys           Passkey[]
-  purchases          Purchase[]
-  sessions           Session[]
-  toolJobs           ToolJob[]
-  twofactors         TwoFactor[]
+  id                      String                  @id @default(cuid())
+  name                    String
+  email                   String                  @unique
+  emailVerified           Boolean
+  image                   String?
+  createdAt               DateTime
+  updatedAt               DateTime
+  username                String?                 @unique
+  role                    String?
+  banned                  Boolean?
+  banReason               String?
+  banExpires              DateTime?
+  onboardingComplete      Boolean                 @default(false)
+  paymentsCustomerId      String?
+  locale                  String?
+  twoFactorEnabled        Boolean?
+  accounts                Account[]
+  aiChats                 AiChat[]
+  invitations             Invitation[]
+  members                 Member[]
+  notificationPreference  NotificationPreference?
+  notifications           Notification[]
+  passkeys                Passkey[]
+  purchases               Purchase[]
+  sessions                Session[]
+  toolJobs                ToolJob[]
+  twofactors              TwoFactor[]
 
   @@map("user")
   @@schema("public")
@@ -349,6 +350,26 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt])
   @@map("notification")
+  @@schema("public")
+}
+
+// User notification preferences for controlling which notifications are received
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Per-category preferences (JSON for flexibility)
+  // Each contains: { inApp: boolean, email: boolean }
+  billing  Json @default("{\"inApp\": true, \"email\": true}")
+  security Json @default("{\"inApp\": true, \"email\": true}")
+  team     Json @default("{\"inApp\": true, \"email\": true}")
+  system   Json @default("{\"inApp\": true, \"email\": false}")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preference")
   @@schema("public")
 }
 

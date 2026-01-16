@@ -737,6 +737,23 @@ async function syncCommand(args) {
 		}
 	}
 
+	// Update Render with Vercel URL for Better Auth session validation
+	if (renderServiceId && vercelUrl) {
+		console.log("\n[Render] Updating BETTER_AUTH_URL...");
+
+		if (currentRenderValues.BETTER_AUTH_URL !== vercelUrl) {
+			await setRenderEnvVar(
+				renderServiceId,
+				"BETTER_AUTH_URL",
+				vercelUrl,
+			);
+			console.log(`  - BETTER_AUTH_URL: ${vercelUrl}`);
+			renderEnvChanged = true;
+		} else {
+			console.log("  - BETTER_AUTH_URL: (unchanged)");
+		}
+	}
+
 	// Update Vercel with Render URL - set as branch-specific so each PR preview
 	// gets its own Render URL (otherwise PRs would overwrite each other's values)
 	if (renderUrl && args.branch) {
