@@ -7,17 +7,21 @@ import { test as base, expect } from "@playwright/test";
  *   BASE_URL=https://your-preview.vercel.app pnpm --filter web exec playwright test avatar-upload-external.spec.ts --config=tests/playwright.external.config.ts
  */
 
-// Get the base URL from environment variable - this is REQUIRED for this test
+// Get the base URL from environment variable - skip test if not provided
 const BASE_URL = process.env.BASE_URL;
-if (!BASE_URL) {
-	throw new Error(
-		"BASE_URL environment variable is required. Example: BASE_URL=https://your-preview.vercel.app",
-	);
-}
 
 const test = base.extend({});
 
+// TODO: Remove this skip workaround - see PRA-150 for dedicated CI job
+// This test should run in a separate CI job that triggers after Vercel deployment,
+// not be skipped in the regular test run. The skip is misleading in test reports.
+// For now, we skip gracefully to avoid breaking CI when BASE_URL isn't set.
 test.describe("avatar upload on external deployment", () => {
+	test.skip(
+		!BASE_URL,
+		"BASE_URL environment variable is required for external tests",
+	);
+
 	test("can login and upload avatar", async ({ page }) => {
 		// Increase timeout for external URL testing
 		test.setTimeout(60000);
