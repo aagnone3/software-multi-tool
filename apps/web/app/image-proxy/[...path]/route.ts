@@ -17,14 +17,19 @@ export const GET = async (
 	}
 
 	if (bucket === config.storage.bucketNames.avatars) {
-		const signedUrl = await getSignedUrl(filePath, {
-			bucket,
-			expiresIn: 60 * 60,
-		});
+		try {
+			const signedUrl = await getSignedUrl(filePath, {
+				bucket,
+				expiresIn: 60 * 60,
+			});
 
-		return NextResponse.redirect(signedUrl, {
-			headers: { "Cache-Control": "max-age=3600" },
-		});
+			return NextResponse.redirect(signedUrl, {
+				headers: { "Cache-Control": "max-age=3600" },
+			});
+		} catch (error) {
+			console.error("Image proxy error:", { bucket, filePath, error });
+			return new Response("Failed to get signed URL", { status: 500 });
+		}
 	}
 
 	return new Response("Not found", {

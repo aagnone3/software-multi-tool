@@ -58,6 +58,7 @@ export function UserAvatarUpload({
 				body: croppedImageData,
 				headers: {
 					"Content-Type": "image/png",
+					"x-upsert": "true",
 				},
 			});
 

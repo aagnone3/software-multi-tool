@@ -5,9 +5,17 @@ import { usersRouter } from "./router";
 // Mock dependencies
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
+const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn(() => false));
+const existsMock = vi.hoisted(() => vi.fn(() => Promise.resolve(false)));
+const deleteMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 
 vi.mock("@repo/storage", () => ({
 	getSignedUploadUrl: getSignedUploadUrlMock,
+	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+	getDefaultSupabaseProvider: vi.fn(() => ({
+		exists: existsMock,
+		delete: deleteMock,
+	})),
 }));
 
 vi.mock("@repo/auth", () => ({
