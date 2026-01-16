@@ -1,6 +1,17 @@
-export * from "./local";
-export { LocalStorageProvider } from "./local";
-export * from "./s3";
+// Local storage provider
+export {
+	createLocalStorageProvider,
+	LocalStorageProvider,
+	shouldUseLocalStorage,
+} from "./local";
+
+// S3 storage provider (class only - legacy functions exported from main index.ts with auto-detection)
 export { S3StorageProvider } from "./s3";
-export * from "./supabase";
-export { SupabaseStorageProvider } from "./supabase";
+
+// Supabase storage provider
+export {
+	createSupabaseStorageProvider,
+	getDefaultSupabaseProvider,
+	SupabaseStorageProvider,
+	shouldUseSupabaseStorage,
+} from "./supabase";
