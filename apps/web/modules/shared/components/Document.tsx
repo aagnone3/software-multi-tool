@@ -1,12 +1,12 @@
 import { ClientProviders } from "@shared/components/ClientProviders";
 import { ConsentProvider } from "@shared/components/ConsentProvider";
 import { cn } from "@ui/lib";
-import { Space_Grotesk } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { cookies } from "next/headers";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { PropsWithChildren } from "react";
 
-const sansFont = Space_Grotesk({
+const sansFont = Montserrat({
 	weight: ["400", "500", "600", "700"],
 	subsets: ["latin"],
 	variable: "--font-sans",
