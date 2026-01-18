@@ -1,12 +1,12 @@
 import { ClientProviders } from "@shared/components/ClientProviders";
 import { ConsentProvider } from "@shared/components/ConsentProvider";
 import { cn } from "@ui/lib";
-import { Geist } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import { cookies } from "next/headers";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { PropsWithChildren } from "react";
 
-const sansFont = Geist({
+const sansFont = Space_Grotesk({
 	weight: ["400", "500", "600", "700"],
 	subsets: ["latin"],
 	variable: "--font-sans",
