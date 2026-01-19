@@ -1,9 +1,9 @@
-import { config } from "@repo/config";
 import { PageHeader } from "@saas/shared/components/PageHeader";
 import { ToolCard } from "@saas/tools/components/ToolCard";
+import { getVisibleTools } from "@saas/tools/lib/tool-flags";
 
 export default function ToolsPage() {
-	const enabledTools = config.tools.registry.filter((tool) => tool.enabled);
+	const visibleTools = getVisibleTools();
 
 	return (
 		<div>
@@ -13,8 +13,12 @@ export default function ToolsPage() {
 			/>
 
 			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{enabledTools.map((tool) => (
-					<ToolCard key={tool.slug} tool={tool} />
+				{visibleTools.map((tool) => (
+					<ToolCard
+						key={tool.slug}
+						tool={tool}
+						isComingSoon={tool.isComingSoon}
+					/>
 				))}
 			</div>
 		</div>
