@@ -1,5 +1,6 @@
 import { cn } from "@ui/lib";
 import { Loader2Icon } from "lucide-react";
+import * as React from "react";
 
 export function Spinner({ className }: { className?: string }) {
 	return (

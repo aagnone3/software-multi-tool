@@ -19,7 +19,9 @@ const REQUIRED_ENV_VARS = [
 	"STRIPE_WEBHOOK_SECRET",
 	"NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY",
 	"NEXT_PUBLIC_PRICE_ID_PRO_YEARLY",
-	"NEXT_PUBLIC_PRICE_ID_LIFETIME",
+	"NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BOOST",
+	"NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BUNDLE",
+	"NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_VAULT",
 ];
 
 const _WEBHOOK_EVENTS = [
@@ -107,7 +109,10 @@ async function validatePriceIds(stripe) {
 	const priceIds = {
 		"Pro Monthly": process.env.NEXT_PUBLIC_PRICE_ID_PRO_MONTHLY,
 		"Pro Yearly": process.env.NEXT_PUBLIC_PRICE_ID_PRO_YEARLY,
-		Lifetime: process.env.NEXT_PUBLIC_PRICE_ID_LIFETIME,
+		"Credit Pack Boost": process.env.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BOOST,
+		"Credit Pack Bundle":
+			process.env.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_BUNDLE,
+		"Credit Pack Vault": process.env.NEXT_PUBLIC_PRICE_ID_CREDIT_PACK_VAULT,
 	};
 
 	let allValid = true;

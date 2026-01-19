@@ -19,17 +19,21 @@ NC='\033[0m' # No Color
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") <worktree-path> [--check-only]
+Usage: $(basename "$0") <worktree-path> [--check-only] [--offset <number>]
 
 Generate and allocate a deterministic port for a git worktree.
 
 Arguments:
   worktree-path   Path to the worktree directory (e.g., .worktrees/feat-pra-35-auth)
   --check-only    Only check if port is available, don't allocate
+  --offset <num>  Add offset to the calculated port (useful for api-server: --offset 500)
 
 Examples:
-  # Allocate port for worktree
+  # Allocate port for web app
   $(basename "$0") .worktrees/feat-pra-35-auth
+
+  # Allocate port for api-server (offset by 500)
+  $(basename "$0") .worktrees/feat-pra-35-auth --offset 500
 
   # Check if port is available
   $(basename "$0") .worktrees/feat-pra-35-auth --check-only
@@ -38,7 +42,9 @@ Output:
   Prints the allocated port number to stdout
   Returns 0 on success, 1 on error
 
-Port Range: $PORT_MIN-$PORT_MAX ($PORT_RANGE ports available)
+Port Ranges:
+  Web app:    $PORT_MIN-$PORT_MAX ($PORT_RANGE ports available)
+  API server: Use --offset 500 for range 4001-4499
 EOF
 }
 
@@ -113,6 +119,7 @@ find_available_port() {
 main() {
   local worktree_path=""
   local check_only=false
+  local port_offset=0
 
   # Parse arguments
   while [ $# -gt 0 ]; do
@@ -120,6 +127,15 @@ main() {
       --check-only)
         check_only=true
         shift
+        ;;
+      --offset)
+        if [ -z "$2" ] || [[ "$2" == -* ]]; then
+          echo "ERROR: --offset requires a numeric argument" >&2
+          usage
+          exit 1
+        fi
+        port_offset=$2
+        shift 2
         ;;
       --help|-h)
         usage
@@ -131,6 +147,7 @@ main() {
         else
           echo "ERROR: Unknown argument: $1" >&2
           usage
+          exit 1
         fi
         shift
         ;;
@@ -154,6 +171,9 @@ main() {
   # Generate deterministic port
   local initial_port
   initial_port=$(generate_port_from_path "$worktree_path")
+
+  # Apply offset (for api-server use --offset 500)
+  initial_port=$((initial_port + port_offset))
 
   if [ "$check_only" = true ]; then
     # Only check if initial port is available
