@@ -22,9 +22,9 @@
 		"@types/node": "25.0.9",
 		"@types/nodemailer": "7.0.1",
 		"@types/react": "19.2.8",
-		"@vitest/coverage-v8": "4.0.16",
+		"@vitest/coverage-v8": "4.0.17",
 		"jsdom": "27.4.0",
-		"vitest": "4.0.16"
+		"vitest": "4.0.17"
 	},
 	"main": "./index.ts",
 	"name": "@repo/mail",

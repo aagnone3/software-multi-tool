@@ -33,9 +33,9 @@
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "25.0.9",
 		"@types/ws": "8.5.13",
-		"@vitest/coverage-v8": "4.0.16",
+		"@vitest/coverage-v8": "4.0.17",
 		"tsx": "4.20.1",
 		"typescript": "5.9.3",
-		"vitest": "4.0.16"
+		"vitest": "4.0.17"
 	}
 }

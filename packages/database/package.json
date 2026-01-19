@@ -14,13 +14,13 @@
 		"@repo/tsconfig": "workspace:*",
 		"@testcontainers/postgresql": "11.11.0",
 		"@types/node": "25.0.9",
-		"@vitest/coverage-v8": "4.0.16",
+		"@vitest/coverage-v8": "4.0.17",
 		"dotenv-cli": "11.0.0",
 		"drizzle-kit": "0.31.8",
 		"prisma": "6.19.0",
 		"prisma-zod-generator": "1.32.1",
 		"testcontainers": "11.11.0",
-		"vitest": "4.0.16"
+		"vitest": "4.0.17"
 	},
 	"main": "./index.ts",
 	"name": "@repo/database",

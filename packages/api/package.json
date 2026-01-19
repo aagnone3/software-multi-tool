@@ -34,11 +34,11 @@
 		"@repo/tsconfig": "workspace:*",
 		"@types/pdf-parse": "1.1.5",
 		"@types/react": "19.2.8",
-		"@vitest/coverage-v8": "4.0.16",
+		"@vitest/coverage-v8": "4.0.17",
 		"encoding": "0.1.13",
 		"pg-boss": "^10.4.0",
 		"typescript": "5.9.3",
-		"vitest": "4.0.16"
+		"vitest": "4.0.17"
 	},
 	"main": "./index.ts",
 	"name": "@repo/api",
