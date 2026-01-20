@@ -10,6 +10,7 @@ import {
 import {
 	Tooltip,
 	TooltipContent,
+	TooltipProvider,
 	TooltipTrigger,
 } from "@ui/components/tooltip";
 import { cn } from "@ui/lib";
@@ -75,20 +76,22 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 					<CardDescription>{tool.description}</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								className="w-full cursor-not-allowed"
-								variant="outline"
-								disabled
-							>
-								Coming Soon
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>This tool is coming soon</p>
-						</TooltipContent>
-					</Tooltip>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									className="w-full cursor-not-allowed"
+									variant="outline"
+									disabled
+								>
+									Coming Soon
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>This tool is coming soon</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				</CardContent>
 			</Card>
 		);
