@@ -74,7 +74,8 @@ export const createCheckoutLink: CreateCheckoutLink = async (options) => {
 					payment_intent_data: {
 						metadata,
 					},
-					customer_creation: "always",
+					// Only set customer_creation when no existing customer
+					...(customerId ? {} : { customer_creation: "always" }),
 				}
 			: {
 					subscription_data: {

@@ -117,7 +117,7 @@ export const webhookHandler: WebhookHandler = async (req) => {
 				const { metadata, customerId, subscription, productId } =
 					event.data;
 
-				if (subscription) {
+				if (subscription || !productId) {
 					break;
 				}
 
@@ -140,6 +140,10 @@ export const webhookHandler: WebhookHandler = async (req) => {
 			case "subscription.created": {
 				const { metadata, customerId, productId, id, status } =
 					event.data;
+
+				if (!productId) {
+					break;
+				}
 
 				await createPurchase({
 					subscriptionId: id,
