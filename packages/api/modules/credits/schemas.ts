@@ -28,6 +28,18 @@ export const usageStatsQuerySchema = z.object({
 export type UsageStatsQuery = z.infer<typeof usageStatsQuerySchema>;
 
 /**
+ * Individual credit pack purchase
+ */
+export const creditPurchaseSchema = z.object({
+	id: z.string(),
+	amount: z.number(),
+	description: z.string().nullable(),
+	createdAt: z.string().datetime(),
+});
+
+export type CreditPurchase = z.infer<typeof creditPurchaseSchema>;
+
+/**
  * Response schema for credit balance
  */
 export const balanceResponseSchema = z.object({
@@ -43,6 +55,7 @@ export const balanceResponseSchema = z.object({
 		id: z.string(),
 		name: z.string(),
 	}),
+	purchases: z.array(creditPurchaseSchema),
 });
 
 export type BalanceResponse = z.infer<typeof balanceResponseSchema>;

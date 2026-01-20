@@ -7,12 +7,7 @@ import { BadgeCheckIcon, CheckIcon } from "lucide-react";
 import { CustomerPortalButton } from "../../settings/components/CustomerPortalButton";
 import { SubscriptionStatusBadge } from "../../settings/components/SubscriptionStatusBadge";
 
-export function ActivePlan({
-	organizationId,
-}: {
-	organizationId?: string;
-	seats?: number;
-}) {
+export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	const { planData } = usePlanData();
 	const { activePlan } = usePurchases(organizationId);
 
@@ -80,14 +75,6 @@ export function ActivePlan({
 										: formatYear(price.intervalCount ?? 1)}
 								</span>
 							)}
-							{organizationId &&
-								"seatBased" in price &&
-								price.seatBased && (
-									<span className="font-normal text-xs opacity-60">
-										{" / "}
-										seat
-									</span>
-								)}
 						</strong>
 					)}
 				</div>

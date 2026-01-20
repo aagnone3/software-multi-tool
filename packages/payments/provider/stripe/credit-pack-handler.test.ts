@@ -75,11 +75,11 @@ describe("Credit Pack Handler", () => {
 		});
 
 		it("should return existing transaction for duplicate purchase (idempotency)", async () => {
-			// Mock: existing transaction found
+			// Mock: existing transaction found (only id is selected)
 			const existingTxnId = "txn_existing456";
 			vi.mocked(db.creditTransaction.findFirst).mockResolvedValue({
 				id: existingTxnId,
-			});
+			} as never);
 
 			const result = await grantPurchasedCredits(mockParams);
 
@@ -192,7 +192,7 @@ describe("Credit Pack Handler", () => {
 			// Second call: transaction now exists
 			vi.mocked(db.creditTransaction.findFirst).mockResolvedValueOnce({
 				id: "txn_first",
-			});
+			} as never);
 
 			const result2 = await grantPurchasedCredits(mockParams);
 			expect(result2.processed).toBe(false);

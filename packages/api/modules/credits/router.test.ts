@@ -5,6 +5,7 @@ import { creditsRouter } from "./router";
 // Mock dependencies
 const getSessionMock = vi.hoisted(() => vi.fn());
 const getPurchasesByOrganizationIdMock = vi.hoisted(() => vi.fn());
+const getCreditPurchasesByOrganizationIdMock = vi.hoisted(() => vi.fn());
 
 // Credit service mocks
 const getCreditStatusMock = vi.hoisted(() => vi.fn());
@@ -20,6 +21,7 @@ vi.mock("@repo/auth", () => ({
 
 vi.mock("@repo/database", () => ({
 	getPurchasesByOrganizationId: getPurchasesByOrganizationIdMock,
+	getCreditPurchasesByOrganizationId: getCreditPurchasesByOrganizationIdMock,
 }));
 
 vi.mock("@repo/payments", () => ({
@@ -59,6 +61,7 @@ describe("Credits Router", () => {
 		getPurchasesByOrganizationIdMock.mockResolvedValue([
 			{ id: "purchase-1", productId: "prod_123", type: "SUBSCRIPTION" },
 		]);
+		getCreditPurchasesByOrganizationIdMock.mockResolvedValue([]);
 	});
 
 	describe("credits.balance", () => {
@@ -99,6 +102,7 @@ describe("Credits Router", () => {
 					id: "pro",
 					name: "Pro",
 				},
+				purchases: [],
 			});
 		});
 

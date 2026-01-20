@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Mock all external dependencies before importing the module
 vi.mock("@repo/config", () => ({
 	getPlanCredits: vi.fn(),
+}));
+
+vi.mock("../../src/lib/helper", () => ({
 	getPlanIdFromPriceId: vi.fn(),
 }));
 
@@ -50,7 +53,7 @@ vi.mock("stripe", () => {
 });
 
 // Import mocked modules
-import { getPlanCredits, getPlanIdFromPriceId } from "@repo/config";
+import { getPlanCredits } from "@repo/config";
 import {
 	adjustCreditsForPlanChange,
 	createPurchase,
@@ -60,6 +63,7 @@ import {
 	resetCreditsForNewPeriod,
 } from "@repo/database";
 import { setCustomerIdToEntity } from "../../src/lib/customer";
+import { getPlanIdFromPriceId } from "../../src/lib/helper";
 
 describe("Credit Webhook Integration", () => {
 	beforeEach(() => {

@@ -239,14 +239,6 @@ export function PricingTable({
 																)}
 													</span>
 												)}
-												{organizationId &&
-													"seatBased" in price &&
-													price.seatBased && (
-														<span className="font-normal text-xs opacity-60">
-															{" / "}
-															seat
-														</span>
-													)}
 											</strong>
 										)}
 

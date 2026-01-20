@@ -1,6 +1,36 @@
 import { type CreditTransactionType, db } from "../client";
 
 /**
+ * Get purchase transactions for an organization
+ */
+export async function getCreditPurchasesByOrganizationId(
+	organizationId: string,
+) {
+	const balance = await db.creditBalance.findUnique({
+		where: { organizationId },
+		select: { id: true },
+	});
+
+	if (!balance) {
+		return [];
+	}
+
+	return db.creditTransaction.findMany({
+		where: {
+			balanceId: balance.id,
+			type: "PURCHASE",
+		},
+		orderBy: { createdAt: "desc" },
+		select: {
+			id: true,
+			amount: true,
+			description: true,
+			createdAt: true,
+		},
+	});
+}
+
+/**
  * Find a credit balance by organization ID
  */
 export async function getCreditBalanceByOrganizationId(organizationId: string) {

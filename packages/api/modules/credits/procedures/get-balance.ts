@@ -1,6 +1,9 @@
 import { ORPCError } from "@orpc/server";
 import { config } from "@repo/config";
-import { getPurchasesByOrganizationId } from "@repo/database";
+import {
+	getCreditPurchasesByOrganizationId,
+	getPurchasesByOrganizationId,
+} from "@repo/database";
 import { createPurchasesHelper } from "@repo/payments";
 import {
 	getCreditStatus,
@@ -38,6 +41,10 @@ export const getBalance = protectedProcedure
 		const purchases = await getPurchasesByOrganizationId(organizationId);
 		const { activePlan } = createPurchasesHelper(purchases);
 
+		// Get credit pack purchases
+		const creditPurchases =
+			await getCreditPurchasesByOrganizationId(organizationId);
+
 		const planId = activePlan?.id ?? "free";
 		const planConfig =
 			config.payments.plans[planId as keyof typeof config.payments.plans];
@@ -61,5 +68,11 @@ export const getBalance = protectedProcedure
 				id: planId,
 				name: planName,
 			},
+			purchases: creditPurchases.map((p) => ({
+				id: p.id,
+				amount: p.amount,
+				description: p.description,
+				createdAt: p.createdAt.toISOString(),
+			})),
 		};
 	});

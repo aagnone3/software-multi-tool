@@ -72,23 +72,27 @@ graph TD
     A --> C[Main Working Directory<br/>branch: main]
     A --> D[.worktrees/]
 
-    D --> E[feat-pra-45-user-profile/<br/>branch: feat/pra-45-user-profile<br/>PORT: 3742]
-    D --> F[fix-pra-52-nav-bug/<br/>branch: fix/pra-52-nav-bug<br/>PORT: 3621]
+    D --> E[feat-pra-45-user-profile/<br/>branch: feat/pra-45-user-profile]
+    D --> F[fix-pra-52-nav-bug/<br/>branch: fix/pra-52-nav-bug]
 
     B -.->|shared| E
     B -.->|shared| F
 
     E --> E1[apps/web/.env.local<br/>PORT=3742]
+    E --> E2[apps/api-server/.env.local<br/>PORT=4242]
     F --> F1[apps/web/.env.local<br/>PORT=3621]
+    F --> F2[apps/api-server/.env.local<br/>PORT=4121]
 
     style B fill:#e1f5ff
     style E fill:#d4edda
     style F fill:#fff3cd
     style E1 fill:#d4edda
+    style E2 fill:#d4edda
     style F1 fill:#fff3cd
+    style F2 fill:#fff3cd
 ```
 
-**Key**: All worktrees share `.git/` but have independent working directories and ports.
+**Key**: All worktrees share `.git/` but have independent working directories. Each worktree has unique ports for both web app (3501-3999) and api-server (4001-4499).
 
 ## Directory Selection Process
 
@@ -210,7 +214,9 @@ cd .worktrees/feat-pra-35-user-auth
 
 ### Step 3: Configure Environment Variables (For Parallel Development)
 
-**CRITICAL for parallel dev servers**: Each worktree needs its own PORT to avoid conflicts and prevent Next.js auto-switching ports.
+**CRITICAL for parallel dev servers**: Each worktree needs unique PORTs for both the web app AND api-server to avoid conflicts.
+
+#### 3a. Web App Environment
 
 ```bash
 # Copy parent .env.local as template
@@ -218,23 +224,51 @@ cp ../../apps/web/.env.local apps/web/.env.local
 
 # AUTOMATIC PORT ALLOCATION (recommended)
 # Uses deterministic hash of worktree path to generate unique port
-WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
+WEB_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
 echo "" >> apps/web/.env.local
 echo "# Worktree-specific port (auto-allocated)" >> apps/web/.env.local
-echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
+echo "PORT=$WEB_PORT" >> apps/web/.env.local
 
 # Update NEXT_PUBLIC_SITE_URL to match allocated port
 # This prevents Better Auth "Invalid origin" errors
-sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
+sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WEB_PORT\"|" apps/web/.env.local
 rm -f apps/web/.env.local.bak
 
-# Verify port assignment
-echo "Allocated port: $WORKTREE_PORT"
+echo "Web app allocated port: $WEB_PORT"
 ```
+
+#### 3b. API Server Environment
+
+```bash
+# Copy parent .env.local as template
+cp ../../apps/api-server/.env.local apps/api-server/.env.local
+
+# AUTOMATIC PORT ALLOCATION with offset (api-server uses +500 offset)
+API_PORT=$(../../tooling/scripts/src/worktree-port.sh . --offset 500)
+echo "" >> apps/api-server/.env.local
+echo "# Worktree-specific port (auto-allocated with offset)" >> apps/api-server/.env.local
+echo "PORT=$API_PORT" >> apps/api-server/.env.local
+
+# Update CORS_ORIGIN to match web app's port
+sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$WEB_PORT|" apps/api-server/.env.local
+
+# Update BETTER_AUTH_URL to match api-server's port
+sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$API_PORT|" apps/api-server/.env.local
+rm -f apps/api-server/.env.local.bak
+
+echo "API server allocated port: $API_PORT"
+```
+
+**Port allocation strategy**:
+
+| App        | Port Range | Calculation                          |
+| ---------- | ---------- | ------------------------------------ |
+| Web        | 3501-3999  | `hash(worktree_path) % 499 + 3501`   |
+| API Server | 4001-4499  | `web_port + 500` (via `--offset 500`)|
 
 **How automatic port allocation works**:
 
-1. **Deterministic**: Hashes worktree path → consistent port number (3501-3999)
+1. **Deterministic**: Hashes worktree path → consistent port number
 2. **Collision-safe**: Checks if port is actually in use with `lsof`
 3. **Auto-recovery**: If port taken, finds next available port automatically
 4. **No file locking**: Uses real-time port availability checks
