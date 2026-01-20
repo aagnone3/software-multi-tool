@@ -117,7 +117,7 @@
 		"dev": "dotenv -c -e .env.local -- sh -c 'next dev --turbo -p ${PORT:-3000}'",
 		"postinstall": "content-collections build",
 		"e2e": "pnpm exec playwright test --ui",
-		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
+		"e2e:ci": "pnpm exec playwright install --with-deps && pnpm exec playwright test",
 		"lint": "next lint",
 		"shadcn-ui": "pnpm dlx shadcn@latest",
 		"start": "next start",
