@@ -3,15 +3,18 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
 	dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
+	// Only enable Sentry in production to reduce usage
+	enabled: process.env.NEXT_PUBLIC_VERCEL_ENV === "production",
+
 	// Adjust sample rate for production to control volume
-	tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+	tracesSampleRate: 0.1,
 
 	// Setting this option to true will print useful information to the console while you're setting up Sentry.
 	debug: false,
 
 	// Replay configuration for session recordings
 	replaysOnErrorSampleRate: 1.0, // Capture 100% of errors with replay
-	replaysSessionSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 0,
+	replaysSessionSampleRate: 0.1,
 
 	integrations: [
 		Sentry.replayIntegration({
