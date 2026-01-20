@@ -1,5 +1,7 @@
 import { PostListItem } from "@marketing/blog/components/PostListItem";
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
+import { config } from "@repo/config";
+import { notFound } from "next/navigation";
 
 /** Default locale (English only - i18n removed) */
 const DEFAULT_LOCALE = "en";
@@ -11,6 +13,11 @@ export async function generateMetadata() {
 }
 
 export default async function BlogListPage() {
+	// Return 404 when blog is disabled
+	if (!config.ui.blog.enabled) {
+		notFound();
+	}
+
 	const locale = DEFAULT_LOCALE;
 
 	const posts = await getAllPosts();

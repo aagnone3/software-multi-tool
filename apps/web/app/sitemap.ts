@@ -1,4 +1,5 @@
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
+import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { allLegalPages } from "content-collections";
 import type { MetadataRoute } from "next";
@@ -13,7 +14,7 @@ const locales = [DEFAULT_LOCALE];
 const staticMarketingPages = [""];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const posts = await getAllPosts();
+	const posts = config.ui.blog.enabled ? await getAllPosts() : [];
 
 	return [
 		...staticMarketingPages.flatMap((page) =>

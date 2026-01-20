@@ -1,10 +1,11 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
+import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 /** Default locale (English only - i18n removed) */
 const DEFAULT_LOCALE = "en";
@@ -40,6 +41,11 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 }
 
 export default async function BlogPostPage(props: { params: Promise<Params> }) {
+	// Return 404 when blog is disabled
+	if (!config.ui.blog.enabled) {
+		notFound();
+	}
+
 	const { path } = await props.params;
 	const locale = DEFAULT_LOCALE;
 

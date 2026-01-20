@@ -316,3 +316,19 @@ describe("credit pack configuration", () => {
 		}
 	});
 });
+
+describe("blog configuration", () => {
+	it("config.ui.blog exists and has enabled property", () => {
+		expect(config.ui.blog).toBeDefined();
+		expect(typeof config.ui.blog.enabled).toBe("boolean");
+	});
+
+	it("blog is disabled by default", () => {
+		expect(config.ui.blog.enabled).toBe(false);
+	});
+
+	it("blog config is part of the ui section", () => {
+		expect("blog" in config.ui).toBe(true);
+		expect(config.ui.blog).toHaveProperty("enabled");
+	});
+});

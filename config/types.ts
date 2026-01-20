@@ -121,6 +121,10 @@ export type Config = {
 		marketing: {
 			enabled: boolean;
 		};
+		blog: {
+			/** Whether the blog functionality is enabled */
+			enabled: boolean;
+		};
 	};
 	contactForm: {
 		enabled: boolean;
