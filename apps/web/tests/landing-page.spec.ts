@@ -53,9 +53,11 @@ test.describe("landing page", () => {
 		}) => {
 			await gotoAndWait("/");
 
-			// Badge
+			// Badge - use first() since text may appear multiple places
 			await expect(
-				page.getByText(/ai-powered tools for small businesses/i),
+				page
+					.getByText(/ai-powered tools for small businesses/i)
+					.first(),
 			).toBeVisible();
 
 			// Primary CTA
@@ -68,9 +70,9 @@ test.describe("landing page", () => {
 				page.getByRole("link", { name: /see how it works/i }),
 			).toBeVisible();
 
-			// Tagline
+			// Tagline - use first() since text may appear multiple places
 			await expect(
-				page.getByText(/no credit card required/i),
+				page.getByText(/no credit card required/i).first(),
 			).toBeVisible();
 		});
 
@@ -275,9 +277,11 @@ test.describe("landing page", () => {
 		}) => {
 			await gotoAndWait("/");
 
-			// Should have h1 for main heading
-			const h1 = page.getByRole("heading", { level: 1 });
-			await expect(h1).toBeVisible();
+			// Should have at least one h1 for main heading
+			// Note: Page may have multiple h1 elements from different sections (Hero, Pricing, FAQ)
+			const h1s = page.getByRole("heading", { level: 1 });
+			expect(await h1s.count()).toBeGreaterThanOrEqual(1);
+			await expect(h1s.first()).toBeVisible();
 
 			// Should have h2 for section headings
 			const h2s = page.getByRole("heading", { level: 2 });
