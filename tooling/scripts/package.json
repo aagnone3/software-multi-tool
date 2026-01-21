@@ -34,7 +34,6 @@
 		"stripe:validate": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/stripe/validate-webhooks.mjs",
 		"stripe:test-credits": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/stripe/test-credit-webhooks.ts",
 		"supabase:validate-seed": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/supabase/validate-preview-seed.mjs",
-		"storage:migrate-avatars": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/storage/migrate-user-avatars.ts",
 		"preview-sync": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/preview-sync/index.mjs",
 		"type-check": "tsc --noEmit",
 		"test": "vitest --config ./vitest.config.ts --run",
