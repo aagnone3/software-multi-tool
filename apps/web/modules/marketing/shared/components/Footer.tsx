@@ -17,9 +17,11 @@ export function Footer() {
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<Link href="/blog" className="block">
-						Blog
-					</Link>
+					{config.ui.blog.enabled && (
+						<Link href="/blog" className="block">
+							Blog
+						</Link>
+					)}
 
 					<a href="#features" className="block">
 						Features

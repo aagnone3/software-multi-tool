@@ -28,6 +28,8 @@ test.describe("smoke tests - marketing pages", () => {
 		gotoAndWait,
 		page,
 	}) => {
+		test.skip(!config.ui.blog.enabled, "Blog is disabled");
+
 		await gotoAndWait("/blog");
 
 		// Verify blog page renders

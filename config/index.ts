@@ -190,6 +190,11 @@ export const config = {
 			// whether the marketing features should be enabled (otherwise all routes will be redirect to the saas part)
 			enabled: true,
 		},
+		// blog functionality
+		blog: {
+			// whether the blog should be enabled (set to false to hide blog links and return 404 for blog routes)
+			enabled: false,
+		},
 	},
 	// Storage
 	storage: {

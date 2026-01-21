@@ -60,10 +60,14 @@ export function NavBar() {
 			label: "FAQ",
 			href: "/#faq",
 		},
-		{
-			label: "Blog",
-			href: "/blog",
-		},
+		...(config.ui.blog.enabled
+			? [
+					{
+						label: "Blog",
+						href: "/blog",
+					},
+				]
+			: []),
 		...(config.contactForm.enabled
 			? [
 					{
