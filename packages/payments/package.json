@@ -5,6 +5,8 @@
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
 		"@repo/logs": "workspace:*",
+		"@repo/mail": "workspace:*",
+		"@repo/utils": "workspace:*",
 		"chargebee-typescript": "2.53.0",
 		"dodopayments": "1.53.2",
 		"stripe": "18.5.0",

@@ -876,6 +876,12 @@ importers:
       '@repo/logs':
         specifier: workspace:*
         version: link:../logs
+      '@repo/mail':
+        specifier: workspace:*
+        version: link:../mail
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       chargebee-typescript:
         specifier: 2.53.0
         version: 2.53.0
