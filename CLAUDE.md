@@ -10,6 +10,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm build` - Compile all apps and packages for production
 - `pnpm start` - Serve the production build locally
 
+### Storybook
+
+- `pnpm --filter web storybook` - Start Storybook development server on port 6006
+- `pnpm --filter web storybook:build` - Build static Storybook to `storybook-static/`
+- Stories are located in `apps/web/modules/ui/components/` and `apps/web/modules/shared/components/`
+- Configuration is in `apps/web/.storybook/`
+- Supports dark/light mode via toolbar toggle
+
 ### Testing
 
 - `pnpm test` - Run Vitest workspace pipeline (Turbo-scoped to affected packages)

@@ -52,3 +52,6 @@ dist/
 
 # worktrees
 .worktrees/
+
+# storybook
+storybook-static/
