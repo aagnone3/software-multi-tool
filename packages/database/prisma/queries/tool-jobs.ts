@@ -94,6 +94,12 @@ export async function cancelToolJob(id: string) {
 	});
 }
 
+export async function deleteToolJob(id: string) {
+	return await db.toolJob.delete({
+		where: { id },
+	});
+}
+
 export async function claimNextPendingJob(toolSlug?: string) {
 	// Use a transaction with raw SQL for atomic update
 	// This prevents race conditions when multiple workers try to claim the same job

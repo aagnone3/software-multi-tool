@@ -4,13 +4,11 @@ import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useToolAnalytics } from "../../../modules/tools/analytics";
 import { NewsAnalyzerForm } from "./news-analyzer-form";
-import {
-	type NewsAnalysisOutput,
-	NewsAnalyzerResults,
-} from "./news-analyzer-results";
+import type { NewsAnalysisOutput } from "./news-analyzer-results";
 
 interface CreateJobResponse {
 	job: {
@@ -27,13 +25,15 @@ const MAX_POLL_RETRIES = 3; // Number of consecutive failures before giving up
 const MAX_POLL_DURATION_MS = 5 * 60 * 1000; // 5 minutes max polling duration
 
 export function NewsAnalyzer() {
+	const router = useRouter();
 	const [jobId, setJobId] = useState<string | null>(null);
-	const [result, setResult] = useState<NewsAnalysisOutput | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [pollingIntervalId, setPollingIntervalId] =
 		useState<NodeJS.Timeout | null>(null);
 	const pollRetryCount = useRef(0);
 	const pollStartTime = useRef<number | null>(null);
+	const isMountedRef = useRef(true);
+	const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Analytics tracking
 	const {
@@ -44,9 +44,19 @@ export function NewsAnalyzer() {
 	} = useToolAnalytics({ toolName: "news-analyzer" });
 	const processingStartTime = useRef<number | null>(null);
 
-	// Track page view on mount
+	// Track page view on mount and cleanup on unmount
 	useEffect(() => {
+		isMountedRef.current = true;
 		trackToolViewed();
+
+		return () => {
+			isMountedRef.current = false;
+			// Stop any active polling on unmount
+			if (pollingIntervalRef.current) {
+				clearInterval(pollingIntervalRef.current);
+				pollingIntervalRef.current = null;
+			}
+		};
 	}, [trackToolViewed]);
 
 	// Create job mutation
@@ -68,11 +78,8 @@ export function NewsAnalyzer() {
 		onSuccess: (data) => {
 			const job = data.job;
 
-			// If job is already completed (from cache), show results immediately
+			// If job is already completed (from cache), navigate to detail page
 			if (job.status === "COMPLETED" && job.output) {
-				setResult(job.output as unknown as NewsAnalysisOutput);
-				setError(null);
-
 				// Track completion from cache
 				const duration = processingStartTime.current
 					? Date.now() - processingStartTime.current
@@ -83,6 +90,11 @@ export function NewsAnalyzer() {
 					fromCache: true,
 				});
 				processingStartTime.current = null;
+
+				// Navigate to detail page (only if still mounted)
+				if (isMountedRef.current) {
+					router.push(`/app/tools/news-analyzer/${job.id}`);
+				}
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Job failed");
 
@@ -155,8 +167,6 @@ export function NewsAnalyzer() {
 			pollRetryCount.current = 0;
 
 			if (job.status === "COMPLETED" && job.output) {
-				setResult(job.output as unknown as NewsAnalysisOutput);
-				setError(null);
 				stopPolling();
 
 				// Track completion
@@ -169,6 +179,11 @@ export function NewsAnalyzer() {
 					fromCache: false,
 				});
 				processingStartTime.current = null;
+
+				// Navigate to detail page (only if still mounted)
+				if (isMountedRef.current) {
+					router.push(`/app/tools/news-analyzer/${id}`);
+				}
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Analysis failed");
 				stopPolling();
@@ -234,9 +249,15 @@ export function NewsAnalyzer() {
 
 		// Poll at configured interval
 		const intervalId = setInterval(() => {
+			// Don't poll if component is unmounted
+			if (!isMountedRef.current) {
+				clearInterval(intervalId);
+				return;
+			}
 			pollJobStatus(id);
 		}, POLL_INTERVAL_MS);
 		setPollingIntervalId(intervalId);
+		pollingIntervalRef.current = intervalId;
 
 		// Also poll immediately
 		pollJobStatus(id);
@@ -247,13 +268,16 @@ export function NewsAnalyzer() {
 			clearInterval(pollingIntervalId);
 			setPollingIntervalId(null);
 		}
+		if (pollingIntervalRef.current) {
+			clearInterval(pollingIntervalRef.current);
+			pollingIntervalRef.current = null;
+		}
 	};
 
 	const handleSubmit = (data: {
 		articleUrl?: string;
 		articleText?: string;
 	}) => {
-		setResult(null);
 		setError(null);
 		setJobId(null);
 
@@ -278,7 +302,7 @@ export function NewsAnalyzer() {
 				</Alert>
 			)}
 
-			{jobId && !result && (
+			{jobId && (
 				<div className="rounded-lg border border-dashed border-muted-foreground/25 bg-muted/50 p-8 text-center">
 					<p className="text-muted-foreground">
 						Analyzing article...
@@ -288,8 +312,6 @@ export function NewsAnalyzer() {
 					</p>
 				</div>
 			)}
-
-			{result && <NewsAnalyzerResults output={result} />}
 		</div>
 	);
 }
