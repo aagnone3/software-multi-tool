@@ -212,26 +212,6 @@ const uploadFile = async (file: File) => {
 };
 ```
 
-## Migration Script
-
-For migrating existing files to new paths:
-
-```bash
-# Dry run (shows what would be migrated)
-pnpm --filter @repo/scripts storage:migrate-avatars
-
-# Execute migration
-pnpm --filter @repo/scripts storage:migrate-avatars --execute
-```
-
-The migration script:
-
-1. Finds users with legacy paths (`users/{userId}/...`)
-2. Determines their active organization
-3. Copies files to new org-scoped paths
-4. Updates database records
-5. Deletes old files
-
 ## Bucket Configuration
 
 Buckets are configured in `config/index.ts`:
@@ -288,7 +268,6 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 | `packages/storage/provider/s3/` | S3-compatible storage implementation |
 | `config/index.ts` | Bucket name configuration |
 | `apps/web/app/image-proxy/[...path]/route.ts` | Image serving proxy |
-| `tooling/scripts/src/storage/migrate-user-avatars.ts` | Migration script |
 
 ## Environment Variables
 
