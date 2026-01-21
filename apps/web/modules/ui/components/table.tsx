@@ -33,7 +33,7 @@ const TableFooter = ({
 }: React.HTMLAttributes<HTMLTableSectionElement>) => (
 	<tfoot
 		className={cn(
-			"bg-primary font-medium text-primary-foreground",
+			"border-t bg-muted/50 font-medium text-foreground",
 			className,
 		)}
 		{...props}
