@@ -13,11 +13,15 @@ vi.mock("@repo/database", () => ({
 	getOrganizationBySlug: getOrganizationBySlugMock,
 }));
 
-vi.mock("@repo/storage", () => ({
-	getSignedUploadUrl: getSignedUploadUrlMock,
-	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
-}));
+vi.mock("@repo/storage", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@repo/storage")>();
+	return {
+		...actual,
+		getSignedUploadUrl: getSignedUploadUrlMock,
+		shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+		getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	};
+});
 
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
@@ -105,6 +109,10 @@ describe("Organizations Router", () => {
 	});
 
 	describe("organizations.createLogoUploadUrl", () => {
+		// Valid UUIDs for testing (buildOrgPath validates UUID format)
+		const TEST_ORG_ID = "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
+		const OTHER_ORG_ID = "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e";
+
 		const createClient = (userId = "user-123") => {
 			getSessionMock.mockResolvedValue({
 				user: { id: userId, role: "member" },
@@ -123,14 +131,14 @@ describe("Organizations Router", () => {
 
 		it("creates signed upload URL for authenticated user", async () => {
 			const client = createClient();
-			const result = await client({ organizationId: "org-123" });
+			const result = await client({ organizationId: TEST_ORG_ID });
 
 			expect(result).toEqual({
 				signedUploadUrl: "https://storage.test/signed-upload-url",
-				path: "organizations/org-123/logo.png",
+				path: `organizations/${TEST_ORG_ID}/logo.png`,
 			});
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"organizations/org-123/logo.png",
+				`organizations/${TEST_ORG_ID}/logo.png`,
 				{
 					bucket: expect.any(String),
 				},
@@ -139,10 +147,10 @@ describe("Organizations Router", () => {
 
 		it("uses organization ID in path", async () => {
 			const client = createClient();
-			await client({ organizationId: "different-org-id" });
+			await client({ organizationId: OTHER_ORG_ID });
 
 			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				"organizations/different-org-id/logo.png",
+				`organizations/${OTHER_ORG_ID}/logo.png`,
 				{
 					bucket: expect.any(String),
 				},
@@ -162,7 +170,7 @@ describe("Organizations Router", () => {
 			);
 
 			await expect(
-				client({ organizationId: "org-123" }),
+				client({ organizationId: TEST_ORG_ID }),
 			).rejects.toMatchObject({
 				code: "UNAUTHORIZED",
 			});

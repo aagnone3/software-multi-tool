@@ -21,6 +21,7 @@ import type {
 // ============================================================================
 
 export * from "./mime";
+export * from "./paths";
 export * from "./provider";
 export * from "./types";
 export * from "./validation";

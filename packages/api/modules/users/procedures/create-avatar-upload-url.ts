@@ -1,5 +1,7 @@
+import { ORPCError } from "@orpc/server";
 import { config } from "@repo/config";
 import {
+	buildUserPath,
 	getDefaultSupabaseProvider,
 	getSignedUploadUrl,
 	shouldUseSupabaseStorage,
@@ -15,10 +17,23 @@ export const createAvatarUploadUrl = protectedProcedure
 		description:
 			"Create a signed upload URL to upload an avatar image to the storage bucket",
 	})
-	.handler(async ({ context: { user } }) => {
-		// Path structure: users/{userId}/avatar.png
-		// This ensures no collisions between users and supports overwriting
-		const path = `users/${user.id}/avatar.png`;
+	.handler(async ({ context: { user, session } }) => {
+		// Require an active organization for multi-tenant path isolation
+		const organizationId = session.activeOrganizationId;
+		if (!organizationId) {
+			throw new ORPCError("BAD_REQUEST", {
+				message:
+					"An active organization is required to upload an avatar",
+			});
+		}
+
+		// Path structure: organizations/{orgId}/users/{userId}/avatar.png
+		// This ensures multi-tenant isolation and supports overwriting
+		const path = buildUserPath({
+			organizationId,
+			userId: user.id,
+			fileType: "avatar.png",
+		});
 		const bucket = config.storage.bucketNames.avatars;
 
 		// Delete existing file first to avoid "resource already exists" error

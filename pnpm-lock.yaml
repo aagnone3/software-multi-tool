@@ -992,12 +992,18 @@ importers:
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../config
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
       '@repo/logs':
         specifier: workspace:*
         version: link:../../packages/logs
+      '@repo/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
