@@ -227,6 +227,9 @@ export const config = {
 				process.env.NEXT_PUBLIC_EXPENSES_BUCKET_NAME ?? "expenses",
 			/* c8 ignore next */
 			files: process.env.NEXT_PUBLIC_FILES_BUCKET_NAME ?? "files",
+			/* c8 ignore next */
+			invoices:
+				process.env.NEXT_PUBLIC_INVOICES_BUCKET_NAME ?? "invoices",
 		},
 	},
 	contactForm: {

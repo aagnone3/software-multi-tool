@@ -28,31 +28,66 @@ import {
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import {
+	AlertTriangleIcon,
 	ArrowRightIcon,
 	BuildingIcon,
 	CalendarIcon,
 	CheckCircle2Icon,
+	FileIcon,
 	FileSpreadsheetIcon,
+	FileTextIcon,
 	HashIcon,
+	ImageIcon,
+	LoaderIcon,
 	MailIcon,
 	MapPinIcon,
 	PhoneIcon,
 	ReceiptIcon,
 	RefreshCwIcon,
+	ScanIcon,
 	SparklesIcon,
+	UploadIcon,
+	XIcon,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_FILE_TYPES = {
+	"application/pdf": [".pdf"],
+	"image/jpeg": [".jpg", ".jpeg"],
+	"image/png": [".png"],
+	"image/tiff": [".tiff", ".tif"],
+	"image/webp": [".webp"],
+};
+
 const formSchema = z.object({
-	invoiceText: z.string().min(1, "Invoice text is required"),
+	invoiceText: z.string().optional(),
 	outputFormat: z.enum(["json", "csv", "quickbooks", "xero"]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+type InputMode = "text" | "file";
+
+interface FileData {
+	file: File;
+	preview?: string;
+}
+
+function getFileIcon(mimeType: string) {
+	if (mimeType === "application/pdf") {
+		return FileTextIcon;
+	}
+	if (mimeType.startsWith("image/")) {
+		return ImageIcon;
+	}
+	return FileIcon;
+}
 
 interface LineItem {
 	description: string;
@@ -95,6 +130,11 @@ interface InvoiceOutput {
 	};
 	currency: string;
 	confidence: number;
+	extractionMetadata?: {
+		usedOcr: boolean;
+		ocrConfidence?: number;
+		fileType?: string;
+	};
 }
 
 const formatIcons = {
@@ -138,6 +178,10 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 export function InvoiceProcessorTool() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<InvoiceOutput | null>(null);
+	const [inputMode, setInputMode] = useState<InputMode>("file");
+	const [uploadedFile, setUploadedFile] = useState<FileData | null>(null);
+	const [fileError, setFileError] = useState<string | null>(null);
+	const [isProcessingFile, setIsProcessingFile] = useState(false);
 	const createJobMutation = useCreateJob();
 
 	const form = useForm<FormValues>({
@@ -148,16 +192,108 @@ export function InvoiceProcessorTool() {
 		},
 	});
 
+	// File dropzone handler
+	const onDrop = useCallback((acceptedFiles: File[]) => {
+		const file = acceptedFiles[0];
+		if (!file) {
+			return;
+		}
+
+		setFileError(null);
+
+		// Validate file size
+		if (file.size > MAX_FILE_SIZE) {
+			setFileError(
+				`File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum allowed size (10MB)`,
+			);
+			return;
+		}
+
+		// Create preview for images
+		let preview: string | undefined;
+		if (file.type.startsWith("image/")) {
+			preview = URL.createObjectURL(file);
+		}
+
+		setUploadedFile({ file, preview });
+	}, []);
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		onDrop,
+		accept: ACCEPTED_FILE_TYPES,
+		maxFiles: 1,
+		maxSize: MAX_FILE_SIZE,
+		onDropRejected: (fileRejections) => {
+			const rejection = fileRejections[0];
+			if (rejection?.errors[0]?.code === "file-too-large") {
+				setFileError("File size exceeds maximum allowed size (10MB)");
+			} else if (rejection?.errors[0]?.code === "file-invalid-type") {
+				setFileError(
+					"Invalid file type. Please upload a PDF or image file (JPG, PNG, TIFF, WebP)",
+				);
+			} else {
+				setFileError("Invalid file. Please try again.");
+			}
+		},
+	});
+
+	// Convert file to base64 for submission
+	const fileToBase64 = (file: File): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => {
+				const result = reader.result as string;
+				// Remove data URL prefix to get raw base64
+				const base64 = result.split(",")[1];
+				resolve(base64 ?? "");
+			};
+			reader.onerror = reject;
+		});
+	};
+
 	const onSubmit = async (values: FormValues) => {
 		setResult(null);
+
+		// Validate that we have either text or file
+		if (inputMode === "text" && !values.invoiceText?.trim()) {
+			form.setError("invoiceText", {
+				message: "Invoice text is required",
+			});
+			return;
+		}
+
+		if (inputMode === "file" && !uploadedFile) {
+			setFileError("Please upload an invoice file");
+			return;
+		}
+
 		try {
+			const input: Record<string, unknown> = {
+				outputFormat: values.outputFormat,
+			};
+
+			if (inputMode === "text") {
+				input.invoiceText = values.invoiceText;
+			} else if (uploadedFile) {
+				setIsProcessingFile(true);
+				const base64 = await fileToBase64(uploadedFile.file);
+				input.fileData = {
+					buffer: base64,
+					mimeType: uploadedFile.file.type,
+					filename: uploadedFile.file.name,
+				};
+			}
+
 			const response = await createJobMutation.mutateAsync({
 				toolSlug: "invoice-processor",
-				input: values,
+				input,
 			});
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+		} finally {
+			setIsProcessingFile(false);
 		}
 	};
 
@@ -168,7 +304,17 @@ export function InvoiceProcessorTool() {
 	const handleNewInvoice = () => {
 		setJobId(null);
 		setResult(null);
+		setUploadedFile(null);
+		setFileError(null);
 		form.reset();
+	};
+
+	const removeFile = () => {
+		if (uploadedFile?.preview) {
+			URL.revokeObjectURL(uploadedFile.preview);
+		}
+		setUploadedFile(null);
+		setFileError(null);
 	};
 
 	return (
@@ -197,31 +343,196 @@ export function InvoiceProcessorTool() {
 								onSubmit={form.handleSubmit(onSubmit)}
 								className="space-y-6"
 							>
-								<FormField
-									control={form.control}
-									name="invoiceText"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="flex items-center gap-2 font-semibold text-base">
-												<SparklesIcon className="size-4 text-primary" />
-												Invoice Text
-											</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Paste your invoice text here..."
-													className="min-h-[280px] resize-none rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-primary focus:bg-background"
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription className="text-muted-foreground/80">
-												Paste the text content of your
-												invoice. You can copy from PDFs,
-												emails, or any text source.
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								{/* Input Mode Toggle */}
+								<div className="mb-6 inline-flex rounded-xl bg-muted/50 p-1">
+									<Button
+										type="button"
+										variant={
+											inputMode === "file"
+												? "secondary"
+												: "ghost"
+										}
+										size="sm"
+										className={cn(
+											"rounded-lg px-4",
+											inputMode === "file" &&
+												"bg-background shadow-sm",
+										)}
+										onClick={() => setInputMode("file")}
+									>
+										<UploadIcon className="mr-2 size-4" />
+										Upload File
+									</Button>
+									<Button
+										type="button"
+										variant={
+											inputMode === "text"
+												? "secondary"
+												: "ghost"
+										}
+										size="sm"
+										className={cn(
+											"rounded-lg px-4",
+											inputMode === "text" &&
+												"bg-background shadow-sm",
+										)}
+										onClick={() => setInputMode("text")}
+									>
+										<FileTextIcon className="mr-2 size-4" />
+										Paste Text
+									</Button>
+								</div>
+
+								{/* File Upload Mode */}
+								{inputMode === "file" && (
+									<div className="space-y-4">
+										{uploadedFile ? (
+											<div className="relative rounded-xl border-2 border-primary bg-primary/5 p-4">
+												<div className="flex items-center gap-4">
+													{uploadedFile.preview ? (
+														<div className="relative size-20 overflow-hidden rounded-lg border bg-muted">
+															{/* biome-ignore lint/performance/noImgElement: Using img for data URL preview - Next/Image doesn't support data URLs well */}
+															<img
+																src={
+																	uploadedFile.preview
+																}
+																alt="Invoice preview"
+																className="size-full object-cover"
+															/>
+														</div>
+													) : (
+														<div className="flex size-20 items-center justify-center rounded-lg border bg-muted">
+															{(() => {
+																const Icon =
+																	getFileIcon(
+																		uploadedFile
+																			.file
+																			.type,
+																	);
+																return (
+																	<Icon className="size-8 text-muted-foreground" />
+																);
+															})()}
+														</div>
+													)}
+													<div className="flex-1 min-w-0">
+														<p className="truncate font-medium">
+															{
+																uploadedFile
+																	.file.name
+															}
+														</p>
+														<p className="text-muted-foreground text-sm">
+															{(
+																uploadedFile
+																	.file.size /
+																1024
+															).toFixed(1)}{" "}
+															KB •{" "}
+															{uploadedFile.file.type
+																.split("/")[1]
+																?.toUpperCase()}
+														</p>
+														<div className="mt-2 flex items-center gap-2 text-primary text-xs">
+															<ScanIcon className="size-3" />
+															{uploadedFile.file
+																.type ===
+															"application/pdf"
+																? "PDF text extraction + OCR fallback"
+																: "OCR text extraction"}
+														</div>
+													</div>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														className="shrink-0 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+														onClick={removeFile}
+													>
+														<XIcon className="size-4" />
+													</Button>
+												</div>
+											</div>
+										) : (
+											<div
+												{...getRootProps()}
+												className={cn(
+													"cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors",
+													isDragActive
+														? "border-primary bg-primary/5"
+														: "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
+												)}
+											>
+												<input {...getInputProps()} />
+												<UploadIcon className="mx-auto size-12 text-muted-foreground" />
+												<p className="mt-4 font-medium">
+													{isDragActive
+														? "Drop your invoice here..."
+														: "Drag & drop an invoice file"}
+												</p>
+												<p className="mt-1 text-muted-foreground text-sm">
+													or click to browse (max
+													10MB)
+												</p>
+												<p className="mt-3 text-muted-foreground text-xs">
+													Supports: PDF, JPG, PNG,
+													TIFF, WebP
+												</p>
+												<div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+													<span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary text-xs">
+														<FileTextIcon className="size-3" />
+														Native PDF text
+													</span>
+													<span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary text-xs">
+														<ScanIcon className="size-3" />
+														OCR for scanned docs
+													</span>
+													<span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary text-xs">
+														<ImageIcon className="size-3" />
+														Image processing
+													</span>
+												</div>
+											</div>
+										)}
+
+										{fileError && (
+											<div className="flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-destructive text-sm">
+												<AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
+												{fileError}
+											</div>
+										)}
+									</div>
+								)}
+
+								{/* Text Input Mode */}
+								{inputMode === "text" && (
+									<FormField
+										control={form.control}
+										name="invoiceText"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="flex items-center gap-2 font-semibold text-base">
+													<SparklesIcon className="size-4 text-primary" />
+													Invoice Text
+												</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="Paste your invoice text here..."
+														className="min-h-[280px] resize-none rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-primary focus:bg-background"
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription className="text-muted-foreground/80">
+													Paste the text content of
+													your invoice. You can copy
+													from PDFs, emails, or any
+													text source.
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								)}
 
 								<FormField
 									control={form.control}
@@ -275,12 +586,27 @@ export function InvoiceProcessorTool() {
 								<Button
 									type="submit"
 									variant="primary"
-									loading={form.formState.isSubmitting}
+									loading={
+										form.formState.isSubmitting ||
+										isProcessingFile
+									}
+									disabled={
+										inputMode === "file" && !uploadedFile
+									}
 									className="h-12 w-full rounded-xl font-semibold text-base shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
 								>
-									<SparklesIcon className="mr-2 size-5" />
-									Process Invoice
-									<ArrowRightIcon className="ml-2 size-5" />
+									{isProcessingFile ? (
+										<>
+											<LoaderIcon className="mr-2 size-5 animate-spin" />
+											Preparing File...
+										</>
+									) : (
+										<>
+											<SparklesIcon className="mr-2 size-5" />
+											Process Invoice
+											<ArrowRightIcon className="ml-2 size-5" />
+										</>
+									)}
 								</Button>
 							</form>
 						</Form>
@@ -311,10 +637,19 @@ export function InvoiceProcessorTool() {
 										<h3 className="font-bold text-xl">
 											Invoice Extracted Successfully
 										</h3>
-										<p className="text-muted-foreground">
-											All data has been parsed and
-											structured
-										</p>
+										<div className="flex items-center gap-2 text-muted-foreground">
+											<span>
+												All data has been parsed and
+												structured
+											</span>
+											{result.extractionMetadata
+												?.usedOcr && (
+												<span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-blue-700 text-xs dark:bg-blue-900/30 dark:text-blue-400">
+													<ScanIcon className="size-3" />
+													OCR
+												</span>
+											)}
+										</div>
 									</div>
 								</div>
 								<ConfidenceBadge

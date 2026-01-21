@@ -62,54 +62,58 @@ describe("InvoiceProcessorTool", () => {
 		vi.clearAllMocks();
 	});
 
-	it("renders the invoice processor form", () => {
+	it("renders the invoice processor form with tabs", () => {
 		render(<InvoiceProcessorTool />);
 
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
-		expect(screen.getByText("Invoice Text")).toBeInTheDocument();
+		// Default tab is Upload File
+		expect(screen.getByText("Upload File")).toBeInTheDocument();
+		expect(screen.getByText("Paste Text")).toBeInTheDocument();
 		expect(screen.getByText("Output Format")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Process Invoice" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows validation error when invoice text is empty", async () => {
+	it("shows validation error when no file is uploaded", () => {
 		render(<InvoiceProcessorTool />);
 
+		// File upload tab is active by default, submit button should be disabled
+		// when no file is selected in file mode
 		const submitButton = screen.getByRole("button", {
 			name: "Process Invoice",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
-
-		await waitFor(() => {
-			expect(
-				screen.getByText("Invoice text is required"),
-			).toBeInTheDocument();
-		});
+		expect(submitButton).toBeDisabled();
 	});
 
-	it("submits form and shows progress indicator", async () => {
+	it("submits form with correct tool slug using text input", async () => {
+		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-123" } });
 
 		render(<InvoiceProcessorTool />);
 
+		// Switch to Paste Text mode using the button toggle
+		const pasteTextButton = screen.getByRole("button", {
+			name: /Paste Text/i,
+		});
+		await user.click(pasteTextButton);
+
+		// Wait for the textarea to appear after mode switch
+		await waitFor(() => {
+			expect(
+				screen.getByPlaceholderText("Paste your invoice text here..."),
+			).toBeInTheDocument();
+		});
+
 		const textarea = screen.getByPlaceholderText(
 			"Paste your invoice text here...",
 		);
-		await act(async () => {
-			fireEvent.change(textarea, {
-				target: { value: "Test invoice content" },
-			});
-		});
+		await user.type(textarea, "Test invoice content");
 
 		const submitButton = screen.getByRole("button", {
 			name: "Process Invoice",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
+		await user.click(submitButton);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -126,6 +130,18 @@ describe("InvoiceProcessorTool", () => {
 				screen.getByTestId("job-progress-indicator"),
 			).toBeInTheDocument();
 		});
+	});
+
+	it("shows upload tab by default", () => {
+		render(<InvoiceProcessorTool />);
+
+		// The upload tab should be active by default with drag & drop area
+		expect(
+			screen.getByText(/Drag & drop an invoice file/i),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Supports: PDF, JPG, PNG, TIFF, WebP/i),
+		).toBeInTheDocument();
 	});
 });
 
