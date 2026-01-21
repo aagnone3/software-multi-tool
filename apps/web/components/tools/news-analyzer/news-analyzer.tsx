@@ -32,6 +32,8 @@ export function NewsAnalyzer() {
 		useState<NodeJS.Timeout | null>(null);
 	const pollRetryCount = useRef(0);
 	const pollStartTime = useRef<number | null>(null);
+	const isMountedRef = useRef(true);
+	const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Analytics tracking
 	const {
@@ -42,9 +44,19 @@ export function NewsAnalyzer() {
 	} = useToolAnalytics({ toolName: "news-analyzer" });
 	const processingStartTime = useRef<number | null>(null);
 
-	// Track page view on mount
+	// Track page view on mount and cleanup on unmount
 	useEffect(() => {
+		isMountedRef.current = true;
 		trackToolViewed();
+
+		return () => {
+			isMountedRef.current = false;
+			// Stop any active polling on unmount
+			if (pollingIntervalRef.current) {
+				clearInterval(pollingIntervalRef.current);
+				pollingIntervalRef.current = null;
+			}
+		};
 	}, [trackToolViewed]);
 
 	// Create job mutation
@@ -79,8 +91,10 @@ export function NewsAnalyzer() {
 				});
 				processingStartTime.current = null;
 
-				// Navigate to detail page
-				router.push(`/app/tools/news-analyzer/${job.id}`);
+				// Navigate to detail page (only if still mounted)
+				if (isMountedRef.current) {
+					router.push(`/app/tools/news-analyzer/${job.id}`);
+				}
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Job failed");
 
@@ -166,8 +180,10 @@ export function NewsAnalyzer() {
 				});
 				processingStartTime.current = null;
 
-				// Navigate to detail page
-				router.push(`/app/tools/news-analyzer/${id}`);
+				// Navigate to detail page (only if still mounted)
+				if (isMountedRef.current) {
+					router.push(`/app/tools/news-analyzer/${id}`);
+				}
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Analysis failed");
 				stopPolling();
@@ -233,9 +249,15 @@ export function NewsAnalyzer() {
 
 		// Poll at configured interval
 		const intervalId = setInterval(() => {
+			// Don't poll if component is unmounted
+			if (!isMountedRef.current) {
+				clearInterval(intervalId);
+				return;
+			}
 			pollJobStatus(id);
 		}, POLL_INTERVAL_MS);
 		setPollingIntervalId(intervalId);
+		pollingIntervalRef.current = intervalId;
 
 		// Also poll immediately
 		pollJobStatus(id);
@@ -245,6 +267,10 @@ export function NewsAnalyzer() {
 		if (pollingIntervalId) {
 			clearInterval(pollingIntervalId);
 			setPollingIntervalId(null);
+		}
+		if (pollingIntervalRef.current) {
+			clearInterval(pollingIntervalRef.current);
+			pollingIntervalRef.current = null;
 		}
 	};
 
