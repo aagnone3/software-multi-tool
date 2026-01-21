@@ -195,7 +195,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 						New chat
 					</Button>
 
-					{sortedChats.map((chat) => (
+					{sortedChats.map((chat: (typeof chats)[number]) => (
 						<div className="relative" key={chat.id}>
 							<Button
 								variant="link"
