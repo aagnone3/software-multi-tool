@@ -210,4 +210,77 @@ describe("securityNotifications", () => {
 			);
 		});
 	});
+
+	describe("error handling", () => {
+		it("handles user without email gracefully when sending email notification", async () => {
+			shouldSendNotificationMock.mockResolvedValue(true);
+			createNotificationMock.mockResolvedValue({ id: "notif-1" });
+			getUserByIdMock.mockResolvedValue({
+				id: "user-123",
+				email: null, // User has no email
+			});
+
+			await securityNotifications.passwordChanged({ userId: "user-123" });
+
+			// In-app notification should still be created
+			expect(createNotificationMock).toHaveBeenCalled();
+			// Email should not be sent (no valid email address)
+			expect(sendEmailMock).not.toHaveBeenCalled();
+		});
+
+		it("handles user not found gracefully when sending email notification", async () => {
+			shouldSendNotificationMock.mockResolvedValue(true);
+			createNotificationMock.mockResolvedValue({ id: "notif-1" });
+			getUserByIdMock.mockResolvedValue(null); // User not found
+
+			await securityNotifications.passwordChanged({ userId: "user-123" });
+
+			// In-app notification should still be created
+			expect(createNotificationMock).toHaveBeenCalled();
+			// Email should not be sent
+			expect(sendEmailMock).not.toHaveBeenCalled();
+		});
+
+		it("handles email sending failure gracefully", async () => {
+			shouldSendNotificationMock.mockResolvedValue(true);
+			createNotificationMock.mockResolvedValue({ id: "notif-1" });
+			getUserByIdMock.mockResolvedValue({
+				id: "user-123",
+				email: "user@example.com",
+			});
+			sendEmailMock.mockRejectedValue(
+				new Error("Email service unavailable"),
+			);
+
+			// Should not throw
+			await expect(
+				securityNotifications.passwordChanged({ userId: "user-123" }),
+			).resolves.toBeUndefined();
+
+			// Email attempt was made
+			expect(sendEmailMock).toHaveBeenCalled();
+		});
+
+		it("handles in-app notification creation failure gracefully", async () => {
+			shouldSendNotificationMock.mockResolvedValue(true);
+			createNotificationMock.mockRejectedValue(
+				new Error("Database unavailable"),
+			);
+			getUserByIdMock.mockResolvedValue({
+				id: "user-123",
+				email: "user@example.com",
+			});
+			sendEmailMock.mockResolvedValue(true);
+
+			// Should not throw
+			await expect(
+				securityNotifications.passwordChanged({ userId: "user-123" }),
+			).resolves.toBeUndefined();
+
+			// In-app notification creation was attempted
+			expect(createNotificationMock).toHaveBeenCalled();
+			// Email should still be sent even if in-app fails
+			expect(sendEmailMock).toHaveBeenCalled();
+		});
+	});
 });
