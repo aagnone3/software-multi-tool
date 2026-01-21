@@ -9,6 +9,7 @@ import {
 import { cn } from "@ui/lib";
 import { CoinsIcon } from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 interface CreditBalanceIndicatorProps {
@@ -18,7 +19,23 @@ interface CreditBalanceIndicatorProps {
 export function CreditBalanceIndicator({
 	className,
 }: CreditBalanceIndicatorProps) {
-	const { balance, isLoading, isLowCredits } = useCreditsBalance();
+	const { balance, isLoading, isLowCredits, hasActiveOrganization } =
+		useCreditsBalance();
+
+	// Show placeholder when no active organization (defensive - this shouldn't happen normally)
+	if (!hasActiveOrganization) {
+		return (
+			<div
+				className={cn(
+					"flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-sm opacity-50",
+					className,
+				)}
+			>
+				<CoinsIcon className="size-3.5" />
+				<span>--</span>
+			</div>
+		);
+	}
 
 	if (isLoading) {
 		return (
