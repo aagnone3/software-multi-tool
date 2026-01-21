@@ -8,7 +8,7 @@ test.describe("home page", () => {
 
 			await expect(
 				page.getByRole("heading", {
-					name: "Simple, helpful software tools for modern business",
+					name: /your one-stop shop for ai-powered business tools/i,
 				}),
 			).toBeVisible();
 		});
