@@ -91,25 +91,27 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
 
 				{!isLoading && !isError && notifications.length > 0 && (
 					<div className="divide-y">
-						{notifications.map((notification) => (
-							<NotificationItem
-								key={notification.id}
-								id={notification.id}
-								type={notification.type}
-								title={notification.title}
-								body={notification.body}
-								actionUrl={notification.actionUrl}
-								read={notification.read}
-								createdAt={notification.createdAt}
-								onMarkAsRead={(id) => {
-									handleMarkAsRead(id);
-									handleNotificationClick(
-										notification.actionUrl,
-									);
-								}}
-								onDelete={handleDelete}
-							/>
-						))}
+						{notifications.map(
+							(notification: (typeof notifications)[number]) => (
+								<NotificationItem
+									key={notification.id}
+									id={notification.id}
+									type={notification.type}
+									title={notification.title}
+									body={notification.body}
+									actionUrl={notification.actionUrl}
+									read={notification.read}
+									createdAt={notification.createdAt}
+									onMarkAsRead={(id) => {
+										handleMarkAsRead(id);
+										handleNotificationClick(
+											notification.actionUrl,
+										);
+									}}
+									onDelete={handleDelete}
+								/>
+							),
+						)}
 					</div>
 				)}
 			</div>
