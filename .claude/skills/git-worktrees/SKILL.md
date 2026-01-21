@@ -32,11 +32,97 @@ Enable parallel development with isolated git worktrees for concurrent features,
 
 | Operation | Command |
 | --------- | ------- |
-| Create worktree with new branch | `git worktree add <path> -b <branch-name>` |
+| **Create worktree (automated)** | `pnpm worktree:create <issue-key> <type> <description>` |
+| **Remove worktree (automated)** | `pnpm worktree:remove <worktree-name>` |
+| **List worktrees** | `pnpm worktree:list` |
+| Create worktree manually | `git worktree add <path> -b <branch-name>` |
 | List all worktrees | `git worktree list` |
-| Remove worktree | `git worktree remove <path>` |
+| Remove worktree manually | `git worktree remove <path>` |
 | Prune stale references | `git worktree prune` |
 | Check if directory is ignored | `git check-ignore -q <directory>` |
+
+## Automated Worktree Setup (Recommended)
+
+> **Use the automated setup script for all worktree operations.**
+
+The `worktree-setup.sh` script automates the complete worktree setup process, eliminating manual steps and common errors.
+
+### Single Command Setup
+
+```bash
+# Create a fully configured worktree
+pnpm worktree:create PRA-163 feat improve-auth-flow
+
+# Or use the script directly
+./tooling/scripts/src/worktree-setup.sh create PRA-163 feat improve-auth-flow
+```
+
+This single command:
+
+1. ✅ Creates the git worktree with proper branch naming
+2. ✅ Copies environment files from parent repository
+3. ✅ Allocates unique ports for web app and api-server
+4. ✅ Installs/links dependencies (`pnpm install`)
+5. ✅ Generates Prisma client
+6. ✅ Runs baseline type-check verification
+7. ✅ Reports success with next steps
+
+### Available Commands
+
+```bash
+# Create a new worktree
+pnpm worktree:create <issue-key> <type> <description>
+# Examples:
+#   pnpm worktree:create PRA-163 feat worktree-automation
+#   pnpm worktree:create 42 fix navigation-bug
+
+# Remove a worktree (with safety checks)
+pnpm worktree:remove <worktree-name>
+# Example:
+#   pnpm worktree:remove feat-pra-163-worktree-automation
+
+# List all worktrees
+pnpm worktree:list
+
+# Resume/repair setup on existing worktree
+pnpm worktree:resume <worktree-name>
+# Example:
+#   pnpm worktree:resume feat-pra-163-worktree-automation
+```
+
+### Branch Types
+
+| Type | Use Case |
+| ---- | -------- |
+| `feat` | New features |
+| `fix` | Bug fixes |
+| `chore` | Maintenance tasks |
+| `docs` | Documentation |
+| `refactor` | Code refactoring |
+| `test` | Test improvements |
+
+### Fail-Fast and Idempotent
+
+- **Fail-fast**: Script stops on first error with clear message
+- **Idempotent**: Safe to re-run on existing worktrees to complete setup
+- **Safety checks**: Warns about uncommitted changes before removal
+
+### Example Workflow
+
+```bash
+# 1. Create worktree for Linear ticket
+pnpm worktree:create PRA-163 feat improve-auth-flow
+
+# 2. Navigate to worktree (script shows this path)
+cd .worktrees/feat-pra-163-improve-auth-flow
+
+# 3. Start development
+pnpm dev
+
+# 4. After PR is merged, clean up
+cd ../..
+pnpm worktree:remove feat-pra-163-improve-auth-flow
+```
 
 ## When to Use This Skill
 
