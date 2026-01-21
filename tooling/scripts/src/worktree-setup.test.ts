@@ -107,6 +107,65 @@ describe("worktree-setup.sh", () => {
 				expect(execError.code).toBe(1);
 			}
 		});
+
+		it("should reject invalid branch type", async () => {
+			try {
+				await execAsync(
+					`"${SCRIPT_PATH}" create PRA-123 invalid-type test-desc`,
+					{ cwd: REPO_ROOT },
+				);
+				expect.fail("Script should reject invalid branch type");
+			} catch (error) {
+				const execError = error as { stderr?: string; code?: number };
+				expect(execError.stderr).toContain("Invalid branch type");
+				expect(execError.code).toBe(1);
+			}
+		});
+
+		it("should reject description with uppercase letters", async () => {
+			try {
+				await execAsync(
+					`"${SCRIPT_PATH}" create PRA-123 feat InvalidDesc`,
+					{ cwd: REPO_ROOT },
+				);
+				expect.fail("Script should reject uppercase description");
+			} catch (error) {
+				const execError = error as { stderr?: string; code?: number };
+				expect(execError.stderr).toContain("Invalid description");
+				expect(execError.stderr).toContain("kebab-case");
+				expect(execError.code).toBe(1);
+			}
+		});
+
+		it("should reject description with spaces", async () => {
+			try {
+				await execAsync(
+					`"${SCRIPT_PATH}" create PRA-123 feat "invalid desc"`,
+					{ cwd: REPO_ROOT },
+				);
+				expect.fail("Script should reject description with spaces");
+			} catch (error) {
+				const execError = error as { stderr?: string; code?: number };
+				expect(execError.stderr).toContain("Invalid description");
+				expect(execError.code).toBe(1);
+			}
+		});
+
+		it("should reject description with special characters", async () => {
+			try {
+				await execAsync(
+					`"${SCRIPT_PATH}" create PRA-123 feat "test_desc"`,
+					{ cwd: REPO_ROOT },
+				);
+				expect.fail(
+					"Script should reject description with special chars",
+				);
+			} catch (error) {
+				const execError = error as { stderr?: string; code?: number };
+				expect(execError.stderr).toContain("Invalid description");
+				expect(execError.code).toBe(1);
+			}
+		});
 	});
 
 	describe("list command", () => {

@@ -135,6 +135,25 @@ validate_branch_type() {
   esac
 }
 
+# Validate description - must be kebab-case
+validate_description() {
+  local desc="$1"
+  # Must be lowercase letters, numbers, and hyphens only
+  # Must start and end with alphanumeric character
+  if [[ ! "$desc" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$ ]]; then
+    log_error "Invalid description: $desc"
+    log_error "Description must be kebab-case (lowercase letters, numbers, hyphens only)"
+    log_error "Example: improve-auth-flow, fix-login-bug, add-user-profile"
+    return 1
+  fi
+  # Prevent excessively long descriptions
+  if [ ${#desc} -gt 50 ]; then
+    log_error "Description too long (max 50 characters): $desc"
+    return 1
+  fi
+  return 0
+}
+
 # Check if we're in the repository root
 check_repo_root() {
   # .git can be a directory (normal repo) or a file (worktree pointing to parent)
@@ -204,6 +223,9 @@ create_worktree() {
 
   # Validate branch type
   validate_branch_type "$branch_type" || exit 1
+
+  # Validate description
+  validate_description "$description" || exit 1
 
   # Convert issue key to lowercase for directory name
   local issue_lower
@@ -282,34 +304,73 @@ setup_worktree_environment() {
 
   local web_port
   local api_port
+  local web_env_file="$worktree_path/apps/web/.env.local"
+  local api_env_file="$worktree_path/apps/api-server/.env.local"
 
-  # Allocate web port
-  web_port=$("$PORT_ALLOCATOR" "$worktree_path" 2>/dev/null | head -1)
-  echo "" >> "$worktree_path/apps/web/.env.local"
-  echo "# Worktree-specific port (auto-allocated by worktree-setup.sh)" >> "$worktree_path/apps/web/.env.local"
-  echo "PORT=$web_port" >> "$worktree_path/apps/web/.env.local"
-
-  # Update NEXT_PUBLIC_SITE_URL
-  if grep -q "^NEXT_PUBLIC_SITE_URL=" "$worktree_path/apps/web/.env.local"; then
-    sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$web_port\"|" "$worktree_path/apps/web/.env.local"
-    rm -f "$worktree_path/apps/web/.env.local.bak"
+  # Check if web port is already configured (for resume/idempotency)
+  if grep -q "^PORT=" "$web_env_file" 2>/dev/null; then
+    web_port=$(grep "^PORT=" "$web_env_file" | tail -1 | cut -d= -f2)
+    log_info "Web port already configured: $web_port (preserving existing)"
+  else
+    # Allocate web port with proper error handling
+    local port_output
+    if ! port_output=$("$PORT_ALLOCATOR" "$worktree_path" 2>&1); then
+      log_error "Failed to allocate web port: $port_output"
+      exit 1
+    fi
+    web_port=$(echo "$port_output" | grep -E '^[0-9]+$' | head -1)
+    if [ -z "$web_port" ]; then
+      log_error "Port allocator did not return a valid port number"
+      log_error "Output: $port_output"
+      exit 1
+    fi
+    # Append port to env file using grouped redirect
+    {
+      echo ""
+      echo "# Worktree-specific port (auto-allocated by worktree-setup.sh)"
+      echo "PORT=$web_port"
+    } >> "$web_env_file"
+    log_success "Web app port allocated: $web_port"
   fi
 
-  log_success "Web app port allocated: $web_port"
+  # Update NEXT_PUBLIC_SITE_URL
+  if grep -q "^NEXT_PUBLIC_SITE_URL=" "$web_env_file"; then
+    sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$web_port\"|" "$web_env_file"
+    rm -f "$web_env_file.bak"
+  fi
 
   # Allocate API server port if env exists
-  if [ -f "$worktree_path/apps/api-server/.env.local" ]; then
-    api_port=$("$PORT_ALLOCATOR" "$worktree_path" --offset 500 2>/dev/null | head -1)
-    echo "" >> "$worktree_path/apps/api-server/.env.local"
-    echo "# Worktree-specific port (auto-allocated by worktree-setup.sh)" >> "$worktree_path/apps/api-server/.env.local"
-    echo "PORT=$api_port" >> "$worktree_path/apps/api-server/.env.local"
+  if [ -f "$api_env_file" ]; then
+    # Check if API port is already configured (for resume/idempotency)
+    if grep -q "^PORT=" "$api_env_file" 2>/dev/null; then
+      api_port=$(grep "^PORT=" "$api_env_file" | tail -1 | cut -d= -f2)
+      log_info "API port already configured: $api_port (preserving existing)"
+    else
+      # Allocate API port with proper error handling
+      local api_port_output
+      if ! api_port_output=$("$PORT_ALLOCATOR" "$worktree_path" --offset 500 2>&1); then
+        log_error "Failed to allocate API port: $api_port_output"
+        exit 1
+      fi
+      api_port=$(echo "$api_port_output" | grep -E '^[0-9]+$' | head -1)
+      if [ -z "$api_port" ]; then
+        log_error "Port allocator did not return a valid API port number"
+        log_error "Output: $api_port_output"
+        exit 1
+      fi
+      # Append port to env file using grouped redirect
+      {
+        echo ""
+        echo "# Worktree-specific port (auto-allocated by worktree-setup.sh)"
+        echo "PORT=$api_port"
+      } >> "$api_env_file"
+      log_success "API server port allocated: $api_port"
+    fi
 
     # Update CORS_ORIGIN and BETTER_AUTH_URL
-    sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$web_port|" "$worktree_path/apps/api-server/.env.local"
-    sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$api_port|" "$worktree_path/apps/api-server/.env.local"
-    rm -f "$worktree_path/apps/api-server/.env.local.bak"
-
-    log_success "API server port allocated: $api_port"
+    sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$web_port|" "$api_env_file"
+    sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$api_port|" "$api_env_file"
+    rm -f "$api_env_file.bak"
   fi
 
   # Step 4: Install dependencies
