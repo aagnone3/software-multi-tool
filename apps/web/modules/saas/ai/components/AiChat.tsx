@@ -147,7 +147,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 	const sortedChats = useMemo(() => {
 		return (
 			chats?.sort(
-				(a, b) =>
+				(a: (typeof chats)[number], b: (typeof chats)[number]) =>
 					new Date(b.createdAt).getTime() -
 					new Date(a.createdAt).getTime(),
 			) ?? []
