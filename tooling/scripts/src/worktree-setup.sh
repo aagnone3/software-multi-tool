@@ -115,8 +115,8 @@ normalize_issue_key() {
   if [[ "$key" =~ ^[0-9]+$ ]]; then
     echo "PRA-$key"
   else
-    # Ensure uppercase
-    echo "${key^^}"
+    # Ensure uppercase (compatible with bash 3.2 on macOS)
+    echo "$key" | tr '[:lower:]' '[:upper:]'
   fi
 }
 
