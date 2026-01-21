@@ -11,8 +11,13 @@ import {
 } from "@repo/database";
 import { logger } from "@repo/logs";
 import Stripe from "stripe";
+import { billingNotifications } from "../../src/lib/billing-notifications";
 import { setCustomerIdToEntity } from "../../src/lib/customer";
-import { getPlanIdFromPriceId } from "../../src/lib/helper";
+import {
+	getPlanIdFromPriceId,
+	getPlanNameFromId,
+	getPlanNameFromPriceId,
+} from "../../src/lib/helper";
 import type {
 	CancelSubscription,
 	CreateCheckoutLink,
@@ -196,6 +201,13 @@ async function handleSubscriptionCreated(
 					`Granted ${planCredits.included} credits to organization ${organizationId} for plan ${planId}`,
 				);
 			}
+
+			// Send notification for subscription creation
+			const planName = getPlanNameFromId(planId);
+			await billingNotifications.subscriptionCreated({
+				organizationId,
+				planName,
+			});
 		}
 	}
 }
@@ -253,6 +265,16 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
 	logger.info(
 		`Reset credits for organization ${organizationId} for new billing period`,
 	);
+
+	// Send renewal notification
+	const priceId = subscriptionItem.price?.id;
+	if (priceId) {
+		const planName = getPlanNameFromPriceId(priceId);
+		await billingNotifications.subscriptionRenewed({
+			organizationId,
+			planName,
+		});
+	}
 }
 
 /**
@@ -307,6 +329,9 @@ async function handleSubscriptionUpdated(
 			const oldPlanCredits = getPlanCredits(oldPlanId);
 
 			if (newPlanCredits && oldPlanCredits) {
+				const oldPlanName = getPlanNameFromId(oldPlanId);
+				const newPlanName = getPlanNameFromId(newPlanId);
+
 				// Check if this is an upgrade (more credits)
 				if (newPlanCredits.included > oldPlanCredits.included) {
 					// Upgrade: immediately adjust credits
@@ -318,12 +343,26 @@ async function handleSubscriptionUpdated(
 					logger.info(
 						`Adjusted credits for organization ${organizationId} on upgrade from ${oldPlanId} to ${newPlanId}`,
 					);
+
+					// Send upgrade notification
+					await billingNotifications.planUpgraded({
+						organizationId,
+						oldPlanName,
+						newPlanName,
+					});
 				} else {
 					// Downgrade: credits will be reduced at next billing period
 					// We don't immediately reduce credits - user already paid for current period
 					logger.info(
 						`Plan downgrade detected for organization ${organizationId} from ${oldPlanId} to ${newPlanId}. Credits will be adjusted at next renewal.`,
 					);
+
+					// Send downgrade notification
+					await billingNotifications.planDowngraded({
+						organizationId,
+						oldPlanName,
+						newPlanName,
+					});
 				}
 			}
 		}
@@ -337,6 +376,14 @@ async function handleSubscriptionUpdated(
 async function handleSubscriptionDeleted(
 	subscription: Stripe.Subscription,
 ): Promise<void> {
+	// Get organization before deleting purchase
+	const customerId = subscription.customer;
+	let organizationId: string | null = null;
+
+	if (typeof customerId === "string") {
+		organizationId = await getOrganizationIdFromCustomer(customerId);
+	}
+
 	// Delete the purchase record
 	await deletePurchaseBySubscriptionId(subscription.id);
 
@@ -346,6 +393,13 @@ async function handleSubscriptionDeleted(
 	logger.info(
 		`Subscription ${subscription.id} deleted. Credits remain until period end.`,
 	);
+
+	// Send cancellation notification
+	if (organizationId) {
+		await billingNotifications.subscriptionCancelled({
+			organizationId,
+		});
+	}
 }
 
 export const webhookHandler: WebhookHandler = async (req) => {
@@ -427,6 +481,13 @@ export const webhookHandler: WebhookHandler = async (req) => {
 						logger.info(
 							`Credit pack ${creditPack.id} purchased: granted ${creditPack.credits} credits to organization ${organizationId}`,
 						);
+
+						// Send credit pack purchase notification
+						await billingNotifications.creditPackPurchased({
+							organizationId,
+							packName: creditPack.name,
+							credits: creditPack.credits,
+						});
 					}
 				}
 

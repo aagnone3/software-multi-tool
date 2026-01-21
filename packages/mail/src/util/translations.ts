@@ -34,6 +34,9 @@ export const defaultTranslations = {
 			body: "Thank you for signing up for the Software Multitool newsletter. We will keep you updated with the latest news and updates.",
 			subject: "Welcome to the Software Multitool Newsletter!",
 		},
+		notificationEmail: {
+			subject: "Notification from Software Multitool",
+		},
 		organizationInvitation: {
 			body: "You have been invited to join the organization {organizationName}. Click the button below or copy and paste the link into your browser of choice to accept the invitation and join the organization.",
 			headline: "Join the organization {organizationName}",

@@ -25,6 +25,8 @@ import {
 	username,
 } from "better-auth/plugins";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+import { securityNotifications } from "./lib/security-notifications";
+import { teamNotifications } from "./lib/team-notifications";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 
 /** Default locale (English only - i18n removed) */
@@ -93,6 +95,7 @@ export const auth = betterAuth({
 	},
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
+			// Organization membership changes - invitation accepted (member joined)
 			if (ctx.path.startsWith("/organization/accept-invitation")) {
 				const { invitationId } = ctx.body;
 
@@ -109,6 +112,21 @@ export const auth = betterAuth({
 				await updateSeatsInOrganizationSubscription(
 					invitation.organizationId,
 				);
+
+				// Send team notification for member joining
+				// Get the user who accepted the invitation
+				const acceptingUserId = ctx.context.session?.session?.userId;
+				if (acceptingUserId) {
+					const acceptingUser = await getUserByEmail(
+						invitation.email,
+					);
+					await teamNotifications.memberJoined({
+						organizationId: invitation.organizationId,
+						organizationName: invitation.organization.name,
+						memberName: acceptingUser?.name || "",
+						memberEmail: invitation.email,
+					});
+				}
 			} else if (ctx.path.startsWith("/organization/remove-member")) {
 				const { organizationId } = ctx.body;
 
@@ -117,6 +135,60 @@ export const auth = betterAuth({
 				}
 
 				await updateSeatsInOrganizationSubscription(organizationId);
+
+				// Note: We can't easily get the removed member's info here since
+				// the hook runs after the removal. For member left notifications,
+				// this would need to be handled in a "before" hook that stores the
+				// member info, or by extending Better Auth's organization plugin.
+			}
+
+			// Organization membership - role changed
+			if (ctx.path.startsWith("/organization/update-member-role")) {
+				const { organizationId, memberId, role } = ctx.body;
+
+				if (organizationId && memberId && role) {
+					// Get organization name for the notification
+					const organization = await db.organization.findUnique({
+						where: { id: organizationId },
+						select: { name: true },
+					});
+
+					// Get the member's user ID
+					const member = await db.member.findFirst({
+						where: { id: memberId },
+						select: { userId: true },
+					});
+
+					if (organization && member) {
+						await teamNotifications.roleChanged({
+							userId: member.userId,
+							organizationName: organization.name,
+							newRole: role,
+						});
+					}
+				}
+			}
+
+			// Security notifications
+			const userId = ctx.context.session?.session?.userId;
+			if (userId) {
+				// Password change notification
+				if (
+					ctx.path.startsWith("/change-password") ||
+					ctx.path.startsWith("/reset-password")
+				) {
+					await securityNotifications.passwordChanged({ userId });
+				}
+
+				// 2FA enabled notification
+				if (ctx.path.startsWith("/two-factor/enable")) {
+					await securityNotifications.twoFactorEnabled({ userId });
+				}
+
+				// 2FA disabled notification
+				if (ctx.path.startsWith("/two-factor/disable")) {
+					await securityNotifications.twoFactorDisabled({ userId });
+				}
 			}
 		}),
 		before: createAuthMiddleware(async (ctx) => {

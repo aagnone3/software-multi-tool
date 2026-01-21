@@ -90,6 +90,33 @@ export function getPlanIdFromPriceId(priceId: string): string | undefined {
 	return undefined;
 }
 
+/**
+ * Get a human-readable plan name from a plan ID.
+ * Capitalizes the plan ID (e.g., 'pro' -> 'Pro', 'starter' -> 'Starter').
+ *
+ * @param planId - The plan ID (e.g., 'pro', 'starter', 'free')
+ * @returns The formatted plan name
+ */
+export function getPlanNameFromId(planId: string): string {
+	if (!planId) {
+		return "Unknown";
+	}
+	// Capitalize first letter
+	return planId.charAt(0).toUpperCase() + planId.slice(1);
+}
+
+/**
+ * Get a human-readable plan name from a Stripe price ID.
+ * Convenience function that combines getPlanIdFromPriceId and getPlanNameFromId.
+ *
+ * @param priceId - The Stripe price ID (e.g., 'price_xxx')
+ * @returns The formatted plan name or 'Unknown' if not found
+ */
+export function getPlanNameFromPriceId(priceId: string): string {
+	const planId = getPlanIdFromPriceId(priceId);
+	return planId ? getPlanNameFromId(planId) : "Unknown";
+}
+
 export function createPurchasesHelper(purchases: PurchaseWithoutTimestamps[]) {
 	const activePlan = getActivePlanFromPurchases(purchases);
 

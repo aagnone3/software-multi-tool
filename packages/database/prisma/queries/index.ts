@@ -3,6 +3,7 @@ export * from "./audit-logs";
 export * from "./credit-balance";
 export * from "./gdpr-export";
 export * from "./notification-preferences";
+export * from "./notification-triggers";
 export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";
