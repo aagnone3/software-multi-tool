@@ -33,20 +33,11 @@ export interface CreditBalance {
 }
 
 export function useCreditsBalance() {
-	const { activeOrganization, loaded: organizationLoaded } =
-		useActiveOrganization();
+	const { activeOrganization } = useActiveOrganization();
 
-	// Skip the API call when no organization is set to prevent 400 errors
-	// This should rarely happen in normal use - if it does, investigate the cause
+	// Skip the API call when no organization is set to prevent 400 errors.
+	// This is expected when the user is not on an organization-scoped route (e.g., /app/settings).
 	const hasActiveOrganization = !!activeOrganization;
-
-	if (!hasActiveOrganization && organizationLoaded) {
-		console.warn(
-			"[useCreditsBalance] No active organization set - skipping credits API call. " +
-				"This state should not occur in normal use. If you see this frequently, " +
-				"investigate why the user has no active organization.",
-		);
-	}
 
 	const query = useQuery({
 		...orpc.credits.balance.queryOptions({}),

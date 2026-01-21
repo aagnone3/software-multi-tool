@@ -29,10 +29,11 @@ import { useCreditsBalance } from "./use-credits-balance";
 describe("useCreditsBalance", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		// Default: mock an active organization
+		// Default: mock an active organization on an org route
 		mockUseActiveOrganization.mockReturnValue({
 			activeOrganization: { id: "org-123", name: "Test Org" },
 			loaded: true,
+			isOrgRoute: true,
 		});
 	});
 
@@ -62,6 +63,7 @@ describe("useCreditsBalance", () => {
 			mockUseActiveOrganization.mockReturnValue({
 				activeOrganization: null,
 				loaded: true,
+				isOrgRoute: false,
 			});
 
 			const { result } = renderHook(() => useCreditsBalance(), {
@@ -78,6 +80,7 @@ describe("useCreditsBalance", () => {
 			mockUseActiveOrganization.mockReturnValue({
 				activeOrganization: undefined,
 				loaded: true,
+				isOrgRoute: false,
 			});
 
 			const { result } = renderHook(() => useCreditsBalance(), {
@@ -92,6 +95,7 @@ describe("useCreditsBalance", () => {
 			mockUseActiveOrganization.mockReturnValue({
 				activeOrganization: { id: "org-123", name: "Test Org" },
 				loaded: true,
+				isOrgRoute: true,
 			});
 
 			const { result } = renderHook(() => useCreditsBalance(), {
@@ -103,46 +107,22 @@ describe("useCreditsBalance", () => {
 			expect(result.current.isLoading).toBe(true);
 		});
 
-		it("logs warning when no organization and org context is loaded", () => {
-			const consoleSpy = vi
-				.spyOn(console, "warn")
-				.mockImplementation(() => {});
-
+		it("disables query when not on org route (no warning expected)", () => {
+			// This tests the scenario where user navigates from /app/org to /app/settings
+			// The query should be disabled without any warnings since this is expected behavior
 			mockUseActiveOrganization.mockReturnValue({
 				activeOrganization: null,
 				loaded: true,
+				isOrgRoute: false, // Not on an organization-scoped route
 			});
 
-			renderHook(() => useCreditsBalance(), {
+			const { result } = renderHook(() => useCreditsBalance(), {
 				wrapper: createWrapper(),
 			});
 
-			expect(consoleSpy).toHaveBeenCalledWith(
-				expect.stringContaining(
-					"[useCreditsBalance] No active organization set",
-				),
-			);
-
-			consoleSpy.mockRestore();
-		});
-
-		it("does not log warning when org context is not yet loaded", () => {
-			const consoleSpy = vi
-				.spyOn(console, "warn")
-				.mockImplementation(() => {});
-
-			mockUseActiveOrganization.mockReturnValue({
-				activeOrganization: null,
-				loaded: false,
-			});
-
-			renderHook(() => useCreditsBalance(), {
-				wrapper: createWrapper(),
-			});
-
-			expect(consoleSpy).not.toHaveBeenCalled();
-
-			consoleSpy.mockRestore();
+			expect(result.current.hasActiveOrganization).toBe(false);
+			expect(result.current.isLoading).toBe(false);
+			expect(result.current.balance).toBeUndefined();
 		});
 	});
 
