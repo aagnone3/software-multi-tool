@@ -1,0 +1,163 @@
+name: Preview Deploy
+
+# Deploy preview environments only when the 'deploy-preview' label is present.
+# This reduces costs by not deploying full preview stacks for PRs that only need CI validation.
+
+on:
+  pull_request:
+    types: [labeled, opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: preview-deploy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+jobs:
+  # Check if the deploy-preview label is present
+  check-label:
+    name: Check for deploy-preview label
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Check for deploy-preview label
+        id: check
+        run: |
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | jq -e 'index("deploy-preview")' > /dev/null 2>&1; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "deploy-preview label found - will deploy preview environments"
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "deploy-preview label not found - skipping preview deployment"
+          fi
+
+  # Deploy to Vercel when label is present
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: check-label
+    if: |
+      needs.check-label.outputs.should_deploy == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.preview_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel environment info
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT }}
+
+      - name: Build project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $DEPLOY_URL"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT }}
+
+      - name: Comment on PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
+            const prNumber = ${{ github.event.pull_request.number }};
+
+            const body = `## Vercel Preview Deployment
+
+            Your preview deployment is ready!
+
+            **Preview URL**: ${previewUrl}
+
+            This deployment was triggered because the \`deploy-preview\` label was added to this PR.`;
+
+            // Find existing comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Vercel Preview Deployment')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+  # Post a notice when label is not present
+  skip-notice:
+    name: Post skip notice
+    runs-on: ubuntu-latest
+    needs: check-label
+    if: |
+      needs.check-label.outputs.should_deploy == 'false' &&
+      github.event.action == 'opened'
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ github.event.pull_request.number }};
+
+            const body = `## Preview Deployment Skipped
+
+            Full preview deployment (Vercel, Render) was skipped for this PR.
+
+            **To enable preview deployments**, add the \`deploy-preview\` label to this PR.
+
+            > **Note**: CI checks (lint, type-check, tests) and Supabase preview branch (for E2E tests) are still running.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body,
+            });
