@@ -17,7 +17,7 @@
  * ## What this script does
  *
  * 1. Queries all users with an `image` field that starts with `users/` (legacy path)
- * 2. For each user, finds their active organization (or first membership)
+ * 2. For each user, finds their first organization membership
  * 3. Copies the file from the old path to the new org-scoped path
  * 4. Updates the user's `image` field in the database
  * 5. Deletes the old file (only after successful copy and DB update)
@@ -80,6 +80,7 @@ async function migrateUserAvatars(dryRun = true): Promise<MigrationSummary> {
 	const results: MigrationResult[] = [];
 
 	// Find all users with legacy avatar paths
+	// Note: We get organization from user's membership, not session's activeOrganizationId
 	const usersWithLegacyAvatars = await db.user.findMany({
 		where: {
 			image: {
@@ -90,7 +91,6 @@ async function migrateUserAvatars(dryRun = true): Promise<MigrationSummary> {
 			id: true,
 			email: true,
 			image: true,
-			activeOrganizationId: true,
 			members: {
 				select: {
 					organizationId: true,
@@ -168,9 +168,8 @@ async function migrateUserAvatars(dryRun = true): Promise<MigrationSummary> {
 			continue;
 		}
 
-		// Find the organization to use
-		const organizationId =
-			user.activeOrganizationId ?? user.members[0]?.organizationId;
+		// Find the organization to use (from user's first membership)
+		const organizationId = user.members[0]?.organizationId;
 
 		if (!organizationId) {
 			results.push({
