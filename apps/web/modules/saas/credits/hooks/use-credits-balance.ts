@@ -1,5 +1,10 @@
 "use client";
 
+import {
+	type ApiErrorCode,
+	classifyError,
+	isApiInitializing,
+} from "@shared/lib/api-error-utils";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useActiveOrganization } from "../../organizations/hooks/use-active-organization";
@@ -67,11 +72,23 @@ export function useCreditsBalance() {
 			? balance.totalAvailable / totalCredits < 0.2
 			: false;
 
+	// Classify the error for UI handling
+	const errorCode: ApiErrorCode | undefined = query.error
+		? classifyError(query.error)
+		: undefined;
+
+	// Check if API is still initializing (preview environments)
+	const apiInitializing = query.error
+		? isApiInitializing(query.error)
+		: false;
+
 	return {
 		balance,
 		isLoading: query.isLoading,
 		isError: query.isError,
 		error: query.error,
+		errorCode,
+		isApiInitializing: apiInitializing,
 		totalCredits,
 		percentageUsed,
 		isLowCredits,
