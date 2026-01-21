@@ -12,7 +12,7 @@ test.describe("example with shared fixtures", () => {
 		if (config.ui.marketing.enabled) {
 			await expect(
 				page.getByRole("heading", {
-					name: "Simple, helpful software tools for modern business",
+					name: /Your one-stop shop for.*AI-powered.*business tools/i,
 				}),
 			).toBeVisible();
 		}
@@ -24,7 +24,7 @@ test.describe("example with shared fixtures", () => {
 		if (config.ui.marketing.enabled) {
 			await expect(
 				extendedPage.getByRole("heading", {
-					name: "Simple, helpful software tools for modern business",
+					name: /Your one-stop shop for.*AI-powered.*business tools/i,
 				}),
 			).toBeVisible();
 		} else {
