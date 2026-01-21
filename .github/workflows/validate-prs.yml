@@ -277,4 +277,5 @@ jobs:
         env:
           TURBO_TELEMETRY_DISABLED: "1"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ASSEMBLYAI_API_KEY: ${{ secrets.ASSEMBLYAI_API_KEY }}
         run: pnpm test:ci

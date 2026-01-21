@@ -5,6 +5,7 @@ import { registerFeedbackProcessor } from "../../feedback-analyzer";
 import { registerGdprExporterProcessor } from "../../gdpr-exporter";
 import { registerInvoiceProcessor } from "../../invoice-processor";
 import { registerMeetingProcessor } from "../../meeting-summarizer";
+import { registerSpeakerSeparationProcessor } from "../../speaker-separation";
 
 let initialized = false;
 
@@ -20,6 +21,7 @@ export function registerAllProcessors() {
 	registerMeetingProcessor();
 	registerGdprExporterProcessor();
 	registerDiarizationProcessor();
+	registerSpeakerSeparationProcessor();
 
 	initialized = true;
 }

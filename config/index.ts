@@ -33,6 +33,21 @@ export const config = {
 				},
 			},
 			{
+				slug: "speaker-separation",
+				name: "Speaker Separation",
+				description:
+					"Separate and identify speakers in audio files with timestamps and transcripts",
+				icon: "audio-lines",
+				public: false, // Requires authentication (no anonymous access)
+				enabled: true,
+				creditCost: 2, // 2 credits per minute of audio (~$0.015/min AssemblyAI cost)
+				creditUnit: "minute",
+				rateLimits: {
+					anonymous: { requests: 0, window: "1d" }, // Not available for anonymous
+					authenticated: { requests: 30, window: "1h" },
+				},
+			},
+			{
 				slug: "news-analyzer",
 				name: "News Analyzer",
 				description: "Analyze news articles for bias and sentiment",
