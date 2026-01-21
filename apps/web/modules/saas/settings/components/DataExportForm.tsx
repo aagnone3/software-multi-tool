@@ -51,19 +51,28 @@ export function DataExportForm() {
 		},
 	});
 
+	type ExportItem = NonNullable<typeof exportsData>["exports"][number];
+
 	// Check if there's an active export
 	const activeExport = exportsData?.exports.find(
-		(exp) => exp.status === "PENDING" || exp.status === "PROCESSING",
+		(exp: ExportItem) =>
+			exp.status === "PENDING" || exp.status === "PROCESSING",
 	);
 
 	// Check if there's a recent completed export with valid download URL
-	const recentCompletedExport = exportsData?.exports.find((exp) => {
-		if (exp.status !== "COMPLETED" || !exp.downloadUrl || !exp.expiresAt) {
-			return false;
-		}
-		// Check if download URL is still valid
-		return new Date(exp.expiresAt) > new Date();
-	});
+	const recentCompletedExport = exportsData?.exports.find(
+		(exp: ExportItem) => {
+			if (
+				exp.status !== "COMPLETED" ||
+				!exp.downloadUrl ||
+				!exp.expiresAt
+			) {
+				return false;
+			}
+			// Check if download URL is still valid
+			return new Date(exp.expiresAt) > new Date();
+		},
+	);
 
 	const getStatusIcon = (status: string) => {
 		switch (status) {
@@ -144,57 +153,62 @@ export function DataExportForm() {
 							Recent exports
 						</h4>
 						<div className="space-y-2">
-							{exportsData.exports.slice(0, 5).map((exp) => (
-								<div
-									key={exp.jobId}
-									className="flex items-center justify-between gap-4 text-sm text-foreground/60 border rounded-lg px-3 py-2"
-								>
-									<div className="flex items-center gap-2">
-										{getStatusIcon(exp.status)}
-										<span>{formatDate(exp.createdAt)}</span>
-										{exp.totalRecords && (
-											<span className="text-xs">
-												({exp.totalRecords} records)
+							{exportsData.exports
+								.slice(0, 5)
+								.map((exp: ExportItem) => (
+									<div
+										key={exp.jobId}
+										className="flex items-center justify-between gap-4 text-sm text-foreground/60 border rounded-lg px-3 py-2"
+									>
+										<div className="flex items-center gap-2">
+											{getStatusIcon(exp.status)}
+											<span>
+												{formatDate(exp.createdAt)}
 											</span>
-										)}
-									</div>
-									<div>
-										{exp.status === "COMPLETED" &&
-											exp.downloadUrl &&
-											exp.expiresAt &&
-											new Date(exp.expiresAt) >
-												new Date() && (
-												<a
-													href={exp.downloadUrl}
-													className="text-primary hover:underline flex items-center gap-1"
-													download
-												>
-													<DownloadIcon className="size-3" />
-													Download
-												</a>
-											)}
-										{exp.status === "COMPLETED" &&
-											exp.expiresAt &&
-											new Date(exp.expiresAt) <=
-												new Date() && (
-												<span className="text-foreground/40">
-													Expired
+											{exp.totalRecords && (
+												<span className="text-xs">
+													({exp.totalRecords} records)
 												</span>
 											)}
-										{exp.status === "FAILED" && (
-											<span className="text-red-500 text-xs">
-												{exp.error || "Failed"}
-											</span>
-										)}
-										{(exp.status === "PENDING" ||
-											exp.status === "PROCESSING") && (
-											<span className="text-blue-500 text-xs">
-												Processing...
-											</span>
-										)}
+										</div>
+										<div>
+											{exp.status === "COMPLETED" &&
+												exp.downloadUrl &&
+												exp.expiresAt &&
+												new Date(exp.expiresAt) >
+													new Date() && (
+													<a
+														href={exp.downloadUrl}
+														className="text-primary hover:underline flex items-center gap-1"
+														download
+													>
+														<DownloadIcon className="size-3" />
+														Download
+													</a>
+												)}
+											{exp.status === "COMPLETED" &&
+												exp.expiresAt &&
+												new Date(exp.expiresAt) <=
+													new Date() && (
+													<span className="text-foreground/40">
+														Expired
+													</span>
+												)}
+											{exp.status === "FAILED" && (
+												<span className="text-red-500 text-xs">
+													{exp.error || "Failed"}
+												</span>
+											)}
+											{(exp.status === "PENDING" ||
+												exp.status ===
+													"PROCESSING") && (
+												<span className="text-blue-500 text-xs">
+													Processing...
+												</span>
+											)}
+										</div>
 									</div>
-								</div>
-							))}
+								))}
 						</div>
 					</div>
 				)}
