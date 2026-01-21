@@ -19,7 +19,11 @@
 		"metrics:weekly": "pnpm --filter @repo/scripts exec tsx src/weekly-test-summary.ts",
 		"test": "dotenv -c -- turbo run test",
 		"test:ci": "dotenv -c -- env TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
-		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts"
+		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts",
+		"worktree:create": "./tooling/scripts/src/worktree-setup.sh create",
+		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
+		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",
+		"worktree:resume": "./tooling/scripts/src/worktree-setup.sh resume"
 	},
 	"engines": {
 		"node": "v25.2.1"
