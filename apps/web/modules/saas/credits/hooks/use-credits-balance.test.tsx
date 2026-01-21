@@ -17,12 +17,23 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 	},
 }));
 
+// Mock the useActiveOrganization hook
+const mockUseActiveOrganization = vi.fn();
+vi.mock("../../organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: () => mockUseActiveOrganization(),
+}));
+
 // Import hook after mocking
 import { useCreditsBalance } from "./use-credits-balance";
 
 describe("useCreditsBalance", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Default: mock an active organization
+		mockUseActiveOrganization.mockReturnValue({
+			activeOrganization: { id: "org-123", name: "Test Org" },
+			loaded: true,
+		});
 	});
 
 	const createWrapper = (initialData?: Record<string, unknown>) => {
@@ -46,108 +57,199 @@ describe("useCreditsBalance", () => {
 			);
 	};
 
-	it("returns loading state initially", () => {
-		const { result } = renderHook(() => useCreditsBalance(), {
-			wrapper: createWrapper(),
+	describe("organization state", () => {
+		it("disables query when activeOrganization is null", () => {
+			mockUseActiveOrganization.mockReturnValue({
+				activeOrganization: null,
+				loaded: true,
+			});
+
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
+
+			expect(result.current.hasActiveOrganization).toBe(false);
+			// Query should not be loading since it's disabled
+			expect(result.current.isLoading).toBe(false);
+			expect(result.current.balance).toBeUndefined();
 		});
 
-		expect(result.current.isLoading).toBe(true);
-		expect(result.current.balance).toBeUndefined();
-	});
+		it("disables query when activeOrganization is undefined", () => {
+			mockUseActiveOrganization.mockReturnValue({
+				activeOrganization: undefined,
+				loaded: true,
+			});
 
-	it("calculates percentageUsed correctly", async () => {
-		const mockBalance = {
-			included: 100,
-			used: 25,
-			remaining: 75,
-			overage: 0,
-			purchasedCredits: 0,
-			totalAvailable: 75,
-			periodStart: "2025-01-01T00:00:00.000Z",
-			periodEnd: "2025-02-01T00:00:00.000Z",
-			plan: { id: "pro", name: "Pro" },
-		};
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
 
-		const { result } = renderHook(() => useCreditsBalance(), {
-			wrapper: createWrapper(mockBalance),
-		});
-
-		await waitFor(() => {
+			expect(result.current.hasActiveOrganization).toBe(false);
 			expect(result.current.isLoading).toBe(false);
 		});
 
-		expect(result.current.percentageUsed).toBe(25);
+		it("enables query when activeOrganization is set", () => {
+			mockUseActiveOrganization.mockReturnValue({
+				activeOrganization: { id: "org-123", name: "Test Org" },
+				loaded: true,
+			});
+
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
+
+			expect(result.current.hasActiveOrganization).toBe(true);
+			// Query should be enabled and loading
+			expect(result.current.isLoading).toBe(true);
+		});
+
+		it("logs warning when no organization and org context is loaded", () => {
+			const consoleSpy = vi
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+
+			mockUseActiveOrganization.mockReturnValue({
+				activeOrganization: null,
+				loaded: true,
+			});
+
+			renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
+
+			expect(consoleSpy).toHaveBeenCalledWith(
+				expect.stringContaining(
+					"[useCreditsBalance] No active organization set",
+				),
+			);
+
+			consoleSpy.mockRestore();
+		});
+
+		it("does not log warning when org context is not yet loaded", () => {
+			const consoleSpy = vi
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+
+			mockUseActiveOrganization.mockReturnValue({
+				activeOrganization: null,
+				loaded: false,
+			});
+
+			renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
+
+			expect(consoleSpy).not.toHaveBeenCalled();
+
+			consoleSpy.mockRestore();
+		});
 	});
 
-	it("detects low credits when remaining is below 20%", async () => {
-		const mockBalance = {
-			included: 100,
-			used: 85,
-			remaining: 15,
-			overage: 0,
-			purchasedCredits: 0,
-			totalAvailable: 15,
-			periodStart: "2025-01-01T00:00:00.000Z",
-			periodEnd: "2025-02-01T00:00:00.000Z",
-			plan: { id: "pro", name: "Pro" },
-		};
+	describe("balance calculations", () => {
+		it("returns loading state initially when organization is set", () => {
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(),
+			});
 
-		const { result } = renderHook(() => useCreditsBalance(), {
-			wrapper: createWrapper(mockBalance),
+			expect(result.current.isLoading).toBe(true);
+			expect(result.current.balance).toBeUndefined();
 		});
 
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
+		it("calculates percentageUsed correctly", async () => {
+			const mockBalance = {
+				included: 100,
+				used: 25,
+				remaining: 75,
+				overage: 0,
+				purchasedCredits: 0,
+				totalAvailable: 75,
+				periodStart: "2025-01-01T00:00:00.000Z",
+				periodEnd: "2025-02-01T00:00:00.000Z",
+				plan: { id: "pro", name: "Pro" },
+			};
+
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(mockBalance),
+			});
+
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			expect(result.current.percentageUsed).toBe(25);
 		});
 
-		expect(result.current.isLowCredits).toBe(true);
-	});
+		it("detects low credits when remaining is below 20%", async () => {
+			const mockBalance = {
+				included: 100,
+				used: 85,
+				remaining: 15,
+				overage: 0,
+				purchasedCredits: 0,
+				totalAvailable: 15,
+				periodStart: "2025-01-01T00:00:00.000Z",
+				periodEnd: "2025-02-01T00:00:00.000Z",
+				plan: { id: "pro", name: "Pro" },
+			};
 
-	it("does not flag low credits when remaining is above 20%", async () => {
-		const mockBalance = {
-			included: 100,
-			used: 50,
-			remaining: 50,
-			overage: 0,
-			purchasedCredits: 0,
-			totalAvailable: 50,
-			periodStart: "2025-01-01T00:00:00.000Z",
-			periodEnd: "2025-02-01T00:00:00.000Z",
-			plan: { id: "pro", name: "Pro" },
-		};
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(mockBalance),
+			});
 
-		const { result } = renderHook(() => useCreditsBalance(), {
-			wrapper: createWrapper(mockBalance),
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			expect(result.current.isLowCredits).toBe(true);
 		});
 
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
+		it("does not flag low credits when remaining is above 20%", async () => {
+			const mockBalance = {
+				included: 100,
+				used: 50,
+				remaining: 50,
+				overage: 0,
+				purchasedCredits: 0,
+				totalAvailable: 50,
+				periodStart: "2025-01-01T00:00:00.000Z",
+				periodEnd: "2025-02-01T00:00:00.000Z",
+				plan: { id: "pro", name: "Pro" },
+			};
+
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(mockBalance),
+			});
+
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			expect(result.current.isLowCredits).toBe(false);
 		});
 
-		expect(result.current.isLowCredits).toBe(false);
-	});
+		it("caps percentageUsed at 100", async () => {
+			const mockBalance = {
+				included: 100,
+				used: 150,
+				remaining: 0,
+				overage: 50,
+				purchasedCredits: 0,
+				totalAvailable: 0,
+				periodStart: "2025-01-01T00:00:00.000Z",
+				periodEnd: "2025-02-01T00:00:00.000Z",
+				plan: { id: "pro", name: "Pro" },
+			};
 
-	it("caps percentageUsed at 100", async () => {
-		const mockBalance = {
-			included: 100,
-			used: 150,
-			remaining: 0,
-			overage: 50,
-			purchasedCredits: 0,
-			totalAvailable: 0,
-			periodStart: "2025-01-01T00:00:00.000Z",
-			periodEnd: "2025-02-01T00:00:00.000Z",
-			plan: { id: "pro", name: "Pro" },
-		};
+			const { result } = renderHook(() => useCreditsBalance(), {
+				wrapper: createWrapper(mockBalance),
+			});
 
-		const { result } = renderHook(() => useCreditsBalance(), {
-			wrapper: createWrapper(mockBalance),
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			expect(result.current.percentageUsed).toBe(100);
 		});
-
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
-		});
-
-		expect(result.current.percentageUsed).toBe(100);
 	});
 });

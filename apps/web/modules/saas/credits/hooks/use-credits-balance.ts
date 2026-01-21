@@ -1,7 +1,13 @@
 "use client";
 
+import {
+	type ApiErrorCode,
+	classifyError,
+	isApiInitializing,
+} from "@shared/lib/api-error-utils";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
+import { useActiveOrganization } from "../../organizations/hooks/use-active-organization";
 
 export interface CreditPurchase {
 	id: string;
@@ -27,7 +33,25 @@ export interface CreditBalance {
 }
 
 export function useCreditsBalance() {
-	const query = useQuery(orpc.credits.balance.queryOptions({}));
+	const { activeOrganization, loaded: organizationLoaded } =
+		useActiveOrganization();
+
+	// Skip the API call when no organization is set to prevent 400 errors
+	// This should rarely happen in normal use - if it does, investigate the cause
+	const hasActiveOrganization = !!activeOrganization;
+
+	if (!hasActiveOrganization && organizationLoaded) {
+		console.warn(
+			"[useCreditsBalance] No active organization set - skipping credits API call. " +
+				"This state should not occur in normal use. If you see this frequently, " +
+				"investigate why the user has no active organization.",
+		);
+	}
+
+	const query = useQuery({
+		...orpc.credits.balance.queryOptions({}),
+		enabled: hasActiveOrganization,
+	});
 
 	const balance = query.data as CreditBalance | undefined;
 
@@ -48,14 +72,27 @@ export function useCreditsBalance() {
 			? balance.totalAvailable / totalCredits < 0.2
 			: false;
 
+	// Classify the error for UI handling
+	const errorCode: ApiErrorCode | undefined = query.error
+		? classifyError(query.error)
+		: undefined;
+
+	// Check if API is still initializing (preview environments)
+	const apiInitializing = query.error
+		? isApiInitializing(query.error)
+		: false;
+
 	return {
 		balance,
 		isLoading: query.isLoading,
 		isError: query.isError,
 		error: query.error,
+		errorCode,
+		isApiInitializing: apiInitializing,
 		totalCredits,
 		percentageUsed,
 		isLowCredits,
+		hasActiveOrganization,
 		refetch: query.refetch,
 	};
 }

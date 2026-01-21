@@ -8,6 +8,7 @@ import { CommandPaletteProvider } from "@saas/shared/components/CommandPalettePr
 import { CommandPaletteShortcut } from "@saas/shared/components/CommandPaletteShortcut";
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
 import { Document } from "@shared/components/Document";
+import { PreviewStatusBanner } from "@shared/components/PreviewStatusBanner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -51,6 +52,7 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 						<ConfirmationAlertProvider>
 							<CommandPaletteProvider>
 								<CommandPaletteShortcut />
+								<PreviewStatusBanner />
 								{children}
 							</CommandPaletteProvider>
 						</ConfirmationAlertProvider>
