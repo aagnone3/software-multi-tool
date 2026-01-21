@@ -341,7 +341,7 @@ export function AuditLogList() {
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="all">All Resources</SelectItem>
-						{filtersData?.resources.map((resource) => (
+						{filtersData?.resources.map((resource: string) => (
 							<SelectItem key={resource} value={resource}>
 								{resource}
 							</SelectItem>
