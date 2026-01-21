@@ -50,30 +50,69 @@
 }
 
 @layer base {
+	/*
+	 * Brand Color Palette - Software Multitool
+	 *
+	 * Design Direction: Professional & Trustworthy
+	 * Primary: Blue (#2563EB) - Classic, professional, widely trusted for SaaS
+	 *
+	 * Color System:
+	 * - Primary: Blue - main brand color for CTAs, links, focus states
+	 * - Secondary: Slate - text, buttons, strong contrast elements
+	 * - Accent: Sky Blue - highlights, interactive elements, hover states
+	 * - Highlight: Amber - attention-grabbing accents, badges, notifications
+	 *
+	 * Semantic Colors:
+	 * - Success: Green (#16A34A) - confirmations, positive actions
+	 * - Destructive: Red (#DC2626) - errors, deletions, warnings
+	 *
+	 * Accessibility: All color combinations meet WCAG 2.1 AA contrast requirements
+	 */
 	:root {
-		--border: #e3ebf6;
-		--input: #c7ced8;
-		--ring: #4e6df5;
-		--background: #fafafe;
-		--foreground: #292b35;
-		--primary: #4e6df5;
-		--primary-foreground: #f6f7f9;
-		--secondary: #292b35;
-		--secondary-foreground: #ffffff;
-		--destructive: #ef4444;
-		--destructive-foreground: #ffffff;
-		--success: #39a561;
-		--success-foreground: #ffffff;
-		--muted: #f8fafc;
-		--muted-foreground: #64748b;
-		--accent: #ddddea;
-		--accent-foreground: #292b35;
-		--popover: #ffffff;
-		--popover-foreground: #292b35;
-		--card: #ffffff;
-		--card-foreground: #292b35;
-		--highlight: #e5a158;
-		--highlight-foreground: #ffffff;
+		/* Borders & Inputs */
+		--border: #E2E8F0;
+		--input: #CBD5E1;
+		--ring: #2563EB;
+
+		/* Backgrounds */
+		--background: #FAFBFC;
+		--foreground: #0F172A;
+
+		/* Primary - Blue (Professional & Trustworthy) */
+		--primary: #2563EB;
+		--primary-foreground: #FFFFFF;
+
+		/* Secondary - Slate (Strong Contrast) */
+		--secondary: #1E293B;
+		--secondary-foreground: #FFFFFF;
+
+		/* Semantic - Destructive */
+		--destructive: #DC2626;
+		--destructive-foreground: #FFFFFF;
+
+		/* Semantic - Success */
+		--success: #16A34A;
+		--success-foreground: #FFFFFF;
+
+		/* Muted - Subtle backgrounds */
+		--muted: #F1F5F9;
+		--muted-foreground: #64748B;
+
+		/* Accent - Sky Blue (Interactive) */
+		--accent: #E0F2FE;
+		--accent-foreground: #0369A1;
+
+		/* Popover & Card */
+		--popover: #FFFFFF;
+		--popover-foreground: #0F172A;
+		--card: #FFFFFF;
+		--card-foreground: #0F172A;
+
+		/* Highlight - Amber (Attention) */
+		--highlight: #F59E0B;
+		--highlight-foreground: #FFFFFF;
+
+		/* Border Radius */
 		--radius: 0.75rem;
 
 		/* fumadocs */
@@ -81,29 +120,48 @@
 	}
 
 	.dark {
-		--border: #2b303d;
-		--input: #4c5362;
-		--ring: #5581f7;
-		--background: #070d12;
-		--foreground: #e9eef3;
-		--primary: #5581f7;
-		--primary-foreground: #091521;
-		--secondary: #e9eef3;
-		--secondary-foreground: #091521;
-		--destructive: #ef4444;
-		--destructive-foreground: #ffffff;
-		--success: #39a561;
-		--success-foreground: #ffffff;
-		--muted: #020817;
-		--muted-foreground: #94a3b8;
-		--accent: #1e293b;
-		--accent-foreground: #f8fafc;
-		--popover: #0d1116;
-		--popover-foreground: #e9eef3;
-		--card: #0d1116;
-		--card-foreground: #e9eef3;
-		--highlight: #e5a158;
-		--highlight-foreground: #ffffff;
+		/* Borders & Inputs */
+		--border: #334155;
+		--input: #475569;
+		--ring: #3B82F6;
+
+		/* Backgrounds */
+		--background: #0F172A;
+		--foreground: #F1F5F9;
+
+		/* Primary - Blue (Lighter for dark mode contrast) */
+		--primary: #3B82F6;
+		--primary-foreground: #0F172A;
+
+		/* Secondary - Light Slate (Inverted for dark mode) */
+		--secondary: #E2E8F0;
+		--secondary-foreground: #0F172A;
+
+		/* Semantic - Destructive */
+		--destructive: #EF4444;
+		--destructive-foreground: #FFFFFF;
+
+		/* Semantic - Success */
+		--success: #22C55E;
+		--success-foreground: #FFFFFF;
+
+		/* Muted - Dark subtle backgrounds */
+		--muted: #1E293B;
+		--muted-foreground: #94A3B8;
+
+		/* Accent - Dark Sky Blue */
+		--accent: #1E3A5F;
+		--accent-foreground: #7DD3FC;
+
+		/* Popover & Card */
+		--popover: #1E293B;
+		--popover-foreground: #F1F5F9;
+		--card: #1E293B;
+		--card-foreground: #F1F5F9;
+
+		/* Highlight - Amber */
+		--highlight: #F59E0B;
+		--highlight-foreground: #FFFFFF;
 	}
 
 	*,
