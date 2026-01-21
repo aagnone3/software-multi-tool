@@ -11,3 +11,4 @@ export {
 	JobProgressInline,
 } from "./JobProgressIndicator";
 export { MeetingSummarizerTool } from "./MeetingSummarizerTool";
+export { SpeakerSeparationTool } from "./SpeakerSeparationTool";
