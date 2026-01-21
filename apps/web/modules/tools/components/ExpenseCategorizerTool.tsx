@@ -33,18 +33,39 @@ import {
 	AlertTriangleIcon,
 	CheckCircleIcon,
 	DollarSignIcon,
+	DownloadIcon,
+	FileSpreadsheetIcon,
 	LightbulbIcon,
 	PlusIcon,
 	ReceiptIcon,
 	TrashIcon,
 	TrendingUpIcon,
+	UploadIcon,
 	WalletIcon,
+	XIcon,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
+import {
+	type ColumnMapping,
+	type DetectedMapping,
+	detectColumnMappings,
+	type ExpenseField,
+	exportToCSV,
+	type ParsedExpense,
+	type ParseResult,
+	parseExpenseFile,
+	transformToExpenses,
+	validateExpenseFile,
+} from "../lib/expense-file-parser";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+
+// ============================================================================
+// Helper Components
+// ============================================================================
 
 // Deduction percentage ring visualization
 function DeductionRing({ percentage }: { percentage: number }) {
@@ -169,6 +190,274 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 	);
 }
 
+// ============================================================================
+// Column Mapping Component
+// ============================================================================
+
+interface ColumnMappingProps {
+	headers: string[];
+	detectedMapping: DetectedMapping;
+	onMappingChange: (mappings: ColumnMapping[]) => void;
+	onConfirm: () => void;
+	onCancel: () => void;
+}
+
+const EXPENSE_FIELDS: { value: ExpenseField; label: string }[] = [
+	{ value: "description", label: "Description" },
+	{ value: "amount", label: "Amount" },
+	{ value: "date", label: "Date" },
+	{ value: "vendor", label: "Vendor/Merchant" },
+	{ value: "category", label: "Category (optional)" },
+];
+
+function ColumnMappingUI({
+	headers,
+	detectedMapping,
+	onMappingChange,
+	onConfirm,
+	onCancel,
+}: ColumnMappingProps) {
+	const [mappings, setMappings] = useState<ColumnMapping[]>(
+		detectedMapping.mappings,
+	);
+
+	const getMappedField = (header: string): ExpenseField | "" => {
+		const mapping = mappings.find((m) => m.sourceColumn === header);
+		return mapping?.targetField ?? "";
+	};
+
+	const handleFieldChange = (header: string, field: ExpenseField | "") => {
+		let newMappings = mappings.filter((m) => m.sourceColumn !== header);
+
+		if (field) {
+			// Remove any existing mapping for this field
+			newMappings = newMappings.filter((m) => m.targetField !== field);
+			newMappings.push({ sourceColumn: header, targetField: field });
+		}
+
+		setMappings(newMappings);
+		onMappingChange(newMappings);
+	};
+
+	const hasRequiredMappings =
+		mappings.some((m) => m.targetField === "description") &&
+		mappings.some((m) => m.targetField === "amount");
+
+	return (
+		<Card className="overflow-hidden border-0 shadow-lg">
+			<CardHeader className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent">
+				<div className="flex items-center gap-3">
+					<div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-500/25">
+						<FileSpreadsheetIcon className="size-5 text-white" />
+					</div>
+					<div>
+						<CardTitle>Map Your Columns</CardTitle>
+						<CardDescription className="mt-1">
+							Match your file columns to expense fields.
+							Description and Amount are required.
+						</CardDescription>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent className="p-6">
+				<div className="space-y-4">
+					{headers.map((header) => {
+						const confidence = detectedMapping.confidence[header];
+						return (
+							<div
+								key={header}
+								className="flex items-center gap-4 rounded-lg border p-3"
+							>
+								<div className="min-w-0 flex-1">
+									<p className="truncate font-medium">
+										{header}
+									</p>
+									{confidence && (
+										<p className="text-muted-foreground text-xs">
+											{Math.round(confidence * 100)}%
+											confidence
+										</p>
+									)}
+								</div>
+								<Select
+									value={getMappedField(header)}
+									onValueChange={(value) =>
+										handleFieldChange(
+											header,
+											value as ExpenseField | "",
+										)
+									}
+								>
+									<SelectTrigger className="w-48">
+										<SelectValue placeholder="Select field..." />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="">
+											<span className="text-muted-foreground">
+												Skip this column
+											</span>
+										</SelectItem>
+										{EXPENSE_FIELDS.map((field) => {
+											const isUsed = mappings.some(
+												(m) =>
+													m.targetField ===
+														field.value &&
+													m.sourceColumn !== header,
+											);
+											return (
+												<SelectItem
+													key={field.value}
+													value={field.value}
+													disabled={isUsed}
+												>
+													{field.label}
+													{isUsed && " (in use)"}
+												</SelectItem>
+											);
+										})}
+									</SelectContent>
+								</Select>
+							</div>
+						);
+					})}
+				</div>
+
+				{!hasRequiredMappings && (
+					<div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+						<AlertTriangleIcon className="mr-2 inline-block size-4" />
+						Please map at least Description and Amount columns to
+						continue.
+					</div>
+				)}
+
+				<div className="mt-6 flex justify-end gap-3">
+					<Button variant="outline" onClick={onCancel}>
+						Cancel
+					</Button>
+					<Button
+						onClick={onConfirm}
+						disabled={!hasRequiredMappings}
+						className="bg-emerald-600 hover:bg-emerald-700"
+					>
+						Continue with Mapping
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+// ============================================================================
+// Preview Component
+// ============================================================================
+
+interface PreviewProps {
+	expenses: ParsedExpense[];
+	onConfirm: () => void;
+	onBack: () => void;
+	isSubmitting: boolean;
+}
+
+function ExpensePreview({
+	expenses,
+	onConfirm,
+	onBack,
+	isSubmitting,
+}: PreviewProps) {
+	const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+	return (
+		<Card className="overflow-hidden border-0 shadow-lg">
+			<CardHeader className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<div className="flex size-10 items-center justify-center rounded-xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
+							<ReceiptIcon className="size-5 text-white" />
+						</div>
+						<div>
+							<CardTitle>Review Imported Expenses</CardTitle>
+							<CardDescription className="mt-1">
+								{expenses.length} expenses found •{" "}
+								<span className="font-semibold text-emerald-600">
+									$
+									{totalAmount.toLocaleString(undefined, {
+										minimumFractionDigits: 2,
+									})}
+								</span>{" "}
+								total
+							</CardDescription>
+						</div>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent className="p-0">
+				<div className="max-h-[400px] overflow-auto">
+					<table className="w-full text-sm">
+						<thead className="sticky top-0 border-b bg-muted/50">
+							<tr>
+								<th className="p-3 text-left font-semibold">
+									Description
+								</th>
+								<th className="p-3 text-right font-semibold">
+									Amount
+								</th>
+								<th className="p-3 text-left font-semibold">
+									Date
+								</th>
+								<th className="p-3 text-left font-semibold">
+									Vendor
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{expenses.slice(0, 100).map((expense, index) => (
+								<tr
+									key={index}
+									className="border-b transition-colors last:border-0 hover:bg-muted/30"
+								>
+									<td className="p-3">
+										{expense.description}
+									</td>
+									<td className="p-3 text-right font-medium">
+										${expense.amount.toFixed(2)}
+									</td>
+									<td className="p-3 text-muted-foreground">
+										{expense.date ?? "—"}
+									</td>
+									<td className="p-3 text-muted-foreground">
+										{expense.vendor ?? "—"}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				{expenses.length > 100 && (
+					<div className="border-t p-3 text-center text-muted-foreground text-sm">
+						Showing first 100 of {expenses.length} expenses
+					</div>
+				)}
+				<div className="flex justify-end gap-3 border-t p-4">
+					<Button variant="outline" onClick={onBack}>
+						Back to Mapping
+					</Button>
+					<Button
+						onClick={onConfirm}
+						loading={isSubmitting}
+						className="bg-emerald-600 hover:bg-emerald-700"
+					>
+						Categorize {expenses.length} Expenses
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+// ============================================================================
+// Form Schema
+// ============================================================================
+
 const expenseItemSchema = z.object({
 	description: z.string().min(1, "Description is required"),
 	amount: z.number().positive("Amount must be positive"),
@@ -186,6 +475,10 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface TaxCategory {
 	irsCategory: string;
@@ -264,12 +557,29 @@ const categoryLabels: Record<string, string> = {
 	personal: "Personal (Non-Deductible)",
 };
 
+// ============================================================================
+// Main Component
+// ============================================================================
+
+type InputMode = "form" | "text" | "file";
+type FileStep = "upload" | "mapping" | "preview";
+
 export function ExpenseCategorizerTool() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<ExpenseOutput | null>(null);
-	const [inputMode, setInputMode] = useState<"form" | "text">("form");
+	const [inputMode, setInputMode] = useState<InputMode>("form");
 	const [bulkText, setBulkText] = useState("");
 	const createJobMutation = useCreateJob();
+
+	// File upload state
+	const [fileStep, setFileStep] = useState<FileStep>("upload");
+	const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+	const [parseResult, setParseResult] = useState<ParseResult | null>(null);
+	const [detectedMapping, setDetectedMapping] =
+		useState<DetectedMapping | null>(null);
+	const [currentMappings, setCurrentMappings] = useState<ColumnMapping[]>([]);
+	const [parsedExpenses, setParsedExpenses] = useState<ParsedExpense[]>([]);
+	const [fileError, setFileError] = useState<string | null>(null);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -284,6 +594,90 @@ export function ExpenseCategorizerTool() {
 		control: form.control,
 		name: "expenses",
 	});
+
+	// File dropzone
+	const onDrop = useCallback(async (acceptedFiles: File[]) => {
+		const file = acceptedFiles[0];
+		if (!file) return;
+
+		setFileError(null);
+
+		// Validate file
+		const validation = validateExpenseFile(file);
+		if (!validation.valid) {
+			setFileError(validation.error ?? "Invalid file");
+			return;
+		}
+
+		setUploadedFile(file);
+
+		// Parse file
+		const result = await parseExpenseFile(file);
+		if (!result.success) {
+			setFileError(result.error ?? "Failed to parse file");
+			return;
+		}
+
+		if (result.data.length === 0) {
+			setFileError("No data found in file");
+			return;
+		}
+
+		setParseResult(result);
+
+		// Detect column mappings
+		const detected = detectColumnMappings(result.headers, result.data);
+		setDetectedMapping(detected);
+		setCurrentMappings(detected.mappings);
+
+		// Move to mapping step
+		setFileStep("mapping");
+	}, []);
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		onDrop,
+		accept: {
+			"text/csv": [".csv"],
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+				[".xlsx"],
+			"application/vnd.ms-excel": [".xls"],
+		},
+		maxFiles: 1,
+	});
+
+	const handleMappingConfirm = () => {
+		if (!parseResult) return;
+
+		const expenses = transformToExpenses(parseResult.data, currentMappings);
+		if (expenses.length === 0) {
+			setFileError(
+				"No valid expenses found with the current mapping. Please check your column mappings.",
+			);
+			return;
+		}
+
+		setParsedExpenses(expenses);
+		setFileStep("preview");
+	};
+
+	const handleFileSubmit = async () => {
+		if (parsedExpenses.length === 0) return;
+
+		setResult(null);
+		try {
+			const response = await createJobMutation.mutateAsync({
+				toolSlug: "expense-categorizer",
+				input: {
+					expenses: parsedExpenses,
+					businessType: form.getValues("businessType"),
+					country: form.getValues("country"),
+				},
+			});
+			setJobId(response.job.id);
+		} catch (error) {
+			console.error("Failed to create job:", error);
+		}
+	};
 
 	const parseBulkText = () => {
 		const lines = bulkText.split("\n").filter((line) => line.trim());
@@ -327,285 +721,537 @@ export function ExpenseCategorizerTool() {
 		setResult(null);
 		form.reset();
 		setBulkText("");
+		setUploadedFile(null);
+		setParseResult(null);
+		setDetectedMapping(null);
+		setCurrentMappings([]);
+		setParsedExpenses([]);
+		setFileError(null);
+		setFileStep("upload");
 	};
+
+	const handleExportCSV = () => {
+		if (!result) return;
+
+		const csv = exportToCSV(result.categorizedExpenses);
+		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = `categorized-expenses-${new Date().toISOString().split("T")[0]}.csv`;
+		link.click();
+		URL.revokeObjectURL(url);
+	};
+
+	const resetFileUpload = () => {
+		setUploadedFile(null);
+		setParseResult(null);
+		setDetectedMapping(null);
+		setCurrentMappings([]);
+		setParsedExpenses([]);
+		setFileError(null);
+		setFileStep("upload");
+	};
+
+	// ========================================================================
+	// Render
+	// ========================================================================
 
 	return (
 		<div className="space-y-6">
+			{/* Input Form - Show when no job is running */}
 			{!jobId && (
-				<Card className="overflow-hidden border-0 shadow-lg">
-					<div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 pb-0">
-						<div className="flex items-start gap-4">
-							<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
-								<WalletIcon className="size-7 text-white" />
-							</div>
-							<div className="flex-1">
-								<CardTitle className="text-xl">
-									Expense Categorizer
-								</CardTitle>
-								<CardDescription className="mt-1">
-									Automatically categorize business expenses
-									for tax deductions and accounting
-								</CardDescription>
-							</div>
-						</div>
-					</div>
-					<CardContent className="p-6">
-						<div className="mb-6 inline-flex rounded-xl bg-muted/50 p-1">
-							<Button
-								type="button"
-								variant={
-									inputMode === "form" ? "secondary" : "ghost"
+				<>
+					{/* File Upload Mode - Mapping Step */}
+					{inputMode === "file" && fileStep === "mapping" && (
+						<ColumnMappingUI
+							headers={parseResult?.headers ?? []}
+							detectedMapping={
+								detectedMapping ?? {
+									mappings: [],
+									confidence: {},
+									unmappedColumns: [],
 								}
-								size="sm"
-								className={cn(
-									"rounded-lg px-4",
-									inputMode === "form" &&
-										"bg-background shadow-sm",
-								)}
-								onClick={() => setInputMode("form")}
-							>
-								<ReceiptIcon className="mr-2 size-4" />
-								Form Entry
-							</Button>
-							<Button
-								type="button"
-								variant={
-									inputMode === "text" ? "secondary" : "ghost"
-								}
-								size="sm"
-								className={cn(
-									"rounded-lg px-4",
-									inputMode === "text" &&
-										"bg-background shadow-sm",
-								)}
-								onClick={() => setInputMode("text")}
-							>
-								Bulk Text
-							</Button>
-						</div>
+							}
+							onMappingChange={setCurrentMappings}
+							onConfirm={handleMappingConfirm}
+							onCancel={resetFileUpload}
+						/>
+					)}
 
-						{inputMode === "text" ? (
-							<div className="space-y-4">
-								<div>
-									<label
-										htmlFor="bulk-expenses"
-										className="mb-2 block font-semibold text-sm"
-									>
-										Paste Expenses
-									</label>
-									<Textarea
-										id="bulk-expenses"
-										placeholder="Office supplies - $45.99&#10;Software subscription - $29.99&#10;Client lunch: $85.00"
-										className="min-h-[200px] rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-emerald-500 focus:bg-background"
-										value={bulkText}
-										onChange={(e) =>
-											setBulkText(e.target.value)
-										}
-									/>
-									<p className="mt-2 text-muted-foreground text-sm">
-										Enter one expense per line with amount
-										(e.g., "Description - $amount")
-									</p>
+					{/* File Upload Mode - Preview Step */}
+					{inputMode === "file" && fileStep === "preview" && (
+						<ExpensePreview
+							expenses={parsedExpenses}
+							onConfirm={handleFileSubmit}
+							onBack={() => setFileStep("mapping")}
+							isSubmitting={createJobMutation.isPending}
+						/>
+					)}
+
+					{/* Main Input Card - Show for upload step or other modes */}
+					{(inputMode !== "file" || fileStep === "upload") && (
+						<Card className="overflow-hidden border-0 shadow-lg">
+							<div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6 pb-0">
+								<div className="flex items-start gap-4">
+									<div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
+										<WalletIcon className="size-7 text-white" />
+									</div>
+									<div className="flex-1">
+										<CardTitle className="text-xl">
+											Expense Categorizer
+										</CardTitle>
+										<CardDescription className="mt-1">
+											Automatically categorize business
+											expenses for tax deductions and
+											accounting
+										</CardDescription>
+									</div>
 								</div>
-								<Button
-									type="button"
-									onClick={parseBulkText}
-									className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
-								>
-									Parse Expenses
-								</Button>
 							</div>
-						) : (
-							<Form {...form}>
-								<form
-									onSubmit={form.handleSubmit(onSubmit)}
-									className="space-y-6"
-								>
-									<div className="space-y-3">
-										{fields.map((field, index) => (
+							<CardContent className="p-6">
+								{/* Mode Toggle */}
+								<div className="mb-6 inline-flex rounded-xl bg-muted/50 p-1">
+									<Button
+										type="button"
+										variant={
+											inputMode === "form"
+												? "secondary"
+												: "ghost"
+										}
+										size="sm"
+										className={cn(
+											"rounded-lg px-4",
+											inputMode === "form" &&
+												"bg-background shadow-sm",
+										)}
+										onClick={() => setInputMode("form")}
+									>
+										<ReceiptIcon className="mr-2 size-4" />
+										Form Entry
+									</Button>
+									<Button
+										type="button"
+										variant={
+											inputMode === "text"
+												? "secondary"
+												: "ghost"
+										}
+										size="sm"
+										className={cn(
+											"rounded-lg px-4",
+											inputMode === "text" &&
+												"bg-background shadow-sm",
+										)}
+										onClick={() => setInputMode("text")}
+									>
+										Bulk Text
+									</Button>
+									<Button
+										type="button"
+										variant={
+											inputMode === "file"
+												? "secondary"
+												: "ghost"
+										}
+										size="sm"
+										className={cn(
+											"rounded-lg px-4",
+											inputMode === "file" &&
+												"bg-background shadow-sm",
+										)}
+										onClick={() => setInputMode("file")}
+									>
+										<UploadIcon className="mr-2 size-4" />
+										File Upload
+									</Button>
+								</div>
+
+								{/* File Upload Mode */}
+								{inputMode === "file" && (
+									<div className="space-y-4">
+										{uploadedFile ? (
+											<div className="flex items-center justify-between rounded-xl border-2 border-emerald-500 bg-emerald-50 p-4 dark:bg-emerald-900/20">
+												<div className="flex items-center gap-3">
+													<FileSpreadsheetIcon className="size-8 text-emerald-600" />
+													<div>
+														<p className="font-medium">
+															{uploadedFile.name}
+														</p>
+														<p className="text-muted-foreground text-sm">
+															{(
+																uploadedFile.size /
+																1024
+															).toFixed(1)}{" "}
+															KB
+														</p>
+													</div>
+												</div>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={resetFileUpload}
+												>
+													<XIcon className="size-4" />
+												</Button>
+											</div>
+										) : (
 											<div
-												key={field.id}
-												className="group flex items-end gap-3 rounded-xl border-2 border-dashed border-muted bg-muted/20 p-3 transition-colors hover:border-emerald-500/30 hover:bg-muted/30"
+												{...getRootProps()}
+												className={cn(
+													"cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors",
+													isDragActive
+														? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20"
+														: "border-muted-foreground/25 hover:border-emerald-500/50 hover:bg-muted/30",
+												)}
 											>
+												<input {...getInputProps()} />
+												<UploadIcon className="mx-auto size-12 text-muted-foreground" />
+												<p className="mt-4 font-medium">
+													{isDragActive
+														? "Drop your file here..."
+														: "Drag & drop a CSV or Excel file"}
+												</p>
+												<p className="mt-1 text-muted-foreground text-sm">
+													or click to browse (max 5MB)
+												</p>
+												<p className="mt-3 text-muted-foreground text-xs">
+													Supports: .csv, .xlsx, .xls
+												</p>
+											</div>
+										)}
+
+										{fileError && (
+											<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 text-sm dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+												<AlertTriangleIcon className="mr-2 inline-block size-4" />
+												{fileError}
+											</div>
+										)}
+
+										{/* Business context fields for file upload */}
+										<div className="grid gap-4 pt-4 md:grid-cols-2">
+											<FormField
+												control={form.control}
+												name="businessType"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="font-semibold">
+															Business Type
+															(Optional)
+														</FormLabel>
+														<FormControl>
+															<Input
+																placeholder="e.g., Consulting, Retail, SaaS"
+																className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background"
+																{...field}
+															/>
+														</FormControl>
+														<FormDescription>
+															Helps with more
+															accurate
+															categorization
+														</FormDescription>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+
+											<FormField
+												control={form.control}
+												name="country"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="font-semibold">
+															Country
+														</FormLabel>
+														<Select
+															onValueChange={
+																field.onChange
+															}
+															defaultValue={
+																field.value
+															}
+														>
+															<FormControl>
+																<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background">
+																	<SelectValue placeholder="Select country" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																<SelectItem value="US">
+																	United
+																	States
+																</SelectItem>
+																<SelectItem value="CA">
+																	Canada
+																</SelectItem>
+																<SelectItem value="UK">
+																	United
+																	Kingdom
+																</SelectItem>
+																<SelectItem value="AU">
+																	Australia
+																</SelectItem>
+															</SelectContent>
+														</Select>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+								)}
+
+								{/* Bulk Text Mode */}
+								{inputMode === "text" && (
+									<div className="space-y-4">
+										<div>
+											<label
+												htmlFor="bulk-expenses"
+												className="mb-2 block font-semibold text-sm"
+											>
+												Paste Expenses
+											</label>
+											<Textarea
+												id="bulk-expenses"
+												placeholder="Office supplies - $45.99&#10;Software subscription - $29.99&#10;Client lunch: $85.00"
+												className="min-h-[200px] rounded-xl border-2 bg-muted/30 font-mono text-sm transition-colors focus:border-emerald-500 focus:bg-background"
+												value={bulkText}
+												onChange={(e) =>
+													setBulkText(e.target.value)
+												}
+											/>
+											<p className="mt-2 text-muted-foreground text-sm">
+												Enter one expense per line with
+												amount (e.g., "Description -
+												$amount")
+											</p>
+										</div>
+										<Button
+											type="button"
+											onClick={parseBulkText}
+											className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
+										>
+											Parse Expenses
+										</Button>
+									</div>
+								)}
+
+								{/* Form Entry Mode */}
+								{inputMode === "form" && (
+									<Form {...form}>
+										<form
+											onSubmit={form.handleSubmit(
+												onSubmit,
+											)}
+											className="space-y-6"
+										>
+											<div className="space-y-3">
+												{fields.map((field, index) => (
+													<div
+														key={field.id}
+														className="group flex items-end gap-3 rounded-xl border-2 border-dashed border-muted bg-muted/20 p-3 transition-colors hover:border-emerald-500/30 hover:bg-muted/30"
+													>
+														<FormField
+															control={
+																form.control
+															}
+															name={`expenses.${index}.description`}
+															render={({
+																field,
+															}) => (
+																<FormItem className="flex-1">
+																	{index ===
+																		0 && (
+																		<FormLabel className="font-semibold">
+																			Description
+																		</FormLabel>
+																	)}
+																	<FormControl>
+																		<Input
+																			placeholder="Office supplies"
+																			className="rounded-lg border-0 bg-background shadow-sm"
+																			{...field}
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+														<FormField
+															control={
+																form.control
+															}
+															name={`expenses.${index}.amount`}
+															render={({
+																field,
+															}) => (
+																<FormItem className="w-36">
+																	{index ===
+																		0 && (
+																		<FormLabel className="font-semibold">
+																			Amount
+																		</FormLabel>
+																	)}
+																	<FormControl>
+																		<div className="relative">
+																			<DollarSignIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-emerald-600" />
+																			<Input
+																				type="number"
+																				step="0.01"
+																				placeholder="0.00"
+																				className="rounded-lg border-0 bg-background pl-8 shadow-sm"
+																				value={
+																					field.value
+																				}
+																				onChange={(
+																					e,
+																				) =>
+																					field.onChange(
+																						e
+																							.target
+																							.value
+																							? Number.parseFloat(
+																									e
+																										.target
+																										.value,
+																								)
+																							: 0,
+																					)
+																				}
+																			/>
+																		</div>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+														{fields.length > 1 && (
+															<Button
+																type="button"
+																variant="ghost"
+																size="icon"
+																className="size-10 shrink-0 rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-red-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
+																onClick={() =>
+																	remove(
+																		index,
+																	)
+																}
+															>
+																<TrashIcon className="size-4" />
+															</Button>
+														)}
+													</div>
+												))}
+											</div>
+
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												className="rounded-lg border-dashed"
+												onClick={() =>
+													append({
+														description: "",
+														amount: 0,
+													})
+												}
+											>
+												<PlusIcon className="mr-2 size-4" />
+												Add Expense
+											</Button>
+
+											<div className="grid gap-4 md:grid-cols-2">
 												<FormField
 													control={form.control}
-													name={`expenses.${index}.description`}
+													name="businessType"
 													render={({ field }) => (
-														<FormItem className="flex-1">
-															{index === 0 && (
-																<FormLabel className="font-semibold">
-																	Description
-																</FormLabel>
-															)}
+														<FormItem>
+															<FormLabel className="font-semibold">
+																Business Type
+																(Optional)
+															</FormLabel>
 															<FormControl>
 																<Input
-																	placeholder="Office supplies"
-																	className="rounded-lg border-0 bg-background shadow-sm"
+																	placeholder="e.g., Consulting, Retail, SaaS"
+																	className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background"
 																	{...field}
 																/>
 															</FormControl>
+															<FormDescription>
+																Helps with more
+																accurate
+																categorization
+															</FormDescription>
 															<FormMessage />
 														</FormItem>
 													)}
 												/>
+
 												<FormField
 													control={form.control}
-													name={`expenses.${index}.amount`}
+													name="country"
 													render={({ field }) => (
-														<FormItem className="w-36">
-															{index === 0 && (
-																<FormLabel className="font-semibold">
-																	Amount
-																</FormLabel>
-															)}
-															<FormControl>
-																<div className="relative">
-																	<DollarSignIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-emerald-600" />
-																	<Input
-																		type="number"
-																		step="0.01"
-																		placeholder="0.00"
-																		className="rounded-lg border-0 bg-background pl-8 shadow-sm"
-																		value={
-																			field.value
-																		}
-																		onChange={(
-																			e,
-																		) =>
-																			field.onChange(
-																				e
-																					.target
-																					.value
-																					? Number.parseFloat(
-																							e
-																								.target
-																								.value,
-																						)
-																					: 0,
-																			)
-																		}
-																	/>
-																</div>
-															</FormControl>
+														<FormItem>
+															<FormLabel className="font-semibold">
+																Country
+															</FormLabel>
+															<Select
+																onValueChange={
+																	field.onChange
+																}
+																defaultValue={
+																	field.value
+																}
+															>
+																<FormControl>
+																	<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background">
+																		<SelectValue placeholder="Select country" />
+																	</SelectTrigger>
+																</FormControl>
+																<SelectContent>
+																	<SelectItem value="US">
+																		United
+																		States
+																	</SelectItem>
+																	<SelectItem value="CA">
+																		Canada
+																	</SelectItem>
+																	<SelectItem value="UK">
+																		United
+																		Kingdom
+																	</SelectItem>
+																	<SelectItem value="AU">
+																		Australia
+																	</SelectItem>
+																</SelectContent>
+															</Select>
 															<FormMessage />
 														</FormItem>
 													)}
 												/>
-												{fields.length > 1 && (
-													<Button
-														type="button"
-														variant="ghost"
-														size="icon"
-														className="size-10 shrink-0 rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-red-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
-														onClick={() =>
-															remove(index)
-														}
-													>
-														<TrashIcon className="size-4" />
-													</Button>
-												)}
 											</div>
-										))}
-									</div>
 
-									<Button
-										type="button"
-										variant="outline"
-										size="sm"
-										className="rounded-lg border-dashed"
-										onClick={() =>
-											append({
-												description: "",
-												amount: 0,
-											})
-										}
-									>
-										<PlusIcon className="mr-2 size-4" />
-										Add Expense
-									</Button>
-
-									<div className="grid gap-4 md:grid-cols-2">
-										<FormField
-											control={form.control}
-											name="businessType"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="font-semibold">
-														Business Type (Optional)
-													</FormLabel>
-													<FormControl>
-														<Input
-															placeholder="e.g., Consulting, Retail, SaaS"
-															className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background"
-															{...field}
-														/>
-													</FormControl>
-													<FormDescription>
-														Helps with more accurate
-														categorization
-													</FormDescription>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="country"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="font-semibold">
-														Country
-													</FormLabel>
-													<Select
-														onValueChange={
-															field.onChange
-														}
-														defaultValue={
-															field.value
-														}
-													>
-														<FormControl>
-															<SelectTrigger className="rounded-xl border-2 bg-muted/30 transition-colors focus:border-emerald-500 focus:bg-background">
-																<SelectValue placeholder="Select country" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															<SelectItem value="US">
-																United States
-															</SelectItem>
-															<SelectItem value="CA">
-																Canada
-															</SelectItem>
-															<SelectItem value="UK">
-																United Kingdom
-															</SelectItem>
-															<SelectItem value="AU">
-																Australia
-															</SelectItem>
-														</SelectContent>
-													</Select>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<Button
-										type="submit"
-										variant="primary"
-										loading={form.formState.isSubmitting}
-										className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
-									>
-										Categorize Expenses
-									</Button>
-								</form>
-							</Form>
-						)}
-					</CardContent>
-				</Card>
+											<Button
+												type="submit"
+												variant="primary"
+												loading={
+													form.formState.isSubmitting
+												}
+												className="h-12 w-full rounded-xl bg-emerald-600 font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-700"
+											>
+												Categorize Expenses
+											</Button>
+										</form>
+									</Form>
+								)}
+							</CardContent>
+						</Card>
+					)}
+				</>
 			)}
 
+			{/* Job Progress */}
 			{jobId && !result && (
 				<JobProgressIndicator
 					jobId={jobId}
@@ -615,24 +1261,36 @@ export function ExpenseCategorizerTool() {
 				/>
 			)}
 
+			{/* Results */}
 			{result && (
 				<div className="space-y-6">
 					{/* Summary Overview */}
 					<Card className="overflow-hidden border-0 shadow-lg">
 						<div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-6">
-							<div className="flex items-center gap-3">
-								<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
-									<TrendingUpIcon className="size-6 text-white" />
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-3">
+									<div className="flex size-12 items-center justify-center rounded-xl bg-emerald-600 shadow-lg shadow-emerald-500/25">
+										<TrendingUpIcon className="size-6 text-white" />
+									</div>
+									<div>
+										<h3 className="font-semibold text-lg">
+											Expense Summary
+										</h3>
+										<p className="text-muted-foreground text-sm">
+											{result.categorizedExpenses.length}{" "}
+											expenses analyzed
+										</p>
+									</div>
 								</div>
-								<div>
-									<h3 className="font-semibold text-lg">
-										Expense Summary
-									</h3>
-									<p className="text-muted-foreground text-sm">
-										{result.categorizedExpenses.length}{" "}
-										expenses analyzed
-									</p>
-								</div>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={handleExportCSV}
+									className="rounded-lg"
+								>
+									<DownloadIcon className="mr-2 size-4" />
+									Export CSV
+								</Button>
 							</div>
 						</div>
 						<CardContent className="p-6">

@@ -109,6 +109,7 @@ export type Config = {
 			avatars: string;
 			contracts: string;
 			audio: string;
+			expenses: string;
 		};
 	};
 	ui: {
