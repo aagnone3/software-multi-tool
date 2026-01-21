@@ -29,11 +29,12 @@ export function ActiveOrganizationProvider({
 	const params = useParams();
 
 	const activeOrganizationSlug = params.organizationSlug as string;
+	const hasOrgSlugInUrl = !!activeOrganizationSlug;
 
-	const { data: activeOrganization } = useActiveOrganizationQuery(
+	const { data: activeOrganization, isFetched } = useActiveOrganizationQuery(
 		activeOrganizationSlug,
 		{
-			enabled: !!activeOrganizationSlug,
+			enabled: hasOrgSlugInUrl,
 		},
 	);
 
@@ -86,18 +87,18 @@ export function ActiveOrganizationProvider({
 		router.push(`/app/${newActiveOrganization.slug}`);
 	};
 
-	const [loaded, setLoaded] = useState(activeOrganization !== undefined);
+	// Determine if we've loaded the organization state:
+	// - If no org slug in URL: we're "loaded" immediately (there's nothing to load)
+	// - If org slug in URL: we're loaded once the query has fetched
+	// This prevents the race condition where navigating from /app/org to /app/settings
+	// would leave `loaded: true` but `activeOrganization: null`, triggering warnings.
+	const loaded = hasOrgSlugInUrl ? isFetched : true;
 
-	useEffect(() => {
-		if (!loaded && activeOrganization !== undefined) {
-			setLoaded(true);
-		}
-	}, [activeOrganization]);
-
-	// Defensive fallback: For sessions created before databaseHooks deployment,
+	// TODO(2026-02-15): Remove this fallback after all legacy sessions have expired.
+	// Legacy fallback: For sessions created before databaseHooks deployment (2026-01-16),
 	// the session may have activeOrganizationId = null even though the user has orgs.
 	// This fetches the user's orgs and sets the first one as active if needed.
-	// This can be removed once all legacy sessions have expired.
+	// Sessions have a 30-day max age, so by 2026-02-15 all legacy sessions should be expired.
 	const { data: organizations } = useOrganizationListQuery();
 	const [hasAttemptedFallback, setHasAttemptedFallback] = useState(false);
 
@@ -123,7 +124,6 @@ export function ActiveOrganizationProvider({
 		}
 
 		// Session has no active org but user has orgs - apply fallback
-		// Defensive fallback for sessions created before databaseHooks deployment
 		setHasAttemptedFallback(true);
 		const firstOrg = organizations[0];
 		if (firstOrg?.slug) {
@@ -162,6 +162,7 @@ export function ActiveOrganizationProvider({
 					!!activeOrganization &&
 					!!user &&
 					isOrganizationAdmin(activeOrganization, user),
+				isOrgRoute: hasOrgSlugInUrl,
 				setActiveOrganization,
 				refetchActiveOrganization,
 			}}

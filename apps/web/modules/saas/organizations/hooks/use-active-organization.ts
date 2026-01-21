@@ -16,6 +16,7 @@ export const useActiveOrganization = () => {
 			activeOrganizationUserRole: null,
 			isOrganizationAdmin: false,
 			loaded: true,
+			isOrgRoute: false,
 		} satisfies ActiveOrganizationContextType;
 	}
 
