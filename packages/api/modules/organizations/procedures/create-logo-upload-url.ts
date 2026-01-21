@@ -1,5 +1,6 @@
 import { config } from "@repo/config";
 import {
+	buildOrgPath,
 	getDefaultSupabaseProvider,
 	getSignedUploadUrl,
 	shouldUseSupabaseStorage,
@@ -26,7 +27,10 @@ export const createLogoUploadUrl = protectedProcedure
 
 		// Path structure: organizations/{orgId}/logo.png
 		// This ensures no collisions between organizations and supports overwriting
-		const path = `organizations/${organizationId}/logo.png`;
+		const path = buildOrgPath({
+			organizationId,
+			fileType: "logo.png",
+		});
 		const bucket = config.storage.bucketNames.avatars;
 
 		// Delete existing file first to avoid "resource already exists" error
