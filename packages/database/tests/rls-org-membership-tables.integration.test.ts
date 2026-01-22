@@ -172,9 +172,10 @@ describe.sequential("RLS on organization/membership tables (integration)", () =>
 					},
 				});
 
-				const organization = await harness.prisma.organization.findUnique({
-					where: { id: testOrganizationId },
-				});
+				const organization =
+					await harness.prisma.organization.findUnique({
+						where: { id: testOrganizationId },
+					});
 
 				expect(organization).toBeDefined();
 				expect(organization?.paymentsCustomerId).toBe("cus_test_12345");
@@ -361,7 +362,9 @@ describe.sequential("RLS on organization/membership tables (integration)", () =>
 						email: "invitee@example.com",
 						role: "member",
 						status: "pending",
-						expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+						expiresAt: new Date(
+							Date.now() + 7 * 24 * 60 * 60 * 1000,
+						), // 7 days
 						inviterId: testUserId,
 					},
 				});
