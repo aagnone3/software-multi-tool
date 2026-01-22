@@ -56,6 +56,9 @@ describe.skipIf(!hasApiKey)(
 		const TIMEOUT = 300000; // 5 minutes for longer files
 
 		// Path to the local test fixture
+		// NOTE: Fixture is gitignored to prevent expensive API calls in CI (~$0.015/min).
+		// The test below uses skipIf(!hasFixture) so it only runs locally when you
+		// manually place an audio file in __fixtures__/. This saves CI costs.
 		const FIXTURE_PATH = path.join(
 			__dirname,
 			"__fixtures__",
