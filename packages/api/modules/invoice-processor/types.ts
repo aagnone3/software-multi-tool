@@ -1,12 +1,21 @@
 import { z } from "zod";
 
-export const InvoiceProcessorInputSchema = z.object({
-	invoiceText: z.string().min(1, "Invoice text is required"),
-	outputFormat: z
-		.enum(["json", "csv", "quickbooks", "xero"])
-		.optional()
-		.default("json"),
-});
+export const InvoiceProcessorInputSchema = z
+	.object({
+		invoiceText: z.string().optional(),
+		// Storage path reference (preferred for file uploads)
+		filePath: z.string().optional(),
+		bucket: z.string().optional(),
+		mimeType: z.string().optional(),
+		outputFormat: z
+			.enum(["json", "csv", "quickbooks", "xero"])
+			.optional()
+			.default("json"),
+	})
+	.refine((data) => data.invoiceText || (data.filePath && data.bucket), {
+		message:
+			"Either invoice text or a file reference (filePath + bucket) must be provided",
+	});
 
 export type InvoiceProcessorInput = z.infer<typeof InvoiceProcessorInputSchema>;
 
@@ -54,6 +63,13 @@ export const InvoiceProcessorOutputSchema = z.object({
 	currency: z.string(),
 	confidence: z.number().min(0).max(1),
 	rawExtractedData: z.record(z.string(), z.unknown()).optional(),
+	extractionMetadata: z
+		.object({
+			usedOcr: z.boolean(),
+			ocrConfidence: z.number().min(0).max(1).optional(),
+			fileType: z.string().optional(),
+		})
+		.optional(),
 });
 
 export type InvoiceProcessorOutput = z.infer<

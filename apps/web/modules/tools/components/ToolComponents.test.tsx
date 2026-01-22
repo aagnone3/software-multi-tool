@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	act,
 	fireEvent,
@@ -57,59 +58,78 @@ import { InvoiceProcessorTool } from "./InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "./MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "./SpeakerSeparationTool";
 
+// Helper to create a wrapper with QueryClientProvider for components that use React Query
+const createQueryWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false },
+			mutations: { retry: false },
+		},
+	});
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
+			{children}
+		</QueryClientProvider>
+	);
+};
+
 describe("InvoiceProcessorTool", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("renders the invoice processor form", () => {
-		render(<InvoiceProcessorTool />);
+	it("renders the invoice processor form with tabs", () => {
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
-		expect(screen.getByText("Invoice Text")).toBeInTheDocument();
+		// Default tab is Upload File
+		expect(screen.getByText("Upload File")).toBeInTheDocument();
+		expect(screen.getByText("Paste Text")).toBeInTheDocument();
 		expect(screen.getByText("Output Format")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Process Invoice" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows validation error when invoice text is empty", async () => {
-		render(<InvoiceProcessorTool />);
+	it("shows validation error when no file is uploaded", () => {
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
+		// File upload tab is active by default, submit button should be disabled
+		// when no file is selected in file mode
 		const submitButton = screen.getByRole("button", {
 			name: "Process Invoice",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
-
-		await waitFor(() => {
-			expect(
-				screen.getByText("Invoice text is required"),
-			).toBeInTheDocument();
-		});
+		expect(submitButton).toBeDisabled();
 	});
 
-	it("submits form and shows progress indicator", async () => {
+	it("submits form with correct tool slug using text input", async () => {
+		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-123" } });
 
-		render(<InvoiceProcessorTool />);
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+
+		// Switch to Paste Text mode using the button toggle
+		const pasteTextButton = screen.getByRole("button", {
+			name: /Paste Text/i,
+		});
+		await user.click(pasteTextButton);
+
+		// Wait for the textarea to appear after mode switch
+		await waitFor(() => {
+			expect(
+				screen.getByPlaceholderText("Paste your invoice text here..."),
+			).toBeInTheDocument();
+		});
 
 		const textarea = screen.getByPlaceholderText(
 			"Paste your invoice text here...",
 		);
-		await act(async () => {
-			fireEvent.change(textarea, {
-				target: { value: "Test invoice content" },
-			});
-		});
+		await user.type(textarea, "Test invoice content");
 
 		const submitButton = screen.getByRole("button", {
 			name: "Process Invoice",
 		});
-		await act(async () => {
-			fireEvent.click(submitButton);
-		});
+		await user.click(submitButton);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -126,6 +146,18 @@ describe("InvoiceProcessorTool", () => {
 				screen.getByTestId("job-progress-indicator"),
 			).toBeInTheDocument();
 		});
+	});
+
+	it("shows upload tab by default", () => {
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+
+		// The upload tab should be active by default with drag & drop area
+		expect(
+			screen.getByText(/Drag & drop an invoice file/i),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Supports: PDF, JPG, PNG, TIFF, WebP/i),
+		).toBeInTheDocument();
 	});
 });
 

@@ -1,7 +1,47 @@
 import { executePrompt } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database";
+import { logger } from "@repo/logs";
+import {
+	getDefaultSupabaseProvider,
+	getSignedUrl,
+	shouldUseSupabaseStorage,
+} from "@repo/storage";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { InvoiceProcessorInput, InvoiceProcessorOutput } from "../types";
+import { extractTextFromInvoiceDocument } from "./document-extractor";
+
+/**
+ * Fetch a file from storage using the provided path and bucket.
+ */
+async function fetchFileFromStorage(
+	filePath: string,
+	bucket: string,
+): Promise<Buffer> {
+	if (shouldUseSupabaseStorage()) {
+		const provider = getDefaultSupabaseProvider();
+		const signedUrl = await provider.getSignedDownloadUrl(filePath, {
+			bucket,
+			expiresIn: 300, // 5 minutes
+		});
+		const response = await fetch(signedUrl);
+		if (!response.ok) {
+			throw new Error(
+				`Failed to fetch file from storage: ${response.statusText}`,
+			);
+		}
+		return Buffer.from(await response.arrayBuffer());
+	}
+
+	// Fallback to legacy signed URL function
+	const signedUrl = await getSignedUrl(filePath, { bucket });
+	const response = await fetch(signedUrl);
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch file from storage: ${response.statusText}`,
+		);
+	}
+	return Buffer.from(await response.arrayBuffer());
+}
 
 const INVOICE_EXTRACTION_PROMPT = `You are an expert invoice data extraction system. Extract structured data from the following invoice text.
 
@@ -64,16 +104,81 @@ Invoice text to extract:
 export async function processInvoiceJob(job: ToolJob): Promise<JobResult> {
 	const input = job.input as unknown as InvoiceProcessorInput;
 
-	if (!input.invoiceText || input.invoiceText.trim().length === 0) {
+	let invoiceText = input.invoiceText?.trim() ?? "";
+	let extractionMetadata: {
+		usedOcr?: boolean;
+		ocrConfidence?: number;
+		fileType?: string;
+	} = {};
+
+	// If storage file reference is provided, fetch and extract text from the file
+	if (input.filePath && input.bucket) {
+		logger.info("Processing invoice file from storage", {
+			filePath: input.filePath,
+			bucket: input.bucket,
+			mimeType: input.mimeType,
+		});
+
+		try {
+			// Fetch file from storage
+			const buffer = await fetchFileFromStorage(
+				input.filePath,
+				input.bucket,
+			);
+
+			// Extract text from the file
+			const extractionResult = await extractTextFromInvoiceDocument(
+				buffer,
+				input.mimeType,
+				input.filePath,
+			);
+
+			if (!extractionResult.success) {
+				return {
+					success: false,
+					error: extractionResult.error.message,
+				};
+			}
+
+			invoiceText = extractionResult.text;
+			extractionMetadata = {
+				usedOcr: extractionResult.metadata.usedOcr,
+				ocrConfidence: extractionResult.metadata.ocrConfidence,
+				fileType: extractionResult.metadata.fileType,
+			};
+
+			logger.info("Invoice text extracted successfully", {
+				characterCount: extractionResult.metadata.characterCount,
+				usedOcr: extractionResult.metadata.usedOcr,
+				ocrConfidence: extractionResult.metadata.ocrConfidence,
+			});
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Failed to fetch file from storage";
+			logger.error("Failed to fetch invoice file from storage", {
+				error: errorMessage,
+				filePath: input.filePath,
+				bucket: input.bucket,
+			});
+			return {
+				success: false,
+				error: `Failed to fetch file from storage: ${errorMessage}`,
+			};
+		}
+	}
+
+	if (!invoiceText || invoiceText.length === 0) {
 		return {
 			success: false,
-			error: "Invoice text is required",
+			error: "No text could be extracted from the invoice. Please ensure the file contains readable text or try pasting the invoice text directly.",
 		};
 	}
 
 	try {
 		const result = await executePrompt(
-			`${INVOICE_EXTRACTION_PROMPT}\n\n${input.invoiceText}`,
+			`${INVOICE_EXTRACTION_PROMPT}\n\n${invoiceText}`,
 			{
 				model: "claude-3-5-haiku-20241022",
 				maxTokens: 4096,
@@ -85,6 +190,16 @@ export async function processInvoiceJob(job: ToolJob): Promise<JobResult> {
 		const extractedData = JSON.parse(
 			result.content,
 		) as InvoiceProcessorOutput;
+
+		// Adjust confidence if OCR was used (OCR extraction is less reliable)
+		let confidence = extractedData.confidence ?? 0.8;
+		if (extractionMetadata.usedOcr && extractionMetadata.ocrConfidence) {
+			// Combine AI confidence with OCR confidence
+			confidence = Math.min(
+				confidence,
+				confidence * extractionMetadata.ocrConfidence,
+			);
+		}
 
 		const output: InvoiceProcessorOutput = {
 			vendor: {
@@ -120,7 +235,14 @@ export async function processInvoiceJob(job: ToolJob): Promise<JobResult> {
 				bankDetails: extractedData.paymentInfo?.bankDetails ?? null,
 			},
 			currency: extractedData.currency ?? "USD",
-			confidence: extractedData.confidence ?? 0.8,
+			confidence,
+			extractionMetadata: extractionMetadata.usedOcr
+				? {
+						usedOcr: true,
+						ocrConfidence: extractionMetadata.ocrConfidence,
+						fileType: extractionMetadata.fileType,
+					}
+				: undefined,
 		};
 
 		return {

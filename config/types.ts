@@ -111,6 +111,7 @@ export type Config = {
 			audio: string;
 			expenses: string;
 			files: string;
+			invoices: string;
 		};
 	};
 	ui: {
