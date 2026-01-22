@@ -73,6 +73,10 @@ vi.mock("../modules/notifications/router", () => ({
 	notificationsRouter: {},
 }));
 
+vi.mock("../modules/files/router", () => ({
+	filesRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -86,6 +90,7 @@ describe("api router", () => {
 			"newsletter",
 			"contact",
 			"credits",
+			"files",
 			"notifications",
 			"organizations",
 			"users",

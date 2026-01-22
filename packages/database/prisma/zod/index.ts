@@ -118,6 +118,24 @@ export const NotificationPreferenceScalarFieldEnumSchema = z.enum(['id', 'userId
 
 export type NotificationPreferenceScalarFieldEnumEnum = z.infer<typeof NotificationPreferenceScalarFieldEnumSchema>;
 
+// File: FileScalarFieldEnum.schema.ts
+
+export const FileScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'filename', 'mimeType', 'size', 'storagePath', 'bucket', 'createdAt', 'updatedAt'])
+
+export type FileScalarFieldEnumEnum = z.infer<typeof FileScalarFieldEnumSchema>;
+
+// File: FileTagScalarFieldEnum.schema.ts
+
+export const FileTagScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'name', 'createdAt'])
+
+export type FileTagScalarFieldEnumEnum = z.infer<typeof FileTagScalarFieldEnumSchema>;
+
+// File: FileToTagScalarFieldEnum.schema.ts
+
+export const FileToTagScalarFieldEnumSchema = z.enum(['fileId', 'tagId', 'createdAt'])
+
+export type FileToTagScalarFieldEnumEnum = z.infer<typeof FileToTagScalarFieldEnumSchema>;
+
 // File: ArchiveScalarFieldEnum.schema.ts
 
 export const ArchiveScalarFieldEnumSchema = z.enum(['id', 'name', 'priority', 'data', 'state', 'retry_limit', 'retry_count', 'retry_delay', 'retry_backoff', 'start_after', 'started_on', 'singleton_key', 'singleton_on', 'created_on', 'completed_on', 'keep_until', 'output', 'dead_letter', 'policy', 'archived_on'])
@@ -533,6 +551,47 @@ export const NotificationPreferenceSchema = z.object({
 });
 
 export type NotificationPreferenceType = z.infer<typeof NotificationPreferenceSchema>;
+
+
+// File: File.schema.ts
+
+export const FileSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  userId: z.string(),
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number().int(),
+  storagePath: z.string(),
+  bucket: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type FileType = z.infer<typeof FileSchema>;
+
+
+// File: FileTag.schema.ts
+
+export const FileTagSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  name: z.string(),
+  createdAt: z.date(),
+});
+
+export type FileTagType = z.infer<typeof FileTagSchema>;
+
+
+// File: FileToTag.schema.ts
+
+export const FileToTagSchema = z.object({
+  fileId: z.string(),
+  tagId: z.string(),
+  createdAt: z.date(),
+});
+
+export type FileToTagType = z.infer<typeof FileToTagSchema>;
 
 
 // File: archive.schema.ts
