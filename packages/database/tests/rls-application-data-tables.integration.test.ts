@@ -737,7 +737,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 
 				await harness.prisma.auditLog.create({
 					data: {
-						id: "audit-1",
+						id: "audit-read-1",
 						userId: testUserId,
 						action: "LOGOUT",
 						resource: "session",
@@ -749,8 +749,9 @@ describe.sequential("RLS on application data tables (integration)", () => {
 					where: { userId: testUserId },
 				});
 
-				expect(logs).toHaveLength(1);
-				expect(logs[0].action).toBe("LOGOUT");
+				// Should have 2 audit logs: one from "can create" test and this one
+				expect(logs).toHaveLength(2);
+				expect(logs.some((log) => log.action === "LOGOUT")).toBe(true);
 			},
 			TEST_TIMEOUT,
 		);
