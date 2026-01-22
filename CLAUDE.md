@@ -380,6 +380,41 @@ The smoke test verifies the bundle can be loaded without `MODULE_NOT_FOUND` erro
 
 ## Environment & Setup
 
+### Node.js Version
+
+This project requires **Node.js v22 LTS**. The `.nvmrc` file specifies the version for automatic detection.
+
+```bash
+# Using nvm (recommended)
+nvm use              # Automatically uses version from .nvmrc
+nvm install          # Install if not present
+
+# Verify version
+node --version       # Should show v22.x.x
+```
+
+**Why Node.js v22 LTS?**
+
+- Node.js v24+ has compatibility issues with Zod v4's CJS/ESM module interop
+- v22 is the current LTS (Long Term Support) release with best stability
+- The `engines` field in `package.json` enforces `>=22.0.0 <23.0.0`
+
+**Automatic version switching** (optional): Add to your `~/.zshrc` or `~/.bashrc`:
+
+```bash
+# Auto-switch Node version when entering directory with .nvmrc
+autoload -U add-zsh-hook
+load-nvmrc() {
+  if [[ -f .nvmrc && -r .nvmrc ]]; then
+    nvm use
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+```
+
+### Environment Variables
+
 - Copy `apps/web/.env.local.example` to `apps/web/.env.local` for local development
 - `pnpm web:env:list` / `pnpm web:env:set` / `pnpm web:env:unset` - Inspect and manage Vercel environment variables (use `--target` to scope per environment)
 - `pnpm web:env:pull` - Pull environment variables from Vercel into `apps/web/.env.local` (requires Vercel CLI auth or `VERCEL_TOKEN`/`VERCEL_PROJECT`/`VERCEL_SCOPE`)
