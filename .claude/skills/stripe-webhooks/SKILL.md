@@ -1,3 +1,12 @@
+---
+name: stripe-webhooks
+description: Use this skill when testing Stripe webhooks locally, troubleshooting webhook issues, configuring Stripe CLI, or understanding the webhook event flow. Covers local webhook forwarding, account alignment, and webhook event handlers.
+allowed-tools:
+  - Bash
+  - Read
+  - Grep
+---
+
 # Stripe Webhooks Skill
 
 > Local webhook testing and Stripe integration guidance
