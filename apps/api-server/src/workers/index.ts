@@ -36,6 +36,7 @@ const TOOL_SLUGS = [
 	"expense-categorizer",
 	"meeting-summarizer",
 	"news-analyzer",
+	"speaker-separation",
 ] as const;
 
 type ToolSlug = (typeof TOOL_SLUGS)[number];

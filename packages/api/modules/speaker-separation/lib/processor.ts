@@ -112,6 +112,17 @@ function convertUtterancesToSegments(
 }
 
 /**
+ * Convert base64 audio to buffer for AssemblyAI upload.
+ */
+function base64ToBuffer(base64Content: string): Buffer {
+	// Handle data URL format (e.g., "data:audio/wav;base64,...")
+	const base64Data = base64Content.includes(",")
+		? base64Content.split(",")[1]
+		: base64Content;
+	return Buffer.from(base64Data, "base64");
+}
+
+/**
  * Process a speaker separation job using AssemblyAI.
  */
 export async function processSpeakerSeparationJob(
@@ -120,19 +131,23 @@ export async function processSpeakerSeparationJob(
 	const input = job.input as unknown as SpeakerSeparationInput;
 
 	// Validate input
-	if (!input.audioUrl) {
+	if (!input.audioFile?.content) {
 		return {
 			success: false,
-			error: "Audio URL is required",
+			error: "Audio file is required",
 		};
 	}
 
 	try {
 		const client = getAssemblyAIClient();
 
+		// Convert base64 to buffer and upload to AssemblyAI
+		const audioBuffer = base64ToBuffer(input.audioFile.content);
+		const uploadUrl = await client.files.upload(audioBuffer);
+
 		// Submit transcription request with speaker labels enabled
 		const transcript = await client.transcripts.transcribe({
-			audio: input.audioUrl,
+			audio: uploadUrl,
 			speaker_labels: true,
 		});
 

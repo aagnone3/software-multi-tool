@@ -55,6 +55,7 @@ import { ExpenseCategorizerTool } from "./ExpenseCategorizerTool";
 import { FeedbackAnalyzerTool } from "./FeedbackAnalyzerTool";
 import { InvoiceProcessorTool } from "./InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "./MeetingSummarizerTool";
+import { SpeakerSeparationTool } from "./SpeakerSeparationTool";
 
 describe("InvoiceProcessorTool", () => {
 	beforeEach(() => {
@@ -431,5 +432,48 @@ describe("MeetingSummarizerTool", () => {
 		expect(
 			screen.getByText("Project Context (Optional)"),
 		).toBeInTheDocument();
+	});
+});
+
+describe("SpeakerSeparationTool", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("renders the speaker separation form", () => {
+		render(<SpeakerSeparationTool />);
+
+		expect(screen.getByText("Speaker Separation")).toBeInTheDocument();
+		expect(screen.getByText("Audio File")).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Analyze Speakers/i }),
+		).toBeInTheDocument();
+	});
+
+	it("displays correct description", () => {
+		render(<SpeakerSeparationTool />);
+
+		expect(
+			screen.getByText(
+				/Analyze audio to identify different speakers with transcripts and timestamps/i,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("shows file upload instructions", () => {
+		render(<SpeakerSeparationTool />);
+
+		expect(
+			screen.getByText(/Upload an audio file.*up to 100MB/i),
+		).toBeInTheDocument();
+	});
+
+	it("has submit button disabled when no file is selected", () => {
+		render(<SpeakerSeparationTool />);
+
+		const submitButton = screen.getByRole("button", {
+			name: /Analyze Speakers/i,
+		});
+		expect(submitButton).toBeDisabled();
 	});
 });

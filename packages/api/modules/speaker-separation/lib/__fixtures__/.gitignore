@@ -1,0 +1,8 @@
+# Large audio files are excluded from git
+# Tests will skip if fixture is missing
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.ogg
+*.webm
