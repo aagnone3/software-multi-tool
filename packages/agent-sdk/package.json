@@ -1,6 +1,7 @@
 {
 	"dependencies": {
-		"@anthropic-ai/sdk": "0.71.2"
+		"@anthropic-ai/sdk": "0.71.2",
+		"@repo/database": "workspace:*"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.11",

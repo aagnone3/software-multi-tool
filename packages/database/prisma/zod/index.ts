@@ -76,6 +76,12 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: SkillSessionScalarFieldEnum.schema.ts
+
+export const SkillSessionScalarFieldEnumSchema = z.enum(['id', 'skillId', 'userId', 'organizationId', 'toolSlug', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
+
+export type SkillSessionScalarFieldEnumEnum = z.infer<typeof SkillSessionScalarFieldEnumSchema>;
+
 // File: ToolJobScalarFieldEnum.schema.ts
 
 export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId'])
@@ -421,6 +427,28 @@ export const AiChatSchema = z.object({
 });
 
 export type AiChatType = z.infer<typeof AiChatSchema>;
+
+
+// File: SkillSession.schema.ts
+
+export const SkillSessionSchema = z.object({
+  id: z.string(),
+  skillId: z.string(),
+  userId: z.string(),
+  organizationId: z.string().nullish(),
+  toolSlug: z.string().nullish(),
+  jobId: z.string().nullish(),
+  isComplete: z.boolean(),
+  messages: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("[]"),
+  context: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("{}"),
+  extractedData: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  totalInputTokens: z.number().int(),
+  totalOutputTokens: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type SkillSessionType = z.infer<typeof SkillSessionSchema>;
 
 
 // File: ToolJob.schema.ts

@@ -7,5 +7,6 @@ export * from "./notification-triggers";
 export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";
+export * from "./skill-sessions";
 export * from "./tool-jobs";
 export * from "./users";
