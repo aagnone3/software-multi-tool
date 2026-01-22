@@ -9,7 +9,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
-import { Input } from "@ui/components/input";
 import { PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,7 +33,15 @@ export function TagInput({
 	const [newTagName, setNewTagName] = useState("");
 	const [isAddingTag, setIsAddingTag] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const queryClient = useQueryClient();
+
+	// Focus input when entering add mode
+	useEffect(() => {
+		if (isAddingTag && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [isAddingTag]);
 
 	// Handle click outside to close
 	useEffect(() => {
@@ -43,14 +50,25 @@ export function TagInput({
 				containerRef.current &&
 				!containerRef.current.contains(event.target as Node)
 			) {
+				// Don't close if we just entered add mode (dropdown click)
+				if (isAddingTag) {
+					// Give the input a chance to be focused
+					return;
+				}
 				onClose();
 			}
 		}
 
-		document.addEventListener("mousedown", handleClickOutside);
-		return () =>
+		// Use a slight delay to avoid immediate closure when switching modes
+		const timeoutId = setTimeout(() => {
+			document.addEventListener("mousedown", handleClickOutside);
+		}, 100);
+
+		return () => {
+			clearTimeout(timeoutId);
 			document.removeEventListener("mousedown", handleClickOutside);
-	}, [onClose]);
+		};
+	}, [onClose, isAddingTag]);
 
 	// Add tag mutation
 	const addTagMutation = useMutation({
@@ -110,7 +128,9 @@ export function TagInput({
 
 			{isAddingTag ? (
 				<div className="flex gap-1 items-center">
-					<Input
+					<input
+						ref={inputRef}
+						type="text"
 						placeholder="Tag name..."
 						value={newTagName}
 						onChange={(e) => setNewTagName(e.target.value)}
@@ -123,8 +143,7 @@ export function TagInput({
 								setNewTagName("");
 							}
 						}}
-						className="h-6 w-24 text-xs"
-						autoFocus
+						className="h-6 w-24 text-xs rounded border border-input bg-background px-2 focus:outline-none focus:ring-1 focus:ring-ring"
 					/>
 					<Button
 						size="sm"
