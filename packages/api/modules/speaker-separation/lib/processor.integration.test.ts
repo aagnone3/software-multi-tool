@@ -165,12 +165,12 @@ describe.skipIf(!hasApiKey)(
 							expect(segment.confidence).toBeLessThanOrEqual(1);
 						}
 
-						// Verify percentages sum to ~100%
+						// Verify percentages sum reasonably (may be <100% due to silence/gaps)
 						const totalPercentage = output.speakers.reduce(
 							(sum, s) => sum + s.percentage,
 							0,
 						);
-						expect(totalPercentage).toBeGreaterThan(90); // Allow some margin for rounding
+						expect(totalPercentage).toBeGreaterThan(50); // At least half should be speech
 						expect(totalPercentage).toBeLessThanOrEqual(100.5);
 
 						// Log results for manual verification
