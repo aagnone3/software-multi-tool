@@ -3,7 +3,7 @@
  *
  * Shared Claude Agent SDK integration for the application.
  * Provides prompt execution, client configuration, skill documentation management,
- * and multi-turn conversational skill infrastructure.
+ * and multi-turn conversational session infrastructure.
  */
 
 // Client and prompt execution
@@ -22,27 +22,27 @@ export {
 	DEFAULT_MODEL,
 	MODEL_RECOMMENDATIONS,
 } from "./src/models";
-// Example skills
+// Example session configurations
 export {
 	createFeedbackCollectorConfig,
 	type ExtractedFeedback,
 	FEEDBACK_COLLECTOR_CONFIG,
 	type FeedbackCollectorOptions,
 	isExtractedFeedback,
-} from "./src/skill/examples";
+} from "./src/session/examples";
 // Persistence adapters
 export {
-	InMemorySkillPersistence,
-	PrismaSkillPersistence,
-} from "./src/skill/persistence";
-// Multi-turn conversational skills
-export { SkillSession } from "./src/skill/session";
+	InMemorySessionPersistence,
+	PrismaSessionPersistence,
+} from "./src/session/persistence";
+// Multi-turn conversational sessions
+export { AgentSession } from "./src/session/session";
 export type {
-	CreateSkillSessionOptions,
-	SkillConfig,
-	SkillContext,
-	SkillMessage,
-	SkillPersistenceAdapter,
-	SkillSessionState,
-	SkillTurnResult,
-} from "./src/skill/types";
+	AgentSessionConfig,
+	AgentSessionState,
+	CreateAgentSessionOptions,
+	SessionContext,
+	SessionMessage,
+	SessionPersistenceAdapter,
+	TurnResult,
+} from "./src/session/types";

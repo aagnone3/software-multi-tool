@@ -1,7 +1,7 @@
-import type { SkillPersistenceAdapter, SkillSessionState } from "../types";
+import type { AgentSessionState, SessionPersistenceAdapter } from "../types";
 
 /**
- * In-memory persistence adapter for skill sessions.
+ * In-memory persistence adapter for agent sessions.
  *
  * Useful for:
  * - Unit testing
@@ -10,23 +10,23 @@ import type { SkillPersistenceAdapter, SkillSessionState } from "../types";
  *
  * @example
  * ```typescript
- * const persistence = new InMemorySkillPersistence();
- * const session = await SkillSession.create({
- *   config: mySkillConfig,
+ * const persistence = new InMemorySessionPersistence();
+ * const session = await AgentSession.create({
+ *   config: mySessionConfig,
  *   context: { sessionId: "test-1", userId: "user123" },
  *   persistence,
  * });
  * ```
  */
-export class InMemorySkillPersistence implements SkillPersistenceAdapter {
-	private sessions: Map<string, SkillSessionState> = new Map();
+export class InMemorySessionPersistence implements SessionPersistenceAdapter {
+	private sessions: Map<string, AgentSessionState> = new Map();
 
-	async save(state: SkillSessionState): Promise<void> {
+	async save(state: AgentSessionState): Promise<void> {
 		// Deep clone to avoid mutations affecting stored state
 		this.sessions.set(state.id, JSON.parse(JSON.stringify(state)));
 	}
 
-	async load(sessionId: string): Promise<SkillSessionState | null> {
+	async load(sessionId: string): Promise<AgentSessionState | null> {
 		const state = this.sessions.get(sessionId);
 		if (!state) return null;
 
@@ -35,7 +35,7 @@ export class InMemorySkillPersistence implements SkillPersistenceAdapter {
 		cloned.createdAt = new Date(cloned.createdAt);
 		cloned.updatedAt = new Date(cloned.updatedAt);
 		cloned.messages = cloned.messages.map(
-			(m: SkillSessionState["messages"][number]) => ({
+			(m: AgentSessionState["messages"][number]) => ({
 				...m,
 				timestamp: new Date(m.timestamp),
 			}),
@@ -51,7 +51,7 @@ export class InMemorySkillPersistence implements SkillPersistenceAdapter {
 	async listByUser(
 		userId: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]> {
+	): Promise<AgentSessionState[]> {
 		const { limit = 50, offset = 0 } = options ?? {};
 
 		const userSessions = Array.from(this.sessions.values())
@@ -75,7 +75,7 @@ export class InMemorySkillPersistence implements SkillPersistenceAdapter {
 			cloned.createdAt = new Date(cloned.createdAt);
 			cloned.updatedAt = new Date(cloned.updatedAt);
 			cloned.messages = cloned.messages.map(
-				(m: SkillSessionState["messages"][number]) => ({
+				(m: AgentSessionState["messages"][number]) => ({
 					...m,
 					timestamp: new Date(m.timestamp),
 				}),
@@ -84,14 +84,14 @@ export class InMemorySkillPersistence implements SkillPersistenceAdapter {
 		});
 	}
 
-	async listBySkill(
-		skillId: string,
+	async listBySessionType(
+		sessionType: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]> {
+	): Promise<AgentSessionState[]> {
 		const { limit = 50, offset = 0 } = options ?? {};
 
-		const skillSessions = Array.from(this.sessions.values())
-			.filter((s) => s.skillId === skillId)
+		const typeSessions = Array.from(this.sessions.values())
+			.filter((s) => s.sessionType === sessionType)
 			.sort((a, b) => {
 				const aTime =
 					a.updatedAt instanceof Date
@@ -106,12 +106,12 @@ export class InMemorySkillPersistence implements SkillPersistenceAdapter {
 			.slice(offset, offset + limit);
 
 		// Deep clone and restore Date objects
-		return skillSessions.map((state) => {
+		return typeSessions.map((state) => {
 			const cloned = JSON.parse(JSON.stringify(state));
 			cloned.createdAt = new Date(cloned.createdAt);
 			cloned.updatedAt = new Date(cloned.updatedAt);
 			cloned.messages = cloned.messages.map(
-				(m: SkillSessionState["messages"][number]) => ({
+				(m: AgentSessionState["messages"][number]) => ({
 					...m,
 					timestamp: new Date(m.timestamp),
 				}),

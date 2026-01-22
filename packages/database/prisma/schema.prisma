@@ -213,33 +213,33 @@ model AiChat {
   @@schema("public")
 }
 
-// Skill session for multi-turn AI conversations
-model SkillSession {
+// Agent session for multi-turn AI conversations
+model AgentSession {
   id             String   @id @default(cuid())
-  skillId        String   // Skill type identifier (e.g., "feedback-collector")
+  sessionType    String   // Session type identifier (e.g., "feedback-collector")
   userId         String   // Required - authenticated users only
   organizationId String?  // Optional organization context
   toolSlug       String?  // Tool context if invoked from a tool
   jobId          String?  // Job ID if invoked from a specific job
   isComplete     Boolean  @default(false)
-  /// [SkillMessages]
-  messages       Json     @default("[]") // Array of SkillMessage objects
-  /// [SkillContext]
-  context        Json     @default("{}") // SkillContext metadata
-  /// [SkillExtractedData]
+  /// [SessionMessages]
+  messages       Json     @default("[]") // Array of SessionMessage objects
+  /// [SessionContext]
+  context        Json     @default("{}") // SessionContext metadata
+  /// [ExtractedData]
   extractedData  Json?    // Structured data extracted on completion
   totalInputTokens  Int   @default(0)
   totalOutputTokens Int   @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@index([skillId])
+  @@index([sessionType])
   @@index([userId])
   @@index([organizationId])
   @@index([toolSlug])
   @@index([jobId])
   @@index([isComplete])
-  @@map("skill_session")
+  @@map("agent_session")
   @@schema("public")
 }
 

@@ -1,8 +1,12 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InMemorySkillPersistence } from "./persistence/memory";
-import { SkillSession } from "./session";
-import type { SkillConfig, SkillContext, SkillSessionState } from "./types";
+import { InMemorySessionPersistence } from "./persistence/memory";
+import { AgentSession } from "./session";
+import type {
+	AgentSessionConfig,
+	AgentSessionState,
+	SessionContext,
+} from "./types";
 
 // Mock the Anthropic SDK
 vi.mock("@anthropic-ai/sdk");
@@ -17,11 +21,11 @@ const createMockClient = () => {
 	} as unknown as Anthropic;
 };
 
-describe("SkillSession", () => {
-	const testConfig: SkillConfig = {
-		skillId: "test-skill",
-		name: "Test Skill",
-		description: "A test skill for unit testing",
+describe("AgentSession", () => {
+	const testConfig: AgentSessionConfig = {
+		sessionType: "test-session",
+		name: "Test Session",
+		description: "A test session for unit testing",
 		systemPrompt: "You are a helpful test assistant.",
 		initialMessage: "Hello! How can I help you today?",
 		model: "claude-3-5-haiku-20241022",
@@ -30,7 +34,7 @@ describe("SkillSession", () => {
 		maxTurns: 5,
 	};
 
-	const testContext: SkillContext = {
+	const testContext: SessionContext = {
 		sessionId: "test-session-123",
 		userId: "user-456",
 		organizationId: "org-789",
@@ -45,7 +49,7 @@ describe("SkillSession", () => {
 	describe("create", () => {
 		it("should create a new session with initial message", async () => {
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -54,7 +58,7 @@ describe("SkillSession", () => {
 			);
 
 			expect(session.getSessionId()).toBe("test-session-123");
-			expect(session.getSkillId()).toBe("test-skill");
+			expect(session.getSessionType()).toBe("test-session");
 			expect(session.isComplete()).toBe(false);
 
 			const messages = session.getMessages();
@@ -66,13 +70,13 @@ describe("SkillSession", () => {
 		});
 
 		it("should create a session without initial message if not configured", async () => {
-			const configWithoutInitial: SkillConfig = {
+			const configWithoutInitial: AgentSessionConfig = {
 				...testConfig,
 				initialMessage: undefined,
 			};
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: configWithoutInitial,
 					context: testContext,
@@ -85,13 +89,13 @@ describe("SkillSession", () => {
 		});
 
 		it("should generate session ID if not provided", async () => {
-			const contextWithoutId: SkillContext = {
+			const contextWithoutId: SessionContext = {
 				...testContext,
 				sessionId: "",
 			};
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: contextWithoutId,
@@ -99,14 +103,14 @@ describe("SkillSession", () => {
 				client,
 			);
 
-			expect(session.getSessionId()).toMatch(/^skill_\d+_[a-z0-9]+$/);
+			expect(session.getSessionId()).toMatch(/^session_\d+_[a-z0-9]+$/);
 		});
 
 		it("should persist initial state when persistence is provided", async () => {
-			const persistence = new InMemorySkillPersistence();
+			const persistence = new InMemorySessionPersistence();
 			const client = createMockClient();
 
-			await SkillSession.create(
+			await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -118,7 +122,7 @@ describe("SkillSession", () => {
 			const saved = await persistence.load("test-session-123");
 			expect(saved).not.toBeNull();
 			expect(saved?.id).toBe("test-session-123");
-			expect(saved?.skillId).toBe("test-skill");
+			expect(saved?.sessionType).toBe("test-session");
 		});
 	});
 
@@ -137,7 +141,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -168,13 +172,13 @@ describe("SkillSession", () => {
 						type: "text",
 						text: `Thank you for your feedback!
 
-[SKILL_COMPLETE]
+[SESSION_COMPLETE]
 {
   "sentiment": "positive",
   "rating": 5,
   "summary": "User was very satisfied"
 }
-[/SKILL_COMPLETE]`,
+[/SESSION_COMPLETE]`,
 					},
 				],
 				model: "claude-3-5-haiku-20241022",
@@ -183,7 +187,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -210,9 +214,9 @@ describe("SkillSession", () => {
 						type: "text",
 						text: `Done!
 
-[SKILL_COMPLETE]
+[SESSION_COMPLETE]
 {"done": true}
-[/SKILL_COMPLETE]`,
+[/SESSION_COMPLETE]`,
 					},
 				],
 				model: "claude-3-5-haiku-20241022",
@@ -221,7 +225,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -237,7 +241,7 @@ describe("SkillSession", () => {
 		});
 
 		it("should throw error when max turns reached", async () => {
-			const limitedConfig: SkillConfig = {
+			const limitedConfig: AgentSessionConfig = {
 				...testConfig,
 				maxTurns: 2,
 			};
@@ -250,7 +254,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: limitedConfig,
 					context: testContext,
@@ -267,7 +271,7 @@ describe("SkillSession", () => {
 		});
 
 		it("should persist state after each turn", async () => {
-			const persistence = new InMemorySkillPersistence();
+			const persistence = new InMemorySessionPersistence();
 
 			mockMessagesCreate.mockResolvedValue({
 				content: [{ type: "text", text: "Response" }],
@@ -277,7 +281,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -310,7 +314,7 @@ describe("SkillSession", () => {
 				});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -329,13 +333,13 @@ describe("SkillSession", () => {
 
 	describe("restore", () => {
 		it("should restore session from state", async () => {
-			const restoredContext: SkillContext = {
+			const restoredContext: SessionContext = {
 				...testContext,
 				sessionId: "restored-session",
 			};
-			const savedState: SkillSessionState = {
+			const savedState: AgentSessionState = {
 				id: "restored-session",
-				skillId: "test-skill",
+				sessionType: "test-session",
 				context: restoredContext,
 				messages: [
 					{
@@ -356,7 +360,7 @@ describe("SkillSession", () => {
 			};
 
 			const client = createMockClient();
-			const session = await SkillSession.restore(
+			const session = await AgentSession.restore(
 				savedState,
 				testConfig,
 				undefined,
@@ -372,9 +376,9 @@ describe("SkillSession", () => {
 		});
 
 		it("should restore completed session", async () => {
-			const savedState: SkillSessionState = {
+			const savedState: AgentSessionState = {
 				id: "completed-session",
-				skillId: "test-skill",
+				sessionType: "test-session",
 				context: testContext,
 				messages: [],
 				isComplete: true,
@@ -385,7 +389,7 @@ describe("SkillSession", () => {
 			};
 
 			const client = createMockClient();
-			const session = await SkillSession.restore(
+			const session = await AgentSession.restore(
 				savedState,
 				testConfig,
 				undefined,
@@ -400,7 +404,7 @@ describe("SkillSession", () => {
 	describe("markComplete", () => {
 		it("should manually mark session as complete", async () => {
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -417,10 +421,10 @@ describe("SkillSession", () => {
 		});
 
 		it("should persist when marking complete with persistence", async () => {
-			const persistence = new InMemorySkillPersistence();
+			const persistence = new InMemorySessionPersistence();
 			const client = createMockClient();
 
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -447,7 +451,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -470,7 +474,7 @@ describe("SkillSession", () => {
 	describe("getState", () => {
 		it("should return complete state for serialization", async () => {
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -481,7 +485,7 @@ describe("SkillSession", () => {
 			const state = session.getState();
 
 			expect(state.id).toBe("test-session-123");
-			expect(state.skillId).toBe("test-skill");
+			expect(state.sessionType).toBe("test-session");
 			expect(state.context).toEqual(testContext);
 			expect(state.messages).toHaveLength(1);
 			expect(state.isComplete).toBe(false);
@@ -504,7 +508,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: testContext,
@@ -527,7 +531,7 @@ describe("SkillSession", () => {
 		});
 
 		it("should include metadata in system prompt", async () => {
-			const contextWithMetadata: SkillContext = {
+			const contextWithMetadata: SessionContext = {
 				...testContext,
 				metadata: {
 					customField: "custom value",
@@ -543,7 +547,7 @@ describe("SkillSession", () => {
 			});
 
 			const client = createMockClient();
-			const session = await SkillSession.create(
+			const session = await AgentSession.create(
 				{
 					config: testConfig,
 					context: contextWithMetadata,

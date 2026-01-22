@@ -1,3 +1,4 @@
+export * from "./agent-sessions";
 export * from "./ai-chats";
 export * from "./audit-logs";
 export * from "./credit-balance";
@@ -7,6 +8,5 @@ export * from "./notification-triggers";
 export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";
-export * from "./skill-sessions";
 export * from "./tool-jobs";
 export * from "./users";

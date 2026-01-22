@@ -1,19 +1,19 @@
 import type {
 	Prisma,
-	SkillSession as PrismaSkillSession,
+	AgentSession as PrismaAgentSession,
 } from "@prisma/client";
 import {
-	createSkillSession,
-	deleteSkillSession,
-	getSkillSessionById,
-	getSkillSessionsBySkillId,
-	getSkillSessionsByUserId,
-	updateSkillSession,
+	createAgentSession,
+	deleteAgentSession,
+	getAgentSessionById,
+	getAgentSessionsBySessionType,
+	getAgentSessionsByUserId,
+	updateAgentSession,
 } from "@repo/database";
 import type {
-	SkillMessage,
-	SkillPersistenceAdapter,
-	SkillSessionState,
+	AgentSessionState,
+	SessionMessage,
+	SessionPersistenceAdapter,
 } from "../types";
 
 /**
@@ -25,17 +25,17 @@ function toInputJsonValue(value: unknown): Prisma.InputJsonValue {
 }
 
 /**
- * Convert Prisma SkillSession to SkillSessionState
+ * Convert Prisma AgentSession to AgentSessionState
  */
-function toSkillSessionState(
-	prismaSession: PrismaSkillSession,
-): SkillSessionState {
-	const messages = prismaSession.messages as unknown as SkillMessage[];
+function toAgentSessionState(
+	prismaSession: PrismaAgentSession,
+): AgentSessionState {
+	const messages = prismaSession.messages as unknown as SessionMessage[];
 	const context = prismaSession.context as unknown as Record<string, unknown>;
 
 	return {
 		id: prismaSession.id,
-		skillId: prismaSession.skillId,
+		sessionType: prismaSession.sessionType,
 		context: {
 			sessionId: prismaSession.id,
 			userId: prismaSession.userId,
@@ -62,27 +62,27 @@ function toSkillSessionState(
 }
 
 /**
- * Prisma-based persistence adapter for skill sessions.
+ * Prisma-based persistence adapter for agent sessions.
  *
- * Uses the database to persist skill sessions for long-term storage.
+ * Uses the database to persist agent sessions for long-term storage.
  *
  * @example
  * ```typescript
- * const persistence = new PrismaSkillPersistence();
- * const session = await SkillSession.create({
+ * const persistence = new PrismaSessionPersistence();
+ * const session = await AgentSession.create({
  *   config: feedbackConfig,
  *   context: { sessionId: "...", userId: "user123" },
  *   persistence,
  * });
  * ```
  */
-export class PrismaSkillPersistence implements SkillPersistenceAdapter {
-	async save(state: SkillSessionState): Promise<void> {
-		const existingSession = await getSkillSessionById(state.id);
+export class PrismaSessionPersistence implements SessionPersistenceAdapter {
+	async save(state: AgentSessionState): Promise<void> {
+		const existingSession = await getAgentSessionById(state.id);
 
 		if (existingSession) {
 			// Update existing session
-			await updateSkillSession(state.id, {
+			await updateAgentSession(state.id, {
 				messages: toInputJsonValue(state.messages),
 				context: toInputJsonValue(state.context),
 				extractedData: state.extractedData
@@ -94,9 +94,9 @@ export class PrismaSkillPersistence implements SkillPersistenceAdapter {
 			});
 		} else {
 			// Create new session
-			await createSkillSession({
+			await createAgentSession({
 				id: state.id,
-				skillId: state.skillId,
+				sessionType: state.sessionType,
 				userId: state.context.userId,
 				organizationId: state.context.organizationId,
 				toolSlug: state.context.toolSlug,
@@ -107,19 +107,19 @@ export class PrismaSkillPersistence implements SkillPersistenceAdapter {
 		}
 	}
 
-	async load(sessionId: string): Promise<SkillSessionState | null> {
-		const session = await getSkillSessionById(sessionId);
+	async load(sessionId: string): Promise<AgentSessionState | null> {
+		const session = await getAgentSessionById(sessionId);
 
 		if (!session) {
 			return null;
 		}
 
-		return toSkillSessionState(session);
+		return toAgentSessionState(session);
 	}
 
 	async delete(sessionId: string): Promise<void> {
 		try {
-			await deleteSkillSession(sessionId);
+			await deleteAgentSession(sessionId);
 		} catch {
 			// Ignore if session doesn't exist
 		}
@@ -128,30 +128,30 @@ export class PrismaSkillPersistence implements SkillPersistenceAdapter {
 	async listByUser(
 		userId: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]> {
+	): Promise<AgentSessionState[]> {
 		const { limit = 50, offset = 0 } = options ?? {};
 
-		const sessions = await getSkillSessionsByUserId({
+		const sessions = await getAgentSessionsByUserId({
 			userId,
 			limit,
 			offset,
 		});
 
-		return sessions.map(toSkillSessionState);
+		return sessions.map(toAgentSessionState);
 	}
 
-	async listBySkill(
-		skillId: string,
+	async listBySessionType(
+		sessionType: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]> {
+	): Promise<AgentSessionState[]> {
 		const { limit = 50, offset = 0 } = options ?? {};
 
-		const sessions = await getSkillSessionsBySkillId({
-			skillId,
+		const sessions = await getAgentSessionsBySessionType({
+			sessionType,
 			limit,
 			offset,
 		});
 
-		return sessions.map(toSkillSessionState);
+		return sessions.map(toAgentSessionState);
 	}
 }

@@ -1,16 +1,16 @@
 /**
- * Skill infrastructure for multi-turn AI conversations
+ * Session infrastructure for multi-turn AI conversations
  *
- * This module provides the foundation for building conversational AI skills
+ * This module provides the foundation for building conversational AI sessions
  * that can be invoked from various tool contexts.
  *
  * @example
  * ```typescript
- * import { SkillSession, type SkillConfig } from "@repo/agent-sdk/skill";
+ * import { AgentSession, type AgentSessionConfig } from "@repo/agent-sdk/session";
  *
- * // Define a skill configuration
- * const feedbackConfig: SkillConfig = {
- *   skillId: "feedback-collector",
+ * // Define a session configuration
+ * const feedbackConfig: AgentSessionConfig = {
+ *   sessionType: "feedback-collector",
  *   name: "Feedback Collector",
  *   description: "Collects user feedback through conversation",
  *   systemPrompt: "You are a friendly assistant collecting user feedback...",
@@ -18,7 +18,7 @@
  * };
  *
  * // Create and use a session
- * const session = await SkillSession.create({
+ * const session = await AgentSession.create({
  *   config: feedbackConfig,
  *   context: { sessionId: "...", userId: "user123", toolSlug: "news-analyzer" }
  * });
@@ -27,7 +27,7 @@
  * ```
  */
 
-// Example skill configurations
+// Example session configurations
 export {
 	createFeedbackCollectorConfig,
 	type ExtractedFeedback,
@@ -37,18 +37,18 @@ export {
 } from "./examples";
 // Persistence adapters
 export {
-	InMemorySkillPersistence,
-	PrismaSkillPersistence,
+	InMemorySessionPersistence,
+	PrismaSessionPersistence,
 } from "./persistence";
 // Core session management
-export { SkillSession } from "./session";
+export { AgentSession } from "./session";
 // Types
 export type {
-	CreateSkillSessionOptions,
-	SkillConfig,
-	SkillContext,
-	SkillMessage,
-	SkillPersistenceAdapter,
-	SkillSessionState,
-	SkillTurnResult,
+	AgentSessionConfig,
+	AgentSessionState,
+	CreateAgentSessionOptions,
+	SessionContext,
+	SessionMessage,
+	SessionPersistenceAdapter,
+	TurnResult,
 } from "./types";

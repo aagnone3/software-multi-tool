@@ -2,34 +2,34 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "../../client";
 import { DEFAULT_MODEL } from "../models";
 import type {
-	CreateSkillSessionOptions,
-	SkillConfig,
-	SkillContext,
-	SkillMessage,
-	SkillPersistenceAdapter,
-	SkillSessionState,
-	SkillTurnResult,
+	AgentSessionConfig,
+	AgentSessionState,
+	CreateAgentSessionOptions,
+	SessionContext,
+	SessionMessage,
+	SessionPersistenceAdapter,
+	TurnResult,
 } from "./types";
 
 /**
  * Generate a unique session ID
  */
 function generateSessionId(): string {
-	return `skill_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+	return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
- * SkillSession manages a multi-turn conversation with Claude for a specific skill.
+ * AgentSession manages a multi-turn conversation with Claude.
  *
- * A SkillSession:
+ * An AgentSession:
  * - Maintains conversation history
  * - Executes turns against the Claude API
- * - Optionally persists state via a SkillPersistenceAdapter
+ * - Optionally persists state via a SessionPersistenceAdapter
  * - Tracks completion and extracted data
  *
  * @example
  * ```typescript
- * const session = await SkillSession.create({
+ * const session = await AgentSession.create({
  *   config: feedbackCollectorConfig,
  *   context: { sessionId: "...", userId: "...", toolSlug: "news-analyzer" }
  * });
@@ -44,13 +44,13 @@ function generateSessionId(): string {
  * }
  * ```
  */
-export class SkillSession {
-	private readonly config: SkillConfig;
-	private readonly context: SkillContext;
-	private readonly persistence?: SkillPersistenceAdapter;
+export class AgentSession {
+	private readonly config: AgentSessionConfig;
+	private readonly context: SessionContext;
+	private readonly persistence?: SessionPersistenceAdapter;
 	private readonly client: Anthropic;
 
-	private messages: SkillMessage[] = [];
+	private messages: SessionMessage[] = [];
 	private complete = false;
 	private extractedData?: Record<string, unknown>;
 	private totalUsage = { inputTokens: 0, outputTokens: 0 };
@@ -58,9 +58,9 @@ export class SkillSession {
 	private updatedAt: Date;
 
 	private constructor(
-		config: SkillConfig,
-		context: SkillContext,
-		persistence?: SkillPersistenceAdapter,
+		config: AgentSessionConfig,
+		context: SessionContext,
+		persistence?: SessionPersistenceAdapter,
 		client?: Anthropic,
 	) {
 		this.config = config;
@@ -72,21 +72,21 @@ export class SkillSession {
 	}
 
 	/**
-	 * Create a new skill session
+	 * Create a new agent session
 	 */
 	static async create(
-		options: CreateSkillSessionOptions,
+		options: CreateAgentSessionOptions,
 		client?: Anthropic,
-	): Promise<SkillSession> {
+	): Promise<AgentSession> {
 		const { config, context, persistence } = options;
 
 		// Generate session ID if not provided
-		const sessionContext: SkillContext = {
+		const sessionContext: SessionContext = {
 			...context,
 			sessionId: context.sessionId || generateSessionId(),
 		};
 
-		const session = new SkillSession(
+		const session = new AgentSession(
 			config,
 			sessionContext,
 			persistence,
@@ -111,15 +111,15 @@ export class SkillSession {
 	}
 
 	/**
-	 * Restore a skill session from persisted state
+	 * Restore an agent session from persisted state
 	 */
 	static async restore(
-		state: SkillSessionState,
-		config: SkillConfig,
-		persistence?: SkillPersistenceAdapter,
+		state: AgentSessionState,
+		config: AgentSessionConfig,
+		persistence?: SessionPersistenceAdapter,
 		client?: Anthropic,
-	): Promise<SkillSession> {
-		const session = new SkillSession(
+	): Promise<AgentSession> {
+		const session = new AgentSession(
 			config,
 			state.context,
 			persistence,
@@ -142,7 +142,7 @@ export class SkillSession {
 	 * @param userMessage - The user's message
 	 * @returns The result of the turn including the assistant's response
 	 */
-	async executeTurn(userMessage: string): Promise<SkillTurnResult> {
+	async executeTurn(userMessage: string): Promise<TurnResult> {
 		if (this.complete) {
 			throw new Error("Cannot execute turn on completed session");
 		}
@@ -157,7 +157,7 @@ export class SkillSession {
 		}
 
 		// Add user message to history
-		const userMsg: SkillMessage = {
+		const userMsg: SessionMessage = {
 			role: "user",
 			content: userMessage,
 			timestamp: new Date(),
@@ -186,7 +186,7 @@ export class SkillSession {
 			.join("");
 
 		// Add assistant message to history
-		const assistantMsg: SkillMessage = {
+		const assistantMsg: SessionMessage = {
 			role: "assistant",
 			content: responseText,
 			timestamp: new Date(),
@@ -254,13 +254,13 @@ export class SkillSession {
 
 IMPORTANT: When you determine the conversation is complete (user has provided enough feedback or explicitly indicates they're done), include the following marker in your response:
 
-[SKILL_COMPLETE]
+[SESSION_COMPLETE]
 {
   "summary": "brief summary of the conversation",
   "insights": ["key insight 1", "key insight 2"],
   ... any other relevant extracted data ...
 }
-[/SKILL_COMPLETE]
+[/SESSION_COMPLETE]
 
 Continue the conversation naturally until you have gathered sufficient information or the user indicates they are finished.`;
 
@@ -275,7 +275,7 @@ Continue the conversation naturally until you have gathered sufficient informati
 		extractedData?: Record<string, unknown>;
 	} {
 		const completeMatch = response.match(
-			/\[SKILL_COMPLETE\]\s*([\s\S]*?)\s*\[\/SKILL_COMPLETE\]/,
+			/\[SESSION_COMPLETE\]\s*([\s\S]*?)\s*\[\/SESSION_COMPLETE\]/,
 		);
 
 		if (!completeMatch) {
@@ -310,10 +310,10 @@ Continue the conversation naturally until you have gathered sufficient informati
 	/**
 	 * Get the current session state for persistence
 	 */
-	getState(): SkillSessionState {
+	getState(): AgentSessionState {
 		return {
 			id: this.context.sessionId,
-			skillId: this.config.skillId,
+			sessionType: this.config.sessionType,
 			context: this.context,
 			messages: this.messages,
 			isComplete: this.complete,
@@ -332,10 +332,10 @@ Continue the conversation naturally until you have gathered sufficient informati
 	}
 
 	/**
-	 * Get skill ID
+	 * Get session type
 	 */
-	getSkillId(): string {
-		return this.config.skillId;
+	getSessionType(): string {
+		return this.config.sessionType;
 	}
 
 	/**
@@ -355,7 +355,7 @@ Continue the conversation naturally until you have gathered sufficient informati
 	/**
 	 * Get conversation history
 	 */
-	getMessages(): SkillMessage[] {
+	getMessages(): SessionMessage[] {
 		return [...this.messages];
 	}
 
@@ -378,7 +378,7 @@ Continue the conversation naturally until you have gathered sufficient informati
 	/**
 	 * Get the session context
 	 */
-	getContext(): SkillContext {
+	getContext(): SessionContext {
 		return { ...this.context };
 	}
 }

@@ -76,11 +76,11 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
-// File: SkillSessionScalarFieldEnum.schema.ts
+// File: AgentSessionScalarFieldEnum.schema.ts
 
-export const SkillSessionScalarFieldEnumSchema = z.enum(['id', 'skillId', 'userId', 'organizationId', 'toolSlug', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
+export const AgentSessionScalarFieldEnumSchema = z.enum(['id', 'sessionType', 'userId', 'organizationId', 'toolSlug', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
 
-export type SkillSessionScalarFieldEnumEnum = z.infer<typeof SkillSessionScalarFieldEnumSchema>;
+export type AgentSessionScalarFieldEnumEnum = z.infer<typeof AgentSessionScalarFieldEnumSchema>;
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
@@ -429,11 +429,11 @@ export const AiChatSchema = z.object({
 export type AiChatType = z.infer<typeof AiChatSchema>;
 
 
-// File: SkillSession.schema.ts
+// File: AgentSession.schema.ts
 
-export const SkillSessionSchema = z.object({
+export const AgentSessionSchema = z.object({
   id: z.string(),
-  skillId: z.string(),
+  sessionType: z.string(),
   userId: z.string(),
   organizationId: z.string().nullish(),
   toolSlug: z.string().nullish(),
@@ -448,7 +448,7 @@ export const SkillSessionSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type SkillSessionType = z.infer<typeof SkillSessionSchema>;
+export type AgentSessionType = z.infer<typeof AgentSessionSchema>;
 
 
 // File: ToolJob.schema.ts

@@ -1,9 +1,9 @@
-import type { Prisma, SkillSession } from "@prisma/client";
+import type { AgentSession, Prisma } from "@prisma/client";
 import { db } from "../client";
 
-export interface SkillSessionCreateInput {
+export interface AgentSessionCreateInput {
 	id: string;
-	skillId: string;
+	sessionType: string;
 	userId: string;
 	organizationId?: string;
 	toolSlug?: string;
@@ -12,7 +12,7 @@ export interface SkillSessionCreateInput {
 	context?: Prisma.InputJsonValue;
 }
 
-export interface SkillSessionUpdateInput {
+export interface AgentSessionUpdateInput {
 	messages?: Prisma.InputJsonValue;
 	context?: Prisma.InputJsonValue;
 	extractedData?: Prisma.InputJsonValue;
@@ -22,15 +22,15 @@ export interface SkillSessionUpdateInput {
 }
 
 /**
- * Create a new skill session
+ * Create a new agent session
  */
-export async function createSkillSession(
-	input: SkillSessionCreateInput,
-): Promise<SkillSession> {
-	return await db.skillSession.create({
+export async function createAgentSession(
+	input: AgentSessionCreateInput,
+): Promise<AgentSession> {
+	return await db.agentSession.create({
 		data: {
 			id: input.id,
-			skillId: input.skillId,
+			sessionType: input.sessionType,
 			userId: input.userId,
 			organizationId: input.organizationId,
 			toolSlug: input.toolSlug,
@@ -42,24 +42,24 @@ export async function createSkillSession(
 }
 
 /**
- * Get a skill session by ID
+ * Get an agent session by ID
  */
-export async function getSkillSessionById(
+export async function getAgentSessionById(
 	id: string,
-): Promise<SkillSession | null> {
-	return await db.skillSession.findUnique({
+): Promise<AgentSession | null> {
+	return await db.agentSession.findUnique({
 		where: { id },
 	});
 }
 
 /**
- * Update a skill session
+ * Update an agent session
  */
-export async function updateSkillSession(
+export async function updateAgentSession(
 	id: string,
-	input: SkillSessionUpdateInput,
-): Promise<SkillSession> {
-	return await db.skillSession.update({
+	input: AgentSessionUpdateInput,
+): Promise<AgentSession> {
+	return await db.agentSession.update({
 		where: { id },
 		data: {
 			messages: input.messages,
@@ -73,34 +73,34 @@ export async function updateSkillSession(
 }
 
 /**
- * Delete a skill session
+ * Delete an agent session
  */
-export async function deleteSkillSession(id: string): Promise<void> {
-	await db.skillSession.delete({
+export async function deleteAgentSession(id: string): Promise<void> {
+	await db.agentSession.delete({
 		where: { id },
 	});
 }
 
 /**
- * List skill sessions by user ID
+ * List agent sessions by user ID
  */
-export async function getSkillSessionsByUserId({
+export async function getAgentSessionsByUserId({
 	userId,
 	limit = 50,
 	offset = 0,
-	skillId,
+	sessionType,
 	isComplete,
 }: {
 	userId: string;
 	limit?: number;
 	offset?: number;
-	skillId?: string;
+	sessionType?: string;
 	isComplete?: boolean;
-}): Promise<SkillSession[]> {
-	return await db.skillSession.findMany({
+}): Promise<AgentSession[]> {
+	return await db.agentSession.findMany({
 		where: {
 			userId,
-			...(skillId && { skillId }),
+			...(sessionType && { sessionType }),
 			...(isComplete !== undefined && { isComplete }),
 		},
 		orderBy: { updatedAt: "desc" },
@@ -110,22 +110,22 @@ export async function getSkillSessionsByUserId({
 }
 
 /**
- * List skill sessions by skill ID
+ * List agent sessions by session type
  */
-export async function getSkillSessionsBySkillId({
-	skillId,
+export async function getAgentSessionsBySessionType({
+	sessionType,
 	limit = 50,
 	offset = 0,
 	isComplete,
 }: {
-	skillId: string;
+	sessionType: string;
 	limit?: number;
 	offset?: number;
 	isComplete?: boolean;
-}): Promise<SkillSession[]> {
-	return await db.skillSession.findMany({
+}): Promise<AgentSession[]> {
+	return await db.agentSession.findMany({
 		where: {
-			skillId,
+			sessionType,
 			...(isComplete !== undefined && { isComplete }),
 		},
 		orderBy: { updatedAt: "desc" },
@@ -135,9 +135,9 @@ export async function getSkillSessionsBySkillId({
 }
 
 /**
- * List skill sessions by tool slug
+ * List agent sessions by tool slug
  */
-export async function getSkillSessionsByToolSlug({
+export async function getAgentSessionsByToolSlug({
 	toolSlug,
 	limit = 50,
 	offset = 0,
@@ -147,8 +147,8 @@ export async function getSkillSessionsByToolSlug({
 	limit?: number;
 	offset?: number;
 	isComplete?: boolean;
-}): Promise<SkillSession[]> {
-	return await db.skillSession.findMany({
+}): Promise<AgentSession[]> {
+	return await db.agentSession.findMany({
 		where: {
 			toolSlug,
 			...(isComplete !== undefined && { isComplete }),
@@ -160,28 +160,28 @@ export async function getSkillSessionsByToolSlug({
 }
 
 /**
- * List skill sessions by job ID
+ * List agent sessions by job ID
  */
-export async function getSkillSessionsByJobId(
+export async function getAgentSessionsByJobId(
 	jobId: string,
-): Promise<SkillSession[]> {
-	return await db.skillSession.findMany({
+): Promise<AgentSession[]> {
+	return await db.agentSession.findMany({
 		where: { jobId },
 		orderBy: { updatedAt: "desc" },
 	});
 }
 
 /**
- * Count skill sessions by user
+ * Count agent sessions by user
  */
-export async function countSkillSessionsByUser(
+export async function countAgentSessionsByUser(
 	userId: string,
-	skillId?: string,
+	sessionType?: string,
 ): Promise<number> {
-	return await db.skillSession.count({
+	return await db.agentSession.count({
 		where: {
 			userId,
-			...(skillId && { skillId }),
+			...(sessionType && { sessionType }),
 		},
 	});
 }

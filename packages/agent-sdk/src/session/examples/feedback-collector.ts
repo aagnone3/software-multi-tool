@@ -1,10 +1,10 @@
 import { CLAUDE_MODELS } from "../../models";
-import type { SkillConfig } from "../types";
+import type { AgentSessionConfig } from "../types";
 
 /**
- * FeedbackCollectorSkill configuration.
+ * FeedbackCollector session configuration.
  *
- * This skill collects user feedback through a conversational interface.
+ * This session type collects user feedback through a conversational interface.
  * It's designed to be invoked after a tool job completes to gather
  * user satisfaction data and improvement suggestions.
  *
@@ -15,10 +15,10 @@ import type { SkillConfig } from "../types";
  *
  * @example
  * ```typescript
- * import { SkillSession, createFeedbackCollectorConfig } from "@repo/agent-sdk/skill";
+ * import { AgentSession, createFeedbackCollectorConfig } from "@repo/agent-sdk/session";
  *
  * // Create a session for collecting feedback on the news analyzer tool
- * const session = await SkillSession.create({
+ * const session = await AgentSession.create({
  *   config: createFeedbackCollectorConfig({
  *     toolSlug: "news-analyzer",
  *     toolName: "News Analyzer",
@@ -71,11 +71,11 @@ export interface FeedbackCollectorOptions {
 }
 
 /**
- * Create a FeedbackCollector skill configuration
+ * Create a FeedbackCollector session configuration
  */
 export function createFeedbackCollectorConfig(
 	options: FeedbackCollectorOptions = {},
-): SkillConfig {
+): AgentSessionConfig {
 	const { toolSlug, toolName, additionalContext } = options;
 
 	const toolContext = toolName
@@ -85,7 +85,7 @@ export function createFeedbackCollectorConfig(
 			: "The user just used one of our tools.";
 
 	return {
-		skillId: "feedback-collector",
+		sessionType: "feedback-collector",
 		name: "Feedback Collector",
 		description:
 			"Collects user feedback through a friendly conversation and extracts structured insights",
@@ -127,7 +127,7 @@ The extracted data should include:
 }
 
 /**
- * Pre-configured FeedbackCollector skill configuration
+ * Pre-configured FeedbackCollector session configuration
  * Use createFeedbackCollectorConfig() for customization
  */
 export const FEEDBACK_COLLECTOR_CONFIG = createFeedbackCollectorConfig();

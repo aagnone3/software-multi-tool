@@ -1,9 +1,9 @@
 import type { ClaudeModel } from "../models";
 
 /**
- * A single message in a skill conversation
+ * A single message in an agent session conversation
  */
-export interface SkillMessage {
+export interface SessionMessage {
 	/**
 	 * Role of the message sender
 	 */
@@ -21,16 +21,16 @@ export interface SkillMessage {
 }
 
 /**
- * Context provided to a skill for execution
+ * Context provided to an agent session for execution
  */
-export interface SkillContext {
+export interface SessionContext {
 	/**
-	 * Unique identifier for this skill session
+	 * Unique identifier for this session
 	 */
 	sessionId: string;
 
 	/**
-	 * The user ID who initiated the skill
+	 * The user ID who initiated the session
 	 */
 	userId: string;
 
@@ -50,27 +50,27 @@ export interface SkillContext {
 	jobId?: string;
 
 	/**
-	 * Arbitrary metadata to pass to the skill
+	 * Arbitrary metadata to pass to the session
 	 */
 	metadata?: Record<string, unknown>;
 }
 
 /**
- * Configuration options for a skill
+ * Configuration options for an agent session
  */
-export interface SkillConfig {
+export interface AgentSessionConfig {
 	/**
-	 * Unique identifier for this skill type
+	 * Unique identifier for this session type (e.g., "feedback-collector")
 	 */
-	skillId: string;
+	sessionType: string;
 
 	/**
-	 * Human-readable name for the skill
+	 * Human-readable name for the session type
 	 */
 	name: string;
 
 	/**
-	 * Description of what the skill does
+	 * Description of what this session type does
 	 */
 	description: string;
 
@@ -85,7 +85,7 @@ export interface SkillConfig {
 	initialMessage?: string;
 
 	/**
-	 * Model to use for this skill
+	 * Model to use for this session
 	 * @default "claude-3-5-haiku-20241022"
 	 */
 	model?: ClaudeModel;
@@ -110,16 +110,16 @@ export interface SkillConfig {
 }
 
 /**
- * Result of a skill turn (single exchange)
+ * Result of a session turn (single exchange)
  */
-export interface SkillTurnResult {
+export interface TurnResult {
 	/**
 	 * The assistant's response message
 	 */
 	response: string;
 
 	/**
-	 * Whether the skill has completed its task
+	 * Whether the session has completed its task
 	 */
 	isComplete: boolean;
 
@@ -138,31 +138,31 @@ export interface SkillTurnResult {
 }
 
 /**
- * State of a skill session for persistence
+ * State of an agent session for persistence
  */
-export interface SkillSessionState {
+export interface AgentSessionState {
 	/**
 	 * Unique session identifier
 	 */
 	id: string;
 
 	/**
-	 * Skill identifier
+	 * Session type identifier (e.g., "feedback-collector")
 	 */
-	skillId: string;
+	sessionType: string;
 
 	/**
 	 * Session context
 	 */
-	context: SkillContext;
+	context: SessionContext;
 
 	/**
 	 * Conversation history
 	 */
-	messages: SkillMessage[];
+	messages: SessionMessage[];
 
 	/**
-	 * Whether the skill session is complete
+	 * Whether the session is complete
 	 */
 	isComplete: boolean;
 
@@ -191,44 +191,44 @@ export interface SkillSessionState {
 }
 
 /**
- * Options for creating a new skill session
+ * Options for creating a new agent session
  */
-export interface CreateSkillSessionOptions {
+export interface CreateAgentSessionOptions {
 	/**
-	 * Skill configuration
+	 * Session configuration
 	 */
-	config: SkillConfig;
+	config: AgentSessionConfig;
 
 	/**
-	 * Skill context
+	 * Session context
 	 */
-	context: SkillContext;
+	context: SessionContext;
 
 	/**
 	 * Optional persistence adapter for saving session state
 	 */
-	persistence?: SkillPersistenceAdapter;
+	persistence?: SessionPersistenceAdapter;
 }
 
 /**
- * Adapter interface for persisting skill sessions
+ * Adapter interface for persisting agent sessions
  *
- * Implement this interface to store skill sessions in different backends
+ * Implement this interface to store sessions in different backends
  * (e.g., database, Redis, in-memory for testing)
  */
-export interface SkillPersistenceAdapter {
+export interface SessionPersistenceAdapter {
 	/**
-	 * Save a skill session state
+	 * Save a session state
 	 */
-	save(state: SkillSessionState): Promise<void>;
+	save(state: AgentSessionState): Promise<void>;
 
 	/**
-	 * Load a skill session state by ID
+	 * Load a session state by ID
 	 */
-	load(sessionId: string): Promise<SkillSessionState | null>;
+	load(sessionId: string): Promise<AgentSessionState | null>;
 
 	/**
-	 * Delete a skill session
+	 * Delete a session
 	 */
 	delete(sessionId: string): Promise<void>;
 
@@ -238,13 +238,13 @@ export interface SkillPersistenceAdapter {
 	listByUser(
 		userId: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]>;
+	): Promise<AgentSessionState[]>;
 
 	/**
-	 * List sessions by skill ID
+	 * List sessions by session type
 	 */
-	listBySkill(
-		skillId: string,
+	listBySessionType(
+		sessionType: string,
 		options?: { limit?: number; offset?: number },
-	): Promise<SkillSessionState[]>;
+	): Promise<AgentSessionState[]>;
 }

@@ -11,7 +11,7 @@ describe("FeedbackCollector", () => {
 		it("should create default config without options", () => {
 			const config = createFeedbackCollectorConfig();
 
-			expect(config.skillId).toBe("feedback-collector");
+			expect(config.sessionType).toBe("feedback-collector");
 			expect(config.name).toBe("Feedback Collector");
 			expect(config.initialMessage).toBe(
 				"Hi! I'd love to hear about your experience. How did it go?",
@@ -55,7 +55,7 @@ describe("FeedbackCollector", () => {
 
 	describe("FEEDBACK_COLLECTOR_CONFIG", () => {
 		it("should be a valid pre-configured config", () => {
-			expect(FEEDBACK_COLLECTOR_CONFIG.skillId).toBe(
+			expect(FEEDBACK_COLLECTOR_CONFIG.sessionType).toBe(
 				"feedback-collector",
 			);
 			expect(FEEDBACK_COLLECTOR_CONFIG.name).toBe("Feedback Collector");

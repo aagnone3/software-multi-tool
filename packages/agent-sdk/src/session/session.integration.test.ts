@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createFeedbackCollectorConfig } from "./examples/feedback-collector";
-import { InMemorySkillPersistence } from "./persistence/memory";
-import { SkillSession } from "./session";
-import type { SkillConfig, SkillContext } from "./types";
+import { InMemorySessionPersistence } from "./persistence/memory";
+import { AgentSession } from "./session";
+import type { AgentSessionConfig, SessionContext } from "./types";
 
 /**
- * Integration test for Skill infrastructure.
+ * Integration test for Agent Session infrastructure.
  *
- * This test verifies that skills can successfully conduct multi-turn
+ * This test verifies that agent sessions can successfully conduct multi-turn
  * conversations with the Anthropic API.
  *
  * IMPORTANT: This test REQUIRES ANTHROPIC_API_KEY to be set.
@@ -15,7 +15,7 @@ import type { SkillConfig, SkillContext } from "./types";
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-describe("Skill Integration", () => {
+describe("Agent Session Integration", () => {
 	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
 			throw new Error(
@@ -26,23 +26,23 @@ describe("Skill Integration", () => {
 		}
 	};
 
-	const testContext: SkillContext = {
+	const testContext: SessionContext = {
 		sessionId: `integration-test-${Date.now()}`,
 		userId: "integration-test-user",
 		toolSlug: "integration-test-tool",
 	};
 
-	// Simple test skill config
-	const simpleSkillConfig: SkillConfig = {
-		skillId: "integration-test-skill",
-		name: "Integration Test Skill",
-		description: "A minimal skill for integration testing",
+	// Simple test session config
+	const simpleSessionConfig: AgentSessionConfig = {
+		sessionType: "integration-test-session",
+		name: "Integration Test Session",
+		description: "A minimal session for integration testing",
 		systemPrompt: `You are a simple assistant for testing.
 When the user says "complete", respond with exactly this format:
 
-[SKILL_COMPLETE]
+[SESSION_COMPLETE]
 {"status": "completed", "message": "test passed"}
-[/SKILL_COMPLETE]
+[/SESSION_COMPLETE]
 
 Otherwise, just respond with a brief acknowledgment.`,
 		model: "claude-3-5-haiku-20241022",
@@ -57,9 +57,9 @@ Otherwise, just respond with a brief acknowledgment.`,
 		async () => {
 			requireApiKey();
 
-			const persistence = new InMemorySkillPersistence();
-			const session = await SkillSession.create({
-				config: simpleSkillConfig,
+			const persistence = new InMemorySessionPersistence();
+			const session = await AgentSession.create({
+				config: simpleSessionConfig,
 				context: testContext,
 				persistence,
 			});
@@ -99,8 +99,8 @@ Otherwise, just respond with a brief acknowledgment.`,
 		async () => {
 			requireApiKey();
 
-			const session = await SkillSession.create({
-				config: simpleSkillConfig,
+			const session = await AgentSession.create({
+				config: simpleSessionConfig,
 				context: {
 					...testContext,
 					sessionId: `completion-test-${Date.now()}`,
@@ -133,7 +133,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 				toolSlug: "test-tool",
 			});
 
-			const session = await SkillSession.create({
+			const session = await AgentSession.create({
 				config: feedbackConfig,
 				context: {
 					...testContext,
@@ -172,12 +172,12 @@ Otherwise, just respond with a brief acknowledgment.`,
 		async () => {
 			requireApiKey();
 
-			const persistence = new InMemorySkillPersistence();
+			const persistence = new InMemorySessionPersistence();
 			const sessionId = `persist-test-${Date.now()}`;
 
 			// Create and use a session
-			const session1 = await SkillSession.create({
-				config: simpleSkillConfig,
+			const session1 = await AgentSession.create({
+				config: simpleSessionConfig,
 				context: {
 					...testContext,
 					sessionId,
@@ -193,9 +193,9 @@ Otherwise, just respond with a brief acknowledgment.`,
 			expect(savedState).not.toBeNull();
 
 			// Restore session from state
-			const session2 = await SkillSession.restore(
+			const session2 = await AgentSession.restore(
 				savedState!,
-				simpleSkillConfig,
+				simpleSessionConfig,
 				persistence,
 			);
 
@@ -226,8 +226,8 @@ Otherwise, just respond with a brief acknowledgment.`,
 	it("should track token usage correctly", { timeout: 60000 }, async () => {
 		requireApiKey();
 
-		const session = await SkillSession.create({
-			config: simpleSkillConfig,
+		const session = await AgentSession.create({
+			config: simpleSessionConfig,
 			context: {
 				...testContext,
 				sessionId: `usage-test-${Date.now()}`,

@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { SkillSessionState } from "../types";
-import { InMemorySkillPersistence } from "./memory";
+import type { AgentSessionState } from "../types";
+import { InMemorySessionPersistence } from "./memory";
 
-describe("InMemorySkillPersistence", () => {
-	let persistence: InMemorySkillPersistence;
+describe("InMemorySessionPersistence", () => {
+	let persistence: InMemorySessionPersistence;
 
 	const createTestState = (
-		overrides: Partial<SkillSessionState> = {},
-	): SkillSessionState => ({
+		overrides: Partial<AgentSessionState> = {},
+	): AgentSessionState => ({
 		id: `session-${Date.now()}-${Math.random()}`,
-		skillId: "test-skill",
+		sessionType: "test-session",
 		context: {
 			sessionId: "test-session",
 			userId: "user-123",
@@ -25,7 +25,7 @@ describe("InMemorySkillPersistence", () => {
 	});
 
 	beforeEach(() => {
-		persistence = new InMemorySkillPersistence();
+		persistence = new InMemorySessionPersistence();
 	});
 
 	describe("save and load", () => {
@@ -37,7 +37,7 @@ describe("InMemorySkillPersistence", () => {
 
 			expect(loaded).not.toBeNull();
 			expect(loaded?.id).toBe("save-load-test");
-			expect(loaded?.skillId).toBe("test-skill");
+			expect(loaded?.sessionType).toBe("test-session");
 		});
 
 		it("should return null for non-existent session", async () => {
@@ -207,52 +207,58 @@ describe("InMemorySkillPersistence", () => {
 		});
 	});
 
-	describe("listBySkill", () => {
-		it("should list sessions for a skill", async () => {
+	describe("listBySessionType", () => {
+		it("should list sessions by session type", async () => {
 			await persistence.save(
 				createTestState({
-					id: "skill1-session1",
-					skillId: "skill-a",
+					id: "type1-session1",
+					sessionType: "type-a",
 				}),
 			);
 			await persistence.save(
 				createTestState({
-					id: "skill1-session2",
-					skillId: "skill-a",
+					id: "type1-session2",
+					sessionType: "type-a",
 				}),
 			);
 			await persistence.save(
 				createTestState({
-					id: "skill2-session1",
-					skillId: "skill-b",
+					id: "type2-session1",
+					sessionType: "type-b",
 				}),
 			);
 
-			const skillASessions = await persistence.listBySkill("skill-a");
-			const skillBSessions = await persistence.listBySkill("skill-b");
+			const typeASessions = await persistence.listBySessionType("type-a");
+			const typeBSessions = await persistence.listBySessionType("type-b");
 
-			expect(skillASessions).toHaveLength(2);
-			expect(skillBSessions).toHaveLength(1);
+			expect(typeASessions).toHaveLength(2);
+			expect(typeBSessions).toHaveLength(1);
 		});
 
 		it("should respect limit and offset", async () => {
 			for (let i = 0; i < 5; i++) {
 				const state = createTestState({
-					id: `skill-paginated-${i}`,
-					skillId: "paginated-skill",
+					id: `type-paginated-${i}`,
+					sessionType: "paginated-type",
 				});
 				state.updatedAt = new Date(Date.now() - i * 1000);
 				await persistence.save(state);
 			}
 
-			const page1 = await persistence.listBySkill("paginated-skill", {
-				limit: 2,
-				offset: 0,
-			});
-			const page2 = await persistence.listBySkill("paginated-skill", {
-				limit: 2,
-				offset: 2,
-			});
+			const page1 = await persistence.listBySessionType(
+				"paginated-type",
+				{
+					limit: 2,
+					offset: 0,
+				},
+			);
+			const page2 = await persistence.listBySessionType(
+				"paginated-type",
+				{
+					limit: 2,
+					offset: 2,
+				},
+			);
 
 			expect(page1).toHaveLength(2);
 			expect(page2).toHaveLength(2);
