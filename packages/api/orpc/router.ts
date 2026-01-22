@@ -5,6 +5,7 @@ import { contactRouter } from "../modules/contact/router";
 import { creditsRouter } from "../modules/credits/router";
 import { filesRouter } from "../modules/files/router";
 import { gdprRouter } from "../modules/gdpr-exporter/router";
+import { invoiceProcessorRouter } from "../modules/invoice-processor/router";
 import { jobsRouter } from "../modules/jobs/router";
 import { newsletterRouter } from "../modules/newsletter/router";
 import { notificationsRouter } from "../modules/notifications/router";
@@ -29,6 +30,7 @@ export const router = publicProcedure
 		ai: aiRouter,
 		jobs: jobsRouter,
 		gdpr: gdprRouter,
+		invoiceProcessor: invoiceProcessorRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;

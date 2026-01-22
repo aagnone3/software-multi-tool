@@ -9,6 +9,9 @@ const loggerMock = vi.hoisted(() => ({
 	debug: vi.fn(),
 	error: vi.fn(),
 }));
+const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
+const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const getSignedUrlMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/agent-sdk", () => ({
 	executePrompt: executePromptMock,
@@ -20,6 +23,12 @@ vi.mock("./document-extractor", () => ({
 
 vi.mock("@repo/logs", () => ({
 	logger: loggerMock,
+}));
+
+vi.mock("@repo/storage", () => ({
+	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	getSignedUrl: getSignedUrlMock,
 }));
 
 describe("Invoice Processor", () => {
@@ -216,13 +225,29 @@ describe("Invoice Processor", () => {
 		const fileUploadJob: ToolJob = {
 			...mockJob,
 			input: {
-				fileData: {
-					buffer: Buffer.from("fake pdf content").toString("base64"),
-					mimeType: "application/pdf",
-					filename: "invoice.pdf",
-				},
+				filePath:
+					"organizations/org-123/users/user-123/invoices/test.pdf",
+				bucket: "invoices",
+				mimeType: "application/pdf",
 			},
 		};
+
+		const mockFileBuffer = Buffer.from("fake pdf content");
+		const mockSignedUrl = "https://storage.example.com/signed-url";
+
+		beforeEach(() => {
+			// Mock storage functions for file fetching
+			shouldUseSupabaseStorageMock.mockReturnValue(true);
+			getDefaultSupabaseProviderMock.mockReturnValue({
+				getSignedDownloadUrl: vi.fn().mockResolvedValue(mockSignedUrl),
+			});
+
+			// Mock global fetch for file download
+			global.fetch = vi.fn().mockResolvedValue({
+				ok: true,
+				arrayBuffer: vi.fn().mockResolvedValue(mockFileBuffer.buffer),
+			}) as unknown as typeof fetch;
+		});
 
 		it("extracts text from uploaded file and processes it", async () => {
 			extractTextFromInvoiceDocumentMock.mockResolvedValue({
@@ -247,7 +272,7 @@ describe("Invoice Processor", () => {
 			expect(extractTextFromInvoiceDocumentMock).toHaveBeenCalledWith(
 				expect.any(Buffer),
 				"application/pdf",
-				"invoice.pdf",
+				"organizations/org-123/users/user-123/invoices/test.pdf",
 			);
 			expect(result.success).toBe(true);
 		});
@@ -357,13 +382,10 @@ describe("Invoice Processor", () => {
 			const imageJob: ToolJob = {
 				...mockJob,
 				input: {
-					fileData: {
-						buffer: Buffer.from("fake image content").toString(
-							"base64",
-						),
-						mimeType: "image/jpeg",
-						filename: "invoice.jpg",
-					},
+					filePath:
+						"organizations/org-123/users/user-123/invoices/test.jpg",
+					bucket: "invoices",
+					mimeType: "image/jpeg",
 				},
 			};
 
@@ -390,7 +412,54 @@ describe("Invoice Processor", () => {
 			expect(extractTextFromInvoiceDocumentMock).toHaveBeenCalledWith(
 				expect.any(Buffer),
 				"image/jpeg",
-				"invoice.jpg",
+				"organizations/org-123/users/user-123/invoices/test.jpg",
+			);
+			expect(result.success).toBe(true);
+		});
+
+		it("returns error when storage fetch fails", async () => {
+			global.fetch = vi.fn().mockResolvedValue({
+				ok: false,
+				statusText: "Not Found",
+			}) as unknown as typeof fetch;
+
+			const result = await processInvoiceJob(fileUploadJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toContain("Failed to fetch file from storage");
+		});
+
+		it("uses legacy getSignedUrl when Supabase storage is not available", async () => {
+			shouldUseSupabaseStorageMock.mockReturnValue(false);
+			getSignedUrlMock.mockResolvedValue(mockSignedUrl);
+
+			global.fetch = vi.fn().mockResolvedValue({
+				ok: true,
+				arrayBuffer: vi.fn().mockResolvedValue(mockFileBuffer.buffer),
+			}) as unknown as typeof fetch;
+
+			extractTextFromInvoiceDocumentMock.mockResolvedValue({
+				success: true,
+				text: "Invoice from PDF file\nTotal: $500.00",
+				metadata: {
+					fileType: "pdf",
+					characterCount: 37,
+					usedOcr: false,
+				},
+			});
+
+			executePromptMock.mockResolvedValue({
+				content: JSON.stringify(mockAIResponse),
+				model: "claude-3-5-haiku-20241022",
+				usage: { inputTokens: 100, outputTokens: 200 },
+				stopReason: "end_turn",
+			});
+
+			const result = await processInvoiceJob(fileUploadJob);
+
+			expect(getSignedUrlMock).toHaveBeenCalledWith(
+				"organizations/org-123/users/user-123/invoices/test.pdf",
+				{ bucket: "invoices" },
 			);
 			expect(result.success).toBe(true);
 		});

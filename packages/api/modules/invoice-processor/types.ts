@@ -3,20 +3,18 @@ import { z } from "zod";
 export const InvoiceProcessorInputSchema = z
 	.object({
 		invoiceText: z.string().optional(),
-		fileData: z
-			.object({
-				buffer: z.string(), // Base64 encoded file data
-				mimeType: z.string(),
-				filename: z.string(),
-			})
-			.optional(),
+		// Storage path reference (preferred for file uploads)
+		filePath: z.string().optional(),
+		bucket: z.string().optional(),
+		mimeType: z.string().optional(),
 		outputFormat: z
 			.enum(["json", "csv", "quickbooks", "xero"])
 			.optional()
 			.default("json"),
 	})
-	.refine((data) => data.invoiceText || data.fileData, {
-		message: "Either invoice text or a file must be provided",
+	.refine((data) => data.invoiceText || (data.filePath && data.bucket), {
+		message:
+			"Either invoice text or a file reference (filePath + bucket) must be provided",
 	});
 
 export type InvoiceProcessorInput = z.infer<typeof InvoiceProcessorInputSchema>;

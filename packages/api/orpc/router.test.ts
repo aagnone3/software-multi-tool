@@ -77,6 +77,10 @@ vi.mock("../modules/files/router", () => ({
 	filesRouter: {},
 }));
 
+vi.mock("../modules/invoice-processor/router", () => ({
+	invoiceProcessorRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -98,6 +102,7 @@ describe("api router", () => {
 			"ai",
 			"jobs",
 			"gdpr",
+			"invoiceProcessor",
 		]);
 	});
 

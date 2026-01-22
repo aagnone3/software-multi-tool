@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -53,6 +54,7 @@ import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { orpc } from "../../shared/lib/orpc-query-utils";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
@@ -182,7 +184,11 @@ export function InvoiceProcessorTool() {
 	const [uploadedFile, setUploadedFile] = useState<FileData | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [isProcessingFile, setIsProcessingFile] = useState(false);
+	const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
+	const getUploadUrlMutation = useMutation(
+		orpc.invoiceProcessor.uploadUrl.mutationOptions(),
+	);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -237,23 +243,9 @@ export function InvoiceProcessorTool() {
 		},
 	});
 
-	// Convert file to base64 for submission
-	const fileToBase64 = (file: File): Promise<string> => {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => {
-				const result = reader.result as string;
-				// Remove data URL prefix to get raw base64
-				const base64 = result.split(",")[1];
-				resolve(base64 ?? "");
-			};
-			reader.onerror = reject;
-		});
-	};
-
 	const onSubmit = async (values: FormValues) => {
 		setResult(null);
+		setUploadProgress(null);
 
 		// Validate that we have either text or file
 		if (inputMode === "text" && !values.invoiceText?.trim()) {
@@ -277,12 +269,37 @@ export function InvoiceProcessorTool() {
 				input.invoiceText = values.invoiceText;
 			} else if (uploadedFile) {
 				setIsProcessingFile(true);
-				const base64 = await fileToBase64(uploadedFile.file);
-				input.fileData = {
-					buffer: base64,
-					mimeType: uploadedFile.file.type,
-					filename: uploadedFile.file.name,
-				};
+
+				// Step 1: Get signed upload URL from API
+				setUploadProgress("Getting upload URL...");
+				const { signedUploadUrl, path, bucket } =
+					await getUploadUrlMutation.mutateAsync({
+						filename: uploadedFile.file.name,
+						mimeType: uploadedFile.file.type,
+					});
+
+				// Step 2: Upload file directly to storage
+				setUploadProgress("Uploading file...");
+				const uploadResponse = await fetch(signedUploadUrl, {
+					method: "PUT",
+					body: uploadedFile.file,
+					headers: {
+						"Content-Type": uploadedFile.file.type,
+						"x-upsert": "true",
+					},
+				});
+
+				if (!uploadResponse.ok) {
+					throw new Error(
+						`Failed to upload file: ${uploadResponse.statusText}`,
+					);
+				}
+
+				// Step 3: Set file reference for job (NOT base64 data)
+				setUploadProgress("Creating job...");
+				input.filePath = path;
+				input.bucket = bucket;
+				input.mimeType = uploadedFile.file.type;
 			}
 
 			const response = await createJobMutation.mutateAsync({
@@ -292,8 +309,14 @@ export function InvoiceProcessorTool() {
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+			setFileError(
+				error instanceof Error
+					? error.message
+					: "Failed to process invoice",
+			);
 		} finally {
 			setIsProcessingFile(false);
+			setUploadProgress(null);
 		}
 	};
 
@@ -306,6 +329,7 @@ export function InvoiceProcessorTool() {
 		setResult(null);
 		setUploadedFile(null);
 		setFileError(null);
+		setUploadProgress(null);
 		form.reset();
 	};
 
@@ -598,7 +622,7 @@ export function InvoiceProcessorTool() {
 									{isProcessingFile ? (
 										<>
 											<LoaderIcon className="mr-2 size-5 animate-spin" />
-											Preparing File...
+											{uploadProgress ?? "Processing..."}
 										</>
 									) : (
 										<>

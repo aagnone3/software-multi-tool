@@ -1,9 +1,47 @@
 import { executePrompt } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database";
 import { logger } from "@repo/logs";
+import {
+	getDefaultSupabaseProvider,
+	getSignedUrl,
+	shouldUseSupabaseStorage,
+} from "@repo/storage";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { InvoiceProcessorInput, InvoiceProcessorOutput } from "../types";
 import { extractTextFromInvoiceDocument } from "./document-extractor";
+
+/**
+ * Fetch a file from storage using the provided path and bucket.
+ */
+async function fetchFileFromStorage(
+	filePath: string,
+	bucket: string,
+): Promise<Buffer> {
+	if (shouldUseSupabaseStorage()) {
+		const provider = getDefaultSupabaseProvider();
+		const signedUrl = await provider.getSignedDownloadUrl(filePath, {
+			bucket,
+			expiresIn: 300, // 5 minutes
+		});
+		const response = await fetch(signedUrl);
+		if (!response.ok) {
+			throw new Error(
+				`Failed to fetch file from storage: ${response.statusText}`,
+			);
+		}
+		return Buffer.from(await response.arrayBuffer());
+	}
+
+	// Fallback to legacy signed URL function
+	const signedUrl = await getSignedUrl(filePath, { bucket });
+	const response = await fetch(signedUrl);
+	if (!response.ok) {
+		throw new Error(
+			`Failed to fetch file from storage: ${response.statusText}`,
+		);
+	}
+	return Buffer.from(await response.arrayBuffer());
+}
 
 const INVOICE_EXTRACTION_PROMPT = `You are an expert invoice data extraction system. Extract structured data from the following invoice text.
 
@@ -73,39 +111,62 @@ export async function processInvoiceJob(job: ToolJob): Promise<JobResult> {
 		fileType?: string;
 	} = {};
 
-	// If file data is provided, extract text from the file
-	if (input.fileData) {
-		logger.info("Processing invoice file", {
-			filename: input.fileData.filename,
-			mimeType: input.fileData.mimeType,
+	// If storage file reference is provided, fetch and extract text from the file
+	if (input.filePath && input.bucket) {
+		logger.info("Processing invoice file from storage", {
+			filePath: input.filePath,
+			bucket: input.bucket,
+			mimeType: input.mimeType,
 		});
 
-		const buffer = Buffer.from(input.fileData.buffer, "base64");
-		const extractionResult = await extractTextFromInvoiceDocument(
-			buffer,
-			input.fileData.mimeType,
-			input.fileData.filename,
-		);
+		try {
+			// Fetch file from storage
+			const buffer = await fetchFileFromStorage(
+				input.filePath,
+				input.bucket,
+			);
 
-		if (!extractionResult.success) {
+			// Extract text from the file
+			const extractionResult = await extractTextFromInvoiceDocument(
+				buffer,
+				input.mimeType,
+				input.filePath,
+			);
+
+			if (!extractionResult.success) {
+				return {
+					success: false,
+					error: extractionResult.error.message,
+				};
+			}
+
+			invoiceText = extractionResult.text;
+			extractionMetadata = {
+				usedOcr: extractionResult.metadata.usedOcr,
+				ocrConfidence: extractionResult.metadata.ocrConfidence,
+				fileType: extractionResult.metadata.fileType,
+			};
+
+			logger.info("Invoice text extracted successfully", {
+				characterCount: extractionResult.metadata.characterCount,
+				usedOcr: extractionResult.metadata.usedOcr,
+				ocrConfidence: extractionResult.metadata.ocrConfidence,
+			});
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Failed to fetch file from storage";
+			logger.error("Failed to fetch invoice file from storage", {
+				error: errorMessage,
+				filePath: input.filePath,
+				bucket: input.bucket,
+			});
 			return {
 				success: false,
-				error: extractionResult.error.message,
+				error: `Failed to fetch file from storage: ${errorMessage}`,
 			};
 		}
-
-		invoiceText = extractionResult.text;
-		extractionMetadata = {
-			usedOcr: extractionResult.metadata.usedOcr,
-			ocrConfidence: extractionResult.metadata.ocrConfidence,
-			fileType: extractionResult.metadata.fileType,
-		};
-
-		logger.info("Invoice text extracted successfully", {
-			characterCount: extractionResult.metadata.characterCount,
-			usedOcr: extractionResult.metadata.usedOcr,
-			ocrConfidence: extractionResult.metadata.ocrConfidence,
-		});
 	}
 
 	if (!invoiceText || invoiceText.length === 0) {

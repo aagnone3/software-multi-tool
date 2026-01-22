@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
 	act,
 	fireEvent,
@@ -57,13 +58,28 @@ import { InvoiceProcessorTool } from "./InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "./MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "./SpeakerSeparationTool";
 
+// Helper to create a wrapper with QueryClientProvider for components that use React Query
+const createQueryWrapper = () => {
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false },
+			mutations: { retry: false },
+		},
+	});
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
+			{children}
+		</QueryClientProvider>
+	);
+};
+
 describe("InvoiceProcessorTool", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	it("renders the invoice processor form with tabs", () => {
-		render(<InvoiceProcessorTool />);
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
 		// Default tab is Upload File
@@ -76,7 +92,7 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("shows validation error when no file is uploaded", () => {
-		render(<InvoiceProcessorTool />);
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
 		// File upload tab is active by default, submit button should be disabled
 		// when no file is selected in file mode
@@ -90,7 +106,7 @@ describe("InvoiceProcessorTool", () => {
 		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-123" } });
 
-		render(<InvoiceProcessorTool />);
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
 		// Switch to Paste Text mode using the button toggle
 		const pasteTextButton = screen.getByRole("button", {
@@ -133,7 +149,7 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("shows upload tab by default", () => {
-		render(<InvoiceProcessorTool />);
+		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
 
 		// The upload tab should be active by default with drag & drop area
 		expect(
