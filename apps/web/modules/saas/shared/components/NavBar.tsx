@@ -11,6 +11,7 @@ import {
 	BotMessageSquareIcon,
 	ChevronRightIcon,
 	CoinsIcon,
+	FolderOpenIcon,
 	HomeIcon,
 	SettingsIcon,
 	UserCogIcon,
@@ -43,6 +44,14 @@ export function NavBar() {
 			href: "/app/tools",
 			icon: WrenchIcon,
 			isActive: pathname.startsWith("/app/tools"),
+		},
+		{
+			label: "Files",
+			href: activeOrganization
+				? `/app/${activeOrganization.slug}/files`
+				: "/app/files",
+			icon: FolderOpenIcon,
+			isActive: pathname.includes("/files"),
 		},
 		{
 			label: "AI Chatbot",

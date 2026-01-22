@@ -35,6 +35,7 @@ model User {
   twoFactorEnabled        Boolean?
   accounts                Account[]
   aiChats                 AiChat[]
+  files                   File[]
   invitations             Invitation[]
   members                 Member[]
   notificationPreference  NotificationPreference?
@@ -138,6 +139,8 @@ model Organization {
   paymentsCustomerId String?
   aiChats            AiChat[]
   creditBalance      CreditBalance?
+  files              File[]
+  fileTags           FileTag[]
   invitations        Invitation[]
   members            Member[]
   purchases          Purchase[]
@@ -370,6 +373,62 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preference")
+  @@schema("public")
+}
+
+// File management for tracking uploaded files with MIME types
+model File {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  filename       String       // Original filename
+  mimeType       String       // MIME type (e.g., "image/png", "audio/mpeg")
+  size           Int          // File size in bytes
+  storagePath    String       // Path in storage bucket
+  bucket         String       // Storage bucket name
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags         FileToTag[]
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([mimeType])
+  @@index([createdAt])
+  @@map("file")
+  @@schema("public")
+}
+
+// Tags for organizing files
+model FileTag {
+  id             String      @id @default(cuid())
+  organizationId String
+  name           String      // Tag name (e.g., "audio", "invoices", "receipts")
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  files        FileToTag[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("file_tag")
+  @@schema("public")
+}
+
+// Many-to-many relationship between files and tags
+model FileToTag {
+  fileId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  file File    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  tag  FileTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([fileId, tagId])
+  @@index([tagId])
+  @@map("file_to_tag")
   @@schema("public")
 }
 

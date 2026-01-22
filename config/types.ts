@@ -110,6 +110,7 @@ export type Config = {
 			contracts: string;
 			audio: string;
 			expenses: string;
+			files: string;
 		};
 	};
 	ui: {

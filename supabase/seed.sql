@@ -20,6 +20,15 @@ VALUES (
     ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 ) ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'files',
+    'files',
+    false,
+    52428800, -- 50MB
+    NULL -- Allow all MIME types
+) ON CONFLICT (id) DO NOTHING;
+
 -- =====================================================
 -- Test User
 -- =====================================================
@@ -735,7 +744,7 @@ ON CONFLICT ("id") DO NOTHING;
 DO $$
 BEGIN
     RAISE NOTICE 'Preview branch seed completed successfully';
-    RAISE NOTICE 'Storage Bucket: avatars (public, 5MB limit)';
+    RAISE NOTICE 'Storage Buckets: avatars (public, 5MB), files (private, 50MB)';
     RAISE NOTICE 'Test User: test@preview.local';
     RAISE NOTICE 'Test Org: preview-test-org';
     RAISE NOTICE 'Credit Balance: 500 included, 247 used, 100 purchased';
