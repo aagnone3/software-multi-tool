@@ -1,19 +1,6 @@
 ---
-name: database-migration
-description: Use this skill for Prisma database migration workflows including validation, staging, review, and execution. This skill wraps the Prisma CLI and custom migration helpers.
-activation-keywords:
-  - database
-  - schema
-  - migration
-  - prisma
-  - db push
-  - migrate
-  - schema.prisma
-  - database changes
-  - add column
-  - add table
-  - drop column
-  - alter table
+name: prisma-migrate
+description: Use this skill for Prisma database migration workflows including validation, staging, review, and execution. Covers schema changes, migration creation, and the Prisma CLI. Activation keywords include database, schema, migration, prisma, db push, migrate, schema.prisma.
 allowed-tools:
   - Bash
   - Read
