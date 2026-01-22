@@ -38,6 +38,7 @@ model User {
   files                   File[]
   invitations             Invitation[]
   members                 Member[]
+  newsAnalyses            NewsAnalysis[]
   notificationPreference  NotificationPreference?
   notifications           Notification[]
   passkeys                Passkey[]
@@ -143,6 +144,7 @@ model Organization {
   fileTags           FileTag[]
   invitations        Invitation[]
   members            Member[]
+  newsAnalyses       NewsAnalysis[]
   purchases          Purchase[]
 
   @@map("organization")
@@ -244,24 +246,26 @@ model AgentSession {
 }
 
 model ToolJob {
-  id          String        @id @default(cuid())
-  toolSlug    String
-  status      ToolJobStatus @default(PENDING)
-  priority    Int           @default(0)
-  input       Json
-  output      Json?
-  error       String?
-  userId      String?
-  sessionId   String?
-  attempts    Int           @default(0)
-  maxAttempts Int           @default(3)
-  startedAt   DateTime?
-  completedAt DateTime?
-  expiresAt   DateTime
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  pgBossJobId String?       @unique
-  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  toolSlug       String
+  status         ToolJobStatus @default(PENDING)
+  priority       Int           @default(0)
+  input          Json
+  output         Json?
+  error          String?
+  userId         String?
+  sessionId      String?
+  attempts       Int           @default(0)
+  maxAttempts    Int           @default(3)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  pgBossJobId    String?       @unique
+  newsAnalysisId String?       @unique
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
 
   @@index([status, priority])
   @@index([toolSlug, status])
@@ -269,6 +273,28 @@ model ToolJob {
   @@index([sessionId])
   @@index([expiresAt])
   @@map("tool_job")
+  @@schema("public")
+}
+
+model NewsAnalysis {
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  sourceUrl      String?
+  sourceText     String?       @db.Text
+  title          String?
+  analysis       Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  toolJob        ToolJob?
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("news_analysis")
   @@schema("public")
 }
 

@@ -168,14 +168,57 @@ async function processSingleJob(
 		const result = await withTimeout(processor(toolJob), JOB_TIMEOUT_MS);
 
 		if (result.success) {
-			// Mark job as completed
-			await db.toolJob.update({
-				where: { id: toolJobId },
-				data: {
-					status: "COMPLETED",
-					output: result.output ?? {},
-					completedAt: new Date(),
-				},
+			// Use transaction to atomically create NewsAnalysis and update job
+			// This prevents race conditions where job is marked complete but
+			// NewsAnalysis creation fails
+			await db.$transaction(async (tx) => {
+				let newsAnalysisId: string | undefined;
+
+				// Create NewsAnalysis for news-analyzer jobs
+				if (toolSlug === "news-analyzer" && result.output) {
+					const input = toolJob.input as {
+						articleUrl?: string;
+						articleText?: string;
+					};
+
+					// Generate title from source
+					let title: string | undefined;
+					if (input.articleUrl) {
+						try {
+							title = new URL(input.articleUrl).hostname;
+						} catch {
+							title = input.articleUrl.substring(0, 50);
+						}
+					} else if (input.articleText) {
+						title = `${input.articleText.substring(0, 50)}...`;
+					}
+
+					const newsAnalysis = await tx.newsAnalysis.create({
+						data: {
+							userId: toolJob.userId ?? undefined,
+							sourceUrl: input.articleUrl,
+							sourceText: input.articleText,
+							title,
+							analysis: result.output,
+						},
+					});
+
+					newsAnalysisId = newsAnalysis.id;
+					logger.info(
+						`[Worker:${toolSlug}] Created NewsAnalysis ${newsAnalysis.id} for job ${toolJobId}`,
+					);
+				}
+
+				// Mark job as completed with optional NewsAnalysis link
+				await tx.toolJob.update({
+					where: { id: toolJobId },
+					data: {
+						status: "COMPLETED",
+						output: result.output ?? {},
+						completedAt: new Date(),
+						newsAnalysisId,
+					},
+				});
 			});
 
 			logger.info(
