@@ -711,7 +711,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 						id: "audit-1",
 						userId: testUserId,
 						organizationId: testOrganizationId,
-						action: "USER_LOGIN",
+						action: "LOGIN",
 						resource: "session",
 						resourceId: "session-123",
 						ipAddress: "192.168.1.1",
@@ -721,7 +721,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 				});
 
 				expect(log).toBeDefined();
-				expect(log.action).toBe("USER_LOGIN");
+				expect(log.action).toBe("LOGIN");
 				expect(log.resource).toBe("session");
 				expect(log.success).toBe(true);
 			},
@@ -739,7 +739,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 					data: {
 						id: "audit-1",
 						userId: testUserId,
-						action: "USER_LOGOUT",
+						action: "LOGOUT",
 						resource: "session",
 						success: true,
 					},
@@ -750,7 +750,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 				});
 
 				expect(logs).toHaveLength(1);
-				expect(logs[0].action).toBe("USER_LOGOUT");
+				expect(logs[0].action).toBe("LOGOUT");
 			},
 			TEST_TIMEOUT,
 		);
@@ -765,7 +765,7 @@ describe.sequential("RLS on application data tables (integration)", () => {
 				await harness.prisma.auditLog.create({
 					data: {
 						id: "audit-to-delete",
-						action: "SYSTEM_EVENT",
+						action: "CREATE",
 						resource: "system",
 						success: true,
 					},
