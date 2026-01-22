@@ -8,7 +8,7 @@ describe("formatToolName", () => {
 
 	it("returns tool name from registry for known tools", () => {
 		expect(formatToolName("bg-remover")).toBe("Background Remover");
-		expect(formatToolName("diarization")).toBe("Speaker Diarization");
+		expect(formatToolName("speaker-separation")).toBe("Speaker Separation");
 		expect(formatToolName("news-analyzer")).toBe("News Analyzer");
 	});
 

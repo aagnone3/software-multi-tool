@@ -11,7 +11,7 @@ export interface CreditMiddlewareOptions {
 	toolSlug: string;
 	/**
 	 * Optional function to calculate variable cost based on request input.
-	 * For tools like diarization (cost per minute) or contract-analyzer (cost per page).
+	 * For tools like speaker-separation (cost per minute) or contract-analyzer (cost per page).
 	 * If not provided, uses the static creditCost from config.
 	 */
 	getCost?: (c: Context) => number;
@@ -69,7 +69,7 @@ function hasOrganization(c: Context): boolean {
  * app.post(
  *   "/process",
  *   creditMiddleware({
- *     toolSlug: "diarization",
+ *     toolSlug: "speaker-separation",
  *     getCost: (c) => {
  *       const body = c.get("parsedBody");
  *       const minutes = Math.ceil(body.durationSeconds / 60);

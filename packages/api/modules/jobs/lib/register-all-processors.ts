@@ -1,5 +1,4 @@
 import { registerContractProcessor } from "../../contract-analyzer";
-import { registerDiarizationProcessor } from "../../diarization";
 import { registerExpenseProcessor } from "../../expense-categorizer";
 import { registerFeedbackProcessor } from "../../feedback-analyzer";
 import { registerGdprExporterProcessor } from "../../gdpr-exporter";
@@ -20,7 +19,6 @@ export function registerAllProcessors() {
 	registerExpenseProcessor();
 	registerMeetingProcessor();
 	registerGdprExporterProcessor();
-	registerDiarizationProcessor();
 	registerSpeakerSeparationProcessor();
 
 	initialized = true;
