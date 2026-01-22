@@ -1,3 +1,13 @@
+---
+name: linear-workflow
+description: Use this skill when implementing Linear issues using feature branches and pull requests. Provides the complete workflow from issue selection through PR creation and merging, enforcing worktree-based development practices.
+allowed-tools:
+  - Bash
+  - Read
+  - Grep
+  - Glob
+---
+
 # Linear Workflow Skill
 
 This skill provides a guided workflow for implementing Linear issues using feature branches and pull requests. It enforces best practices for branch-based development with code review.
