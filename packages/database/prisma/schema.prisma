@@ -213,6 +213,36 @@ model AiChat {
   @@schema("public")
 }
 
+// Agent session for multi-turn AI conversations
+model AgentSession {
+  id             String   @id @default(cuid())
+  sessionType    String   // Session type identifier (e.g., "feedback-collector")
+  userId         String   // Required - authenticated users only
+  organizationId String?  // Optional organization context
+  toolSlug       String?  // Tool context if invoked from a tool
+  jobId          String?  // Job ID if invoked from a specific job
+  isComplete     Boolean  @default(false)
+  /// [SessionMessages]
+  messages       Json     @default("[]") // Array of SessionMessage objects
+  /// [SessionContext]
+  context        Json     @default("{}") // SessionContext metadata
+  /// [ExtractedData]
+  extractedData  Json?    // Structured data extracted on completion
+  totalInputTokens  Int   @default(0)
+  totalOutputTokens Int   @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([sessionType])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([toolSlug])
+  @@index([jobId])
+  @@index([isComplete])
+  @@map("agent_session")
+  @@schema("public")
+}
+
 model ToolJob {
   id          String        @id @default(cuid())
   toolSlug    String

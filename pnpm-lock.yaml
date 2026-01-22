@@ -530,6 +530,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: 0.71.2
         version: 0.71.2(zod@4.3.5)
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.11
