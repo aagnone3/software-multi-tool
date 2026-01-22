@@ -1,3 +1,12 @@
+---
+name: iconography
+description: Use this skill when adding icons to UI components, choosing icon sizes for different contexts, applying semantic colors to icons, or creating consistent icon usage. Covers the Icon component, Lucide React integration, and size/color systems.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+---
+
 # Iconography Skill
 
 > Standardized icon system built on Lucide React with consistent sizing and semantic color integration.
