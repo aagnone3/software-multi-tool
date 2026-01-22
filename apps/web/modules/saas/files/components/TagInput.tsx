@@ -46,29 +46,30 @@ export function TagInput({
 	// Handle click outside to close
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-			if (
-				containerRef.current &&
-				!containerRef.current.contains(event.target as Node)
-			) {
-				// Don't close if we just entered add mode (dropdown click)
-				if (isAddingTag) {
-					// Give the input a chance to be focused
-					return;
-				}
-				onClose();
+			const target = event.target as Node;
+
+			// Don't close if clicking inside our container
+			if (containerRef.current?.contains(target)) {
+				return;
 			}
+
+			// Don't close if clicking on Radix dropdown content (portaled outside container)
+			if (
+				target instanceof Element &&
+				target.closest("[data-radix-popper-content-wrapper]")
+			) {
+				return;
+			}
+
+			onClose();
 		}
 
-		// Use a slight delay to avoid immediate closure when switching modes
-		const timeoutId = setTimeout(() => {
-			document.addEventListener("mousedown", handleClickOutside);
-		}, 100);
+		document.addEventListener("mousedown", handleClickOutside);
 
 		return () => {
-			clearTimeout(timeoutId);
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [onClose, isAddingTag]);
+	}, [onClose]);
 
 	// Add tag mutation
 	const addTagMutation = useMutation({
