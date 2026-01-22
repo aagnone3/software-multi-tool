@@ -11,7 +11,7 @@ export const config = {
 				description: "Remove backgrounds from images with AI",
 				icon: "image-minus",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 1, // 1 credit per image
 				rateLimits: {
 					anonymous: { requests: 5, window: "1d" },
@@ -24,7 +24,7 @@ export const config = {
 				description: "Analyze audio to identify different speakers",
 				icon: "users",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 2, // 2 credits per minute of audio
 				creditUnit: "minute",
 				rateLimits: {
@@ -81,7 +81,7 @@ export const config = {
 					"Analyze contracts for key terms, risks, and obligations",
 				icon: "file-text",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 5, // 5 credits per page
 				creditUnit: "page",
 				rateLimits: {
@@ -96,7 +96,7 @@ export const config = {
 					"Analyze customer reviews and feedback for sentiment and insights",
 				icon: "message-square-text",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 1, // 1 credit per analysis
 				rateLimits: {
 					anonymous: { requests: 10, window: "1d" },
@@ -110,7 +110,7 @@ export const config = {
 					"Automatically categorize expenses for tax and accounting purposes",
 				icon: "wallet",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 1, // 1 credit per expense
 				rateLimits: {
 					anonymous: { requests: 10, window: "1d" },
@@ -124,7 +124,7 @@ export const config = {
 					"Summarize meeting notes and extract action items automatically",
 				icon: "clipboard-list",
 				public: true,
-				enabled: true,
+				enabled: false,
 				creditCost: 2, // 2 credits per summary
 				rateLimits: {
 					anonymous: { requests: 5, window: "1d" },

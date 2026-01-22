@@ -247,7 +247,7 @@ describe("Dashboard Widgets", () => {
 				jobs: [
 					{
 						id: "1",
-						toolSlug: "bg-remover",
+						toolSlug: "news-analyzer",
 						status: "COMPLETED",
 						createdAt: new Date().toISOString(),
 						completedAt: new Date().toISOString(),
@@ -260,7 +260,7 @@ describe("Dashboard Widgets", () => {
 			});
 
 			expect(screen.getByText("Recently Used")).toBeInTheDocument();
-			expect(screen.getByText("Background Remover")).toBeInTheDocument();
+			expect(screen.getByText("News Analyzer")).toBeInTheDocument();
 		});
 	});
 
