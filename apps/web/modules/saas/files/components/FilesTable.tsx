@@ -34,12 +34,14 @@ import {
 	FileTextIcon,
 	FileVideoIcon,
 	MoreHorizontalIcon,
+	PlusIcon,
 	SearchIcon,
 	TagIcon,
 	TrashIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { DeleteFileDialog } from "./DeleteFileDialog";
+import { FileUploader } from "./FileUploader";
 import { TagInput } from "./TagInput";
 
 interface FilesTableProps {
@@ -107,6 +109,7 @@ export function FilesTable(_props: FilesTableProps) {
 	const [editingTagsFileId, setEditingTagsFileId] = useState<string | null>(
 		null,
 	);
+	const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
 	const queryClient = useQueryClient();
 
@@ -149,7 +152,7 @@ export function FilesTable(_props: FilesTableProps) {
 
 	return (
 		<div className="space-y-4">
-			{/* Filters */}
+			{/* Filters and Upload Button */}
 			<div className="flex flex-wrap gap-4">
 				<div className="relative flex-1 min-w-[200px]">
 					<SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -206,6 +209,11 @@ export function FilesTable(_props: FilesTableProps) {
 						</SelectContent>
 					</Select>
 				)}
+
+				<Button onClick={() => setIsUploadDialogOpen(true)}>
+					<PlusIcon className="mr-2 size-4" />
+					Upload Files
+				</Button>
 			</div>
 
 			{/* Table */}
@@ -402,6 +410,12 @@ export function FilesTable(_props: FilesTableProps) {
 					}
 				}}
 				isDeleting={deleteMutation.isPending}
+			/>
+
+			{/* Upload dialog */}
+			<FileUploader
+				isOpen={isUploadDialogOpen}
+				onClose={() => setIsUploadDialogOpen(false)}
 			/>
 		</div>
 	);
