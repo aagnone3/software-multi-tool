@@ -1,11 +1,23 @@
 import { z } from "zod";
 
 /**
+ * Audio file data schema - matches frontend AudioFileData interface.
+ */
+export const AudioFileDataSchema = z.object({
+	content: z.string().min(1, "Audio content is required"),
+	mimeType: z.string(),
+	filename: z.string(),
+	duration: z.number().optional(),
+});
+
+export type AudioFileData = z.infer<typeof AudioFileDataSchema>;
+
+/**
  * Input schema for the speaker separation processor.
- * Accepts an audio URL (typically a presigned S3 URL).
+ * Accepts audio file data with base64 encoded content.
  */
 export const SpeakerSeparationInputSchema = z.object({
-	audioUrl: z.string().url("Audio URL must be a valid URL"),
+	audioFile: AudioFileDataSchema,
 });
 
 export type SpeakerSeparationInput = z.infer<

@@ -1,7 +1,42 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 import { processSpeakerSeparationJob } from "./processor";
 
 const hasApiKey = !!process.env.ASSEMBLYAI_API_KEY;
+
+/**
+ * Helper to create a mock job object for testing.
+ */
+function createMockJob(input: Record<string, unknown>) {
+	return {
+		id: `integration-test-speaker-${Date.now()}`,
+		toolSlug: "speaker-separation",
+		status: "PROCESSING" as const,
+		priority: 0,
+		input,
+		output: null,
+		error: null,
+		userId: "integration-test-user",
+		sessionId: null,
+		attempts: 1,
+		maxAttempts: 3,
+		startedAt: new Date(),
+		completedAt: null,
+		processAfter: null,
+		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+}
+
+/**
+ * Helper to read a file and convert to base64.
+ */
+function fileToBase64(filePath: string): string {
+	const buffer = fs.readFileSync(filePath);
+	return buffer.toString("base64");
+}
 
 /**
  * Integration tests for the speaker separation processor with real AssemblyAI API calls
@@ -17,49 +52,44 @@ const hasApiKey = !!process.env.ASSEMBLYAI_API_KEY;
 describe.skipIf(!hasApiKey)(
 	"Speaker Separation Processor (integration)",
 	() => {
-		// AssemblyAI transcription can take 30-120 seconds depending on audio length
-		const TIMEOUT = 180000; // 3 minutes
+		// AssemblyAI transcription can take 30-180 seconds depending on audio length
+		const TIMEOUT = 300000; // 5 minutes for longer files
 
-		// Sample audio for testing (sports injuries explainer - single speaker, ~3 min)
-		// Using AssemblyAI's official sample for reliable availability
-		const SAMPLE_AUDIO_URL =
-			"https://storage.googleapis.com/aai-web-samples/5_common_sports_injuries.mp3";
+		// Path to the local test fixture
+		const FIXTURE_PATH = path.join(
+			__dirname,
+			"__fixtures__",
+			"IB4001.Mix-Headset.wav",
+		);
+		const hasFixture = fs.existsSync(FIXTURE_PATH);
 
-		describe("processSpeakerSeparationJob - full end-to-end", () => {
-			it(
-				"should process a real audio file with speaker separation",
+		describe("processSpeakerSeparationJob with base64 audio file", () => {
+			it.skipIf(!hasFixture)(
+				"should process a real WAV audio file with speaker separation",
 				async () => {
-					const job = {
-						id: "integration-test-speaker-1",
-						toolSlug: "speaker-separation",
-						status: "PROCESSING" as const,
-						priority: 0,
-						input: {
-							audioUrl: SAMPLE_AUDIO_URL,
-						},
-						output: null,
-						error: null,
-						userId: "integration-test-user",
-						sessionId: null,
-						attempts: 1,
-						maxAttempts: 3,
-						startedAt: new Date(),
-						completedAt: null,
-						processAfter: null,
-						expiresAt: new Date(
-							Date.now() + 7 * 24 * 60 * 60 * 1000,
-						),
-						createdAt: new Date(),
-						updatedAt: new Date(),
-					};
+					console.log(
+						"\n=== Starting Speaker Separation Integration Test (Local Fixture) ===",
+					);
+					console.log("Fixture path:", FIXTURE_PATH);
 
+					// Read the audio file and convert to base64
+					const base64Content = fileToBase64(FIXTURE_PATH);
 					console.log(
-						"\n=== Starting Speaker Separation Integration Test ===",
+						"Audio file size:",
+						(base64Content.length / 1024 / 1024).toFixed(2),
+						"MB (base64)",
 					);
-					console.log("Audio URL:", SAMPLE_AUDIO_URL);
 					console.log(
-						"This may take 1-2 minutes for AssemblyAI processing...\n",
+						"This may take 2-5 minutes for AssemblyAI processing...\n",
 					);
+
+					const job = createMockJob({
+						audioFile: {
+							content: base64Content,
+							mimeType: "audio/wav",
+							filename: "IB4001.Mix-Headset.wav",
+						},
+					});
 
 					const result = await processSpeakerSeparationJob(job);
 
@@ -153,15 +183,15 @@ describe.skipIf(!hasApiKey)(
 								`  ${speaker.label}: ${speaker.totalTime.toFixed(2)}s (${speaker.percentage.toFixed(1)}%), ${speaker.segmentCount} segments`,
 							);
 						}
-						console.log("\nFirst 3 segments:");
-						for (const segment of output.segments.slice(0, 3)) {
+						console.log("\nFirst 5 segments:");
+						for (const segment of output.segments.slice(0, 5)) {
 							console.log(
-								`  [${segment.startTime.toFixed(2)}s - ${segment.endTime.toFixed(2)}s] ${segment.speaker}: "${segment.text.substring(0, 50)}..."`,
+								`  [${segment.startTime.toFixed(2)}s - ${segment.endTime.toFixed(2)}s] ${segment.speaker}: "${segment.text.substring(0, 80)}..."`,
 							);
 						}
 						console.log("\nTranscript preview:");
 						console.log(
-							`${output.transcript.substring(0, 500)}...`,
+							`${output.transcript.substring(0, 1000)}...`,
 						);
 					}
 				},
@@ -169,74 +199,33 @@ describe.skipIf(!hasApiKey)(
 			);
 
 			it(
-				"should handle invalid audio URL gracefully",
+				"should return error for missing audio file",
 				async () => {
-					const job = {
-						id: "integration-test-speaker-2",
-						toolSlug: "speaker-separation",
-						status: "PROCESSING" as const,
-						priority: 0,
-						input: {
-							audioUrl:
-								"https://example.com/nonexistent-audio-12345.mp3",
-						},
-						output: null,
-						error: null,
-						userId: "integration-test-user",
-						sessionId: null,
-						attempts: 1,
-						maxAttempts: 3,
-						startedAt: new Date(),
-						completedAt: null,
-						processAfter: null,
-						expiresAt: new Date(
-							Date.now() + 7 * 24 * 60 * 60 * 1000,
-						),
-						createdAt: new Date(),
-						updatedAt: new Date(),
-					};
-
-					console.log("\n=== Testing Invalid Audio URL Handling ===");
+					const job = createMockJob({}); // Missing audioFile
 
 					const result = await processSpeakerSeparationJob(job);
 
-					// Should fail gracefully
 					expect(result.success).toBe(false);
-					expect(result.error).toBeTruthy();
-					console.log("Expected error:", result.error);
+					expect(result.error).toBe("Audio file is required");
 				},
 				TIMEOUT,
 			);
 
 			it(
-				"should return error for missing audio URL",
+				"should return error for empty audio content",
 				async () => {
-					const job = {
-						id: "integration-test-speaker-3",
-						toolSlug: "speaker-separation",
-						status: "PROCESSING" as const,
-						priority: 0,
-						input: {}, // Missing audioUrl
-						output: null,
-						error: null,
-						userId: "integration-test-user",
-						sessionId: null,
-						attempts: 1,
-						maxAttempts: 3,
-						startedAt: new Date(),
-						completedAt: null,
-						processAfter: null,
-						expiresAt: new Date(
-							Date.now() + 7 * 24 * 60 * 60 * 1000,
-						),
-						createdAt: new Date(),
-						updatedAt: new Date(),
-					};
+					const job = createMockJob({
+						audioFile: {
+							content: "",
+							mimeType: "audio/wav",
+							filename: "empty.wav",
+						},
+					});
 
 					const result = await processSpeakerSeparationJob(job);
 
 					expect(result.success).toBe(false);
-					expect(result.error).toBe("Audio URL is required");
+					expect(result.error).toBe("Audio file is required");
 				},
 				TIMEOUT,
 			);

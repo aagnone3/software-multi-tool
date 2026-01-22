@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	AudioFileDataSchema,
 	MAX_AUDIO_DURATION_SECONDS,
 	SpeakerSegmentSchema,
 	SpeakerSeparationInputSchema,
@@ -9,21 +10,66 @@ import {
 } from "./types";
 
 describe("Speaker Separation Types", () => {
+	describe("AudioFileDataSchema", () => {
+		it("accepts valid audio file data", () => {
+			const fileData = {
+				content: "base64encodedcontent",
+				mimeType: "audio/wav",
+				filename: "test.wav",
+			};
+			const result = AudioFileDataSchema.safeParse(fileData);
+			expect(result.success).toBe(true);
+		});
+
+		it("accepts optional duration", () => {
+			const fileData = {
+				content: "base64encodedcontent",
+				mimeType: "audio/wav",
+				filename: "test.wav",
+				duration: 120.5,
+			};
+			const result = AudioFileDataSchema.safeParse(fileData);
+			expect(result.success).toBe(true);
+		});
+
+		it("rejects empty content", () => {
+			const fileData = {
+				content: "",
+				mimeType: "audio/wav",
+				filename: "test.wav",
+			};
+			const result = AudioFileDataSchema.safeParse(fileData);
+			expect(result.success).toBe(false);
+		});
+	});
+
 	describe("SpeakerSeparationInputSchema", () => {
-		it("accepts valid audio URL", () => {
-			const input = { audioUrl: "https://example.com/audio.mp3" };
+		it("accepts valid audio file", () => {
+			const input = {
+				audioFile: {
+					content: "base64encodedcontent",
+					mimeType: "audio/wav",
+					filename: "test.wav",
+				},
+			};
 			const result = SpeakerSeparationInputSchema.safeParse(input);
 			expect(result.success).toBe(true);
 		});
 
-		it("rejects invalid URL", () => {
-			const input = { audioUrl: "not-a-url" };
+		it("rejects missing audioFile", () => {
+			const input = {};
 			const result = SpeakerSeparationInputSchema.safeParse(input);
 			expect(result.success).toBe(false);
 		});
 
-		it("rejects missing audioUrl", () => {
-			const input = {};
+		it("rejects empty content in audioFile", () => {
+			const input = {
+				audioFile: {
+					content: "",
+					mimeType: "audio/wav",
+					filename: "test.wav",
+				},
+			};
 			const result = SpeakerSeparationInputSchema.safeParse(input);
 			expect(result.success).toBe(false);
 		});

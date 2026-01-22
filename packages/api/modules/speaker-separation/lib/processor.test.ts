@@ -9,9 +9,13 @@ import {
 
 // Mock AssemblyAI
 const mockTranscribe = vi.hoisted(() => vi.fn());
+const mockUpload = vi.hoisted(() => vi.fn());
 
 vi.mock("assemblyai", () => ({
 	AssemblyAI: class MockAssemblyAI {
+		files = {
+			upload: mockUpload,
+		};
 		transcripts = {
 			transcribe: mockTranscribe,
 		};
@@ -24,11 +28,19 @@ describe("Speaker Separation Processor", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env = { ...originalEnv, ASSEMBLYAI_API_KEY: "test-api-key" };
+		// Default mock for file upload
+		mockUpload.mockResolvedValue(
+			"https://cdn.assemblyai.com/upload/test-upload-url",
+		);
 	});
 
 	afterEach(() => {
 		process.env = originalEnv;
 	});
+
+	// Sample base64 audio content (just a placeholder for testing)
+	const sampleBase64Audio =
+		Buffer.from("test audio content").toString("base64");
 
 	const mockJob: ToolJob = {
 		id: "job-123",
@@ -36,7 +48,11 @@ describe("Speaker Separation Processor", () => {
 		status: "PROCESSING",
 		priority: 0,
 		input: {
-			audioUrl: "https://example.com/audio.mp3",
+			audioFile: {
+				content: sampleBase64Audio,
+				mimeType: "audio/wav",
+				filename: "test.wav",
+			},
 		},
 		output: null,
 		error: null,
@@ -109,16 +125,34 @@ describe("Speaker Separation Processor", () => {
 			expect(output.speakers).toHaveLength(2);
 		});
 
-		it("returns error when audio URL is missing", async () => {
-			const missingUrlJob = {
+		it("returns error when audio file is missing", async () => {
+			const missingFileJob = {
 				...mockJob,
 				input: {},
 			};
 
-			const result = await processSpeakerSeparationJob(missingUrlJob);
+			const result = await processSpeakerSeparationJob(missingFileJob);
 
 			expect(result.success).toBe(false);
-			expect(result.error).toBe("Audio URL is required");
+			expect(result.error).toBe("Audio file is required");
+		});
+
+		it("returns error when audio content is empty", async () => {
+			const emptyContentJob = {
+				...mockJob,
+				input: {
+					audioFile: {
+						content: "",
+						mimeType: "audio/wav",
+						filename: "empty.wav",
+					},
+				},
+			};
+
+			const result = await processSpeakerSeparationJob(emptyContentJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("Audio file is required");
 		});
 
 		it("returns error when ASSEMBLYAI_API_KEY is not set", async () => {
@@ -199,15 +233,28 @@ describe("Speaker Separation Processor", () => {
 			expect(output.segments[1].endTime).toBe(5);
 		});
 
-		it("calls AssemblyAI with speaker_labels enabled", async () => {
+		it("uploads audio file and calls AssemblyAI with speaker_labels enabled", async () => {
 			mockTranscribe.mockResolvedValue(mockAssemblyAIResponse);
 
 			await processSpeakerSeparationJob(mockJob);
 
+			// Should upload the file first
+			expect(mockUpload).toHaveBeenCalled();
+
+			// Should call transcribe with the uploaded URL
 			expect(mockTranscribe).toHaveBeenCalledWith({
-				audio: "https://example.com/audio.mp3",
+				audio: "https://cdn.assemblyai.com/upload/test-upload-url",
 				speaker_labels: true,
 			});
+		});
+
+		it("handles file upload errors", async () => {
+			mockUpload.mockRejectedValue(new Error("Upload failed"));
+
+			const result = await processSpeakerSeparationJob(mockJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("Upload failed");
 		});
 	});
 
