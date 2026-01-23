@@ -1,3 +1,4 @@
+import { AnimatedBackground } from "@marketing/shared/components/AnimatedBackground";
 import { Footer } from "@marketing/shared/components/Footer";
 import { NavBar } from "@marketing/shared/components/NavBar";
 import { SessionProvider } from "@saas/auth/components/SessionProvider";
@@ -22,9 +23,14 @@ export default async function MarketingLayout({ children }: PropsWithChildren) {
 					}}
 				>
 					<SessionProvider>
-						<NavBar />
-						<main className="min-h-screen">{children}</main>
-						<Footer />
+						<div className="relative min-h-screen overflow-x-hidden">
+							<AnimatedBackground />
+							<div className="relative z-10">
+								<NavBar />
+								<main>{children}</main>
+								<Footer />
+							</div>
+						</div>
 					</SessionProvider>
 				</FumadocsRootProvider>
 			</FumadocsNextProvider>
