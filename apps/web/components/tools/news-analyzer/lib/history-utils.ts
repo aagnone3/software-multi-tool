@@ -20,6 +20,7 @@ export interface NewsAnalyzerJob {
 	createdAt: Date;
 	completedAt: Date | null;
 	startedAt?: Date | null;
+	newsAnalysisId?: string | null;
 }
 
 /**

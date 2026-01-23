@@ -76,6 +76,12 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: NewsAnalysisScalarFieldEnum.schema.ts
+
+export const NewsAnalysisScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'sourceUrl', 'sourceText', 'title', 'analysis', 'createdAt', 'updatedAt'])
+
+export type NewsAnalysisScalarFieldEnumEnum = z.infer<typeof NewsAnalysisScalarFieldEnumSchema>;
+
 // File: AgentSessionScalarFieldEnum.schema.ts
 
 export const AgentSessionScalarFieldEnumSchema = z.enum(['id', 'sessionType', 'userId', 'organizationId', 'toolSlug', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
@@ -84,7 +90,7 @@ export type AgentSessionScalarFieldEnumEnum = z.infer<typeof AgentSessionScalarF
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'newsAnalysisId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
@@ -429,6 +435,23 @@ export const AiChatSchema = z.object({
 export type AiChatType = z.infer<typeof AiChatSchema>;
 
 
+// File: NewsAnalysis.schema.ts
+
+export const NewsAnalysisSchema = z.object({
+  id: z.string(),
+  organizationId: z.string().nullish(),
+  userId: z.string().nullish(),
+  sourceUrl: z.string().nullish(),
+  sourceText: z.string().nullish(),
+  title: z.string().nullish(),
+  analysis: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsAnalysisType = z.infer<typeof NewsAnalysisSchema>;
+
+
 // File: AgentSession.schema.ts
 
 export const AgentSessionSchema = z.object({
@@ -463,6 +486,7 @@ export const ToolJobSchema = z.object({
   error: z.string().nullish(),
   userId: z.string().nullish(),
   sessionId: z.string().nullish(),
+  newsAnalysisId: z.string().nullish(),
   attempts: z.number().int(),
   maxAttempts: z.number().int().default(3),
   startedAt: z.date().nullish(),

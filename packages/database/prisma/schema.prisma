@@ -45,6 +45,7 @@ model User {
   sessions                Session[]
   toolJobs                ToolJob[]
   twofactors              TwoFactor[]
+  newsAnalyses            NewsAnalysis[]
 
   @@map("user")
   @@schema("public")
@@ -143,6 +144,7 @@ model Organization {
   fileTags           FileTag[]
   invitations        Invitation[]
   members            Member[]
+  newsAnalyses       NewsAnalysis[]
   purchases          Purchase[]
 
   @@map("organization")
@@ -213,6 +215,29 @@ model AiChat {
   @@schema("public")
 }
 
+// Stored news analysis results for sharing
+model NewsAnalysis {
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  sourceUrl      String?       // URL of the analyzed article
+  sourceText     String?       @db.Text // Text content if pasted directly
+  title          String?       // Title extracted from article
+  /// [NewsAnalysisResult]
+  analysis       Json          // Full analysis result
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  toolJob        ToolJob?
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("news_analysis")
+  @@schema("public")
+}
+
 // Agent session for multi-turn AI conversations
 model AgentSession {
   id             String   @id @default(cuid())
@@ -244,24 +269,26 @@ model AgentSession {
 }
 
 model ToolJob {
-  id          String        @id @default(cuid())
-  toolSlug    String
-  status      ToolJobStatus @default(PENDING)
-  priority    Int           @default(0)
-  input       Json
-  output      Json?
-  error       String?
-  userId      String?
-  sessionId   String?
-  attempts    Int           @default(0)
-  maxAttempts Int           @default(3)
-  startedAt   DateTime?
-  completedAt DateTime?
-  expiresAt   DateTime
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  pgBossJobId String?       @unique
-  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  toolSlug       String
+  status         ToolJobStatus @default(PENDING)
+  priority       Int           @default(0)
+  input          Json
+  output         Json?
+  error          String?
+  userId         String?
+  sessionId      String?
+  newsAnalysisId String?       @unique
+  attempts       Int           @default(0)
+  maxAttempts    Int           @default(3)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  pgBossJobId    String?       @unique
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
 
   @@index([status, priority])
   @@index([toolSlug, status])
