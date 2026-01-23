@@ -404,8 +404,26 @@ setup_worktree_environment() {
     exit 1
   fi
 
-  # Step 6: Run baseline verification
-  log_step "Step 6: Running baseline verification"
+  # Step 6: Ensure database is seeded (idempotent)
+  log_step "Step 6: Checking database seed status"
+
+  # Check if test user exists (all worktrees share the same local database)
+  local test_user_exists
+  if PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -tAc "SELECT 1 FROM \"user\" WHERE email = 'test@preview.local'" 2>/dev/null | grep -q "1"; then
+    log_success "Database already seeded (test user exists)"
+    test_user_exists=true
+  else
+    log_info "Test user not found, seeding database..."
+    if PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f "$REPO_ROOT/supabase/seed.sql" 2>/dev/null; then
+      log_success "Database seeded successfully"
+    else
+      log_warning "Database seeding had issues (non-blocking - may need manual seeding)"
+      log_info "Run: PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql"
+    fi
+  fi
+
+  # Step 7: Run baseline verification
+  log_step "Step 7: Running baseline verification"
 
   log_info "Running type check..."
   if pnpm --filter web run type-check 2>/dev/null; then
