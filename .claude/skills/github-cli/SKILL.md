@@ -1,6 +1,10 @@
 ---
 name: github-cli
 description: Use this skill for all GitHub operations including creating pull requests, managing issues, and using the GitHub API. This skill enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
+allowed-tools:
+  - Bash
+  - Read
+  - Grep
 ---
 
 # GitHub CLI

@@ -1,35 +1,16 @@
+---
+name: async-jobs
+description: Use this skill when implementing job processors, debugging stuck or failed jobs, configuring job timeouts or retries, understanding pg-boss architecture, or troubleshooting job processing issues. Covers the ToolJob table, job-runner maintenance, and expire handlers.
+allowed-tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+---
+
 # Async Jobs Skill
-
----
-activation_keywords:
-
-- pg-boss
-- job queue
-- async job
-- background job
-- worker
-- job processing
-- ToolJob
-- job stuck
-- job timeout
-- job retry
-- job expiration
-- job reconciliation
-- cron maintenance
-- processor registration
-use_when:
-- implementing new job processors
-- debugging stuck or failed jobs
-- configuring job timeouts or retries
-- understanding pg-boss architecture
-- adding new tool to job queue
-- troubleshooting job processing issues
-- working with ToolJob table
-- modifying job-runner maintenance
-- understanding expire handlers
-- fixing state divergence between pg-boss and ToolJob
-
----
 
 > **Purpose**: Guide for implementing and managing async job processing with pg-boss
 
