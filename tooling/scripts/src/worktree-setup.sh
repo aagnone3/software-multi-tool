@@ -30,6 +30,7 @@ NC='\033[0m' # No Color
 # Configuration
 WORKTREE_BASE_DIR=".worktrees"
 PORT_ALLOCATOR="$SCRIPT_DIR/worktree-port.sh"
+REQUIRED_NODE_MAJOR="22"
 
 # Print colored output
 log_info() {
@@ -50,6 +51,63 @@ log_error() {
 
 log_step() {
   echo -e "\n${BOLD}=== $1 ===${NC}"
+}
+
+# Check and switch to correct Node version
+ensure_node_version() {
+  local current_major
+  current_major=$(node --version 2>/dev/null | grep -oE '^v[0-9]+' | tr -d 'v')
+
+  if [ "$current_major" = "$REQUIRED_NODE_MAJOR" ]; then
+    log_success "Node.js v$REQUIRED_NODE_MAJOR is active"
+    return 0
+  fi
+
+  log_warning "Node.js v$current_major detected, but v$REQUIRED_NODE_MAJOR is required"
+
+  # Try to switch using nvm
+  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    log_info "Attempting to switch Node version using nvm..."
+
+    # Source nvm (needed in scripts)
+    export NVM_DIR="$HOME/.nvm"
+    # shellcheck source=/dev/null
+    . "$NVM_DIR/nvm.sh"
+
+    # Check if v22 is installed
+    if nvm ls "$REQUIRED_NODE_MAJOR" &>/dev/null; then
+      nvm use "$REQUIRED_NODE_MAJOR" --silent
+      log_success "Switched to Node.js v$REQUIRED_NODE_MAJOR using nvm"
+      return 0
+    else
+      log_warning "Node.js v$REQUIRED_NODE_MAJOR not installed in nvm"
+      log_info "Installing Node.js v$REQUIRED_NODE_MAJOR..."
+      if nvm install "$REQUIRED_NODE_MAJOR" && nvm use "$REQUIRED_NODE_MAJOR" --silent; then
+        log_success "Installed and switched to Node.js v$REQUIRED_NODE_MAJOR"
+        return 0
+      fi
+    fi
+  fi
+
+  # Try fnm as fallback
+  if command -v fnm &>/dev/null; then
+    log_info "Attempting to switch Node version using fnm..."
+    if fnm use "$REQUIRED_NODE_MAJOR" 2>/dev/null || fnm install "$REQUIRED_NODE_MAJOR" && fnm use "$REQUIRED_NODE_MAJOR"; then
+      log_success "Switched to Node.js v$REQUIRED_NODE_MAJOR using fnm"
+      return 0
+    fi
+  fi
+
+  # Could not switch automatically
+  log_error "Could not switch to Node.js v$REQUIRED_NODE_MAJOR automatically"
+  log_error ""
+  log_error "This project requires Node.js v22 LTS. Please switch manually:"
+  log_error "  nvm install 22 && nvm use 22"
+  log_error "  # or"
+  log_error "  fnm install 22 && fnm use 22"
+  log_error ""
+  log_error "Current version: $(node --version)"
+  return 1
 }
 
 usage() {
@@ -168,6 +226,11 @@ check_prerequisites() {
   log_step "Checking prerequisites"
 
   local errors=0
+
+  # Check Node.js version FIRST (before any pnpm commands)
+  if ! ensure_node_version; then
+    errors=$((errors + 1))
+  fi
 
   # Check git version
   if ! command -v git &> /dev/null; then

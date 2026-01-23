@@ -12,9 +12,9 @@ Sentry.init({
 	// Setting this option to true will print useful information to the console while you're setting up Sentry.
 	debug: false,
 
-	// Replay configuration for session recordings
-	replaysOnErrorSampleRate: 1.0, // Capture 100% of errors with replay
-	replaysSessionSampleRate: 0.1,
+	// Replay configuration for session recordings (reduced to control budget)
+	replaysOnErrorSampleRate: 0.1, // Capture 10% of errors with replay
+	replaysSessionSampleRate: 0.01, // Capture 1% of sessions
 
 	integrations: [
 		Sentry.replayIntegration({
