@@ -1,4 +1,46 @@
+import type { Prisma } from "@prisma/client";
 import { db } from "../client";
+
+export interface CreateNewsAnalysisInput {
+	sourceUrl?: string;
+	sourceText?: string;
+	title?: string;
+	analysis: Prisma.InputJsonValue;
+	userId?: string;
+	organizationId?: string;
+}
+
+/**
+ * Create a NewsAnalysis record and optionally link it to a ToolJob
+ */
+export async function createNewsAnalysis(
+	input: CreateNewsAnalysisInput,
+	toolJobId?: string,
+) {
+	// Use a transaction to create the NewsAnalysis and link to ToolJob atomically
+	return await db.$transaction(async (tx) => {
+		const newsAnalysis = await tx.newsAnalysis.create({
+			data: {
+				sourceUrl: input.sourceUrl,
+				sourceText: input.sourceText,
+				title: input.title,
+				analysis: input.analysis,
+				userId: input.userId,
+				organizationId: input.organizationId,
+			},
+		});
+
+		// If a toolJobId is provided, link the NewsAnalysis to the ToolJob
+		if (toolJobId) {
+			await tx.toolJob.update({
+				where: { id: toolJobId },
+				data: { newsAnalysisId: newsAnalysis.id },
+			});
+		}
+
+		return newsAnalysis;
+	});
+}
 
 /**
  * Get a NewsAnalysis by its ID

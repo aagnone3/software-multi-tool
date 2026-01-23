@@ -24,7 +24,15 @@ vi.mock("./content-extractor", () => ({
 	extractContentFromText: vi.fn(),
 }));
 
+// Mock the database
+vi.mock("@repo/database", () => ({
+	createNewsAnalysis: vi
+		.fn()
+		.mockResolvedValue({ id: "mock-news-analysis-id" }),
+}));
+
 import { executePrompt } from "@repo/agent-sdk";
+import { createNewsAnalysis } from "@repo/database";
 import {
 	extractContentFromText,
 	extractContentFromUrl,
@@ -241,6 +249,108 @@ describe("News Analyzer Processor", () => {
 			if (!result.success) {
 				expect(result.error).toContain("Analysis failed");
 			}
+		});
+
+		it("should succeed even if NewsAnalysis creation fails", async () => {
+			// Mock successful content extraction
+			vi.mocked(extractContentFromUrl).mockResolvedValueOnce({
+				success: true,
+				data: {
+					title: "Test Article",
+					content: "<p>Test content</p>",
+					textContent: "Test content",
+					excerpt: "Test",
+					byline: "Author",
+					siteName: "News",
+					url: "https://example.com/article",
+				},
+			});
+
+			// Mock successful Claude analysis
+			vi.mocked(executePrompt).mockResolvedValueOnce({
+				content: JSON.stringify({
+					summary: ["Point 1"],
+					bias: {
+						politicalLean: "Center",
+						sensationalism: 1,
+						factualRating: "High",
+					},
+					entities: { people: [], organizations: [], places: [] },
+					sentiment: "Neutral",
+				}),
+			});
+
+			// Mock database failure
+			vi.mocked(createNewsAnalysis).mockRejectedValueOnce(
+				new Error("Database error"),
+			);
+
+			const job = {
+				id: "test-job-db-fail",
+				input: { articleUrl: "https://example.com/article" },
+			};
+
+			const result = await processNewsAnalyzerJob(job);
+
+			// Job should still succeed even if NewsAnalysis creation fails
+			expect(result.success).toBe(true);
+		});
+
+		it("should create NewsAnalysis record on successful analysis", async () => {
+			// Mock successful content extraction
+			vi.mocked(extractContentFromUrl).mockResolvedValueOnce({
+				success: true,
+				data: {
+					title: "Test Article Title",
+					content: "<p>Test content</p>",
+					textContent: "Test content",
+					excerpt: "Test",
+					byline: "Author Name",
+					siteName: "Example News",
+					url: "https://example.com/article",
+				},
+			});
+
+			// Mock successful Claude analysis
+			const analysisResult = {
+				summary: ["Point 1", "Point 2"],
+				bias: {
+					politicalLean: "Center",
+					sensationalism: 3,
+					factualRating: "High",
+				},
+				entities: {
+					people: ["Person A"],
+					organizations: ["Org B"],
+					places: ["City C"],
+				},
+				sentiment: "Neutral",
+				sourceCredibility: "High",
+			};
+			vi.mocked(executePrompt).mockResolvedValueOnce({
+				content: JSON.stringify(analysisResult),
+			});
+
+			const job = {
+				id: "test-job-share",
+				userId: "test-user-123",
+				input: {
+					articleUrl: "https://example.com/article",
+				},
+			};
+
+			const result = await processNewsAnalyzerJob(job);
+
+			expect(result.success).toBe(true);
+			expect(createNewsAnalysis).toHaveBeenCalledWith(
+				expect.objectContaining({
+					sourceUrl: "https://example.com/article",
+					title: "Test Article Title",
+					userId: "test-user-123",
+					analysis: analysisResult,
+				}),
+				"test-job-share",
+			);
 		});
 
 		it("should handle Claude JSON wrapped in markdown code fence", async () => {
