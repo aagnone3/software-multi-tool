@@ -383,10 +383,13 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				</Alert>
 			)}
 
-			{/* Results */}
-			{job.status === "COMPLETED" && job.output && (
-				<NewsAnalyzerResults output={job.output} />
-			)}
+			{/* Results - prefer NewsAnalysis data over job.output for durability */}
+			{job.status === "COMPLETED" &&
+				(job.newsAnalysis?.analysis ? (
+					<NewsAnalyzerResults output={job.newsAnalysis.analysis} />
+				) : job.output ? (
+					<NewsAnalyzerResults output={job.output} />
+				) : null)}
 		</div>
 	);
 }
