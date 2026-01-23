@@ -40,6 +40,7 @@ export async function createToolJob({
 export async function getToolJobById(id: string) {
 	return await db.toolJob.findUnique({
 		where: { id },
+		include: { newsAnalysis: true },
 	});
 }
 
@@ -62,6 +63,7 @@ export async function getToolJobsByUserId({
 		orderBy: { createdAt: "desc" },
 		take: limit,
 		skip: offset,
+		include: { newsAnalysis: true },
 	});
 }
 
@@ -84,6 +86,7 @@ export async function getToolJobsBySessionId({
 		orderBy: { createdAt: "desc" },
 		take: limit,
 		skip: offset,
+		include: { newsAnalysis: true },
 	});
 }
 
@@ -144,6 +147,7 @@ export async function claimNextPendingJob(toolSlug?: string) {
 
 	return await db.toolJob.findUnique({
 		where: { id: result[0].id },
+		include: { newsAnalysis: true },
 	});
 }
 
@@ -296,5 +300,6 @@ export async function findCachedJob(
 		orderBy: {
 			completedAt: "desc",
 		},
+		include: { newsAnalysis: true },
 	});
 }

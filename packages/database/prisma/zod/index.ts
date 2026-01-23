@@ -84,9 +84,15 @@ export type AgentSessionScalarFieldEnumEnum = z.infer<typeof AgentSessionScalarF
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
+
+// File: NewsAnalysisScalarFieldEnum.schema.ts
+
+export const NewsAnalysisScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'sourceUrl', 'sourceText', 'title', 'analysis', 'createdAt', 'updatedAt'])
+
+export type NewsAnalysisScalarFieldEnumEnum = z.infer<typeof NewsAnalysisScalarFieldEnumSchema>;
 
 // File: RateLimitEntryScalarFieldEnum.schema.ts
 
@@ -471,9 +477,27 @@ export const ToolJobSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   pgBossJobId: z.string().nullish(),
+  newsAnalysisId: z.string().nullish(),
 });
 
 export type ToolJobType = z.infer<typeof ToolJobSchema>;
+
+
+// File: NewsAnalysis.schema.ts
+
+export const NewsAnalysisSchema = z.object({
+  id: z.string(),
+  organizationId: z.string().nullish(),
+  userId: z.string().nullish(),
+  sourceUrl: z.string().nullish(),
+  sourceText: z.string().nullish(),
+  title: z.string().nullish(),
+  analysis: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsAnalysisType = z.infer<typeof NewsAnalysisSchema>;
 
 
 // File: RateLimitEntry.schema.ts
