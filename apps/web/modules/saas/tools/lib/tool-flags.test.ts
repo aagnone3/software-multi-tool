@@ -31,10 +31,11 @@ vi.mock("@repo/config", () => ({
 					creditCost: 1,
 				},
 				{
-					slug: "diarization",
-					name: "Speaker Diarization",
-					description: "Identify speakers in audio",
-					icon: "users",
+					slug: "speaker-separation",
+					name: "Speaker Separation",
+					description:
+						"Separate and identify speakers in audio files",
+					icon: "audio-lines",
 					public: true,
 					enabled: true,
 					creditCost: 2,
@@ -87,21 +88,21 @@ describe("parseEnabledToolsEnv", () => {
 
 	it("parses multiple comma-separated tool slugs", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS =
-			"bg-remover,news-analyzer,diarization";
+			"bg-remover,news-analyzer,speaker-separation";
 		expect(parseEnabledToolsEnv()).toEqual([
 			"bg-remover",
 			"news-analyzer",
-			"diarization",
+			"speaker-separation",
 		]);
 	});
 
 	it("trims whitespace from slugs", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS =
-			" bg-remover , news-analyzer , diarization ";
+			" bg-remover , news-analyzer , speaker-separation ";
 		expect(parseEnabledToolsEnv()).toEqual([
 			"bg-remover",
 			"news-analyzer",
-			"diarization",
+			"speaker-separation",
 		]);
 	});
 
@@ -136,7 +137,7 @@ describe("isToolEnabled", () => {
 		it("returns true for tools with enabled: true in config", () => {
 			expect(isToolEnabled("bg-remover")).toBe(true);
 			expect(isToolEnabled("news-analyzer")).toBe(true);
-			expect(isToolEnabled("diarization")).toBe(true);
+			expect(isToolEnabled("speaker-separation")).toBe(true);
 		});
 
 		it("returns false for tools with enabled: false in config", () => {
@@ -158,7 +159,7 @@ describe("isToolEnabled", () => {
 		it("returns false for tools not in the allowlist", () => {
 			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
 			expect(isToolEnabled("news-analyzer")).toBe(false);
-			expect(isToolEnabled("diarization")).toBe(false);
+			expect(isToolEnabled("speaker-separation")).toBe(false);
 		});
 
 		it("returns false for tools disabled in config even if in allowlist", () => {
@@ -211,7 +212,7 @@ describe("getToolsWithStatus", () => {
 		expect(tools.map((t) => t.slug)).toEqual([
 			"bg-remover",
 			"news-analyzer",
-			"diarization",
+			"speaker-separation",
 			"disabled-tool",
 		]);
 	});
@@ -282,7 +283,7 @@ describe("getEnabledTools", () => {
 		expect(tools.map((t) => t.slug)).toEqual([
 			"bg-remover",
 			"news-analyzer",
-			"diarization",
+			"speaker-separation",
 		]);
 	});
 
@@ -324,14 +325,14 @@ describe("getVisibleTools", () => {
 		expect(tools.map((t) => t.slug)).toEqual([
 			"bg-remover",
 			"news-analyzer",
-			"diarization",
+			"speaker-separation",
 		]);
 	});
 
 	it("includes coming soon tools when env var is set", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
 		const tools = getVisibleTools();
-		// bg-remover (enabled) + news-analyzer + diarization (coming soon)
+		// bg-remover (enabled) + news-analyzer + speaker-separation (coming soon)
 		expect(tools).toHaveLength(3);
 		expect(tools.find((t) => t.slug === "bg-remover")?.isEnabled).toBe(
 			true,
@@ -339,9 +340,9 @@ describe("getVisibleTools", () => {
 		expect(
 			tools.find((t) => t.slug === "news-analyzer")?.isComingSoon,
 		).toBe(true);
-		expect(tools.find((t) => t.slug === "diarization")?.isComingSoon).toBe(
-			true,
-		);
+		expect(
+			tools.find((t) => t.slug === "speaker-separation")?.isComingSoon,
+		).toBe(true);
 	});
 
 	it("excludes config-disabled tools", () => {

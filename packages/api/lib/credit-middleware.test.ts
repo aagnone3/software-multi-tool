@@ -26,7 +26,7 @@ vi.mock("config", () => ({
 	getToolCreditCost: vi.fn((slug: string) => {
 		const costs: Record<string, number> = {
 			"bg-remover": 1,
-			diarization: 2,
+			"speaker-separation": 2,
 			"invoice-processor": 3,
 			"contract-analyzer": 5,
 		};
@@ -223,7 +223,7 @@ describe("creditMiddleware", () => {
 		app.get(
 			"/test",
 			creditMiddleware({
-				toolSlug: "diarization",
+				toolSlug: "speaker-separation",
 				bypassInDev: false,
 				getCost: (c) => {
 					const body = c.get("parsedBody") as {
@@ -244,9 +244,9 @@ describe("creditMiddleware", () => {
 		expect(creditsModule.deductCredits).toHaveBeenCalledWith({
 			organizationId: "org_123",
 			amount: 10,
-			toolSlug: "diarization",
+			toolSlug: "speaker-separation",
 			jobId: undefined,
-			description: "Tool usage: diarization",
+			description: "Tool usage: speaker-separation",
 		});
 	});
 

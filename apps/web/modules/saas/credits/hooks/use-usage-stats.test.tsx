@@ -61,7 +61,7 @@ describe("useUsageStats", () => {
 			totalOverage: 10,
 			byTool: [
 				{ toolSlug: "bg-remover", credits: 100, count: 100 },
-				{ toolSlug: "diarization", credits: 50, count: 25 },
+				{ toolSlug: "speaker-separation", credits: 50, count: 25 },
 			],
 			byPeriod: [
 				{ date: "2025-01-14", credits: 75 },
@@ -88,7 +88,7 @@ describe("useUsageStats", () => {
 			totalUsed: 150,
 			totalOverage: 0,
 			byTool: [
-				{ toolSlug: "diarization", credits: 50, count: 25 },
+				{ toolSlug: "speaker-separation", credits: 50, count: 25 },
 				{ toolSlug: "bg-remover", credits: 100, count: 100 },
 			],
 			byPeriod: [],
@@ -112,7 +112,7 @@ describe("useUsageStats", () => {
 			totalOverage: 0,
 			byTool: [
 				{ toolSlug: "bg-remover", credits: 100, count: 100 },
-				{ toolSlug: "diarization", credits: 50, count: 25 },
+				{ toolSlug: "speaker-separation", credits: 50, count: 25 },
 			],
 			byPeriod: [],
 		};

@@ -19,20 +19,6 @@ export const config = {
 				},
 			},
 			{
-				slug: "diarization",
-				name: "Speaker Diarization",
-				description: "Analyze audio to identify different speakers",
-				icon: "users",
-				public: true,
-				enabled: false,
-				creditCost: 2, // 2 credits per minute of audio
-				creditUnit: "minute",
-				rateLimits: {
-					anonymous: { requests: 3, window: "1d" },
-					authenticated: { requests: 30, window: "1h" },
-				},
-			},
-			{
 				slug: "speaker-separation",
 				name: "Speaker Separation",
 				description:
@@ -366,7 +352,7 @@ export function getPlanCredits(planId: string): PlanCredits | undefined {
 
 /**
  * Get the credit cost for a specific tool
- * @param toolSlug - The tool slug identifier (e.g., 'bg-remover', 'diarization')
+ * @param toolSlug - The tool slug identifier (e.g., 'bg-remover', 'speaker-separation')
  * @returns The credit cost for the tool, or undefined if tool doesn't exist
  */
 export function getToolCreditCost(toolSlug: string): number | undefined {

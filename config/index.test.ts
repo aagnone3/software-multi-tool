@@ -180,7 +180,7 @@ describe("tool credit costs", () => {
 
 	it("getToolCreditCost returns correct cost for known tools", () => {
 		expect(getToolCreditCost("bg-remover")).toBe(1);
-		expect(getToolCreditCost("diarization")).toBe(2);
+		expect(getToolCreditCost("speaker-separation")).toBe(2);
 		expect(getToolCreditCost("invoice-processor")).toBe(3);
 		expect(getToolCreditCost("contract-analyzer")).toBe(5);
 	});
@@ -190,10 +190,10 @@ describe("tool credit costs", () => {
 	});
 
 	it("variable-cost tools have creditUnit defined", () => {
-		const diarization = config.tools.registry.find(
-			(t) => t.slug === "diarization",
+		const speakerSeparation = config.tools.registry.find(
+			(t) => t.slug === "speaker-separation",
 		);
-		expect(diarization?.creditUnit).toBe("minute");
+		expect(speakerSeparation?.creditUnit).toBe("minute");
 
 		const contractAnalyzer = config.tools.registry.find(
 			(t) => t.slug === "contract-analyzer",
