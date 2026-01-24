@@ -380,22 +380,8 @@ async function findVercelPreviewDeployment(prNumber, branch = null) {
 		},
 	);
 
-	// Debug: Log deployments to understand metadata structure
-	const deployments = response.deployments || [];
-	if (deployments.length > 0) {
-		console.log(
-			`[Vercel] Found ${deployments.length} READY deployments, checking for PR #${prNumber} or branch "${branch}"...`,
-		);
-		// Log first 5 deployments for debugging
-		for (const d of deployments.slice(0, 5)) {
-			console.log(
-				`[Vercel]   - ${d.url}: githubPrId=${d.meta?.githubPrId}, githubCommitRef=${d.meta?.githubCommitRef}`,
-			);
-		}
-	}
-
 	// Find deployment with PR metadata or matching branch pattern
-	for (const deployment of deployments) {
+	for (const deployment of response.deployments || []) {
 		// Check if deployment has PR number in meta
 		if (deployment.meta?.githubPrId === String(prNumber)) {
 			return deployment;
