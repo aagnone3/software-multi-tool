@@ -24,21 +24,92 @@ This skill documents how the application is configured and deployed across three
 
 ## Local Development
 
-### Quick Start
+### Quick Start (Complete Setup)
+
+Follow these steps in order for a working local development environment:
 
 ```bash
 # 1. Install dependencies
 pnpm install
 
-# 2. Set up environment
+# 2. Set up web app environment
 cp apps/web/.env.local.example apps/web/.env.local
 
-# 3. Start Supabase local stack (optional, for full Supabase features)
-pnpm supabase:start
+# 3. Set up api-server environment
+cp apps/api-server/.env.example apps/api-server/.env.local
 
-# 4. Start development server
+# 4. Configure database connection in apps/web/.env.local
+#    Update these lines with your local PostgreSQL connection:
+#    POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+#    POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+
+# 5. Create local database (if not exists)
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 \
+  -c "CREATE DATABASE local_softwaremultitool;"
+
+# 6. Run database migrations
+pnpm --filter @repo/database migrate
+
+# 7. Seed test data (optional but recommended)
+PGPASSWORD=postgres psql -h localhost -U postgres \
+  -d local_softwaremultitool -f supabase/seed.sql
+
+# 8. Start development server
 pnpm dev
 ```
+
+**After startup:**
+
+- Web app: `http://localhost:3500`
+- API server: `http://localhost:4000`
+- Test login: `test@preview.local` / `PreviewPassword123!`
+
+### Database Options
+
+You have two mutually exclusive options for local database:
+
+#### Option A: Local PostgreSQL (Recommended for simplicity)
+
+Uses Homebrew PostgreSQL on port 5432. This is the default configuration.
+
+| Setting | Value |
+| ------- | ----- |
+| Database | `local_softwaremultitool` |
+| User | `postgres` |
+| Password | `postgres` |
+| Port | `5432` |
+
+**Connection string:**
+
+```text
+postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+```
+
+**Configure in `apps/web/.env.local`:**
+
+```bash
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+```
+
+#### Option B: Supabase Local Stack (For full Supabase features)
+
+Uses Docker-based Supabase on port 54322. Choose this if you need Storage, Realtime, or Edge Functions.
+
+**Start the stack:**
+
+```bash
+pnpm supabase:start
+```
+
+**Configure in `apps/web/.env.local`:**
+
+```bash
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:54322/postgres"
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:54322/postgres"
+```
+
+**Note:** When using local PostgreSQL (Option A), the `storage.buckets` tables from `seed.sql` will error (harmless) since the storage schema only exists in Supabase.
 
 ### Supabase Local Stack
 
@@ -69,30 +140,6 @@ The local Supabase stack provides API, Database, Studio, Storage, Realtime, and 
 - Docker running
 - Supabase CLI installed (`brew install supabase/tap/supabase`)
 
-### Local PostgreSQL (Alternative)
-
-For simpler setups without the full Supabase stack:
-
-| Setting | Value |
-| ------- | ----- |
-| Database | `local_softwaremultitool` |
-| User | `postgres` |
-| Password | `postgres` |
-| Port | `5432` |
-
-**Connection string:**
-
-```text
-postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
-```
-
-**Create database:**
-
-```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 \
-  -c "CREATE DATABASE local_softwaremultitool;"
-```
-
 ### Port Allocation
 
 Default ports for local development:
@@ -114,11 +161,21 @@ A test user is available for local development:
 | Email | `test@preview.local` |
 | Password | `PreviewPassword123!` |
 
-Seed the test user:
+**Seed the test user and sample data:**
 
 ```bash
-pnpm --filter @repo/database seed
+PGPASSWORD=postgres psql -h localhost -U postgres \
+  -d local_softwaremultitool -f supabase/seed.sql
 ```
+
+This seeds:
+
+- Test user and organization
+- Credit balance (500 included, 247 used, 100 purchased)
+- 17 credit transactions over 14 days
+- 8 tool jobs (7 completed, 1 failed)
+
+**Note:** Storage bucket inserts will error on local PostgreSQL (harmless - storage schema is Supabase-only).
 
 ## Preview Environment
 
@@ -218,6 +275,13 @@ const isVercel = !!process.env.VERCEL;
 
 ### Environment Variables
 
+**Required environment files:**
+
+| File | Purpose |
+| ---- | ------- |
+| `apps/web/.env.local` | Web app config, database connection strings |
+| `apps/api-server/.env.local` | API server config, auth secrets |
+
 **Loading order:**
 
 1. `.env` - Base configuration
@@ -229,7 +293,7 @@ const isVercel = !!process.env.VERCEL;
 
 | Variable | Local | Preview | Production |
 | -------- | ----- | ------- | ---------- |
-| `DATABASE_URL` | Local PG | Supabase branch | Supabase main |
+| `POSTGRES_PRISMA_URL` | Local PG | Supabase branch | Supabase main |
 | `NEXT_PUBLIC_SITE_URL` | `localhost:3500` | Preview URL | Production domain |
 | `BETTER_AUTH_URL` | `localhost:4000` | API proxy | Production API |
 
@@ -249,6 +313,12 @@ Migrations flow through the environment pipeline:
 Local Development → PR (Preview Branch) → Main (Production)
         ↓                   ↓                    ↓
     prisma migrate      supabase sync       prisma deploy
+```
+
+**Local migration command:**
+
+```bash
+pnpm --filter @repo/database migrate
 ```
 
 See the `prisma-migrate` skill for detailed migration workflows.
@@ -278,6 +348,9 @@ docker logs <container-id>
 
 # Reset database
 pnpm supabase:reset
+
+# Check database connectivity
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "SELECT 1"
 ```
 
 ### Preview Issues
