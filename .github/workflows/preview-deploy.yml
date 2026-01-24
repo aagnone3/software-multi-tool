@@ -1,6 +1,6 @@
 name: Preview Deploy
 
-# Deploy preview environments only when the 'deploy-preview' label is present.
+# Deploy preview environments only when the 'render-preview' label is present.
 # This reduces costs by not deploying full preview stacks for PRs that only need CI validation.
 
 on:
@@ -18,23 +18,23 @@ permissions:
   deployments: write
 
 jobs:
-  # Check if the deploy-preview label is present
+  # Check if the render-preview label is present
   check-label:
-    name: Check for deploy-preview label
+    name: Check for render-preview label
     runs-on: ubuntu-latest
     outputs:
       should_deploy: ${{ steps.check.outputs.should_deploy }}
     steps:
-      - name: Check for deploy-preview label
+      - name: Check for render-preview label
         id: check
         run: |
           LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
-          if echo "$LABELS" | jq -e 'index("deploy-preview")' > /dev/null 2>&1; then
+          if echo "$LABELS" | jq -e 'index("render-preview")' > /dev/null 2>&1; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
-            echo "deploy-preview label found - will deploy preview environments"
+            echo "render-preview label found - will deploy preview environments"
           else
             echo "should_deploy=false" >> $GITHUB_OUTPUT
-            echo "deploy-preview label not found - skipping preview deployment"
+            echo "render-preview label not found - skipping preview deployment"
           fi
 
   # Deploy to Vercel when label is present
@@ -85,7 +85,10 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prebuilt \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --meta githubPrId=${{ github.event.pull_request.number }} \
+            --meta githubCommitRef=${{ github.event.pull_request.head.ref }})
           echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $DEPLOY_URL"
         env:
@@ -105,7 +108,7 @@ jobs:
 
             **Preview URL**: ${previewUrl}
 
-            This deployment was triggered because the \`deploy-preview\` label was added to this PR.`;
+            This deployment was triggered because the \`render-preview\` label was added to this PR.`;
 
             // Find existing comment to update
             const { data: comments } = await github.rest.issues.listComments({
@@ -154,7 +157,7 @@ jobs:
 
             Full preview deployment (Vercel, Render) was skipped for this PR.
 
-            **To enable preview deployments**, add the \`deploy-preview\` label to this PR.
+            **To enable preview deployments**, add the \`render-preview\` label to this PR.
 
             > **Note**: CI checks (lint, type-check, tests) and Supabase preview branch (for E2E tests) are still running.`;
 
