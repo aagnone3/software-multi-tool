@@ -38,7 +38,7 @@ import {
 
 const RENDER_API_BASE = "https://api.render.com/v1";
 const VERCEL_API_BASE = "https://api.vercel.com";
-const RENDER_SERVICE_PREFIX = "software-multi-tool-pr-";
+const RENDER_SERVICE_PREFIX = "software-multi-tool PR #";
 
 // ============================================================================
 // Utility Functions
