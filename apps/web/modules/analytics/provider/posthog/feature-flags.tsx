@@ -154,13 +154,11 @@ export function FeatureFlagProvider({
 
 		// Timeout fallback - consider loaded after 3 seconds even if PostHog hasn't responded
 		const timeout = setTimeout(() => {
-			if (!isLoaded) {
-				setIsLoaded(true);
-			}
+			setIsLoaded((prev) => (prev ? prev : true));
 		}, 3000);
 
 		return () => clearTimeout(timeout);
-	}, [bootstrappedFlags, isLoaded]);
+	}, [bootstrappedFlags]);
 
 	// Identify user if distinctId is provided
 	useEffect(() => {
