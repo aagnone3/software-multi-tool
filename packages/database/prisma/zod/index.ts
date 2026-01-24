@@ -90,7 +90,7 @@ export type AgentSessionScalarFieldEnumEnum = z.infer<typeof AgentSessionScalarF
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'newsAnalysisId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
@@ -486,7 +486,6 @@ export const ToolJobSchema = z.object({
   error: z.string().nullish(),
   userId: z.string().nullish(),
   sessionId: z.string().nullish(),
-  newsAnalysisId: z.string().nullish(),
   attempts: z.number().int(),
   maxAttempts: z.number().int().default(3),
   startedAt: z.date().nullish(),
@@ -495,6 +494,7 @@ export const ToolJobSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   pgBossJobId: z.string().nullish(),
+  newsAnalysisId: z.string().nullish(),
 });
 
 export type ToolJobType = z.infer<typeof ToolJobSchema>;

@@ -7,6 +7,15 @@ export type JobStatus =
 	| "FAILED"
 	| "CANCELLED";
 
+export interface NewsAnalysisRecord {
+	id: string;
+	title: string | null;
+	sourceUrl: string | null;
+	sourceText: string | null;
+	analysis: NewsAnalysisOutput;
+	createdAt: Date;
+}
+
 export interface NewsAnalyzerJob {
 	id: string;
 	toolSlug: string;
@@ -20,7 +29,7 @@ export interface NewsAnalyzerJob {
 	createdAt: Date;
 	completedAt: Date | null;
 	startedAt?: Date | null;
-	newsAnalysisId?: string | null;
+	newsAnalysis?: NewsAnalysisRecord | null;
 }
 
 /**

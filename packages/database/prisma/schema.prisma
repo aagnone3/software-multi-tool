@@ -38,6 +38,7 @@ model User {
   files                   File[]
   invitations             Invitation[]
   members                 Member[]
+  newsAnalyses            NewsAnalysis[]
   notificationPreference  NotificationPreference?
   notifications           Notification[]
   passkeys                Passkey[]
@@ -45,7 +46,6 @@ model User {
   sessions                Session[]
   toolJobs                ToolJob[]
   twofactors              TwoFactor[]
-  newsAnalyses            NewsAnalysis[]
 
   @@map("user")
   @@schema("public")
@@ -278,7 +278,6 @@ model ToolJob {
   error          String?
   userId         String?
   sessionId      String?
-  newsAnalysisId String?       @unique
   attempts       Int           @default(0)
   maxAttempts    Int           @default(3)
   startedAt      DateTime?
@@ -287,6 +286,7 @@ model ToolJob {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   pgBossJobId    String?       @unique
+  newsAnalysisId String?       @unique
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
 
