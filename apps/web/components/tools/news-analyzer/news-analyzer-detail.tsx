@@ -210,13 +210,13 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				</Button>
 
 				<div className="flex items-center gap-2">
-					{/* Copy Share Link - only show for completed jobs with newsAnalysisId */}
-					{job.status === "COMPLETED" && job.newsAnalysisId && (
+					{/* Copy Share Link - only show for completed jobs with newsAnalysis */}
+					{job.status === "COMPLETED" && job.newsAnalysis?.id && (
 						<Button
 							variant="outline"
 							size="sm"
 							onClick={() => {
-								const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysisId}`;
+								const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
 								navigator.clipboard.writeText(shareUrl);
 								toast.success("Share link copied to clipboard");
 							}}
