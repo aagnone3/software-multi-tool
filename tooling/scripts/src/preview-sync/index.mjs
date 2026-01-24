@@ -363,7 +363,7 @@ async function vercelRequest(path, options = {}, query = {}) {
 	});
 }
 
-async function findVercelPreviewDeployment(prNumber) {
+async function findVercelPreviewDeployment(prNumber, branch = null) {
 	const projectId = process.env.VERCEL_PROJECT;
 	if (!projectId) {
 		throw new Error("VERCEL_PROJECT environment variable is required");
@@ -391,6 +391,11 @@ async function findVercelPreviewDeployment(prNumber) {
 		if (deployment.url?.includes(`-pr-${prNumber}-`)) {
 			return deployment;
 		}
+
+		// Check if deployment matches the branch name (most reliable for GitHub-triggered deployments)
+		if (branch && deployment.meta?.githubCommitRef === branch) {
+			return deployment;
+		}
 	}
 
 	return null;
@@ -402,6 +407,7 @@ async function waitForVercelPreview(prNumber, options = {}) {
 		initialDelay = 5000,
 		maxDelay = 30000,
 		backoffFactor = 1.5,
+		branch = null,
 	} = options;
 
 	const startTime = Date.now();
@@ -410,7 +416,7 @@ async function waitForVercelPreview(prNumber, options = {}) {
 
 	while (Date.now() - startTime < timeoutMs) {
 		attempt++;
-		const deployment = await findVercelPreviewDeployment(prNumber);
+		const deployment = await findVercelPreviewDeployment(prNumber, branch);
 
 		if (deployment && deployment.state === "READY") {
 			const url = `https://${deployment.url}`;
@@ -532,6 +538,12 @@ async function waitCommand(args) {
 		timeoutMs: args.supabaseTimeout * 1000,
 	};
 
+	// Vercel needs branch for matching (GitHub-triggered deployments use branch, not PR number)
+	const vercelWaitOptions = {
+		...waitOptions,
+		branch: args.branch,
+	};
+
 	// Wait for all three services in parallel
 	console.log("Starting parallel wait for all services...\n");
 
@@ -563,7 +575,7 @@ async function waitCommand(args) {
 
 			return { branch, credentials, apiCredentials };
 		})(),
-		waitForVercelPreview(args.prNumber, waitOptions),
+		waitForVercelPreview(args.prNumber, vercelWaitOptions),
 		waitForRenderPreview(args.prNumber, waitOptions),
 	]);
 
