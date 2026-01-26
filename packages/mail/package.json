@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@react-email/components": "0.5.1",
+		"@react-email/components": "0.5.7",
 		"@react-email/render": "1.4.0",
 		"@repo/config": "workspace:*",
 		"@repo/logs": "workspace:*",
