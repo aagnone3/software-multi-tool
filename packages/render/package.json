@@ -4,7 +4,7 @@
 	"main": "./index.ts",
 	"types": "./**/.ts",
 	"devDependencies": {
-		"@biomejs/biome": "2.3.11",
+		"@biomejs/biome": "2.3.12",
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "25.0.10",
 		"@vitest/coverage-v8": "4.0.17",
