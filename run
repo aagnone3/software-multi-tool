@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Wrapper script that ensures correct Node.js version before running commands
+# Usage: ./run pnpm dev
+#        ./run pnpm test
+#        ./run npm run build
+
+# Determine required Node.js version from .nvmrc
+if [ -f ".nvmrc" ]; then
+    REQUIRED_VERSION=$(cat .nvmrc | tr -d 'v' | cut -d. -f1)
+else
+    REQUIRED_VERSION="22"
+fi
+
+# Get current Node.js major version
+CURRENT_VERSION=$(node --version 2>/dev/null | tr -d 'v' | cut -d. -f1)
+
+# Check if we need to switch versions
+if [ "$CURRENT_VERSION" != "$REQUIRED_VERSION" ]; then
+    # Load nvm
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        echo "🔄 Switching from Node.js v$CURRENT_VERSION to v$REQUIRED_VERSION..."
+        \. "$NVM_DIR/nvm.sh"
+        nvm use "$REQUIRED_VERSION" || { echo "❌ Failed to switch. Run: nvm install $REQUIRED_VERSION"; exit 1; }
+        echo "✓ Now using Node.js $(node --version)"
+    # Try fnm
+    elif command -v fnm &> /dev/null; then
+        echo "🔄 Switching from Node.js v$CURRENT_VERSION to v$REQUIRED_VERSION using fnm..."
+        eval "$(fnm env)"
+        fnm use "$REQUIRED_VERSION" --install-if-missing
+        echo "✓ Now using Node.js $(node --version)"
+    else
+        echo "❌ Node.js v$REQUIRED_VERSION required but v$CURRENT_VERSION is active."
+        echo "   Install nvm or fnm, then run: nvm install $REQUIRED_VERSION"
+        exit 1
+    fi
+fi
+
+# Run the actual command
+exec "$@"
