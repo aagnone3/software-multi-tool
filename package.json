@@ -31,7 +31,7 @@
 		"supabase:reset": "./tooling/scripts/src/supabase/supabase-local.sh reset"
 	},
 	"engines": {
-		"node": ">=22.0.0 <23.0.0"
+		"node": "v22.22.0"
 	},
 	"packageManager": "pnpm@10.27.0",
 	"optionalDependencies": {
