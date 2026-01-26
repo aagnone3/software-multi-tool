@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@better-auth/passkey": "1.4.15",
+		"@better-auth/passkey": "1.4.17",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
 		"@repo/logs": "workspace:*",
