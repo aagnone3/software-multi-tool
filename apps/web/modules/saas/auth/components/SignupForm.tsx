@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsFeatureEnabled } from "@analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -63,6 +64,19 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	});
 
 	const invitationOnlyMode = !config.auth.enableSignup && invitationId;
+
+	// Feature flag for GitHub authentication
+	const isGithubLoginEnabled = useIsFeatureEnabled("enable-github-login");
+
+	// Filter OAuth providers based on feature flags
+	const filteredOAuthProviders = Object.keys(oAuthProviders).filter(
+		(providerId) => {
+			if (providerId === "github" && !isGithubLoginEnabled) {
+				return false;
+			}
+			return true;
+		},
+	);
 
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
@@ -229,7 +243,8 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 					</Form>
 
 					{config.auth.enableSignup &&
-						config.auth.enableSocialLogin && (
+						config.auth.enableSocialLogin &&
+						filteredOAuthProviders.length > 0 && (
 							<>
 								<div className="relative my-6 h-4">
 									<hr className="relative top-2" />
@@ -239,7 +254,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								</div>
 
 								<div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2">
-									{Object.keys(oAuthProviders).map(
+									{filteredOAuthProviders.map(
 										(providerId) => (
 											<SocialSigninButton
 												key={providerId}
