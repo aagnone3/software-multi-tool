@@ -6,6 +6,44 @@ import Fastify from "fastify";
 import { env } from "../config/env.js";
 import { logger } from "./logger.js";
 
+/**
+ * Validate CORS origin for Fastify.
+ * Allows the configured CORS_ORIGIN plus all *.vercel.app origins
+ * (for preview environment cross-origin requests).
+ */
+function validateCorsOrigin(
+	origin: string | undefined,
+	callback: (err: Error | null, allow: boolean) => void,
+): void {
+	// Allow requests with no origin (e.g., same-origin, curl, mobile apps)
+	if (!origin) {
+		callback(null, true);
+		return;
+	}
+
+	// Allow the configured CORS_ORIGIN
+	if (origin === env.CORS_ORIGIN) {
+		callback(null, true);
+		return;
+	}
+
+	// Allow any *.vercel.app origin (for preview environments)
+	// This is safe because the api-server only runs in preview
+	if (/^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) {
+		callback(null, true);
+		return;
+	}
+
+	// Allow localhost origins for development/testing
+	if (/^http:\/\/localhost(:\d+)?$/.test(origin)) {
+		callback(null, true);
+		return;
+	}
+
+	// Reject other origins
+	callback(null, false);
+}
+
 export async function createServer(): Promise<FastifyInstance> {
 	const server = Fastify({
 		logger: {
@@ -16,9 +54,9 @@ export async function createServer(): Promise<FastifyInstance> {
 		trustProxy: true,
 	});
 
-	// Register CORS plugin
+	// Register CORS plugin with dynamic origin validation
 	await server.register(cors, {
-		origin: env.CORS_ORIGIN,
+		origin: validateCorsOrigin,
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization"],
