@@ -9,13 +9,11 @@ export function getTrustedOrigins(): string[] {
 	const appUrl = getBaseUrl();
 	const trustedOrigins = [appUrl];
 
-	// Add Vercel wildcard for preview environments (both Vercel and Render)
+	// Add Vercel wildcard for preview environments
+	// - On Vercel: VERCEL env var is set
+	// - On Render: RENDER env var is always set (api-server only runs in preview)
 	// This allows cross-origin requests from Vercel preview to Render preview
-	const isPreviewEnvironment =
-		process.env.VERCEL || // Running on Vercel
-		process.env.IS_PULL_REQUEST === "true"; // Running on Render PR preview
-
-	if (isPreviewEnvironment) {
+	if (process.env.VERCEL || process.env.RENDER) {
 		trustedOrigins.push("https://*.vercel.app");
 	}
 
