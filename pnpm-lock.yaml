@@ -1050,8 +1050,8 @@ importers:
   tooling/scripts:
     dependencies:
       '@linear/sdk':
-        specifier: 60.0.0
-        version: 60.0.0(encoding@0.1.13)
+        specifier: 60.0.1
+        version: 60.0.1(encoding@0.1.13)
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -2670,8 +2670,8 @@ packages:
   '@levischuck/tiny-cbor@0.2.11':
     resolution: {integrity: sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==}
 
-  '@linear/sdk@60.0.0':
-    resolution: {integrity: sha512-6mllj354yC4iJ3euXvijisCQdTIlr77gpUl9Oit8qJYGXegtHZv+RwySdiLfNS6bXQy/Z5e0IYXXNg2sv9UrUQ==}
+  '@linear/sdk@60.0.1':
+    resolution: {integrity: sha512-aQwWxycTwvEFBMA9dQp8LiyB9Msiwikk8a8oVQ7XxfHiUZ6I6SrkQV8QJ0NYdfucTqFZzY8XB3Nc/GO3aSFatQ==}
     engines: {node: '>=12.x', yarn: 1.x}
 
   '@mdx-js/esbuild@3.1.1':
@@ -11887,7 +11887,7 @@ snapshots:
 
   '@levischuck/tiny-cbor@0.2.11': {}
 
-  '@linear/sdk@60.0.0(encoding@0.1.13)':
+  '@linear/sdk@60.0.1(encoding@0.1.13)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@15.10.1)
       graphql: 15.10.1
