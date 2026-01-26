@@ -222,6 +222,7 @@ model AgentSession {
   userId         String   // Required - authenticated users only
   organizationId String?  // Optional organization context
   toolSlug       String?  // Tool context if invoked from a tool
+  toolId         String?  // Optional FK for backwards compatibility
   jobId          String?  // Job ID if invoked from a specific job
   isComplete     Boolean  @default(false)
   /// [SessionMessages]
@@ -234,20 +235,47 @@ model AgentSession {
   totalOutputTokens Int   @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  tool           Tool?    @relation(fields: [toolId], references: [id], onDelete: SetNull)
 
   @@index([sessionType])
   @@index([userId])
   @@index([organizationId])
   @@index([toolSlug])
+  @@index([toolId])
   @@index([jobId])
   @@index([isComplete])
   @@map("agent_session")
   @@schema("public")
 }
 
+// Tool registry for proper FK relationships
+// Source of truth remains config/index.ts; this table is synced on deployment
+model Tool {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?
+  creditCost  Int      @default(1)
+  creditUnit  String   @default("request") // "request" | "minute" | "page"
+  enabled     Boolean  @default(true)
+  public      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs              ToolJob[]
+  creditTransactions CreditTransaction[]
+  rateLimitEntries  RateLimitEntry[]
+  agentSessions     AgentSession[]
+
+  @@map("tool")
+  @@schema("public")
+}
+
 model ToolJob {
   id             String        @id @default(cuid())
   toolSlug       String
+  toolId         String?       // Optional FK for backwards compatibility
   status         ToolJobStatus @default(PENDING)
   priority       Int           @default(0)
   input          Json
@@ -266,9 +294,11 @@ model ToolJob {
   newsAnalysisId String?       @unique
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
+  tool           Tool?         @relation(fields: [toolId], references: [id], onDelete: SetNull)
 
   @@index([status, priority])
   @@index([toolSlug, status])
+  @@index([toolId])
   @@index([userId])
   @@index([sessionId])
   @@index([expiresAt])
@@ -302,14 +332,17 @@ model RateLimitEntry {
   id          String   @id @default(cuid())
   identifier  String
   toolSlug    String
+  toolId      String?  // Optional FK for backwards compatibility
   windowStart DateTime
   windowEnd   DateTime
   count       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  tool        Tool?    @relation(fields: [toolId], references: [id], onDelete: SetNull)
 
   @@unique([identifier, toolSlug, windowStart])
   @@index([identifier, toolSlug])
+  @@index([toolId])
   @@index([windowEnd])
   @@map("rate_limit_entry")
   @@schema("public")
@@ -341,13 +374,16 @@ model CreditTransaction {
   amount      Int
   type        CreditTransactionType
   toolSlug    String?
+  toolId      String?               // Optional FK for backwards compatibility
   jobId       String?
   description String?
   createdAt   DateTime              @default(now())
   balance     CreditBalance         @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  tool        Tool?                 @relation(fields: [toolId], references: [id], onDelete: SetNull)
 
   @@index([balanceId])
   @@index([toolSlug])
+  @@index([toolId])
   @@index([createdAt])
   @@map("credit_transaction")
   @@schema("public")
