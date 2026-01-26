@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@linear/sdk": "60.0.0",
+		"@linear/sdk": "60.0.1",
 		"@repo/auth": "workspace:*",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
