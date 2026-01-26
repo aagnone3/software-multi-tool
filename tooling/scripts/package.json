@@ -14,10 +14,10 @@
 		"@biomejs/biome": "2.3.12",
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "25.0.10",
-		"@vitest/coverage-v8": "4.0.17",
+		"@vitest/coverage-v8": "4.0.18",
 		"nanoid": "5.1.5",
 		"tsx": "4.21.0",
-		"vitest": "4.0.17"
+		"vitest": "4.0.18"
 	},
 	"name": "@repo/scripts",
 	"private": true,
