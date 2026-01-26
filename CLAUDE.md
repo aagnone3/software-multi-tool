@@ -121,7 +121,7 @@ Test user credentials:
 | Field    | Value                 |
 | -------- | --------------------- |
 | Email    | test@preview.local    |
-| Password | PreviewPassword123!   |
+| Password | TestPassword123       |
 
 ### Stripe Webhooks
 

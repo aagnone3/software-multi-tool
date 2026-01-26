@@ -162,7 +162,7 @@ export function LoginForm() {
 		try {
 			const { data, error } = await authClient.signIn.email({
 				email: "test@preview.local",
-				password: "PreviewPassword123!",
+				password: "TestPassword123",
 			});
 
 			if (error) {

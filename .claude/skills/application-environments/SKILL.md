@@ -80,7 +80,7 @@ All preview environments have a test user:
 | Field | Value |
 | ----- | ----- |
 | Email | `test@preview.local` |
-| Password | `PreviewPassword123!` |
+| Password | `TestPassword123` |
 
 The login page shows "Quick Login as Test User" in preview environments.
 
