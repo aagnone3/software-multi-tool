@@ -1,7 +1,6 @@
 import { ORPCError } from "@orpc/client";
 import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
-import { trackToolServerEvent } from "../../../lib/analytics";
 import { publicProcedure } from "../../../orpc/procedures";
 import { submitJobToQueue } from "../lib/queue";
 import { CreateJobInputSchema } from "../types";
@@ -68,17 +67,6 @@ export const createJob = publicProcedure
 					`[CreateJob] Returning cached job: ${cachedJob.id} (status: ${cachedJob.status})`,
 				);
 
-				// Track cache hit event (non-blocking)
-				trackToolServerEvent("tool_cache_hit", {
-					tool_name: toolSlug,
-					job_id: cachedJob.id,
-					is_authenticated: !!userId,
-					session_id: sessionId,
-					user_id: userId,
-				}).catch(() => {
-					// Ignore analytics errors
-				});
-
 				// Return the cached job (already completed)
 				return { job: cachedJob };
 			}
@@ -107,18 +95,6 @@ export const createJob = publicProcedure
 			`[CreateJob] Job created successfully: ${job.id} (status: ${job.status})`,
 		);
 
-		// Track job creation event (non-blocking)
-		trackToolServerEvent("tool_job_created", {
-			tool_name: toolSlug,
-			job_id: job.id,
-			is_authenticated: !!userId,
-			session_id: sessionId,
-			user_id: userId,
-			input_type: detectInputType(jobInput),
-		}).catch(() => {
-			// Ignore analytics errors
-		});
-
 		// Submit job to pg-boss queue for worker processing
 		// Workers in api-server will pick up the job and process it
 		// Cron handles maintenance only (stuck jobs, cleanup)
@@ -145,31 +121,3 @@ export const createJob = publicProcedure
 
 		return { job };
 	});
-
-/**
- * Detect the input type from job input for analytics
- */
-function detectInputType(
-	input: Record<string, unknown> | null | undefined,
-): string | undefined {
-	if (!input) {
-		return undefined;
-	}
-
-	// Check for URL input
-	if (input.articleUrl || input.url || input.sourceUrl) {
-		return "url";
-	}
-
-	// Check for text input
-	if (input.articleText || input.text || input.content) {
-		return "text";
-	}
-
-	// Check for file input
-	if (input.fileUrl || input.file || input.audioUrl) {
-		return "file";
-	}
-
-	return "other";
-}

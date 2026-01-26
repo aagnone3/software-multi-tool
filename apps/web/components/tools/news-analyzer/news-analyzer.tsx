@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from "@ui/components/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useToolAnalytics } from "../../../modules/tools/analytics";
 import { NewsAnalyzerForm } from "./news-analyzer-form";
 import type { NewsAnalysisOutput } from "./news-analyzer-results";
 
@@ -35,19 +34,9 @@ export function NewsAnalyzer() {
 	const isMountedRef = useRef(true);
 	const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Analytics tracking
-	const {
-		trackToolViewed,
-		trackProcessingStarted,
-		trackProcessingCompleted,
-		trackProcessingFailed,
-	} = useToolAnalytics({ toolName: "news-analyzer" });
-	const processingStartTime = useRef<number | null>(null);
-
-	// Track page view on mount and cleanup on unmount
+	// Cleanup on unmount
 	useEffect(() => {
 		isMountedRef.current = true;
-		trackToolViewed();
 
 		return () => {
 			isMountedRef.current = false;
@@ -57,7 +46,7 @@ export function NewsAnalyzer() {
 				pollingIntervalRef.current = null;
 			}
 		};
-	}, [trackToolViewed]);
+	}, []);
 
 	// Create job mutation
 	const createJobMutation = useMutation({
@@ -80,34 +69,12 @@ export function NewsAnalyzer() {
 
 			// If job is already completed (from cache), navigate to detail page
 			if (job.status === "COMPLETED" && job.output) {
-				// Track completion from cache
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingCompleted({
-					jobId: job.id,
-					processingDurationMs: duration,
-					fromCache: true,
-				});
-				processingStartTime.current = null;
-
 				// Navigate to detail page (only if still mounted)
 				if (isMountedRef.current) {
 					router.push(`/app/tools/news-analyzer/${job.id}`);
 				}
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Job failed");
-
-				// Track failure
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingFailed({
-					jobId: job.id,
-					errorType: "job_failed",
-					processingDurationMs: duration,
-				});
-				processingStartTime.current = null;
 			} else {
 				// Start polling for job completion
 				setJobId(job.id);
@@ -120,17 +87,6 @@ export function NewsAnalyzer() {
 					? err.message
 					: "Failed to create analysis job";
 			setError(errorMessage);
-
-			// Track failure on job creation
-			const duration = processingStartTime.current
-				? Date.now() - processingStartTime.current
-				: 0;
-			trackProcessingFailed({
-				jobId: "creation_failed",
-				errorType: "job_creation_failed",
-				processingDurationMs: duration,
-			});
-			processingStartTime.current = null;
 		},
 	});
 
@@ -145,17 +101,6 @@ export function NewsAnalyzer() {
 				"Analysis is taking longer than expected. Please try again later.",
 			);
 			stopPolling();
-
-			// Track timeout
-			const duration = processingStartTime.current
-				? Date.now() - processingStartTime.current
-				: 0;
-			trackProcessingFailed({
-				jobId: id,
-				errorType: "polling_timeout",
-				processingDurationMs: duration,
-			});
-			processingStartTime.current = null;
 			return;
 		}
 
@@ -169,17 +114,6 @@ export function NewsAnalyzer() {
 			if (job.status === "COMPLETED" && job.output) {
 				stopPolling();
 
-				// Track completion
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingCompleted({
-					jobId: id,
-					processingDurationMs: duration,
-					fromCache: false,
-				});
-				processingStartTime.current = null;
-
 				// Navigate to detail page (only if still mounted)
 				if (isMountedRef.current) {
 					router.push(`/app/tools/news-analyzer/${id}`);
@@ -187,31 +121,9 @@ export function NewsAnalyzer() {
 			} else if (job.status === "FAILED") {
 				setError(job.error ?? "Analysis failed");
 				stopPolling();
-
-				// Track failure
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingFailed({
-					jobId: id,
-					errorType: "job_failed",
-					processingDurationMs: duration,
-				});
-				processingStartTime.current = null;
 			} else if (job.status === "CANCELLED") {
 				setError("Analysis was cancelled");
 				stopPolling();
-
-				// Track cancellation
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingFailed({
-					jobId: id,
-					errorType: "job_cancelled",
-					processingDurationMs: duration,
-				});
-				processingStartTime.current = null;
 			}
 			// Continue polling if PENDING or PROCESSING
 		} catch (err) {
@@ -226,17 +138,6 @@ export function NewsAnalyzer() {
 						: "Failed to check job status after multiple attempts",
 				);
 				stopPolling();
-
-				// Track polling error
-				const duration = processingStartTime.current
-					? Date.now() - processingStartTime.current
-					: 0;
-				trackProcessingFailed({
-					jobId: id,
-					errorType: "polling_error",
-					processingDurationMs: duration,
-				});
-				processingStartTime.current = null;
 			}
 			// Otherwise, silently continue polling - the error may be transient
 		}
@@ -280,11 +181,6 @@ export function NewsAnalyzer() {
 	}) => {
 		setError(null);
 		setJobId(null);
-
-		// Track processing started (client-side timer)
-		processingStartTime.current = Date.now();
-		trackProcessingStarted({ jobId: "pending", fromCache: false });
-
 		createJobMutation.mutate(data);
 	};
 
