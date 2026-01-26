@@ -21,7 +21,7 @@
 		"@types/jsdom": "27.0.0",
 		"@types/node": "25.0.10",
 		"@types/nodemailer": "7.0.1",
-		"@types/react": "19.2.8",
+		"@types/react": "19.2.9",
 		"@vitest/coverage-v8": "4.0.17",
 		"jsdom": "27.4.0",
 		"vitest": "4.0.17"
