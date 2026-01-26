@@ -16,7 +16,7 @@
 		"@repo/payments": "workspace:*",
 		"@repo/storage": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@scalar/hono-api-reference": "0.9.16",
+		"@scalar/hono-api-reference": "0.9.37",
 		"@sindresorhus/slugify": "2.2.1",
 		"assemblyai": "^4.22.1",
 		"cookie": "1.1.1",

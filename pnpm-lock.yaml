@@ -638,8 +638,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
       '@scalar/hono-api-reference':
-        specifier: 0.9.16
-        version: 0.9.16(hono@4.11.3)
+        specifier: 0.9.37
+        version: 0.9.37(hono@4.11.3)
       '@sindresorhus/slugify':
         specifier: 2.2.1
         version: 2.2.1
@@ -4210,22 +4210,22 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@scalar/core@0.3.14':
-    resolution: {integrity: sha512-Fjgscu148WY1g28VNVZikQxGX8iwronPttIoCf7ayausnVMWX6s6wOZm0D3StNbxqMl2js8FQ/s0GlfCAG6XEg==}
+  '@scalar/core@0.3.34':
+    resolution: {integrity: sha512-dZnpkrnjiPvPLa/sIdjoaxdVoYowWUqC5nCCXJI+29laMIII6dCze8ThxLPGN1b9gJ8cYcQwBrwr+RNCjqJgdQ==}
     engines: {node: '>=20'}
 
-  '@scalar/hono-api-reference@0.9.16':
-    resolution: {integrity: sha512-kItGQFtZfUjKCI0L5B1WwVJ2Vf61ixFf4QqvjfwEiNh8hWirwkqGLlFwPGlvwZVGzuScfoVJrpXUjQQ782txUw==}
+  '@scalar/helpers@0.2.9':
+    resolution: {integrity: sha512-Y4ffJF0yELdwZ0BKgonqn3SumIgRn1WKyYCVHD+TDM7qRFChdGRypyt20+efHs26fmJeyBAIIv2laICj5uimiw==}
+    engines: {node: '>=20'}
+
+  '@scalar/hono-api-reference@0.9.37':
+    resolution: {integrity: sha512-eprpFplQoirRmfC5fWo90jLQX5x01H7QS2XrRDmNES207eaEvtUZHyW9vPV7Bi9ltjrnqG8WK2oPMd/uZClptg==}
     engines: {node: '>=20'}
     peerDependencies:
-      hono: ^4.0.0
+      hono: ^4.10.3
 
-  '@scalar/openapi-types@0.3.7':
-    resolution: {integrity: sha512-QHSvHBVDze3+dUwAhIGq6l1iOev4jdoqdBK7QpfeN1Q4h+6qpVEw3EEqBiH0AXUSh/iWwObBv4uMgfIx0aNZ5g==}
-    engines: {node: '>=20'}
-
-  '@scalar/types@0.2.13':
-    resolution: {integrity: sha512-rO6KGMJqOsBnN/2R4fErMFLpRSPVJElni+HABDpf+ZlLJp2lvxuPn0IXLumK5ytfplUH9iqKgSXjndnZfxSYLQ==}
+  '@scalar/types@0.5.10':
+    resolution: {integrity: sha512-37qAHQC2J7O+Mt8u0HOZttTQPQ1OEWKWxo9SMbahYKTosL9k1KtTG2F3EB33EkW3WqEVQitkUKrM0+MVM2HeYQ==}
     engines: {node: '>=20'}
 
   '@schummar/icu-type-parser@1.21.5':
@@ -8023,6 +8023,11 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
+  nanoid@5.1.6:
+    resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   nanostores@1.1.0:
     resolution: {integrity: sha512-yJBmDJr18xy47dbNVlHcgdPrulSn1nhSE6Ns9vTG+Nx9VPT6iV1MD6aQFp/t52zpf82FhLLTXAXr30NuCnxvwA==}
     engines: {node: ^20.0.0 || >=22.0.0}
@@ -9978,9 +9983,6 @@ packages:
 
   zlibjs@0.3.1:
     resolution: {integrity: sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w==}
-
-  zod@3.24.1:
-    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
   zod@4.3.5:
     resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
@@ -13511,24 +13513,23 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.55.1':
     optional: true
 
-  '@scalar/core@0.3.14':
+  '@scalar/core@0.3.34':
     dependencies:
-      '@scalar/types': 0.2.13
+      '@scalar/types': 0.5.10
 
-  '@scalar/hono-api-reference@0.9.16(hono@4.11.3)':
+  '@scalar/helpers@0.2.9': {}
+
+  '@scalar/hono-api-reference@0.9.37(hono@4.11.3)':
     dependencies:
-      '@scalar/core': 0.3.14
+      '@scalar/core': 0.3.34
       hono: 4.11.3
 
-  '@scalar/openapi-types@0.3.7':
+  '@scalar/types@0.5.10':
     dependencies:
-      zod: 3.24.1
-
-  '@scalar/types@0.2.13':
-    dependencies:
-      '@scalar/openapi-types': 0.3.7
-      nanoid: 5.1.5
-      zod: 3.24.1
+      '@scalar/helpers': 0.2.9
+      nanoid: 5.1.6
+      type-fest: 5.4.1
+      zod: 4.3.5
 
   '@schummar/icu-type-parser@1.21.5': {}
 
@@ -18205,6 +18206,8 @@ snapshots:
 
   nanoid@5.1.5: {}
 
+  nanoid@5.1.6: {}
+
   nanostores@1.1.0: {}
 
   negotiator@0.6.3: {}
@@ -20408,8 +20411,6 @@ snapshots:
       readable-stream: 4.7.0
 
   zlibjs@0.3.1: {}
-
-  zod@3.24.1: {}
 
   zod@4.3.5: {}
 
