@@ -29,7 +29,7 @@
 		"supabase:stop": "./tooling/scripts/src/supabase/supabase-local.sh stop",
 		"supabase:status": "./tooling/scripts/src/supabase/supabase-local.sh status",
 		"supabase:reset": "./tooling/scripts/src/supabase/supabase-local.sh reset",
-		"cli": "pnpm --filter @repo/cli cli"
+		"mt": "pnpm --filter @repo/cli mt"
 	},
 	"engines": {
 		"node": ">=22.0.0 <23.0.0"

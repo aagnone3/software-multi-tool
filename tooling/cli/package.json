@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"cli": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/index.ts"
+		"mt": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/index.ts"
 	},
 	"dependencies": {
 		"chalk": "5.4.1",
