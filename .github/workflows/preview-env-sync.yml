@@ -1,11 +1,11 @@
 name: Preview Environment Sync
 
 # Synchronize environment variables across Supabase, Vercel, and Render
-# preview environments when a PR has the 'deploy-preview' label.
+# preview environments when a PR has the 'render-preview' label.
 #
 # This workflow only runs when:
-# 1. The 'deploy-preview' label is added to a PR
-# 2. A PR with 'deploy-preview' label is updated (synchronize/reopened)
+# 1. The 'render-preview' label is added to a PR
+# 2. A PR with 'render-preview' label is updated (synchronize/reopened)
 # 3. Manually triggered via workflow_dispatch
 
 on:
@@ -40,13 +40,13 @@ jobs:
 
     # Only run if:
     # 1. workflow_dispatch (manual trigger)
-    # 2. PR has 'deploy-preview' label AND is not from a fork
+    # 2. PR has 'render-preview' label AND is not from a fork
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'pull_request' &&
         github.event.pull_request.head.repo.full_name == github.repository &&
-        contains(github.event.pull_request.labels.*.name, 'deploy-preview')
+        contains(github.event.pull_request.labels.*.name, 'render-preview')
       )
 
     steps:

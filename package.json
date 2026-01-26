@@ -24,7 +24,12 @@
 		"worktree:create": "./tooling/scripts/src/worktree-setup.sh create",
 		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
 		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",
-		"worktree:resume": "./tooling/scripts/src/worktree-setup.sh resume"
+		"worktree:resume": "./tooling/scripts/src/worktree-setup.sh resume",
+		"supabase:check": "./tooling/scripts/src/supabase/supabase-local.sh check",
+		"supabase:start": "./tooling/scripts/src/supabase/supabase-local.sh start",
+		"supabase:stop": "./tooling/scripts/src/supabase/supabase-local.sh stop",
+		"supabase:status": "./tooling/scripts/src/supabase/supabase-local.sh status",
+		"supabase:reset": "./tooling/scripts/src/supabase/supabase-local.sh reset"
 	},
 	"engines": {
 		"node": ">=22.0.0 <23.0.0"
