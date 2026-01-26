@@ -670,6 +670,9 @@ importers:
       pdf-parse:
         specifier: 1.1.1
         version: 1.1.1
+      posthog-node:
+        specifier: ^5.24.2
+        version: 5.24.2
       sharp:
         specifier: ^0.34.2
         version: 0.34.3
@@ -3280,6 +3283,9 @@ packages:
 
   '@polar-sh/sdk@0.42.1':
     resolution: {integrity: sha512-4euyChnpZcjho2KhwnSXCBhJr5m8k+oaIicvwFHOZ/cXxKIKh7+EicJagSKg6jmuuq4YMOFhsxreHk3qqKXdWQ==}
+
+  '@posthog/core@1.14.0':
+    resolution: {integrity: sha512-havjGYHwL8Gy6LXIR911h+M/sYlJLQbepxP/cc1M7Cp3v8F92bzpqkbuvUIUyb7/izkxfGwc9wMqKAo0QxMTrg==}
 
   '@posthog/core@1.9.0':
     resolution: {integrity: sha512-j7KSWxJTUtNyKynLt/p0hfip/3I46dWU2dk+pt7dKRoz2l5CYueHuHK4EO7Wlgno5yo1HO4sc4s30MXMTICHJw==}
@@ -8460,6 +8466,10 @@ packages:
   posthog-js@1.313.0:
     resolution: {integrity: sha512-CL8RkC7m9BTZrix86w0fdnSCVqC/gxrfs6c4Wfkz/CldFD7f2912S2KqnWFmwRVDGIwm9IR82YhublQ88gdDKw==}
 
+  posthog-node@5.24.2:
+    resolution: {integrity: sha512-cywIUYtSIC9BilgLlZd1R2xNk6omKL6tywG/SCPmUJKeG2jhjvJHSrHXYx4x3uQsUjn8aB9UVI8km+W326Zm8g==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+
   preact@10.28.2:
     resolution: {integrity: sha512-lbteaWGzGHdlIuiJ0l2Jq454m6kcpI1zNje6d8MlGAFlYvP2GO4ibnat7P74Esfz4sPTdM6UxtTwh/d3pwM9JA==}
 
@@ -12597,6 +12607,10 @@ snapshots:
     dependencies:
       standardwebhooks: 1.0.0
       zod: 4.3.5
+
+  '@posthog/core@1.14.0':
+    dependencies:
+      cross-spawn: 7.0.6
 
   '@posthog/core@1.9.0':
     dependencies:
@@ -18618,6 +18632,10 @@ snapshots:
       fflate: 0.4.8
       preact: 10.28.2
       web-vitals: 4.2.4
+
+  posthog-node@5.24.2:
+    dependencies:
+      '@posthog/core': 1.14.0
 
   preact@10.28.2: {}
 

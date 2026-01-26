@@ -34,3 +34,17 @@ export function useAnalytics() {
 		trackEvent,
 	};
 }
+
+export type {
+	FeatureFlagMap,
+	FeatureFlagProviderProps,
+	FeatureFlagValue,
+} from "./feature-flags";
+// Re-export feature flag components and hooks
+export {
+	FeatureFlagProvider,
+	useFeatureFlag,
+	useFeatureFlagContext,
+	useFeatureFlags,
+	useIsFeatureEnabled,
+} from "./feature-flags";
