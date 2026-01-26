@@ -287,8 +287,8 @@ importers:
         specifier: 15.8.5
         version: 15.8.5(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(lucide-react@0.562.0(react@19.2.3))(next@15.5.9(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       hono:
-        specifier: 4.11.3
-        version: 4.11.3
+        specifier: 4.11.5
+        version: 4.11.5
       input-otp:
         specifier: 1.4.2
         version: 1.4.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -639,7 +639,7 @@ importers:
         version: link:../utils
       '@scalar/hono-api-reference':
         specifier: 0.9.37
-        version: 0.9.37(hono@4.11.3)
+        version: 0.9.37(hono@4.11.5)
       '@sindresorhus/slugify':
         specifier: 2.2.1
         version: 2.2.1
@@ -650,8 +650,8 @@ importers:
         specifier: 1.1.1
         version: 1.1.1
       hono:
-        specifier: 4.11.3
-        version: 4.11.3
+        specifier: 4.11.5
+        version: 4.11.5
       linkedom:
         specifier: 0.18.9
         version: 0.18.9
@@ -7176,8 +7176,8 @@ packages:
   hast-util-whitespace@3.0.0:
     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
 
-  hono@4.11.3:
-    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
+  hono@4.11.5:
+    resolution: {integrity: sha512-WemPi9/WfyMwZs+ZUXdiwcCh9Y+m7L+8vki9MzDw3jJ+W9Lc+12HGsd368Qc1vZi1xwW8BWMMsnK5efYKPdt4g==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@2.8.9:
@@ -13635,10 +13635,10 @@ snapshots:
 
   '@scalar/helpers@0.2.9': {}
 
-  '@scalar/hono-api-reference@0.9.37(hono@4.11.3)':
+  '@scalar/hono-api-reference@0.9.37(hono@4.11.5)':
     dependencies:
       '@scalar/core': 0.3.34
-      hono: 4.11.3
+      hono: 4.11.5
 
   '@scalar/types@0.5.10':
     dependencies:
@@ -17142,7 +17142,7 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
 
-  hono@4.11.3: {}
+  hono@4.11.5: {}
 
   hosted-git-info@2.8.9: {}
 
