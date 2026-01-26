@@ -50,11 +50,12 @@ import {
 	UploadIcon,
 	XIcon,
 } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { orpc } from "../../shared/lib/orpc-query-utils";
+import { useToolAnalytics } from "../analytics";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
 
@@ -190,6 +191,21 @@ export function InvoiceProcessorTool() {
 		orpc.invoiceProcessor.uploadUrl.mutationOptions(),
 	);
 
+	// Analytics tracking
+	const {
+		trackToolViewed,
+		trackUploadStarted,
+		trackProcessingStarted,
+		trackProcessingCompleted,
+		trackProcessingFailed,
+	} = useToolAnalytics({ toolName: "invoice-processor" });
+	const processingStartTime = useRef<number | null>(null);
+
+	// Track page view on mount
+	useEffect(() => {
+		trackToolViewed();
+	}, [trackToolViewed]);
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -199,30 +215,39 @@ export function InvoiceProcessorTool() {
 	});
 
 	// File dropzone handler
-	const onDrop = useCallback((acceptedFiles: File[]) => {
-		const file = acceptedFiles[0];
-		if (!file) {
-			return;
-		}
+	const onDrop = useCallback(
+		(acceptedFiles: File[]) => {
+			const file = acceptedFiles[0];
+			if (!file) {
+				return;
+			}
 
-		setFileError(null);
+			setFileError(null);
 
-		// Validate file size
-		if (file.size > MAX_FILE_SIZE) {
-			setFileError(
-				`File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum allowed size (10MB)`,
-			);
-			return;
-		}
+			// Validate file size
+			if (file.size > MAX_FILE_SIZE) {
+				setFileError(
+					`File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum allowed size (10MB)`,
+				);
+				return;
+			}
 
-		// Create preview for images
-		let preview: string | undefined;
-		if (file.type.startsWith("image/")) {
-			preview = URL.createObjectURL(file);
-		}
+			// Track file upload
+			trackUploadStarted({
+				fileType: file.type,
+				fileSize: file.size,
+			});
 
-		setUploadedFile({ file, preview });
-	}, []);
+			// Create preview for images
+			let preview: string | undefined;
+			if (file.type.startsWith("image/")) {
+				preview = URL.createObjectURL(file);
+			}
+
+			setUploadedFile({ file, preview });
+		},
+		[trackUploadStarted],
+	);
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		onDrop,
@@ -259,6 +284,9 @@ export function InvoiceProcessorTool() {
 			setFileError("Please upload an invoice file");
 			return;
 		}
+
+		// Start timing for analytics
+		processingStartTime.current = Date.now();
 
 		try {
 			const input: Record<string, unknown> = {
@@ -306,9 +334,27 @@ export function InvoiceProcessorTool() {
 				toolSlug: "invoice-processor",
 				input,
 			});
+
+			// Track processing started
+			trackProcessingStarted({
+				jobId: response.job.id,
+				fromCache: false,
+			});
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+
+			// Track processing failure
+			const duration = processingStartTime.current
+				? Date.now() - processingStartTime.current
+				: 0;
+			trackProcessingFailed({
+				jobId: "job_creation_failed",
+				errorType: "job_creation_error",
+				processingDurationMs: duration,
+			});
+			processingStartTime.current = null;
+
 			setFileError(
 				error instanceof Error
 					? error.message
@@ -321,7 +367,33 @@ export function InvoiceProcessorTool() {
 	};
 
 	const handleComplete = (output: Record<string, unknown>) => {
+		// Track processing completed
+		const duration = processingStartTime.current
+			? Date.now() - processingStartTime.current
+			: 0;
+		trackProcessingCompleted({
+			jobId: jobId ?? "unknown",
+			processingDurationMs: duration,
+			fromCache: false,
+		});
+		processingStartTime.current = null;
+
 		setResult(output as unknown as InvoiceOutput);
+	};
+
+	const handleError = (error: string) => {
+		// Track processing failure
+		const duration = processingStartTime.current
+			? Date.now() - processingStartTime.current
+			: 0;
+		trackProcessingFailed({
+			jobId: jobId ?? "unknown",
+			errorType: "job_failed",
+			processingDurationMs: duration,
+		});
+		processingStartTime.current = null;
+
+		setFileError(error);
 	};
 
 	const handleNewInvoice = () => {
@@ -644,6 +716,7 @@ export function InvoiceProcessorTool() {
 					title="Processing Invoice"
 					description="AI is extracting data from your invoice..."
 					onComplete={handleComplete}
+					onError={handleError}
 				/>
 			)}
 

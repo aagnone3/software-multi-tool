@@ -30,6 +30,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useToolAnalytics } from "../analytics";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { type AudioFileData, AudioFileUpload } from "./AudioFileUpload";
 import { JobProgressIndicator } from "./JobProgressIndicator";
@@ -484,9 +485,11 @@ function AudioPlayer({
 function ExportOptions({
 	result,
 	filename,
+	onDownload,
 }: {
 	result: SpeakerSeparationOutput;
 	filename: string;
+	onDownload?: (format: string) => void;
 }) {
 	const [copied, setCopied] = useState(false);
 
@@ -495,10 +498,11 @@ function ExportOptions({
 			await navigator.clipboard.writeText(result.transcript);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
+			onDownload?.("clipboard");
 		} catch {
 			// Clipboard API not available
 		}
-	}, [result.transcript]);
+	}, [result.transcript, onDownload]);
 
 	const handleDownloadJSON = useCallback(() => {
 		const data = JSON.stringify(result, null, 2);
@@ -509,7 +513,8 @@ function ExportOptions({
 		a.download = `${filename.replace(/\.[^.]+$/, "")}-speaker-separation.json`;
 		a.click();
 		URL.revokeObjectURL(url);
-	}, [result, filename]);
+		onDownload?.("json");
+	}, [result, filename, onDownload]);
 
 	const handleDownloadText = useCallback(() => {
 		const blob = new Blob([result.transcript], { type: "text/plain" });
@@ -519,7 +524,8 @@ function ExportOptions({
 		a.download = `${filename.replace(/\.[^.]+$/, "")}-transcript.txt`;
 		a.click();
 		URL.revokeObjectURL(url);
-	}, [result.transcript, filename]);
+		onDownload?.("txt");
+	}, [result.transcript, filename, onDownload]);
 
 	return (
 		<div className="flex flex-wrap gap-2">
@@ -554,7 +560,24 @@ export function SpeakerSeparationTool() {
 	const [audioFile, setAudioFile] = useState<AudioFileData | null>(null);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [_jobError, setJobError] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
+
+	// Analytics tracking
+	const {
+		trackToolViewed,
+		trackUploadStarted,
+		trackProcessingStarted,
+		trackProcessingCompleted,
+		trackProcessingFailed,
+		trackResultDownloaded,
+	} = useToolAnalytics({ toolName: "speaker-separation" });
+	const processingStartTime = useRef<number | null>(null);
+
+	// Track page view on mount
+	useEffect(() => {
+		trackToolViewed();
+	}, [trackToolViewed]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -565,23 +588,75 @@ export function SpeakerSeparationTool() {
 
 	const onSubmit: SubmitHandler<FormValues> = async (values) => {
 		setResult(null);
+		setJobError(null);
 		if (!values.audioFile) {
 			return;
 		}
+
+		// Start timing for analytics
+		processingStartTime.current = Date.now();
+
 		try {
 			const response = await createJobMutation.mutateAsync({
 				toolSlug: "speaker-separation",
 				input: values,
 			});
+
+			// Track processing started
+			trackProcessingStarted({
+				jobId: response.job.id,
+				fromCache: false,
+			});
 			setJobId(response.job.id);
 			setAudioFile(values.audioFile);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+
+			// Track processing failure
+			const duration = processingStartTime.current
+				? Date.now() - processingStartTime.current
+				: 0;
+			trackProcessingFailed({
+				jobId: "job_creation_failed",
+				errorType: "job_creation_error",
+				processingDurationMs: duration,
+			});
+			processingStartTime.current = null;
+
+			setJobError(
+				error instanceof Error ? error.message : "Failed to create job",
+			);
 		}
 	};
 
 	const handleComplete = (output: Record<string, unknown>) => {
+		// Track processing completed
+		const duration = processingStartTime.current
+			? Date.now() - processingStartTime.current
+			: 0;
+		trackProcessingCompleted({
+			jobId: jobId ?? "unknown",
+			processingDurationMs: duration,
+			fromCache: false,
+		});
+		processingStartTime.current = null;
+
 		setResult(output as unknown as SpeakerSeparationOutput);
+	};
+
+	const handleError = (error: string) => {
+		// Track processing failure
+		const duration = processingStartTime.current
+			? Date.now() - processingStartTime.current
+			: 0;
+		trackProcessingFailed({
+			jobId: jobId ?? "unknown",
+			errorType: "job_failed",
+			processingDurationMs: duration,
+		});
+		processingStartTime.current = null;
+
+		setJobError(error);
 	};
 
 	const handleNewAnalysis = () => {
@@ -594,6 +669,11 @@ export function SpeakerSeparationTool() {
 	};
 
 	const handleFileSelected = (fileData: AudioFileData) => {
+		// Track file upload
+		trackUploadStarted({
+			fileType: fileData.mimeType,
+			fileSize: fileData.content.length, // Base64 length as approximation
+		});
 		form.setValue("audioFile", fileData, { shouldValidate: true });
 	};
 
@@ -699,6 +779,7 @@ export function SpeakerSeparationTool() {
 					title="Analyzing Audio"
 					description="AI is identifying speakers and transcribing your audio..."
 					onComplete={handleComplete}
+					onError={handleError}
 				/>
 			)}
 
@@ -729,6 +810,12 @@ export function SpeakerSeparationTool() {
 								<ExportOptions
 									result={result}
 									filename={audioFile.filename}
+									onDownload={(format) =>
+										trackResultDownloaded({
+											jobId: jobId ?? "unknown",
+											downloadFormat: format,
+										})
+									}
 								/>
 							</div>
 						</CardContent>
