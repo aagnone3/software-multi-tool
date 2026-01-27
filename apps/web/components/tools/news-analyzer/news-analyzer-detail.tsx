@@ -31,6 +31,7 @@ import {
 	FileText,
 	Loader2,
 	RefreshCw,
+	Timer,
 	Trash2,
 	XCircle,
 } from "lucide-react";
@@ -323,7 +324,8 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 					{/* Processing Info */}
 					<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 						<div>
-							<p className="text-sm font-medium text-muted-foreground">
+							<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+								<Timer className="size-3.5" />
 								Processing Time
 							</p>
 							<p className="text-sm">
@@ -332,7 +334,8 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 						</div>
 						{job.completedAt && (
 							<div>
-								<p className="text-sm font-medium text-muted-foreground">
+								<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+									<Clock className="size-3.5" />
 									Completed
 								</p>
 								<p className="text-sm">

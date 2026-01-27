@@ -57,12 +57,12 @@ describe("Badge", () => {
 			render(<Badge status="success">Test</Badge>);
 			const badge = screen.getByText("Test");
 
-			expect(badge.className).toContain("inline-block");
+			expect(badge.className).toContain("inline-flex");
+			expect(badge.className).toContain("items-center");
 			expect(badge.className).toContain("rounded-full");
 			expect(badge.className).toContain("px-3");
 			expect(badge.className).toContain("py-1");
 			expect(badge.className).toContain("text-xs");
-			expect(badge.className).toContain("uppercase");
 			expect(badge.className).toContain("font-semibold");
 			expect(badge.className).toContain("leading-tight");
 		});
