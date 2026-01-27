@@ -9,6 +9,7 @@ export interface ExtractedContent {
 	byline: string | null;
 	siteName: string | null;
 	url: string;
+	ogImage: string | null;
 }
 
 export interface ExtractionError {
@@ -104,6 +105,24 @@ export async function extractContentFromUrl(
 		const { document } = parseHTML(html);
 		// Set the document URL for Readability (used for resolving relative links)
 		Object.defineProperty(document, "documentURI", { value: url });
+
+		// Extract Open Graph image before Readability modifies the document
+		let ogImage: string | null = null;
+		const ogImageMeta = document.querySelector(
+			'meta[property="og:image"]',
+		) as HTMLMetaElement | null;
+		if (ogImageMeta?.content) {
+			ogImage = ogImageMeta.content;
+			// Resolve relative URLs to absolute
+			if (ogImage && !ogImage.startsWith("http")) {
+				try {
+					ogImage = new URL(ogImage, url).href;
+				} catch {
+					// Keep original if URL resolution fails
+				}
+			}
+		}
+
 		// linkedom's document is compatible with Readability at runtime
 		// but has different type definitions - cast to satisfy the type checker
 		const reader = new Readability(document as unknown as Document);
@@ -127,6 +146,7 @@ export async function extractContentFromUrl(
 				byline: article.byline,
 				siteName: article.siteName,
 				url,
+				ogImage,
 			},
 		};
 	} catch (error) {
@@ -163,5 +183,6 @@ export function extractContentFromText(
 		byline: null,
 		siteName: null,
 		url: "",
+		ogImage: null,
 	};
 }

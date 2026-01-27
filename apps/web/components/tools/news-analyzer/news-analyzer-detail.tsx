@@ -29,6 +29,7 @@ import {
 	Clock,
 	ExternalLink,
 	FileText,
+	ImageIcon,
 	Link2,
 	Loader2,
 	RefreshCw,
@@ -36,6 +37,7 @@ import {
 	Trash2,
 	XCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -305,41 +307,93 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					{/* Source */}
-					<div>
-						<p className="text-sm font-medium text-muted-foreground mb-1">
-							Source
-						</p>
-						<div className="flex items-start gap-2">
-							{isUrl ? (
-								<>
-									<ExternalLink className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-									<a
-										href={job.input.articleUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm text-primary hover:underline break-all"
-									>
-										{job.input.articleUrl}
-									</a>
-								</>
-							) : (
-								<>
-									<FileText className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-									<p className="text-sm text-muted-foreground">
-										{articleSource &&
-										articleSource.length > 200
-											? articleSource.slice(0, 200) +
-												"..."
-											: articleSource}
-									</p>
-								</>
+					{/* Article Preview with Thumbnail */}
+					<div className="flex gap-4">
+						{/* Thumbnail */}
+						<div className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+							{(job.output?.articleMetadata?.ogImage ||
+								job.newsAnalysis?.analysis?.articleMetadata
+									?.ogImage) && (
+								<Image
+									src={
+										job.output?.articleMetadata?.ogImage ||
+										job.newsAnalysis?.analysis
+											?.articleMetadata?.ogImage ||
+										""
+									}
+									alt="Article preview"
+									fill
+									className="object-cover"
+									unoptimized
+								/>
 							)}
+							{!job.output?.articleMetadata?.ogImage &&
+								!job.newsAnalysis?.analysis?.articleMetadata
+									?.ogImage && (
+									<div className="absolute inset-0 flex items-center justify-center">
+										<ImageIcon className="size-8 text-muted-foreground/50" />
+									</div>
+								)}
+						</div>
+
+						{/* Source Info */}
+						<div className="flex-1 min-w-0">
+							{/* Title from metadata if available */}
+							{(job.output?.articleMetadata?.title ||
+								job.newsAnalysis?.analysis?.articleMetadata
+									?.title ||
+								job.newsAnalysis?.title) && (
+								<p className="font-medium text-sm mb-1 line-clamp-2">
+									{job.output?.articleMetadata?.title ||
+										job.newsAnalysis?.analysis
+											?.articleMetadata?.title ||
+										job.newsAnalysis?.title}
+								</p>
+							)}
+
+							{/* Site name if available */}
+							{(job.output?.articleMetadata?.siteName ||
+								job.newsAnalysis?.analysis?.articleMetadata
+									?.siteName) && (
+								<p className="text-xs text-muted-foreground mb-1">
+									{job.output?.articleMetadata?.siteName ||
+										job.newsAnalysis?.analysis
+											?.articleMetadata?.siteName}
+								</p>
+							)}
+
+							{/* Source URL or text excerpt */}
+							<div className="flex items-start gap-1.5">
+								{isUrl ? (
+									<>
+										<ExternalLink className="size-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+										<a
+											href={job.input.articleUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="text-xs text-primary hover:underline break-all line-clamp-1"
+										>
+											{job.input.articleUrl}
+										</a>
+									</>
+								) : (
+									<>
+										<FileText className="size-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+										<p className="text-xs text-muted-foreground line-clamp-2">
+											{articleSource &&
+											articleSource.length > 100
+												? articleSource.slice(0, 100) +
+													"..."
+												: articleSource}
+										</p>
+									</>
+								)}
+							</div>
 						</div>
 					</div>
 
 					{/* Processing Info */}
-					<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+					<div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2 border-t">
 						<div>
 							<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
 								<Timer className="size-3.5" />

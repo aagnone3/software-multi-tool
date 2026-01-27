@@ -1,4 +1,7 @@
-import type { NewsAnalysisOutput } from "../news-analyzer-results";
+import type {
+	ArticleMetadata,
+	NewsAnalysisOutput,
+} from "../news-analyzer-results";
 
 export type JobStatus =
 	| "PENDING"
@@ -12,7 +15,7 @@ export interface NewsAnalysisRecord {
 	title: string | null;
 	sourceUrl: string | null;
 	sourceText: string | null;
-	analysis: NewsAnalysisOutput;
+	analysis: NewsAnalysisOutput & { articleMetadata?: ArticleMetadata };
 	createdAt: Date;
 }
 
@@ -24,7 +27,7 @@ export interface NewsAnalyzerJob {
 		articleUrl?: string;
 		articleText?: string;
 	};
-	output: NewsAnalysisOutput | null;
+	output: (NewsAnalysisOutput & { articleMetadata?: ArticleMetadata }) | null;
 	error: string | null;
 	createdAt: Date;
 	completedAt: Date | null;

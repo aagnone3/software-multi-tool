@@ -36,6 +36,12 @@ interface NewsAnalyzerOutput {
 	sentiment: string;
 	sourceCredibility?: string;
 	relatedContext?: string[];
+	articleMetadata?: {
+		title?: string;
+		ogImage?: string | null;
+		siteName?: string | null;
+		byline?: string | null;
+	};
 }
 
 /**
@@ -144,6 +150,17 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 		logger.info(`[NewsAnalyzer] Job ${job.id}: Starting AI analysis`);
 		const analysisResult = await analyzeArticle(extractedContent);
 
+		// Add article metadata to the analysis result
+		const outputWithMetadata: NewsAnalyzerOutput = {
+			...analysisResult,
+			articleMetadata: {
+				title: extractedContent.title,
+				ogImage: extractedContent.ogImage,
+				siteName: extractedContent.siteName,
+				byline: extractedContent.byline,
+			},
+		};
+
 		logger.info(
 			`[NewsAnalyzer] Job ${job.id}: Analysis completed successfully`,
 		);
@@ -156,7 +173,7 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 					sourceText: input.articleText,
 					title: extractedContent.title,
 					analysis:
-						analysisResult as unknown as Prisma.InputJsonValue,
+						outputWithMetadata as unknown as Prisma.InputJsonValue,
 					userId: job.userId ?? undefined,
 				},
 				job.id,
@@ -179,7 +196,7 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 
 		return {
 			success: true,
-			output: analysisResult as unknown as Prisma.InputJsonValue,
+			output: outputWithMetadata as unknown as Prisma.InputJsonValue,
 		};
 	} catch (error) {
 		logger.error(`[NewsAnalyzer] Job ${job.id}: Analysis failed`, {

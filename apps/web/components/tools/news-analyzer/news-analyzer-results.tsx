@@ -46,6 +46,13 @@ interface EntitiesAnalysis {
 	places: string[];
 }
 
+export interface ArticleMetadata {
+	title?: string;
+	ogImage?: string | null;
+	siteName?: string | null;
+	byline?: string | null;
+}
+
 export interface NewsAnalysisOutput {
 	summary: string[];
 	bias: BiasAnalysis;
@@ -53,6 +60,7 @@ export interface NewsAnalysisOutput {
 	sentiment: string;
 	sourceCredibility?: string;
 	relatedContext?: string[];
+	articleMetadata?: ArticleMetadata;
 }
 
 export interface NewsAnalyzerResultsProps {

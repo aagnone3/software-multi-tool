@@ -39,6 +39,7 @@ import {
 	Newspaper,
 	XCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
@@ -175,17 +176,35 @@ export function NewsAnalyzerHistory() {
 				accessorKey: "input",
 				header: "Article",
 				cell: ({ row }) => {
-					const { input } = row.original;
+					const { input, output, newsAnalysis } = row.original;
 					const title = getArticleTitle(input);
 					const isUrl = !!input.articleUrl;
+					const ogImage =
+						output?.articleMetadata?.ogImage ||
+						newsAnalysis?.analysis?.articleMetadata?.ogImage;
 
 					return (
-						<div className="flex items-center gap-2 max-w-[300px]">
-							{isUrl ? (
-								<ExternalLink className="size-4 text-muted-foreground flex-shrink-0" />
-							) : (
-								<FileText className="size-4 text-muted-foreground flex-shrink-0" />
-							)}
+						<div className="flex items-center gap-3 max-w-[350px]">
+							{/* Thumbnail */}
+							<div className="relative w-16 h-10 flex-shrink-0 rounded overflow-hidden bg-muted">
+								{ogImage ? (
+									<Image
+										src={ogImage}
+										alt=""
+										fill
+										className="object-cover"
+										unoptimized
+									/>
+								) : (
+									<div className="absolute inset-0 flex items-center justify-center">
+										{isUrl ? (
+											<ExternalLink className="size-4 text-muted-foreground/50" />
+										) : (
+											<FileText className="size-4 text-muted-foreground/50" />
+										)}
+									</div>
+								)}
+							</div>
 							<span
 								className="text-sm truncate"
 								title={input.articleUrl ?? input.articleText}

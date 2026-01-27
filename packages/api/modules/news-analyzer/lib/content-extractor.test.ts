@@ -176,6 +176,121 @@ describe("content-extractor", () => {
 				expect(result.data).toBeDefined();
 			}
 		});
+
+		it("should extract og:image from HTML", async () => {
+			const mockHtml = `
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<title>Article with Image</title>
+						<meta property="og:image" content="https://example.com/article-image.jpg">
+					</head>
+					<body>
+						<article>
+							<h1>Test Headline</h1>
+							<p>Article content with an open graph image.</p>
+						</article>
+					</body>
+				</html>
+			`;
+
+			const originalFetch = global.fetch;
+			global.fetch = vi.fn(() =>
+				Promise.resolve({
+					ok: true,
+					status: 200,
+					text: () => Promise.resolve(mockHtml),
+				}),
+			) as any;
+
+			const result = await extractContentFromUrl(
+				"https://example.com/article",
+			);
+
+			global.fetch = originalFetch;
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.ogImage).toBe(
+					"https://example.com/article-image.jpg",
+				);
+			}
+		});
+
+		it("should resolve relative og:image URLs to absolute", async () => {
+			const mockHtml = `
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<title>Article with Relative Image</title>
+						<meta property="og:image" content="/images/thumb.png">
+					</head>
+					<body>
+						<article>
+							<h1>Test</h1>
+							<p>Article with a relative og:image URL.</p>
+						</article>
+					</body>
+				</html>
+			`;
+
+			const originalFetch = global.fetch;
+			global.fetch = vi.fn(() =>
+				Promise.resolve({
+					ok: true,
+					status: 200,
+					text: () => Promise.resolve(mockHtml),
+				}),
+			) as any;
+
+			const result = await extractContentFromUrl(
+				"https://example.com/news/article",
+			);
+
+			global.fetch = originalFetch;
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.ogImage).toBe(
+					"https://example.com/images/thumb.png",
+				);
+			}
+		});
+
+		it("should return null ogImage when not present in HTML", async () => {
+			const mockHtml = `
+				<!DOCTYPE html>
+				<html>
+					<head><title>No OG Image</title></head>
+					<body>
+						<article>
+							<h1>Test</h1>
+							<p>Article without an open graph image.</p>
+						</article>
+					</body>
+				</html>
+			`;
+
+			const originalFetch = global.fetch;
+			global.fetch = vi.fn(() =>
+				Promise.resolve({
+					ok: true,
+					status: 200,
+					text: () => Promise.resolve(mockHtml),
+				}),
+			) as any;
+
+			const result = await extractContentFromUrl(
+				"https://example.com/article",
+			);
+
+			global.fetch = originalFetch;
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.ogImage).toBeNull();
+			}
+		});
 	});
 
 	describe("extractContentFromText", () => {
@@ -191,6 +306,7 @@ describe("content-extractor", () => {
 			expect(result.byline).toBeNull();
 			expect(result.siteName).toBeNull();
 			expect(result.url).toBe("");
+			expect(result.ogImage).toBeNull();
 		});
 
 		it("should accept custom title", () => {
