@@ -913,6 +913,30 @@ echo "PORT=3502" >> apps/web/.env.local
 pnpm dev
 ```
 
+### Missing Analytics/PostHog Keys (Manual Setup)
+
+**Problem**: Console warning: `[PostHog.js] PostHog was initialized without a token`
+
+**Root cause**: When setting up worktrees manually (not using the automated script), copying from `apps/web/.env.local.example` gives you placeholder values, not real credentials. Keys like `NEXT_PUBLIC_POSTHOG_KEY` will be empty.
+
+**Solution**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Option 1: Pull credentials from Vercel (recommended)
+pnpm web:env:pull
+
+# Option 2: Copy missing keys from api-server (if it has them)
+grep "POSTHOG" ../../apps/api-server/.env.local >> apps/web/.env.local
+
+# Option 3: Manually add from your password manager/team docs
+echo 'NEXT_PUBLIC_POSTHOG_KEY=phc_...' >> apps/web/.env.local
+echo 'NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com' >> apps/web/.env.local
+```
+
+**Prevention**: Always use `pnpm worktree:create` which copies from configured env files. When manual setup is required, use `pnpm web:env:pull` after creating the worktree to get real credentials.
+
 ### Jobs Not Processing (Database URL Mismatch)
 
 **Problem**: Jobs are created successfully (shown in logs) but never get picked up by workers. pg-boss monitor shows 0 jobs in all queues.
