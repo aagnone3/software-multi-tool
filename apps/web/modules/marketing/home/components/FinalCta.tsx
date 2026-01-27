@@ -19,11 +19,11 @@ export function FinalCta() {
 
 					<div className="relative">
 						<h2 className="mx-auto max-w-2xl text-balance font-bold text-3xl md:text-4xl lg:text-5xl">
-							Ready to transform your business with AI?
+							Ready to transform your productivity with AI?
 						</h2>
 
 						<p className="mx-auto mt-4 max-w-xl text-balance text-primary-foreground/80 text-lg">
-							Join thousands of small business owners who are
+							Join the league of small business owners who are
 							already saving time and boosting productivity with
 							our AI tools.
 						</p>

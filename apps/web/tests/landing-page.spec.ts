@@ -42,7 +42,7 @@ test.describe("landing page", () => {
 			// Final CTA section
 			await expect(
 				page.getByRole("heading", {
-					name: /ready to transform your business with ai/i,
+					name: /ready to transform your productivity with ai/i,
 				}),
 			).toBeVisible();
 		});
@@ -125,7 +125,7 @@ test.describe("landing page", () => {
 			// Final CTA heading
 			await expect(
 				page.getByRole("heading", {
-					name: /ready to transform your business with ai/i,
+					name: /ready to transform your productivity with ai/i,
 				}),
 			).toBeVisible();
 
@@ -178,7 +178,7 @@ test.describe("landing page", () => {
 
 			// Scroll to final CTA section
 			const finalCta = page.getByRole("heading", {
-				name: /ready to transform your business with ai/i,
+				name: /ready to transform your productivity with ai/i,
 			});
 			await finalCta.scrollIntoViewIfNeeded();
 
@@ -222,7 +222,7 @@ test.describe("landing page", () => {
 			// Final CTA should be visible
 			await expect(
 				page.getByRole("heading", {
-					name: /ready to transform your business with ai/i,
+					name: /ready to transform your productivity with ai/i,
 				}),
 			).toBeVisible();
 		});

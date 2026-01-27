@@ -54,7 +54,7 @@ export function NavBar() {
 			isActive: pathname.includes("/files"),
 		},
 		{
-			label: "AI Chatbot",
+			label: "Chat",
 			href: activeOrganization
 				? `/app/${activeOrganization.slug}/chatbot`
 				: "/app/chatbot",
