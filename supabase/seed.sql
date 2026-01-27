@@ -65,7 +65,7 @@ INSERT INTO "public"."user" (
 ) ON CONFLICT ("id") DO NOTHING;
 
 -- Create account entry for credential-based login
--- Password: "PreviewPassword123!" - hashed using Better Auth's hashPassword()
+-- Password: "TestPassword123" - hashed using Better Auth's hashPassword()
 -- IMPORTANT: This hash MUST be generated using better-auth/crypto's hashPassword()
 -- Other scrypt implementations will NOT work due to different parameters.
 -- To regenerate: run `pnpm --filter @repo/auth test -- --grep "Password hashing"`
@@ -91,7 +91,7 @@ INSERT INTO "public"."account" (
     NULL,
     NULL,
     NULL,
-    '82c764f05562c8bf07546bda4ef17e48:409a2556ed4349d0701eda52ee62716627fd25cd0059f598b3adb9f987d4e958f68c9ef4df4889ec33cd054fae68c89fcbcce8aba12f17a5edcff07375f09fad',
+    '46eb4f9cb6d62a4d8e23b83744388089:7d25dab94fc9a80b74b4d07fcbe05856de9a885e589d919f9075268ba89b8ca1f672c9c0f2cd29d457d228eb31c4e4e6e4b9b673034a75eb89e407ae3b44be7a',
     NOW(),
     NOW()
 ) ON CONFLICT ("id") DO NOTHING;

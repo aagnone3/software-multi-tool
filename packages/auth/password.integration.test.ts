@@ -42,7 +42,7 @@ describe.sequential("Password hashing integration tests", () => {
 		it(
 			"can hash and verify a password",
 			async () => {
-				const password = "PreviewPassword123!";
+				const password = "TestPassword123";
 
 				// Hash the password using Better Auth's crypto
 				const hashedPassword = await hashPassword(password);
@@ -64,8 +64,8 @@ describe.sequential("Password hashing integration tests", () => {
 		it(
 			"rejects incorrect password",
 			async () => {
-				const password = "PreviewPassword123!";
-				const wrongPassword = "WrongPassword456!";
+				const password = "TestPassword123";
+				const wrongPassword = "WrongPassword456";
 
 				const hashedPassword = await hashPassword(password);
 
@@ -84,7 +84,7 @@ describe.sequential("Password hashing integration tests", () => {
 			async () => {
 				const prisma = requirePrisma();
 				const email = "test@preview.local";
-				const password = "PreviewPassword123!";
+				const password = "TestPassword123";
 
 				// Hash the password using Better Auth's crypto
 				const hashedPassword = await hashPassword(password);

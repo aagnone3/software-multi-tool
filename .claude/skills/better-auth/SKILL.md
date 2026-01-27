@@ -335,10 +335,10 @@ pnpm --filter @repo/auth test
 
 For local development, a test user enables Quick Login on the login page:
 
-| Field    | Value               |
-| -------- | ------------------- |
-| Email    | test@preview.local  |
-| Password | PreviewPassword123! |
+| Field    | Value              |
+| -------- | ------------------ |
+| Email    | test@preview.local |
+| Password | TestPassword123    |
 
 **Seeding the test user:**
 
@@ -360,10 +360,10 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f 
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 
 // Generate hash
-const hash = await hashPassword("PreviewPassword123!");
+const hash = await hashPassword("TestPassword123");
 
 // Verify it works
-const isValid = await verifyPassword({ hash, password: "PreviewPassword123!" });
+const isValid = await verifyPassword({ hash, password: "TestPassword123" });
 ```
 
 **Test file**: `packages/auth/password.integration.test.ts` generates and verifies password hashes.
