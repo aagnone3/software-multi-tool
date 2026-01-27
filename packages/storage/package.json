@@ -4,7 +4,7 @@
 		"@aws-sdk/s3-request-presigner": "3.437.0",
 		"@repo/config": "workspace:*",
 		"@repo/logs": "workspace:*",
-		"@supabase/supabase-js": "^2.90.1",
+		"@supabase/supabase-js": "2.91.1",
 		"file-type": "21.3.0"
 	},
 	"devDependencies": {
