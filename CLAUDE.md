@@ -399,6 +399,8 @@ node --version       # Should show v22.x.x
 - v22 is the current LTS (Long Term Support) release with best stability
 - The `engines` field in `package.json` enforces `>=22.0.0 <23.0.0`
 
+**API Server Auto-Switch**: The `api-server` dev script automatically switches to Node.js v22 via nvm if you're on an incompatible version. Just run `pnpm dev` and it will handle the switch. See `apps/api-server/scripts/ensure-node-version.sh`.
+
 **Automatic version switching** (optional): Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
