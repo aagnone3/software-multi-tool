@@ -177,40 +177,73 @@ export function NewsAnalyzerHistory() {
 				header: "Article",
 				cell: ({ row }) => {
 					const { input, output, newsAnalysis } = row.original;
-					const title = getArticleTitle(input);
 					const isUrl = !!input.articleUrl;
 					const ogImage =
 						output?.articleMetadata?.ogImage ||
 						newsAnalysis?.analysis?.articleMetadata?.ogImage;
+					// Prefer metadata title, fall back to extracted title
+					const displayTitle =
+						output?.articleMetadata?.title ||
+						newsAnalysis?.analysis?.articleMetadata?.title ||
+						newsAnalysis?.title ||
+						getArticleTitle(input);
+
+					const thumbnailContent = (
+						<div className="relative w-16 h-10 flex-shrink-0 rounded overflow-hidden bg-muted">
+							{ogImage ? (
+								<Image
+									src={ogImage}
+									alt=""
+									fill
+									className="object-cover"
+									unoptimized
+								/>
+							) : (
+								<div className="absolute inset-0 flex items-center justify-center">
+									{isUrl ? (
+										<ExternalLink className="size-4 text-muted-foreground/50" />
+									) : (
+										<FileText className="size-4 text-muted-foreground/50" />
+									)}
+								</div>
+							)}
+						</div>
+					);
 
 					return (
 						<div className="flex items-center gap-3 max-w-[350px]">
-							{/* Thumbnail */}
-							<div className="relative w-16 h-10 flex-shrink-0 rounded overflow-hidden bg-muted">
-								{ogImage ? (
-									<Image
-										src={ogImage}
-										alt=""
-										fill
-										className="object-cover"
-										unoptimized
-									/>
-								) : (
-									<div className="absolute inset-0 flex items-center justify-center">
-										{isUrl ? (
-											<ExternalLink className="size-4 text-muted-foreground/50" />
-										) : (
-											<FileText className="size-4 text-muted-foreground/50" />
-										)}
-									</div>
-								)}
-							</div>
-							<span
-								className="text-sm truncate"
-								title={input.articleUrl ?? input.articleText}
-							>
-								{title}
-							</span>
+							{isUrl ? (
+								<a
+									href={input.articleUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									onClick={(e) => e.stopPropagation()}
+									className="hover:opacity-80 transition-opacity"
+								>
+									{thumbnailContent}
+								</a>
+							) : (
+								thumbnailContent
+							)}
+							{isUrl ? (
+								<a
+									href={input.articleUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									onClick={(e) => e.stopPropagation()}
+									className="text-sm truncate hover:text-primary transition-colors"
+									title={displayTitle}
+								>
+									{displayTitle}
+								</a>
+							) : (
+								<span
+									className="text-sm truncate"
+									title={input.articleText}
+								>
+									{displayTitle}
+								</span>
+							)}
 						</div>
 					);
 				},

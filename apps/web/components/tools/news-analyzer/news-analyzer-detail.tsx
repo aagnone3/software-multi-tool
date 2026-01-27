@@ -27,7 +27,6 @@ import {
 	ArrowLeft,
 	CheckCircle2,
 	Clock,
-	ExternalLink,
 	FileText,
 	ImageIcon,
 	Link2,
@@ -309,86 +308,94 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				<CardContent className="space-y-4">
 					{/* Article Preview with Thumbnail */}
 					<div className="flex gap-4">
-						{/* Thumbnail */}
-						<div className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
-							{(job.output?.articleMetadata?.ogImage ||
-								job.newsAnalysis?.analysis?.articleMetadata
-									?.ogImage) && (
-								<Image
-									src={
-										job.output?.articleMetadata?.ogImage ||
-										job.newsAnalysis?.analysis
-											?.articleMetadata?.ogImage ||
-										""
-									}
-									alt="Article preview"
-									fill
-									className="object-cover"
-									unoptimized
-								/>
-							)}
-							{!job.output?.articleMetadata?.ogImage &&
-								!job.newsAnalysis?.analysis?.articleMetadata
-									?.ogImage && (
-									<div className="absolute inset-0 flex items-center justify-center">
-										<ImageIcon className="size-8 text-muted-foreground/50" />
-									</div>
+						{/* Thumbnail - clickable for URL articles */}
+						{isUrl ? (
+							<a
+								href={job.input.articleUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity"
+							>
+								{(job.output?.articleMetadata?.ogImage ||
+									job.newsAnalysis?.analysis?.articleMetadata
+										?.ogImage) && (
+									<Image
+										src={
+											job.output?.articleMetadata
+												?.ogImage ||
+											job.newsAnalysis?.analysis
+												?.articleMetadata?.ogImage ||
+											""
+										}
+										alt="Article preview"
+										fill
+										className="object-cover"
+										unoptimized
+									/>
 								)}
-						</div>
+								{!job.output?.articleMetadata?.ogImage &&
+									!job.newsAnalysis?.analysis?.articleMetadata
+										?.ogImage && (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<ImageIcon className="size-8 text-muted-foreground/50" />
+										</div>
+									)}
+							</a>
+						) : (
+							<div className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+								<div className="absolute inset-0 flex items-center justify-center">
+									<FileText className="size-8 text-muted-foreground/50" />
+								</div>
+							</div>
+						)}
 
 						{/* Source Info */}
 						<div className="flex-1 min-w-0">
-							{/* Title from metadata if available */}
+							{/* Title from metadata - clickable for URL articles */}
 							{(job.output?.articleMetadata?.title ||
 								job.newsAnalysis?.analysis?.articleMetadata
 									?.title ||
-								job.newsAnalysis?.title) && (
-								<p className="font-medium text-sm mb-1 line-clamp-2">
-									{job.output?.articleMetadata?.title ||
-										job.newsAnalysis?.analysis
-											?.articleMetadata?.title ||
-										job.newsAnalysis?.title}
-								</p>
-							)}
+								job.newsAnalysis?.title) &&
+								(isUrl ? (
+									<a
+										href={job.input.articleUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="font-medium text-sm mb-1 line-clamp-2 hover:text-primary transition-colors block"
+									>
+										{job.output?.articleMetadata?.title ||
+											job.newsAnalysis?.analysis
+												?.articleMetadata?.title ||
+											job.newsAnalysis?.title}
+									</a>
+								) : (
+									<p className="font-medium text-sm mb-1 line-clamp-2">
+										{job.output?.articleMetadata?.title ||
+											job.newsAnalysis?.analysis
+												?.articleMetadata?.title ||
+											job.newsAnalysis?.title}
+									</p>
+								))}
 
 							{/* Site name if available */}
 							{(job.output?.articleMetadata?.siteName ||
 								job.newsAnalysis?.analysis?.articleMetadata
 									?.siteName) && (
-								<p className="text-xs text-muted-foreground mb-1">
+								<p className="text-xs text-muted-foreground">
 									{job.output?.articleMetadata?.siteName ||
 										job.newsAnalysis?.analysis
 											?.articleMetadata?.siteName}
 								</p>
 							)}
 
-							{/* Source URL or text excerpt */}
-							<div className="flex items-start gap-1.5">
-								{isUrl ? (
-									<>
-										<ExternalLink className="size-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-										<a
-											href={job.input.articleUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="text-xs text-primary hover:underline break-all line-clamp-1"
-										>
-											{job.input.articleUrl}
-										</a>
-									</>
-								) : (
-									<>
-										<FileText className="size-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-										<p className="text-xs text-muted-foreground line-clamp-2">
-											{articleSource &&
-											articleSource.length > 100
-												? articleSource.slice(0, 100) +
-													"..."
-												: articleSource}
-										</p>
-									</>
-								)}
-							</div>
+							{/* Text excerpt for non-URL articles */}
+							{!isUrl && (
+								<p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+									{articleSource && articleSource.length > 100
+										? `${articleSource.slice(0, 100)}...`
+										: articleSource}
+								</p>
+							)}
 						</div>
 					</div>
 
