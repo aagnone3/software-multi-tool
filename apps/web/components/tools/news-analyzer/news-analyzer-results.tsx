@@ -1,5 +1,6 @@
 "use client";
 
+import { SemiCircleGauge } from "@shared/components/SemiCircleGauge";
 import {
 	Card,
 	CardContent,
@@ -140,173 +141,26 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 	);
 }
 
-function SensationalismGauge({ score }: { score: number }) {
-	const [animatedScore, setAnimatedScore] = useState(0);
-
-	useEffect(() => {
-		const timer = setTimeout(() => setAnimatedScore(score), 100);
-		return () => clearTimeout(timer);
-	}, [score]);
-
-	// SVG gauge parameters
-	const size = 200;
-	const strokeWidth = 20;
-	const radius = (size - strokeWidth) / 2;
-	const centerX = size / 2;
-	const centerY = size / 2 + 20; // Offset to center the semi-circle
-
-	// Needle angle based on score (0-10)
-	const needleAngle = Math.PI - (animatedScore / 10) * Math.PI;
-
-	// Create semi-circle arc path
-	const arcPath = `
-		M ${centerX - radius} ${centerY}
-		A ${radius} ${radius} 0 0 1 ${centerX + radius} ${centerY}
-	`;
-
-	// Color segments for the gauge background
-	const getGaugeColor = (value: number) => {
-		if (value <= 3) return "text-green-500";
-		if (value <= 6) return "text-amber-500";
-		return "text-red-500";
-	};
-
-	return (
-		<div className="flex flex-col items-center">
-			<div
-				className="relative"
-				style={{ width: size, height: size / 2 + 40 }}
-			>
-				<svg
-					width={size}
-					height={size / 2 + 40}
-					viewBox={`0 0 ${size} ${size / 2 + 40}`}
-					className="overflow-visible"
-					role="img"
-					aria-label={`Sensationalism gauge showing ${score} out of 10`}
-				>
-					<title>Sensationalism Score: {score}/10</title>
-					{/* Background arc with gradient segments */}
-					<defs>
-						<linearGradient
-							id="gaugeGradient"
-							x1="0%"
-							y1="0%"
-							x2="100%"
-							y2="0%"
-						>
-							<stop offset="0%" stopColor="#22c55e" />
-							<stop offset="30%" stopColor="#22c55e" />
-							<stop offset="50%" stopColor="#eab308" />
-							<stop offset="70%" stopColor="#f97316" />
-							<stop offset="100%" stopColor="#ef4444" />
-						</linearGradient>
-					</defs>
-
-					{/* Track background */}
-					<path
-						d={arcPath}
-						fill="none"
-						stroke="currentColor"
-						strokeWidth={strokeWidth}
-						className="text-muted/30"
-						strokeLinecap="round"
-					/>
-
-					{/* Colored progress arc */}
-					<path
-						d={arcPath}
-						fill="none"
-						stroke="url(#gaugeGradient)"
-						strokeWidth={strokeWidth}
-						strokeLinecap="round"
-						strokeDasharray={`${(animatedScore / 10) * Math.PI * radius} ${Math.PI * radius}`}
-						className="transition-all duration-700 ease-out"
-					/>
-
-					{/* Tick marks */}
-					{[0, 2.5, 5, 7.5, 10].map((tick) => {
-						const tickAngle = Math.PI - (tick / 10) * Math.PI;
-						const innerRadius = radius - strokeWidth / 2 - 5;
-						const outerRadius = radius - strokeWidth / 2 - 15;
-						const x1 = centerX + Math.cos(tickAngle) * innerRadius;
-						const y1 = centerY - Math.sin(tickAngle) * innerRadius;
-						const x2 = centerX + Math.cos(tickAngle) * outerRadius;
-						const y2 = centerY - Math.sin(tickAngle) * outerRadius;
-						return (
-							<line
-								key={tick}
-								x1={x1}
-								y1={y1}
-								x2={x2}
-								y2={y2}
-								stroke="currentColor"
-								strokeWidth="2"
-								className="text-muted-foreground/50"
-							/>
-						);
-					})}
-
-					{/* Needle */}
-					<g
-						className="transition-transform duration-700 ease-out"
-						style={{
-							transformOrigin: `${centerX}px ${centerY}px`,
-							transform: `rotate(${-(needleAngle * 180) / Math.PI + 180}deg)`,
-						}}
-					>
-						<line
-							x1={centerX}
-							y1={centerY}
-							x2={centerX}
-							y2={centerY - radius + strokeWidth + 10}
-							stroke="currentColor"
-							strokeWidth="3"
-							strokeLinecap="round"
-							className="text-foreground"
-						/>
-						<circle
-							cx={centerX}
-							cy={centerY}
-							r="8"
-							className="fill-foreground"
-						/>
-						<circle
-							cx={centerX}
-							cy={centerY}
-							r="4"
-							className="fill-background"
-						/>
-					</g>
-				</svg>
-
-				{/* Center score display */}
-				<div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
-					<span
-						className={cn(
-							"text-4xl font-bold tabular-nums",
-							getGaugeColor(score),
-						)}
-					>
-						{score}
-					</span>
-					<span className="text-lg text-muted-foreground">/10</span>
-				</div>
-			</div>
-
-			<p className="mt-2 text-sm text-muted-foreground">
-				Sensationalism Score
-			</p>
-			<p className="text-xs text-muted-foreground/75">
-				{score <= 3
-					? "Low - Factual reporting"
-					: score <= 6
-						? "Moderate - Some bias"
-						: "High - Sensationalized"}
-			</p>
-		</div>
-	);
-}
+const SENSATIONALISM_THRESHOLDS = [
+	{
+		value: 0,
+		color: "#22c55e",
+		textClass: "text-green-500",
+		label: "Low - Factual reporting",
+	},
+	{
+		value: 4,
+		color: "#eab308",
+		textClass: "text-amber-500",
+		label: "Moderate - Some bias",
+	},
+	{
+		value: 7,
+		color: "#ef4444",
+		textClass: "text-red-500",
+		label: "High - Sensationalized",
+	},
+];
 
 function FactualRatingBadge({ rating }: { rating: string }) {
 	const normalizedRating = rating.toLowerCase();
@@ -552,8 +406,11 @@ export function NewsAnalyzerResults({ output }: NewsAnalyzerResultsProps) {
 							</div>
 
 							<div className="flex justify-center">
-								<SensationalismGauge
-									score={output.bias.sensationalism}
+								<SemiCircleGauge
+									value={output.bias.sensationalism}
+									max={10}
+									label="Sensationalism Score"
+									thresholds={SENSATIONALISM_THRESHOLDS}
 								/>
 							</div>
 
