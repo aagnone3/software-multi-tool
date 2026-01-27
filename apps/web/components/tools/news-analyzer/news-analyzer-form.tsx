@@ -4,6 +4,8 @@ import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { Label } from "@ui/components/label";
 import { Textarea } from "@ui/components/textarea";
+import { cn } from "@ui/lib";
+import { FileText, Link2 } from "lucide-react";
 import { useState } from "react";
 
 export interface NewsAnalyzerFormProps {
@@ -31,27 +33,32 @@ export function NewsAnalyzerForm({
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
-			<div className="flex gap-2 border-b">
+			{/* Segmented Mode Switcher */}
+			<div className="rounded-lg bg-muted p-1 inline-flex">
 				<button
 					type="button"
 					onClick={() => setInputMode("url")}
-					className={`px-4 py-2 font-medium ${
+					className={cn(
+						"inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200",
 						inputMode === "url"
-							? "border-b-2 border-primary text-primary"
-							: "text-muted-foreground"
-					}`}
+							? "bg-background text-foreground shadow-sm"
+							: "text-muted-foreground hover:text-foreground",
+					)}
 				>
+					<Link2 className="size-4" />
 					URL
 				</button>
 				<button
 					type="button"
 					onClick={() => setInputMode("text")}
-					className={`px-4 py-2 font-medium ${
+					className={cn(
+						"inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200",
 						inputMode === "text"
-							? "border-b-2 border-primary text-primary"
-							: "text-muted-foreground"
-					}`}
+							? "bg-background text-foreground shadow-sm"
+							: "text-muted-foreground hover:text-foreground",
+					)}
 				>
+					<FileText className="size-4" />
 					Paste Text
 				</button>
 			</div>
@@ -86,9 +93,28 @@ export function NewsAnalyzerForm({
 						rows={10}
 						className="resize-y"
 					/>
-					<p className="text-sm text-muted-foreground">
-						Paste the full text of the article you want to analyze.
-					</p>
+					<div className="flex items-center justify-between">
+						<p className="text-sm text-muted-foreground">
+							Paste the full text of the article you want to
+							analyze.
+						</p>
+						<p
+							className={cn(
+								"text-sm tabular-nums",
+								articleText.length < 100
+									? "text-amber-500"
+									: "text-muted-foreground",
+							)}
+						>
+							{articleText.length.toLocaleString()} characters
+							{articleText.length < 100 &&
+								articleText.length > 0 && (
+									<span className="ml-1 text-xs">
+										(min 100 recommended)
+									</span>
+								)}
+						</p>
+					</div>
 				</div>
 			)}
 

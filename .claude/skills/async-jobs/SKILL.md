@@ -636,8 +636,11 @@ Integration tests require the api-server running with `USE_PGBOSS_WORKERS=true`:
 ### Jobs Not Being Processed
 
 1. **Check api-server is running**:
+   - Run `pnpm dev` at the project root (starts both web and api-server)
+   - Or run `pnpm --filter api-server dev` separately
    - Verify `USE_PGBOSS_WORKERS=true` is set
    - Check logs for "pg-boss started successfully"
+   - **Note**: The api-server auto-switches to Node.js v22 if needed (v24+ is incompatible with Zod v4)
 
 2. **Check pg-boss queue**:
 

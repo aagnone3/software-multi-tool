@@ -367,6 +367,8 @@ echo "API server allocated port: $API_PORT"
 
 **Database isolation**: Testcontainers automatically allocates unique ports for PostgreSQL containers - no manual `DATABASE_URL` configuration needed!
 
+**Database URL consistency**: The setup script automatically verifies that web app and api-server use the **same database URL**. If they differ (e.g., web pointing to Supabase local on port 54322, api-server pointing to Homebrew Postgres on port 5432), jobs created by the web app won't be processed by api-server workers. The script syncs them automatically and warns you.
+
 ### Step 4: Install Dependencies (Usually Not Needed)
 
 **Important**: Worktrees share `node_modules` and `.turbo` cache from the parent repository.
@@ -910,6 +912,63 @@ kill -9 <PID>
 echo "PORT=3502" >> apps/web/.env.local
 pnpm dev
 ```
+
+### Jobs Not Processing (Database URL Mismatch)
+
+**Problem**: Jobs are created successfully (shown in logs) but never get picked up by workers. pg-boss monitor shows 0 jobs in all queues.
+
+**Root cause**: Web app and api-server are using **different databases**:
+
+- Web app: `localhost:54322/postgres` (Supabase local)
+- API server: `localhost:5432/local_softwaremultitool` (Homebrew Postgres)
+
+Jobs get created in one database, but workers poll the other.
+
+**Solution**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Check both database URLs
+grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+grep "DATABASE_URL\|POSTGRES_PRISMA_URL" apps/api-server/.env.local
+
+# If they differ, sync web to match api-server
+# (The automated setup script now does this automatically)
+# Or manually update apps/web/.env.local to use the same URL
+
+# Restart dev server after fixing
+pnpm dev
+```
+
+**Prevention**: The `worktree-setup.sh` script now automatically checks and syncs database URLs during worktree creation.
+
+### Schema Mismatch (Pending Migrations)
+
+**Problem**: Prisma errors like `The column X does not exist in the current database` when the worktree has schema changes.
+
+**Root cause**: The worktree branch has Prisma migrations that haven't been applied to your local database. This commonly happens when:
+
+- Checking out a branch with new schema changes
+- The worktree was created from a branch ahead of your local DB state
+
+**Solution**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Check migration status
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+pnpm --filter @repo/database exec prisma migrate status
+
+# Apply pending migrations
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+pnpm --filter @repo/database exec prisma migrate deploy
+```
+
+**Prevention**: After creating a worktree, check for pending migrations if the branch has schema changes.
 
 ## Cleanup Workflow
 

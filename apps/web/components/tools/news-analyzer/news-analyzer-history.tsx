@@ -36,6 +36,7 @@ import {
 	ExternalLink,
 	FileText,
 	Loader2,
+	Newspaper,
 	XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -68,6 +69,7 @@ const statusIcons: Record<
 function StatusBadge({ status }: { status: JobStatus }) {
 	const config = statusConfig[status];
 	const Icon = statusIcons[status];
+	const isProcessing = status === "PROCESSING" || status === "PENDING";
 
 	return (
 		<Badge
@@ -80,6 +82,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
 							? "warning"
 							: "info"
 			}
+			className={isProcessing ? "motion-safe:animate-pulse" : ""}
 		>
 			<Icon
 				className={`size-3 mr-1 ${status === "PROCESSING" ? "animate-spin" : ""}`}
@@ -294,7 +297,7 @@ export function NewsAnalyzerHistory() {
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer hover:bg-muted/50"
+									className="cursor-pointer transition-colors duration-150 hover:bg-muted/50"
 									onClick={() => {
 										const job = row.original;
 										if (
@@ -346,11 +349,16 @@ export function NewsAnalyzerHistory() {
 											</Button>
 										</div>
 									) : (
-										<div className="text-muted-foreground">
-											<p>No analyses yet.</p>
-											<p className="text-sm mt-1">
-												Analyze an article to see it
-												here.
+										<div className="flex flex-col items-center py-8 text-center">
+											<div className="flex size-16 items-center justify-center rounded-full bg-muted mb-4">
+												<Newspaper className="size-8 text-muted-foreground" />
+											</div>
+											<h3 className="font-semibold text-foreground">
+												No analyses yet
+											</h3>
+											<p className="mt-1 text-sm text-muted-foreground max-w-xs">
+												Analyze your first article to
+												see your results history here.
 											</p>
 										</div>
 									)}

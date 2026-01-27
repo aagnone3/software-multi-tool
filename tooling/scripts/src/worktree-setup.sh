@@ -434,6 +434,33 @@ setup_worktree_environment() {
     sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$web_port|" "$api_env_file"
     sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$api_port|" "$api_env_file"
     rm -f "$api_env_file.bak"
+
+    # Verify database URL consistency between web and api-server
+    log_info "Verifying database URL consistency..."
+    local web_db_url api_db_url
+    web_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    api_db_url=$(grep "^DATABASE_URL=" "$api_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    # Also check POSTGRES_PRISMA_URL in api-server if DATABASE_URL not found
+    if [ -z "$api_db_url" ]; then
+      api_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$api_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    fi
+
+    if [ -n "$web_db_url" ] && [ -n "$api_db_url" ]; then
+      if [ "$web_db_url" != "$api_db_url" ]; then
+        log_warning "Database URL mismatch detected!"
+        log_warning "  Web:        $web_db_url"
+        log_warning "  API Server: $api_db_url"
+        log_warning "This can cause jobs to be created in one database but workers polling another."
+        log_info "Syncing web database URL to match api-server..."
+        # Update web env file to use the same database as api-server
+        sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$api_db_url\"|" "$web_env_file"
+        sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$api_db_url\"|" "$web_env_file"
+        rm -f "$web_env_file.bak"
+        log_success "Database URLs synchronized"
+      else
+        log_success "Database URLs are consistent"
+      fi
+    fi
   fi
 
   # Step 4: Install dependencies
@@ -457,7 +484,7 @@ setup_worktree_environment() {
     log_success "Dependencies installed"
   fi
 
-  # Step 5: Generate Prisma client
+  # Step 5: Generate Prisma client and check migrations
   log_step "Step 5: Generating Prisma client"
 
   if pnpm --filter @repo/database generate 2>/dev/null; then
@@ -465,6 +492,24 @@ setup_worktree_environment() {
   else
     log_error "Failed to generate Prisma client"
     exit 1
+  fi
+
+  # Check for pending migrations (informational only)
+  log_info "Checking for pending database migrations..."
+  local web_db_url
+  web_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+  if [ -n "$web_db_url" ]; then
+    local migrate_status
+    if migrate_status=$(POSTGRES_PRISMA_URL="$web_db_url" POSTGRES_URL_NON_POOLING="$web_db_url" \
+      pnpm --filter @repo/database exec prisma migrate status 2>&1); then
+      if echo "$migrate_status" | grep -q "Following migration have not yet been applied"; then
+        log_warning "Pending database migrations detected!"
+        echo "$migrate_status" | grep -A1 "Following migration" | tail -1 | sed 's/^/  /'
+        log_info "Run: POSTGRES_PRISMA_URL=\"$web_db_url\" POSTGRES_URL_NON_POOLING=\"$web_db_url\" pnpm --filter @repo/database exec prisma migrate deploy"
+      else
+        log_success "Database migrations are up to date"
+      fi
+    fi
   fi
 
   # Step 6: Ensure Supabase local is running and database is seeded
