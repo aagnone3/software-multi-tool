@@ -1,5 +1,5 @@
 import { executePrompt, MODEL_RECOMMENDATIONS } from "@repo/agent-sdk";
-import type { Prisma, ToolJob } from "@repo/database";
+import { createNewsAnalysis, type Prisma, type ToolJob } from "@repo/database";
 import { logger } from "@repo/logs";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import {
@@ -147,6 +147,36 @@ export async function processNewsAnalyzerJob(job: ToolJob): Promise<JobResult> {
 		logger.info(
 			`[NewsAnalyzer] Job ${job.id}: Analysis completed successfully`,
 		);
+
+		// Create NewsAnalysis record for sharing support
+		try {
+			const newsAnalysis = await createNewsAnalysis(
+				{
+					sourceUrl: input.articleUrl,
+					sourceText: input.articleText,
+					title: extractedContent.title,
+					analysis:
+						analysisResult as unknown as Prisma.InputJsonValue,
+					userId: job.userId ?? undefined,
+				},
+				job.id,
+			);
+			logger.info(
+				`[NewsAnalyzer] Job ${job.id}: Created NewsAnalysis record ${newsAnalysis.id}`,
+			);
+		} catch (dbError) {
+			// Log the error but don't fail the job - the analysis still succeeded
+			logger.error(
+				`[NewsAnalyzer] Job ${job.id}: Failed to create NewsAnalysis record`,
+				{
+					error:
+						dbError instanceof Error
+							? dbError.message
+							: String(dbError),
+				},
+			);
+		}
+
 		return {
 			success: true,
 			output: analysisResult as unknown as Prisma.InputJsonValue,

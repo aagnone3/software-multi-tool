@@ -467,8 +467,41 @@ setup_worktree_environment() {
     exit 1
   fi
 
-  # Step 6: Run baseline verification
-  log_step "Step 6: Running baseline verification"
+  # Step 6: Ensure Supabase local is running and database is seeded
+  log_step "Step 6: Checking Supabase local status"
+
+  # Check if Supabase local is running
+  if ! supabase status &>/dev/null; then
+    log_warning "Supabase local is not running"
+    log_info "Starting Supabase local..."
+    if supabase start; then
+      log_success "Supabase local started"
+    else
+      log_error "Failed to start Supabase local"
+      log_info "Run: supabase start"
+      log_info "Then: supabase db reset"
+      exit 1
+    fi
+  else
+    log_success "Supabase local is running"
+  fi
+
+  # Check if test user exists (indicates database is seeded)
+  # Use Supabase local database (port 54322)
+  if PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT 1 FROM \"user\" WHERE id = 'preview_user_001'" 2>/dev/null | grep -q "1"; then
+    log_success "Database already seeded (preview_user_001 exists)"
+  else
+    log_info "Test user not found, resetting database with seed..."
+    if supabase db reset --no-confirm 2>&1; then
+      log_success "Database reset and seeded successfully"
+    else
+      log_warning "Database reset had issues (non-blocking)"
+      log_info "Run manually: supabase db reset"
+    fi
+  fi
+
+  # Step 7: Run baseline verification
+  log_step "Step 7: Running baseline verification"
 
   log_info "Running type check..."
   if pnpm --filter web run type-check 2>/dev/null; then

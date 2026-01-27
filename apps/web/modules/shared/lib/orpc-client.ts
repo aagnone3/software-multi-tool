@@ -4,7 +4,9 @@ import type { ApiRouterClient } from "@repo/api/orpc/router";
 import { getOrpcUrl } from "@repo/utils";
 
 const link = new RPCLink({
-	url: getOrpcUrl(),
+	// URL is evaluated dynamically at request time to ensure correct
+	// client-side vs server-side URL resolution in preview environments
+	url: () => getOrpcUrl(),
 	headers: async () => {
 		if (typeof window !== "undefined") {
 			// In browser context, include x-session-id for anonymous user job ownership

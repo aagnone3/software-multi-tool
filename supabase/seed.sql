@@ -33,7 +33,7 @@ VALUES (
 -- Test User
 -- =====================================================
 -- Email: test@preview.local
--- Password: "PreviewPassword123!" (hashed using Better Auth)
+-- Password: "TestPassword123" (hashed using Better Auth)
 -- This user can be used to test the preview environment
 
 INSERT INTO "public"."user" (
@@ -65,7 +65,7 @@ INSERT INTO "public"."user" (
 ) ON CONFLICT ("id") DO NOTHING;
 
 -- Create account entry for credential-based login
--- Password: "PreviewPassword123!" - hashed using Better Auth's password.hash()
+-- Password: "TestPassword123" - hashed using Better Auth's password.hash()
 INSERT INTO "public"."account" (
     "id",
     "accountId",
@@ -87,7 +87,7 @@ INSERT INTO "public"."account" (
     NULL,
     NULL,
     NULL,
-    'c23abb2783a2ac51ed7d399d359a4a4f:24282aad657c2c5e2b295a2205842333ef8a9262fcea3248bba145307d7217d1542ec04bb0cf3527411c58e0e2e1617fe592e0c262f2a3320e6d3bb88d9a804a',
+    '46eb4f9cb6d62a4d8e23b83744388089:7d25dab94fc9a80b74b4d07fcbe05856de9a885e589d919f9075268ba89b8ca1f672c9c0f2cd29d457d228eb31c4e4e6e4b9b673034a75eb89e407ae3b44be7a',
     NOW(),
     NOW()
 ) ON CONFLICT ("id") DO NOTHING;

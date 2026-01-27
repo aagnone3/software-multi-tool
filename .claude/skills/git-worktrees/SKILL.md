@@ -531,15 +531,36 @@ Testcontainers automatically:
 
 This enables **parallel integration tests** across multiple worktrees without conflicts.
 
-### Local PostgreSQL (Development)
+### Local Development Database (Supabase Local)
 
-The local PostgreSQL instance on port `5432` is typically only used by the parent repository. Worktrees use Testcontainers for integration tests.
+**All worktrees share Supabase local** for development. This ensures consistency with preview/production environments.
 
-**Connection string** (for reference):
+**Connection string:**
 
 ```text
-postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
+
+**Start Supabase local** (from any worktree or main repo):
+
+```bash
+supabase start
+```
+
+**Reset database** (applies migrations + seed.sql):
+
+```bash
+supabase db reset
+```
+
+**Why Supabase local?**
+
+- Same `seed.sql` runs automatically (no manual seeding)
+- Storage buckets are created (avatars, files)
+- Identical environment to preview deployments
+- Test user (`test@preview.local` / `TestPassword123`) works immediately
+
+**Note**: The `worktree-setup.sh` script automatically verifies Supabase local is running and seeds the database if needed.
 
 ## Environment Variable Isolation
 
@@ -969,6 +990,7 @@ git worktree list
 - **`dev:pull-request` skill**: Create organized PRs from worktree changes
 - **`prisma-migrate` skill**: Database migrations in isolated worktrees
 - **`better-auth` skill**: Authentication development in dedicated worktrees
+- **`application-environments` skill**: Local Supabase setup with worktrees (see "Supabase Local Stack" section)
 
 ## Git Hooks Integration
 
