@@ -238,7 +238,7 @@ export function RecentActivityFeed({
 						className="w-full"
 						asChild
 					>
-						<Link href="/app/settings/billing/usage">
+						<Link href="/app/settings/usage">
 							View all activity
 							<ChevronRightIcon className="size-4 ml-1" />
 						</Link>

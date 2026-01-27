@@ -39,8 +39,8 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 		: "/app/settings/billing";
 
 	const usagePath = activeOrganization
-		? `/app/${activeOrganization.slug}/settings/billing/usage`
-		: "/app/settings/billing/usage";
+		? `/app/${activeOrganization.slug}/settings/usage`
+		: "/app/settings/usage";
 
 	if (isLoading) {
 		return (
