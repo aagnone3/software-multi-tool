@@ -70,3 +70,5 @@ After `pre-commit install`, each commit runs:
 - Contributor workflow details (including testing expectations) are documented in `CONTRIBUTING.md`.
 
 Have feedback or ideas? Open an issue or start a discussion in this repository to help shape Software Multitool.
+
+<!-- Test commit for worktree skill verification - 2026-01-27 -->
