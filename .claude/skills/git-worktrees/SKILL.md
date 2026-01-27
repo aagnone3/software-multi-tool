@@ -541,6 +541,16 @@ The local PostgreSQL instance on port `5432` is typically only used by the paren
 postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
 ```
 
+### Local Supabase (Advanced)
+
+For features requiring Supabase Storage, Realtime, or Edge Functions, you can run a local Supabase stack. See the **`application-environments` skill** for detailed setup instructions.
+
+**⚠️ Important:** Supabase commands (`pnpm supabase:*`) run from the monorepo root, not the worktree. This means:
+
+- `supabase:reset` applies `seed.sql` from `main` branch, not your worktree
+- You must manually apply worktree-specific seed changes to the local database
+- Environment variables in the worktree's `.env.local` must be updated to point to local Supabase
+
 ## Environment Variable Isolation
 
 ### Shared Variables (Default)
@@ -969,6 +979,7 @@ git worktree list
 - **`dev:pull-request` skill**: Create organized PRs from worktree changes
 - **`prisma-migrate` skill**: Database migrations in isolated worktrees
 - **`better-auth` skill**: Authentication development in dedicated worktrees
+- **`application-environments` skill**: Local Supabase setup with worktrees (see "Supabase Local Stack" section)
 
 ## Git Hooks Integration
 
