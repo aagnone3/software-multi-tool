@@ -88,40 +88,49 @@ The sync script:
 
 #### Local Development Database
 
-Local PostgreSQL (Homebrew) on port 5432:
+**Use Supabase local** for development to match preview/production environments exactly.
 
-| Setting  | Value                   |
-| -------- | ----------------------- |
-| Database | local_softwaremultitool |
-| User     | postgres                |
-| Password | postgres                |
+**Start Supabase local:**
+
+```bash
+supabase start
+```
+
+This starts a local Supabase instance with:
+
+- PostgreSQL on port 54322
+- Studio UI at http://127.0.0.1:54323
+- Storage, Auth, and all Supabase services
 
 **Connection string:**
 
 ```text
-postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
-**Create database (if needed):**
+**Reset database (applies migrations + seed.sql):**
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+supabase db reset
 ```
 
-**Seed test user (for Quick Login button):**
+This is the **same process** used in preview environments, ensuring consistency between local dev and deployed previews.
 
-The login page shows a "Quick Login as Test User" button in non-production environments. This requires a test user to exist in the database. In Vercel preview environments, this user is automatically created via Supabase's `seed.sql`. For local development, manually seed the test user:
-
-```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql
-```
-
-Test user credentials:
+**Test user credentials (Quick Login button):**
 
 | Field    | Value                 |
 | -------- | --------------------- |
 | Email    | test@preview.local    |
 | Password | TestPassword123       |
+
+The test user is automatically created by `supabase/seed.sql` which runs during `supabase db reset` and on preview branch creation.
+
+**Why Supabase local instead of standalone Postgres?**
+
+- Same seed.sql runs automatically (no manual seeding)
+- Storage buckets are created (seed.sql creates `avatars` and `files` buckets)
+- Identical environment to preview deployments
+- Supabase Studio provides visual database management
 
 ### Stripe Webhooks
 

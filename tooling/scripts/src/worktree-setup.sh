@@ -467,21 +467,36 @@ setup_worktree_environment() {
     exit 1
   fi
 
-  # Step 6: Ensure database is seeded (idempotent)
-  log_step "Step 6: Checking database seed status"
+  # Step 6: Ensure Supabase local is running and database is seeded
+  log_step "Step 6: Checking Supabase local status"
 
-  # Check if test user exists (all worktrees share the same local database)
-  local test_user_exists
-  if PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -tAc "SELECT 1 FROM \"user\" WHERE email = 'test@preview.local'" 2>/dev/null | grep -q "1"; then
-    log_success "Database already seeded (test user exists)"
-    test_user_exists=true
-  else
-    log_info "Test user not found, seeding database..."
-    if PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f "$REPO_ROOT/supabase/seed.sql" 2>/dev/null; then
-      log_success "Database seeded successfully"
+  # Check if Supabase local is running
+  if ! supabase status &>/dev/null; then
+    log_warning "Supabase local is not running"
+    log_info "Starting Supabase local..."
+    if supabase start; then
+      log_success "Supabase local started"
     else
-      log_warning "Database seeding had issues (non-blocking - may need manual seeding)"
-      log_info "Run: PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql"
+      log_error "Failed to start Supabase local"
+      log_info "Run: supabase start"
+      log_info "Then: supabase db reset"
+      exit 1
+    fi
+  else
+    log_success "Supabase local is running"
+  fi
+
+  # Check if test user exists (indicates database is seeded)
+  # Use Supabase local database (port 54322)
+  if PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT 1 FROM \"user\" WHERE id = 'preview_user_001'" 2>/dev/null | grep -q "1"; then
+    log_success "Database already seeded (preview_user_001 exists)"
+  else
+    log_info "Test user not found, resetting database with seed..."
+    if supabase db reset --no-confirm 2>&1; then
+      log_success "Database reset and seeded successfully"
+    else
+      log_warning "Database reset had issues (non-blocking)"
+      log_info "Run manually: supabase db reset"
     fi
   fi
 

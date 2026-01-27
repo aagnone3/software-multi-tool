@@ -531,25 +531,36 @@ Testcontainers automatically:
 
 This enables **parallel integration tests** across multiple worktrees without conflicts.
 
-### Local PostgreSQL (Development)
+### Local Development Database (Supabase Local)
 
-The local PostgreSQL instance on port `5432` is typically only used by the parent repository. Worktrees use Testcontainers for integration tests.
+**All worktrees share Supabase local** for development. This ensures consistency with preview/production environments.
 
-**Connection string** (for reference):
+**Connection string:**
 
 ```text
-postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
-### Local Supabase (Advanced)
+**Start Supabase local** (from any worktree or main repo):
 
-For features requiring Supabase Storage, Realtime, or Edge Functions, you can run a local Supabase stack. See the **`application-environments` skill** for detailed setup instructions.
+```bash
+supabase start
+```
 
-**⚠️ Important:** Supabase commands (`pnpm supabase:*`) run from the monorepo root, not the worktree. This means:
+**Reset database** (applies migrations + seed.sql):
 
-- `supabase:reset` applies `seed.sql` from `main` branch, not your worktree
-- You must manually apply worktree-specific seed changes to the local database
-- Environment variables in the worktree's `.env.local` must be updated to point to local Supabase
+```bash
+supabase db reset
+```
+
+**Why Supabase local?**
+
+- Same `seed.sql` runs automatically (no manual seeding)
+- Storage buckets are created (avatars, files)
+- Identical environment to preview deployments
+- Test user (`test@preview.local` / `TestPassword123`) works immediately
+
+**Note**: The `worktree-setup.sh` script automatically verifies Supabase local is running and seeds the database if needed.
 
 ## Environment Variable Isolation
 
