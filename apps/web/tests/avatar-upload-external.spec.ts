@@ -62,7 +62,7 @@ test.describe("avatar upload on external deployment", () => {
 				.first();
 
 			await emailInput.fill("test@preview.local");
-			await passwordInput.fill("PreviewPassword123!");
+			await passwordInput.fill("TestPassword123");
 
 			// Find and click submit button
 			const submitButton = page.locator('button[type="submit"]').first();

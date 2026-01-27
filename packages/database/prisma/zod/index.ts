@@ -76,6 +76,12 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnumEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: NewsAnalysisScalarFieldEnum.schema.ts
+
+export const NewsAnalysisScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'sourceUrl', 'sourceText', 'title', 'analysis', 'createdAt', 'updatedAt'])
+
+export type NewsAnalysisScalarFieldEnumEnum = z.infer<typeof NewsAnalysisScalarFieldEnumSchema>;
+
 // File: AgentSessionScalarFieldEnum.schema.ts
 
 export const AgentSessionScalarFieldEnumSchema = z.enum(['id', 'sessionType', 'userId', 'organizationId', 'toolSlug', 'toolId', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
@@ -93,12 +99,6 @@ export type ToolScalarFieldEnumEnum = z.infer<typeof ToolScalarFieldEnumSchema>;
 export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
-
-// File: NewsAnalysisScalarFieldEnum.schema.ts
-
-export const NewsAnalysisScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'sourceUrl', 'sourceText', 'title', 'analysis', 'createdAt', 'updatedAt'])
-
-export type NewsAnalysisScalarFieldEnumEnum = z.infer<typeof NewsAnalysisScalarFieldEnumSchema>;
 
 // File: RateLimitEntryScalarFieldEnum.schema.ts
 
@@ -441,6 +441,23 @@ export const AiChatSchema = z.object({
 export type AiChatType = z.infer<typeof AiChatSchema>;
 
 
+// File: NewsAnalysis.schema.ts
+
+export const NewsAnalysisSchema = z.object({
+  id: z.string(),
+  organizationId: z.string().nullish(),
+  userId: z.string().nullish(),
+  sourceUrl: z.string().nullish(),
+  sourceText: z.string().nullish(),
+  title: z.string().nullish(),
+  analysis: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsAnalysisType = z.infer<typeof NewsAnalysisSchema>;
+
+
 // File: AgentSession.schema.ts
 
 export const AgentSessionSchema = z.object({
@@ -508,23 +525,6 @@ export const ToolJobSchema = z.object({
 });
 
 export type ToolJobType = z.infer<typeof ToolJobSchema>;
-
-
-// File: NewsAnalysis.schema.ts
-
-export const NewsAnalysisSchema = z.object({
-  id: z.string(),
-  organizationId: z.string().nullish(),
-  userId: z.string().nullish(),
-  sourceUrl: z.string().nullish(),
-  sourceText: z.string().nullish(),
-  title: z.string().nullish(),
-  analysis: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export type NewsAnalysisType = z.infer<typeof NewsAnalysisSchema>;
 
 
 // File: RateLimitEntry.schema.ts

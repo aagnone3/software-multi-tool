@@ -96,8 +96,8 @@ export function GettingStartedChecklist({
 	);
 	const isAllComplete = completedCount === checklistItems.length;
 
-	// Don't show if dismissed or loading
-	if (isDismissed || usageLoading) {
+	// Don't show if dismissed, loading, or 100% complete
+	if (isDismissed || usageLoading || isAllComplete) {
 		return null;
 	}
 

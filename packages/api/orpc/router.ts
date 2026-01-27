@@ -11,6 +11,7 @@ import { newsletterRouter } from "../modules/newsletter/router";
 import { notificationsRouter } from "../modules/notifications/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
+import { shareRouter } from "../modules/share/router";
 import { usersRouter } from "../modules/users/router";
 import { publicProcedure } from "./procedures";
 
@@ -31,6 +32,7 @@ export const router = publicProcedure
 		jobs: jobsRouter,
 		gdpr: gdprRouter,
 		invoiceProcessor: invoiceProcessorRouter,
+		share: shareRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;

@@ -107,7 +107,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 			},
 			{
 				id: "chatbot",
-				label: "AI Chatbot",
+				label: "Chat",
 				href: activeOrganization
 					? `/app/${activeOrganization.slug}/chatbot`
 					: "/app/chatbot",

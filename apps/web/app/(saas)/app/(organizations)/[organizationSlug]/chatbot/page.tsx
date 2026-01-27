@@ -46,10 +46,7 @@ export default async function AiDemoPage({
 
 	return (
 		<>
-			<PageHeader
-				title="AI Chatbot"
-				subtitle="This is an example chatbot built with the OpenAI API"
-			/>
+			<PageHeader title="Chat" subtitle="Chat with our AI assistant" />
 
 			<AiChat organizationId={organizationId} />
 		</>

@@ -4,8 +4,11 @@ import { getBaseUrl } from "./base-url";
 
 const originalEnv = process.env;
 const envKeys = [
+	"BETTER_AUTH_URL",
 	"NEXT_PUBLIC_SITE_URL",
 	"NEXT_PUBLIC_VERCEL_URL",
+	"VERCEL_URL",
+	"VERCEL_ENV",
 	"PORT",
 ] as const;
 
@@ -27,6 +30,34 @@ describe("getBaseUrl", () => {
 
 	const scenarios = [
 		{
+			name: "prefers BETTER_AUTH_URL when defined, even if others exist",
+			env: {
+				BETTER_AUTH_URL: "https://auth.example.com",
+				NEXT_PUBLIC_SITE_URL: "https://example.com",
+				NEXT_PUBLIC_VERCEL_URL: "ignored.vercel.app",
+				PORT: "9999",
+			},
+			expected: "https://auth.example.com",
+		},
+		{
+			name: "uses VERCEL_URL in preview environment even when NEXT_PUBLIC_SITE_URL is set",
+			env: {
+				NEXT_PUBLIC_SITE_URL: "https://example.com",
+				VERCEL_ENV: "preview",
+				VERCEL_URL: "my-preview-abc123.vercel.app",
+			},
+			expected: "https://my-preview-abc123.vercel.app",
+		},
+		{
+			name: "uses NEXT_PUBLIC_SITE_URL in production Vercel environment",
+			env: {
+				NEXT_PUBLIC_SITE_URL: "https://example.com",
+				VERCEL_ENV: "production",
+				VERCEL_URL: "my-production.vercel.app",
+			},
+			expected: "https://example.com",
+		},
+		{
 			name: "prefers NEXT_PUBLIC_SITE_URL when defined, even if others exist",
 			env: {
 				NEXT_PUBLIC_SITE_URL: "https://example.com",
@@ -34,6 +65,13 @@ describe("getBaseUrl", () => {
 				PORT: "9999",
 			},
 			expected: "https://example.com",
+		},
+		{
+			name: "falls back to VERCEL_URL when NEXT_PUBLIC_SITE_URL is missing",
+			env: {
+				VERCEL_URL: "my-app-abc.vercel.app",
+			},
+			expected: "https://my-app-abc.vercel.app",
 		},
 		{
 			name: "falls back to NEXT_PUBLIC_VERCEL_URL when site url missing",

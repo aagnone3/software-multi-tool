@@ -29,6 +29,7 @@ import {
 	Clock,
 	ExternalLink,
 	FileText,
+	Link2,
 	Loader2,
 	RefreshCw,
 	Timer,
@@ -210,6 +211,22 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				</Button>
 
 				<div className="flex items-center gap-2">
+					{/* Copy Share Link - only show for completed jobs with newsAnalysis */}
+					{job.status === "COMPLETED" && job.newsAnalysis?.id && (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
+								navigator.clipboard.writeText(shareUrl);
+								toast.success("Share link copied to clipboard");
+							}}
+						>
+							<Link2 className="mr-2 size-4" />
+							Copy link
+						</Button>
+					)}
+
 					<Button
 						variant="outline"
 						size="sm"

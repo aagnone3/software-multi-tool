@@ -4,8 +4,7 @@ import Link from "next/link";
 
 export function Hero() {
 	return (
-		<section className="relative max-w-full overflow-x-hidden bg-linear-to-b from-0% from-card to-[50vh] to-background">
-			<div className="absolute left-1/2 z-10 ml-[-500px] h-[500px] w-[1000px] rounded-full bg-linear-to-r from-primary/30 to-highlight/20 opacity-30 blur-[150px]" />
+		<section className="relative max-w-full overflow-x-hidden">
 			<div className="container relative z-20 pt-32 pb-16 text-center md:pt-40 lg:pt-48 lg:pb-24">
 				<div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary">
 					<SparklesIcon className="size-4" />

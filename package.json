@@ -20,6 +20,7 @@
 		"test": "dotenv -c -- turbo run test",
 		"test:ci": "dotenv -c -- env TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
 		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts",
+		"db:seed": "PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql",
 		"worktree:create": "./tooling/scripts/src/worktree-setup.sh create",
 		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
 		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",
@@ -32,7 +33,7 @@
 		"mt": "pnpm --filter @repo/cli mt"
 	},
 	"engines": {
-		"node": ">=22.0.0 <23.0.0"
+		"node": "v22.22.0"
 	},
 	"packageManager": "pnpm@10.27.0",
 	"optionalDependencies": {

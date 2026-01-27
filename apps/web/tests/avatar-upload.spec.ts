@@ -7,7 +7,7 @@ import { expect, test } from "./fixtures";
  *   BASE_URL=https://your-preview-url.vercel.app pnpm --filter web run e2e -- --grep "avatar upload"
  *
  * Prerequisites for preview deployments:
- * - The test user (test@preview.local / PreviewPassword123!) must exist
+ * - The test user (test@preview.local / TestPassword123) must exist
  * - This is seeded automatically in Supabase preview branches via seed.sql
  */
 test.describe("avatar upload @avatar", () => {
@@ -58,7 +58,7 @@ test.describe("avatar upload @avatar", () => {
 			});
 
 			await emailInput.fill("test@preview.local");
-			await passwordInput.fill("PreviewPassword123!");
+			await passwordInput.fill("TestPassword123");
 			await submitButton.click();
 
 			// Wait for login to complete

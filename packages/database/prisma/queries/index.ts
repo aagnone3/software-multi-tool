@@ -3,6 +3,7 @@ export * from "./ai-chats";
 export * from "./audit-logs";
 export * from "./credit-balance";
 export * from "./gdpr-export";
+export * from "./news-analysis";
 export * from "./notification-preferences";
 export * from "./notification-triggers";
 export * from "./notifications";

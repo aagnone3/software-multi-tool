@@ -81,6 +81,10 @@ vi.mock("../modules/invoice-processor/router", () => ({
 	invoiceProcessorRouter: {},
 }));
 
+vi.mock("../modules/share/router", () => ({
+	shareRouter: {},
+}));
+
 afterEach(() => {
 	getSessionMock.mockReset();
 });
@@ -103,6 +107,7 @@ describe("api router", () => {
 			"jobs",
 			"gdpr",
 			"invoiceProcessor",
+			"share",
 		]);
 	});
 

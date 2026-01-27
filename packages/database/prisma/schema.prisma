@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["multiSchema"]
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
 }
 
 generator zod {
@@ -215,6 +216,29 @@ model AiChat {
   @@schema("public")
 }
 
+// Stored news analysis results for sharing
+model NewsAnalysis {
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  sourceUrl      String?       // URL of the analyzed article
+  sourceText     String?       @db.Text // Text content if pasted directly
+  title          String?       // Title extracted from article
+  /// [NewsAnalysisResult]
+  analysis       Json          // Full analysis result
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  toolJob        ToolJob?
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("news_analysis")
+  @@schema("public")
+}
+
 // Agent session for multi-turn AI conversations
 model AgentSession {
   id             String   @id @default(cuid())
@@ -303,28 +327,6 @@ model ToolJob {
   @@index([sessionId])
   @@index([expiresAt])
   @@map("tool_job")
-  @@schema("public")
-}
-
-model NewsAnalysis {
-  id             String        @id @default(cuid())
-  organizationId String?
-  userId         String?
-  sourceUrl      String?
-  sourceText     String?       @db.Text
-  title          String?
-  analysis       Json
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  toolJob        ToolJob?
-
-  @@index([organizationId])
-  @@index([userId])
-  @@index([createdAt])
-  @@map("news_analysis")
   @@schema("public")
 }
 

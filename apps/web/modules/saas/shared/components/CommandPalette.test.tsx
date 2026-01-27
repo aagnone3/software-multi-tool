@@ -253,7 +253,7 @@ describe("CommandPalette", () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
 		expect(screen.getByText("Home")).toBeInTheDocument();
-		expect(screen.getByText("AI Chatbot")).toBeInTheDocument();
+		expect(screen.getByText("Chat")).toBeInTheDocument();
 		expect(screen.getByText("Settings")).toBeInTheDocument();
 		expect(screen.getByText("Usage")).toBeInTheDocument();
 	});
@@ -261,7 +261,7 @@ describe("CommandPalette", () => {
 	it("navigates to page when selected", async () => {
 		render(<CommandPalette isOpen={true} onClose={mockClose} />);
 
-		const page = screen.getByText("AI Chatbot");
+		const page = screen.getByText("Chat");
 		fireEvent.click(page);
 
 		await waitFor(() => {
