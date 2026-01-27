@@ -10,4 +10,5 @@ export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";
 export * from "./tool-jobs";
+export * from "./tools";
 export * from "./users";

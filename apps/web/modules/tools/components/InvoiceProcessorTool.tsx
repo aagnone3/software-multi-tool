@@ -306,6 +306,7 @@ export function InvoiceProcessorTool() {
 				toolSlug: "invoice-processor",
 				input,
 			});
+
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
@@ -322,6 +323,10 @@ export function InvoiceProcessorTool() {
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as InvoiceOutput);
+	};
+
+	const handleError = (error: string) => {
+		setFileError(error);
 	};
 
 	const handleNewInvoice = () => {
@@ -644,6 +649,7 @@ export function InvoiceProcessorTool() {
 					title="Processing Invoice"
 					description="AI is extracting data from your invoice..."
 					onComplete={handleComplete}
+					onError={handleError}
 				/>
 			)}
 

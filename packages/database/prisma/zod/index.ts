@@ -84,19 +84,25 @@ export type NewsAnalysisScalarFieldEnumEnum = z.infer<typeof NewsAnalysisScalarF
 
 // File: AgentSessionScalarFieldEnum.schema.ts
 
-export const AgentSessionScalarFieldEnumSchema = z.enum(['id', 'sessionType', 'userId', 'organizationId', 'toolSlug', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
+export const AgentSessionScalarFieldEnumSchema = z.enum(['id', 'sessionType', 'userId', 'organizationId', 'toolSlug', 'toolId', 'jobId', 'isComplete', 'messages', 'context', 'extractedData', 'totalInputTokens', 'totalOutputTokens', 'createdAt', 'updatedAt'])
 
 export type AgentSessionScalarFieldEnumEnum = z.infer<typeof AgentSessionScalarFieldEnumSchema>;
 
+// File: ToolScalarFieldEnum.schema.ts
+
+export const ToolScalarFieldEnumSchema = z.enum(['id', 'slug', 'name', 'description', 'icon', 'creditCost', 'creditUnit', 'enabled', 'public', 'createdAt', 'updatedAt'])
+
+export type ToolScalarFieldEnumEnum = z.infer<typeof ToolScalarFieldEnumSchema>;
+
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
 // File: RateLimitEntryScalarFieldEnum.schema.ts
 
-export const RateLimitEntryScalarFieldEnumSchema = z.enum(['id', 'identifier', 'toolSlug', 'windowStart', 'windowEnd', 'count', 'createdAt', 'updatedAt'])
+export const RateLimitEntryScalarFieldEnumSchema = z.enum(['id', 'identifier', 'toolSlug', 'toolId', 'windowStart', 'windowEnd', 'count', 'createdAt', 'updatedAt'])
 
 export type RateLimitEntryScalarFieldEnumEnum = z.infer<typeof RateLimitEntryScalarFieldEnumSchema>;
 
@@ -108,7 +114,7 @@ export type CreditBalanceScalarFieldEnumEnum = z.infer<typeof CreditBalanceScala
 
 // File: CreditTransactionScalarFieldEnum.schema.ts
 
-export const CreditTransactionScalarFieldEnumSchema = z.enum(['id', 'balanceId', 'amount', 'type', 'toolSlug', 'jobId', 'description', 'createdAt'])
+export const CreditTransactionScalarFieldEnumSchema = z.enum(['id', 'balanceId', 'amount', 'type', 'toolSlug', 'toolId', 'jobId', 'description', 'createdAt'])
 
 export type CreditTransactionScalarFieldEnumEnum = z.infer<typeof CreditTransactionScalarFieldEnumSchema>;
 
@@ -460,6 +466,7 @@ export const AgentSessionSchema = z.object({
   userId: z.string(),
   organizationId: z.string().nullish(),
   toolSlug: z.string().nullish(),
+  toolId: z.string().nullish(),
   jobId: z.string().nullish(),
   isComplete: z.boolean(),
   messages: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("[]"),
@@ -474,11 +481,31 @@ export const AgentSessionSchema = z.object({
 export type AgentSessionType = z.infer<typeof AgentSessionSchema>;
 
 
+// File: Tool.schema.ts
+
+export const ToolSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  icon: z.string().nullish(),
+  creditCost: z.number().int().default(1),
+  creditUnit: z.string().default("request"),
+  enabled: z.boolean().default(true),
+  public: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ToolType = z.infer<typeof ToolSchema>;
+
+
 // File: ToolJob.schema.ts
 
 export const ToolJobSchema = z.object({
   id: z.string(),
   toolSlug: z.string(),
+  toolId: z.string().nullish(),
   status: ToolJobStatusSchema.default("PENDING"),
   priority: z.number().int(),
   input: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
@@ -506,6 +533,7 @@ export const RateLimitEntrySchema = z.object({
   id: z.string(),
   identifier: z.string(),
   toolSlug: z.string(),
+  toolId: z.string().nullish(),
   windowStart: z.date(),
   windowEnd: z.date(),
   count: z.number().int(),
@@ -542,6 +570,7 @@ export const CreditTransactionSchema = z.object({
   amount: z.number().int(),
   type: CreditTransactionTypeSchema,
   toolSlug: z.string().nullish(),
+  toolId: z.string().nullish(),
   jobId: z.string().nullish(),
   description: z.string().nullish(),
   createdAt: z.date(),

@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@linear/sdk": "60.0.0",
+		"@linear/sdk": "60.0.1",
 		"@repo/auth": "workspace:*",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
@@ -11,13 +11,13 @@
 		"stripe": "18.5.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.11",
+		"@biomejs/biome": "2.3.12",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "25.0.9",
-		"@vitest/coverage-v8": "4.0.17",
+		"@types/node": "25.0.10",
+		"@vitest/coverage-v8": "4.0.18",
 		"nanoid": "5.1.5",
 		"tsx": "4.21.0",
-		"vitest": "4.0.17"
+		"vitest": "4.0.18"
 	},
 	"name": "@repo/scripts",
 	"private": true,

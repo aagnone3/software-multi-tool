@@ -426,6 +426,7 @@ load-nvmrc
 - **Architecture skill**: `.claude/skills/architecture/` (codebase structure, integrations, how-to guides)
 - **Analytics skill**: `.claude/skills/analytics/` (PostHog, event tracking, provider system)
 - **Auth skill**: `.claude/skills/better-auth/` (authentication implementation)
+- **Feature flags skill**: `.claude/skills/feature-flags/` (PostHog feature flags, A/B testing, progressive rollouts)
 - **Prisma skill**: `.claude/skills/prisma-migrate/` (database migrations)
 - In-app docs: `apps/web/content/docs`
 - Agent guidance: `AGENTS.md`

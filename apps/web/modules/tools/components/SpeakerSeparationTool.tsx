@@ -554,6 +554,7 @@ export function SpeakerSeparationTool() {
 	const [audioFile, setAudioFile] = useState<AudioFileData | null>(null);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [_jobError, setJobError] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
 
 	const form = useForm<FormValues>({
@@ -565,23 +566,33 @@ export function SpeakerSeparationTool() {
 
 	const onSubmit: SubmitHandler<FormValues> = async (values) => {
 		setResult(null);
+		setJobError(null);
 		if (!values.audioFile) {
 			return;
 		}
+
 		try {
 			const response = await createJobMutation.mutateAsync({
 				toolSlug: "speaker-separation",
 				input: values,
 			});
+
 			setJobId(response.job.id);
 			setAudioFile(values.audioFile);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+			setJobError(
+				error instanceof Error ? error.message : "Failed to create job",
+			);
 		}
 	};
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as SpeakerSeparationOutput);
+	};
+
+	const handleError = (error: string) => {
+		setJobError(error);
 	};
 
 	const handleNewAnalysis = () => {
@@ -699,6 +710,7 @@ export function SpeakerSeparationTool() {
 					title="Analyzing Audio"
 					description="AI is identifying speakers and transcribing your audio..."
 					onComplete={handleComplete}
+					onError={handleError}
 				/>
 			)}
 

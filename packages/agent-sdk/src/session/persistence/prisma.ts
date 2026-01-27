@@ -1,13 +1,11 @@
-import type {
-	Prisma,
-	AgentSession as PrismaAgentSession,
-} from "@prisma/client";
 import {
 	createAgentSession,
 	deleteAgentSession,
 	getAgentSessionById,
 	getAgentSessionsBySessionType,
 	getAgentSessionsByUserId,
+	type Prisma,
+	type AgentSession as PrismaAgentSession,
 	updateAgentSession,
 } from "@repo/database";
 import type {

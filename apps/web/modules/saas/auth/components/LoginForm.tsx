@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsFeatureEnabled } from "@analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -152,6 +153,20 @@ export function LoginForm() {
 	};
 
 	const signinMode = form.watch("mode");
+
+	// Feature flags for authentication methods
+	const isGithubLoginEnabled = useIsFeatureEnabled("enable-github-login");
+	const isPasskeyLoginEnabled = useIsFeatureEnabled("enable-passkey-login");
+
+	// Filter OAuth providers based on feature flags
+	const filteredOAuthProviders = Object.keys(oAuthProviders).filter(
+		(providerId) => {
+			if (providerId === "github" && !isGithubLoginEnabled) {
+				return false;
+			}
+			return true;
+		},
+	);
 
 	// Quick login for non-production environments
 	const isNonProduction = isDevEnvironment();
@@ -346,9 +361,10 @@ export function LoginForm() {
 						</form>
 					</Form>
 
-					{(config.auth.enablePasskeys ||
+					{((config.auth.enablePasskeys && isPasskeyLoginEnabled) ||
 						(config.auth.enableSignup &&
-							config.auth.enableSocialLogin)) && (
+							config.auth.enableSocialLogin &&
+							filteredOAuthProviders.length > 0)) && (
 						<>
 							<div className="relative my-6 h-4">
 								<hr className="relative top-2" />
@@ -360,27 +376,26 @@ export function LoginForm() {
 							<div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2">
 								{config.auth.enableSignup &&
 									config.auth.enableSocialLogin &&
-									Object.keys(oAuthProviders).map(
-										(providerId) => (
-											<SocialSigninButton
-												key={providerId}
-												provider={
-													providerId as OAuthProvider
-												}
-											/>
-										),
-									)}
+									filteredOAuthProviders.map((providerId) => (
+										<SocialSigninButton
+											key={providerId}
+											provider={
+												providerId as OAuthProvider
+											}
+										/>
+									))}
 
-								{config.auth.enablePasskeys && (
-									<Button
-										variant="light"
-										className="w-full sm:col-span-2"
-										onClick={() => signInWithPasskey()}
-									>
-										<KeyIcon className="mr-1.5 size-4 text-primary" />
-										Sign in with passkey
-									</Button>
-								)}
+								{config.auth.enablePasskeys &&
+									isPasskeyLoginEnabled && (
+										<Button
+											variant="light"
+											className="w-full sm:col-span-2"
+											onClick={() => signInWithPasskey()}
+										>
+											<KeyIcon className="mr-1.5 size-4 text-primary" />
+											Sign in with passkey
+										</Button>
+									)}
 							</div>
 						</>
 					)}
