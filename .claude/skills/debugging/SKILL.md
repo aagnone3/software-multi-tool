@@ -13,6 +13,15 @@ allowed-tools:
 
 Debug applications across Vercel, Supabase, and Render in local, preview, and production environments.
 
+## When to Use This Skill
+
+- App not loading or returning errors
+- Database connection issues
+- Authentication/session problems
+- Preview environment misconfiguration
+- Performance investigation
+- Tracing requests across services
+
 ---
 
 ## Quick Fixes

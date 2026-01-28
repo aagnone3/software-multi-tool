@@ -1,6 +1,6 @@
 ---
 name: linear-workflow
-description: Use this skill when implementing Linear issues using feature branches and pull requests. Provides the complete workflow from issue selection through PR creation and merging, enforcing worktree-based development practices.
+description: Implements Linear issues using worktrees, feature branches, and pull requests. Use when working on a ticket, starting a feature, picking up groomed issues, or creating PRs. Enforces worktree-based development and automatic PR creation.
 allowed-tools:
   - Bash
   - Read
@@ -10,111 +10,62 @@ allowed-tools:
 
 # Linear Workflow Skill
 
-This skill provides a guided workflow for implementing Linear issues using feature branches and pull requests. It enforces best practices for branch-based development with code review.
+Guided workflow for implementing Linear issues with feature branches and pull requests.
+
+## Quick Reference
+
+| State           | Action                              |
+| --------------- | ----------------------------------- |
+| **Inbox**       | Needs grooming (`/dev:groom-work`)  |
+| **Backlog**     | Groomed, waiting for priority       |
+| **Ready**       | Pick these up for development       |
+| **In Progress** | Currently being worked on           |
+| **Done**        | After PR is merged                  |
 
 ## When to Use This Skill
 
-Use this skill when:
-
-- The user asks to work on a specific Linear issue (e.g., "work on PRA-19")
-- The user wants to start implementing a feature from Linear
-- The user asks to pick up groomed issues from Linear (issues in **Ready** state)
-
-> **State Convention:**
->
-> - **Inbox** = New ticket (use `/dev:groom-work` to groom)
-> - **Backlog** = Groomed but not immediately ready (waiting for dependencies/priority)
-> - **Ready** = Groomed and ready for development (pick these up)
-> - **In Progress** = Currently being worked on
-> - **Done** = Completed (only after PR is merged)
+- User asks to work on a Linear issue (e.g., "work on PRA-19")
+- User wants to pick up groomed issues from Linear
+- User needs to create a PR for completed work
+- User wants to merge a PR and close the issue
 
 ## Core Workflow
 
-### 1. Issue Selection and Context Gathering
+### 1. Issue Selection
 
-When the user wants to work on a Linear issue:
+```bash
+# Get issue details
+pnpm --filter @repo/scripts linear issues get --issue PRA-19
 
-1. **Get issue details** from Linear (use existing Linear CLI or MCP tools)
-2. **Verify issue is groomed** - Check that the issue is in **Ready** state
-   - If issue is in **Inbox**, inform user it needs grooming first: `/dev:groom-work`
-   - If issue is in **Backlog**, it's groomed but not ready - ask user to move to Ready or pick a different issue
-   - Only proceed with issues in **Ready** state (groomed and immediately workable)
-3. **Verify issue is not blocked** - Check that it's not blocked by other issues
-4. **Move issue to "In Progress"** - Automatically update Linear status:
-
-   ```bash
-   pnpm --filter @repo/scripts linear issues start --issue {ISSUE-KEY}
-   ```
-
-5. **Understand requirements** - Read issue description, acceptance criteria, and related context
-6. **Ask clarifying questions** if requirements are unclear
-
-### 2. Worktree Creation
-
-> **🚨 MANDATORY: ALWAYS use git worktrees for feature work 🚨**
-
-**Never work on main. Always use isolated worktrees.**
-
-**Why worktrees are mandatory:**
-
-- Multiple Claude Code instances work on tickets in parallel
-- Main branch stays pure and clean as a reference point
-- Complete isolation between concurrent development efforts
-- You (the user) can freely experiment on main without affecting agent work
-- Zero interference between parallel tasks
-
-**You MUST use the git-worktrees skill** to create an isolated worktree:
-
-```text
-Use Skill tool with skill: "git-worktrees"
+# Verify issue is in Ready state (not Inbox or Backlog)
+# Move to In Progress
+pnpm --filter @repo/scripts linear issues start --issue PRA-19
 ```
 
-The git-worktrees skill will handle:
+### 2. Create Worktree
 
-- Creating worktree directory (`.worktrees/{ISSUE-KEY}-...`)
-- Setting up isolated environment with unique PORT
-- Configuring `.env.local` for parallel development
-- Running baseline verification tests
-- Ensuring gitignore is configured correctly
+**MANDATORY: Always use worktrees. Never `git checkout -b`.**
 
-Branch naming convention (skill handles this): `{ISSUE-KEY}/{short-description}`
-
-Example: `PRA-19/seed-utilities`
-
-**DO NOT use `git checkout -b`** - this violates the parallel development architecture.
-
-### 3. Implementation
-
-Follow this pattern:
-
-1. **Create a todo list** for the implementation steps (MUST include PR creation steps)
-2. **Break down the work** into logical, testable units
-3. **Implement incrementally** with frequent commits
-4. **Run tests** after each significant change
-5. **Update todo list** as work progresses
-
-**Required Ready List Structure:**
-
-When working on a Linear issue, your todo list MUST include these final steps:
-
-```text
-1. [pending] Implement feature X
-2. [pending] Implement feature Y
-3. [pending] Run tests to verify they pass
-4. [pending] Commit changes to feature branch
-5. [pending] Push branch and create PR
+```bash
+pnpm worktree:create PRA-19 feat short-description
+cd .worktrees/feat-pra-19-short-description
 ```
 
-This ensures you don't forget to create a PR after implementation is complete.
+See **git-worktrees** skill for complete setup.
 
-### 4. Committing Work
+### 3. Implement
 
-**Commit message format:**
+1. Create todo list for implementation steps
+2. Break work into logical, testable units
+3. Commit frequently with proper format
+4. Run tests after significant changes
+
+### 4. Commit Format
 
 ```text
-{ISSUE-KEY}: {Brief summary}
+PRA-19: Brief summary
 
-{Detailed description of changes}
+Detailed description of changes.
 
 Key changes:
 - Bullet point 1
@@ -125,272 +76,90 @@ Key changes:
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-**Commit guidelines:**
+### 5. Create PR (Automatic)
 
-- Make atomic, focused commits
-- Include issue key in commit message
-- Describe WHY, not just WHAT
-- Run pre-commit hooks (they run automatically)
-- Fix any linting/formatting issues before proceeding
+**When tests pass, automatically create PR. Don't ask user.**
 
-### 5. Testing
+```bash
+git push -u origin HEAD
 
-Before submitting a PR:
+gh pr create --base main --title "PRA-19: Title" --body "$(cat <<'EOF'
+## Summary
+Brief overview of changes.
 
-1. **Run relevant tests**:
-   - `pnpm test` - Run all tests
-   - `pnpm --filter {workspace} test` - Run specific workspace tests
-   - `pnpm lint` - Check code quality
-   - `pnpm type-check` - Verify TypeScript types
+## Changes
+- Change 1
+- Change 2
 
-2. **Test manually** if applicable (e2e, UI changes, etc.)
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
 
-3. **Verify pre-commit hooks pass**
+Closes PRA-19
 
-## Implementation Completion Checklist
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
 
-**CRITICAL:** When you have completed implementation work on a Linear issue, you MUST verify these conditions and automatically proceed to PR creation:
+### 6. Merge PR
 
-### Completion Conditions
+**Only when user explicitly confirms:**
 
-1. ✅ All work documented in the ticket is implemented
-2. ✅ All local tests passing
+```bash
+gh pr merge <PR_NUMBER> --squash --delete-branch
+pnpm --filter @repo/scripts linear issues close --issue PRA-19
+```
 
-### Required Next Steps (DO NOT SKIP)
+## Implementation Checklist
 
-When BOTH conditions above are met, you MUST immediately proceed to:
+When implementation is complete:
 
-1. [ ] Verify you're in a worktree (NOT main branch)
-2. [ ] Commit all changes with proper format
-3. [ ] Push branch to remote
-4. [ ] Create pull request against main
-5. [ ] Return PR URL to user
+1. ✅ All ticket requirements implemented
+2. ✅ All tests passing
+3. [ ] Verify you're in a worktree (not main)
+4. [ ] Commit all changes
+5. [ ] Push branch
+6. [ ] Create PR against main
+7. [ ] Return PR URL to user
 
-**IMPORTANT:** Implementation is NOT complete until a PR is open against main. Do not consider the work done or ask the user what to do next - automatically proceed with PR creation when tests pass.
+**Important**: Implementation is NOT complete until PR is open.
 
-### 6. Pull Request Creation
+## Constraints
 
-**IMPORTANT:** Code is NOT ready for review until there is an open pull request against `main`.
+### Never Do
 
-**Only create a PR when:**
+- ❌ Commit directly to main
+- ❌ Use `git checkout -b` (always worktrees)
+- ❌ Create PR without running tests
+- ❌ Skip worktree workflow
+- ❌ Force push to shared branches
 
-- All tests pass
-- Code is ready for review
-- User explicitly asks to create a PR
+### Always Do
 
-**PR creation steps:**
-
-1. **Push branch to remote**: `git push -u origin {branch-name}`
-
-2. **Create PR against main with descriptive content**:
-
-   ```bash
-   gh pr create --base main --title "{ISSUE-KEY}: {Title}" --body "$(cat <<'EOF'
-   ## Summary
-   {Brief overview of changes}
-
-   ## Changes
-   - {Change 1}
-   - {Change 2}
-
-   ## Testing
-   - [ ] Unit tests pass
-   - [ ] Integration tests pass
-   - [ ] Manual testing completed
-
-   ## Related
-   Closes {ISSUE-KEY}
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-   EOF
-   )"
-   ```
-
-3. **Link PR to Linear issue** (gh cli does this automatically via issue key in title)
-
-4. **Return PR URL** to user
-
-### 7. Post-PR Actions
-
-After PR is created:
-
-1. Linear issue status is already "In Progress" (set at start)
-2. **Inform user** of next steps (wait for review, address feedback, etc.)
-3. Issue will auto-close when PR is merged (via "Closes {ISSUE-KEY}" in PR description)
-
-### 8. Merging Pull Requests
-
-**Only when user confirms PR is ready to merge:**
-
-When the user says the PR is ready to merge (e.g., "ready to merge PR #39"), follow these steps in order:
-
-1. **Merge the PR** using GitHub CLI:
-
-   ```bash
-   gh pr merge {PR_NUMBER} --repo {org}/{repo} --squash --delete-branch
-   ```
-
-   - Use `--squash` to squash all commits into one
-   - Use `--delete-branch` to automatically delete the feature branch
-   - Repository often requires squash merge (not regular merge)
-
-2. **Close the Linear issue**:
-
-   ```bash
-   pnpm --filter @repo/scripts linear issues close --issue {ISSUE-KEY}
-   ```
-
-   - Note: GitHub may auto-close via "Closes {ISSUE-KEY}" in PR description
-   - Always verify the issue is closed
-
-3. **Clean up worktree** (optional):
-
-   After PR is merged, you can optionally clean up the worktree:
-
-   ```bash
-   cd ../..  # Return to main repo
-   git worktree remove .worktrees/{issue-worktree-name}
-   git worktree prune
-   ```
-
-   - Main branch automatically stays up to date
-   - Worktree cleanup is optional; you can keep it for follow-up work
-
-4. **Confirm completion** to user with:
-   - PR merge status
-   - Linear issue status
-   - Confirmation that main branch is updated
-
-**Important notes:**
-
-- Only merge when user explicitly confirms
-- Check for required approvals before merging
-- Verify CI/CD checks have passed
-- The feature branch is automatically deleted after merge
-
-## Important Constraints
-
-### What NOT to Do
-
-- ❌ **Never** commit directly to main
-- ❌ **Never** use `git checkout -b` (always use worktrees)
-- ❌ **Never** create a PR without running tests first
-- ❌ **Never** skip the worktree workflow
-- ❌ **Never** force push to shared branches
-- ❌ **Never** commit without issue context
-- ❌ **Never** consider code "ready for review" without an open PR against main
-
-### What TO Do
-
-- ✅ **Always** use git worktrees for feature work (never `git checkout -b`)
-- ✅ **Always** run tests before creating PR
-- ✅ **Always** create PR against main (use `--base main`)
-- ✅ **Always** include issue key in commits and PR title
-- ✅ **Always** write descriptive commit messages
-- ✅ **Always** clean up todo list when done
-- ✅ **Always** open a PR for code review
-
-## Workflow States
-
-### State 1: Starting Work
-
-User says: "work on PRA-19"
-
-Actions:
-
-1. Get issue details from Linear
-2. Check if issue is ready (not blocked)
-3. **Move issue to "In Progress"** using `linear issues start`
-4. Present issue summary to user
-5. Ask if they want to proceed
-6. **Create worktree** using git-worktrees skill
-7. Create todo list for implementation
-
-### State 2: Implementing
-
-User is actively working on the issue
-
-Actions:
-
-1. Follow implementation plan
-2. Make focused commits
-3. Update todo list
-4. Run tests frequently
-5. Fix issues as they arise
-
-### State 3: Implementation Complete (Auto-Transition to PR)
-
-**Automatic state transition when:**
-
-- All work documented in ticket is implemented
-- All tests pass
-
-**Required Actions (DO NOT ASK USER):**
-
-1. Verify you're in a worktree (NOT main branch)
-2. Commit all changes with proper format
-3. Push branch to remote
-4. Create PR against main
-5. Return PR URL to user
-
-**DO NOT:**
-
-- Ask user if they want to create a PR
-- Wait for user to tell you to create a PR
-- Consider work complete without a PR
-
-This is an automatic workflow step that happens when implementation + tests are complete.
-
-### State 4: PR Created
-
-PR is now open and ready for review
-
-Actions:
-
-1. Confirm PR URL to user
-2. Suggest next steps (wait for review, address feedback if needed)
-
-### State 5: Merging PR
-
-User says: "ready to merge PR #X" or "merge the PR"
-
-Actions:
-
-1. Merge PR with squash and delete branch
-2. Close Linear issue (verify auto-close worked)
-3. Update local main branch
-4. Confirm completion to user
-
-## Integration with Existing Tools
-
-This skill uses:
-
-- **Linear CLI** (`pnpm --filter @repo/scripts linear`) for Linear operations
-- **Git** for version control and branching
-- **GitHub CLI** (`gh`) for PR creation
-- **pnpm** for running tests and build commands
+- ✅ Use git worktrees for feature work
+- ✅ Run tests before creating PR
+- ✅ Create PR against main
+- ✅ Include issue key in commits and PR
+- ✅ Auto-create PR when tests pass
 
 ## Example Session
 
 ```text
 User: Work on PRA-19
 
-Claude: Let me get the details for PRA-19...
+Claude: [Fetches issue, moves to In Progress]
+        [Creates worktree using git-worktrees skill]
+        [Creates todo list]
+        [Implements]
+        [Tests pass]
+        [Creates PR automatically]
 
-[Fetches issue from Linear]
-[Moves issue to "In Progress"]
+        ✅ PR created: https://github.com/org/repo/pull/123
+```
 
-Claude: ✅ Moved PRA-19 to "In Progress"
+## Related Skills
 
-PRA-19: Create seeded random utilities for testing
-
-The issue requires:
-- Implement seeded random number generators
-- Create deterministic test fixtures
-- Add documentation
-
-I'll create a worktree and start implementation.
-
-[Creates worktree using git-worktrees skill]
-[Creates todo list]
-[Begins implementation]
+- **git-worktrees**: Worktree creation and management
+- **linear**: Linear CLI commands and issue operations
+- **github-cli**: PR creation and GitHub operations
