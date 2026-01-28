@@ -36,6 +36,29 @@ export interface NewsAnalyzerJob {
 }
 
 /**
+ * Removes common site name suffixes from article titles
+ * e.g., "Article Title | CNN" -> "Article Title"
+ * e.g., "Article Title - The New York Times" -> "Article Title"
+ */
+export function cleanArticleTitle(title: string): string {
+	// Common separators used by news sites to append their name
+	const separators = [" | ", " - ", " – ", " — ", " · "];
+
+	for (const sep of separators) {
+		const lastIndex = title.lastIndexOf(sep);
+		if (lastIndex > 0) {
+			// Only remove if the suffix is relatively short (likely a site name)
+			const suffix = title.slice(lastIndex + sep.length);
+			if (suffix.length < 40) {
+				return title.slice(0, lastIndex).trim();
+			}
+		}
+	}
+
+	return title;
+}
+
+/**
  * Extracts a display title from the job input
  * For URLs: shows hostname + truncated path
  * For text: shows first 50 characters

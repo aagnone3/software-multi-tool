@@ -83,9 +83,20 @@ const POLITICAL_LEAN_LABELS = [
 	"Right",
 ];
 
-function PoliticalLeanSpectrum({ lean }: { lean: string }) {
+const POLITICAL_LEAN_LABELS_COMPACT = ["Left", "Center", "Right"];
+
+export function PoliticalLeanSpectrum({
+	lean,
+	compact = false,
+}: {
+	lean: string;
+	compact?: boolean;
+}) {
 	const [animated, setAnimated] = useState(false);
 	const position = POLITICAL_LEAN_POSITIONS[lean] ?? 50;
+	const labels = compact
+		? POLITICAL_LEAN_LABELS_COMPACT
+		: POLITICAL_LEAN_LABELS;
 
 	useEffect(() => {
 		const timer = setTimeout(() => setAnimated(true), 100);
@@ -94,10 +105,15 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 
 	return (
 		<TooltipProvider>
-			<div className="space-y-3">
+			<div className={compact ? "space-y-2" : "space-y-3"}>
 				{/* Spectrum bar with tick marks */}
 				<div className="relative">
-					<div className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-gray-300 to-red-500" />
+					<div
+						className={cn(
+							"rounded-full bg-gradient-to-r from-blue-500 via-gray-300 to-red-500",
+							compact ? "h-2" : "h-3",
+						)}
+					/>
 					{/* Indicator dot */}
 					<div
 						className={cn(
@@ -109,7 +125,12 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<div className="relative">
-									<div className="h-5 w-5 rounded-full border-2 border-white bg-primary shadow-lg motion-safe:animate-pulse" />
+									<div
+										className={cn(
+											"rounded-full border-2 border-white bg-primary shadow-lg motion-safe:animate-pulse",
+											compact ? "h-4 w-4" : "h-5 w-5",
+										)}
+									/>
 									<div className="absolute inset-0 rounded-full bg-primary/20 motion-safe:animate-ping" />
 								</div>
 							</TooltipTrigger>
@@ -125,7 +146,7 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 				</div>
 				{/* Labels */}
 				<div className="flex justify-between text-xs text-muted-foreground">
-					{POLITICAL_LEAN_LABELS.map((label) => (
+					{labels.map((label) => (
 						<span
 							key={label}
 							className={cn(
@@ -138,12 +159,14 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 						</span>
 					))}
 				</div>
-				{/* Current value badge */}
-				<div className="flex justify-center">
-					<span className="rounded-full border px-3 py-1 text-sm font-medium">
-						{lean}
-					</span>
-				</div>
+				{/* Current value badge - hide in compact mode */}
+				{!compact && (
+					<div className="flex justify-center">
+						<span className="rounded-full border px-3 py-1 text-sm font-medium">
+							{lean}
+						</span>
+					</div>
+				)}
 			</div>
 		</TooltipProvider>
 	);
@@ -170,7 +193,69 @@ const SENSATIONALISM_THRESHOLDS = [
 	},
 ];
 
-function FactualRatingBadge({ rating }: { rating: string }) {
+export function SensationalismRadial({ value }: { value: number }) {
+	const percentage = (value / 10) * 100;
+	const radius = 28;
+	const circumference = 2 * Math.PI * radius;
+	const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+	// Get color based on value
+	const getColor = () => {
+		if (value <= 3) return "#22c55e"; // green
+		if (value <= 6) return "#eab308"; // amber
+		return "#ef4444"; // red
+	};
+
+	const color = getColor();
+
+	return (
+		<div className="relative inline-flex items-center justify-center">
+			<svg
+				width="64"
+				height="64"
+				className="-rotate-90"
+				role="img"
+				aria-labelledby="sensationalism-title"
+			>
+				<title id="sensationalism-title">
+					Sensationalism score: {value} out of 10
+				</title>
+				{/* Background circle */}
+				<circle
+					cx="32"
+					cy="32"
+					r={radius}
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="4"
+					className="text-muted/30"
+				/>
+				{/* Progress circle */}
+				<circle
+					cx="32"
+					cy="32"
+					r={radius}
+					fill="none"
+					stroke={color}
+					strokeWidth="4"
+					strokeLinecap="round"
+					strokeDasharray={circumference}
+					strokeDashoffset={strokeDashoffset}
+					className="transition-all duration-700 ease-out"
+				/>
+			</svg>
+			{/* Value in center */}
+			<span
+				className="absolute text-sm font-bold tabular-nums"
+				style={{ color }}
+			>
+				{value}
+			</span>
+		</div>
+	);
+}
+
+export function FactualRatingBadge({ rating }: { rating: string }) {
 	const normalizedRating = rating.toLowerCase();
 
 	if (normalizedRating.includes("high")) {
@@ -202,7 +287,7 @@ function FactualRatingBadge({ rating }: { rating: string }) {
 	);
 }
 
-function SentimentIndicator({ sentiment }: { sentiment: string }) {
+export function SentimentIndicator({ sentiment }: { sentiment: string }) {
 	const normalizedSentiment = sentiment.toLowerCase();
 
 	const getIconAndColor = () => {
@@ -290,59 +375,6 @@ export function NewsAnalyzerResults({ output }: NewsAnalyzerResultsProps) {
 
 	return (
 		<div className="space-y-6">
-			{/* Metrics Hero Section */}
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<Scale className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Political Lean
-						</p>
-						<p className="mt-1 font-semibold">
-							{output.bias.politicalLean}
-						</p>
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<SentimentIndicator sentiment={output.sentiment} />
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<Info className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Factual Rating
-						</p>
-						<div className="mt-2">
-							<FactualRatingBadge
-								rating={output.bias.factualRating}
-							/>
-						</div>
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<AlertTriangle className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Sensationalism
-						</p>
-						<p
-							className={cn(
-								"mt-1 text-2xl font-bold tabular-nums",
-								output.bias.sensationalism <= 3
-									? "text-green-500"
-									: output.bias.sensationalism <= 6
-										? "text-amber-500"
-										: "text-red-500",
-							)}
-						>
-							{output.bias.sensationalism}/10
-						</p>
-					</CardContent>
-				</Card>
-			</div>
-
 			<Tabs defaultValue="summary" className="w-full">
 				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="summary" className="gap-2">

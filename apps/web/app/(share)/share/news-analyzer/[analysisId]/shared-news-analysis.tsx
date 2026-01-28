@@ -12,11 +12,28 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@ui/components/card";
-import { AlertCircle, ExternalLink, FileText, Loader2 } from "lucide-react";
-import Link from "next/link";
 import {
+	AlertCircle,
+	AlertTriangle,
+	FileText,
+	ImageIcon,
+	Info,
+	Loader2,
+	Newspaper,
+	Scale,
+	Share2,
+	Sparkles,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { toast } from "sonner";
+import { cleanArticleTitle } from "../../../../../components/tools/news-analyzer/lib/history-utils";
+import {
+	FactualRatingBadge,
 	type NewsAnalysisOutput,
 	NewsAnalyzerResults,
+	PoliticalLeanSpectrum,
+	SentimentIndicator,
 } from "../../../../../components/tools/news-analyzer/news-analyzer-results";
 
 interface SharedNewsAnalysisProps {
@@ -61,7 +78,7 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 						</p>
 						<Button asChild>
 							<Link href="/auth/login?redirect=/app/tools/news-analyzer">
-								Try {config.appName}
+								Get Started Free
 							</Link>
 						</Button>
 					</div>
@@ -71,97 +88,217 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 	}
 
 	const { analysis } = data;
+	const analysisOutput = analysis.analysis as unknown as NewsAnalysisOutput;
 	const articleSource = analysis.sourceUrl ?? analysis.sourceText;
 	const isUrl = !!analysis.sourceUrl;
+	const ogImage = analysisOutput?.articleMetadata?.ogImage;
+	const rawTitle = analysisOutput?.articleMetadata?.title ?? analysis.title;
+	const displayTitle = rawTitle
+		? cleanArticleTitle(rawTitle)
+		: "News Analysis";
+	const siteName = analysisOutput?.articleMetadata?.siteName;
 
 	return (
 		<div className="container mx-auto max-w-4xl px-4 py-8">
 			<div className="space-y-6">
-				{/* Header */}
-				<div className="text-center">
-					<h1 className="text-3xl font-bold tracking-tight">
-						{analysis.title ?? "News Analysis"}
-					</h1>
-					<p className="mt-2 text-muted-foreground">
-						Analyzed on{" "}
-						{new Date(analysis.createdAt).toLocaleDateString(
-							undefined,
-							{
-								weekday: "long",
-								year: "numeric",
-								month: "long",
-								day: "numeric",
-							},
-						)}
-						{analysis.createdBy && ` by ${analysis.createdBy}`}
+				{/* Page Header */}
+				<Link
+					href="/"
+					className="flex items-center gap-3 hover:opacity-80 transition-opacity w-fit"
+				>
+					<Newspaper className="size-6 text-primary" />
+					<div>
+						<h1 className="text-2xl font-semibold">
+							News Analyzer
+						</h1>
+						<p className="text-xs text-muted-foreground">
+							by {config.appName}
+						</p>
+					</div>
+				</Link>
+
+				{/* CTA Banner */}
+				<div className="flex items-center justify-center gap-4 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10">
+					<Sparkles className="size-4 text-primary" />
+					<p className="text-sm font-medium">
+						Analyze your own articles for free!
 					</p>
+					<Button size="sm" asChild>
+						<Link href="/auth/login?redirect=/app/tools/news-analyzer">
+							Get Started
+						</Link>
+					</Button>
 				</div>
 
-				{/* Source Card */}
+				{/* Summary Card */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Source</CardTitle>
+						<CardTitle>Summary</CardTitle>
 						<CardDescription>
-							The original article that was analyzed
+							Analyzed on{" "}
+							{new Date(analysis.createdAt).toLocaleDateString(
+								undefined,
+								{
+									weekday: "long",
+									year: "numeric",
+									month: "long",
+									day: "numeric",
+								},
+							)}
+							{analysis.createdBy && ` by ${analysis.createdBy}`}
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<div className="flex items-start gap-2">
+					<CardContent className="space-y-6">
+						{/* Article Preview with Thumbnail */}
+						<div className="flex gap-4">
+							{/* Thumbnail - clickable for URL articles */}
 							{isUrl ? (
-								<>
-									<ExternalLink className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+								<a
+									href={analysis.sourceUrl ?? "#"}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity"
+								>
+									{ogImage ? (
+										<Image
+											src={ogImage}
+											alt="Article preview"
+											fill
+											className="object-cover"
+											unoptimized
+										/>
+									) : (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<ImageIcon className="size-8 text-muted-foreground/50" />
+										</div>
+									)}
+								</a>
+							) : (
+								<div className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+									<div className="absolute inset-0 flex items-center justify-center">
+										<FileText className="size-8 text-muted-foreground/50" />
+									</div>
+								</div>
+							)}
+
+							{/* Source Info */}
+							<div className="flex-1 min-w-0">
+								{/* Title from metadata - clickable for URL articles */}
+								{isUrl ? (
 									<a
 										href={analysis.sourceUrl ?? "#"}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="text-sm text-primary hover:underline break-all"
+										className="font-medium text-sm mb-1 line-clamp-2 hover:text-primary transition-colors block"
 									>
-										{analysis.sourceUrl}
+										{displayTitle}
 									</a>
-								</>
-							) : (
-								<>
-									<FileText className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-									<p className="text-sm text-muted-foreground">
-										{articleSource &&
-										articleSource.length > 300
-											? articleSource.slice(0, 300) +
-												"..."
+								) : (
+									<p className="font-medium text-sm mb-1 line-clamp-2">
+										{displayTitle}
+									</p>
+								)}
+
+								{/* Site name if available - linked to source */}
+								{siteName && isUrl && (
+									<a
+										href={analysis.sourceUrl ?? "#"}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-xs text-muted-foreground hover:text-primary transition-colors"
+									>
+										{siteName}
+									</a>
+								)}
+
+								{/* Text excerpt for non-URL articles */}
+								{!isUrl && articleSource && (
+									<p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+										{articleSource.length > 100
+											? `${articleSource.slice(0, 100)}...`
 											: articleSource}
 									</p>
-								</>
-							)}
+								)}
+
+								{/* Share button */}
+								<Button
+									variant="outline"
+									size="sm"
+									className="mt-2"
+									onClick={() => {
+										const shareUrl = `${window.location.origin}/share/news-analyzer/${analysisId}`;
+										navigator.clipboard.writeText(shareUrl);
+										toast.success(
+											"Share link copied to clipboard",
+										);
+									}}
+								>
+									<Share2 className="mr-2 size-4" />
+									Share Analysis
+								</Button>
+							</div>
 						</div>
+
+						{/* High-level Metrics */}
+						{analysisOutput && (
+							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-4 border-t">
+								<div className="p-3 rounded-lg bg-muted/50">
+									<Scale className="mx-auto mb-2 size-5 text-muted-foreground" />
+									<p className="text-xs text-muted-foreground text-center mb-2">
+										Political Lean
+									</p>
+									<PoliticalLeanSpectrum
+										lean={analysisOutput.bias.politicalLean}
+										compact
+									/>
+								</div>
+								<div className="text-center p-3 rounded-lg bg-muted/50">
+									<SentimentIndicator
+										sentiment={analysisOutput.sentiment}
+									/>
+								</div>
+								<div className="text-center p-3 rounded-lg bg-muted/50">
+									<Info className="mx-auto mb-2 size-5 text-muted-foreground" />
+									<p className="text-xs text-muted-foreground">
+										Factual Rating
+									</p>
+									<div className="mt-1">
+										<FactualRatingBadge
+											rating={
+												analysisOutput.bias
+													.factualRating
+											}
+										/>
+									</div>
+								</div>
+								<div className="text-center p-3 rounded-lg bg-muted/50">
+									<AlertTriangle className="mx-auto mb-2 size-5 text-muted-foreground" />
+									<p className="text-xs text-muted-foreground">
+										Sensationalism
+									</p>
+									<p
+										className={`mt-1 text-lg font-bold tabular-nums ${
+											analysisOutput.bias
+												.sensationalism <= 3
+												? "text-green-500"
+												: analysisOutput.bias
+															.sensationalism <= 6
+													? "text-amber-500"
+													: "text-red-500"
+										}`}
+									>
+										{analysisOutput.bias.sensationalism *
+											10}
+										%
+									</p>
+								</div>
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
 				{/* Analysis Results */}
-				<NewsAnalyzerResults
-					output={analysis.analysis as unknown as NewsAnalysisOutput}
-				/>
-
-				{/* CTA Section */}
-				<Card className="border-primary/20 bg-primary/5">
-					<CardContent className="pt-6">
-						<div className="flex flex-col items-center text-center gap-4">
-							<div>
-								<h2 className="text-xl font-semibold">
-									Want to analyze your own articles?
-								</h2>
-								<p className="mt-1 text-muted-foreground">
-									{config.appName} helps you understand news
-									bias, sentiment, and key facts with
-									AI-powered analysis.
-								</p>
-							</div>
-							<Button size="lg" asChild>
-								<Link href="/auth/login?redirect=/app/tools/news-analyzer">
-									Try it yourself
-								</Link>
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
+				<NewsAnalyzerResults output={analysisOutput} />
 
 				{/* Footer Branding */}
 				<div className="border-t pt-6 text-center">

@@ -45,6 +45,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import {
+	cleanArticleTitle,
 	filterJobsBySearch,
 	filterJobsByStatus,
 	getArticleTitle,
@@ -182,11 +183,13 @@ export function NewsAnalyzerHistory() {
 						output?.articleMetadata?.ogImage ||
 						newsAnalysis?.analysis?.articleMetadata?.ogImage;
 					// Prefer metadata title, fall back to extracted title
-					const displayTitle =
+					const rawTitle =
 						output?.articleMetadata?.title ||
 						newsAnalysis?.analysis?.articleMetadata?.title ||
-						newsAnalysis?.title ||
-						getArticleTitle(input);
+						newsAnalysis?.title;
+					const displayTitle = rawTitle
+						? cleanArticleTitle(rawTitle)
+						: getArticleTitle(input);
 
 					const thumbnailContent = (
 						<div className="relative w-16 h-10 flex-shrink-0 rounded overflow-hidden bg-muted">
