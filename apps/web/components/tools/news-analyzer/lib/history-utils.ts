@@ -1,4 +1,7 @@
-import type { NewsAnalysisOutput } from "../news-analyzer-results";
+import type {
+	ArticleMetadata,
+	NewsAnalysisOutput,
+} from "../news-analyzer-results";
 
 export type JobStatus =
 	| "PENDING"
@@ -12,7 +15,7 @@ export interface NewsAnalysisRecord {
 	title: string | null;
 	sourceUrl: string | null;
 	sourceText: string | null;
-	analysis: NewsAnalysisOutput;
+	analysis: NewsAnalysisOutput & { articleMetadata?: ArticleMetadata };
 	createdAt: Date;
 }
 
@@ -24,12 +27,35 @@ export interface NewsAnalyzerJob {
 		articleUrl?: string;
 		articleText?: string;
 	};
-	output: NewsAnalysisOutput | null;
+	output: (NewsAnalysisOutput & { articleMetadata?: ArticleMetadata }) | null;
 	error: string | null;
 	createdAt: Date;
 	completedAt: Date | null;
 	startedAt?: Date | null;
 	newsAnalysis?: NewsAnalysisRecord | null;
+}
+
+/**
+ * Removes common site name suffixes from article titles
+ * e.g., "Article Title | CNN" -> "Article Title"
+ * e.g., "Article Title - The New York Times" -> "Article Title"
+ */
+export function cleanArticleTitle(title: string): string {
+	// Common separators used by news sites to append their name
+	const separators = [" | ", " - ", " – ", " — ", " · "];
+
+	for (const sep of separators) {
+		const lastIndex = title.lastIndexOf(sep);
+		if (lastIndex > 0) {
+			// Only remove if the suffix is relatively short (likely a site name)
+			const suffix = title.slice(lastIndex + sep.length);
+			if (suffix.length < 40) {
+				return title.slice(0, lastIndex).trim();
+			}
+		}
+	}
+
+	return title;
 }
 
 /**

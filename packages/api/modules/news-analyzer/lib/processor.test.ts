@@ -88,6 +88,7 @@ describe("News Analyzer Processor", () => {
 					byline: "Author Name",
 					siteName: "Example News",
 					url: "https://example.com/article",
+					ogImage: null,
 				},
 			});
 
@@ -141,6 +142,7 @@ describe("News Analyzer Processor", () => {
 					byline: null,
 					siteName: null,
 					url: "",
+					ogImage: null,
 				},
 			});
 
@@ -191,6 +193,7 @@ describe("News Analyzer Processor", () => {
 					byline: null,
 					siteName: null,
 					url: "https://example.com/article",
+					ogImage: null,
 				},
 			});
 
@@ -228,6 +231,7 @@ describe("News Analyzer Processor", () => {
 					byline: null,
 					siteName: null,
 					url: "",
+					ogImage: null,
 				},
 			});
 
@@ -263,6 +267,7 @@ describe("News Analyzer Processor", () => {
 					byline: "Author",
 					siteName: "News",
 					url: "https://example.com/article",
+					ogImage: null,
 				},
 			});
 
@@ -308,6 +313,7 @@ describe("News Analyzer Processor", () => {
 					byline: "Author Name",
 					siteName: "Example News",
 					url: "https://example.com/article",
+					ogImage: "https://example.com/image.jpg",
 				},
 			});
 
@@ -347,7 +353,15 @@ describe("News Analyzer Processor", () => {
 					sourceUrl: "https://example.com/article",
 					title: "Test Article Title",
 					userId: "test-user-123",
-					analysis: analysisResult,
+					analysis: {
+						...analysisResult,
+						articleMetadata: {
+							title: "Test Article Title",
+							ogImage: "https://example.com/image.jpg",
+							siteName: "Example News",
+							byline: "Author Name",
+						},
+					},
 				}),
 				"test-job-share",
 			);
@@ -365,6 +379,7 @@ describe("News Analyzer Processor", () => {
 					byline: null,
 					siteName: null,
 					url: "",
+					ogImage: null,
 				},
 			});
 

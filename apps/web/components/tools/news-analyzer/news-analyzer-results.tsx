@@ -1,5 +1,6 @@
 "use client";
 
+import { SemiCircleGauge } from "@shared/components/SemiCircleGauge";
 import {
 	Card,
 	CardContent,
@@ -45,6 +46,13 @@ interface EntitiesAnalysis {
 	places: string[];
 }
 
+export interface ArticleMetadata {
+	title?: string;
+	ogImage?: string | null;
+	siteName?: string | null;
+	byline?: string | null;
+}
+
 export interface NewsAnalysisOutput {
 	summary: string[];
 	bias: BiasAnalysis;
@@ -52,6 +60,7 @@ export interface NewsAnalysisOutput {
 	sentiment: string;
 	sourceCredibility?: string;
 	relatedContext?: string[];
+	articleMetadata?: ArticleMetadata;
 }
 
 export interface NewsAnalyzerResultsProps {
@@ -74,9 +83,20 @@ const POLITICAL_LEAN_LABELS = [
 	"Right",
 ];
 
-function PoliticalLeanSpectrum({ lean }: { lean: string }) {
+const POLITICAL_LEAN_LABELS_COMPACT = ["Left", "Center", "Right"];
+
+export function PoliticalLeanSpectrum({
+	lean,
+	compact = false,
+}: {
+	lean: string;
+	compact?: boolean;
+}) {
 	const [animated, setAnimated] = useState(false);
 	const position = POLITICAL_LEAN_POSITIONS[lean] ?? 50;
+	const labels = compact
+		? POLITICAL_LEAN_LABELS_COMPACT
+		: POLITICAL_LEAN_LABELS;
 
 	useEffect(() => {
 		const timer = setTimeout(() => setAnimated(true), 100);
@@ -85,10 +105,15 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 
 	return (
 		<TooltipProvider>
-			<div className="space-y-3">
+			<div className={compact ? "space-y-2" : "space-y-3"}>
 				{/* Spectrum bar with tick marks */}
 				<div className="relative">
-					<div className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-gray-300 to-red-500" />
+					<div
+						className={cn(
+							"rounded-full bg-gradient-to-r from-blue-500 via-gray-300 to-red-500",
+							compact ? "h-2" : "h-3",
+						)}
+					/>
 					{/* Indicator dot */}
 					<div
 						className={cn(
@@ -100,7 +125,12 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<div className="relative">
-									<div className="h-5 w-5 rounded-full border-2 border-white bg-primary shadow-lg motion-safe:animate-pulse" />
+									<div
+										className={cn(
+											"rounded-full border-2 border-white bg-primary shadow-lg motion-safe:animate-pulse",
+											compact ? "h-4 w-4" : "h-5 w-5",
+										)}
+									/>
 									<div className="absolute inset-0 rounded-full bg-primary/20 motion-safe:animate-ping" />
 								</div>
 							</TooltipTrigger>
@@ -116,7 +146,7 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 				</div>
 				{/* Labels */}
 				<div className="flex justify-between text-xs text-muted-foreground">
-					{POLITICAL_LEAN_LABELS.map((label) => (
+					{labels.map((label) => (
 						<span
 							key={label}
 							className={cn(
@@ -129,186 +159,103 @@ function PoliticalLeanSpectrum({ lean }: { lean: string }) {
 						</span>
 					))}
 				</div>
-				{/* Current value badge */}
-				<div className="flex justify-center">
-					<span className="rounded-full border px-3 py-1 text-sm font-medium">
-						{lean}
-					</span>
-				</div>
+				{/* Current value badge - hide in compact mode */}
+				{!compact && (
+					<div className="flex justify-center">
+						<span className="rounded-full border px-3 py-1 text-sm font-medium">
+							{lean}
+						</span>
+					</div>
+				)}
 			</div>
 		</TooltipProvider>
 	);
 }
 
-function SensationalismGauge({ score }: { score: number }) {
-	const [animatedScore, setAnimatedScore] = useState(0);
+const SENSATIONALISM_THRESHOLDS = [
+	{
+		value: 0,
+		color: "#22c55e",
+		textClass: "text-green-500",
+		label: "Low - Factual reporting",
+	},
+	{
+		value: 4,
+		color: "#eab308",
+		textClass: "text-amber-500",
+		label: "Moderate - Some bias",
+	},
+	{
+		value: 7,
+		color: "#ef4444",
+		textClass: "text-red-500",
+		label: "High - Sensationalized",
+	},
+];
 
-	useEffect(() => {
-		const timer = setTimeout(() => setAnimatedScore(score), 100);
-		return () => clearTimeout(timer);
-	}, [score]);
+export function SensationalismRadial({ value }: { value: number }) {
+	const percentage = (value / 10) * 100;
+	const radius = 28;
+	const circumference = 2 * Math.PI * radius;
+	const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-	// SVG gauge parameters
-	const size = 200;
-	const strokeWidth = 20;
-	const radius = (size - strokeWidth) / 2;
-	const centerX = size / 2;
-	const centerY = size / 2 + 20; // Offset to center the semi-circle
-
-	// Needle angle based on score (0-10)
-	const needleAngle = Math.PI - (animatedScore / 10) * Math.PI;
-
-	// Create semi-circle arc path
-	const arcPath = `
-		M ${centerX - radius} ${centerY}
-		A ${radius} ${radius} 0 0 1 ${centerX + radius} ${centerY}
-	`;
-
-	// Color segments for the gauge background
-	const getGaugeColor = (value: number) => {
-		if (value <= 3) return "text-green-500";
-		if (value <= 6) return "text-amber-500";
-		return "text-red-500";
+	// Get color based on value
+	const getColor = () => {
+		if (value <= 3) return "#22c55e"; // green
+		if (value <= 6) return "#eab308"; // amber
+		return "#ef4444"; // red
 	};
 
+	const color = getColor();
+
 	return (
-		<div className="flex flex-col items-center">
-			<div
-				className="relative"
-				style={{ width: size, height: size / 2 + 40 }}
+		<div className="relative inline-flex items-center justify-center">
+			<svg
+				width="64"
+				height="64"
+				className="-rotate-90"
+				role="img"
+				aria-labelledby="sensationalism-title"
 			>
-				<svg
-					width={size}
-					height={size / 2 + 40}
-					viewBox={`0 0 ${size} ${size / 2 + 40}`}
-					className="overflow-visible"
-					role="img"
-					aria-label={`Sensationalism gauge showing ${score} out of 10`}
-				>
-					<title>Sensationalism Score: {score}/10</title>
-					{/* Background arc with gradient segments */}
-					<defs>
-						<linearGradient
-							id="gaugeGradient"
-							x1="0%"
-							y1="0%"
-							x2="100%"
-							y2="0%"
-						>
-							<stop offset="0%" stopColor="#22c55e" />
-							<stop offset="30%" stopColor="#22c55e" />
-							<stop offset="50%" stopColor="#eab308" />
-							<stop offset="70%" stopColor="#f97316" />
-							<stop offset="100%" stopColor="#ef4444" />
-						</linearGradient>
-					</defs>
-
-					{/* Track background */}
-					<path
-						d={arcPath}
-						fill="none"
-						stroke="currentColor"
-						strokeWidth={strokeWidth}
-						className="text-muted/30"
-						strokeLinecap="round"
-					/>
-
-					{/* Colored progress arc */}
-					<path
-						d={arcPath}
-						fill="none"
-						stroke="url(#gaugeGradient)"
-						strokeWidth={strokeWidth}
-						strokeLinecap="round"
-						strokeDasharray={`${(animatedScore / 10) * Math.PI * radius} ${Math.PI * radius}`}
-						className="transition-all duration-700 ease-out"
-					/>
-
-					{/* Tick marks */}
-					{[0, 2.5, 5, 7.5, 10].map((tick) => {
-						const tickAngle = Math.PI - (tick / 10) * Math.PI;
-						const innerRadius = radius - strokeWidth / 2 - 5;
-						const outerRadius = radius - strokeWidth / 2 - 15;
-						const x1 = centerX + Math.cos(tickAngle) * innerRadius;
-						const y1 = centerY - Math.sin(tickAngle) * innerRadius;
-						const x2 = centerX + Math.cos(tickAngle) * outerRadius;
-						const y2 = centerY - Math.sin(tickAngle) * outerRadius;
-						return (
-							<line
-								key={tick}
-								x1={x1}
-								y1={y1}
-								x2={x2}
-								y2={y2}
-								stroke="currentColor"
-								strokeWidth="2"
-								className="text-muted-foreground/50"
-							/>
-						);
-					})}
-
-					{/* Needle */}
-					<g
-						className="transition-transform duration-700 ease-out"
-						style={{
-							transformOrigin: `${centerX}px ${centerY}px`,
-							transform: `rotate(${-(needleAngle * 180) / Math.PI + 180}deg)`,
-						}}
-					>
-						<line
-							x1={centerX}
-							y1={centerY}
-							x2={centerX}
-							y2={centerY - radius + strokeWidth + 10}
-							stroke="currentColor"
-							strokeWidth="3"
-							strokeLinecap="round"
-							className="text-foreground"
-						/>
-						<circle
-							cx={centerX}
-							cy={centerY}
-							r="8"
-							className="fill-foreground"
-						/>
-						<circle
-							cx={centerX}
-							cy={centerY}
-							r="4"
-							className="fill-background"
-						/>
-					</g>
-				</svg>
-
-				{/* Center score display */}
-				<div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
-					<span
-						className={cn(
-							"text-4xl font-bold tabular-nums",
-							getGaugeColor(score),
-						)}
-					>
-						{score}
-					</span>
-					<span className="text-lg text-muted-foreground">/10</span>
-				</div>
-			</div>
-
-			<p className="mt-2 text-sm text-muted-foreground">
-				Sensationalism Score
-			</p>
-			<p className="text-xs text-muted-foreground/75">
-				{score <= 3
-					? "Low - Factual reporting"
-					: score <= 6
-						? "Moderate - Some bias"
-						: "High - Sensationalized"}
-			</p>
+				<title id="sensationalism-title">
+					Sensationalism score: {value} out of 10
+				</title>
+				{/* Background circle */}
+				<circle
+					cx="32"
+					cy="32"
+					r={radius}
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="4"
+					className="text-muted/30"
+				/>
+				{/* Progress circle */}
+				<circle
+					cx="32"
+					cy="32"
+					r={radius}
+					fill="none"
+					stroke={color}
+					strokeWidth="4"
+					strokeLinecap="round"
+					strokeDasharray={circumference}
+					strokeDashoffset={strokeDashoffset}
+					className="transition-all duration-700 ease-out"
+				/>
+			</svg>
+			{/* Value in center */}
+			<span
+				className="absolute text-sm font-bold tabular-nums"
+				style={{ color }}
+			>
+				{value}
+			</span>
 		</div>
 	);
 }
 
-function FactualRatingBadge({ rating }: { rating: string }) {
+export function FactualRatingBadge({ rating }: { rating: string }) {
 	const normalizedRating = rating.toLowerCase();
 
 	if (normalizedRating.includes("high")) {
@@ -340,7 +287,7 @@ function FactualRatingBadge({ rating }: { rating: string }) {
 	);
 }
 
-function SentimentIndicator({ sentiment }: { sentiment: string }) {
+export function SentimentIndicator({ sentiment }: { sentiment: string }) {
 	const normalizedSentiment = sentiment.toLowerCase();
 
 	const getIconAndColor = () => {
@@ -428,59 +375,6 @@ export function NewsAnalyzerResults({ output }: NewsAnalyzerResultsProps) {
 
 	return (
 		<div className="space-y-6">
-			{/* Metrics Hero Section */}
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<Scale className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Political Lean
-						</p>
-						<p className="mt-1 font-semibold">
-							{output.bias.politicalLean}
-						</p>
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<SentimentIndicator sentiment={output.sentiment} />
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<Info className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Factual Rating
-						</p>
-						<div className="mt-2">
-							<FactualRatingBadge
-								rating={output.bias.factualRating}
-							/>
-						</div>
-					</CardContent>
-				</Card>
-				<Card className="text-center">
-					<CardContent className="pt-6">
-						<AlertTriangle className="mx-auto mb-2 size-6 text-muted-foreground" />
-						<p className="text-xs text-muted-foreground">
-							Sensationalism
-						</p>
-						<p
-							className={cn(
-								"mt-1 text-2xl font-bold tabular-nums",
-								output.bias.sensationalism <= 3
-									? "text-green-500"
-									: output.bias.sensationalism <= 6
-										? "text-amber-500"
-										: "text-red-500",
-							)}
-						>
-							{output.bias.sensationalism}/10
-						</p>
-					</CardContent>
-				</Card>
-			</div>
-
 			<Tabs defaultValue="summary" className="w-full">
 				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="summary" className="gap-2">
@@ -552,8 +446,11 @@ export function NewsAnalyzerResults({ output }: NewsAnalyzerResultsProps) {
 							</div>
 
 							<div className="flex justify-center">
-								<SensationalismGauge
-									score={output.bias.sensationalism}
+								<SemiCircleGauge
+									value={output.bias.sensationalism}
+									max={10}
+									label="Sensationalism Score"
+									thresholds={SENSATIONALISM_THRESHOLDS}
 								/>
 							</div>
 

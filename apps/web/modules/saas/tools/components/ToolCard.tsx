@@ -56,11 +56,11 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 		return (
 			<Card
 				className={cn(
-					"group transition-all",
+					"group flex h-full flex-col transition-all",
 					"opacity-60 grayscale hover:opacity-70",
 				)}
 			>
-				<CardHeader>
+				<CardHeader className="flex-1">
 					<div className="mb-2 flex items-center gap-2">
 						<div className="flex size-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
 							<Icon className="size-6" />
@@ -75,7 +75,7 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 					</CardTitle>
 					<CardDescription>{tool.description}</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="pt-0">
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -98,15 +98,15 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 	}
 
 	return (
-		<Card className="group transition-all hover:border-primary/50 hover:shadow-md">
-			<CardHeader>
+		<Card className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-md">
+			<CardHeader className="flex-1">
 				<div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
 					<Icon className="size-6" />
 				</div>
 				<CardTitle className="text-lg">{tool.name}</CardTitle>
 				<CardDescription>{tool.description}</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="pt-0">
 				<Link href={`/app/tools/${tool.slug}`}>
 					<Button className="w-full" variant="outline">
 						Open Tool

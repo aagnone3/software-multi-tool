@@ -20,33 +20,49 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from "@ui/components/dialog";
 import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@ui/components/dropdown-menu";
+import {
 	AlertCircle,
+	AlertTriangle,
 	ArrowLeft,
 	CheckCircle2,
 	Clock,
-	ExternalLink,
 	FileText,
-	Link2,
+	ImageIcon,
+	Info,
 	Loader2,
+	MoreVertical,
+	Newspaper,
 	RefreshCw,
-	Timer,
+	Scale,
+	Share2,
 	Trash2,
 	XCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-	formatDuration,
+	cleanArticleTitle,
 	type JobStatus,
 	type NewsAnalyzerJob,
 	statusConfig,
 } from "./lib/history-utils";
-import { NewsAnalyzerResults } from "./news-analyzer-results";
+import {
+	FactualRatingBadge,
+	NewsAnalyzerResults,
+	PoliticalLeanSpectrum,
+	SentimentIndicator,
+} from "./news-analyzer-results";
 
 interface NewsAnalyzerDetailProps {
 	jobId: string;
@@ -199,58 +215,80 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 	const articleSource = job.input.articleUrl ?? job.input.articleText;
 	const isUrl = !!job.input.articleUrl;
 
+	// Get analysis output (prefer persisted NewsAnalysis over job.output)
+	const analysisOutput = job.newsAnalysis?.analysis ?? job.output;
+
 	return (
 		<div className="space-y-6">
-			{/* Header */}
+			{/* Page Header */}
 			<div className="flex items-center justify-between">
-				<Button variant="ghost" asChild>
-					<Link href="/app/tools/news-analyzer?tab=history">
-						<ArrowLeft className="mr-2 size-4" />
-						Back to History
-					</Link>
-				</Button>
+				<div className="flex items-center gap-3">
+					<Newspaper className="size-6 text-primary" />
+					<h1 className="text-2xl font-semibold">News Analyzer</h1>
+				</div>
 
 				<div className="flex items-center gap-2">
-					{/* Copy Share Link - only show for completed jobs with newsAnalysis */}
-					{job.status === "COMPLETED" && job.newsAnalysis?.id && (
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
-								navigator.clipboard.writeText(shareUrl);
-								toast.success("Share link copied to clipboard");
-							}}
-						>
-							<Link2 className="mr-2 size-4" />
-							Copy link
-						</Button>
-					)}
-
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => reanalyzeMutation.mutate()}
-						disabled={reanalyzeMutation.isPending}
-					>
-						{reanalyzeMutation.isPending ? (
-							<Loader2 className="mr-2 size-4 animate-spin" />
-						) : (
-							<RefreshCw className="mr-2 size-4" />
-						)}
-						Re-analyze
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/app/tools/news-analyzer?tab=history">
+							Back to History
+						</Link>
 					</Button>
 
+					{/* Options Dropdown */}
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="outline" size="icon">
+								<MoreVertical className="size-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							{job.status === "COMPLETED" &&
+								job.newsAnalysis?.id && (
+									<>
+										<DropdownMenuItem
+											onClick={() => {
+												const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
+												navigator.clipboard.writeText(
+													shareUrl,
+												);
+												toast.success(
+													"Share link copied to clipboard",
+												);
+											}}
+										>
+											<Share2 className="mr-2 size-4" />
+											Copy Share Link
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+									</>
+								)}
+							<DropdownMenuItem
+								onClick={() => reanalyzeMutation.mutate()}
+								disabled={reanalyzeMutation.isPending}
+							>
+								{reanalyzeMutation.isPending ? (
+									<Loader2 className="mr-2 size-4 animate-spin" />
+								) : (
+									<RefreshCw className="mr-2 size-4" />
+								)}
+								Re-analyze
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								onClick={() => setIsDeleteDialogOpen(true)}
+								className="text-destructive focus:text-destructive"
+							>
+								<Trash2 className="mr-2 size-4" />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					{/* Delete Dialog */}
 					<Dialog
 						open={isDeleteDialogOpen}
 						onOpenChange={setIsDeleteDialogOpen}
 					>
-						<DialogTrigger asChild>
-							<Button variant="outline" size="sm">
-								<Trash2 className="mr-2 size-4" />
-								Delete
-							</Button>
-						</DialogTrigger>
 						<DialogContent>
 							<DialogHeader>
 								<DialogTitle>Delete Analysis</DialogTitle>
@@ -285,84 +323,196 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				</div>
 			</div>
 
-			{/* Metadata Card */}
+			{/* Summary Card */}
 			<Card>
 				<CardHeader>
 					<div className="flex items-center justify-between">
-						<CardTitle>Analysis Details</CardTitle>
+						<CardTitle>Summary</CardTitle>
 						<StatusBadge status={job.status} />
 					</div>
 					<CardDescription>
-						Submitted on{" "}
 						{new Date(job.createdAt).toLocaleDateString(undefined, {
 							weekday: "long",
 							year: "numeric",
 							month: "long",
 							day: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
 						})}
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					{/* Source */}
-					<div>
-						<p className="text-sm font-medium text-muted-foreground mb-1">
-							Source
-						</p>
-						<div className="flex items-start gap-2">
-							{isUrl ? (
-								<>
-									<ExternalLink className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+				<CardContent className="space-y-6">
+					{/* Article Preview with Thumbnail */}
+					<div className="flex gap-4">
+						{/* Thumbnail - clickable for URL articles */}
+						{isUrl ? (
+							<a
+								href={job.input.articleUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity"
+							>
+								{(job.output?.articleMetadata?.ogImage ||
+									job.newsAnalysis?.analysis?.articleMetadata
+										?.ogImage) && (
+									<Image
+										src={
+											job.output?.articleMetadata
+												?.ogImage ||
+											job.newsAnalysis?.analysis
+												?.articleMetadata?.ogImage ||
+											""
+										}
+										alt="Article preview"
+										fill
+										className="object-cover"
+										unoptimized
+									/>
+								)}
+								{!job.output?.articleMetadata?.ogImage &&
+									!job.newsAnalysis?.analysis?.articleMetadata
+										?.ogImage && (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<ImageIcon className="size-8 text-muted-foreground/50" />
+										</div>
+									)}
+							</a>
+						) : (
+							<div className="relative w-32 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+								<div className="absolute inset-0 flex items-center justify-center">
+									<FileText className="size-8 text-muted-foreground/50" />
+								</div>
+							</div>
+						)}
+
+						{/* Source Info */}
+						<div className="flex-1 min-w-0">
+							{/* Title from metadata - clickable for URL articles */}
+							{(() => {
+								const rawTitle =
+									job.output?.articleMetadata?.title ||
+									job.newsAnalysis?.analysis?.articleMetadata
+										?.title ||
+									job.newsAnalysis?.title;
+								if (!rawTitle) return null;
+								const displayTitle =
+									cleanArticleTitle(rawTitle);
+								return isUrl ? (
 									<a
 										href={job.input.articleUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="text-sm text-primary hover:underline break-all"
+										className="font-medium text-sm mb-1 line-clamp-2 hover:text-primary transition-colors block"
 									>
-										{job.input.articleUrl}
+										{displayTitle}
 									</a>
-								</>
-							) : (
-								<>
-									<FileText className="size-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-									<p className="text-sm text-muted-foreground">
-										{articleSource &&
-										articleSource.length > 200
-											? articleSource.slice(0, 200) +
-												"..."
-											: articleSource}
+								) : (
+									<p className="font-medium text-sm mb-1 line-clamp-2">
+										{displayTitle}
 									</p>
-								</>
+								);
+							})()}
+
+							{/* Site name if available - linked to source */}
+							{(job.output?.articleMetadata?.siteName ||
+								job.newsAnalysis?.analysis?.articleMetadata
+									?.siteName) &&
+								isUrl && (
+									<a
+										href={job.input.articleUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-xs text-muted-foreground hover:text-primary transition-colors"
+									>
+										{job.output?.articleMetadata
+											?.siteName ||
+											job.newsAnalysis?.analysis
+												?.articleMetadata?.siteName}
+									</a>
+								)}
+
+							{/* Text excerpt for non-URL articles */}
+							{!isUrl && (
+								<p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+									{articleSource && articleSource.length > 100
+										? `${articleSource.slice(0, 100)}...`
+										: articleSource}
+								</p>
 							)}
+
+							{/* Share button - only show when completed and shareable */}
+							{job.status === "COMPLETED" &&
+								job.newsAnalysis?.id && (
+									<Button
+										variant="outline"
+										size="sm"
+										className="mt-2"
+										onClick={() => {
+											const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
+											navigator.clipboard.writeText(
+												shareUrl,
+											);
+											toast.success(
+												"Share link copied to clipboard",
+											);
+										}}
+									>
+										<Share2 className="mr-2 size-4" />
+										Share Analysis
+									</Button>
+								)}
 						</div>
 					</div>
 
-					{/* Processing Info */}
-					<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-						<div>
-							<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-								<Timer className="size-3.5" />
-								Processing Time
-							</p>
-							<p className="text-sm">
-								{formatDuration(job.startedAt, job.completedAt)}
-							</p>
-						</div>
-						{job.completedAt && (
-							<div>
-								<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-									<Clock className="size-3.5" />
-									Completed
+					{/* High-level Metrics (only show when completed) */}
+					{job.status === "COMPLETED" && analysisOutput && (
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-4 border-t">
+							<div className="p-3 rounded-lg bg-muted/50">
+								<Scale className="mx-auto mb-2 size-5 text-muted-foreground" />
+								<p className="text-xs text-muted-foreground text-center mb-2">
+									Political Lean
 								</p>
-								<p className="text-sm">
-									{new Date(
-										job.completedAt,
-									).toLocaleTimeString()}
+								<PoliticalLeanSpectrum
+									lean={analysisOutput.bias.politicalLean}
+									compact
+								/>
+							</div>
+							<div className="text-center p-3 rounded-lg bg-muted/50">
+								<SentimentIndicator
+									sentiment={analysisOutput.sentiment}
+								/>
+							</div>
+							<div className="text-center p-3 rounded-lg bg-muted/50">
+								<Info className="mx-auto mb-2 size-5 text-muted-foreground" />
+								<p className="text-xs text-muted-foreground">
+									Factual Rating
+								</p>
+								<div className="mt-1">
+									<FactualRatingBadge
+										rating={
+											analysisOutput.bias.factualRating
+										}
+									/>
+								</div>
+							</div>
+							<div className="text-center p-3 rounded-lg bg-muted/50">
+								<AlertTriangle className="mx-auto mb-2 size-5 text-muted-foreground" />
+								<p className="text-xs text-muted-foreground">
+									Sensationalism
+								</p>
+								<p
+									className={`mt-1 text-lg font-bold tabular-nums ${
+										analysisOutput.bias.sensationalism <= 3
+											? "text-green-500"
+											: analysisOutput.bias
+														.sensationalism <= 6
+												? "text-amber-500"
+												: "text-red-500"
+									}`}
+								>
+									{analysisOutput.bias.sensationalism * 10}%
 								</p>
 							</div>
-						)}
-					</div>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 
@@ -410,6 +560,32 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				) : job.output ? (
 					<NewsAnalyzerResults output={job.output} />
 				) : null)}
+
+			{/* Share CTA at bottom */}
+			{job.status === "COMPLETED" && job.newsAnalysis?.id && (
+				<Card className="bg-primary/5 border-primary/20">
+					<CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
+						<div className="text-center sm:text-left">
+							<p className="font-medium">
+								Found this analysis helpful?
+							</p>
+							<p className="text-sm text-muted-foreground">
+								Share it with others to help them stay informed.
+							</p>
+						</div>
+						<Button
+							onClick={() => {
+								const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
+								navigator.clipboard.writeText(shareUrl);
+								toast.success("Share link copied to clipboard");
+							}}
+						>
+							<Share2 className="mr-2 size-4" />
+							Copy Share Link
+						</Button>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }
