@@ -316,6 +316,8 @@ model ToolJob {
   updatedAt      DateTime      @updatedAt
   pgBossJobId    String?       @unique
   newsAnalysisId String?       @unique
+  audioFileUrl   String?       // S3/Supabase storage URL for audio files (speaker-separation)
+  audioMetadata  Json?         // Audio file metadata: { filename, mimeType, duration, size }
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
   tool           Tool?         @relation(fields: [toolId], references: [id], onDelete: SetNull)

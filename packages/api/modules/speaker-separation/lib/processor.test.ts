@@ -22,6 +22,13 @@ vi.mock("assemblyai", () => ({
 	},
 }));
 
+// Mock audio-storage
+const mockDownloadAudioFromStorage = vi.hoisted(() => vi.fn());
+
+vi.mock("./audio-storage", () => ({
+	downloadAudioFromStorage: mockDownloadAudioFromStorage,
+}));
+
 describe("Speaker Separation Processor", () => {
 	const originalEnv = process.env;
 
@@ -66,6 +73,8 @@ describe("Speaker Separation Processor", () => {
 		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 		createdAt: new Date(),
 		updatedAt: new Date(),
+		audioFileUrl: null,
+		audioMetadata: null,
 	};
 
 	const mockAssemblyAIResponse = {
@@ -255,6 +264,102 @@ describe("Speaker Separation Processor", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.error).toBe("Upload failed");
+		});
+
+		it("processes job with audioFileUrl from job record", async () => {
+			const storageBuffer = Buffer.from("audio from storage");
+			mockDownloadAudioFromStorage.mockResolvedValue(storageBuffer);
+			mockTranscribe.mockResolvedValue(mockAssemblyAIResponse);
+
+			const jobWithStorageUrl = {
+				...mockJob,
+				audioFileUrl: "speaker-separation/job-123.mp3",
+				input: {
+					audioFileUrl: "speaker-separation/job-123.mp3",
+					audioMetadata: {
+						filename: "test.mp3",
+						mimeType: "audio/mp3",
+					},
+				},
+			};
+
+			const result = await processSpeakerSeparationJob(jobWithStorageUrl);
+
+			expect(result.success).toBe(true);
+			expect(mockDownloadAudioFromStorage).toHaveBeenCalledWith(
+				"speaker-separation/job-123.mp3",
+			);
+		});
+
+		it("prioritizes job.audioFileUrl over input.audioFileUrl", async () => {
+			const storageBuffer = Buffer.from("audio from storage");
+			mockDownloadAudioFromStorage.mockResolvedValue(storageBuffer);
+			mockTranscribe.mockResolvedValue(mockAssemblyAIResponse);
+
+			const jobWithBothUrls = {
+				...mockJob,
+				audioFileUrl: "speaker-separation/job-url.mp3",
+				input: {
+					audioFileUrl: "speaker-separation/input-url.mp3",
+				},
+			};
+
+			await processSpeakerSeparationJob(jobWithBothUrls);
+
+			// Should use job.audioFileUrl, not input.audioFileUrl
+			expect(mockDownloadAudioFromStorage).toHaveBeenCalledWith(
+				"speaker-separation/job-url.mp3",
+			);
+		});
+
+		it("uses input.audioFileUrl when job.audioFileUrl is not set", async () => {
+			const storageBuffer = Buffer.from("audio from storage");
+			mockDownloadAudioFromStorage.mockResolvedValue(storageBuffer);
+			mockTranscribe.mockResolvedValue(mockAssemblyAIResponse);
+
+			const jobWithInputUrl = {
+				...mockJob,
+				audioFileUrl: null,
+				input: {
+					audioFileUrl: "speaker-separation/input-only.mp3",
+				},
+			};
+
+			await processSpeakerSeparationJob(jobWithInputUrl);
+
+			expect(mockDownloadAudioFromStorage).toHaveBeenCalledWith(
+				"speaker-separation/input-only.mp3",
+			);
+		});
+
+		it("handles storage download errors", async () => {
+			mockDownloadAudioFromStorage.mockRejectedValue(
+				new Error("Storage download failed"),
+			);
+
+			const jobWithStorageUrl = {
+				...mockJob,
+				audioFileUrl: "speaker-separation/job-123.mp3",
+				input: {},
+			};
+
+			const result = await processSpeakerSeparationJob(jobWithStorageUrl);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("Storage download failed");
+		});
+
+		it("returns error when no audio source is available", async () => {
+			const emptyJob = {
+				...mockJob,
+				audioFileUrl: null,
+				input: {},
+			};
+
+			const result = await processSpeakerSeparationJob(emptyJob);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toBe("Audio file is required");
 		});
 	});
 

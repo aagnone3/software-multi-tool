@@ -12,6 +12,8 @@ export interface CreateToolJobInput {
 	priority?: number;
 	maxAttempts?: number;
 	expiresAt?: Date;
+	audioFileUrl?: string;
+	audioMetadata?: Prisma.InputJsonValue;
 }
 
 export async function createToolJob({
@@ -22,6 +24,8 @@ export async function createToolJob({
 	priority = 0,
 	maxAttempts = 3,
 	expiresAt,
+	audioFileUrl,
+	audioMetadata,
 }: CreateToolJobInput) {
 	return await db.toolJob.create({
 		data: {
@@ -33,6 +37,8 @@ export async function createToolJob({
 			maxAttempts,
 			expiresAt:
 				expiresAt ?? new Date(Date.now() + DEFAULT_EXPIRATION_MS),
+			audioFileUrl,
+			audioMetadata,
 		},
 	});
 }

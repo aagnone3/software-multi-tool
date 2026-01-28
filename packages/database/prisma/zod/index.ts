@@ -96,7 +96,7 @@ export type ToolScalarFieldEnumEnum = z.infer<typeof ToolScalarFieldEnumSchema>;
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId', 'audioFileUrl', 'audioMetadata'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
@@ -522,6 +522,8 @@ export const ToolJobSchema = z.object({
   updatedAt: z.date(),
   pgBossJobId: z.string().nullish(),
   newsAnalysisId: z.string().nullish(),
+  audioFileUrl: z.string().nullish(),
+  audioMetadata: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
 });
 
 export type ToolJobType = z.infer<typeof ToolJobSchema>;

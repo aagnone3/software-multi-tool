@@ -2,6 +2,7 @@ import { z } from "zod";
 
 /**
  * Audio file data schema - matches frontend AudioFileData interface.
+ * Used when audio is provided as base64 content (legacy/inline mode).
  */
 export const AudioFileDataSchema = z.object({
 	content: z.string().min(1, "Audio content is required"),
@@ -13,12 +14,32 @@ export const AudioFileDataSchema = z.object({
 export type AudioFileData = z.infer<typeof AudioFileDataSchema>;
 
 /**
- * Input schema for the speaker separation processor.
- * Accepts audio file data with base64 encoded content.
+ * Audio metadata schema - stored alongside the job for quick access.
  */
-export const SpeakerSeparationInputSchema = z.object({
-	audioFile: AudioFileDataSchema,
+export const AudioMetadataSchema = z.object({
+	filename: z.string(),
+	mimeType: z.string(),
+	duration: z.number().optional(),
+	size: z.number().optional(),
 });
+
+export type AudioMetadata = z.infer<typeof AudioMetadataSchema>;
+
+/**
+ * Input schema for the speaker separation processor.
+ * Supports two modes:
+ * 1. audioFile with base64 content (legacy, used during upload before storage)
+ * 2. audioFileUrl with S3 reference (new, used after storage upload)
+ */
+export const SpeakerSeparationInputSchema = z
+	.object({
+		audioFile: AudioFileDataSchema.optional(),
+		audioFileUrl: z.string().optional(),
+		audioMetadata: AudioMetadataSchema.optional(),
+	})
+	.refine((data) => data.audioFile || data.audioFileUrl, {
+		message: "Either audioFile or audioFileUrl must be provided",
+	});
 
 export type SpeakerSeparationInput = z.infer<
 	typeof SpeakerSeparationInputSchema
