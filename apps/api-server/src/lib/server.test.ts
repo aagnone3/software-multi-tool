@@ -41,6 +41,16 @@ describe("Fastify Server", () => {
 			expect(response.body).toBe("OK");
 		});
 
+		it("should respond to GET /api/health (proxied health check)", async () => {
+			const response = await server.inject({
+				method: "GET",
+				url: "/api/health",
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.body).toBe("OK");
+		});
+
 		it("should return correct content-type", async () => {
 			const response = await server.inject({
 				method: "GET",
@@ -48,6 +58,23 @@ describe("Fastify Server", () => {
 			});
 
 			expect(response.headers["content-type"]).toContain("text/plain");
+		});
+
+		it("should return same response for /health and /api/health", async () => {
+			const healthResponse = await server.inject({
+				method: "GET",
+				url: "/health",
+			});
+
+			const apiHealthResponse = await server.inject({
+				method: "GET",
+				url: "/api/health",
+			});
+
+			expect(healthResponse.statusCode).toBe(
+				apiHealthResponse.statusCode,
+			);
+			expect(healthResponse.body).toBe(apiHealthResponse.body);
 		});
 	});
 
