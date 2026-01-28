@@ -72,10 +72,18 @@ export async function createServer(): Promise<FastifyInstance> {
 		},
 	});
 
-	// Health check endpoint
-	server.get("/health", async (_request, reply) => {
+	// Health check endpoints
+	// /health - Direct health check (used by Render/infrastructure)
+	// /api/health - Proxied health check (used by frontend via /api/proxy/health)
+	const healthHandler = async (
+		_request: import("fastify").FastifyRequest,
+		reply: import("fastify").FastifyReply,
+	) => {
 		return reply.code(200).send("OK");
-	});
+	};
+
+	server.get("/health", healthHandler);
+	server.get("/api/health", healthHandler);
 
 	// WebSocket endpoint
 	server.register(async (fastify) => {
