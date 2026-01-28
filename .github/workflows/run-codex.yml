@@ -6,11 +6,11 @@ on:
       prompt:
         description: >
           Instructions passed to Codex. Update this message to describe the work
-          you want Codex to perform in the Software Multitool repository.
+          you want Codex to perform in the AI Multitool repository.
         required: false
         default: >
           You are Codex running inside a GitHub Actions workflow for the
-          Software Multitool monorepo. Review AGENTS.md for repository conventions, run
+          AI Multitool monorepo. Review AGENTS.md for repository conventions, run
           any necessary checks, and summarize the work you perform.
 
 jobs:

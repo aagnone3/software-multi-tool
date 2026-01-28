@@ -13,6 +13,6 @@ describe("opengraph-image", () => {
 	});
 
 	it("exports alt text with app name", () => {
-		expect(alt).toBe("Software Multitool");
+		expect(alt).toBe("AI Multitool");
 	});
 });

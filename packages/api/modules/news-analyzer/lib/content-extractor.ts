@@ -55,7 +55,7 @@ export async function extractContentFromUrl(
 			signal: controller.signal,
 			headers: {
 				"User-Agent":
-					"Mozilla/5.0 (compatible; NewsAnalyzer/1.0; +https://softwaremultitool.com)",
+					"Mozilla/5.0 (compatible; NewsAnalyzer/1.0; +https://aimultitool.com)",
 			},
 		});
 

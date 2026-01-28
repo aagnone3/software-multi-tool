@@ -51,7 +51,7 @@ This runs pg-boss with `migrate: true` (default) to create all required schema o
 Export the pg-boss schema for reference:
 
 ```bash
-PGPASSWORD=postgres pg_dump -h localhost -U postgres -d local_softwaremultitool \
+PGPASSWORD=postgres pg_dump -h localhost -U postgres -d local_aimultitool \
   --schema=pgboss --schema-only --no-owner --no-privileges \
   > /tmp/pgboss-schema-reference.sql
 ```
@@ -67,7 +67,7 @@ pnpm --filter @repo/database db:pull
 **Important**: Remove the tables that pg-boss created so Prisma can apply the migration cleanly:
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "DROP SCHEMA pgboss CASCADE;"
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_aimultitool -c "DROP SCHEMA pgboss CASCADE;"
 ```
 
 ### Step 4: Create the Migration File

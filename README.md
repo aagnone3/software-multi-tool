@@ -1,6 +1,6 @@
-# Software Multitool
+# AI Multitool
 
-Software Multitool is a customizable Next.js 15 monorepo for shipping modern SaaS products. It combines a React 19 App Router frontend with a typed Hono/oRPC backend, shared packages, and batteries-included tooling so your team can focus on product work instead of project setup.
+AI Multitool is a customizable Next.js 15 monorepo for shipping modern SaaS products. It combines a React 19 App Router frontend with a typed Hono/oRPC backend, shared packages, and batteries-included tooling so your team can focus on product work instead of project setup.
 
 ## Highlights
 
@@ -69,4 +69,4 @@ After `pre-commit install`, each commit runs:
 - Agent/developer guidance, including Linear workflow helpers, is captured in `AGENTS.md`.
 - Contributor workflow details (including testing expectations) are documented in `CONTRIBUTING.md`.
 
-Have feedback or ideas? Open an issue or start a discussion in this repository to help shape Software Multitool.
+Have feedback or ideas? Open an issue or start a discussion in this repository to help shape AI Multitool.

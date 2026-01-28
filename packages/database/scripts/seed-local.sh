@@ -13,7 +13,7 @@ SEED_FILE="$REPO_ROOT/supabase/seed.sql"
 # Default local database settings (can be overridden via env vars)
 DB_HOST="${POSTGRES_HOST:-localhost}"
 DB_PORT="${POSTGRES_PORT:-5432}"
-DB_NAME="${POSTGRES_DATABASE:-local_softwaremultitool}"
+DB_NAME="${POSTGRES_DATABASE:-local_aimultitool}"
 DB_USER="${POSTGRES_USER:-postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:-postgres}"
 

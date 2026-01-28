@@ -10,7 +10,7 @@ export function Footer() {
 		>
 			<span>
 				<a href="https://github.com/aagnone3/software-multi-tool">
-					Built by Software Multitool
+					Built by AI Multitool
 				</a>
 			</span>
 			<span className="opacity-50"> | </span>

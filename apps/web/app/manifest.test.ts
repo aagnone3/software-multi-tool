@@ -6,8 +6,8 @@ describe("manifest", () => {
 	it("returns valid manifest with app name", () => {
 		const result = manifest();
 
-		expect(result.name).toBe("Software Multitool");
-		expect(result.short_name).toBe("SoftwareMultitool");
+		expect(result.name).toBe("AI Multitool");
+		expect(result.short_name).toBe("AIMultitool");
 	});
 
 	it("includes PWA display mode", () => {

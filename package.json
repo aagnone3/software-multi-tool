@@ -1,6 +1,6 @@
 {
 	"name": "software-multi-tool",
-	"description": "Software Multitool monorepo for building SaaS with Next.js 15",
+	"description": "AI Multitool monorepo for building SaaS with Next.js 15",
 	"private": true,
 	"scripts": {
 		"build": "dotenv -c -- turbo build",
@@ -20,7 +20,7 @@
 		"test": "dotenv -c -- turbo run test",
 		"test:ci": "dotenv -c -- env TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
 		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts",
-		"db:seed": "PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql",
+		"db:seed": "PGPASSWORD=postgres psql -h localhost -U postgres -d local_aimultitool -f supabase/seed.sql",
 		"worktree:create": "./tooling/scripts/src/worktree-setup.sh create",
 		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
 		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",

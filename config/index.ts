@@ -1,7 +1,7 @@
 import type { Config, CreditPack, PlanCredits } from "./types";
 
 export const config = {
-	appName: "Software Multitool",
+	appName: "AI Multitool",
 	// Tools/Sub-apps registry
 	tools: {
 		registry: [
@@ -171,7 +171,7 @@ export const config = {
 	// Mails
 	mails: {
 		// the from address for mails
-		from: "noreply@softwaremultitool.com",
+		from: "noreply@aimultitool.com",
 	},
 	// Frontend
 	ui: {

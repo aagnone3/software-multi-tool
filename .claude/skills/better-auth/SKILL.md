@@ -343,7 +343,7 @@ For local development, a test user enables Quick Login on the login page:
 **Seeding the test user:**
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_aimultitool -f supabase/seed.sql
 ```
 
 ## Troubleshooting

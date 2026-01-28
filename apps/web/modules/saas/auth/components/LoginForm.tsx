@@ -214,7 +214,7 @@ export function LoginForm() {
 			if (isUserNotFoundError) {
 				form.setError("root", {
 					message:
-						"Test user not found. Seed your database using: PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql",
+						"Test user not found. Seed your database using: PGPASSWORD=postgres psql -h localhost -U postgres -d local_aimultitool -f supabase/seed.sql",
 				});
 			} else {
 				form.setError("root", {

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Software Multitool! This guide highlights the testing-related expectations before opening a pull request.
+Thanks for helping improve AI Multitool! This guide highlights the testing-related expectations before opening a pull request.
 
 ## Test Workflow
 

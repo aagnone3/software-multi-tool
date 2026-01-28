@@ -920,7 +920,7 @@ pnpm dev
 **Root cause**: Web app and api-server are using **different databases**:
 
 - Web app: `localhost:54322/postgres` (Supabase local)
-- API server: `localhost:5432/local_softwaremultitool` (Homebrew Postgres)
+- API server: `localhost:5432/local_aimultitool` (Homebrew Postgres)
 
 Jobs get created in one database, but workers poll the other.
 
@@ -958,13 +958,13 @@ pnpm dev
 cd .worktrees/<worktree-name>
 
 # Check migration status
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_aimultitool" \
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_aimultitool" \
 pnpm --filter @repo/database exec prisma migrate status
 
 # Apply pending migrations
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_aimultitool" \
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_aimultitool" \
 pnpm --filter @repo/database exec prisma migrate deploy
 ```
 

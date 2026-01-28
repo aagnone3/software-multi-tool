@@ -13,7 +13,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
 	return {
 		name: config.appName,
-		short_name: "SoftwareMultitool",
+		short_name: "AIMultitool",
 		description: "AI-powered tools for productivity and automation",
 		start_url: "/",
 		display: "standalone",

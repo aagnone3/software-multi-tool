@@ -1,6 +1,6 @@
 # Brand Color Palette
 
-This document defines the official color palette for Software Multitool. All colors are designed to convey a **Professional & Trustworthy** brand identity.
+This document defines the official color palette for AI Multitool. All colors are designed to convey a **Professional & Trustworthy** brand identity.
 
 ## Color Philosophy
 

@@ -293,7 +293,7 @@ lsof -i :4000  # API
 lsof -i :5432  # Database
 
 # Test database
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "SELECT 1;"
+PGPASSWORD=postgres psql -h localhost -U postgres -d local_aimultitool -c "SELECT 1;"
 ```
 
 ### Local Common Fixes
@@ -309,7 +309,7 @@ brew services list | grep postgres
 
 # Create database
 PGPASSWORD=postgres psql -h localhost -U postgres -d template1 \
-  -c "CREATE DATABASE local_softwaremultitool;"
+  -c "CREATE DATABASE local_aimultitool;"
 
 # Missing env vars
 cp apps/web/.env.local.example apps/web/.env.local

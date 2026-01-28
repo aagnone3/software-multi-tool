@@ -17,14 +17,14 @@ export function Logo({
 		>
 			<Image
 				src="/images/icon-sd.png"
-				alt="Software Multitool"
+				alt="AI Multitool"
 				width={40}
 				height={40}
 				className="size-10"
 			/>
 			{withLabel && (
 				<span className="ml-3 hidden text-lg md:block">
-					Software Multitool
+					AI Multitool
 				</span>
 			)}
 		</span>

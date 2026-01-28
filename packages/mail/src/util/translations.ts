@@ -21,21 +21,21 @@ export const defaultTranslations = {
 			subject: "Reset your password",
 		},
 		magicLink: {
-			body: "Hey,\nyou requested a login email from Software Multitool.\n\nClick the link below to login.",
+			body: "Hey,\nyou requested a login email from AI Multitool.\n\nClick the link below to login.",
 			login: "Login",
-			subject: "Login to Software Multitool",
+			subject: "Login to AI Multitool",
 		},
 		newUser: {
-			body: "Hey,\nthanks for signing up for Software Multitool.\n\nTo start using our app, please confirm your email address by clicking the link below.",
+			body: "Hey,\nthanks for signing up for AI Multitool.\n\nTo start using our app, please confirm your email address by clicking the link below.",
 			confirmEmail: "Confirm email",
 			subject: "Confirm your email",
 		},
 		newsletterSignup: {
-			body: "Thank you for signing up for the Software Multitool newsletter. We will keep you updated with the latest news and updates.",
-			subject: "Welcome to the Software Multitool Newsletter!",
+			body: "Thank you for signing up for the AI Multitool newsletter. We will keep you updated with the latest news and updates.",
+			subject: "Welcome to the AI Multitool Newsletter!",
 		},
 		notificationEmail: {
-			subject: "Notification from Software Multitool",
+			subject: "Notification from AI Multitool",
 		},
 		organizationInvitation: {
 			body: "You have been invited to join the organization {organizationName}. Click the button below or copy and paste the link into your browser of choice to accept the invitation and join the organization.",

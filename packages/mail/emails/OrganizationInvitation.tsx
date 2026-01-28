@@ -48,7 +48,7 @@ OrganizationInvitation.PreviewProps = {
 	locale: defaultLocale,
 	translations: defaultTranslations,
 	url: "#",
-	organizationName: "Software Multitool",
+	organizationName: "AI Multitool",
 };
 
 export default OrganizationInvitation;

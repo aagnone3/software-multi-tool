@@ -20,7 +20,7 @@ describe("config", () => {
 		process.env = { ...originalEnv };
 
 		const defaults = await import("./index");
-		expect(defaults.config.appName).toBe("Software Multitool");
+		expect(defaults.config.appName).toBe("AI Multitool");
 		expect(defaults.config.storage.bucketNames.avatars).toBe("avatars");
 
 		vi.resetModules();

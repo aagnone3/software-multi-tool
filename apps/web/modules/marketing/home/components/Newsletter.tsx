@@ -45,7 +45,7 @@ export function Newsletter() {
 						Get early access
 					</h1>
 					<p className="mt-3 text-lg opacity-70">
-						Be among the first to get access to Software Multitool.
+						Be among the first to get access to AI Multitool.
 					</p>
 				</div>
 

@@ -17,7 +17,7 @@ import PgBoss from "pg-boss";
 
 const connectionString =
 	process.env.POSTGRES_PRISMA_URL ||
-	"postgresql://postgres:postgres@localhost:5432/local_softwaremultitool";
+	"postgresql://postgres:postgres@localhost:5432/local_aimultitool";
 
 console.log("Verifying pg-boss schema setup...");
 console.log(`Connection: ${connectionString.replace(/:[^:@]+@/, ":****@")}`);

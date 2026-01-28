@@ -1,6 +1,6 @@
 # CI Testing Documentation
 
-This document describes the test suite integration in the CI workflow for the Software Multitool monorepo.
+This document describes the test suite integration in the CI workflow for the AI Multitool monorepo.
 
 ## Overview
 

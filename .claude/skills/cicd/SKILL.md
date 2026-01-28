@@ -737,7 +737,7 @@ For local development (not preview environments):
 
 ```bash
 # Use local PostgreSQL
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_aimultitool"
 
 # Or use Supabase local stack
 supabase start

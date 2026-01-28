@@ -53,24 +53,24 @@ pnpm test
 
 Local PostgreSQL runs on Homebrew installation:
 
-| Setting  | Value                   |
-| -------- | ----------------------- |
-| Host     | localhost               |
-| Port     | 5432                    |
-| Database | local_softwaremultitool |
-| User     | postgres                |
-| Password | postgres                |
+| Setting  | Value             |
+| -------- | ----------------- |
+| Host     | localhost         |
+| Port     | 5432              |
+| Database | local_aimultitool |
+| User     | postgres          |
+| Password | postgres          |
 
 **Connection string for `.env.local`:**
 
 ```text
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_aimultitool"
 ```
 
 **Create database (if needed):**
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_aimultitool;"
 ```
 
 ## Core Command Patterns

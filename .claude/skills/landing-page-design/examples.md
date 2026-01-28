@@ -6,7 +6,7 @@ Real-world examples from this codebase and implementation patterns for landing p
 
 File: `apps/web/modules/marketing/shared/components/AnimatedBackground.tsx`
 
-This is the production implementation used on the Software Multitool landing page:
+This is the production implementation used on the AI Multitool landing page:
 
 ```tsx
 "use client";
