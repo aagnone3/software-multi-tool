@@ -24,35 +24,46 @@ This project uses a **preview-first development model**: local development for f
 
 ## Local Development
 
-Local dev is optimized for **fast frontend iteration**. No database setup required.
-
 ### Quick Start
 
 ```bash
 # 1. Install dependencies
 pnpm install
 
-# 2. Copy environment file
+# 2. Copy environment files
 cp apps/web/.env.local.example apps/web/.env.local
+cp apps/api-server/.env.local.example apps/api-server/.env.local
 
-# 3. Start dev server
+# 3. Start ALL apps (web + api-server) via Turborepo
 pnpm dev
 ```
 
-**That's it.** Web app runs at `http://localhost:3500`.
+**IMPORTANT**: Always use `pnpm dev` from the monorepo root. This starts all apps via Turborepo:
 
-### What Works Locally
+- **Web app**: `http://localhost:3637` (or port from `apps/web/.env.local`)
+- **API server**: `http://localhost:4000` (or port from `apps/api-server/.env.local`)
+
+The web app's `API_SERVER_URL` in `.env.local` must match the api-server's port.
+
+### Frontend-Only Development
+
+For fast frontend iteration without backend:
 
 - Frontend development with hot reload
 - Component development and styling
 - TypeScript checking and linting
 
-### What Requires Preview Environment
+### Full-Stack Local Development
 
-- Database operations
-- Authentication flows
-- API endpoints that need data
-- Full end-to-end testing
+For authentication, database, and API testing locally, start Supabase local:
+
+```bash
+pnpm supabase:start   # Start PostgreSQL + Storage + Auth
+pnpm supabase:reset   # Apply migrations and seed data
+pnpm dev              # Start web + api-server
+```
+
+See "Supabase Local Stack" section below for detailed setup.
 
 ## Preview Environment (Primary Testing)
 
@@ -292,6 +303,27 @@ lsof -i :3500
 # Restart dev server
 pkill -f "next dev" && pnpm dev
 ```
+
+#### Dev Server Returns 404 on All Routes
+
+If the dev server starts but returns 404 for every route (including `/`), check for EMFILE errors in the console:
+
+```text
+Watchpack Error (watcher): Error: EMFILE: too many open files, watch
+```
+
+**Root cause**: macOS file descriptor limit exhausted by multiple node processes.
+
+**Fix**: Increase the limit in your current terminal:
+
+```bash
+ulimit -n 65536
+pnpm dev
+```
+
+**Permanent fix**: Add `ulimit -n 65536` to your `~/.zshrc`.
+
+See the `git-worktrees` skill for detailed EMFILE troubleshooting.
 
 ### Preview Issues
 

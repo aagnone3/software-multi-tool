@@ -70,12 +70,16 @@ ensure_node_version() {
     log_info "Attempting to switch Node version using nvm..."
 
     # Source nvm (needed in scripts)
+    # Note: nvm sourcing can trigger non-zero exit codes with set -e, so temporarily disable
     export NVM_DIR="$HOME/.nvm"
+    set +e
     # shellcheck source=/dev/null
     . "$NVM_DIR/nvm.sh"
+    set -e
 
-    # Check if v22 is installed
-    if nvm ls "$REQUIRED_NODE_MAJOR" &>/dev/null; then
+    # Check if v22 is installed by looking for version directory
+    # Note: nvm ls can return non-zero exit codes even when version exists
+    if ls "$NVM_DIR/versions/node/"v"$REQUIRED_NODE_MAJOR".* &>/dev/null; then
       nvm use "$REQUIRED_NODE_MAJOR" --silent
       log_success "Switched to Node.js v$REQUIRED_NODE_MAJOR using nvm"
       return 0
