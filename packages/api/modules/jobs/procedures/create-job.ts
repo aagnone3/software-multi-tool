@@ -1,12 +1,18 @@
 import { ORPCError } from "@orpc/client";
 import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
+import { shouldUseSupabaseStorage } from "@repo/storage";
 import { publicProcedure } from "../../../orpc/procedures";
+import { uploadAudioToStorage } from "../../speaker-separation/lib/audio-storage";
+import type { AudioMetadata } from "../../speaker-separation/types";
 import { submitJobToQueue } from "../lib/queue";
 import { CreateJobInputSchema } from "../types";
 
 // Tools that support caching (check for existing completed jobs)
 const CACHEABLE_TOOLS = new Set(["news-analyzer"]);
+
+// Tools that use audio storage
+const AUDIO_STORAGE_TOOLS = new Set(["speaker-separation"]);
 
 export const createJob = publicProcedure
 	.route({
@@ -74,12 +80,85 @@ export const createJob = publicProcedure
 		}
 
 		logger.info(`[CreateJob] Creating new job for tool: ${toolSlug}`);
+
+		// Handle audio storage for speaker-separation jobs
+		let audioFileUrl: string | undefined;
+		let audioMetadata: AudioMetadata | undefined;
+		let processedInput = jobInput as Record<string, unknown>;
+
+		if (
+			AUDIO_STORAGE_TOOLS.has(toolSlug) &&
+			shouldUseSupabaseStorage() &&
+			processedInput.audioFile
+		) {
+			const audioFile = processedInput.audioFile as {
+				content: string;
+				filename: string;
+				mimeType: string;
+				duration?: number;
+			};
+
+			// Generate a temporary job ID for the storage key
+			// We'll create the job with this key, then the storage key becomes permanent
+			const tempJobId = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
+			logger.info(
+				`[CreateJob] Uploading audio to storage for temp job: ${tempJobId}`,
+			);
+
+			try {
+				// Prepare metadata
+				audioMetadata = {
+					filename: audioFile.filename,
+					mimeType: audioFile.mimeType,
+					duration: audioFile.duration,
+					size: audioFile.content.length, // Base64 size (actual is ~75% of this)
+				};
+
+				// Upload to storage
+				audioFileUrl = await uploadAudioToStorage(
+					tempJobId,
+					audioFile.content,
+					audioMetadata,
+				);
+
+				// Remove base64 content from input to reduce job size
+				// Keep other audioFile fields for reference
+				processedInput = {
+					...processedInput,
+					audioFile: {
+						filename: audioFile.filename,
+						mimeType: audioFile.mimeType,
+						duration: audioFile.duration,
+						// content removed - now in storage
+					},
+					audioFileUrl, // Add storage reference to input
+				};
+
+				logger.info(
+					`[CreateJob] Audio uploaded successfully: ${audioFileUrl}`,
+				);
+			} catch (error) {
+				logger.error("[CreateJob] Failed to upload audio to storage", {
+					error:
+						error instanceof Error ? error.message : String(error),
+				});
+				// Fall back to storing base64 in input (legacy behavior)
+				// This ensures the job can still be processed
+				logger.warn(
+					"[CreateJob] Falling back to base64 storage in job input",
+				);
+			}
+		}
+
 		const job = await createToolJob({
 			toolSlug,
-			input: jobInput as Prisma.InputJsonValue,
+			input: processedInput as Prisma.InputJsonValue,
 			userId,
 			sessionId: userId ? undefined : sessionId, // Only use sessionId if not authenticated
 			priority,
+			audioFileUrl,
+			audioMetadata: audioMetadata as Prisma.InputJsonValue | undefined,
 		});
 
 		if (!job) {

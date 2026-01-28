@@ -10,6 +10,18 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock Next.js navigation
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: vi.fn(),
+		replace: vi.fn(),
+		prefetch: vi.fn(),
+		back: vi.fn(),
+	}),
+	usePathname: () => "/app/tools/speaker-separation",
+	useSearchParams: () => new URLSearchParams(),
+}));
+
 // Mock the useCreateJob hook
 const mockMutateAsync = vi.fn();
 vi.mock("../hooks/use-job-polling", () => ({

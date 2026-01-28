@@ -49,8 +49,16 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
 	"speaker-separation": SpeakerSeparationTool,
 };
 
+// Tools with dedicated routes (not handled by this generic page)
+const DEDICATED_ROUTE_TOOLS = new Set(["news-analyzer", "speaker-separation"]);
+
 export default async function ToolPage({ params }: ToolPageProps) {
 	const { toolSlug } = await params;
+
+	// Tools with dedicated routes should use their specific routes
+	if (DEDICATED_ROUTE_TOOLS.has(toolSlug)) {
+		redirect(`/app/tools/${toolSlug}`);
+	}
 
 	// First check if tool exists in config
 	const tool = config.tools.registry.find(

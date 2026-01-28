@@ -1,4 +1,5 @@
 import type { Prisma, ToolJob } from "@repo/database";
+import { logger } from "@repo/logs";
 import { AssemblyAI } from "assemblyai";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type {
@@ -8,6 +9,7 @@ import type {
 	SpeakerSeparationOutput,
 	SpeakerStats,
 } from "../types";
+import { downloadAudioFromStorage } from "./audio-storage";
 
 /**
  * Get AssemblyAI client instance.
@@ -123,6 +125,38 @@ function base64ToBuffer(base64Content: string): Buffer {
 }
 
 /**
+ * Get audio buffer from either storage or base64 input.
+ */
+async function getAudioBuffer(
+	job: ToolJob,
+	input: SpeakerSeparationInput,
+): Promise<Buffer> {
+	// Priority 1: Use storage URL from job record (set during job creation)
+	if (job.audioFileUrl) {
+		logger.info(
+			`[SpeakerSeparation] Downloading audio from storage: ${job.audioFileUrl}`,
+		);
+		return downloadAudioFromStorage(job.audioFileUrl);
+	}
+
+	// Priority 2: Use storage URL from input (legacy/migration path)
+	if (input.audioFileUrl) {
+		logger.info(
+			`[SpeakerSeparation] Downloading audio from input URL: ${input.audioFileUrl}`,
+		);
+		return downloadAudioFromStorage(input.audioFileUrl);
+	}
+
+	// Priority 3: Use base64 content from input (legacy inline mode)
+	if (input.audioFile?.content) {
+		logger.info("[SpeakerSeparation] Using base64 audio from input");
+		return base64ToBuffer(input.audioFile.content);
+	}
+
+	throw new Error("No audio source available");
+}
+
+/**
  * Process a speaker separation job using AssemblyAI.
  */
 export async function processSpeakerSeparationJob(
@@ -130,8 +164,8 @@ export async function processSpeakerSeparationJob(
 ): Promise<JobResult> {
 	const input = job.input as unknown as SpeakerSeparationInput;
 
-	// Validate input
-	if (!input.audioFile?.content) {
+	// Validate input - need either audioFile, audioFileUrl, or job.audioFileUrl
+	if (!input.audioFile?.content && !input.audioFileUrl && !job.audioFileUrl) {
 		return {
 			success: false,
 			error: "Audio file is required",
@@ -141,8 +175,13 @@ export async function processSpeakerSeparationJob(
 	try {
 		const client = getAssemblyAIClient();
 
-		// Convert base64 to buffer and upload to AssemblyAI
-		const audioBuffer = base64ToBuffer(input.audioFile.content);
+		// Get audio buffer from storage or base64
+		const audioBuffer = await getAudioBuffer(job, input);
+		logger.info(
+			`[SpeakerSeparation] Audio buffer size: ${audioBuffer.length} bytes`,
+		);
+
+		// Upload to AssemblyAI
 		const uploadUrl = await client.files.upload(audioBuffer);
 
 		// Submit transcription request with speaker labels enabled

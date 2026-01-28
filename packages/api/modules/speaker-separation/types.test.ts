@@ -56,7 +56,42 @@ describe("Speaker Separation Types", () => {
 			expect(result.success).toBe(true);
 		});
 
-		it("rejects missing audioFile", () => {
+		it("accepts audioFileUrl instead of audioFile", () => {
+			const input = {
+				audioFileUrl: "speaker-separation/job-123.mp3",
+			};
+			const result = SpeakerSeparationInputSchema.safeParse(input);
+			expect(result.success).toBe(true);
+		});
+
+		it("accepts both audioFile and audioFileUrl", () => {
+			const input = {
+				audioFile: {
+					content: "base64encodedcontent",
+					mimeType: "audio/wav",
+					filename: "test.wav",
+				},
+				audioFileUrl: "speaker-separation/job-123.mp3",
+			};
+			const result = SpeakerSeparationInputSchema.safeParse(input);
+			expect(result.success).toBe(true);
+		});
+
+		it("accepts audioMetadata with audioFileUrl", () => {
+			const input = {
+				audioFileUrl: "speaker-separation/job-123.mp3",
+				audioMetadata: {
+					filename: "test.mp3",
+					mimeType: "audio/mp3",
+					duration: 120,
+					size: 1024000,
+				},
+			};
+			const result = SpeakerSeparationInputSchema.safeParse(input);
+			expect(result.success).toBe(true);
+		});
+
+		it("rejects missing audioFile and audioFileUrl", () => {
 			const input = {};
 			const result = SpeakerSeparationInputSchema.safeParse(input);
 			expect(result.success).toBe(false);
@@ -72,6 +107,18 @@ describe("Speaker Separation Types", () => {
 			};
 			const result = SpeakerSeparationInputSchema.safeParse(input);
 			expect(result.success).toBe(false);
+		});
+
+		it("accepts audioMetadata alone with audioFileUrl", () => {
+			const input = {
+				audioFileUrl: "speaker-separation/job-456.wav",
+				audioMetadata: {
+					filename: "recording.wav",
+					mimeType: "audio/wav",
+				},
+			};
+			const result = SpeakerSeparationInputSchema.safeParse(input);
+			expect(result.success).toBe(true);
 		});
 	});
 

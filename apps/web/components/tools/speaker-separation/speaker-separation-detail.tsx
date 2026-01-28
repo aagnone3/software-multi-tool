@@ -1,99 +1,101 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { orpcClient } from "@shared/lib/orpc-client";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@ui/components/alert";
+import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
-import { Card, CardContent } from "@ui/components/card";
 import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@ui/components/form";
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@ui/components/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@ui/components/dialog";
 import { cn } from "@ui/lib";
 import {
-	ArrowRightIcon,
-	AudioLinesIcon,
-	CheckCircle2Icon,
+	AlertCircle,
+	ArrowLeft,
+	AudioLines,
+	CheckCircle2,
+	Clock,
 	ClockIcon,
 	CopyIcon,
 	DownloadIcon,
+	FileText,
 	FileTextIcon,
-	MicIcon,
+	Loader2,
 	PauseIcon,
 	PlayIcon,
-	RefreshCwIcon,
+	RefreshCw,
+	Timer,
+	Trash2,
+	Users,
 	UsersIcon,
+	XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
-import { useCreateJob } from "../hooks/use-job-polling";
-import { type AudioFileData, AudioFileUpload } from "./AudioFileUpload";
-import { JobProgressIndicator } from "./JobProgressIndicator";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import {
+	formatDuration,
+	formatProcessingDuration,
+	getDuration,
+	getFilename,
+	type JobStatus,
+	type SpeakerSeparationJob,
+	statusConfig,
+} from "./lib/history-utils";
+import type { SpeakerSegment, SpeakerSeparationOutput } from "./lib/types";
 
-/** Schema for audio file data in form. */
-const audioFileSchema = z.object({
-	content: z.string().min(1),
-	mimeType: z.string(),
-	filename: z.string(),
-	duration: z.number().optional(),
-});
-
-const formSchema = z.object({
-	audioFile: audioFileSchema.nullable(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-/**
- * Speaker segment from the speaker separation output.
- */
-interface SpeakerSegment {
-	speaker: string;
-	text: string;
-	startTime: number;
-	endTime: number;
-	confidence: number;
+interface SpeakerSeparationDetailProps {
+	jobId: string;
 }
 
-/**
- * Per-speaker statistics.
- */
-interface SpeakerStats {
-	id: string;
-	label: string;
-	totalTime: number;
-	percentage: number;
-	segmentCount: number;
-}
+const statusIcons: Record<
+	JobStatus,
+	React.ComponentType<{ className?: string }>
+> = {
+	PENDING: Clock,
+	PROCESSING: Loader2,
+	COMPLETED: CheckCircle2,
+	FAILED: XCircle,
+	CANCELLED: AlertCircle,
+};
 
-/**
- * Speaker separation output structure.
- */
-interface SpeakerSeparationOutput {
-	speakerCount: number;
-	duration: number;
-	speakers: SpeakerStats[];
-	segments: SpeakerSegment[];
-	transcript: string;
-}
+function StatusBadge({ status }: { status: JobStatus }) {
+	const config = statusConfig[status];
+	const Icon = statusIcons[status];
 
-/**
- * Format duration in seconds to MM:SS or HH:MM:SS.
- */
-function formatDuration(seconds: number): string {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = Math.floor(seconds % 60);
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
+	return (
+		<Badge
+			status={
+				config.variant === "success"
+					? "success"
+					: config.variant === "error"
+						? "error"
+						: config.variant === "warning"
+							? "warning"
+							: "info"
+			}
+		>
+			<Icon
+				className={`size-3 mr-1 ${status === "PROCESSING" ? "animate-spin" : ""}`}
+			/>
+			{config.label}
+		</Badge>
+	);
 }
 
 /**
@@ -159,7 +161,7 @@ function getSpeakerColor(speakerIndex: number): {
 }
 
 /**
- * Timeline visualization showing speaker segments with transcripts.
+ * Timeline visualization showing speaker segments.
  */
 function SpeakerTimeline({
 	segments,
@@ -179,7 +181,6 @@ function SpeakerTimeline({
 		speakerIndexMap.set(speaker, index);
 	});
 
-	// Calculate playhead position
 	const playheadPosition = (currentTime / totalDuration) * 100;
 
 	return (
@@ -216,13 +217,11 @@ function SpeakerTimeline({
 						/>
 					);
 				})}
-				{/* Playhead */}
 				<div
 					className="absolute top-0 h-full w-0.5 bg-foreground/80 pointer-events-none z-10 transition-all"
 					style={{ left: `${playheadPosition}%` }}
 				/>
 			</div>
-			{/* Legend */}
 			<div className="flex flex-wrap gap-3 mt-2">
 				{speakers.map((speaker, index) => {
 					const color = getSpeakerColor(index);
@@ -244,7 +243,7 @@ function SpeakerTimeline({
 }
 
 /**
- * Transcript view with clickable segments that sync with audio.
+ * Transcript view with clickable segments.
  */
 function TranscriptView({
 	segments,
@@ -265,12 +264,10 @@ function TranscriptView({
 		speakerIndexMap.set(speaker, index);
 	});
 
-	// Find current segment
 	const currentSegmentIndex = segments.findIndex(
 		(seg) => currentTime >= seg.startTime && currentTime < seg.endTime,
 	);
 
-	// Auto-scroll to active segment
 	useEffect(() => {
 		if (activeSegmentRef.current && containerRef.current) {
 			const container = containerRef.current;
@@ -278,7 +275,6 @@ function TranscriptView({
 			const containerRect = container.getBoundingClientRect();
 			const elementRect = element.getBoundingClientRect();
 
-			// Check if element is outside visible area
 			if (
 				elementRect.top < containerRect.top ||
 				elementRect.bottom > containerRect.bottom
@@ -343,10 +339,10 @@ function TranscriptView({
 }
 
 /**
- * Audio player with playback controls.
+ * Audio player that loads from a URL (storage) or base64.
  */
-function AudioPlayer({
-	audioData,
+function AudioPlayerFromUrl({
+	audioUrl,
 	currentTime,
 	duration,
 	isPlaying,
@@ -354,7 +350,7 @@ function AudioPlayer({
 	onSeek,
 	onPlayPause,
 }: {
-	audioData: AudioFileData;
+	audioUrl: string;
 	currentTime: number;
 	duration: number;
 	isPlaying: boolean;
@@ -363,23 +359,7 @@ function AudioPlayer({
 	onPlayPause: () => void;
 }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
-	const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-	// Create audio URL from base64
-	useEffect(() => {
-		const blob = new Blob(
-			[Uint8Array.from(atob(audioData.content), (c) => c.charCodeAt(0))],
-			{ type: audioData.mimeType },
-		);
-		const url = URL.createObjectURL(blob);
-		setAudioUrl(url);
-
-		return () => {
-			URL.revokeObjectURL(url);
-		};
-	}, [audioData.content, audioData.mimeType]);
-
-	// Handle play/pause
 	useEffect(() => {
 		if (!audioRef.current) {
 			return;
@@ -394,7 +374,6 @@ function AudioPlayer({
 		}
 	}, [isPlaying]);
 
-	// Handle seek from external source
 	useEffect(() => {
 		if (
 			audioRef.current &&
@@ -427,10 +406,6 @@ function AudioPlayer({
 			audioRef.current.currentTime = 0;
 		}
 	}, [onSeek]);
-
-	if (!audioUrl) {
-		return null;
-	}
 
 	return (
 		<div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
@@ -527,7 +502,7 @@ function ExportOptions({
 			<Button variant="outline" size="sm" onClick={handleCopyTranscript}>
 				{copied ? (
 					<>
-						<CheckCircle2Icon className="mr-2 size-4" />
+						<CheckCircle2 className="mr-2 size-4" />
 						Copied!
 					</>
 				) : (
@@ -549,73 +524,117 @@ function ExportOptions({
 	);
 }
 
-export function SpeakerSeparationTool() {
+export function SpeakerSeparationDetail({
+	jobId,
+}: SpeakerSeparationDetailProps) {
 	const router = useRouter();
-	const [jobId, setJobId] = useState<string | null>(null);
-	const [result, setResult] = useState<SpeakerSeparationOutput | null>(null);
-	const [audioFile, setAudioFile] = useState<AudioFileData | null>(null);
+	const queryClient = useQueryClient();
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [_jobError, setJobError] = useState<string | null>(null);
-	const createJobMutation = useCreateJob();
+	const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			audioFile: null,
+	const { data, isLoading, error } = useQuery({
+		...orpc.jobs.get.queryOptions({
+			input: { jobId },
+		}),
+		refetchInterval: (query) => {
+			const job = query.state.data?.job as
+				| SpeakerSeparationJob
+				| undefined;
+			if (job?.status === "PENDING" || job?.status === "PROCESSING") {
+				return 2000;
+			}
+			return false;
 		},
 	});
 
-	const onSubmit: SubmitHandler<FormValues> = async (values) => {
-		setResult(null);
-		setJobError(null);
-		if (!values.audioFile) {
-			return;
+	const job = data?.job as SpeakerSeparationJob | undefined;
+	const result = job?.output as SpeakerSeparationOutput | null;
+
+	// Fetch signed URL for audio playback when job is available
+	useEffect(() => {
+		async function fetchAudioUrl() {
+			if (!job?.audioFileUrl) return;
+
+			try {
+				// Call the audio download URL API
+				const response = await fetch(
+					`/api/tools/speaker-separation/audio/${jobId}`,
+				);
+				if (response.ok) {
+					const data = await response.json();
+					setAudioUrl(data.url);
+				}
+			} catch (error) {
+				console.error("Failed to fetch audio URL:", error);
+			}
 		}
 
-		try {
-			const response = await createJobMutation.mutateAsync({
+		if (job?.status === "COMPLETED" && job?.audioFileUrl) {
+			fetchAudioUrl();
+		}
+	}, [job?.audioFileUrl, job?.status, jobId]);
+
+	// Re-analyze mutation
+	const reanalyzeMutation = useMutation({
+		mutationFn: async () => {
+			if (!job) throw new Error("No job data");
+
+			const sessionId =
+				typeof window !== "undefined"
+					? (localStorage.getItem("speaker-separation-session-id") ??
+						undefined)
+					: undefined;
+
+			// Re-create job with same input
+			// If audio is in storage, use audioFileUrl; otherwise use original input
+			const input = job.audioFileUrl
+				? {
+						audioFileUrl: job.audioFileUrl,
+						audioMetadata: job.audioMetadata,
+					}
+				: job.input;
+
+			const response = await orpcClient.jobs.create({
 				toolSlug: "speaker-separation",
-				input: values,
+				input,
+				sessionId,
 			});
 
-			setJobId(response.job.id);
-			setAudioFile(values.audioFile);
-		} catch (error) {
-			console.error("Failed to create job:", error);
-			setJobError(
-				error instanceof Error ? error.message : "Failed to create job",
+			return response;
+		},
+		onSuccess: (data) => {
+			toast.success("Re-analysis started");
+			router.push(`/app/tools/speaker-separation/${data.job.id}`);
+		},
+		onError: (err) => {
+			toast.error(
+				err instanceof Error
+					? err.message
+					: "Failed to start re-analysis",
 			);
-		}
-	};
+		},
+	});
 
-	const handleComplete = (_output: Record<string, unknown>) => {
-		// Navigate to the detail page when analysis completes
-		if (jobId) {
-			router.push(`/app/tools/speaker-separation/${jobId}`);
-		}
-	};
-
-	const handleError = (error: string) => {
-		setJobError(error);
-	};
-
-	const handleNewAnalysis = () => {
-		setJobId(null);
-		setResult(null);
-		setAudioFile(null);
-		setCurrentTime(0);
-		setIsPlaying(false);
-		form.reset();
-	};
-
-	const handleFileSelected = (fileData: AudioFileData) => {
-		form.setValue("audioFile", fileData, { shouldValidate: true });
-	};
-
-	const handleFileClear = () => {
-		form.setValue("audioFile", null, { shouldValidate: true });
-	};
+	// Delete mutation
+	const deleteMutation = useMutation({
+		mutationFn: async () => {
+			await orpcClient.jobs.delete({ jobId });
+		},
+		onSuccess: () => {
+			toast.success("Analysis deleted");
+			queryClient.invalidateQueries({ queryKey: ["jobs", "list"] });
+			router.push("/app/tools/speaker-separation?tab=history");
+		},
+		onError: (err) => {
+			toast.error(
+				err instanceof Error
+					? err.message
+					: "Failed to delete analysis",
+			);
+		},
+	});
 
 	const handleSeek = useCallback((time: number) => {
 		setCurrentTime(time);
@@ -629,105 +648,231 @@ export function SpeakerSeparationTool() {
 		setCurrentTime(time);
 	}, []);
 
-	const selectedFile = form.watch("audioFile");
+	if (isLoading) {
+		return (
+			<Card className="p-8">
+				<div className="flex items-center justify-center">
+					<Loader2 className="mr-2 size-6 animate-spin text-primary" />
+					<span>Loading analysis...</span>
+				</div>
+			</Card>
+		);
+	}
+
+	if (error || !job) {
+		return (
+			<Card className="p-8">
+				<Alert variant="error">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription>
+						{error instanceof Error
+							? error.message
+							: "Failed to load analysis. It may have been deleted or expired."}
+					</AlertDescription>
+				</Alert>
+				<div className="mt-4 flex justify-center">
+					<Button variant="outline" asChild>
+						<Link href="/app/tools/speaker-separation?tab=history">
+							<ArrowLeft className="mr-2 size-4" />
+							Back to History
+						</Link>
+					</Button>
+				</div>
+			</Card>
+		);
+	}
+
+	const filename = getFilename(job);
+	const duration = getDuration(job);
 
 	return (
-		<div className="mx-auto max-w-4xl space-y-8">
-			{!jobId && (
-				<Card className="overflow-hidden border-0 shadow-lg">
-					<div className="bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent p-6 pb-0">
-						<div className="flex items-start gap-4">
-							<div className="flex size-14 items-center justify-center rounded-2xl bg-violet-500 shadow-lg shadow-violet-500/25">
-								<AudioLinesIcon className="size-7 text-white" />
+		<div className="space-y-6">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<Button variant="ghost" asChild>
+					<Link href="/app/tools/speaker-separation?tab=history">
+						<ArrowLeft className="mr-2 size-4" />
+						Back to History
+					</Link>
+				</Button>
+
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => reanalyzeMutation.mutate()}
+						disabled={reanalyzeMutation.isPending}
+					>
+						{reanalyzeMutation.isPending ? (
+							<Loader2 className="mr-2 size-4 animate-spin" />
+						) : (
+							<RefreshCw className="mr-2 size-4" />
+						)}
+						Re-analyze
+					</Button>
+
+					<Dialog
+						open={isDeleteDialogOpen}
+						onOpenChange={setIsDeleteDialogOpen}
+					>
+						<DialogTrigger asChild>
+							<Button variant="outline" size="sm">
+								<Trash2 className="mr-2 size-4" />
+								Delete
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Delete Analysis</DialogTitle>
+								<DialogDescription>
+									Are you sure you want to delete this
+									analysis? This action cannot be undone.
+								</DialogDescription>
+							</DialogHeader>
+							<DialogFooter>
+								<Button
+									variant="outline"
+									onClick={() => setIsDeleteDialogOpen(false)}
+								>
+									Cancel
+								</Button>
+								<Button
+									variant="error"
+									onClick={() => {
+										deleteMutation.mutate();
+										setIsDeleteDialogOpen(false);
+									}}
+									disabled={deleteMutation.isPending}
+								>
+									{deleteMutation.isPending ? (
+										<Loader2 className="mr-2 size-4 animate-spin" />
+									) : null}
+									Delete
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+				</div>
+			</div>
+
+			{/* Metadata Card */}
+			<Card>
+				<CardHeader>
+					<div className="flex items-center justify-between">
+						<CardTitle className="flex items-center gap-2">
+							<AudioLines className="size-5 text-violet-500" />
+							{filename}
+						</CardTitle>
+						<StatusBadge status={job.status} />
+					</div>
+					<CardDescription>
+						Submitted on{" "}
+						{new Date(job.createdAt).toLocaleDateString(undefined, {
+							weekday: "long",
+							year: "numeric",
+							month: "long",
+							day: "numeric",
+							hour: "2-digit",
+							minute: "2-digit",
+						})}
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div>
+							<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+								<Clock className="size-3.5" />
+								Duration
+							</p>
+							<p className="text-sm">
+								{formatDuration(duration)}
+							</p>
+						</div>
+						{result && (
+							<div>
+								<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+									<Users className="size-3.5" />
+									Speakers
+								</p>
+								<p className="text-sm">{result.speakerCount}</p>
 							</div>
-							<div className="flex-1">
-								<h2 className="font-bold text-2xl tracking-tight">
-									Speaker Separation
-								</h2>
-								<p className="mt-1 text-muted-foreground">
-									Analyze audio to identify different speakers
-									with transcripts and timestamps
+						)}
+						<div>
+							<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+								<Timer className="size-3.5" />
+								Processing Time
+							</p>
+							<p className="text-sm">
+								{formatProcessingDuration(
+									job.startedAt,
+									job.completedAt,
+								)}
+							</p>
+						</div>
+						{job.completedAt && (
+							<div>
+								<p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+									<CheckCircle2 className="size-3.5" />
+									Completed
+								</p>
+								<p className="text-sm">
+									{new Date(
+										job.completedAt,
+									).toLocaleTimeString()}
 								</p>
 							</div>
-						</div>
+						)}
 					</div>
-					<CardContent className="p-6 pt-8">
-						<Form {...form}>
-							<form
-								onSubmit={form.handleSubmit(onSubmit)}
-								className="space-y-6"
-							>
-								<FormField
-									control={form.control}
-									name="audioFile"
-									render={() => (
-										<FormItem>
-											<FormLabel className="flex items-center gap-2 font-semibold text-base">
-												<MicIcon className="size-4 text-violet-500" />
-												Audio File
-											</FormLabel>
-											<FormControl>
-												<AudioFileUpload
-													onFileSelected={
-														handleFileSelected
-													}
-													onFileClear={
-														handleFileClear
-													}
-													selectedFile={selectedFile}
-													disabled={
-														form.formState
-															.isSubmitting
-													}
-												/>
-											</FormControl>
-											<FormDescription className="text-muted-foreground/80">
-												Upload an audio file (MP3, WAV,
-												M4A, FLAC, OGG, WebM) up to
-												100MB. Maximum duration: 60
-												minutes.
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+				</CardContent>
+			</Card>
 
-								<Button
-									type="submit"
-									variant="primary"
-									loading={form.formState.isSubmitting}
-									disabled={!selectedFile}
-									className="h-12 w-full rounded-xl bg-violet-500 font-semibold text-base shadow-lg shadow-violet-500/25 transition-all hover:bg-violet-600 hover:shadow-xl hover:shadow-violet-500/30"
-								>
-									<AudioLinesIcon className="mr-2 size-5" />
-									Analyze Speakers
-									<ArrowRightIcon className="ml-2 size-5" />
-								</Button>
-							</form>
-						</Form>
-					</CardContent>
+			{/* Processing State */}
+			{(job.status === "PENDING" || job.status === "PROCESSING") && (
+				<Card className="p-8">
+					<div className="flex flex-col items-center justify-center text-center">
+						<Loader2 className="size-8 animate-spin text-primary mb-4" />
+						<p className="text-muted-foreground">
+							{job.status === "PENDING"
+								? "Analysis queued..."
+								: "Analyzing audio..."}
+						</p>
+						<p className="text-sm text-muted-foreground mt-2">
+							This may take a few minutes for longer audio files
+						</p>
+					</div>
 				</Card>
 			)}
 
-			{jobId && !result && (
-				<JobProgressIndicator
-					jobId={jobId}
-					title="Analyzing Audio"
-					description="AI is identifying speakers and transcribing your audio..."
-					onComplete={handleComplete}
-					onError={handleError}
-				/>
+			{/* Error State */}
+			{job.status === "FAILED" && (
+				<Alert variant="error">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription>
+						{job.error ?? "Analysis failed. Please try again."}
+					</AlertDescription>
+				</Alert>
 			)}
 
-			{result && audioFile && (
+			{/* Cancelled State */}
+			{job.status === "CANCELLED" && (
+				<Alert variant="error">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription>
+						This analysis was cancelled.
+					</AlertDescription>
+				</Alert>
+			)}
+
+			{/* Results */}
+			{job.status === "COMPLETED" && result && (
 				<div className="space-y-6">
-					{/* Success Header */}
-					<Card className="overflow-hidden border-0 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent shadow-lg">
+					{/* Export Options */}
+					<Card className="border-0 shadow-md">
 						<CardContent className="p-6">
 							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div className="flex items-center gap-4">
 									<div className="flex size-12 items-center justify-center rounded-full bg-emerald-500/20">
-										<CheckCircle2Icon className="size-6 text-emerald-600" />
+										<CheckCircle2 className="size-6 text-emerald-600" />
 									</div>
 									<div>
 										<h3 className="font-bold text-xl">
@@ -738,33 +883,34 @@ export function SpeakerSeparationTool() {
 											{result.speakerCount !== 1
 												? "s"
 												: ""}{" "}
-											identified in{" "}
-											{formatDuration(result.duration)}
+											identified
 										</p>
 									</div>
 								</div>
 								<ExportOptions
 									result={result}
-									filename={audioFile.filename}
+									filename={filename}
 								/>
 							</div>
 						</CardContent>
 					</Card>
 
 					{/* Audio Player */}
-					<Card className="border-0 shadow-md">
-						<CardContent className="p-6">
-							<AudioPlayer
-								audioData={audioFile}
-								currentTime={currentTime}
-								duration={result.duration}
-								isPlaying={isPlaying}
-								onTimeUpdate={handleTimeUpdate}
-								onSeek={handleSeek}
-								onPlayPause={handlePlayPause}
-							/>
-						</CardContent>
-					</Card>
+					{audioUrl && (
+						<Card className="border-0 shadow-md">
+							<CardContent className="p-6">
+								<AudioPlayerFromUrl
+									audioUrl={audioUrl}
+									currentTime={currentTime}
+									duration={result.duration}
+									isPlaying={isPlaying}
+									onTimeUpdate={handleTimeUpdate}
+									onSeek={handleSeek}
+									onPlayPause={handlePlayPause}
+								/>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Speaker Timeline */}
 					<Card className="border-0 shadow-md">
@@ -829,7 +975,6 @@ export function SpeakerSeparationTool() {
 													{speaker.segmentCount}
 												</span>
 											</div>
-											{/* Progress bar */}
 											<div className="mt-2 h-2 rounded-full bg-muted/50 overflow-hidden">
 												<div
 													className={cn(
@@ -852,7 +997,7 @@ export function SpeakerSeparationTool() {
 					<Card className="border-0 shadow-md">
 						<CardContent className="p-6">
 							<h4 className="mb-4 flex items-center gap-2 font-semibold">
-								<FileTextIcon className="size-5 text-violet-500" />
+								<FileText className="size-5 text-violet-500" />
 								Transcript ({result.segments.length} segments)
 							</h4>
 							<TranscriptView
@@ -863,18 +1008,6 @@ export function SpeakerSeparationTool() {
 							/>
 						</CardContent>
 					</Card>
-
-					{/* Action Button */}
-					<div className="flex justify-center pt-2">
-						<Button
-							onClick={handleNewAnalysis}
-							variant="outline"
-							className="h-11 rounded-xl px-6"
-						>
-							<RefreshCwIcon className="mr-2 size-4" />
-							Analyze Another Audio
-						</Button>
-					</div>
 				</div>
 			)}
 		</div>
