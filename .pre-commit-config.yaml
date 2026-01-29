@@ -1,4 +1,16 @@
 repos:
+  # Post-merge hooks: run after git pull/merge to keep local env in sync
+  - repo: local
+    hooks:
+      - id: prisma-regenerate
+        name: Regenerate Prisma client after schema changes
+        entry: bash -c 'CHANGED=$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD -- packages/database/prisma/schema.prisma 2>/dev/null | wc -l | tr -d " "); if [ "$CHANGED" -gt 0 ]; then echo "🔄 Prisma schema changed - regenerating client..."; pnpm --filter @repo/database generate && echo "✅ Prisma client regenerated"; fi'
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [post-merge, post-checkout]
+
+  # Pre-commit hooks
   - repo: local
     hooks:
       - id: prevent-main-commit
