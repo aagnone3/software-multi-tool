@@ -24,7 +24,16 @@ Coverage thresholds are configured per workspace in `tooling/test/coverage-thres
 
 ## Pre-commit Hooks
 
-Install hooks with `pre-commit install`. Every commit runs:
+Install hooks with:
+
+```bash
+pre-commit install
+pre-commit install --hook-type post-merge --hook-type post-checkout
+```
+
+The first command installs pre-commit hooks. The second installs post-merge and post-checkout hooks that automatically regenerate the Prisma client when the schema changes (prevents "stale client" issues after pulling).
+
+Every commit runs:
 
 - `pnpm exec biome check --write`
 - `pnpm lint`

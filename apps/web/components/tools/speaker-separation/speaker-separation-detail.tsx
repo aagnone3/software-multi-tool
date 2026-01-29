@@ -1,5 +1,9 @@
 "use client";
 
+import type {
+	SpeakerSegment,
+	SpeakerSeparationOutput,
+} from "@repo/api/modules/speaker-separation/types";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -44,7 +48,6 @@ import {
 	type SpeakerSeparationJob,
 	statusConfig,
 } from "./lib/history-utils";
-import type { SpeakerSegment, SpeakerSeparationOutput } from "./lib/types";
 
 interface SpeakerSeparationDetailProps {
 	jobId: string;
