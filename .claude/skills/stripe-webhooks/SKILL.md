@@ -245,6 +245,12 @@ When switching between Stripe accounts (e.g., personal → company):
 
 ---
 
+## Related Skills
+
+- **architecture**: Understanding the payments integration
+- **debugging**: Troubleshooting webhook delivery and processing issues
+- **tools**: Understanding credit costs for tools
+
 ## Related Files
 
 - **Webhook handler**: `packages/payments/provider/stripe/index.ts`
