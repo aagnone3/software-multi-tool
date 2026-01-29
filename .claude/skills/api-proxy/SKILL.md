@@ -12,6 +12,18 @@ allowed-tools:
 
 This skill provides guidance for the API proxy system used in preview environments to enable session-based authentication across different domains.
 
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Debugging authentication issues in preview environments
+- Understanding why cookies don't work cross-origin
+- Implementing API proxying for new routes
+- Troubleshooting preview environment job creation
+- Configuring environment variables for preview deployments
+- Understanding the difference between production and preview request flows
+- Investigating 502 Bad Gateway errors in previews
+
 ## Quick Reference
 
 | Component                | Location                                    |
