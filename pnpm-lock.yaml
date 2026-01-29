@@ -244,6 +244,9 @@ importers:
       '@sindresorhus/slugify':
         specifier: 2.2.1
         version: 2.2.1
+      '@supabase/supabase-js':
+        specifier: 2.91.1
+        version: 2.91.1
       '@tanstack/react-query':
         specifier: 5.85.9
         version: 5.85.9(react@19.2.3)
