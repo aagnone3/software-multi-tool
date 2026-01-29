@@ -1,6 +1,6 @@
 ---
 name: typography
-description: Use this skill when changing fonts, understanding typography configuration, working with Tailwind font utilities, or updating font settings across the web app and email templates. Covers Next.js font loading, CSS variables, and font fallbacks.
+description: Provides typography configuration guidance covering Next.js font loading, Tailwind font utilities, CSS variables, and email template fonts. Activated when changing fonts, working with font utilities, or updating typography settings.
 allowed-tools:
   - Read
   - Edit

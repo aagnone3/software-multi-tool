@@ -1,6 +1,6 @@
 ---
 name: render
-description: Provides Render deployment management including service operations, deploy triggering, and environment variable management. Use when deploying the api-server, managing Render services, troubleshooting deployments, or configuring build settings.
+description: Provides Render deployment management guidance covering service operations, deploy triggering, and environment variable configuration. Activated when deploying api-server, managing Render services, or troubleshooting deployments.
 allowed-tools:
   - Bash
 ---
