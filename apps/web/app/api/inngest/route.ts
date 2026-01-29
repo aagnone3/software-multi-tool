@@ -1,5 +1,11 @@
 import { serve } from "inngest/next";
 import { inngest } from "../../../inngest/client";
+import { contractAnalyzer } from "../../../inngest/functions/contract-analyzer";
+import { expenseCategorizer } from "../../../inngest/functions/expense-categorizer";
+import { feedbackAnalyzer } from "../../../inngest/functions/feedback-analyzer";
+import { gdprExporter } from "../../../inngest/functions/gdpr-exporter";
+import { invoiceProcessor } from "../../../inngest/functions/invoice-processor";
+import { meetingSummarizer } from "../../../inngest/functions/meeting-summarizer";
 import { newsAnalyzer } from "../../../inngest/functions/news-analyzer";
 import { speakerSeparation } from "../../../inngest/functions/speaker-separation";
 
@@ -7,7 +13,7 @@ import { speakerSeparation } from "../../../inngest/functions/speaker-separation
  * Inngest serve endpoint for handling background jobs.
  *
  * This endpoint is called by Inngest to invoke functions when events are received.
- * Functions will be registered here as they are migrated from pg-boss.
+ * All 8 job processors from the pg-boss migration are registered here.
  *
  * Local development:
  *   npx inngest-cli@latest dev
@@ -20,14 +26,16 @@ import { speakerSeparation } from "../../../inngest/functions/speaker-separation
 export const { GET, POST, PUT } = serve({
 	client: inngest,
 	functions: [
+		// AI-powered analysis jobs
 		newsAnalyzer,
+		contractAnalyzer,
+		feedbackAnalyzer,
+		invoiceProcessor,
+		expenseCategorizer,
+		meetingSummarizer,
+		// Long-running audio processing
 		speakerSeparation,
-		// Functions will be added here as they are migrated:
-		// - invoiceProcessor (US-009)
-		// - contractAnalyzer (US-009)
-		// - feedbackAnalyzer (US-009)
-		// - expenseCategorizer (US-009)
-		// - meetingSummarizer (US-009)
-		// - gdprExporter (US-009)
+		// GDPR compliance
+		gdprExporter,
 	],
 });
