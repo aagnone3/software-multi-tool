@@ -91,40 +91,12 @@ The sync script:
 
 **Use Supabase local** for development to match preview/production environments exactly.
 
-**Quick Start (Recommended):**
+**Quick Start:**
 
 ```bash
-pnpm setup
+pnpm setup    # Starts Supabase, seeds database, creates .env.local
+pnpm dev
 ```
-
-This single command handles everything:
-
-1. Starts Supabase if not running
-2. Seeds the database with test data if needed
-3. Creates `.env.local` files from examples if missing
-
-**Manual Setup:**
-
-If you prefer manual control or need to troubleshoot:
-
-```bash
-# 1. Start Supabase services
-supabase start
-
-# 2. Seed the database (REQUIRED for test user!)
-supabase db reset
-
-# 3. Copy environment files
-cp apps/web/.env.local.example apps/web/.env.local
-```
-
-> **Important:** Running only `supabase start` does NOT seed the database. The test user (`test@preview.local`) won't exist until you run `supabase db reset`. If the "Quick Login" button fails, this is likely why.
-
-**Supabase Services:**
-
-- PostgreSQL on port 54322
-- Studio UI at http://127.0.0.1:54323
-- Storage, Auth, and all Supabase services
 
 **Connection string:**
 
@@ -139,24 +111,7 @@ postgresql://postgres:postgres@127.0.0.1:54322/postgres
 | Email    | test@preview.local    |
 | Password | TestPassword123       |
 
-The test user is automatically created by `supabase/seed.sql` which runs during `supabase db reset` and on preview branch creation.
-
-**Why Supabase local instead of standalone Postgres?**
-
-- Same seed.sql runs automatically (no manual seeding)
-- Storage buckets are created (seed.sql creates `avatars` and `files` buckets)
-- Identical environment to preview deployments
-- Supabase Studio provides visual database management
-
-**Useful Commands:**
-
-| Command | Description |
-| ------- | ----------- |
-| `pnpm setup` | Full setup (start + seed + env files) |
-| `pnpm setup --force-reset` | Force database reset even if seeded |
-| `pnpm supabase:status` | Check Supabase service status |
-| `pnpm supabase:reset` | Reset database with fresh seed data |
-| `pnpm supabase:stop` | Stop all Supabase services |
+The test user is created by `supabase/seed.sql` which runs during `pnpm setup` and on preview branch creation.
 
 ### Stripe Webhooks
 
