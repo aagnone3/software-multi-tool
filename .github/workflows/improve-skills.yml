@@ -48,7 +48,9 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          direct_prompt: |
+          claude_args: |
+            --allowedTools "Edit,Write,Bash(git:*),Bash(wc:*),Bash(gh pr create:*),Bash(gh pr view:*)"
+          prompt: |
             Run the /skills:review command to review and improve Claude skills.
 
             Arguments: ${{ steps.args.outputs.args }}

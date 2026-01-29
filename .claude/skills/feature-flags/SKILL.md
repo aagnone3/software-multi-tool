@@ -1,6 +1,6 @@
 ---
 name: feature-flags
-description: Use this skill when implementing feature flags, A/B testing, progressive rollouts, or conditional feature access. Covers PostHog feature flag integration for both server-side (SSR/API) and client-side (React hooks) evaluation.
+description: Provides feature flag implementation guidance for A/B testing, progressive rollouts, and conditional feature access. Covers PostHog feature flag integration for both server-side (SSR/API) and client-side (React hooks) evaluation.
 allowed-tools:
   - Read
   - Edit

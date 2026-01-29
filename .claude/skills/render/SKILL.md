@@ -1,6 +1,6 @@
 ---
 name: render
-description: Use this skill when the user needs to interact with Render for managing services, triggering deploys, or managing environment variables. This skill wraps the Render API client and CLI helpers.
+description: Provides Render deployment management including service operations, deploy triggering, and environment variable management. Use when deploying the api-server, managing Render services, troubleshooting deployments, or configuring build settings.
 allowed-tools:
   - Bash
 ---
@@ -193,6 +193,12 @@ Invoke this skill when:
 - Managing environment variables on services
 - Debugging deployment issues
 - Automating Render operations in scripts
+
+## Related Skills
+
+- **architecture**: Understanding the api-server and hybrid backend architecture
+- **cicd**: CI/CD pipeline and deployment workflows
+- **debugging**: Troubleshooting deployment and runtime issues
 
 ## Scope Limitations
 

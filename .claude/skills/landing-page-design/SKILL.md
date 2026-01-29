@@ -1,6 +1,6 @@
 ---
 name: landing-page-design
-description: Use this skill when designing landing pages, creating animated backgrounds, implementing decorative patterns, or enhancing marketing page visual appeal. Covers background effects, hero sections, and modern web design patterns.
+description: Provides landing page design guidance including animated backgrounds, decorative patterns, and visual enhancement techniques. Covers background effects, hero sections, and modern web design patterns.
 allowed-tools:
   - Read
   - Write

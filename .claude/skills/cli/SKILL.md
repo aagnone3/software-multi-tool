@@ -1,3 +1,15 @@
+---
+name: cli
+description: Developer CLI (mt) providing commands for development workflows, feature flag inspection, and tooling automation. Use when running CLI commands, adding new commands, debugging CLI issues, or understanding the CLI architecture.
+allowed-tools:
+  - Read
+  - Edit
+  - Write
+  - Bash
+  - Grep
+  - Glob
+---
+
 # CLI Skill
 
 Developer CLI (`mt`) for the software-multi-tool monorepo. Provides commands for development workflows, feature flag inspection, and tooling automation.
@@ -12,14 +24,14 @@ Developer CLI (`mt`) for the software-multi-tool monorepo. Provides commands for
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Running CLI commands for development workflows
 - Adding new CLI commands to the tooling
 - Debugging CLI issues or extending functionality
 - Understanding the CLI architecture
-
-**Activation keywords**: CLI, mt command, feature flags, developer tooling, pnpm mt
+- Working with PostHog feature flags via CLI
+- Creating scripting workflows with JSON output
 
 ## Architecture
 
@@ -324,5 +336,5 @@ pnpm exec tsc --noEmit -p tooling/cli/tsconfig.json
 ## Related Skills
 
 - **analytics**: PostHog integration and feature flag concepts
-- **feature-flags**: Feature flag implementation patterns
-- **architecture**: Overall monorepo structure
+- **feature-flags**: Feature flag implementation patterns and PostHog configuration
+- **architecture**: Overall monorepo structure and tooling organization

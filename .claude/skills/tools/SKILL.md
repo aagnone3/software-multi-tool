@@ -1,6 +1,6 @@
 ---
 name: tools
-description: Use this skill when adding new tools/sub-apps to the application, understanding the multi-app architecture, or modifying existing tools. Provides guidance on the tool registry, routing structure, and shared layouts.
+description: Provides tool registry configuration and multi-app routing guidance. Use when registering new tools, configuring public access, setting credit costs, or understanding the tool listing page. Covers tool metadata, icon selection, and credit system integration.
 allowed-tools:
   - Read
   - Edit
@@ -257,9 +257,11 @@ export default function PdfConverterPage() {
 
 ## Related Skills
 
-- **architecture**: Overall codebase structure
+- **sub-app**: Complete tool implementation (backend, database, frontend)
+- **architecture**: Overall codebase structure and routing
 - **better-auth**: User authentication for private tools
 - **analytics**: Event tracking for tool usage
+- **iconography**: Icon component and Lucide icon usage
 
 ## Credit System
 

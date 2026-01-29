@@ -486,6 +486,12 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 | `config/index.ts` | Bucket name configuration |
 | `apps/web/app/image-proxy/[...path]/route.ts` | Image serving proxy |
 
+## Related Skills
+
+- **sub-app**: Implementing file uploads in new tools
+- **architecture**: Understanding the storage layer in the overall architecture
+- **async-jobs**: File upload + job processing pattern
+
 ## Environment Variables
 
 | Variable | Purpose | Required |

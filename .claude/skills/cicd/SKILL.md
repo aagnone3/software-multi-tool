@@ -12,6 +12,18 @@ allowed-tools:
 
 CI/CD pipeline, preview environments, and database branching workflow.
 
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Understanding CI/CD pipeline flow
+- Debugging preview environment issues
+- Working with database branching
+- Syncing Prisma and Supabase migrations
+- Configuring environment variables for deployments
+- Troubleshooting GitHub Actions workflows
+- Understanding Vercel/Render/Supabase integration
+
 ## Quick Reference
 
 | Component           | Location                                              |
@@ -23,14 +35,6 @@ CI/CD pipeline, preview environments, and database branching workflow.
 | Prisma Schema       | `packages/database/prisma/schema.prisma`              |
 | Prisma Migrations   | `packages/database/prisma/migrations/`                |
 | Seed Script         | `pnpm --filter @repo/scripts supabase:validate-seed`  |
-
-## When to Use This Skill
-
-- Understanding CI/CD pipeline flow
-- Debugging preview environment issues
-- Working with database branching
-- Syncing Prisma and Supabase migrations
-- Configuring environment variables for deployments
 
 ## Architecture Overview
 
