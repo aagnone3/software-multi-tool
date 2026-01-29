@@ -1,6 +1,6 @@
 ---
 name: api-proxy
-description: Use this skill when working with preview environment authentication, cross-origin cookie issues, or API proxying in preview deployments. Covers the Next.js API proxy route, environment detection, and oRPC client configuration.
+description: Provides preview environment authentication proxy guidance covering Next.js API proxy routes, cross-origin cookie handling, and oRPC client configuration. Activated when debugging preview auth or configuring environment variables.
 allowed-tools:
   - Read
   - Grep
