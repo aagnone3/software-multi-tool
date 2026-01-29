@@ -1,6 +1,6 @@
 ---
 name: analytics
-description: Use this skill when implementing event tracking, working with PostHog analytics, swapping analytics providers, or adding analytics to new features. Provides guidance on the pluggable analytics system and PostHog configuration.
+description: Provides event tracking implementation guidance, PostHog analytics integration, and provider swapping patterns. Activated when working with analytics, tracking events, or switching providers.
 allowed-tools:
   - Read
   - Edit

@@ -1,6 +1,6 @@
 ---
 name: storage
-description: Use this skill when implementing file uploads (avatars, logos, documents), adding new upload types, working with storage providers (Supabase, S3), or debugging file access issues. Covers multi-tenant path conventions and the @repo/storage package.
+description: Provides file upload and storage management guidance covering multi-tenant path conventions, storage providers (Supabase, S3), and the @repo/storage package. Activated when implementing uploads, adding new upload types, or debugging file access issues.
 allowed-tools:
   - Read
   - Edit

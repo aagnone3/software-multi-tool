@@ -1,6 +1,6 @@
 ---
 name: reflect-for-skill-updates
-description: Use this skill when a conversation reveals gaps in skills, documentation, or automation that caused issues, confusion, or wasted time. Helps identify and fix systemic problems to prevent recurrence.
+description: Provides skill improvement guidance for identifying and fixing systemic problems in documentation, automation, and workflows. Activated when conversations reveal gaps that caused issues, confusion, or wasted time.
 allowed-tools:
   - Read
   - Edit
