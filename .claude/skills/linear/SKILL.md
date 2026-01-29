@@ -1,6 +1,6 @@
 ---
 name: linear
-description: Use this skill when the user needs to interact with Linear for project management tasks including listing/managing projects, creating/listing milestones, managing issue dependencies, closing issues, or assigning issues to milestones. This skill wraps the Linear CLI helpers and provides comprehensive Linear workflow support.
+description: Provides Linear integration for project management tasks including listing/managing projects, creating/listing milestones, managing issue dependencies, closing issues, and assigning issues to milestones. Wraps the Linear CLI helpers and provides comprehensive Linear workflow support.
 allowed-tools:
   - Bash
 ---
@@ -40,6 +40,18 @@ All Linear operations use this base command:
 ```bash
 pnpm --filter @repo/scripts linear <resource> <action> [options]
 ```
+
+## When to Use This Skill
+
+Use this skill when:
+
+- User mentions a Linear issue key (e.g., PRA-21, PRA-30)
+- Working with Linear projects, milestones, or issues
+- Starting work on an issue
+- Closing completed work (after PR merge)
+- Managing project dependencies and milestones
+
+**Activation keywords**: Linear, PRA-, issue, project, milestone, dependency, close issue
 
 ## Available Operations
 
@@ -354,15 +366,6 @@ pnpm --filter @repo/scripts linear issues close --issue <key>
 
 - **ONLY after PR is merged**
 - Marks work as complete
-
-## When to Use This Skill
-
-Invoke this skill when:
-
-- User mentions a Linear issue key (e.g., PRA-21, PRA-30)
-- Working with Linear projects, milestones, or issues
-- Starting work on a ticket
-- Closing completed work (after PR merge)
 
 ## Automatic Workflow Integration
 
