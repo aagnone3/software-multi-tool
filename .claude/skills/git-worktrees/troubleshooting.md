@@ -196,6 +196,48 @@ grep "DATABASE_URL\|POSTGRES_PRISMA_URL" apps/api-server/.env.local
 pnpm dev
 ```
 
+## Quick Login Button Fails (Invalid Password)
+
+**Problem**: The "Quick Login" button (test@preview.local / TestPassword123) fails with "Invalid password" error, even though the setup script reported "Database already seeded".
+
+**Root cause**: The setup script may have verified seeding against Supabase local (port 54322), but the env files point to a different database (e.g., Homebrew Postgres on port 5432) that either:
+
+1. Doesn't have the test user at all
+2. Has the test user but with an incorrect password hash (from old/different seeding)
+
+**Diagnosis**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Check which database the app is actually using
+grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+# Look for the port: 54322 = Supabase local, 5432 = Homebrew Postgres
+
+# Check if test user exists and has correct password hash
+psql "$(grep POSTGRES_PRISMA_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
+  -c "SELECT password FROM account WHERE \"userId\" = 'preview_user_001';"
+
+# Correct hash should start with: 46eb4f9cb6d62a4d8e23
+# If it starts with something else, the password won't work
+```
+
+**Solution**:
+
+```bash
+# Option 1: Switch to Supabase local (recommended)
+sed -i.bak 's|localhost:5432|localhost:54322|g' apps/web/.env.local
+sed -i.bak 's|/local_softwaremultitool|/postgres|g' apps/web/.env.local
+rm -f apps/web/.env.local.bak
+supabase db reset
+
+# Option 2: Reseed your current database
+psql "postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+  -f supabase/seed.sql
+```
+
+**Prevention**: The `worktree-setup.sh` script now enforces Supabase Local and verifies password hash correctness.
+
 ## Schema Mismatch (Pending Migrations)
 
 **Problem**: Prisma errors about missing columns.
@@ -208,4 +250,26 @@ pnpm --filter @repo/database exec prisma migrate status
 
 POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
 pnpm --filter @repo/database exec prisma migrate deploy
+```
+
+## Missing API Credentials for Integration Tests
+
+**Problem**: Integration tests fail with "ANTHROPIC_API_KEY is required for integration tests"
+
+**Root cause**: The worktree's `apps/web/.env.local` is missing the API key or is outdated.
+
+**Solution**:
+
+```bash
+# Check if .env.local exists in worktree
+ls -la apps/web/.env.local
+
+# If missing or outdated, copy from parent
+cp ../../apps/web/.env.local apps/web/.env.local
+
+# Preserve worktree-specific PORT setting
+WORKTREE_PORT=$(grep "^PORT=" apps/web/.env.local | cut -d'=' -f2)
+if [ -n "$WORKTREE_PORT" ]; then
+  echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
+fi
 ```

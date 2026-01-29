@@ -269,859 +269,119 @@ fi
 
 No verification needed - directory is outside the repository entirely.
 
-## Worktree Creation Workflow
+## Manual Worktree Creation
 
-### Step 1: Pre-flight Checks
+> **Prefer using the automated setup** (`pnpm worktree:create`) which handles all steps automatically.
 
-Before creating a worktree, verify repository state:
+For manual setup, see [examples.md](examples.md) for complete workflows including:
 
-```bash
-# Prune stale worktree references
-git worktree prune
+- Basic worktree creation with port allocation
+- Parallel development with multiple worktrees
+- Hotfix workflow
+- Code review workflow
+- Cleanup after PR merge
 
-# Check current branch (should NOT be main for safety)
-CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" = "main" ]; then
-  echo "WARNING: Currently on main branch"
-  echo "Consider switching to a feature branch first"
-fi
-
-# Ensure main is clean and up-to-date
-git fetch origin main
-git checkout main
-git status  # Should show "nothing to commit, working tree clean"
-```
-
-### Step 2: Create Worktree with New Branch
-
-Follow branch naming conventions: `<type>/pra-<issue>-<description>`
+**Quick manual setup:**
 
 ```bash
-# Example: Feature branch for Linear issue PRA-35
-git worktree add .worktrees/feat-pra-35-user-auth -b feat/pra-35-user-auth
+# Create worktree
+git worktree add .worktrees/feat-pra-35-auth -b feat/pra-35-auth
+cd .worktrees/feat-pra-35-auth
 
-# Navigate to worktree
-cd .worktrees/feat-pra-35-user-auth
-```
-
-**Branch types**: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
-
-### Step 3: Configure Environment Variables (For Parallel Development)
-
-**CRITICAL for parallel dev servers**: Each worktree needs unique PORTs for both the web app AND api-server to avoid conflicts.
-
-#### 3a. Web App Environment
-
-```bash
-# Copy parent .env.local as template
+# Configure environment
 cp ../../apps/web/.env.local apps/web/.env.local
+WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
+echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
 
-# AUTOMATIC PORT ALLOCATION (recommended)
-# Uses deterministic hash of worktree path to generate unique port
-WEB_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
-echo "" >> apps/web/.env.local
-echo "# Worktree-specific port (auto-allocated)" >> apps/web/.env.local
-echo "PORT=$WEB_PORT" >> apps/web/.env.local
-
-# Update NEXT_PUBLIC_SITE_URL to match allocated port
-# This prevents Better Auth "Invalid origin" errors
-sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WEB_PORT\"|" apps/web/.env.local
-rm -f apps/web/.env.local.bak
-
-echo "Web app allocated port: $WEB_PORT"
+# Start development
+pnpm dev
 ```
-
-#### 3b. API Server Environment
-
-```bash
-# Copy parent .env.local as template
-cp ../../apps/api-server/.env.local apps/api-server/.env.local
-
-# AUTOMATIC PORT ALLOCATION with offset (api-server uses +500 offset)
-API_PORT=$(../../tooling/scripts/src/worktree-port.sh . --offset 500)
-echo "" >> apps/api-server/.env.local
-echo "# Worktree-specific port (auto-allocated with offset)" >> apps/api-server/.env.local
-echo "PORT=$API_PORT" >> apps/api-server/.env.local
-
-# Update CORS_ORIGIN to match web app's port
-sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$WEB_PORT|" apps/api-server/.env.local
-
-# Update BETTER_AUTH_URL to match api-server's port
-sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$API_PORT|" apps/api-server/.env.local
-rm -f apps/api-server/.env.local.bak
-
-echo "API server allocated port: $API_PORT"
-```
-
-**Port allocation strategy**:
-
-| App        | Port Range | Calculation                          |
-| ---------- | ---------- | ------------------------------------ |
-| Web        | 3501-3999  | `hash(worktree_path) % 499 + 3501`   |
-| API Server | 4001-4499  | `web_port + 500` (via `--offset 500`)|
-
-**How automatic port allocation works**:
-
-1. **Deterministic**: Hashes worktree path → consistent port number
-2. **Collision-safe**: Checks if port is actually in use with `lsof`
-3. **Auto-recovery**: If port taken, finds next available port automatically
-4. **No file locking**: Uses real-time port availability checks
-
-**Why this matters**:
-
-- ❌ Manual port assignment → human error, conflicts
-- ❌ Next.js auto-switch → breaks apps expecting specific PORT
-- ✅ Automatic allocation → collision-free, deterministic, reliable
-
-**Database isolation**: Testcontainers automatically allocates unique ports for PostgreSQL containers - no manual `DATABASE_URL` configuration needed!
-
-**Database URL consistency**: The setup script automatically verifies that web app and api-server use the **same database URL**. If they differ (e.g., web pointing to Supabase local on port 54322, api-server pointing to Homebrew Postgres on port 5432), jobs created by the web app won't be processed by api-server workers. The script syncs them automatically and warns you.
-
-### Step 4: Install Dependencies (Usually Not Needed)
-
-**Important**: Worktrees share `node_modules` and `.turbo` cache from the parent repository.
-
-```bash
-# Generally SKIP this step
-# pnpm install
-
-# Only run if encountering dependency issues:
-# - Missing dependencies error
-# - Version mismatch warnings
-# - After updating pnpm-lock.yaml in worktree
-```
-
-> **Note**: Content-collections types are automatically generated via `postinstall` script when running `pnpm install`. This ensures TypeScript type-checking works in fresh worktrees without requiring a manual build step.
-
-### Step 5: Baseline Verification
-
-Run tests to ensure clean starting state:
-
-```bash
-# Run unit tests
-pnpm test
-
-# Run TypeScript checks
-pnpm --filter web run type-check
-
-# Run integration tests (Testcontainers handles database isolation)
-pnpm --filter @repo/database run test:integration
-```
-
-**Skip coverage enforcement** (too strict for worktree creation):
-
-```bash
-# DO NOT run
-# pnpm test:ci  # Enforces coverage thresholds
-```
-
-**Report failures explicitly**. If tests fail, require user approval before proceeding.
-
-### Step 6: Start Development
-
-```bash
-# Start dev server on custom port
-pnpm dev  # Uses PORT=3501 from .env.local
-
-# Open in browser
-# http://localhost:3501
-```
-
-**Parallel development**: You can now run multiple dev servers simultaneously by following Steps 2-6 for each worktree with different PORT values.
 
 ## pnpm Monorepo Considerations
 
-### Shared Resources
+Worktrees **share** from parent: `node_modules/`, `.turbo/`, `.git/hooks/`, `.git/config`
 
-Worktrees share these resources from the parent repository:
+Worktrees have **independent**: working directory, `.env.local`, Turbo task runs
 
-- **node_modules/**: Package dependencies (saves ~500MB per worktree)
-- **.turbo/**: Turbo cache for faster builds
-- **.git/hooks/**: Git hooks (pre-commit applies to all worktrees)
-- **.git/config**: Git configuration
+**Clear Turbo cache** if experiencing build inconsistencies: `pnpm clean`
 
-### Independent Resources
+## Port and Database Management
 
-Each worktree has its own:
+The automated setup script handles port allocation and database configuration. For detailed diagrams and explanations, see [diagrams.md](diagrams.md).
 
-- **Working directory**: Full file tree at specific branch state
-- **.env.local**: Environment configuration (create per worktree)
-- **Turbo task runs**: Independent build/test execution
+**Key points:**
 
-### Turbo Cache Management
+- **Dev server ports**: Automatically allocated from 3501-3999 (deterministic + collision-safe)
+- **API server ports**: Offset by +500 (4001-4499)
+- **Integration tests**: Testcontainers allocates random PostgreSQL ports automatically
+- **Local development**: All worktrees share Supabase local (port 54322)
 
-If experiencing build inconsistencies across worktrees:
+**Quick commands:**
 
 ```bash
-# Clear Turbo cache
-rm -rf node_modules/.cache/turbo
-
-# Or use pnpm script
-pnpm clean
-```
-
-## Port Conflict Management
-
-### Automatic Dev Server Port Allocation
-
-**Use the worktree port allocator** to avoid collisions automatically:
-
-```mermaid
-flowchart TD
-    A[Create Worktree<br/>.worktrees/feat-pra-45] --> B[Run Port Allocator<br/>worktree-port.sh]
-
-    B --> C{Hash Worktree Path}
-    C --> D[SHA256 Hash<br/>→ 0x2A3F...]
-    D --> E[Modulo 499<br/>→ 241]
-    E --> F[Add 3501<br/>→ Port 3742]
-
-    F --> G{Check Port<br/>Available?}
-
-    G -->|Yes| H[✓ Use Port 3742]
-    G -->|No| I[Try Next Port<br/>→ 3743]
-
-    I --> J{Check Port<br/>Available?}
-    J -->|Yes| K[✓ Use Port 3743]
-    J -->|No| L[Continue...]
-
-    H --> M[Write to .env.local<br/>PORT=3742]
-    K --> N[Write to .env.local<br/>PORT=3743]
-
-    style H fill:#d4edda
-    style K fill:#d4edda
-    style G fill:#fff3cd
-    style J fill:#fff3cd
-```
-
-```bash
-# In worktree directory
-cd .worktrees/feat-pra-123-feature
-
-# Allocate port automatically
+# Allocate port for worktree
 WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
-echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
 
-# Start dev server
-pnpm dev  # → Uses allocated port
-```
-
-**Port allocator features**:
-
-- **Deterministic**: Same worktree → same port (based on path hash)
-- **Range**: 3501-3999 (499 ports available)
-- **Collision detection**: Checks actual port usage with `lsof`
-- **Auto-recovery**: Finds next available port if conflict occurs
-
-**Check port availability**:
-
-```bash
-# Check if a specific port is free
-tooling/scripts/src/worktree-port.sh .worktrees/feat-pra-35-auth --check-only
-
-# List all ports in use
+# Check port usage
 lsof -i :3500-3999 | grep LISTEN
-```
 
-**Manual override** (not recommended):
-
-```bash
-# If you really need a specific port
-echo "PORT=3505" >> apps/web/.env.local
-```
-
-### Database Ports (Integration Tests)
-
-**No manual configuration needed!**
-
-Testcontainers automatically:
-
-- Allocates random available ports for each PostgreSQL container
-- Configures `DATABASE_URL` in the test environment
-- Cleans up containers after test completion
-
-This enables **parallel integration tests** across multiple worktrees without conflicts.
-
-### Local Development Database (Supabase Local)
-
-**All worktrees share Supabase local** for development. This ensures consistency with preview/production environments.
-
-**Connection string:**
-
-```text
-postgresql://postgres:postgres@127.0.0.1:54322/postgres
-```
-
-**Start Supabase local** (from any worktree or main repo):
-
-```bash
+# Start/reset Supabase local
 supabase start
-```
-
-**Reset database** (applies migrations + seed.sql):
-
-```bash
 supabase db reset
 ```
 
-**Why Supabase local?**
-
-- Same `seed.sql` runs automatically (no manual seeding)
-- Storage buckets are created (avatars, files)
-- Identical environment to preview deployments
-- Test user (`test@preview.local` / `TestPassword123`) works immediately
+See [environment-setup.md](environment-setup.md) for detailed configuration.
 
 **Note**: The `worktree-setup.sh` script automatically verifies Supabase local is running and seeds the database if needed.
 
-## Environment Variable Isolation
+## Environment Setup
 
-### Shared Variables (Default)
+See [environment-setup.md](environment-setup.md) for detailed configuration including:
 
-By default, all worktrees share the parent `apps/web/.env.local` file. This is fine for:
-
-- API keys (PostHog, Stripe, etc.)
-- Database credentials (not used by Testcontainers)
-- Feature flags
-
-### Per-Worktree Variables (Required for Parallel Development)
-
-Create worktree-specific `.env.local` files for:
-
-1. **PORT**: Dev server port (automatically allocated)
-2. **Any variables that cause conflicts** when running parallel servers
-
-**Setup pattern with automatic port allocation**:
-
-```bash
-cd .worktrees/feat-pra-35-auth
-
-# Copy parent template
-cp ../../apps/web/.env.local apps/web/.env.local
-
-# Auto-allocate port (deterministic + collision-safe)
-WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
-echo "" >> apps/web/.env.local
-echo "# Auto-allocated port for this worktree" >> apps/web/.env.local
-echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
-
-# Update NEXT_PUBLIC_SITE_URL to match allocated port
-sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
-rm -f apps/web/.env.local.bak
-
-# Verify
-cat apps/web/.env.local | grep -E "PORT|NEXT_PUBLIC_SITE_URL"
-# Output:
-# NEXT_PUBLIC_SITE_URL="http://localhost:3518"
-# PORT=3518
-```
-
-**Why automatic allocation?**
-
-- Prevents manual port assignment errors
-- Stops Next.js from auto-switching ports (which breaks apps reading PORT from .env)
-- Deterministic: Same worktree always gets same port attempt
-- Collision-safe: Finds next available port if conflict occurs
-
-### Git Configuration
-
-**Important**: Per-worktree `.env.local` files are git-ignored by default (`.gitignore` includes `apps/web/.env.local`). This prevents accidentally committing worktree-specific configuration.
-
-## Environment Variables for Integration Tests
-
-### Critical Requirement
-
-**All integration tests require API credentials** to be present in `apps/web/.env.local`.
-
-**IMPORTANT**: Tests will **FAIL** (not skip) when credentials are missing. This ensures:
-
-- Worktrees have consistent environment setup
-- Integration tests are always executed when credentials are available
-- Configuration issues are caught immediately, not silently ignored
-
-### Required Credentials
-
-The following API keys are required for integration tests:
-
-```bash
-# Claude Agent SDK integration tests
-ANTHROPIC_API_KEY=sk-ant-api03-...
-
-# Add other integration test credentials as needed
-```
-
-### How Environment Loading Works
-
-Environment variables are automatically loaded from `apps/web/.env.local` via the test setup:
-
-1. **Test setup file** (`tests/setup/environment.ts`) loads `apps/web/.env.local` at test initialization
-2. **All test files** inherit these environment variables through Vitest's setup system
-3. **Integration tests** check for required credentials and **fail immediately** if missing
-
-**Affected test files:**
-
-- `packages/agent-sdk/integration.test.ts` - Requires `ANTHROPIC_API_KEY`
-- `packages/api/modules/news-analyzer/lib/processor.integration.test.ts` - Requires `ANTHROPIC_API_KEY`
-
-### Worktree Environment Setup
-
-When creating a worktree, you MUST ensure `apps/web/.env.local` contains all required credentials:
-
-```bash
-cd .worktrees/feat-pra-35-auth
-
-# Copy parent .env.local (includes API credentials)
-cp ../../apps/web/.env.local apps/web/.env.local
-
-# Auto-allocate port
-WORKTREE_PORT=$(../../tooling/scripts/src/worktree-port.sh .)
-echo "" >> apps/web/.env.local
-echo "# Auto-allocated port for this worktree" >> apps/web/.env.local
-echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
-
-# Update NEXT_PUBLIC_SITE_URL
-sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$WORKTREE_PORT\"|" apps/web/.env.local
-rm -f apps/web/.env.local.bak
-
-# Verify credentials are present
-grep -q "ANTHROPIC_API_KEY=" apps/web/.env.local && echo "✓ API credentials loaded" || echo "✗ Missing ANTHROPIC_API_KEY"
-```
-
-### Troubleshooting Missing Credentials
-
-**Problem**: Integration tests fail with "ANTHROPIC_API_KEY is required for integration tests"
-
-**Root cause**: The worktree's `apps/web/.env.local` is missing the API key or is outdated.
-
-**Solution**:
-
-```bash
-# Check if .env.local exists in worktree
-ls -la apps/web/.env.local
-
-# If missing, copy from parent
-cp ../../apps/web/.env.local apps/web/.env.local
-
-# If exists but outdated, verify credentials
-grep "ANTHROPIC_API_KEY" apps/web/.env.local
-
-# If empty, update from parent
-cp ../../apps/web/.env.local apps/web/.env.local
-
-# Preserve worktree-specific PORT setting
-WORKTREE_PORT=$(grep "^PORT=" apps/web/.env.local | cut -d'=' -f2)
-if [ -n "$WORKTREE_PORT" ]; then
-  echo "PORT=$WORKTREE_PORT" >> apps/web/.env.local
-fi
-```
+- Environment variable isolation (shared vs per-worktree)
+- Port allocation strategy for parallel development
+- API server environment configuration
+- Integration test credentials
+- Database configuration (Testcontainers and Supabase local)
 
 ## Baseline Verification
 
-### Test Strategy
-
-Run these tests in each new worktree to verify clean state:
+Run in new worktrees to verify clean state:
 
 ```bash
-# 1. Unit tests (fast, no external dependencies)
-pnpm test
-
-# 2. Type checking (catches TypeScript errors)
-pnpm --filter web run type-check
-
-# 3. Integration tests (uses Testcontainers, slower)
-pnpm --filter @repo/database run test:integration
+pnpm test                                         # Unit tests
+pnpm --filter web run type-check                  # TypeScript
+pnpm --filter @repo/database run test:integration # Integration (Testcontainers)
 ```
 
-### Parallel Testing
+**Parallel testing supported**: Testcontainers creates isolated PostgreSQL containers per worktree.
 
-**Supported!** Multiple worktrees can run integration tests simultaneously:
+**Skip** `pnpm test:ci` during setup (coverage thresholds too strict).
 
-```bash
-# Terminal 1 - Worktree 1
-cd .worktrees/feat-pra-123-feature
-pnpm --filter @repo/database run test:integration
+## Troubleshooting
 
-# Terminal 2 - Worktree 2 (runs in parallel!)
-cd .worktrees/fix-pra-456-bugfix
-pnpm --filter @repo/database run test:integration
-```
+See [troubleshooting.md](troubleshooting.md) for common issues including:
 
-Testcontainers ensures database isolation by:
-
-- Creating separate PostgreSQL containers
-- Using random ports for each container
-- Cleaning up after tests complete
-
-### Coverage Enforcement
-
-**Skip** `pnpm test:ci` during worktree creation - coverage thresholds are too strict:
-
-```bash
-# DO NOT run during worktree setup
-# pnpm test:ci
-
-# Use standard test command instead
-pnpm test
-```
-
-## Edge Cases & Troubleshooting
-
-### Stale Worktree References
-
-**Problem**: `.git/worktrees/<name>` exists but directory was deleted manually.
-
-**Solution**:
-
-```bash
-# Prune stale references
-git worktree prune
-
-# Verify cleanup
-git worktree list
-```
-
-### Worktree Already Exists for Branch
-
-**Problem**: Trying to create worktree for a branch that already has one.
-
-**Solution**:
-
-```bash
-# List existing worktrees
-git worktree list
-
-# Remove existing worktree first
-git worktree remove .worktrees/feat-pra-35-auth
-
-# Or move to that worktree instead
-cd .worktrees/feat-pra-35-auth
-```
-
-### Directory Name Conflicts
-
-**Problem**: Worktree directory already exists (from previous manual deletion).
-
-**Solution**:
-
-```bash
-# Check if directory exists
-ls -la .worktrees/feat-pra-35-auth
-
-# Remove directory
-rm -rf .worktrees/feat-pra-35-auth
-
-# Prune stale git references
-git worktree prune
-
-# Create worktree
-git worktree add .worktrees/feat-pra-35-auth -b feat/pra-35-auth
-```
-
-### Currently Checked Out Branch
-
-**Problem**: Cannot create worktree for the branch you're currently on.
-
-**Solution**:
-
-```bash
-# Check current branch
-git branch --show-current
-
-# Switch to different branch first
-git checkout main
-
-# Then create worktree
-git worktree add .worktrees/feat-pra-35-auth -b feat/pra-35-auth
-```
-
-### pnpm Lock File Conflicts
-
-**Problem**: `pnpm-lock.yaml` modified in worktree after creation.
-
-**Solution**:
-
-```bash
-cd .worktrees/feat-pra-35-auth
-
-# Check for modifications
-git status | grep "pnpm-lock.yaml"
-
-# If modified, restore from parent
-git restore pnpm-lock.yaml
-
-# If needed, run install in parent instead
-cd ../..
-pnpm install
-```
-
-### Orphaned Worktrees After System Crash
-
-**Problem**: Worktree directory exists but git doesn't recognize it.
-
-**Solution**:
-
-```bash
-# Repair worktree references
-git worktree repair
-
-# List to verify
-git worktree list
-
-# If still broken, remove and recreate
-git worktree remove .worktrees/feat-pra-35-auth --force
-git worktree add .worktrees/feat-pra-35-auth -b feat/pra-35-auth
-```
-
-### Turbo Cache Corruption
-
-**Problem**: Builds succeed in parent but fail in worktree (or vice versa).
-
-**Solution**:
-
-```bash
-# Clear Turbo cache
-rm -rf node_modules/.cache/turbo
-
-# Or use pnpm script
-pnpm clean
-
-# Rebuild
-pnpm build
-```
-
-### Content-Collections Type Errors (Auto-Resolved)
-
-**Problem**: TypeScript errors like `Cannot find module 'content-collections'` in fresh worktrees.
-
-**Note**: This is now automatically handled! The `apps/web` package has a `postinstall` script that runs `content-collections build` to generate types during `pnpm install`.
-
-If you still encounter this error:
-
-```bash
-# Regenerate content-collections types manually
-pnpm --filter @repo/web exec content-collections build
-
-# Or run a full install which triggers postinstall
-pnpm install
-```
-
-### Port Already in Use
-
-**Problem**: `Error: listen EADDRINUSE: address already in use :::3501`
-
-**Solution**:
-
-```bash
-# Check what's using the port
-lsof -i :3501
-
-# Kill the process
-kill -9 <PID>
-
-# Or use a different port
-echo "PORT=3502" >> apps/web/.env.local
-pnpm dev
-```
-
-### Missing Analytics/PostHog Keys (Manual Setup)
-
-**Problem**: Console warning: `[PostHog.js] PostHog was initialized without a token`
-
-**Root cause**: When setting up worktrees manually (not using the automated script), copying from `apps/web/.env.local.example` gives you placeholder values, not real credentials. Keys like `NEXT_PUBLIC_POSTHOG_KEY` will be empty.
-
-**Solution**:
-
-```bash
-cd .worktrees/<worktree-name>
-
-# Option 1: Pull credentials from Vercel (recommended)
-pnpm web:env:pull
-
-# Option 2: Copy missing keys from api-server (if it has them)
-grep "POSTHOG" ../../apps/api-server/.env.local >> apps/web/.env.local
-
-# Option 3: Manually add from your password manager/team docs
-echo 'NEXT_PUBLIC_POSTHOG_KEY=phc_...' >> apps/web/.env.local
-echo 'NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com' >> apps/web/.env.local
-```
-
-**Prevention**: Always use `pnpm worktree:create` which copies from configured env files. When manual setup is required, use `pnpm web:env:pull` after creating the worktree to get real credentials.
-
-### Jobs Not Processing (Database URL Mismatch)
-
-**Problem**: Jobs are created successfully (shown in logs) but never get picked up by workers. pg-boss monitor shows 0 jobs in all queues.
-
-**Root cause**: Web app and api-server are using **different databases**:
-
-- Web app: `localhost:54322/postgres` (Supabase local)
-- API server: `localhost:5432/local_softwaremultitool` (Homebrew Postgres)
-
-Jobs get created in one database, but workers poll the other.
-
-**Solution**:
-
-```bash
-cd .worktrees/<worktree-name>
-
-# Check both database URLs
-grep "POSTGRES_PRISMA_URL" apps/web/.env.local
-grep "DATABASE_URL\|POSTGRES_PRISMA_URL" apps/api-server/.env.local
-
-# If they differ, sync web to match api-server
-# (The automated setup script now does this automatically)
-# Or manually update apps/web/.env.local to use the same URL
-
-# Restart dev server after fixing
-pnpm dev
-```
-
-**Prevention**: The `worktree-setup.sh` script now automatically checks and syncs database URLs during worktree creation.
-
-### Quick Login Button Fails (Invalid Password)
-
-**Problem**: The "Quick Login" button (test@preview.local / TestPassword123) fails with "Invalid password" error, even though the setup script reported "Database already seeded".
-
-**Root cause**: The setup script may have verified seeding against Supabase local (port 54322), but the env files point to a different database (e.g., Homebrew Postgres on port 5432) that either:
-
-1. Doesn't have the test user at all
-2. Has the test user but with an incorrect password hash (from old/different seeding)
-
-**Diagnosis**:
-
-```bash
-cd .worktrees/<worktree-name>
-
-# Check which database the app is actually using
-grep "POSTGRES_PRISMA_URL" apps/web/.env.local
-# Look for the port: 54322 = Supabase local, 5432 = Homebrew Postgres
-
-# Check if test user exists and has correct password hash
-psql "$(grep POSTGRES_PRISMA_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
-  -c "SELECT password FROM account WHERE \"userId\" = 'preview_user_001';"
-
-# Correct hash should start with: 46eb4f9cb6d62a4d8e23
-# If it starts with something else (e.g., 82c764f05...), the password won't work
-```
-
-**Solution**:
-
-```bash
-# Option 1: Switch to Supabase local (recommended)
-# Update apps/web/.env.local to use port 54322
-sed -i.bak 's|localhost:5432|localhost:54322|g' apps/web/.env.local
-sed -i.bak 's|/local_softwaremultitool|/postgres|g' apps/web/.env.local
-rm -f apps/web/.env.local.bak
-
-# Then reset the database with proper seed
-supabase db reset
-
-# Option 2: Reseed the Homebrew Postgres database
-# Apply the seed.sql manually to your database
-psql "postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-  -f /path/to/repo/supabase/seed.sql
-```
-
-**Prevention**: The `worktree-setup.sh` script now:
-
-1. Detects which database the env files point to
-2. Verifies seeding against that ACTUAL database (not assumed Supabase)
-3. Checks that the password hash is correct (not just that user exists)
-4. Warns if using non-Supabase database that may not be properly seeded
-
-### Schema Mismatch (Pending Migrations)
-
-**Problem**: Prisma errors like `The column X does not exist in the current database` when the worktree has schema changes.
-
-**Root cause**: The worktree branch has Prisma migrations that haven't been applied to your local database. This commonly happens when:
-
-- Checking out a branch with new schema changes
-- The worktree was created from a branch ahead of your local DB state
-
-**Solution**:
-
-```bash
-cd .worktrees/<worktree-name>
-
-# Check migration status
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-pnpm --filter @repo/database exec prisma migrate status
-
-# Apply pending migrations
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
-pnpm --filter @repo/database exec prisma migrate deploy
-```
-
-**Prevention**: After creating a worktree, check for pending migrations if the branch has schema changes.
+- Stale worktree references
+- Port conflicts
+- Database URL mismatches
+- Quick Login failures
+- Schema migration issues
+- Missing API credentials
 
 ## Cleanup Workflow
 
-### Step 1: Verify Work is Complete
-
-Before removing a worktree, ensure:
-
-1. **All commits are pushed** to remote:
-
-   ```bash
-   cd .worktrees/feat-pra-35-auth
-   git status
-   # Should show: "Your branch is up to date with 'origin/feat/pra-35-auth'"
-   ```
-
-2. **Pull request is merged** (if applicable):
-
-   ```bash
-   gh pr status
-   # Check PR status for this branch
-   ```
-
-3. **Linear issue is closed** (if applicable):
-
-   ```bash
-   # Close Linear issue
-   pnpm --filter @repo/scripts linear issues close --issue PRA-35
-   ```
-
-### Step 2: Remove Worktree
-
 ```bash
-# From parent repository
+# Verify PR is merged, then:
+pnpm worktree:remove feat-pra-35-auth   # Automated (recommended)
+
+# Or manually:
 git worktree remove .worktrees/feat-pra-35-auth
-
-# Git automatically:
-# - Verifies no uncommitted changes
-# - Removes the directory
-# - Cleans up .git/worktrees/<name> references
-```
-
-**Force removal** (if worktree has uncommitted changes):
-
-```bash
-# WARNING: This DELETES uncommitted work!
-git worktree remove .worktrees/feat-pra-35-auth --force
-```
-
-### Step 3: Delete Branch (Optional)
-
-After PR is merged:
-
-```bash
-# Delete local branch
 git branch -d feat/pra-35-auth
-
-# Delete remote branch (if not auto-deleted by PR merge)
-git push origin --delete feat/pra-35-auth
-```
-
-### Step 4: Prune Stale References
-
-```bash
-# Clean up any stale worktree references
 git worktree prune
-
-# Verify cleanup
-git worktree list
-# Should only show parent repository (if no other worktrees)
 ```
+
+See [examples.md](examples.md) for complete cleanup workflow including Linear issue closure.
 
 ## Related Skills
 
