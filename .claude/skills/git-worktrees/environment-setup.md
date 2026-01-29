@@ -2,6 +2,14 @@
 
 Detailed environment configuration for git worktrees.
 
+> **🚨 CRITICAL: Only use Supabase databases 🚨**
+>
+> Worktrees must use **Supabase Local** (port 54322) or **Supabase Preview**.
+>
+> **NEVER use Homebrew PostgreSQL** (port 5432). It lacks storage, proper seeding, and will cause auth failures.
+>
+> The `worktree-setup.sh` script automatically enforces Supabase Local.
+
 ## Environment Variable Isolation
 
 ### Shared Variables (Default)

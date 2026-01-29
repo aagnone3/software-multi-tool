@@ -203,9 +203,46 @@ pnpm dev
 **Root cause**: Worktree branch has migrations not applied to local DB.
 
 ```bash
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
 pnpm --filter @repo/database exec prisma migrate status
-
-POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
 pnpm --filter @repo/database exec prisma migrate deploy
 ```
+
+## Quick Login Button Fails (Invalid Password)
+
+**Problem**: The "Quick Login" button (test@preview.local / TestPassword123) fails with "Invalid password" error, even though setup reported "Database already seeded".
+
+**Root cause**: The env files may point to a database that either:
+
+1. Doesn't have the test user at all
+2. Has the test user but with an incorrect password hash
+
+**Diagnosis**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Check which database the app is using (should be port 54322)
+grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+
+# Check if test user has correct password hash
+psql "$(grep POSTGRES_PRISMA_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
+  -c "SELECT LEFT(password, 25) FROM account WHERE \"userId\" = 'preview_user_001';"
+
+# Correct hash should start with: 46eb4f9cb6d62a4d8e23
+```
+
+**Solution**:
+
+```bash
+# Ensure using Supabase Local (port 54322)
+# The automated setup script enforces this
+
+# If still seeing issues, reset the database
+supabase db reset
+```
+
+**Prevention**: The `worktree-setup.sh` script now:
+
+1. Enforces Supabase Local (port 54322) for all worktrees
+2. Verifies the password hash is correct (not just that user exists)
+3. Automatically resets the database if seeding is incorrect
