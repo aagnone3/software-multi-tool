@@ -1,6 +1,6 @@
 ---
 name: better-auth
-description: Use this skill when working with authentication, user management, sessions, organizations, or any auth-related features. Provides context on Better Auth configuration, plugins, and patterns used in this project.
+description: Provides comprehensive Better Auth guidance covering authentication, user management, sessions, organizations, and auth configuration. Activated when working with auth-related features, login flows, or session handling.
 allowed-tools:
   - Read
   - Edit
