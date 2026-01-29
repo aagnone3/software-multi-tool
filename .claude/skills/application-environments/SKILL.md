@@ -14,13 +14,33 @@ allowed-tools:
 
 This project uses a **preview-first development model**: local development for fast frontend iteration, preview deployments for full-stack testing.
 
+> **🚨 CRITICAL: Only use Supabase databases 🚨**
+>
+> This project requires **Supabase Local** (port 54322) or **Supabase Preview** for development.
+>
+> **NEVER use Homebrew PostgreSQL** (port 5432) or standalone Postgres installations. They lack:
+>
+> - Storage (S3-compatible file storage for uploads)
+> - Proper seeding (test user won't work)
+> - Schema compatibility (missing `storage` schema)
+>
+> If your `.env.local` points to port `5432`, you're using the wrong database.
+
 ## Quick Reference
 
 | Environment    | Purpose               | Database       | URL             |
 | -------------- | --------------------- | -------------- | --------------- |
-| **Local**      | Frontend development  | Supabase local | `localhost:3637`|
+| **Local**      | Full-stack development| Supabase local | `localhost:3637`|
 | **Preview**    | Full-stack PR testing | Supabase branch| `*.vercel.app`  |
 | **Production** | Live application      | Supabase main  | Custom domain   |
+
+**Supported databases:**
+
+| Database              | Port     | Use Case                    |
+| --------------------- | -------- | --------------------------- |
+| Supabase Local        | 54322    | Local development (default) |
+| Supabase Preview      | Remote   | PR testing, integration     |
+| ~~Homebrew Postgres~~ | ~~5432~~ | ❌ **Never use**            |
 
 ## When to Use This Skill
 
