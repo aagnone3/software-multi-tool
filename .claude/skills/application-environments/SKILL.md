@@ -18,12 +18,9 @@ This project uses a **preview-first development model**: local development for f
 
 **When the user asks to "set up local dev" or similar, you MUST:**
 
-1. Check if Supabase local is running (`supabase status`)
-2. Start Supabase if not running (`supabase start`)
-3. Verify `apps/web/.env.local` exists
-4. Create it from example if missing
-5. **Start the dev server** (`pnpm dev`)
-6. Report the URL where the application is available
+1. Run `pnpm setup` to ensure environment is ready (starts Supabase, seeds database, creates env files)
+2. **Start the dev server** (`pnpm dev`)
+3. Report the URL where the application is available
 
 Setup is **not complete** until `pnpm dev` is running and the user can access the application.
 
@@ -65,12 +62,12 @@ Setup is **not complete** until `pnpm dev` is running and the user can access th
 
 ## Local Development
 
-### Quick Start
+### Quick Start (Recommended)
 
 ```bash
 pnpm install
-cp apps/web/.env.local.example apps/web/.env.local
-pnpm dev
+pnpm setup    # Starts Supabase, seeds database, creates .env.local files
+pnpm dev      # Start Next.js dev server
 ```
 
 **IMPORTANT**: Always use `pnpm dev` from monorepo root. This starts:
@@ -87,13 +84,15 @@ For fast iteration without backend:
 
 ### Full-Stack Local (Supabase)
 
-For authentication, database, and API testing:
+For authentication, database, and API testing, `pnpm setup` handles everything automatically. For manual control:
 
 ```bash
-supabase start        # Start PostgreSQL + Storage + Auth
-supabase db reset     # Apply migrations and seed data
+pnpm supabase:start   # Start PostgreSQL + Storage + Auth
+pnpm supabase:reset   # Apply migrations and seed data (REQUIRED for test user!)
 pnpm dev              # Start Next.js dev server
 ```
+
+> **Note:** Running only `supabase start` does NOT seed the database. Use `pnpm setup` or `pnpm supabase:reset` to ensure the test user exists.
 
 **Service URLs (Local)**:
 
@@ -199,7 +198,13 @@ pnpm dev
 
 ### Login Fails with "Invalid credentials"
 
-Verify test user exists in local database:
+This usually means the database wasn't seeded. Run:
+
+```bash
+pnpm setup --force-reset
+```
+
+Or verify test user exists manually:
 
 ```bash
 PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c \

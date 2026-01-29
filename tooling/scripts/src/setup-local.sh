@@ -221,21 +221,6 @@ main() {
         echo "  You may need to create apps/web/.env.local manually"
     fi
 
-    # Check apps/api-server/.env.local
-    if [[ -f "$REPO_ROOT/apps/api-server/.env.local" ]]; then
-        success "apps/api-server/.env.local exists"
-    elif [[ -f "$REPO_ROOT/apps/api-server/.env.local.example" ]]; then
-        info "Creating apps/api-server/.env.local from example..."
-        cp "$REPO_ROOT/apps/api-server/.env.local.example" "$REPO_ROOT/apps/api-server/.env.local"
-        success "Created apps/api-server/.env.local"
-        env_created=true
-    else
-        # api-server may not have an example file, which is fine
-        if [[ ! -f "$REPO_ROOT/apps/api-server/.env.local" ]]; then
-            info "apps/api-server/.env.local not found (may not be required)"
-        fi
-    fi
-
     if [[ "$env_created" == "true" ]]; then
         echo ""
         warn "New environment files were created from examples"
