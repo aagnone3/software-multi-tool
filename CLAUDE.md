@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 
+- `pnpm setup` - **Run this first!** Sets up local development environment (Supabase, database seeding, env files)
 - `pnpm dev` - Start the hot-reloading development server (concurrency limited to 15)
 - `pnpm build` - Compile all apps and packages for production
 - `pnpm start` - Serve the production build locally
@@ -90,13 +91,36 @@ The sync script:
 
 **Use Supabase local** for development to match preview/production environments exactly.
 
-**Start Supabase local:**
+**Quick Start (Recommended):**
 
 ```bash
-supabase start
+pnpm setup
 ```
 
-This starts a local Supabase instance with:
+This single command handles everything:
+
+1. Starts Supabase if not running
+2. Seeds the database with test data if needed
+3. Creates `.env.local` files from examples if missing
+
+**Manual Setup:**
+
+If you prefer manual control or need to troubleshoot:
+
+```bash
+# 1. Start Supabase services
+supabase start
+
+# 2. Seed the database (REQUIRED for test user!)
+supabase db reset
+
+# 3. Copy environment files
+cp apps/web/.env.local.example apps/web/.env.local
+```
+
+> **Important:** Running only `supabase start` does NOT seed the database. The test user (`test@preview.local`) won't exist until you run `supabase db reset`. If the "Quick Login" button fails, this is likely why.
+
+**Supabase Services:**
 
 - PostgreSQL on port 54322
 - Studio UI at http://127.0.0.1:54323
@@ -107,14 +131,6 @@ This starts a local Supabase instance with:
 ```text
 postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
-
-**Reset database (applies migrations + seed.sql):**
-
-```bash
-supabase db reset
-```
-
-This is the **same process** used in preview environments, ensuring consistency between local dev and deployed previews.
 
 **Test user credentials (Quick Login button):**
 
@@ -131,6 +147,16 @@ The test user is automatically created by `supabase/seed.sql` which runs during 
 - Storage buckets are created (seed.sql creates `avatars` and `files` buckets)
 - Identical environment to preview deployments
 - Supabase Studio provides visual database management
+
+**Useful Commands:**
+
+| Command | Description |
+| ------- | ----------- |
+| `pnpm setup` | Full setup (start + seed + env files) |
+| `pnpm setup --force-reset` | Force database reset even if seeded |
+| `pnpm supabase:status` | Check Supabase service status |
+| `pnpm supabase:reset` | Reset database with fresh seed data |
+| `pnpm supabase:stop` | Stop all Supabase services |
 
 ### Stripe Webhooks
 
