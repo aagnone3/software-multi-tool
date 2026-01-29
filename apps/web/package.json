@@ -47,6 +47,7 @@
 		"fumadocs-core": "15.8.5",
 		"fumadocs-ui": "15.8.5",
 		"hono": "4.11.5",
+		"inngest": "3.49.3",
 		"input-otp": "1.4.2",
 		"js-cookie": "3.0.5",
 		"lucide-react": "0.562.0",
