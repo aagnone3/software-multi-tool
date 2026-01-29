@@ -14,6 +14,19 @@ allowed-tools:
 
 This skill provides comprehensive guidance for working with Better Auth in this project, including configuration, plugins, and common patterns.
 
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Implementing login/signup flows
+- Adding new authentication methods
+- Working with user sessions
+- Managing organizations and invitations
+- Modifying auth configuration
+- Debugging auth issues
+- Adding protected routes
+- Integrating with payment systems (subscription seats)
+
 ## Quick Reference
 
 For deep Better Auth documentation, reference: https://www.better-auth.com/llms.txt
@@ -298,19 +311,6 @@ See `examples.md` in this skill directory for detailed examples of:
 - Handling organization workflows
 - Implementing protected routes
 - Testing auth flows
-
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Implementing login/signup flows
-- Adding new authentication methods
-- Working with user sessions
-- Managing organizations and invitations
-- Modifying auth configuration
-- Debugging auth issues
-- Adding protected routes
-- Integrating with payment systems (subscription seats)
 
 ## Key Principles
 
