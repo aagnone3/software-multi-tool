@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Use this skill when debugging applications across platforms (Vercel, Supabase, Render) and environments (local, preview, production). Covers log access, error patterns, connection troubleshooting, and performance monitoring.
+description: Provides debugging capabilities for applications across platforms (Vercel, Supabase, Render) and environments (local, preview, production). Covers log access, error patterns, connection troubleshooting, and performance monitoring.
 allowed-tools:
   - Read
   - Grep
@@ -162,132 +162,21 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 
 ---
 
-## Vercel Platform Details
+## Platform-Specific Details
 
-### Vercel Log Commands
+For detailed platform-specific debugging guides, see:
 
-```bash
-# Runtime logs
-vercel logs <deployment-url>
-vercel logs <deployment-url> --follow
-vercel logs <deployment-url> --filter "api/proxy"
+- [Vercel debugging](platform-vercel.md) - Logs, environment variables, API proxy
+- [Supabase debugging](platform-supabase.md) - Database logs, health checks, branch databases
+- [Render debugging](platform-render.md) - Service logs, health checks, deployments
 
-# Build logs
-vercel inspect <deployment-url>
-# Or: Dashboard → Deployments → Build Logs
-```
+### Quick Platform Reference
 
-### Vercel Environment Variables
-
-```bash
-pnpm web:env:list                    # List all
-pnpm web:env:list --target preview   # Preview only
-pnpm web:env:pull                    # Pull to local
-vercel env ls | grep DATABASE_URL    # Check specific var
-```
-
-**Note**: Vercel bakes env vars at build time. Changes require redeploy.
-
-### Vercel API Proxy (Preview Only)
-
-Preview environments use `/api/proxy/*` to forward requests to Render (different domains can't share cookies).
-
-```bash
-# Verify proxy env vars
-vercel env ls preview | grep API_SERVER_URL
-
-# Check requests in browser DevTools → Network → filter "api/proxy"
-```
-
----
-
-## Supabase Platform Details
-
-### Supabase Log Commands
-
-```bash
-# Via MCP
-mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "postgres"
-mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "auth"
-
-# Via Dashboard: Project → Settings → Logs
-```
-
-### Supabase Health Checks
-
-```bash
-# Performance advisors
-mcp__plugin_supabase_supabase__get_advisors --project_id <id> --type "performance"
-
-# Security advisors
-mcp__plugin_supabase_supabase__get_advisors --project_id <id> --type "security"
-
-# Database health (local MCP)
-mcp__postgres-ro-local-dev__analyze_db_health --health_type "all"
-```
-
-### Supabase Useful Queries
-
-```sql
--- Active connections
-SELECT * FROM pg_stat_activity WHERE state = 'active';
-
--- Blocking queries
-SELECT blocked_locks.pid AS blocked_pid,
-       blocking_locks.pid AS blocking_pid,
-       blocked_activity.query AS blocked_query
-FROM pg_catalog.pg_locks blocked_locks
-JOIN pg_catalog.pg_stat_activity blocked_activity
-  ON blocked_activity.pid = blocked_locks.pid
-JOIN pg_catalog.pg_locks blocking_locks
-  ON blocking_locks.locktype = blocked_locks.locktype
-JOIN pg_catalog.pg_stat_activity blocking_activity
-  ON blocking_activity.pid = blocking_locks.pid
-WHERE NOT blocked_locks.granted;
-
--- Slow queries (requires pg_stat_statements)
-SELECT * FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;
-```
-
-### Supabase Branch Databases (Preview)
-
-```bash
-# List branches
-mcp__plugin_supabase_supabase__list_branches --project_id <id>
-
-# Branch DB URL: Dashboard → Database → Branches → Select branch → Settings
-```
-
----
-
-## Render Platform Details
-
-### Render Log Commands
-
-```bash
-# List services
-pnpm --filter @repo/scripts render services list
-
-# List deploys
-pnpm --filter @repo/scripts render deploys list --service <service-id>
-
-# Dashboard: Service → Logs tab → "Live Tail" for streaming
-```
-
-### Render Environment Variables
-
-```bash
-pnpm --filter @repo/scripts render env list --service <service-id>
-pnpm --filter @repo/scripts render env get --service <service-id> --key DATABASE_URL
-pnpm --filter @repo/scripts render env set --service <service-id> --key CORS_ORIGIN --value "https://..."
-```
-
-### Render Health Check
-
-```bash
-curl https://<service-url>/health
-# Expected: OK
-```
+| Platform | Logs | Health Check |
+| -------- | ---- | ------------ |
+| Vercel | `vercel logs <url>` | Dashboard → Deployments |
+| Supabase | MCP supabase__get_logs | MCP supabase__get_advisors |
+| Render | `pnpm render logs <service>` | `curl <url>/health` |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: git-worktrees
-description: MANDATORY skill for ALL feature work. This system requires worktrees to support parallel development with multiple Claude Code instances working simultaneously. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. DO NOT use git checkout -b - always use worktrees.
+description: MANDATORY skill for ALL feature work. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. Supports parallel development with multiple Claude Code instances working simultaneously. Enforces worktree-based development instead of traditional branching.
 allowed-tools:
   - Bash
   - Read

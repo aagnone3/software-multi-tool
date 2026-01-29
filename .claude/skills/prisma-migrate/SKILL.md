@@ -1,6 +1,6 @@
 ---
 name: prisma-migrate
-description: Use this skill for Prisma database migration workflows including validation, staging, review, and execution. Covers schema changes, migration creation, and the Prisma CLI. Activation keywords include database, schema, migration, prisma, db push, migrate, schema.prisma.
+description: Provides Prisma database migration workflows with safety checks and advisory locking. Use when creating migrations, validating schema changes, debugging drift, or working with pg-boss schema. Covers validation scripts, staging helpers, and migration review workflows.
 allowed-tools:
   - Bash
   - Read
@@ -412,3 +412,10 @@ Invoke this skill when:
 - User encounters migration errors or drift
 - User asks about database changes
 - User needs to work with pg-boss schema or background jobs
+
+## Related Skills
+
+- **architecture**: Overall database and backend architecture
+- **git-worktrees**: Database configuration in isolated worktree environments
+- **sub-app**: Creating database models for new tools
+- **dev:migrate-database**: Skill for executing migrations in workflow context

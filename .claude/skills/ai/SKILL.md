@@ -1,6 +1,6 @@
 ---
 name: ai
-description: Use this skill when working with AI/LLM features, adding AI processors, configuring AI providers (Anthropic/OpenAI), or understanding the AI architecture. Covers Claude via @repo/agent-sdk and OpenAI via @repo/ai.
+description: Provides guidance on AI/LLM integration including Claude (Anthropic SDK), OpenAI, AI processors, model selection, and chat systems. Use when implementing AI features, adding processors, configuring providers, debugging AI calls, or selecting models.
 allowed-tools:
   - Bash
   - Read
@@ -13,6 +13,20 @@ allowed-tools:
 # AI/LLM Skill
 
 This skill documents the AI architecture, providers, and patterns used in this codebase.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Implementing AI-powered features or processors
+- Adding new AI processors for document analysis
+- Configuring Anthropic or OpenAI API keys
+- Selecting appropriate models for use cases
+- Debugging AI API calls or response parsing
+- Understanding model pricing and token limits
+- Implementing streaming AI responses
+- Working with the chat system
+- Troubleshooting AI integration issues
 
 ## Quick Reference
 
@@ -309,9 +323,11 @@ await new Promise(resolve => setTimeout(resolve, 1000));
 
 ## Related Skills
 
-- **architecture** - Overall codebase structure
-- **tools** - Adding new tool modules
-- **async-jobs** - Background job processing (used by processors)
+- **architecture** - Overall codebase structure and module organization
+- **tools** - Adding new tool modules that use AI processors
+- **async-jobs** - Background job processing system used by AI processors
+- **feature-flags** - A/B testing AI features and gradual rollouts
+- **storage** - Storing AI-generated content and uploaded files for processing
 
 ## Additional Resources
 

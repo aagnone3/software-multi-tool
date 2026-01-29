@@ -343,8 +343,10 @@ Invoke this skill when:
 
 ## Related Skills
 
-- **architecture**: Overall codebase structure
-- **sub-app**: Adding typography to new applications
+- **architecture**: Overall codebase structure and theming
+- **sub-app**: Implementing typography in new tools
+- **landing-page-design**: Typography in marketing pages
+- **iconography**: Complementary visual design system
 
 ## Additional Resources
 

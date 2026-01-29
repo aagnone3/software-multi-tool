@@ -1,6 +1,6 @@
 ---
 name: linear-workflow
-description: Implements Linear issues using worktrees, feature branches, and pull requests. Use when working on a ticket, starting a feature, picking up groomed issues, or creating PRs. Enforces worktree-based development and automatic PR creation.
+description: Provides Linear issue implementation workflow using worktrees, feature branches, and pull requests. Covers working on tickets, starting features, picking up groomed issues, and creating PRs. Enforces worktree-based development and automatic PR creation.
 allowed-tools:
   - Bash
   - Read
@@ -163,3 +163,5 @@ Claude: [Fetches issue, moves to In Progress]
 - **git-worktrees**: Worktree creation and management
 - **linear**: Linear CLI commands and issue operations
 - **github-cli**: PR creation and GitHub operations
+- **prisma-migrate**: Database migrations during feature development
+- **debugging**: Troubleshooting issues during implementation
