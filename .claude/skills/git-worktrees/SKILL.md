@@ -1,6 +1,6 @@
 ---
 name: git-worktrees
-description: MANDATORY skill for ALL feature work. This system requires worktrees to support parallel development with multiple Claude Code instances working simultaneously. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. DO NOT use git checkout -b - always use worktrees.
+description: MANDATORY skill for ALL feature work. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. Supports parallel development with multiple Claude Code instances working simultaneously. Enforces worktree-based development instead of traditional branching.
 allowed-tools:
   - Bash
   - Read
@@ -74,7 +74,8 @@ This single command:
 4. ✅ Allocates unique ports for web app and api-server
 5. ✅ Installs dependencies and generates Prisma client
 6. ✅ Verifies database seeding with correct test user
-7. ✅ Runs baseline type-check verification
+7. ✅ **Configures Supabase Local storage** (SUPABASE_URL + service role key)
+8. ✅ Runs baseline type-check verification
 
 ### Branch Types
 
