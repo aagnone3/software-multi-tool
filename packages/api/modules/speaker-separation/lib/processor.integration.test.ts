@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import type { Prisma, ToolJob } from "@repo/database";
 import { describe, expect, it } from "vitest";
 import { processSpeakerSeparationJob } from "./processor";
 
@@ -8,13 +9,14 @@ const hasApiKey = !!process.env.ASSEMBLYAI_API_KEY;
 /**
  * Helper to create a mock job object for testing.
  */
-function createMockJob(input: Record<string, unknown>) {
+function createMockJob(input: Record<string, unknown>): ToolJob {
 	return {
 		id: `integration-test-speaker-${Date.now()}`,
 		toolSlug: "speaker-separation",
-		status: "PROCESSING" as const,
+		toolId: null,
+		status: "PROCESSING",
 		priority: 0,
-		input,
+		input: input as Prisma.JsonValue,
 		output: null,
 		error: null,
 		userId: "integration-test-user",
@@ -23,10 +25,13 @@ function createMockJob(input: Record<string, unknown>) {
 		maxAttempts: 3,
 		startedAt: new Date(),
 		completedAt: null,
-		processAfter: null,
 		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 		createdAt: new Date(),
 		updatedAt: new Date(),
+		pgBossJobId: null,
+		newsAnalysisId: null,
+		audioFileUrl: null,
+		audioMetadata: null,
 	};
 }
 

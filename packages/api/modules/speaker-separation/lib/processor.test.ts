@@ -49,10 +49,11 @@ describe("Speaker Separation Processor", () => {
 	const sampleBase64Audio =
 		Buffer.from("test audio content").toString("base64");
 
-	const mockJob: ToolJob = {
+	const mockJob = {
 		id: "job-123",
 		toolSlug: "speaker-separation",
-		status: "PROCESSING",
+		toolId: null,
+		status: "PROCESSING" as const,
 		priority: 0,
 		input: {
 			audioFile: {
@@ -69,13 +70,14 @@ describe("Speaker Separation Processor", () => {
 		maxAttempts: 3,
 		startedAt: new Date(),
 		completedAt: null,
-		processAfter: null,
 		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 		createdAt: new Date(),
 		updatedAt: new Date(),
+		pgBossJobId: null,
+		newsAnalysisId: null,
 		audioFileUrl: null,
 		audioMetadata: null,
-	};
+	} satisfies ToolJob;
 
 	const mockAssemblyAIResponse = {
 		id: "transcript-123",

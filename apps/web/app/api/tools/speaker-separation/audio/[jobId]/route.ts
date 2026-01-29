@@ -1,11 +1,10 @@
+import { config } from "@repo/config";
 import { getToolJobById } from "@repo/database";
 import {
 	getDefaultSupabaseProvider,
 	shouldUseSupabaseStorage,
 } from "@repo/storage";
 import { NextResponse } from "next/server";
-
-const AUDIO_BUCKET = "audio-uploads";
 
 export async function GET(
 	_request: Request,
@@ -39,7 +38,7 @@ export async function GET(
 		const signedUrl = await provider.getSignedDownloadUrl(
 			job.audioFileUrl,
 			{
-				bucket: AUDIO_BUCKET,
+				bucket: config.storage.bucketNames.files,
 				expiresIn: 3600, // 1 hour
 			},
 		);
