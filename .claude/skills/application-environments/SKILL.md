@@ -1,6 +1,6 @@
 ---
 name: application-environments
-description: Configures local, preview, and production environments. Use when setting up development, understanding deployment targets, or troubleshooting environment issues. Covers Supabase local, Vercel previews, and environment variables.
+description: Configures local, preview, and production environments including Supabase local, Vercel previews, and environment variables. Use when setting up development, understanding deployment targets, troubleshooting environment issues, or configuring databases for different environments.
 allowed-tools:
   - Bash
   - Read
