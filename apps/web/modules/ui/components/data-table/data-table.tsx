@@ -22,6 +22,7 @@ export interface DataTableProps<TData> {
 	emptyMessage?: ReactNode;
 	onRowClick?: (row: TData) => void;
 	rowClassName?: string | ((row: TData) => string);
+	hideHeaders?: boolean;
 }
 
 export function DataTable<TData>({
@@ -32,6 +33,7 @@ export function DataTable<TData>({
 	emptyMessage = "No results.",
 	onRowClick,
 	rowClassName,
+	hideHeaders = false,
 }: DataTableProps<TData>) {
 	const rows = table.getRowModel().rows;
 	const hasRows = rows.length > 0;
@@ -39,25 +41,28 @@ export function DataTable<TData>({
 	return (
 		<div className="rounded-md border">
 			<Table>
-				<TableHeader>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => (
-								<TableHead
-									key={header.id}
-									colSpan={header.colSpan}
-								>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext(),
-											)}
-								</TableHead>
-							))}
-						</TableRow>
-					))}
-				</TableHeader>
+				{!hideHeaders && (
+					<TableHeader>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<TableHead
+										key={header.id}
+										colSpan={header.colSpan}
+									>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef
+														.header,
+													header.getContext(),
+												)}
+									</TableHead>
+								))}
+							</TableRow>
+						))}
+					</TableHeader>
+				)}
 				<TableBody>
 					{isLoading ? (
 						<TableRow>

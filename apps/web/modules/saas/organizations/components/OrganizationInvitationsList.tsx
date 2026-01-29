@@ -10,22 +10,14 @@ import {
 } from "@saas/organizations/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
 import { Button } from "@ui/components/button";
+import { DataTable, useDataTable } from "@ui/components/data-table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
-import { Table, TableBody, TableCell, TableRow } from "@ui/components/table";
 import { cn } from "@ui/lib";
 import {
 	CheckIcon,
@@ -178,47 +170,20 @@ export function OrganizationInvitationsList({
 		},
 	];
 
-	const table = useReactTable({
+	const { table } = useDataTable({
 		data: invitations ?? [],
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
+		enablePagination: true,
+		enableSorting: true,
+		enableFiltering: true,
 	});
 
 	return (
-		<div className="rounded-md border">
-			<Table>
-				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && "selected"}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
-										{flexRender(
-											cell.column.columnDef.cell,
-											cell.getContext(),
-										)}
-									</TableCell>
-								))}
-							</TableRow>
-						))
-					) : (
-						<TableRow>
-							<TableCell
-								colSpan={columns.length}
-								className="h-24 text-center"
-							>
-								You have not invited any members yet.
-							</TableCell>
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
+		<DataTable
+			table={table}
+			columns={columns.length}
+			emptyMessage="You have not invited any members yet."
+			hideHeaders
+		/>
 	);
 }
