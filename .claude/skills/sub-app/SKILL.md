@@ -1,6 +1,6 @@
 ---
 name: sub-app
-description: Use this skill when creating new sub-applications/tools in the multi-app structure, implementing tool-specific database schemas, API endpoints, or understanding the complete sub-app development workflow
+description: Provides complete sub-application development workflows including database schema, API modules, job processing, and frontend UI. Use when building new tools from scratch, implementing async job patterns, or understanding the generic ToolJob architecture.
 allowed-tools:
   - Bash
   - Read
@@ -232,245 +232,54 @@ packages/api/modules/my-tool/
     └── processor.ts      # Job processing logic
 ```
 
-#### Example: Create Job Procedure
+**Key components:**
+- Define input/output schemas in `types.ts` using Zod
+- Implement procedures using `publicProcedure` or `protectedProcedure`
+- Export procedures from `router.ts` as an object
+- Register router in `packages/api/orpc/router.ts`
 
-```typescript
-// packages/api/modules/my-tool/procedures/create-job.ts
-import { publicProcedure } from "../../../orpc/procedures";
-import { createToolJob, type Prisma } from "@repo/database";
-import { MyToolInputSchema } from "../types";
-import { ORPCError } from "@orpc/client";
-
-export const createJob = publicProcedure
-  .route({
-    method: "POST",
-    path: "/my-tool/jobs",
-    tags: ["MyTool"],
-    summary: "Create My Tool job",
-    description: "Create a new async job for My Tool",
-  })
-  .input(MyToolInputSchema)
-  .handler(async ({ input, context }) => {
-    // Try to get user from session if authenticated
-    let userId: string | undefined;
-    try {
-      const { auth } = await import("@repo/auth");
-      const session = await auth.api.getSession({
-        headers: context.headers,
-      });
-      userId = session?.user?.id;
-    } catch {
-      // Not authenticated, continue without userId
-    }
-
-    // For anonymous users, generate or accept a sessionId
-    const sessionId = !userId ? (input.sessionId || generateSessionId()) : undefined;
-
-    const job = await createToolJob({
-      toolSlug: "my-tool",
-      input: input as Prisma.InputJsonValue,
-      userId,
-      sessionId,
-      priority: 0,
-    });
-
-    return { job };
-  });
-```
-
-#### Example: Router
-
-```typescript
-// packages/api/modules/my-tool/router.ts
-import { createJob } from "./procedures/create-job";
-import { getJob } from "./procedures/get-job";
-import { listJobs } from "./procedures/list-jobs";
-
-export const myToolRouter = {
-  jobs: {
-    create: createJob,
-    get: getJob,
-    list: listJobs,
-  },
-};
-```
-
-#### Register Router in Main API
-
-```typescript
-// packages/api/orpc/router.ts
-import { myToolRouter } from "../modules/my-tool/router";
-
-export const apiRouter = {
-  // ... existing routers
-  myTool: myToolRouter,
-};
-```
+See [implementation-patterns.md](implementation-patterns.md) for complete code examples.
 
 ### Step 5: Implement Job Processor
 
-Create processor logic that runs in the background:
+Create processor logic in `packages/api/modules/my-tool/lib/processor.ts`:
 
+**Processor responsibilities:**
+- Fetch job by ID using `getToolJobById()`
+- Parse input and perform tool-specific processing
+- Mark job as completed with `markJobCompleted(jobId, output)`
+- Handle errors with `markJobFailed(jobId, errorMessage)`
+
+**Register processor** in `packages/api/modules/jobs/lib/processor-registry.ts`:
 ```typescript
-// packages/api/modules/my-tool/lib/processor.ts
-import { getToolJobById, markJobCompleted, markJobFailed } from "@repo/database";
-import type { MyToolInput, MyToolOutput } from "../types";
-
-export async function processMyToolJob(jobId: string) {
-  const job = await getToolJobById(jobId);
-
-  if (!job) {
-    throw new Error(`Job ${jobId} not found`);
-  }
-
-  try {
-    // Parse input
-    const input = job.input as MyToolInput;
-
-    // Perform tool-specific processing
-    // This could involve:
-    // - Calling external APIs
-    // - Running ML models
-    // - Processing files
-    // - etc.
-    const result = await performToolLogic(input);
-
-    // Prepare output
-    const output: MyToolOutput = {
-      resultUrl: result.url,
-      metadata: result.metadata,
-    };
-
-    // Mark job as completed
-    await markJobCompleted(jobId, output as any);
-
-  } catch (error) {
-    // Mark job as failed
-    await markJobFailed(
-      jobId,
-      error instanceof Error ? error.message : "Unknown error"
-    );
-  }
-}
-
-async function performToolLogic(input: MyToolInput) {
-  // Implement your tool-specific logic here
-  // ...
-}
-```
-
-#### Register Processor
-
-```typescript
-// packages/api/modules/jobs/lib/processor-registry.ts
-import { processMyToolJob } from "../../my-tool/lib/processor";
-
 export const processorRegistry = {
   "my-tool": processMyToolJob,
-  // ... other tool processors
 };
 ```
 
+See [implementation-patterns.md](implementation-patterns.md) for complete processor examples.
+
 ### Step 6: Create Frontend UI
 
-#### Basic Tool Page
+Create tool page at `apps/web/app/(saas)/app/tools/my-tool/page.tsx`:
+- Use Server Component for the page
+- Import client component from `@/modules/saas/tools/my-tool/`
 
-```tsx
-// apps/web/app/(saas)/app/tools/my-tool/page.tsx
-import { MyToolClient } from "@/modules/saas/tools/my-tool/MyToolClient";
+**Client component patterns:**
+- Use `useApiMutation()` for creating jobs
+- Use `useApiQuery()` with polling for job status
+- Show loading states and error handling
+- Poll job status until completed or failed
 
-export default function MyToolPage() {
-  return <MyToolClient />;
-}
-```
-
-#### Client Component
-
-```tsx
-// apps/web/modules/saas/tools/my-tool/MyToolClient.tsx
-"use client";
-
-import { useState } from "react";
-import { useApiMutation } from "@/lib/api-client";
-
-export function MyToolClient() {
-  const [input, setInput] = useState("");
-
-  const createJob = useApiMutation(
-    (client) => client.myTool.jobs.create,
-    {
-      onSuccess: (data) => {
-        console.log("Job created:", data.job);
-        // Poll for job status or redirect to results
-      },
-    }
-  );
-
-  const handleSubmit = () => {
-    createJob.mutate({
-      parameter1: input,
-    });
-  };
-
-  return (
-    <div className="container max-w-4xl px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">My New Tool</h1>
-
-      <div className="space-y-4">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter input..."
-          className="w-full px-4 py-2 border rounded"
-        />
-
-        <button
-          onClick={handleSubmit}
-          disabled={createJob.isPending}
-          className="px-6 py-2 bg-blue-600 text-white rounded"
-        >
-          {createJob.isPending ? "Processing..." : "Submit"}
-        </button>
-      </div>
-    </div>
-  );
-}
-```
+See [implementation-patterns.md](implementation-patterns.md) for complete UI examples with polling.
 
 ### Step 7: Update Middleware (if public tool)
 
-If your tool should be accessible without authentication, ensure middleware allows it:
-
-```typescript
-// apps/web/middleware.ts
-function isPublicToolRoute(pathname: string): boolean {
-  if (!pathname.startsWith("/app/tools")) return false;
-  if (pathname === "/app/tools") return true;
-
-  const toolSlug = pathname.split("/app/tools/")[1]?.split("/")[0];
-  const tool = appConfig.tools.registry.find(
-    (t) => t.slug === toolSlug && t.enabled
-  );
-  return tool?.public ?? false;
-}
-```
+For public tools, ensure `apps/web/middleware.ts` includes your tool's route in `isPublicToolRoute()`. The middleware checks `tool.public` from the registry.
 
 ### Step 8: Add Icon to ToolCard
 
-```typescript
-// apps/web/modules/saas/tools/components/ToolCard.tsx
-import { WrenchIcon, MyNewToolIcon } from "lucide-react";
-
-function getToolIcon(iconName: string) {
-  const icons = {
-    "wrench": WrenchIcon,
-    "my-new-tool": MyNewToolIcon,
-    // ... other icons
-  };
-  return icons[iconName] || WrenchIcon;
-}
-```
+Import the icon from Lucide React and add to `getToolIcon()` in `apps/web/modules/saas/tools/components/ToolCard.tsx`.
 
 ## Best Practices
 
@@ -511,115 +320,51 @@ function getToolIcon(iconName: string) {
 2. **Per-Tool Limits**: Configure in registry, not hardcoded in logic
 3. **Clear Feedback**: Show users their usage limits and remaining quota
 
-## Common Patterns
+## Implementation Patterns
 
-### Pattern 1: Synchronous Tool (Fast Processing)
+For detailed implementation patterns and complete examples, see [implementation-patterns.md](implementation-patterns.md).
 
-For tools that complete instantly (< 500ms):
+### Quick Pattern Reference
 
-- Process directly in the API procedure
-- Return results immediately
+**Pattern 1: Synchronous Tool (Fast Processing)**
+- For operations < 500ms
+- Process directly in API procedure, return immediately
 - No job queue needed
+- Example: Text formatters, validators
 
-```typescript
-export const processSync = publicProcedure
-  .input(MyToolInputSchema)
-  .handler(async ({ input }) => {
-    const result = await performFastOperation(input);
-    return { result };
-  });
-```
-
-### Pattern 2: Async Tool with Job Queue (Long Processing)
-
-For tools that take > 500ms or require background processing:
-
-- Create job in API procedure
-- Return job ID immediately
-- Process in background worker
+**Pattern 2: Async Tool with Job Queue (Long Processing)**
+- For operations > 500ms or background processing
+- Create job, return ID, process in background
 - Client polls for results
+- Example: Image processing, ML inference
 
-```typescript
-// 1. Create job endpoint (returns immediately)
-export const createJob = publicProcedure
-  .input(MyToolInputSchema)
-  .handler(async ({ input }) => {
-    const job = await createToolJob({
-      toolSlug: "my-tool",
-      input: input as any,
-    });
-    return { jobId: job.id };
-  });
-
-// 2. Get job status endpoint (polling target)
-export const getJob = publicProcedure
-  .input(z.object({ jobId: z.string() }))
-  .handler(async ({ input }) => {
-    const job = await getToolJobById(input.jobId);
-    return { job };
-  });
-
-// 3. Background processor
-export async function processMyToolJob(jobId: string) {
-  // ... processing logic
-}
-```
-
-### Pattern 3: Hybrid Tool (Fast Preview + Full Processing)
-
-For tools that can show quick preview but also detailed results:
-
-- Return instant preview in API response
-- Create job for full processing
+**Pattern 3: Hybrid Tool (Fast Preview + Full Processing)**
+- Return instant preview, create job for full results
 - Show preview while job completes
+- Example: SEO analyzers, data reports
 
 ## Testing
 
-### Unit Tests for Procedures
+For comprehensive testing patterns and detailed examples, see [testing-patterns.md](testing-patterns.md).
 
-```typescript
-// packages/api/modules/my-tool/router.test.ts
-import { describe, it, expect } from "vitest";
-import { myToolRouter } from "./router";
+### Quick Testing Reference
 
-describe("myToolRouter", () => {
-  it("creates a job", async () => {
-    const result = await myToolRouter.jobs.create({
-      input: { parameter1: "test" },
-      context: { headers: new Headers() },
-    });
+- **Unit tests**: Test API procedures in isolation using Vitest
+- **Integration tests**: Test job processors with real database using Testcontainers
+- **Database tests**: Use PostgreSQL container for isolated testing
+- **Mock strategy**: Mock pg-boss for job queue, mock external APIs
+- **E2E tests**: Use Playwright for complete user flows
+- **Coverage**: Minimum thresholds enforced in CI (configured in `tooling/test/coverage-thresholds.ts`)
 
-    expect(result.job).toBeDefined();
-    expect(result.job.toolSlug).toBe("my-tool");
-  });
-});
-```
+```bash
+# Run all tests
+pnpm test
 
-### Integration Tests for Processors
+# Run tests for specific workspace
+pnpm --filter @repo/api test
 
-```typescript
-// packages/api/modules/my-tool/lib/processor.test.ts
-import { describe, it, expect } from "vitest";
-import { processMyToolJob } from "./processor";
-import { createToolJob, getToolJobById } from "@repo/database";
-
-describe("processMyToolJob", () => {
-  it("processes job successfully", async () => {
-    // Create test job
-    const job = await createToolJob({
-      toolSlug: "my-tool",
-      input: { parameter1: "test" },
-    });
-
-    // Process job
-    await processMyToolJob(job.id);
-
-    // Verify results
-    const processed = await getToolJobById(job.id);
-    expect(processed?.status).toBe("COMPLETED");
-    expect(processed?.output).toBeDefined();
-  });
-});
+# Run with coverage
+pnpm test:ci
 ```
 
 ## Related Skills
@@ -628,10 +373,13 @@ describe("processMyToolJob", () => {
 - **architecture**: Overall codebase structure and API patterns
 - **prisma-migrate**: Database migration workflows
 - **better-auth**: User authentication for private tools
+- **async-jobs**: Detailed job queue and pg-boss documentation
+- **storage**: File upload patterns for tools
 
 ## Additional Resources
 
-- Examples: See `examples.md` in this skill directory
-- Existing modules: `packages/api/modules/` for reference implementations
-- Job queue docs: `packages/api/modules/jobs/README.md`
-- Database docs: `packages/database/README.md`
+- **Progressive Disclosure**: For detailed examples and patterns, see:
+  - `examples.md` in this skill directory (implementation examples)
+  - `packages/api/modules/` for reference implementations
+  - `packages/api/modules/jobs/README.md` for job queue details
+  - `packages/database/README.md` for database patterns
