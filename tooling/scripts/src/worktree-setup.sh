@@ -366,6 +366,45 @@ setup_worktree_environment() {
     log_success "Copied apps/api-server/.env.local"
   fi
 
+  # Enforce Supabase Local database (NEVER use Homebrew Postgres)
+  log_info "Enforcing Supabase Local database..."
+  local web_env_tmp="$worktree_path/apps/web/.env.local"
+  local api_env_tmp="$worktree_path/apps/api-server/.env.local"
+  local supabase_url="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
+  # Check and fix web app database URL
+  if [ -f "$web_env_tmp" ]; then
+    local current_web_db
+    current_web_db=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    if echo "$current_web_db" | grep -q ":5432[^2]"; then
+      log_warning "Homebrew Postgres detected in web app (port 5432)"
+      log_info "Switching to Supabase Local (port 54322)..."
+      sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$supabase_url\"|" "$web_env_tmp"
+      sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$supabase_url\"|" "$web_env_tmp"
+      rm -f "$web_env_tmp.bak"
+      log_success "Web app database URL updated to Supabase Local"
+    elif echo "$current_web_db" | grep -q ":54322"; then
+      log_success "Web app already using Supabase Local"
+    fi
+  fi
+
+  # Check and fix api-server database URL
+  if [ -f "$api_env_tmp" ]; then
+    local current_api_db
+    current_api_db=$(grep "^DATABASE_URL=\|^POSTGRES_PRISMA_URL=" "$api_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    if echo "$current_api_db" | grep -q ":5432[^2]"; then
+      log_warning "Homebrew Postgres detected in api-server (port 5432)"
+      log_info "Switching to Supabase Local (port 54322)..."
+      sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=\"$supabase_url\"|" "$api_env_tmp"
+      sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$supabase_url\"|" "$api_env_tmp"
+      sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$supabase_url\"|" "$api_env_tmp"
+      rm -f "$api_env_tmp.bak"
+      log_success "API server database URL updated to Supabase Local"
+    elif echo "$current_api_db" | grep -q ":54322"; then
+      log_success "API server already using Supabase Local"
+    fi
+  fi
+
   # Step 3: Allocate unique ports
   log_step "Step 3: Allocating unique ports"
 
@@ -516,11 +555,14 @@ setup_worktree_environment() {
     fi
   fi
 
-  # Step 6: Ensure Supabase local is running and database is seeded
-  log_step "Step 6: Checking Supabase local status"
+  # Step 6: Verify Supabase Local is running and database is seeded
+  # Note: We enforce Supabase Local in Step 2, so we know we're using port 54322
+  log_step "Step 6: Checking Supabase Local status"
 
-  # Check if Supabase local is running
-  if ! supabase status &>/dev/null; then
+  # Ensure Supabase local is running
+  if supabase status &>/dev/null; then
+    log_success "Supabase local is running"
+  else
     log_warning "Supabase local is not running"
     log_info "Starting Supabase local..."
     if supabase start; then
@@ -531,14 +573,31 @@ setup_worktree_environment() {
       log_info "Then: supabase db reset"
       exit 1
     fi
-  else
-    log_success "Supabase local is running"
   fi
 
-  # Check if test user exists (indicates database is seeded)
-  # Use Supabase local database (port 54322)
+  # Verify test user exists with correct password hash
+  log_info "Checking for test user in Supabase Local..."
+
   if PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT 1 FROM \"user\" WHERE id = 'preview_user_001'" 2>/dev/null | grep -q "1"; then
-    log_success "Database already seeded (preview_user_001 exists)"
+    # User exists, verify password hash is correct
+    local password_hash
+    password_hash=$(PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT password FROM account WHERE \"userId\" = 'preview_user_001'" 2>/dev/null | tr -d ' ')
+
+    # Expected hash from seed.sql (first 20 chars)
+    local expected_prefix="46eb4f9cb6d62a4d8e23"
+
+    if echo "$password_hash" | grep -q "^$expected_prefix"; then
+      log_success "Database seeded correctly (preview_user_001 exists with valid password)"
+    else
+      log_warning "Test user exists but password hash is incorrect"
+      log_info "Resetting database with correct seed..."
+      if supabase db reset --no-confirm 2>&1; then
+        log_success "Database reset and seeded successfully"
+      else
+        log_warning "Database reset had issues (non-blocking)"
+        log_info "Run manually: supabase db reset"
+      fi
+    fi
   else
     log_info "Test user not found, resetting database with seed..."
     if supabase db reset --no-confirm 2>&1; then

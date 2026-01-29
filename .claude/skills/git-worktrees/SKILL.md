@@ -15,6 +15,14 @@ allowed-tools:
 
 Enable parallel development with isolated git worktrees for concurrent features, testing, and code review.
 
+> **🚨 CRITICAL: Only use Supabase databases 🚨**
+>
+> Worktrees must use **Supabase Local** (port 54322) or **Supabase Preview**.
+>
+> **NEVER use Homebrew PostgreSQL** (port 5432). It lacks storage, proper seeding, and will cause auth failures.
+>
+> The setup script automatically enforces Supabase Local. If you see port `5432` in your `.env.local`, the configuration is wrong.
+
 ## System Architecture: Why Worktrees Are Mandatory
 
 **This repository is designed for parallel development** with multiple Claude Code instances working simultaneously.
@@ -966,6 +974,57 @@ pnpm dev
 ```
 
 **Prevention**: The `worktree-setup.sh` script now automatically checks and syncs database URLs during worktree creation.
+
+### Quick Login Button Fails (Invalid Password)
+
+**Problem**: The "Quick Login" button (test@preview.local / TestPassword123) fails with "Invalid password" error, even though the setup script reported "Database already seeded".
+
+**Root cause**: The setup script may have verified seeding against Supabase local (port 54322), but the env files point to a different database (e.g., Homebrew Postgres on port 5432) that either:
+
+1. Doesn't have the test user at all
+2. Has the test user but with an incorrect password hash (from old/different seeding)
+
+**Diagnosis**:
+
+```bash
+cd .worktrees/<worktree-name>
+
+# Check which database the app is actually using
+grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+# Look for the port: 54322 = Supabase local, 5432 = Homebrew Postgres
+
+# Check if test user exists and has correct password hash
+psql "$(grep POSTGRES_PRISMA_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
+  -c "SELECT password FROM account WHERE \"userId\" = 'preview_user_001';"
+
+# Correct hash should start with: 46eb4f9cb6d62a4d8e23
+# If it starts with something else (e.g., 82c764f05...), the password won't work
+```
+
+**Solution**:
+
+```bash
+# Option 1: Switch to Supabase local (recommended)
+# Update apps/web/.env.local to use port 54322
+sed -i.bak 's|localhost:5432|localhost:54322|g' apps/web/.env.local
+sed -i.bak 's|/local_softwaremultitool|/postgres|g' apps/web/.env.local
+rm -f apps/web/.env.local.bak
+
+# Then reset the database with proper seed
+supabase db reset
+
+# Option 2: Reseed the Homebrew Postgres database
+# Apply the seed.sql manually to your database
+psql "postgresql://postgres:postgres@localhost:5432/local_softwaremultitool" \
+  -f /path/to/repo/supabase/seed.sql
+```
+
+**Prevention**: The `worktree-setup.sh` script now:
+
+1. Detects which database the env files point to
+2. Verifies seeding against that ACTUAL database (not assumed Supabase)
+3. Checks that the password hash is correct (not just that user exists)
+4. Warns if using non-Supabase database that may not be properly seeded
 
 ### Schema Mismatch (Pending Migrations)
 
