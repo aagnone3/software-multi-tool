@@ -1,6 +1,6 @@
 ---
 name: github-cli
-description: Use this skill for all GitHub operations including creating pull requests, managing issues, and using the GitHub API. This skill enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
+description: Provides GitHub operations support including creating pull requests, managing issues, and using the GitHub API. Enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
 allowed-tools:
   - Bash
   - Read
@@ -50,6 +50,18 @@ This system may have multiple GitHub accounts configured. Use:
 - **Organization:** `aagnone3`
 - **Repository:** `software-multi-tool`
 - **Remote URL:** `git@github.com:aagnone3/software-multi-tool.git`
+
+## When to Use This Skill
+
+Use this skill when:
+
+- Creating or managing pull requests
+- Working with GitHub issues
+- Using the GitHub API
+- Switching between GitHub accounts
+- Troubleshooting GitHub CLI authentication
+
+**Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api
 
 ## Common Workflows
 
