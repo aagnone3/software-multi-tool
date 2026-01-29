@@ -172,6 +172,12 @@ Use this template to structure your reflection:
 | `better-auth` | Auth configuration, session handling |
 | `linear-workflow` | Workflow steps, Linear API changes |
 
+## Related Skills
+
+- **agent-skills**: Best practices for creating and improving skills
+- **git-worktrees**: Often needs updates based on environment issues
+- **architecture**: Central documentation that requires ongoing updates
+
 ## Related Resources
 
 - **CLAUDE.md**: Project-level configuration and commands
