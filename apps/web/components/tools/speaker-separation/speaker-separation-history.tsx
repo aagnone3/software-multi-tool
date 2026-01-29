@@ -5,14 +5,10 @@ import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card } from "@ui/components/card";
+import { DataTable, useDataTable } from "@ui/components/data-table";
 import { Input } from "@ui/components/input";
 import {
 	Select,
@@ -21,14 +17,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@ui/components/table";
 import {
 	AlertCircle,
 	AudioLines,
@@ -254,12 +242,18 @@ export function SpeakerSeparationHistory() {
 		[],
 	);
 
-	const table = useReactTable({
+	const { table } = useDataTable({
 		data: paginatedJobs,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		manualPagination: true,
+		enablePagination: false, // We handle pagination externally with URL state
+		enableSorting: false, // Client-side filtering handles this
 	});
+
+	const handleRowClick = (job: SpeakerSeparationJob) => {
+		if (job.status === "COMPLETED" || job.status === "FAILED") {
+			window.location.href = `/app/tools/speaker-separation/${job.id}`;
+		}
+	};
 
 	return (
 		<Card className="p-6">
@@ -299,101 +293,49 @@ export function SpeakerSeparationHistory() {
 				</Select>
 			</div>
 
-			<div className="rounded-md border">
-				<Table>
-					<TableHeader>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<TableHead key={header.id}>
-										{header.isPlaceholder
-											? null
-											: flexRender(
-													header.column.columnDef
-														.header,
-													header.getContext(),
-												)}
-									</TableHead>
-								))}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									className="cursor-pointer transition-colors duration-150 hover:bg-muted/50"
-									onClick={() => {
-										const job = row.original;
-										if (
-											job.status === "COMPLETED" ||
-											job.status === "FAILED"
-										) {
-											window.location.href = `/app/tools/speaker-separation/${job.id}`;
-										}
-									}}
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center"
-								>
-									{isLoading ? (
-										<div className="flex h-full items-center justify-center">
-											<Spinner className="mr-2 size-4 text-primary" />
-											Loading history...
-										</div>
-									) : filteredJobs.length === 0 &&
-										(debouncedSearchTerm ||
-											statusFilter) ? (
-										<div className="text-muted-foreground">
-											<p>
-												No analyses match your search
-												criteria.
-											</p>
-											<Button
-												variant="link"
-												className="mt-2"
-												onClick={() => {
-													setSearchTerm("");
-													setStatusFilter("");
-												}}
-											>
-												Clear filters
-											</Button>
-										</div>
-									) : (
-										<div className="flex flex-col items-center py-8 text-center">
-											<div className="flex size-16 items-center justify-center rounded-full bg-muted mb-4">
-												<AudioLines className="size-8 text-muted-foreground" />
-											</div>
-											<h3 className="font-semibold text-foreground">
-												No analyses yet
-											</h3>
-											<p className="mt-1 text-sm text-muted-foreground max-w-xs">
-												Analyze your first audio file to
-												see your results history here.
-											</p>
-										</div>
-									)}
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+			<DataTable
+				table={table}
+				columns={columns.length}
+				isLoading={isLoading}
+				loadingMessage={
+					<div className="flex items-center justify-center">
+						<Spinner className="mr-2 size-4 text-primary" />
+						Loading history...
+					</div>
+				}
+				emptyMessage={
+					filteredJobs.length === 0 &&
+					(debouncedSearchTerm || statusFilter) ? (
+						<div className="text-muted-foreground">
+							<p>No analyses match your search criteria.</p>
+							<Button
+								variant="link"
+								className="mt-2"
+								onClick={() => {
+									setSearchTerm("");
+									setStatusFilter("");
+								}}
+							>
+								Clear filters
+							</Button>
+						</div>
+					) : (
+						<div className="flex flex-col items-center py-8 text-center">
+							<div className="flex size-16 items-center justify-center rounded-full bg-muted mb-4">
+								<AudioLines className="size-8 text-muted-foreground" />
+							</div>
+							<h3 className="font-semibold text-foreground">
+								No analyses yet
+							</h3>
+							<p className="mt-1 text-sm text-muted-foreground max-w-xs">
+								Analyze your first audio file to see your
+								results history here.
+							</p>
+						</div>
+					)
+				}
+				onRowClick={handleRowClick}
+			/>
 
 			{filteredJobs.length > ITEMS_PER_PAGE && (
 				<Pagination

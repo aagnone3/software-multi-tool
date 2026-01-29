@@ -8,14 +8,9 @@ import { UserAvatar } from "@shared/components/UserAvatar";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	getPaginationRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
 import { Button } from "@ui/components/button";
 import { Card } from "@ui/components/card";
+import { DataTable, useDataTable } from "@ui/components/data-table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -23,7 +18,6 @@ import {
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
 import { Input } from "@ui/components/input";
-import { Table, TableBody, TableCell, TableRow } from "@ui/components/table";
 import {
 	MoreVerticalIcon,
 	Repeat1Icon,
@@ -283,11 +277,10 @@ export function UserList() {
 
 	const users = useMemo(() => data?.users ?? [], [data?.users]);
 
-	const table = useReactTable({
+	const { table } = useDataTable({
 		data: users,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
+		enablePagination: true,
 		manualPagination: true,
 	});
 
@@ -302,51 +295,19 @@ export function UserList() {
 				className="mb-4"
 			/>
 
-			<div className="rounded-md border">
-				<Table>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									data-state={
-										row.getIsSelected() && "selected"
-									}
-									className="group"
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell
-											key={cell.id}
-											className="py-2 group-first:rounded-t-md group-last:rounded-b-md"
-										>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center"
-								>
-									{isLoading ? (
-										<div className="flex h-full items-center justify-center">
-											<Spinner className="mr-2 size-4 text-primary" />
-											Loading users...
-										</div>
-									) : (
-										<p>No results.</p>
-									)}
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+			<DataTable
+				table={table}
+				columns={columns.length}
+				isLoading={isLoading}
+				loadingMessage={
+					<div className="flex items-center justify-center">
+						<Spinner className="mr-2 size-4 text-primary" />
+						Loading users...
+					</div>
+				}
+				emptyMessage="No results."
+				hideHeaders
+			/>
 
 			{data?.total && data.total > ITEMS_PER_PAGE && (
 				<Pagination

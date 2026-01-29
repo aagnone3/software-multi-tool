@@ -10,29 +10,16 @@ import {
 } from "@saas/organizations/lib/api";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import { useQueryClient } from "@tanstack/react-query";
-import type {
-	ColumnDef,
-	ColumnFiltersState,
-	SortingState,
-} from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@ui/components/button";
+import { DataTable, useDataTable } from "@ui/components/data-table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
-import { Table, TableBody, TableCell, TableRow } from "@ui/components/table";
 import { LogOutIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
 
@@ -44,8 +31,6 @@ export function OrganizationMembersList({
 	const queryClient = useQueryClient();
 	const { user } = useSession();
 	const { data: organization } = useFullOrganizationQuery(organizationId);
-	const [sorting, setSorting] = useState<SortingState>([]);
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const memberRoles = useOrganizationMemberRoles();
 
 	const userIsOrganizationAdmin = isOrganizationAdmin(organization, user);
@@ -202,54 +187,21 @@ export function OrganizationMembersList({
 		},
 	];
 
-	const table = useReactTable({
+	const { table } = useDataTable({
 		data: organization?.members ?? [],
 		columns,
+		enablePagination: true,
+		enableSorting: true,
+		enableFiltering: true,
 		manualPagination: true,
-		onSortingChange: setSorting,
-		onColumnFiltersChange: setColumnFilters,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		state: {
-			sorting,
-			columnFilters,
-		},
 	});
 
 	return (
-		<div className="rounded-md border">
-			<Table>
-				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && "selected"}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
-										{flexRender(
-											cell.column.columnDef.cell,
-											cell.getContext(),
-										)}
-									</TableCell>
-								))}
-							</TableRow>
-						))
-					) : (
-						<TableRow>
-							<TableCell
-								colSpan={columns.length}
-								className="h-24 text-center"
-							>
-								No results.
-							</TableCell>
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
+		<DataTable
+			table={table}
+			columns={columns.length}
+			emptyMessage="No results."
+			hideHeaders
+		/>
 	);
 }

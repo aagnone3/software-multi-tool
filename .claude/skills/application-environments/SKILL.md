@@ -14,6 +14,19 @@ allowed-tools:
 
 This project uses a **preview-first development model**: local development for fast frontend iteration, preview deployments for full-stack testing.
 
+## Skill Behavior: Setting Up Local Dev
+
+**When the user asks to "set up local dev" or similar, you MUST:**
+
+1. Check if Supabase local is running (`supabase status`)
+2. Start Supabase if not running (`supabase start`)
+3. Verify `.env.local` files exist for web and api-server
+4. Create them from examples if missing
+5. **Start the dev servers** (`pnpm dev`)
+6. Report the URLs where services are available
+
+Setup is **not complete** until `pnpm dev` is running and the user can access the application.
+
 > **🚨 CRITICAL: Only use Supabase databases 🚨**
 >
 > This project requires **Supabase Local** (port 54322) or **Supabase Preview** for development.

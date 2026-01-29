@@ -5,15 +5,10 @@ import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	getPaginationRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card } from "@ui/components/card";
+import { DataTable, useDataTable } from "@ui/components/data-table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -28,14 +23,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@ui/components/table";
 import { CheckCircle2Icon, DownloadIcon, XCircleIcon } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo } from "react";
@@ -271,11 +258,10 @@ export function AuditLogList() {
 
 	const logs = useMemo(() => (data?.logs ?? []) as AuditLog[], [data?.logs]);
 
-	const table = useReactTable({
+	const { table } = useDataTable({
 		data: logs,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
+		enablePagination: true,
 		manualPagination: true,
 	});
 
@@ -366,64 +352,18 @@ export function AuditLogList() {
 				</Select>
 			</div>
 
-			<div className="rounded-md border">
-				<Table>
-					<TableHeader>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<TableHead key={header.id}>
-										{header.isPlaceholder
-											? null
-											: flexRender(
-													header.column.columnDef
-														.header,
-													header.getContext(),
-												)}
-									</TableHead>
-								))}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									data-state={
-										row.getIsSelected() && "selected"
-									}
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="h-24 text-center"
-								>
-									{isLoading ? (
-										<div className="flex h-full items-center justify-center">
-											<Spinner className="mr-2 size-4 text-primary" />
-											Loading audit logs...
-										</div>
-									) : (
-										<p>No results.</p>
-									)}
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+			<DataTable
+				table={table}
+				columns={columns.length}
+				isLoading={isLoading}
+				loadingMessage={
+					<div className="flex items-center justify-center">
+						<Spinner className="mr-2 size-4 text-primary" />
+						Loading audit logs...
+					</div>
+				}
+				emptyMessage="No results."
+			/>
 
 			{data?.total && data.total > ITEMS_PER_PAGE && (
 				<Pagination
