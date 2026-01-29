@@ -1,6 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type {
+	SpeakerSegment,
+	SpeakerSeparationOutput,
+} from "@repo/api/modules/speaker-separation/types";
+import { formatDuration } from "@repo/utils";
 import { Button } from "@ui/components/button";
 import { Card, CardContent } from "@ui/components/card";
 import {
@@ -12,7 +17,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@ui/components/form";
-import { cn } from "@ui/lib";
+import { cn, getEntityColor } from "@ui/lib";
 import {
 	ArrowRightIcon,
 	AudioLinesIcon,
@@ -49,114 +54,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-/**
- * Speaker segment from the speaker separation output.
- */
-interface SpeakerSegment {
-	speaker: string;
-	text: string;
-	startTime: number;
-	endTime: number;
-	confidence: number;
-}
-
-/**
- * Per-speaker statistics.
- */
-interface SpeakerStats {
-	id: string;
-	label: string;
-	totalTime: number;
-	percentage: number;
-	segmentCount: number;
-}
-
-/**
- * Speaker separation output structure.
- */
-interface SpeakerSeparationOutput {
-	speakerCount: number;
-	duration: number;
-	speakers: SpeakerStats[];
-	segments: SpeakerSegment[];
-	transcript: string;
-}
-
-/**
- * Format duration in seconds to MM:SS or HH:MM:SS.
- */
-function formatDuration(seconds: number): string {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = Math.floor(seconds % 60);
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
-}
-
-/**
- * Get a color for a speaker based on their index.
- */
-function getSpeakerColor(speakerIndex: number): {
-	bg: string;
-	text: string;
-	bar: string;
-	border: string;
-} {
-	const colors = [
-		{
-			bg: "bg-blue-100 dark:bg-blue-900/30",
-			text: "text-blue-700 dark:text-blue-300",
-			bar: "bg-blue-500",
-			border: "border-blue-300 dark:border-blue-700",
-		},
-		{
-			bg: "bg-emerald-100 dark:bg-emerald-900/30",
-			text: "text-emerald-700 dark:text-emerald-300",
-			bar: "bg-emerald-500",
-			border: "border-emerald-300 dark:border-emerald-700",
-		},
-		{
-			bg: "bg-amber-100 dark:bg-amber-900/30",
-			text: "text-amber-700 dark:text-amber-300",
-			bar: "bg-amber-500",
-			border: "border-amber-300 dark:border-amber-700",
-		},
-		{
-			bg: "bg-purple-100 dark:bg-purple-900/30",
-			text: "text-purple-700 dark:text-purple-300",
-			bar: "bg-purple-500",
-			border: "border-purple-300 dark:border-purple-700",
-		},
-		{
-			bg: "bg-pink-100 dark:bg-pink-900/30",
-			text: "text-pink-700 dark:text-pink-300",
-			bar: "bg-pink-500",
-			border: "border-pink-300 dark:border-pink-700",
-		},
-		{
-			bg: "bg-cyan-100 dark:bg-cyan-900/30",
-			text: "text-cyan-700 dark:text-cyan-300",
-			bar: "bg-cyan-500",
-			border: "border-cyan-300 dark:border-cyan-700",
-		},
-		{
-			bg: "bg-orange-100 dark:bg-orange-900/30",
-			text: "text-orange-700 dark:text-orange-300",
-			bar: "bg-orange-500",
-			border: "border-orange-300 dark:border-orange-700",
-		},
-		{
-			bg: "bg-indigo-100 dark:bg-indigo-900/30",
-			text: "text-indigo-700 dark:text-indigo-300",
-			bar: "bg-indigo-500",
-			border: "border-indigo-300 dark:border-indigo-700",
-		},
-	];
-	return colors[speakerIndex % colors.length];
-}
+/** Alias getEntityColor for speaker-specific usage */
+const getSpeakerColor = getEntityColor;
 
 /**
  * Timeline visualization showing speaker segments with transcripts.

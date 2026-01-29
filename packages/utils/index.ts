@@ -1,2 +1,3 @@
 export * from "./lib/api-url";
 export * from "./lib/base-url";
+export * from "./lib/format-duration";
