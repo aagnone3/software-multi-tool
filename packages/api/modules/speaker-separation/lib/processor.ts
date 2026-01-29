@@ -132,6 +132,7 @@ async function getAudioBuffer(
 	input: SpeakerSeparationInput,
 ): Promise<Buffer> {
 	// Priority 1: Use storage URL from job record (set during job creation)
+	// All audio files are stored in the files bucket
 	if (job.audioFileUrl) {
 		logger.info(
 			`[SpeakerSeparation] Downloading audio from storage: ${job.audioFileUrl}`,

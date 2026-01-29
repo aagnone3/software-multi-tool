@@ -1,5 +1,5 @@
 import { ORPCError } from "@orpc/client";
-import { createToolJob, findCachedJob, type Prisma } from "@repo/database";
+import { createToolJob, db, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
 import { shouldUseSupabaseStorage } from "@repo/storage";
 import { publicProcedure } from "../../../orpc/procedures";
@@ -33,16 +33,21 @@ export const createJob = publicProcedure
 			inputKeys: Object.keys(jobInput || {}),
 		});
 
-		// Try to get user from session if authenticated
+		// Try to get user and organization from session if authenticated
 		let userId: string | undefined;
+		let organizationId: string | undefined;
 		try {
 			const { auth } = await import("@repo/auth");
 			const session = await auth.api.getSession({
 				headers: context.headers,
 			});
 			userId = session?.user?.id;
+			organizationId =
+				session?.session?.activeOrganizationId ?? undefined;
 			if (userId) {
-				logger.debug(`[CreateJob] Authenticated user found: ${userId}`);
+				logger.debug(
+					`[CreateJob] Authenticated user found: ${userId}, org: ${organizationId ?? "none"}`,
+				);
 			}
 		} catch (error) {
 			logger.debug(
@@ -83,14 +88,24 @@ export const createJob = publicProcedure
 
 		// Handle audio storage for speaker-separation jobs
 		let audioFileUrl: string | undefined;
-		let audioMetadata: AudioMetadata | undefined;
+		let audioMetadata: (AudioMetadata & { size: number }) | undefined;
 		let processedInput = jobInput as Record<string, unknown>;
 
-		if (
-			AUDIO_STORAGE_TOOLS.has(toolSlug) &&
-			shouldUseSupabaseStorage() &&
-			processedInput.audioFile
-		) {
+		if (AUDIO_STORAGE_TOOLS.has(toolSlug) && processedInput.audioFile) {
+			// Speaker separation requires organization context for file storage
+			if (!organizationId || !userId) {
+				throw new ORPCError("BAD_REQUEST", {
+					message:
+						"Speaker separation requires authentication with an active organization",
+				});
+			}
+
+			if (!shouldUseSupabaseStorage()) {
+				throw new ORPCError("INTERNAL_SERVER_ERROR", {
+					message: "Storage is not configured",
+				});
+			}
+
 			const audioFile = processedInput.audioFile as {
 				content: string;
 				filename: string;
@@ -98,57 +113,67 @@ export const createJob = publicProcedure
 				duration?: number;
 			};
 
-			// Generate a temporary job ID for the storage key
-			// We'll create the job with this key, then the storage key becomes permanent
-			const tempJobId = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-
 			logger.info(
-				`[CreateJob] Uploading audio to storage for temp job: ${tempJobId}`,
+				`[CreateJob] Uploading audio to storage for organization: ${organizationId}`,
 			);
 
-			try {
-				// Prepare metadata
-				audioMetadata = {
+			// Upload to the files bucket
+			const uploadResult = await uploadAudioToStorage(
+				organizationId,
+				audioFile.content,
+				{
 					filename: audioFile.filename,
 					mimeType: audioFile.mimeType,
 					duration: audioFile.duration,
-					size: audioFile.content.length, // Base64 size (actual is ~75% of this)
-				};
+				},
+			);
 
-				// Upload to storage
-				audioFileUrl = await uploadAudioToStorage(
-					tempJobId,
-					audioFile.content,
-					audioMetadata,
-				);
+			// Prepare metadata
+			audioMetadata = {
+				filename: audioFile.filename,
+				mimeType: audioFile.mimeType,
+				duration: audioFile.duration,
+				size: uploadResult.size,
+			};
 
-				// Remove base64 content from input to reduce job size
-				// Keep other audioFile fields for reference
-				processedInput = {
-					...processedInput,
-					audioFile: {
-						filename: audioFile.filename,
-						mimeType: audioFile.mimeType,
-						duration: audioFile.duration,
-						// content removed - now in storage
-					},
-					audioFileUrl, // Add storage reference to input
-				};
+			audioFileUrl = uploadResult.storagePath;
 
-				logger.info(
-					`[CreateJob] Audio uploaded successfully: ${audioFileUrl}`,
-				);
-			} catch (error) {
-				logger.error("[CreateJob] Failed to upload audio to storage", {
-					error:
-						error instanceof Error ? error.message : String(error),
-				});
-				// Fall back to storing base64 in input (legacy behavior)
-				// This ensures the job can still be processed
-				logger.warn(
-					"[CreateJob] Falling back to base64 storage in job input",
-				);
-			}
+			// Register the file in the Files table so it appears in the Files page
+			const file = await db.file.create({
+				data: {
+					organizationId,
+					userId,
+					filename: audioFile.filename,
+					mimeType: audioFile.mimeType,
+					size: uploadResult.size,
+					storagePath: uploadResult.storagePath,
+					bucket: uploadResult.bucket,
+				},
+			});
+
+			logger.info(
+				`[CreateJob] File registered in Files table: ${file.id}`,
+				{
+					filename: audioFile.filename,
+					organizationId,
+				},
+			);
+
+			// Remove base64 content from input to reduce job size
+			processedInput = {
+				...processedInput,
+				audioFile: {
+					filename: audioFile.filename,
+					mimeType: audioFile.mimeType,
+					duration: audioFile.duration,
+					// content removed - now in storage
+				},
+				audioFileUrl, // Add storage reference to input
+			};
+
+			logger.info(
+				`[CreateJob] Audio uploaded successfully: ${audioFileUrl}`,
+			);
 		}
 
 		const job = await createToolJob({
@@ -158,7 +183,9 @@ export const createJob = publicProcedure
 			sessionId: userId ? undefined : sessionId, // Only use sessionId if not authenticated
 			priority,
 			audioFileUrl,
-			audioMetadata: audioMetadata as Prisma.InputJsonValue | undefined,
+			audioMetadata: audioMetadata as unknown as
+				| Prisma.InputJsonValue
+				| undefined,
 		});
 
 		if (!job) {

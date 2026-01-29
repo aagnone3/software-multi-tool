@@ -74,7 +74,8 @@ This single command:
 4. ✅ Allocates unique ports for web app and api-server
 5. ✅ Installs dependencies and generates Prisma client
 6. ✅ Verifies database seeding with correct test user
-7. ✅ Runs baseline type-check verification
+7. ✅ **Configures Supabase Local storage** (SUPABASE_URL + service role key)
+8. ✅ Runs baseline type-check verification
 
 ### Branch Types
 

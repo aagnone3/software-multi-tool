@@ -608,8 +608,58 @@ setup_worktree_environment() {
     fi
   fi
 
-  # Step 7: Run baseline verification
-  log_step "Step 7: Running baseline verification"
+  # Step 7: Configure Supabase Local Storage
+  log_step "Step 7: Configuring Supabase Local Storage"
+
+  # Supabase local storage requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+  # These are standard local development values for Supabase
+  local supabase_local_url="http://127.0.0.1:54321"
+  local supabase_service_role_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+
+  # Configure web app storage
+  if [ -f "$web_env_file" ]; then
+    if ! grep -q "^SUPABASE_URL=" "$web_env_file" 2>/dev/null; then
+      {
+        echo ""
+        echo "# Supabase Local Storage Configuration (auto-configured by worktree-setup.sh)"
+        echo "SUPABASE_URL=$supabase_local_url"
+        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key"
+      } >> "$web_env_file"
+      log_success "Web app Supabase storage configured"
+    else
+      # Update existing values to use local
+      sed -i.bak "s|^SUPABASE_URL=.*|SUPABASE_URL=$supabase_local_url|" "$web_env_file"
+      rm -f "$web_env_file.bak"
+      if ! grep -q "^SUPABASE_SERVICE_ROLE_KEY=" "$web_env_file" 2>/dev/null; then
+        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key" >> "$web_env_file"
+      fi
+      log_success "Web app Supabase storage updated for local"
+    fi
+  fi
+
+  # Configure api-server storage
+  if [ -f "$api_env_file" ]; then
+    if ! grep -q "^SUPABASE_URL=" "$api_env_file" 2>/dev/null; then
+      {
+        echo ""
+        echo "# Supabase Local Storage Configuration (auto-configured by worktree-setup.sh)"
+        echo "SUPABASE_URL=$supabase_local_url"
+        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key"
+      } >> "$api_env_file"
+      log_success "API server Supabase storage configured"
+    else
+      # Update existing values to use local
+      sed -i.bak "s|^SUPABASE_URL=.*|SUPABASE_URL=$supabase_local_url|" "$api_env_file"
+      rm -f "$api_env_file.bak"
+      if ! grep -q "^SUPABASE_SERVICE_ROLE_KEY=" "$api_env_file" 2>/dev/null; then
+        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key" >> "$api_env_file"
+      fi
+      log_success "API server Supabase storage updated for local"
+    fi
+  fi
+
+  # Step 8: Run baseline verification
+  log_step "Step 8: Running baseline verification"
 
   log_info "Running type check..."
   if pnpm --filter web run type-check 2>/dev/null; then

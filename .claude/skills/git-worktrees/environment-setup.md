@@ -148,6 +148,27 @@ supabase db reset  # Apply migrations + seed
 - Storage buckets created
 - Test user works immediately (`test@preview.local` / `TestPassword123`)
 
+### Supabase Storage Configuration
+
+The worktree setup script automatically configures Supabase local storage by adding these environment variables:
+
+```bash
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+These are **required** for features that use Supabase storage (file uploads, speaker separation audio files, etc.). The `SUPABASE_SERVICE_ROLE_KEY` is the standard local development key used by Supabase CLI.
+
+**If storage features fail with "Storage is not configured"**:
+
+```bash
+# Add to both apps/web/.env.local and apps/api-server/.env.local
+echo 'SUPABASE_URL=http://127.0.0.1:54321' >> apps/web/.env.local
+echo 'SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU' >> apps/web/.env.local
+
+# Then restart dev servers
+```
+
 ## Database URL Consistency
 
 The setup script verifies web app and api-server use the **same database URL**. If they differ, jobs created by web won't be processed by api-server workers.

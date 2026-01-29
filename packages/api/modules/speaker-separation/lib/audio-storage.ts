@@ -1,3 +1,4 @@
+import { config } from "@repo/config";
 import { logger } from "@repo/logs";
 import {
 	getDefaultSupabaseProvider,
@@ -5,38 +6,44 @@ import {
 } from "@repo/storage";
 import type { AudioMetadata } from "../types";
 
-/** Storage bucket for speaker separation audio files */
-const AUDIO_BUCKET = "audio-uploads";
-
-/** Storage path prefix for speaker separation files */
-const STORAGE_PREFIX = "speaker-separation";
-
-/** Audio file retention period in days */
-export const AUDIO_RETENTION_DAYS = 30;
-
 /**
- * Generates the storage key/path for an audio file.
- * Format: speaker-separation/{jobId}.{extension}
+ * Result from uploading audio to storage.
  */
-export function getAudioStorageKey(jobId: string, filename: string): string {
-	// Extract extension from filename
-	const ext = filename.split(".").pop()?.toLowerCase() ?? "audio";
-	return `${STORAGE_PREFIX}/${jobId}.${ext}`;
+export interface AudioUploadResult {
+	/** Storage path of the uploaded file */
+	storagePath: string;
+	/** Bucket name where the file was stored */
+	bucket: string;
+	/** Actual file size in bytes after decoding from base64 */
+	size: number;
 }
 
 /**
- * Upload audio file to storage and return the storage key.
+ * Generates the storage key/path for an audio file in the Files bucket.
+ * Format: organizations/{orgId}/files/{timestamp}-{filename}
+ */
+export function getAudioStorageKey(
+	organizationId: string,
+	filename: string,
+): string {
+	const timestamp = Date.now();
+	const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+	return `organizations/${organizationId}/files/${timestamp}-${sanitizedFilename}`;
+}
+
+/**
+ * Upload audio file to the files bucket and return the storage details.
  *
- * @param jobId - The job ID to associate with the file
+ * @param organizationId - Organization ID for the storage path
  * @param base64Content - Base64-encoded audio content
  * @param metadata - Audio file metadata
- * @returns Storage key (path) of the uploaded file
+ * @returns Storage details including path, bucket, and size
  */
 export async function uploadAudioToStorage(
-	jobId: string,
+	organizationId: string,
 	base64Content: string,
 	metadata: AudioMetadata,
-): Promise<string> {
+): Promise<AudioUploadResult> {
 	// Only use Supabase storage if configured
 	if (!shouldUseSupabaseStorage()) {
 		logger.warn(
@@ -46,7 +53,8 @@ export async function uploadAudioToStorage(
 	}
 
 	const provider = getDefaultSupabaseProvider();
-	const storageKey = getAudioStorageKey(jobId, metadata.filename);
+	const bucket = config.storage.bucketNames.files;
+	const storagePath = getAudioStorageKey(organizationId, metadata.filename);
 
 	// Convert base64 to buffer
 	// Handle data URL format (e.g., "data:audio/wav;base64,...")
@@ -55,24 +63,30 @@ export async function uploadAudioToStorage(
 		: base64Content;
 	const buffer = Buffer.from(base64Data, "base64");
 
-	logger.info(`[AudioStorage] Uploading audio file: ${storageKey}`, {
-		jobId,
+	logger.info(`[AudioStorage] Uploading audio file: ${storagePath}`, {
+		organizationId,
 		filename: metadata.filename,
 		mimeType: metadata.mimeType,
 		size: buffer.length,
+		bucket,
 	});
 
-	await provider.upload(storageKey, buffer, {
-		bucket: AUDIO_BUCKET,
+	await provider.upload(storagePath, buffer, {
+		bucket,
 		contentType: metadata.mimeType,
 	});
 
-	logger.info(`[AudioStorage] Upload complete: ${storageKey}`);
-	return storageKey;
+	logger.info(`[AudioStorage] Upload complete: ${storagePath} (${bucket})`);
+
+	return {
+		storagePath,
+		bucket,
+		size: buffer.length,
+	};
 }
 
 /**
- * Get a signed download URL for an audio file.
+ * Get a signed download URL for an audio file from the files bucket.
  *
  * @param storageKey - The storage key/path of the audio file
  * @param expiresIn - URL expiration time in seconds (default: 1 hour)
@@ -87,8 +101,9 @@ export async function getAudioDownloadUrl(
 	}
 
 	const provider = getDefaultSupabaseProvider();
+	const bucket = config.storage.bucketNames.files;
 	return provider.getSignedDownloadUrl(storageKey, {
-		bucket: AUDIO_BUCKET,
+		bucket,
 		expiresIn,
 	});
 }
@@ -136,9 +151,10 @@ export async function deleteAudioFromStorage(
 	}
 
 	const provider = getDefaultSupabaseProvider();
+	const bucket = config.storage.bucketNames.files;
 
 	logger.info(`[AudioStorage] Deleting audio file: ${storageKey}`);
-	await provider.delete(storageKey, AUDIO_BUCKET);
+	await provider.delete(storageKey, bucket);
 	logger.info(`[AudioStorage] Delete complete: ${storageKey}`);
 }
 
@@ -156,5 +172,6 @@ export async function audioExistsInStorage(
 	}
 
 	const provider = getDefaultSupabaseProvider();
-	return provider.exists(storageKey, AUDIO_BUCKET);
+	const bucket = config.storage.bucketNames.files;
+	return provider.exists(storageKey, bucket);
 }
