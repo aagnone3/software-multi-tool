@@ -1,5 +1,6 @@
 import { serve } from "inngest/next";
 import { inngest } from "../../../inngest/client";
+import { newsAnalyzer } from "../../../inngest/functions/news-analyzer";
 
 /**
  * Inngest serve endpoint for handling background jobs.
@@ -18,8 +19,8 @@ import { inngest } from "../../../inngest/client";
 export const { GET, POST, PUT } = serve({
 	client: inngest,
 	functions: [
+		newsAnalyzer,
 		// Functions will be added here as they are migrated:
-		// - newsAnalyzer (US-007)
 		// - speakerSeparation (US-008)
 		// - invoiceProcessor (US-009)
 		// - contractAnalyzer (US-009)
