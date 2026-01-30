@@ -1,6 +1,6 @@
 ---
 name: prisma-migrate
-description: Provides Prisma database migration workflows with safety checks and advisory locking. Use when creating migrations, validating schema changes, debugging drift, or working with pg-boss schema. Covers validation scripts, staging helpers, and migration review workflows.
+description: Provides Prisma database migration workflows with safety checks and advisory locking. Use when creating migrations, validating schema changes, or debugging drift. Covers validation scripts, staging helpers, and migration review workflows.
 allowed-tools:
   - Bash
   - Read
@@ -383,25 +383,6 @@ When working on features that require database changes:
 5. Run tests: `pnpm test`
 6. Commit schema + migration + code changes together
 
-## pg-boss Schema Management
-
-This project uses pg-boss for background job processing. The pg-boss schema is managed through Prisma migrations using raw SQL (because pg-boss uses partitioned tables and stored functions that Prisma cannot model).
-
-**Key points:**
-
-- pg-boss schema version **24** is required for pg-boss 10.4.x
-- Always use `migrate: false` in application code
-- See existing migration: `packages/database/prisma/migrations/20260112205243_add_pgboss_schema/`
-
-**Quick commands:**
-
-```bash
-pnpm --filter @repo/database pgboss:verify  # Verify pg-boss works
-pnpm --filter @repo/database run test:integration  # Run integration tests (requires Docker)
-```
-
-📖 **For detailed pg-boss migration workflows, troubleshooting, and version pinning, see [pgboss-reference.md](./pgboss-reference.md)**
-
 ## When to Use This Skill
 
 Invoke this skill when:
@@ -411,7 +392,8 @@ Invoke this skill when:
 - User needs to create/stage/execute a migration
 - User encounters migration errors or drift
 - User asks about database changes
-- User needs to work with pg-boss schema or background jobs
+
+**Note**: Background jobs are now handled by **Inngest** (not pg-boss). See the architecture skill for Inngest documentation.
 
 ## Related Skills
 

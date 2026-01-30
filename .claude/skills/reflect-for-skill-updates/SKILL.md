@@ -131,7 +131,7 @@ Use this template to structure your reflection:
 ### Undocumented Dependencies
 
 **Pattern**: Feature X only works if Y is configured, but Y isn't mentioned
-**Example**: Jobs only process if api-server is running with pg-boss enabled
+**Example**: Inngest functions require INNGEST_EVENT_KEY and INNGEST_SIGNING_KEY to be set
 **Fix**: Document dependencies explicitly in the relevant skill
 
 ### Silent Failures
@@ -148,19 +148,19 @@ Use this template to structure your reflection:
 
 ## Example Reflection
 
-**Issue**: News analyzer jobs were created but never processed.
+**Issue**: Inngest jobs were created but never processed in local development.
 
-**Root Cause**: Web app `.env.local` had `POSTGRES_PRISMA_URL` pointing to Supabase local (port 54322), while api-server `.env.local` pointed to Homebrew Postgres (port 5432). Jobs were written to one database, workers polled another.
+**Root Cause**: The Inngest dev server wasn't running. Unlike production where Inngest Cloud handles job execution, local development requires `npx inngest-cli@latest dev` to be running.
 
-**Impact**: ~30 minutes debugging, user confusion about whether the feature was broken.
+**Impact**: ~20 minutes debugging, user confusion about whether the feature was broken.
 
 **Fix Applied**:
 
-1. Updated `tooling/scripts/src/worktree-setup.sh` to verify database URL consistency
-2. Added troubleshooting section to `.claude/skills/git-worktrees/SKILL.md`
-3. Script now auto-syncs URLs if they differ
+1. Updated `.claude/skills/application-environments/SKILL.md` to mention Inngest dev server
+2. Added troubleshooting section to debugging skill
+3. Updated local dev quick start to include Inngest
 
-**Prevention**: Future worktree setups will automatically detect and fix this mismatch before development begins.
+**Prevention**: Future local development setup guidance now explicitly mentions starting the Inngest dev server for background job testing.
 
 ## Skills Commonly Needing Updates
 

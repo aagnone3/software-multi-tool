@@ -4,7 +4,7 @@ description: Stop local dev servers for the current worktree with graceful shutd
 
 # Stop Applications
 
-Stop the local development servers (web app and api-server) for the current worktree or main repository.
+Stop the local development server (web app) for the current worktree or main repository.
 
 ## Identify Running Processes
 
@@ -27,14 +27,7 @@ fi
 # Web app port
 WEB_PORT=$(grep "^PORT=" apps/web/.env.local 2>/dev/null | tail -1 | cut -d= -f2 | tr -d '"' || echo "")
 
-# API server port (if exists)
-if [ -f apps/api-server/.env.local ]; then
-  API_PORT=$(grep "^PORT=" apps/api-server/.env.local 2>/dev/null | tail -1 | cut -d= -f2 | tr -d '"' || echo "")
-else
-  API_PORT=""
-fi
-
-echo "Configured ports - Web: ${WEB_PORT:-not set}, API: ${API_PORT:-N/A}"
+echo "Configured port - Web: ${WEB_PORT:-not set}"
 ```
 
 ### 3. Find Running Processes
@@ -57,16 +50,6 @@ if [ -n "$WEB_PORT" ]; then
   fi
 else
   echo "No web port configured in .env.local"
-fi
-
-if [ -n "$API_PORT" ]; then
-  API_PIDS=$(lsof -i ":$API_PORT" -t 2>/dev/null || true)
-  if [ -n "$API_PIDS" ]; then
-    echo "API server processes on port $API_PORT:"
-    get_port_processes "$API_PORT"
-  else
-    echo "No processes on API port $API_PORT"
-  fi
 fi
 ```
 
@@ -152,22 +135,12 @@ force_stop_port() {
 ```bash
 stop_all() {
   local web_port=$1
-  local api_port=$2
   local errors=0
 
   # Stop web server
   if [ -n "$web_port" ]; then
     if ! stop_port "$web_port" "Web app"; then
       if ! force_stop_port "$web_port" "Web app"; then
-        errors=$((errors + 1))
-      fi
-    fi
-  fi
-
-  # Stop API server (if configured)
-  if [ -n "$api_port" ]; then
-    if ! stop_port "$api_port" "API server"; then
-      if ! force_stop_port "$api_port" "API server"; then
         errors=$((errors + 1))
       fi
     fi
@@ -219,11 +192,9 @@ Display a summary:
 
 Configured ports:
   • Web app:    <web-port>
-  • API server: <api-port>
 
 Stopping processes...
   ✓ Web app (port <web-port>): Stopped gracefully
-  ✓ API server (port <api-port>): Stopped gracefully
 
 All applications stopped.
 ```
@@ -279,7 +250,6 @@ Present confirmation via AskUserQuestion before stopping all servers.
 
 Configured ports:
   • Web app:    <port> (not in use)
-  • API server: <port> (not in use)
 ```
 
 ### No Ports Configured
@@ -330,7 +300,6 @@ Reading configured ports...
 ```text
 Configured ports:
   • Web app:    3742
-  • API server: 4242
 ```
 
 Checking for running processes...
@@ -338,9 +307,6 @@ Checking for running processes...
 ```text
 Web server processes on port 3742:
   PID: 12345, Command: node, User: developer
-
-API server processes on port 4242:
-  PID: 12400, Command: node, User: developer
 ```
 
 🛑 Stopping applications for: feat-pra-XX-feature-name
@@ -348,8 +314,6 @@ API server processes on port 4242:
 Stopping processes...
   Stopping Web app on port 3742...
   ✓ Web app (port 3742): Stopped gracefully
-  Stopping API server on port 4242...
-  ✓ API server (port 4242): Stopped gracefully
 
 All applications stopped.
 

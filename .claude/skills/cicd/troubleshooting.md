@@ -34,12 +34,6 @@ psql $DATABASE_URL -f supabase/seed.sql
 2. Check GitHub check shows Supabase branch created
 3. Ensure `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` populated
 
-### Render Preview Failing to Start
-
-1. Check build logs for Prisma connection errors
-2. Verify `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` set
-3. Ensure URLs use correct branch database credentials
-
 ### Supabase Branch Database Not Created
 
 1. Verify GitHub integration authorized
@@ -60,20 +54,11 @@ Check if env var is branch-specific:
 vercel env ls preview | grep <VAR_NAME>
 ```
 
-### Jobs Going to Wrong Database
-
-If jobs appear in different PR's database:
-
-1. Check `NEXT_PUBLIC_API_SERVER_URL` points to correct Render service
-2. Verify Render's `DATABASE_URL` points to correct Supabase branch
-3. Re-run preview-sync with correct branch/PR
-4. Trigger Vercel redeploy
-
 ### Session Authentication Not Working in Preview
 
 1. Check browser DevTools Network - requests should go to `/api/proxy/*`
 2. Verify `NEXT_PUBLIC_VERCEL_ENV` is `preview` in Vercel
-3. Verify `API_SERVER_URL` points to Render preview URL
+3. Verify DATABASE_URL points to correct Supabase branch
 4. See **api-proxy** skill for detailed debugging
 
 ## Storage Issues

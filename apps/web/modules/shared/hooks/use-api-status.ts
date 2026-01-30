@@ -21,8 +21,8 @@ export function useApiStatus(): ApiStatusResult {
 	const query = useQuery({
 		queryKey: ["api-health"],
 		queryFn: async () => {
-			// Simple health check to the proxy
-			const response = await fetch("/api/proxy/health", {
+			// Simple health check to the API
+			const response = await fetch("/api/health", {
 				method: "GET",
 			});
 

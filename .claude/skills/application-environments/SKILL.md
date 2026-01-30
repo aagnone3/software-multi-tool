@@ -20,10 +20,10 @@ This project uses a **preview-first development model**: local development for f
 
 1. Check if Supabase local is running (`supabase status`)
 2. Start Supabase if not running (`supabase start`)
-3. Verify `.env.local` files exist for web and api-server
-4. Create them from examples if missing
-5. **Start the dev servers** (`pnpm dev`)
-6. Report the URLs where services are available
+3. Verify `apps/web/.env.local` exists
+4. Create it from example if missing
+5. **Start the dev server** (`pnpm dev`)
+6. Report the URL where the application is available
 
 Setup is **not complete** until `pnpm dev` is running and the user can access the application.
 
@@ -43,7 +43,7 @@ Setup is **not complete** until `pnpm dev` is running and the user can access th
 
 | Environment    | Purpose               | Database       | URL             |
 | -------------- | --------------------- | -------------- | --------------- |
-| **Local**      | Full-stack development| Supabase local | `localhost:3637`|
+| **Local**      | Full-stack development| Supabase local | `localhost:3500`|
 | **Preview**    | Full-stack PR testing | Supabase branch| `*.vercel.app`  |
 | **Production** | Live application      | Supabase main  | Custom domain   |
 
@@ -70,14 +70,12 @@ Setup is **not complete** until `pnpm dev` is running and the user can access th
 ```bash
 pnpm install
 cp apps/web/.env.local.example apps/web/.env.local
-cp apps/api-server/.env.local.example apps/api-server/.env.local
 pnpm dev
 ```
 
 **IMPORTANT**: Always use `pnpm dev` from monorepo root. This starts:
 
-- **Web app**: `http://localhost:3637` (or PORT from `.env.local`)
-- **API server**: `http://localhost:4000` (or PORT from `.env.local`)
+- **Web app**: `http://localhost:3500` (or PORT from `.env.local`)
 
 ### Frontend-Only Development
 
@@ -92,9 +90,9 @@ For fast iteration without backend:
 For authentication, database, and API testing:
 
 ```bash
-pnpm supabase:start   # Start PostgreSQL + Storage + Auth
-pnpm supabase:reset   # Apply migrations and seed data
-pnpm dev              # Start web + api-server
+supabase start        # Start PostgreSQL + Storage + Auth
+supabase db reset     # Apply migrations and seed data
+pnpm dev              # Start Next.js dev server
 ```
 
 **Service URLs (Local)**:
@@ -104,6 +102,22 @@ pnpm dev              # Start web + api-server
 | Supabase Studio | http://127.0.0.1:54323    |
 | PostgreSQL      | localhost:54322           |
 | Mailpit (Email) | http://127.0.0.1:54324    |
+
+### Background Jobs Local (Inngest)
+
+For testing background job processing locally:
+
+```bash
+npx inngest-cli@latest dev    # Start Inngest dev server
+```
+
+This starts a local Inngest dashboard at http://localhost:8288 where you can:
+
+- See registered functions
+- View event history
+- Trace function runs
+
+**Note**: In production, Inngest is installed via the Vercel Marketplace and runs automatically. Local dev requires the CLI.
 
 **Connection string**:
 
@@ -139,11 +153,11 @@ The login page shows "Quick Login as Test User" in preview environments.
 
 Production deploys automatically when PRs merge to `main`.
 
-| Component  | Platform |
-| ---------- | -------- |
-| Web App    | Vercel   |
-| API Server | Render   |
-| Database   | Supabase |
+| Component       | Platform                     |
+| --------------- | ---------------------------- |
+| Web App         | Vercel                       |
+| Background Jobs | Inngest (Vercel Marketplace) |
+| Database        | Supabase                     |
 
 ## Environment Variables
 
@@ -152,7 +166,6 @@ Production deploys automatically when PRs merge to `main`.
 | File                           | When Needed           |
 | ------------------------------ | --------------------- |
 | `apps/web/.env.local`          | Always                |
-| `apps/api-server/.env.local`   | For local API server  |
 
 ### Managing Vercel Variables
 
@@ -170,7 +183,6 @@ See the **git-worktrees** skill for complete worktree environment setup includin
 
 - Port allocation for parallel dev servers
 - Copying and configuring `.env.local` files
-- Database URL consistency between web and api-server
 
 ## Troubleshooting
 
@@ -207,5 +219,4 @@ pnpm supabase:start   # Start if not
 
 - **git-worktrees**: Parallel development with isolated worktrees
 - **cicd**: CI/CD pipelines and preview environment automation
-- **api-proxy**: Preview environment authentication
 - **debugging**: Comprehensive troubleshooting across platforms

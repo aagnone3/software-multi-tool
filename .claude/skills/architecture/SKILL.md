@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Provides comprehensive codebase architecture overview including monorepo structure, hybrid backend (Next.js + Fastify), API layer (Hono + oRPC), frontend patterns (React 19 + TanStack Query), and deployment infrastructure. Use when navigating the codebase, understanding request flow, or learning integration patterns.
+description: Provides comprehensive codebase architecture overview including monorepo structure, Next.js serverless backend, API layer (Hono + oRPC), frontend patterns (React 19 + TanStack Query), background jobs (Inngest), real-time updates (Supabase Realtime), and deployment infrastructure. Use when navigating the codebase, understanding request flow, or learning integration patterns.
 allowed-tools:
   - Read
   - Grep
@@ -18,20 +18,16 @@ This skill provides comprehensive guidance for understanding and navigating the 
 | Backend API      | `packages/api/index.ts`                   |
 | API Router       | `packages/api/orpc/router.ts`             |
 | Procedures       | `packages/api/orpc/procedures.ts`         |
-| **API Server**   | **`apps/api-server/src/index.ts`**        |
-| **API Server**   | **`apps/api-server/src/lib/server.ts`**   |
 | Auth             | `packages/auth/auth.ts`                   |
 | Database         | `packages/database/prisma/schema.prisma`  |
 | Web App          | `apps/web/app/`                           |
 | API Catch-All    | `apps/web/app/api/[[...rest]]/route.ts`   |
-| **API Proxy**    | **`apps/web/app/api/proxy/[...path]/`**   |
 | Environment URLs | `packages/utils/lib/api-url.ts`           |
 | Config           | `config/index.ts`                         |
 | Theme            | `tooling/tailwind/theme.css`              |
 | PR Validation    | `.github/workflows/validate-prs.yml`      |
 | DB Migrations    | `.github/workflows/db-migrate-deploy.yml` |
 | Env Scripts      | `tooling/scripts/src/env/`                |
-| Render Deploy    | `render.yaml`                             |
 | Next.js Config   | `apps/web/next.config.ts`                 |
 | Turbo Config     | `turbo.json`                              |
 
@@ -42,22 +38,20 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 ```text
 /
 ├── apps/
-│   ├── web/                    # Next.js 15 App Router (Vercel)
-│   └── api-server/             # Fastify backend (Render)
+│   └── web/                    # Next.js 15 App Router (Vercel)
 ├── packages/                   # Backend/shared logic
 │   ├── api/                    # Hono + oRPC API
 │   ├── auth/                   # better-auth configuration
 │   ├── database/               # Prisma ORM + Zod schemas
 │   ├── payments/               # Payment providers
 │   ├── mail/                   # Email providers + templates
-│   ├── storage/                # File storage (S3)
+│   ├── storage/                # File storage (Supabase)
 │   ├── ai/                     # AI SDK integration
 │   ├── i18n/                   # Internationalization
 │   ├── logs/                   # Logging
 │   └── utils/                  # Shared utilities
 ├── config/                     # App configuration
-├── tooling/                    # Build infrastructure
-└── render.yaml                 # Render deployment config
+└── tooling/                    # Build infrastructure
 ```
 
 ### Apps
@@ -70,16 +64,6 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 - `app/auth/` - Authentication pages (login, signup, etc.)
 - Dev server runs on port 3500
 
-**`apps/api-server`** - Fastify backend service (deployed to Render)
-
-- `src/index.ts` - Main entry point with graceful shutdown
-- `src/lib/server.ts` - Fastify server configuration with oRPC + WebSocket
-- `src/config/env.ts` - Environment validation with Zod
-- Supports long-running jobs beyond Vercel's timeout limits
-- Native WebSocket support for real-time communication
-- Shares database and auth with Next.js app
-- Dev server runs on port 4000
-
 ### Packages
 
 All backend logic lives in `packages/`:
@@ -91,7 +75,7 @@ All backend logic lives in `packages/`:
 | `@repo/database` | Prisma schema, generated types, Zod schemas           | `prisma/schema.prisma`                   |
 | `@repo/payments` | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
 | `@repo/mail`     | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
-| `@repo/storage`  | AWS S3 file/image storage                             | `index.ts`                               |
+| `@repo/storage`  | Supabase file/image storage                           | `index.ts`                               |
 | `@repo/ai`       | Vercel AI SDK integration                             | `index.ts`                               |
 | `@repo/logs`     | Centralized logging (consola)                         | `index.ts`                               |
 | `@repo/utils`    | Shared utility functions                              | `index.ts`                               |
@@ -110,78 +94,106 @@ All backend logic lives in `packages/`:
 - `scripts/` - CLI tooling for env management, Linear integration, metrics
 - `test/` - Vitest coverage thresholds
 
-## Hybrid Backend Architecture
+## Backend Architecture
 
-The application uses a **dual-backend hybrid architecture** with complementary strengths:
+The application uses **Next.js with Hono + oRPC** for a unified serverless backend.
 
 ### Architecture Overview
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                         User/Browser                             │
-└───────────────┬──────────────────────────────┬──────────────────┘
-                │                               │
-                ▼                               ▼
-    ┌──────────────────────┐        ┌──────────────────────┐
-    │   Next.js Frontend   │        │  WebSocket Client    │
-    │     (Vercel)         │        │   (Browser WS)       │
-    │  - SSR/SSG pages     │        └──────────┬───────────┘
-    │  - Light API routes  │                   │
-    │  - TanStack Query    │                   │
-    └──────────┬───────────┘                   │
-               │                               │
-               ▼                               ▼
-    ┌──────────────────────┐        ┌──────────────────────┐
-    │    Hono + oRPC       │        │  Fastify Backend     │
-    │   (Serverless)       │        │     (Render)         │
-    │  - /api/rpc/*        │        │  - /ws (WebSocket)   │
-    │  - 60s timeout       │        │  - /api/rpc/*        │
-    └──────────┬───────────┘        │  - /api/* (OpenAPI)  │
-               │                    │  - No timeout        │
-               │                    │  - Long-running jobs │
-               └────────────────────┴──────────────────────┘
-                                    │
-                                    ▼
-                        ┌──────────────────────┐
-                        │   PostgreSQL (DB)    │
-                        │   Better Auth        │
-                        └──────────────────────┘
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+                    ┌──────────────────────┐
+                    │   Next.js Frontend   │
+                    │     (Vercel)         │
+                    │  - SSR/SSG pages     │
+                    │  - TanStack Query    │
+                    │  - Supabase Realtime │
+                    └──────────┬───────────┘
+                               │
+               ┌───────────────┼───────────────┐
+               │               │               │
+               ▼               ▼               ▼
+    ┌──────────────────┐ ┌──────────────┐ ┌──────────────┐
+    │   Hono + oRPC    │ │   Inngest    │ │   Supabase   │
+    │  (Serverless)    │ │ (Background) │ │  (Realtime)  │
+    │  - /api/rpc/*    │ │ - Job queue  │ │ - Broadcast  │
+    │  - /api/* (REST) │ │ - Retries    │ │ - Presence   │
+    └────────┬─────────┘ └──────┬───────┘ └──────────────┘
+             │                  │
+             └────────┬─────────┘
+                      │
+                      ▼
+           ┌──────────────────────┐
+           │  PostgreSQL (Supabase)│
+           │     - Better Auth     │
+           │     - Job records     │
+           │     - App data        │
+           └──────────────────────┘
 ```
 
-### When to Use Each Backend
+### Real-time Updates (Supabase Realtime)
 
-**Use Next.js/Hono (Vercel)** for:
+Real-time functionality is powered by **Supabase Realtime**:
 
-- Quick API requests (< 60 seconds)
-- Server-side rendering (SSR) and static generation (SSG)
-- Edge functions and CDN-optimized routes
-- Standard CRUD operations
-- Most user-facing API endpoints
+#### Realtime Module Files
 
-**Use Fastify (Render)** for:
+| File | Purpose |
+| ---- | ------- |
+| `apps/web/modules/realtime/client.ts` | Supabase client with typed channel helpers |
+| `apps/web/modules/realtime/types.ts` | TypeScript interfaces for subscriptions |
+| `apps/web/modules/realtime/hooks.ts` | React hooks (`useRealtimeEcho`, `useRealtimeBroadcast`) |
+| `apps/web/modules/realtime/echo.ts` | Echo/heartbeat for connection testing |
 
-- Long-running AI/ML processing jobs
-- WebSocket connections for real-time updates
-- Background job processing
-- Slack/Discord bot integrations
-- Tasks requiring > 60 seconds
-- Persistent connections
+#### Channel Types
 
-### Shared Resources
+| Type | Use Case | Persistence |
+| ---- | -------- | ----------- |
+| Broadcast | Pub/sub between clients (chat, cursors) | None |
+| Presence | Who's online tracking | None |
+| postgres_changes | Database row changes | Persisted in DB |
 
-Both backends share:
+#### Example Usage
 
-- **PostgreSQL database** (same `DATABASE_URL`)
-- **Better Auth sessions** (same `BETTER_AUTH_SECRET`)
-- **oRPC API definitions** (from `@repo/api`)
-- **Prisma ORM** (from `@repo/database`)
-- **Environment configuration**
+```typescript
+import { subscribeToBroadcast, broadcastMessage } from "@realtime";
+
+// Subscribe to messages
+const { unsubscribe } = subscribeToBroadcast({
+  channelName: "room-1",
+  event: "message",
+  onMessage: (payload) => console.log("Received:", payload),
+});
+
+// Send a message
+await broadcastMessage({
+  channelName: "room-1",
+  event: "message",
+  payload: { text: "Hello!" },
+});
+
+// Clean up
+unsubscribe();
+```
+
+#### Path Alias
+
+Import via `@realtime` alias (configured in `apps/web/tsconfig.json`):
+
+```typescript
+import { subscribeToBroadcast, subscribeToPresence } from "@realtime";
+```
 
 ### Deployment
 
-- **Next.js**: Vercel (serverless, edge functions)
-- **Fastify**: Render (Docker, persistent process)
-- **Database**: Render Postgres or external provider
+| Component | Platform | Purpose |
+| --------- | -------- | ------- |
+| Next.js | Vercel | Serverless frontend + API |
+| Inngest | Vercel Marketplace | Background job processing |
+| PostgreSQL | Supabase | Database + Realtime |
 
 ## API Architecture (Hono + oRPC)
 
@@ -267,34 +279,6 @@ export type ApiRouterClient = typeof apiRouter;
 // Frontend uses @orpc/tanstack-query for type-safe calls
 ```
 
-### API Proxy for Preview Environments
-
-**Skill available**: Use the `api-proxy` skill for detailed proxy guidance.
-
-In preview environments, the frontend (Vercel) and backend (Render) are deployed to different domains, which breaks session cookies. The API proxy makes requests appear same-origin:
-
-```text
-Production:  Browser → api.domain.com (direct, cookies work)
-Preview:     Browser → /api/proxy/* → Render preview (cookies forwarded)
-```
-
-**Key components:**
-
-| Component          | Location                                     |
-| ------------------ | -------------------------------------------- |
-| Proxy Route        | `apps/web/app/api/proxy/[...path]/route.ts`  |
-| Proxy Utilities    | `apps/web/app/api/proxy/lib.ts`              |
-| Environment URLs   | `packages/utils/lib/api-url.ts`              |
-
-**Environment detection:**
-
-```typescript
-import { getOrpcUrl, isPreviewEnvironment } from "@repo/utils";
-
-// Returns "/api/proxy/rpc" in preview, "{baseUrl}/api/rpc" in production
-const orpcUrl = getOrpcUrl();
-```
-
 ## Frontend Architecture
 
 ### Technology Stack
@@ -359,6 +343,105 @@ Dual-ORM setup for flexibility. Drizzle available alongside Prisma.
 - Integration tests use **Testcontainers** with Postgres 17
 - Test harness: `packages/database/tests/postgres-test-harness.ts`
 
+## Background Jobs (Inngest)
+
+Background job processing is powered by **Inngest**, a durable execution platform:
+
+### Architecture
+
+```text
+┌─────────────────┐    Event    ┌─────────────────┐
+│   Application   │ ──────────► │    Inngest      │
+│  (send event)   │             │   (queues job)  │
+└─────────────────┘             └────────┬────────┘
+                                         │
+                                         ▼
+                                ┌─────────────────┐
+                                │  Serve Endpoint │
+                                │ /api/inngest    │
+                                └────────┬────────┘
+                                         │
+                                         ▼
+                                ┌─────────────────┐
+                                │ Inngest Function│
+                                │ (runs in steps) │
+                                └────────┬────────┘
+                                         │
+                                         ▼
+                                ┌─────────────────┐
+                                │   PostgreSQL    │
+                                │  (job status)   │
+                                └─────────────────┘
+```
+
+### Inngest Module Files
+
+| File | Purpose |
+| ---- | ------- |
+| `apps/web/inngest/client.ts` | Inngest client with typed event schemas |
+| `apps/web/inngest/functions/` | Job function implementations |
+| `apps/web/app/api/inngest/route.ts` | Serve endpoint (registers all functions) |
+
+### Job Functions
+
+8 job processors are registered:
+
+| Function | Purpose | Duration |
+| -------- | ------- | -------- |
+| `news-analyzer` | Analyze news articles with AI | < 2 min |
+| `contract-analyzer` | Analyze legal contracts with AI | < 5 min |
+| `feedback-analyzer` | Analyze customer feedback | < 2 min |
+| `invoice-processor` | Extract data from invoices | < 2 min |
+| `expense-categorizer` | Categorize business expenses | < 2 min |
+| `meeting-summarizer` | Summarize meeting transcripts | < 5 min |
+| `speaker-separation` | Transcribe audio with speaker IDs | 5-60+ min |
+| `gdpr-exporter` | Export user data for GDPR | < 10 min |
+
+### Function Pattern
+
+All functions use the same 3-step pattern:
+
+1. **validate-job**: Verify the job exists in the database
+2. **process-\<job\>**: Run the processor logic (re-fetch job data)
+3. **update-job-status**: Mark job completed or failed
+
+```typescript
+// Example: apps/web/inngest/functions/news-analyzer.ts
+export const newsAnalyzer = inngest.createFunction(
+  { id: "news-analyzer", retries: 3 },
+  { event: "jobs/news-analyzer.requested" },
+  async ({ event, step }) => {
+    // Step 1: Validate
+    await step.run("validate-job", async () => { ... });
+    // Step 2: Process
+    const result = await step.run("process-analysis", async () => { ... });
+    // Step 3: Update status
+    await step.run("update-job-status", async () => { ... });
+  }
+);
+```
+
+### Long-Running Jobs
+
+For jobs exceeding serverless timeout (speaker-separation):
+
+- Use Inngest steps to break work into checkpoints
+- Each step can run up to 2 hours
+- Steps are retried independently on failure
+- Example: AssemblyAI transcription uses submit → poll pattern
+
+### Local Development
+
+```bash
+npx inngest-cli@latest dev
+```
+
+Starts dashboard at http://localhost:8288 showing:
+
+- Registered functions
+- Event history
+- Function run traces
+
 ## Key Integrations
 
 ### Authentication
@@ -404,8 +487,8 @@ See the **tools skill** for detailed credit system documentation.
 
 ### Storage
 
-- **AWS S3** via AWS SDK v3
-- Presigned URL support
+- **Supabase Storage** for file uploads
+- Supports public and private buckets
 - Configuration: `packages/storage/`
 
 ### AI
@@ -420,11 +503,11 @@ For complete deployment infrastructure details including Vercel, GitHub Actions,
 
 ### Quick Deployment Reference
 
-| Environment | Web | API | Database |
-| ----------- | --- | --- | -------- |
-| Local | localhost:3500 | localhost:4000 | Supabase local |
-| Preview | vercel.app | render.com | Supabase branch |
-| Production | vercel | render | Supabase prod |
+| Environment | Web | Database | Jobs |
+| ----------- | --- | -------- | ---- |
+| Local | localhost:3500 | Supabase local | Inngest Dev Server |
+| Preview | vercel.app | Supabase branch | Inngest Cloud |
+| Production | vercel | Supabase prod | Inngest Cloud |
 
 ## Workspace References
 
@@ -453,7 +536,6 @@ Invoke this skill when:
 
 ## Related Skills
 
-- **api-proxy**: Preview environment authentication proxy
 - **better-auth**: Authentication implementation details
 - **cicd**: CI/CD pipeline and preview environments
 - **prisma-migrate**: Database migration workflows
@@ -463,6 +545,7 @@ Invoke this skill when:
 ## Additional Resources
 
 **Progressive Disclosure**: For detailed implementation guidance, see:
+
 - **Skill-specific documentation**: Specialized skills for auth, storage, payments, etc.
 - **In-app docs**: `apps/web/content/docs`
 - **Testing docs**: `docs/postgres-integration-testing.md`

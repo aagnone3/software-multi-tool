@@ -71,7 +71,7 @@ This single command:
 1. ✅ Creates the git worktree with proper branch naming
 2. ✅ Copies environment files from parent repository
 3. ✅ **Enforces Supabase Local database** (port 54322)
-4. ✅ Allocates unique ports for web app and api-server
+4. ✅ Allocates unique port for web app
 5. ✅ Installs dependencies and generates Prisma client
 6. ✅ Verifies database seeding with correct test user
 7. ✅ **Configures Supabase Local storage** (SUPABASE_URL + service role key)

@@ -96,7 +96,7 @@ export type ToolScalarFieldEnumEnum = z.infer<typeof ToolScalarFieldEnumSchema>;
 
 // File: ToolJobScalarFieldEnum.schema.ts
 
-export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'pgBossJobId', 'newsAnalysisId', 'audioFileUrl', 'audioMetadata'])
+export const ToolJobScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'toolId', 'status', 'priority', 'input', 'output', 'error', 'userId', 'sessionId', 'attempts', 'maxAttempts', 'startedAt', 'completedAt', 'expiresAt', 'createdAt', 'updatedAt', 'newsAnalysisId', 'audioFileUrl', 'audioMetadata'])
 
 export type ToolJobScalarFieldEnumEnum = z.infer<typeof ToolJobScalarFieldEnumSchema>;
 
@@ -153,42 +153,6 @@ export type FileTagScalarFieldEnumEnum = z.infer<typeof FileTagScalarFieldEnumSc
 export const FileToTagScalarFieldEnumSchema = z.enum(['fileId', 'tagId', 'createdAt'])
 
 export type FileToTagScalarFieldEnumEnum = z.infer<typeof FileToTagScalarFieldEnumSchema>;
-
-// File: ArchiveScalarFieldEnum.schema.ts
-
-export const ArchiveScalarFieldEnumSchema = z.enum(['id', 'name', 'priority', 'data', 'state', 'retry_limit', 'retry_count', 'retry_delay', 'retry_backoff', 'start_after', 'started_on', 'singleton_key', 'singleton_on', 'created_on', 'completed_on', 'keep_until', 'output', 'dead_letter', 'policy', 'archived_on'])
-
-export type ArchiveScalarFieldEnumEnum = z.infer<typeof ArchiveScalarFieldEnumSchema>;
-
-// File: JobScalarFieldEnum.schema.ts
-
-export const JobScalarFieldEnumSchema = z.enum(['id', 'name', 'priority', 'data', 'state', 'retry_limit', 'retry_count', 'retry_delay', 'retry_backoff', 'start_after', 'started_on', 'singleton_key', 'singleton_on', 'created_on', 'completed_on', 'keep_until', 'output', 'dead_letter', 'policy'])
-
-export type JobScalarFieldEnumEnum = z.infer<typeof JobScalarFieldEnumSchema>;
-
-// File: QueueScalarFieldEnum.schema.ts
-
-export const QueueScalarFieldEnumSchema = z.enum(['name', 'policy', 'retry_limit', 'retry_delay', 'retry_backoff', 'expire_seconds', 'retention_minutes', 'dead_letter', 'partition_name', 'created_on', 'updated_on'])
-
-export type QueueScalarFieldEnumEnum = z.infer<typeof QueueScalarFieldEnumSchema>;
-
-// File: ScheduleScalarFieldEnum.schema.ts
-
-export const ScheduleScalarFieldEnumSchema = z.enum(['name', 'cron', 'timezone', 'data', 'options', 'created_on', 'updated_on'])
-
-export type ScheduleScalarFieldEnumEnum = z.infer<typeof ScheduleScalarFieldEnumSchema>;
-
-// File: SubscriptionScalarFieldEnum.schema.ts
-
-export const SubscriptionScalarFieldEnumSchema = z.enum(['event', 'name', 'created_on', 'updated_on'])
-
-export type SubscriptionScalarFieldEnumEnum = z.infer<typeof SubscriptionScalarFieldEnumSchema>;
-
-// File: VersionScalarFieldEnum.schema.ts
-
-export const VersionScalarFieldEnumSchema = z.enum(['version', 'maintained_on', 'cron_on', 'monitored_on'])
-
-export type VersionScalarFieldEnumEnum = z.infer<typeof VersionScalarFieldEnumSchema>;
 
 // File: SortOrder.schema.ts
 
@@ -249,12 +213,6 @@ export type CreditTransactionTypeEnum = z.infer<typeof CreditTransactionTypeSche
 export const AuditActionSchema = z.enum(['CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'MFA_SETUP', 'MFA_DISABLE', 'IMPERSONATE', 'INVITE', 'EXPORT', 'SUBSCRIPTION_CHANGE', 'PAYMENT'])
 
 export type AuditActionEnum = z.infer<typeof AuditActionSchema>;
-
-// File: job_state.schema.ts
-
-export const job_stateSchema = z.enum(['created', 'retry', 'active', 'completed', 'cancelled', 'failed'])
-
-export type job_stateEnum = z.infer<typeof job_stateSchema>;
 
 // File: User.schema.ts
 
@@ -520,7 +478,6 @@ export const ToolJobSchema = z.object({
   expiresAt: z.date(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  pgBossJobId: z.string().nullish(),
   newsAnalysisId: z.string().nullish(),
   audioFileUrl: z.string().nullish(),
   audioMetadata: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
@@ -675,117 +632,4 @@ export const FileToTagSchema = z.object({
 });
 
 export type FileToTagType = z.infer<typeof FileToTagSchema>;
-
-
-// File: archive.schema.ts
-
-export const archiveSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  priority: z.number().int(),
-  data: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  state: job_stateSchema,
-  retry_limit: z.number().int(),
-  retry_count: z.number().int(),
-  retry_delay: z.number().int(),
-  retry_backoff: z.boolean(),
-  start_after: z.date(),
-  started_on: z.date().nullish(),
-  singleton_key: z.string().nullish(),
-  singleton_on: z.date().nullish(),
-  created_on: z.date(),
-  completed_on: z.date().nullish(),
-  keep_until: z.date(),
-  output: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  dead_letter: z.string().nullish(),
-  policy: z.string().nullish(),
-  archived_on: z.date(),
-});
-
-export type archiveType = z.infer<typeof archiveSchema>;
-
-
-// File: job.schema.ts
-
-export const jobSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  priority: z.number().int(),
-  data: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  state: job_stateSchema.default("created"),
-  retry_limit: z.number().int().default(2),
-  retry_count: z.number().int(),
-  retry_delay: z.number().int(),
-  retry_backoff: z.boolean(),
-  start_after: z.date(),
-  started_on: z.date().nullish(),
-  singleton_key: z.string().nullish(),
-  singleton_on: z.date().nullish(),
-  created_on: z.date(),
-  completed_on: z.date().nullish(),
-  keep_until: z.date(),
-  output: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  dead_letter: z.string().nullish(),
-  policy: z.string().nullish(),
-});
-
-export type jobType = z.infer<typeof jobSchema>;
-
-
-// File: queue.schema.ts
-
-export const queueSchema = z.object({
-  name: z.string(),
-  policy: z.string().nullish(),
-  retry_limit: z.number().int().nullish(),
-  retry_delay: z.number().int().nullish(),
-  retry_backoff: z.boolean().nullish(),
-  expire_seconds: z.number().int().nullish(),
-  retention_minutes: z.number().int().nullish(),
-  dead_letter: z.string().nullish(),
-  partition_name: z.string().nullish(),
-  created_on: z.date(),
-  updated_on: z.date(),
-});
-
-export type queueType = z.infer<typeof queueSchema>;
-
-
-// File: schedule.schema.ts
-
-export const scheduleSchema = z.object({
-  name: z.string(),
-  cron: z.string(),
-  timezone: z.string().nullish(),
-  data: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  options: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
-  created_on: z.date(),
-  updated_on: z.date(),
-});
-
-export type scheduleType = z.infer<typeof scheduleSchema>;
-
-
-// File: subscription.schema.ts
-
-export const subscriptionSchema = z.object({
-  event: z.string(),
-  name: z.string(),
-  created_on: z.date(),
-  updated_on: z.date(),
-});
-
-export type subscriptionType = z.infer<typeof subscriptionSchema>;
-
-
-// File: version.schema.ts
-
-export const versionSchema = z.object({
-  version: z.number().int(),
-  maintained_on: z.date().nullish(),
-  cron_on: z.date().nullish(),
-  monitored_on: z.date().nullish(),
-});
-
-export type versionType = z.infer<typeof versionSchema>;
 

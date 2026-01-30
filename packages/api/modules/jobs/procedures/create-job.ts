@@ -5,7 +5,6 @@ import { shouldUseSupabaseStorage } from "@repo/storage";
 import { publicProcedure } from "../../../orpc/procedures";
 import { uploadAudioToStorage } from "../../speaker-separation/lib/audio-storage";
 import type { AudioMetadata } from "../../speaker-separation/types";
-import { submitJobToQueue } from "../lib/queue";
 import { CreateJobInputSchema } from "../types";
 
 // Tools that support caching (check for existing completed jobs)
@@ -201,29 +200,9 @@ export const createJob = publicProcedure
 			`[CreateJob] Job created successfully: ${job.id} (status: ${job.status})`,
 		);
 
-		// Submit job to pg-boss queue for worker processing
-		// Workers in api-server will pick up the job and process it
-		// Cron handles maintenance only (stuck jobs, cleanup)
-		if (process.env.NODE_ENV !== "test") {
-			logger.debug(
-				`[CreateJob] Submitting job to pg-boss queue: ${job.id}`,
-			);
-			submitJobToQueue(toolSlug, job.id, {
-				priority: priority ?? 0,
-			}).catch((error) => {
-				logger.error(
-					`[CreateJob] Failed to submit job to queue: ${job.id}`,
-					{
-						error:
-							error instanceof Error
-								? error.message
-								: String(error),
-					},
-				);
-				// Job is still in ToolJob table with PENDING status
-				// Cron can handle stuck jobs that never got submitted
-			});
-		}
+		// Job processing is triggered by Inngest events from the caller
+		// The job record is created in PENDING status
+		// Inngest functions in apps/web/inngest/ will process the job
 
 		return { job };
 	});

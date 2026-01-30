@@ -1,0 +1,316 @@
+{
+	"project": "Drop Render Migration",
+	"branchName": "ralph/drop-render-vercel-supabase",
+	"description": "Simplify architecture from 3 services to 2 by eliminating Render. Consolidate compute on Vercel (serverless) and keep Supabase for data layer.",
+	"userStories": [
+		{
+			"id": "US-001",
+			"title": "Research Inngest integration",
+			"description": "As a developer, I need to document Inngest's capabilities for our job processing needs.",
+			"acceptanceCriteria": [
+				"Create docs/research/inngest-evaluation.md with pros, cons, cost analysis",
+				"Document Vercel integration approach",
+				"Document step functions for long-running jobs",
+				"Include code example for basic job definition",
+				"Typecheck passes"
+			],
+			"priority": 1,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-002",
+			"title": "Research Vercel Cron + KV integration",
+			"description": "As a developer, I need to document Vercel Cron + KV capabilities for our job processing needs.",
+			"acceptanceCriteria": [
+				"Create docs/research/vercel-cron-kv-evaluation.md with pros, cons, limitations",
+				"Document manual queue implementation approach",
+				"Document cron pattern limitations",
+				"Include code example for basic cron job with KV state",
+				"Typecheck passes"
+			],
+			"priority": 2,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-003",
+			"title": "Write job platform recommendation",
+			"description": "As a developer, I need a recommendation document comparing the two options.",
+			"acceptanceCriteria": [
+				"Create docs/research/job-platform-recommendation.md",
+				"Compare: developer experience, cost at scale, timeout handling, retry logic, observability",
+				"Include clear recommendation with rationale",
+				"Reference the two evaluation documents",
+				"Typecheck passes"
+			],
+			"priority": 3,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-004",
+			"title": "Audit current WebSocket usage",
+			"description": "As a developer, I need to document all WebSocket functionality in api-server.",
+			"acceptanceCriteria": [
+				"Create docs/research/websocket-audit.md",
+				"List all WebSocket handlers in apps/api-server/",
+				"Document what each handler does (echo, heartbeat, etc.)",
+				"Identify client code that connects to WebSockets",
+				"Recommend Supabase Realtime migration approach",
+				"Typecheck passes"
+			],
+			"priority": 4,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-005",
+			"title": "Audit all pg-boss job processors",
+			"description": "As a developer, I need to document all background jobs running on Render.",
+			"acceptanceCriteria": [
+				"Create docs/research/pgboss-jobs-audit.md",
+				"List all job processors in apps/api-server/",
+				"Document each job's purpose, triggers, and timeout requirements",
+				"Identify jobs that may exceed serverless timeout limits",
+				"Typecheck passes"
+			],
+			"priority": 5,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-006",
+			"title": "Install Inngest SDK and configure",
+			"description": "As a developer, I need to set up Inngest in the monorepo.",
+			"acceptanceCriteria": [
+				"Add inngest package to apps/web",
+				"Create apps/web/inngest/client.ts with Inngest client initialization",
+				"Create apps/web/app/api/inngest/route.ts serve endpoint",
+				"Add INNGEST_EVENT_KEY and INNGEST_SIGNING_KEY to .env.local.example",
+				"Typecheck passes"
+			],
+			"priority": 6,
+			"passes": true,
+			"notes": "This assumes Inngest is chosen. Adjust if Vercel Cron + KV selected."
+		},
+		{
+			"id": "US-007",
+			"title": "Migrate news-analyzer job to Inngest",
+			"description": "As a system, I need the news-analyzer background job to run on Inngest.",
+			"acceptanceCriteria": [
+				"Create apps/web/inngest/functions/news-analyzer.ts",
+				"Job triggers correctly on event or schedule",
+				"Job handles retries via Inngest retry config",
+				"Job respects timeout limits (use steps if needed)",
+				"Register function in apps/web/inngest/client.ts",
+				"Typecheck passes"
+			],
+			"priority": 7,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-008",
+			"title": "Migrate speaker-separation job to Inngest",
+			"description": "As a system, I need the speaker-separation background job to run on Inngest.",
+			"acceptanceCriteria": [
+				"Create apps/web/inngest/functions/speaker-separation.ts",
+				"Job uses Inngest steps for long-running processing",
+				"Job reports progress/status updates to database",
+				"Job handles retries via Inngest retry config",
+				"Register function in apps/web/inngest/client.ts",
+				"Typecheck passes"
+			],
+			"priority": 8,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-009",
+			"title": "Migrate remaining jobs to Inngest",
+			"description": "As a developer, I need to migrate any other background jobs identified in the audit.",
+			"acceptanceCriteria": [
+				"All jobs from US-005 audit migrated to Inngest",
+				"Each job registered in apps/web/inngest/client.ts",
+				"Verify no jobs are missed (cross-reference audit)",
+				"Typecheck passes"
+			],
+			"priority": 9,
+			"passes": true,
+			"notes": "May be no-op if only news-analyzer and speaker-separation exist."
+		},
+		{
+			"id": "US-010",
+			"title": "Set up Supabase Realtime client",
+			"description": "As a developer, I need to configure Supabase Realtime for WebSocket replacement.",
+			"acceptanceCriteria": [
+				"Verify @supabase/supabase-js is installed",
+				"Create apps/web/modules/realtime/client.ts with channel helpers",
+				"Export typed channel subscription functions",
+				"Typecheck passes"
+			],
+			"priority": 10,
+			"passes": true,
+			"notes": ""
+		},
+		{
+			"id": "US-011",
+			"title": "Replace WebSocket with Supabase Realtime",
+			"description": "As a developer, I need to update client code to use Supabase Realtime instead of direct WebSocket.",
+			"acceptanceCriteria": [
+				"Update client WebSocket connection logic to use Supabase channels",
+				"Implement echo/heartbeat functionality via broadcast channel",
+				"Remove direct WebSocket connection code",
+				"Typecheck passes",
+				"Verify in browser using dev tools network tab"
+			],
+			"priority": 11,
+			"passes": true,
+			"notes": "No client WebSocket code existed - implemented replacement functionality in Supabase Realtime module"
+		},
+		{
+			"id": "US-012",
+			"title": "Create migration to drop pg-boss tables",
+			"description": "As a developer, I need to create a database migration to remove pg-boss schema.",
+			"acceptanceCriteria": [
+				"Create Prisma migration to drop pgboss schema/tables",
+				"Migration runs successfully on local database",
+				"Typecheck passes"
+			],
+			"priority": 12,
+			"passes": true,
+			"notes": "Run after confirming all jobs migrated and working."
+		},
+		{
+			"id": "US-013",
+			"title": "Remove pg-boss package dependency",
+			"description": "As a developer, I need to remove pg-boss from the codebase.",
+			"acceptanceCriteria": [
+				"Remove pg-boss from package.json files",
+				"Remove all pg-boss imports and references",
+				"Run pnpm install to update lockfile",
+				"Typecheck passes",
+				"All tests pass"
+			],
+			"priority": 13,
+			"passes": true,
+			"notes": "Removed pg-boss from apps/api-server, packages/api, packages/database. Deleted workers directory, pg-boss lib files, pgboss scripts, and queue.ts. Updated all references to use Inngest."
+		},
+		{
+			"id": "US-014",
+			"title": "Remove Render from CI/CD workflows",
+			"description": "As a developer, I need to update GitHub Actions to remove Render deployment steps.",
+			"acceptanceCriteria": [
+				"Remove Render from preview-sync workflow",
+				"Remove Render deployment steps from all GitHub Actions",
+				"Remove RENDER_* environment variable references from workflows",
+				"CI pipeline syntax is valid (act --list or similar)",
+				"Typecheck passes"
+			],
+			"priority": 14,
+			"passes": true,
+			"notes": "Renamed 'render-preview' label to 'preview' in both workflows. Removed RENDER_API_KEY from preview-env-sync.yml. Updated PR comment messages to remove Render references."
+		},
+		{
+			"id": "US-015",
+			"title": "Delete Render configuration files",
+			"description": "As a developer, I need to remove Render-specific configuration from the repository.",
+			"acceptanceCriteria": [
+				"Delete render.yaml if it exists",
+				"Remove Render-specific scripts from package.json files",
+				"Grep verification: no 'render' references remain (excluding docs)",
+				"Typecheck passes"
+			],
+			"priority": 15,
+			"passes": true,
+			"notes": "Deleted packages/render/ (Render API client), tooling/scripts/src/render/ (CLI helper), .claude/skills/render/. Removed render script from package.json. Updated preview-sync to remove Render code. Deleted github-checks.mjs. Updated debugging, cicd skills. Removed API_SERVER_URL from .env.local.example."
+		},
+		{
+			"id": "US-016",
+			"title": "Delete apps/api-server directory",
+			"description": "As a developer, I need to remove the entire api-server application.",
+			"acceptanceCriteria": [
+				"Delete apps/api-server/ directory",
+				"Remove api-server from turbo.json pipeline",
+				"Remove api-server from pnpm-workspace.yaml if listed",
+				"Typecheck passes",
+				"All tests pass"
+			],
+			"priority": 16,
+			"passes": true,
+			"notes": "Deleted apps/api-server/, apps/web/app/api/proxy/, .claude/skills/async-jobs/, .claude/skills/api-proxy/. Updated CORS config, architecture skill, git-worktrees skill, dev commands, CLAUDE.md, worktree scripts. pnpm-workspace.yaml uses glob so no changes needed. turbo.json uses generic task definitions so no changes needed."
+		},
+		{
+			"id": "US-017",
+			"title": "Remove Fastify dependencies",
+			"description": "As a developer, I need to remove Fastify packages from the monorepo.",
+			"acceptanceCriteria": [
+				"Remove fastify and @fastify/* packages from all package.json files",
+				"Run pnpm install to update lockfile",
+				"Grep verification: no fastify imports remain",
+				"Typecheck passes"
+			],
+			"priority": 17,
+			"passes": true,
+			"notes": "Fastify was already removed from package.json files in US-016 when api-server was deleted. Ran pnpm install to update lockfile (-11 packages). Note: fastify@5.6.2 remains in lockfile as transitive dependency of inngest via @opentelemetry/auto-instrumentations-node - this is an optional instrumentation package and does not affect our code."
+		},
+		{
+			"id": "US-018",
+			"title": "Update CLAUDE.md for new architecture",
+			"description": "As a developer, I need to update CLAUDE.md to reflect the 2-service architecture.",
+			"acceptanceCriteria": [
+				"Remove all Render references from CLAUDE.md",
+				"Update architecture section with new Vercel + Supabase diagram",
+				"Update any command references that mentioned api-server",
+				"Typecheck passes"
+			],
+			"priority": 18,
+			"passes": true,
+			"notes": "No Render or api-server references existed in CLAUDE.md (cleaned in prior stories). Added Inngest background jobs section and Supabase Realtime section. Updated architecture skill SKILL.md description to replace Fastify with Inngest/Supabase Realtime."
+		},
+		{
+			"id": "US-019",
+			"title": "Update architecture skill documentation",
+			"description": "As a developer, I need to update the architecture skill with new diagrams.",
+			"acceptanceCriteria": [
+				"Update .claude/skills/architecture/ files with new architecture",
+				"Remove Render from all diagrams",
+				"Add Inngest to architecture documentation",
+				"Add Supabase Realtime to architecture documentation",
+				"Typecheck passes"
+			],
+			"priority": 19,
+			"passes": true,
+			"notes": "Updated SKILL.md with Inngest architecture diagram, job functions table, 3-step pattern, Supabase Realtime section with channel types. Updated deployment.md with Inngest and Supabase sections. Updated examples.md with how-to guides for adding new jobs and realtime features."
+		},
+		{
+			"id": "US-020",
+			"title": "Update .env.local.example",
+			"description": "As a developer, I need to update environment variable examples.",
+			"acceptanceCriteria": [
+				"Remove Render-related variables from apps/web/.env.local.example",
+				"Add Inngest variables (INNGEST_EVENT_KEY, INNGEST_SIGNING_KEY)",
+				"Verify all new required variables are documented",
+				"Typecheck passes"
+			],
+			"priority": 20,
+			"passes": true,
+			"notes": "Render variables already removed in US-015. Inngest variables already added in US-006. Added missing NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY (for Realtime), NEXT_PUBLIC_POSTHOG_KEY, NEXT_PUBLIC_POSTHOG_HOST (for analytics)."
+		},
+		{
+			"id": "US-021",
+			"title": "Run full test suite and verify",
+			"description": "As a developer, I need to verify all tests pass after migration.",
+			"acceptanceCriteria": [
+				"All unit tests pass (pnpm test)",
+				"All integration tests pass",
+				"E2E tests pass locally (pnpm --filter web run e2e)",
+				"Typecheck passes (pnpm --filter web run type-check)"
+			],
+			"priority": 21,
+			"passes": true,
+			"notes": "All unit tests pass (524 tests in web, 15 workspaces total). All database integration tests pass (117 tests). Typecheck passes. E2E tests require running dev server for manual verification."
+		}
+	]
+}

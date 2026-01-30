@@ -3,8 +3,8 @@
 /**
  * Preview Environment Sync
  *
- * Orchestrates environment variable synchronization across
- * Supabase, Vercel, and Render preview environments.
+ * Orchestrates environment variable synchronization between
+ * Supabase and Vercel preview environments.
  *
  * Usage:
  *   pnpm --filter @repo/scripts preview-sync wait --pr <number> [--branch <name>]
@@ -14,31 +14,18 @@
  * Required environment variables:
  *   SUPABASE_ACCESS_TOKEN - Supabase Management API token
  *   SUPABASE_PROJECT_REF  - Supabase project reference
- *   RENDER_API_KEY        - Render API key
  *   VERCEL_TOKEN          - Vercel API token
  *   VERCEL_PROJECT        - Vercel project ID
  *   VERCEL_SCOPE          - Vercel team/scope ID
- *
- * Optional environment variables (for GitHub Check integration):
- *   GITHUB_TOKEN          - GitHub API token (for creating/updating checks)
- *   GITHUB_REPOSITORY     - GitHub repository (owner/repo format)
  */
 
 import { createSupabaseClientFromEnv } from "../supabase/api-client.mjs";
-import {
-	createGitHubCheck,
-	getRenderDashboardUrl,
-	isGitHubCheckEnabled,
-	updateGitHubCheck,
-} from "./github-checks.mjs";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const RENDER_API_BASE = "https://api.render.com/v1";
 const VERCEL_API_BASE = "https://api.vercel.com";
-const RENDER_SERVICE_PREFIX = "software-multi-tool PR #";
 
 // ============================================================================
 // Utility Functions
@@ -54,7 +41,7 @@ function parseArgs(argv) {
 		prNumber: null,
 		branch: null,
 		sha: null,
-		timeout: 600, // 10 minutes default for Render/Vercel
+		timeout: 600, // 10 minutes default for Vercel
 		supabaseTimeout: 900, // 15 minutes for Supabase (takes longer to provision)
 	};
 
@@ -80,13 +67,6 @@ function parseArgs(argv) {
 	}
 
 	return args;
-}
-
-function redactUrl(url) {
-	if (!url) {
-		return url;
-	}
-	return url.replace(/:([^:@]+)@/, ":****@");
 }
 
 /**
@@ -131,187 +111,6 @@ async function withRetry(fn, options = {}) {
 	}
 
 	throw lastError;
-}
-
-// ============================================================================
-// Render API Functions
-// ============================================================================
-
-async function renderRequest(path, options = {}) {
-	const apiKey = process.env.RENDER_API_KEY;
-	if (!apiKey) {
-		throw new Error("RENDER_API_KEY environment variable is required");
-	}
-
-	return withRetry(async () => {
-		const url = `${RENDER_API_BASE}${path}`;
-		const response = await fetch(url, {
-			...options,
-			headers: {
-				Authorization: `Bearer ${apiKey}`,
-				"Content-Type": "application/json",
-				...options.headers,
-			},
-		});
-
-		if (!response.ok) {
-			let errorMessage = `Render API error: ${response.status} ${response.statusText}`;
-			try {
-				const body = await response.json();
-				if (body.message) {
-					errorMessage = `Render API error: ${body.message}`;
-				}
-			} catch {
-				// Ignore JSON parse errors
-			}
-			throw new Error(errorMessage);
-		}
-
-		if (response.status === 204) {
-			return null;
-		}
-
-		return response.json();
-	});
-}
-
-async function findRenderPreviewService(prNumber) {
-	const serviceName = `${RENDER_SERVICE_PREFIX}${prNumber}`;
-
-	// First, try the name filter (exact match)
-	let services = await renderRequest(
-		`/services?name=${encodeURIComponent(serviceName)}`,
-	);
-
-	if (services && services.length > 0) {
-		return services[0]?.service || null;
-	}
-
-	// If name filter doesn't work, list all services and filter manually
-	// This handles cases where the API name filter is case-sensitive or partial
-	console.log(
-		"[Render] Name filter returned no results, listing all services...",
-	);
-	services = await renderRequest("/services?limit=100");
-
-	if (!services || services.length === 0) {
-		return null;
-	}
-
-	// Find by exact name match or by slug (URL pattern)
-	for (const item of services) {
-		const service = item?.service;
-		if (!service) {
-			continue;
-		}
-
-		// Match by name
-		if (service.name === serviceName) {
-			return service;
-		}
-
-		// Match by slug (the URL identifier)
-		if (service.slug === serviceName) {
-			return service;
-		}
-
-		// Match by URL pattern in serviceDetails
-		if (service.serviceDetails?.url?.includes(serviceName)) {
-			return service;
-		}
-	}
-
-	return null;
-}
-
-async function getRenderServiceUrl(service) {
-	if (!service) {
-		return null;
-	}
-
-	// For web services, the URL is in the service details
-	if (service.serviceDetails?.url) {
-		return service.serviceDetails.url;
-	}
-
-	// Construct URL from service slug (fallback)
-	if (service.slug) {
-		return `https://${service.slug}.onrender.com`;
-	}
-
-	// Last resort: try service name
-	if (service.name) {
-		return `https://${service.name}.onrender.com`;
-	}
-
-	return null;
-}
-
-async function setRenderEnvVar(serviceId, key, value) {
-	await renderRequest(
-		`/services/${serviceId}/env-vars/${encodeURIComponent(key)}`,
-		{
-			method: "PUT",
-			body: JSON.stringify({ value }),
-		},
-	);
-}
-
-async function listRenderEnvVars(serviceId) {
-	const response = await renderRequest(`/services/${serviceId}/env-vars`);
-	if (!response || !Array.isArray(response)) {
-		return [];
-	}
-	return response.map((r) => r.envVar);
-}
-
-async function triggerRenderDeploy(serviceId) {
-	const response = await renderRequest(`/services/${serviceId}/deploys`, {
-		method: "POST",
-		body: JSON.stringify({}),
-	});
-	return response?.deploy || null;
-}
-
-async function waitForRenderPreview(prNumber, options = {}) {
-	const {
-		timeoutMs = 600000, // 10 minutes default
-		initialDelay = 5000,
-		maxDelay = 30000,
-		backoffFactor = 1.5,
-	} = options;
-
-	const startTime = Date.now();
-	let delay = initialDelay;
-	let attempt = 0;
-
-	while (Date.now() - startTime < timeoutMs) {
-		attempt++;
-		const service = await findRenderPreviewService(prNumber);
-
-		if (service) {
-			const url = await getRenderServiceUrl(service);
-			if (url) {
-				console.log(`[Render] Preview service found: ${url}`);
-				return { service, url };
-			}
-		}
-
-		const elapsed = Math.round((Date.now() - startTime) / 1000);
-		const remaining = Math.round(
-			(timeoutMs - (Date.now() - startTime)) / 1000,
-		);
-		console.log(
-			`[Render] Attempt ${attempt}: Preview service not found (${elapsed}s elapsed, ${remaining}s remaining)`,
-		);
-
-		await sleep(delay);
-		delay = Math.min(delay * backoffFactor, maxDelay);
-	}
-
-	throw new Error(
-		`Timeout waiting for Render preview service for PR #${prNumber}`,
-	);
 }
 
 // ============================================================================
@@ -522,7 +321,7 @@ async function waitCommand(args) {
 
 	console.log(`PR Number: ${args.prNumber}`);
 	console.log(`Git Branch: ${args.branch || "(will be determined from PR)"}`);
-	console.log(`Timeout (Render/Vercel): ${args.timeout} seconds`);
+	console.log(`Timeout (Vercel): ${args.timeout} seconds`);
 	console.log(`Timeout (Supabase): ${args.supabaseTimeout} seconds\n`);
 
 	const waitOptions = {
@@ -544,7 +343,7 @@ async function waitCommand(args) {
 		branch: args.branch,
 	};
 
-	// Wait for all three services in parallel
+	// Wait for both services in parallel
 	console.log("Starting parallel wait for all services...\n");
 
 	const results = await Promise.allSettled([
@@ -576,14 +375,13 @@ async function waitCommand(args) {
 			return { branch, credentials, apiCredentials };
 		})(),
 		waitForVercelPreview(args.prNumber, vercelWaitOptions),
-		waitForRenderPreview(args.prNumber, waitOptions),
 	]);
 
 	console.log(`\n${"=".repeat(60)}`);
 	console.log("WAIT RESULTS");
 	console.log(`${"=".repeat(60)}\n`);
 
-	const [supabaseResult, vercelResult, renderResult] = results;
+	const [supabaseResult, vercelResult] = results;
 
 	const output = {
 		supabase:
@@ -594,10 +392,6 @@ async function waitCommand(args) {
 			vercelResult.status === "fulfilled"
 				? vercelResult.value
 				: { error: vercelResult.reason?.message },
-		render:
-			renderResult.status === "fulfilled"
-				? renderResult.value
-				: { error: renderResult.reason?.message },
 	};
 
 	console.log(
@@ -614,15 +408,8 @@ async function waitCommand(args) {
 			? `ERROR: ${output.vercel.error}`
 			: `READY - ${output.vercel.url}`,
 	);
-	console.log(
-		"Render:",
-		output.render.error
-			? `ERROR: ${output.render.error}`
-			: `READY - ${output.render.url}`,
-	);
 
-	// Supabase failure is non-fatal - we can still sync Vercel/Render URLs
-	// Database credentials will be missing, but at least CORS and API URLs get synced
+	// Supabase failure is non-fatal - we can still wait for Vercel
 	const supabaseFailed = supabaseResult.status === "rejected";
 	if (supabaseFailed) {
 		console.log(
@@ -633,14 +420,9 @@ async function waitCommand(args) {
 		);
 	}
 
-	// Critical failures: Render and Vercel must be ready for any sync to work
-	const criticalFailed = [vercelResult, renderResult].filter(
-		(r) => r.status === "rejected",
-	);
-	if (criticalFailed.length > 0) {
-		throw new Error(
-			`${criticalFailed.length} critical service(s) failed to become ready (Render/Vercel required)`,
-		);
+	// Vercel must be ready
+	if (vercelResult.status === "rejected") {
+		throw new Error("Vercel preview deployment failed to become ready");
 	}
 
 	return output;
@@ -658,234 +440,41 @@ async function syncCommand(args) {
 	console.log("UPDATING ENVIRONMENT VARIABLES");
 	console.log(`${"=".repeat(60)}\n`);
 
-	const renderServiceId = services.render?.service?.id;
-	const vercelUrl = services.vercel?.url;
-	const renderUrl = services.render?.url;
 	const supabaseCredentials = services.supabase?.credentials;
 	const supabaseApiCredentials = services.supabase?.apiCredentials;
 
-	let renderEnvChanged = false;
 	let vercelEnvChanged = false;
 
-	// Fetch Render env vars once for all checks
-	let currentRenderValues = {};
-	if (renderServiceId) {
-		const currentEnvVars = await listRenderEnvVars(renderServiceId);
-		currentRenderValues = Object.fromEntries(
-			currentEnvVars.map((e) => [e.key, e.value]),
-		);
-	}
-
-	// Update Render with Supabase credentials
-	// Note: We update both the standard Prisma variable names (DATABASE_URL, DIRECT_URL)
-	// AND the Vercel-style names (POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING) for compatibility.
-	if (renderServiceId && supabaseCredentials) {
-		console.log("\n[Render] Updating database credentials...");
-
-		// Update DATABASE_URL (standard Prisma variable name)
-		if (
-			currentRenderValues.DATABASE_URL !== supabaseCredentials.poolerUrl
-		) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"DATABASE_URL",
-				supabaseCredentials.poolerUrl,
-			);
-			console.log(
-				`  - DATABASE_URL: ${redactUrl(supabaseCredentials.poolerUrl)}`,
-			);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - DATABASE_URL: (unchanged)");
-		}
-
-		// Update DIRECT_URL (standard Prisma variable name for migrations)
-		if (currentRenderValues.DIRECT_URL !== supabaseCredentials.directUrl) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"DIRECT_URL",
-				supabaseCredentials.directUrl,
-			);
-			console.log(
-				`  - DIRECT_URL: ${redactUrl(supabaseCredentials.directUrl)}`,
-			);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - DIRECT_URL: (unchanged)");
-		}
-
-		// Also update POSTGRES_PRISMA_URL for backward compatibility
-		if (
-			currentRenderValues.POSTGRES_PRISMA_URL !==
-			supabaseCredentials.poolerUrl
-		) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"POSTGRES_PRISMA_URL",
-				supabaseCredentials.poolerUrl,
-			);
-			console.log(
-				`  - POSTGRES_PRISMA_URL: ${redactUrl(supabaseCredentials.poolerUrl)}`,
-			);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - POSTGRES_PRISMA_URL: (unchanged)");
-		}
-
-		// Also update POSTGRES_URL_NON_POOLING for backward compatibility
-		if (
-			currentRenderValues.POSTGRES_URL_NON_POOLING !==
-			supabaseCredentials.directUrl
-		) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"POSTGRES_URL_NON_POOLING",
-				supabaseCredentials.directUrl,
-			);
-			console.log(
-				`  - POSTGRES_URL_NON_POOLING: ${redactUrl(supabaseCredentials.directUrl)}`,
-			);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - POSTGRES_URL_NON_POOLING: (unchanged)");
-		}
-	}
-
-	// Update Render with Supabase API credentials for storage
-	// This enables the Supabase storage provider which has native CORS support
-	if (renderServiceId && supabaseApiCredentials) {
-		console.log("\n[Render] Updating Supabase storage credentials...");
-
-		// Update SUPABASE_URL (required for Supabase storage provider)
-		if (
-			currentRenderValues.SUPABASE_URL !==
-			supabaseApiCredentials.supabaseUrl
-		) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"SUPABASE_URL",
-				supabaseApiCredentials.supabaseUrl,
-			);
-			console.log(
-				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl}`,
-			);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - SUPABASE_URL: (unchanged)");
-		}
-
-		// Update SUPABASE_SERVICE_ROLE_KEY (required for server-side storage operations)
-		if (
-			currentRenderValues.SUPABASE_SERVICE_ROLE_KEY !==
-			supabaseApiCredentials.serviceRoleKey
-		) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"SUPABASE_SERVICE_ROLE_KEY",
-				supabaseApiCredentials.serviceRoleKey,
-			);
-			console.log("  - SUPABASE_SERVICE_ROLE_KEY: ****");
-			renderEnvChanged = true;
-		} else {
-			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
-		}
-	}
-
-	// Update Render with Vercel URL for CORS
-	if (renderServiceId && vercelUrl) {
-		console.log("\n[Render] Updating CORS origin...");
-
-		if (currentRenderValues.CORS_ORIGIN !== vercelUrl) {
-			await setRenderEnvVar(renderServiceId, "CORS_ORIGIN", vercelUrl);
-			console.log(`  - CORS_ORIGIN: ${vercelUrl}`);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - CORS_ORIGIN: (unchanged)");
-		}
-	}
-
-	// Update Render with Vercel URL for Better Auth session validation
-	if (renderServiceId && vercelUrl) {
-		console.log("\n[Render] Updating BETTER_AUTH_URL...");
-
-		if (currentRenderValues.BETTER_AUTH_URL !== vercelUrl) {
-			await setRenderEnvVar(
-				renderServiceId,
-				"BETTER_AUTH_URL",
-				vercelUrl,
-			);
-			console.log(`  - BETTER_AUTH_URL: ${vercelUrl}`);
-			renderEnvChanged = true;
-		} else {
-			console.log("  - BETTER_AUTH_URL: (unchanged)");
-		}
-	}
-
-	// Update Vercel with Render URL - set as branch-specific so each PR preview
-	// gets its own Render URL (otherwise PRs would overwrite each other's values)
-	// Set both the server-side API_SERVER_URL (for proxy route) and
-	// the public NEXT_PUBLIC_API_SERVER_URL (for client-side fallback)
-	if (renderUrl && args.branch) {
-		console.log("\n[Vercel] Updating API server URLs (branch-specific)...");
-
-		// Server-side variable for the API proxy route
-		const apiServerUrlChanged = await setVercelEnvVar(
-			"API_SERVER_URL",
-			renderUrl,
-			"preview",
-			args.branch,
-		);
-		if (apiServerUrlChanged) {
-			console.log(
-				`  - API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
-			);
-			vercelEnvChanged = true;
-		}
-
-		// Client-side variable for fallback/SSR detection
-		const publicApiServerUrlChanged = await setVercelEnvVar(
-			"NEXT_PUBLIC_API_SERVER_URL",
-			renderUrl,
-			"preview",
-			args.branch,
-		);
-		if (publicApiServerUrlChanged) {
-			console.log(
-				`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl} (branch: ${args.branch})`,
-			);
-			vercelEnvChanged = true;
-		}
-	} else if (renderUrl) {
-		// Fallback to global preview if no branch specified (shouldn't happen in normal flow)
+	// Sync Supabase database credentials to Vercel (branch-specific)
+	if (supabaseCredentials && args.branch) {
 		console.log(
-			"\n[Vercel] Updating API server URLs (global preview - no branch specified)...",
+			"[Vercel] Updating Supabase database credentials (branch-specific)...",
 		);
 
-		// Server-side variable for the API proxy route
-		const apiServerUrlChanged = await setVercelEnvVar(
-			"API_SERVER_URL",
-			renderUrl,
+		// DATABASE_URL (pooler connection)
+		const databaseUrlChanged = await setVercelEnvVar(
+			"DATABASE_URL",
+			supabaseCredentials.poolerUrl,
 			"preview",
+			args.branch,
 		);
-		if (apiServerUrlChanged) {
-			console.log(`  - API_SERVER_URL: ${renderUrl}`);
+		if (databaseUrlChanged) {
 			vercelEnvChanged = true;
 		}
 
-		// Client-side variable for fallback/SSR detection
-		const publicApiServerUrlChanged = await setVercelEnvVar(
-			"NEXT_PUBLIC_API_SERVER_URL",
-			renderUrl,
+		// DIRECT_URL (direct connection for migrations)
+		const directUrlChanged = await setVercelEnvVar(
+			"DIRECT_URL",
+			supabaseCredentials.directUrl,
 			"preview",
+			args.branch,
 		);
-		if (publicApiServerUrlChanged) {
-			console.log(`  - NEXT_PUBLIC_API_SERVER_URL: ${renderUrl}`);
+		if (directUrlChanged) {
 			vercelEnvChanged = true;
 		}
 	}
 
 	// Sync Supabase storage credentials to Vercel (for image-proxy route)
-	// The image-proxy route runs on Vercel and needs these to generate signed download URLs
 	if (supabaseApiCredentials && args.branch) {
 		console.log(
 			"\n[Vercel] Updating Supabase storage credentials (branch-specific)...",
@@ -899,12 +488,7 @@ async function syncCommand(args) {
 			args.branch,
 		);
 		if (supabaseUrlChanged) {
-			console.log(
-				`  - SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
-			);
 			vercelEnvChanged = true;
-		} else {
-			console.log("  - SUPABASE_URL: (unchanged)");
 		}
 
 		// Server-side SUPABASE_SERVICE_ROLE_KEY for storage provider
@@ -915,12 +499,7 @@ async function syncCommand(args) {
 			args.branch,
 		);
 		if (serviceRoleKeyChanged) {
-			console.log(
-				`  - SUPABASE_SERVICE_ROLE_KEY: **** (branch: ${args.branch})`,
-			);
 			vercelEnvChanged = true;
-		} else {
-			console.log("  - SUPABASE_SERVICE_ROLE_KEY: (unchanged)");
 		}
 
 		// Public NEXT_PUBLIC_SUPABASE_URL for client-side usage
@@ -931,121 +510,41 @@ async function syncCommand(args) {
 			args.branch,
 		);
 		if (publicSupabaseUrlChanged) {
-			console.log(
-				`  - NEXT_PUBLIC_SUPABASE_URL: ${supabaseApiCredentials.supabaseUrl} (branch: ${args.branch})`,
-			);
 			vercelEnvChanged = true;
-		} else {
-			console.log("  - NEXT_PUBLIC_SUPABASE_URL: (unchanged)");
 		}
-	}
 
-	// Trigger redeploys if env vars changed
-	console.log(`\n${"=".repeat(60)}`);
-	console.log("TRIGGERING REDEPLOYS");
-	console.log(`${"=".repeat(60)}\n`);
-
-	if (renderEnvChanged && renderServiceId) {
-		console.log("[Render] Env vars changed, triggering redeploy...");
-		const deploy = await triggerRenderDeploy(renderServiceId);
-		console.log(`  - Deploy triggered: ${deploy?.id || "unknown"}`);
-	} else {
-		console.log("[Render] No env var changes, skipping redeploy");
-	}
-
-	if (vercelEnvChanged) {
-		console.log(
-			"[Vercel] Note: Vercel will use updated env vars on next deployment",
-		);
+		// Public NEXT_PUBLIC_SUPABASE_ANON_KEY for client-side usage
+		if (supabaseApiCredentials.anonKey) {
+			const anonKeyChanged = await setVercelEnvVar(
+				"NEXT_PUBLIC_SUPABASE_ANON_KEY",
+				supabaseApiCredentials.anonKey,
+				"preview",
+				args.branch,
+			);
+			if (anonKeyChanged) {
+				vercelEnvChanged = true;
+			}
+		}
 	}
 
 	console.log(`\n${"=".repeat(60)}`);
 	console.log("SYNC COMPLETE");
 	console.log(`${"=".repeat(60)}\n`);
 
+	if (vercelEnvChanged) {
+		console.log(
+			"[Vercel] Note: Vercel will use updated env vars on next deployment",
+		);
+	} else {
+		console.log("[Vercel] No env var changes needed");
+	}
+
 	return services;
 }
 
 async function runCommand(args) {
-	let checkRunId = null;
-
-	// Create GitHub Check if enabled (requires sha)
-	if (isGitHubCheckEnabled() && args.sha) {
-		console.log(`\n${"=".repeat(60)}`);
-		console.log("CREATING GITHUB CHECK");
-		console.log(`${"=".repeat(60)}\n`);
-
-		try {
-			const result = await createGitHubCheck(args.sha, "in_progress", {
-				summary:
-					"Render preview deployment is being synchronized with other preview services.",
-			});
-			checkRunId = result.id;
-		} catch (error) {
-			console.log(
-				`[GitHub] Warning: Failed to create check run: ${error.message}`,
-			);
-			// Continue even if check creation fails - don't block the sync
-		}
-	} else if (!args.sha) {
-		console.log(
-			"[GitHub] Skipping check creation - no commit SHA provided (use --sha)",
-		);
-	} else {
-		console.log(
-			"[GitHub] Skipping check creation - GITHUB_TOKEN or GITHUB_REPOSITORY not set",
-		);
-	}
-
-	let renderService = null;
-	let renderUrl = null;
-
-	try {
-		// Run the sync command (which includes waiting for services)
-		const services = await syncCommand(args);
-
-		// Capture Render service info for check update
-		renderService = services?.render?.service;
-		renderUrl = services?.render?.url;
-
-		// Update GitHub Check to success if we have one
-		if (checkRunId && isGitHubCheckEnabled()) {
-			try {
-				await updateGitHubCheck(checkRunId, "completed", {
-					conclusion: "success",
-					detailsUrl:
-						renderUrl || getRenderDashboardUrl(renderService),
-					summary: "Render preview deployment is ready!",
-					text: renderUrl
-						? `Preview URL: ${renderUrl}`
-						: "Preview environment synchronized successfully.",
-				});
-			} catch (error) {
-				console.log(
-					`[GitHub] Warning: Failed to update check run: ${error.message}`,
-				);
-			}
-		}
-	} catch (error) {
-		// Update GitHub Check to failure if we have one
-		if (checkRunId && isGitHubCheckEnabled()) {
-			try {
-				await updateGitHubCheck(checkRunId, "completed", {
-					conclusion: "failure",
-					detailsUrl: getRenderDashboardUrl(renderService),
-					summary: "Render preview deployment failed",
-					text: `Error: ${error.message}`,
-				});
-			} catch (updateError) {
-				console.log(
-					`[GitHub] Warning: Failed to update check run: ${updateError.message}`,
-				);
-			}
-		}
-
-		// Re-throw the original error
-		throw error;
-	}
+	// Run the sync command (no GitHub Check integration needed without Render)
+	await syncCommand(args);
 }
 
 // ============================================================================

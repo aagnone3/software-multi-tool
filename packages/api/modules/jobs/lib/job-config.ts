@@ -2,69 +2,38 @@
  * Centralized job queue configuration
  *
  * This module provides a single source of truth for all job-related timeouts
- * and retry configuration. All modules should import these values rather than
+ * and configuration. All modules should import these values rather than
  * defining their own to ensure consistency.
  *
- * ## Timeout Architecture
+ * ## Architecture (Inngest-based)
  *
- * Jobs have multiple timeout mechanisms that work together:
+ * Jobs are processed via Inngest functions in apps/web/inngest/:
+ * - Job creation: packages/api/modules/jobs/procedures/create-job.ts
+ * - Job processing: apps/web/inngest/functions/
+ * - Maintenance: apps/web/app/api/cron/job-maintenance/route.ts
  *
- * 1. **Application Timeout** (`JOB_TIMEOUT_MS`): The processor wrapper uses
- *    `withTimeout()` to kill long-running job handlers. This prevents
- *    indefinite hangs in user code.
+ * ## Timeout Mechanisms
  *
- * 2. **pg-boss Expiration** (`JOB_EXPIRE_IN_SECONDS`): pg-boss marks jobs as
- *    "expired" if they stay in "active" state too long. This catches cases
- *    where the worker dies without completing/failing the job.
+ * 1. **Inngest Step Timeout**: Each Inngest step can run up to 2 hours.
+ *    Long-running jobs use multiple steps to stay within limits.
  *
- * 3. **Stuck Job Cleanup** (`STUCK_JOB_TIMEOUT_MINUTES`): The cron maintenance
+ * 2. **Stuck Job Cleanup** (`STUCK_JOB_TIMEOUT_MINUTES`): The cron maintenance
  *    job marks ToolJob records as FAILED if they've been PROCESSING too long.
- *    This is a fallback for state divergence between pg-boss and ToolJob.
- *
- * ## Timeout Hierarchy
- *
- * ```
- * Application Timeout (10 min)
- *    ↓ triggers
- * Job handler throws TimeoutError
- *    ↓ caught by
- * Worker marks ToolJob FAILED + pg-boss fail()
- *
- * If worker dies before completion:
- *    ↓
- * pg-boss Expiration (10 min from start)
- *    ↓ triggers
- * onExpire handler marks ToolJob EXPIRED
- *
- * If pg-boss also fails:
- *    ↓
- * Stuck Job Cleanup (30 min cron)
- *    ↓ marks
- * ToolJob FAILED with "Job timed out"
- * ```
+ *    This is a fallback for edge cases where Inngest doesn't update status.
  *
  * ## Retry Strategy
  *
- * pg-boss handles retries with exponential backoff:
- * - `retryLimit: 3` - Maximum 3 retry attempts
- * - `retryDelay: 60` - Initial delay of 60 seconds
- * - `retryBackoff: true` - Exponential backoff (delay doubles each retry)
- *
- * Retry timeline for a failing job (with delay=60s):
- * - Attempt 1: Immediate
- * - Retry 1: ~120 seconds (2 minutes) - delay * 2
- * - Retry 2: ~240 seconds (4 minutes) - delay * 4
- * - Retry 3: ~480 seconds (8 minutes) - delay * 8
- *
- * Note: pg-boss adds random jitter to prevent thundering herd.
- * After all retries exhausted, the job is marked permanently failed.
+ * Inngest handles retries with exponential backoff:
+ * - Default 3 retry attempts
+ * - Exponential backoff between retries
+ * - After all retries exhausted, the job is marked permanently failed.
  */
 
 /**
  * Job processing timeout in milliseconds.
  *
- * This is the maximum time a job processor can run before being forcibly
- * terminated. Applied via `withTimeout()` wrapper in worker code.
+ * This is the maximum time a job processor can run before being considered
+ * stuck. Used by the stuck job cleanup mechanism.
  *
  * @default 600000 (10 minutes)
  */
@@ -73,21 +42,11 @@ export const JOB_TIMEOUT_MS = 10 * 60 * 1000;
 /**
  * Job processing timeout in seconds.
  *
- * Same as JOB_TIMEOUT_MS but in seconds for pg-boss configuration.
+ * Same as JOB_TIMEOUT_MS but in seconds.
  *
  * @default 600 (10 minutes)
  */
 export const JOB_TIMEOUT_SECONDS = JOB_TIMEOUT_MS / 1000;
-
-/**
- * pg-boss job expiration interval.
- *
- * Format: PostgreSQL interval string (HH:MM:SS).
- * Jobs are marked as "expired" if they stay in "active" state longer than this.
- *
- * @default "00:10:00" (10 minutes)
- */
-export const JOB_EXPIRE_IN_INTERVAL = "00:10:00";
 
 /**
  * Stuck job cleanup timeout in minutes.
@@ -95,15 +54,17 @@ export const JOB_EXPIRE_IN_INTERVAL = "00:10:00";
  * Used by the cron maintenance job to mark ToolJob records as FAILED
  * if they've been in PROCESSING status longer than this duration.
  *
- * Set higher than JOB_TIMEOUT_SECONDS to allow pg-boss expiration to
- * trigger first, avoiding duplicate state transitions.
+ * Set higher than JOB_TIMEOUT_SECONDS to allow Inngest retries to
+ * complete first, avoiding duplicate state transitions.
  *
  * @default 30 (30 minutes - 3x the job timeout)
  */
 export const STUCK_JOB_TIMEOUT_MINUTES = 30;
 
 /**
- * pg-boss retry configuration
+ * Inngest retry configuration
+ * Note: These values are for reference. Actual retry config is in each
+ * Inngest function definition in apps/web/inngest/functions/
  */
 export const RETRY_CONFIG = {
 	/**
@@ -123,42 +84,4 @@ export const RETRY_CONFIG = {
 	 * Each retry delay doubles: delay * 2^retryCount (plus jitter).
 	 */
 	backoff: true,
-} as const;
-
-/**
- * Archive configuration for completed/failed jobs
- */
-export const ARCHIVE_CONFIG = {
-	/**
-	 * Archive completed jobs after this many seconds.
-	 * @default 604800 (7 days)
-	 */
-	completedAfterSeconds: 60 * 60 * 24 * 7,
-
-	/**
-	 * Archive failed jobs after this many seconds.
-	 * @default 1209600 (14 days)
-	 */
-	failedAfterSeconds: 60 * 60 * 24 * 14,
-} as const;
-
-/**
- * Worker polling configuration
- */
-export const WORKER_CONFIG = {
-	/**
-	 * Number of jobs to fetch per poll.
-	 */
-	batchSize: 5,
-
-	/**
-	 * How often to poll for new jobs (seconds).
-	 */
-	pollingIntervalSeconds: 2,
-
-	/**
-	 * Monitor state interval (seconds).
-	 * How often pg-boss reports queue statistics.
-	 */
-	monitorStateIntervalSeconds: 30,
 } as const;

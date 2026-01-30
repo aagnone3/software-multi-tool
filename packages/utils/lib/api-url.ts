@@ -1,20 +1,15 @@
 import { getBaseUrl } from "./base-url";
 
 /**
- * Environment detection and API URL configuration for preview environments.
+ * Environment detection and API URL configuration.
  *
- * In preview environments (Vercel preview deploys), the frontend and backend
- * are on different domains, which breaks same-site cookie authentication.
- *
+ * All API routes are served from the same Next.js application on Vercel.
  * This utility provides:
  * 1. Detection of preview vs production environments
- * 2. Automatic selection of proxy vs direct API routes
- * 3. Server-side URL resolution for direct API calls
+ * 2. Consistent API URL resolution across client and server
  *
  * Environment Variables:
  * - NEXT_PUBLIC_VERCEL_ENV: Set by Vercel ('production', 'preview', 'development')
- * - NEXT_PUBLIC_API_SERVER_URL: External API server URL (for server-side in preview)
- * - API_SERVER_URL: Internal API server URL (for proxy route, server-only)
  */
 
 /**
@@ -27,18 +22,11 @@ export function isPreviewEnvironment(): boolean {
 }
 
 /**
- * Determines if we should use the API proxy for requests.
- *
- * Proxy is used in preview environments for client-side requests to maintain
- * same-origin for cookies. Server-side requests can go direct.
- *
- * @param isClientSide - Whether this is a client-side request
- * @returns true if requests should be routed through the proxy
+ * @deprecated No longer needed - API is always same-origin on Vercel.
+ * Kept for backwards compatibility but always returns false.
  */
-export function shouldUseProxy(isClientSide: boolean): boolean {
-	// Only client-side requests in preview environments need the proxy
-	// Server-side can make direct calls to the API server
-	return isClientSide && isPreviewEnvironment();
+export function shouldUseProxy(_isClientSide: boolean): boolean {
+	return false;
 }
 
 /**
@@ -58,35 +46,20 @@ function getClientOrigin(): string {
 /**
  * Gets the API base URL for making requests.
  *
- * For client-side in preview environments:
- *   Returns absolute URL to proxy route using window.location.origin
- *   (ensures same-origin to avoid CORS issues)
- *
- * For server-side or production:
- *   Returns the appropriate direct URL
+ * All requests use the same-origin /api route since the API is served
+ * from the same Next.js application on Vercel.
  *
  * @returns The base URL for API requests (without trailing slash)
  */
 export function getApiBaseUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route with window.location.origin
-	// This ensures same-origin requests even when NEXT_PUBLIC_VERCEL_URL differs
-	if (shouldUseProxy(isClientSide)) {
-		return `${getClientOrigin()}/api/proxy`;
+	// Client-side: use window.location.origin for same-origin requests
+	if (isClientSide) {
+		return `${getClientOrigin()}/api`;
 	}
 
-	// Server-side in preview: use direct API server URL if available
-	if (!isClientSide && isPreviewEnvironment()) {
-		const apiServerUrl =
-			process.env.NEXT_PUBLIC_API_SERVER_URL ||
-			process.env.API_SERVER_URL;
-		if (apiServerUrl) {
-			return `${apiServerUrl}/api`;
-		}
-	}
-
-	// Default: use same-origin API route (production or development)
+	// Server-side: use base URL
 	return `${getBaseUrl()}/api`;
 }
 
@@ -98,22 +71,11 @@ export function getApiBaseUrl(): string {
 export function getOrpcUrl(): string {
 	const isClientSide = typeof window !== "undefined";
 
-	// Client-side in preview: use proxy route with window.location.origin
-	// This ensures same-origin requests even when NEXT_PUBLIC_VERCEL_URL differs
-	if (shouldUseProxy(isClientSide)) {
-		return `${getClientOrigin()}/api/proxy/rpc`;
+	// Client-side: use window.location.origin for same-origin requests
+	if (isClientSide) {
+		return `${getClientOrigin()}/api/rpc`;
 	}
 
-	// Server-side in preview: use direct API server URL if available
-	if (!isClientSide && isPreviewEnvironment()) {
-		const apiServerUrl =
-			process.env.NEXT_PUBLIC_API_SERVER_URL ||
-			process.env.API_SERVER_URL;
-		if (apiServerUrl) {
-			return `${apiServerUrl}/api/rpc`;
-		}
-	}
-
-	// Default: use same-origin API route
+	// Server-side: use base URL
 	return `${getBaseUrl()}/api/rpc`;
 }

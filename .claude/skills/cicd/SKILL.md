@@ -1,6 +1,6 @@
 ---
 name: cicd
-description: Provides CI/CD pipeline management guidance covering GitHub Actions, preview environments, database branching, and migration sync. Activated when working with Vercel deployments, Supabase branches, Render previews, or Prisma migration sync.
+description: Provides CI/CD pipeline management guidance covering GitHub Actions, preview environments, database branching, and migration sync. Activated when working with Vercel deployments, Supabase branches, or Prisma migration sync.
 allowed-tools:
   - Read
   - Grep
@@ -22,7 +22,7 @@ Invoke this skill when:
 - Syncing Prisma and Supabase migrations
 - Configuring environment variables for deployments
 - Troubleshooting GitHub Actions workflows
-- Understanding Vercel/Render/Supabase integration
+- Understanding Vercel/Supabase integration
 
 ## Quick Reference
 
@@ -41,10 +41,10 @@ Invoke this skill when:
 ```text
 PR Created → CI Checks → Preview Environments
                               ↓
-         ┌──────────┬──────────┬──────────┐
-         │ Vercel   │ Render   │ Supabase │
-         │ Preview  │ Preview  │ Branch   │
-         └──────────┴──────────┴──────────┘
+              ┌──────────┬──────────┐
+              │ Vercel   │ Supabase │
+              │ Preview  │ Branch   │
+              └──────────┴──────────┘
                               ↓
               PR Merge → Production Deploy
 ```
@@ -137,30 +137,15 @@ pnpm web:env:list --target preview
 pnpm web:env:set VARIABLE_NAME "value" --target preview
 ```
 
-## Render Preview Environments
-
-Preview API servers created for each PR.
-
-### Environment Variable Flow
-
-| Target | Variable                     | Source   |
-| ------ | ---------------------------- | -------- |
-| Render | `POSTGRES_PRISMA_URL`        | Supabase |
-| Render | `CORS_ORIGIN`                | Vercel   |
-| Vercel | `NEXT_PUBLIC_API_SERVER_URL` | Render   |
-| Vercel | `API_SERVER_URL`             | Render   |
-
 ## Preview Environment Sync
 
-GitHub Actions automatically syncs env vars across services when PR opens.
+GitHub Actions automatically syncs env vars between Supabase and Vercel when PR opens.
 
 ### Sync Flow
 
-1. Wait for all services ready (parallel polling)
-2. Sync: Render ← Supabase DB credentials
-3. Sync: Render ← Vercel preview URL (CORS)
-4. Sync: Vercel ← Render API URL
-5. Trigger Render redeploy if changed
+1. Wait for Supabase branch and Vercel preview to be ready (parallel polling)
+2. Sync: Vercel ← Supabase DB credentials (DATABASE_URL, DIRECT_URL)
+3. Sync: Vercel ← Supabase API credentials (SUPABASE_URL, keys)
 
 ### Required GitHub Secrets
 
@@ -168,7 +153,6 @@ GitHub Actions automatically syncs env vars across services when PR opens.
 | ----------------------- | ----------------------- |
 | `SUPABASE_ACCESS_TOKEN` | Supabase Management API |
 | `SUPABASE_PROJECT_REF`  | Project identifier      |
-| `RENDER_API_KEY`        | Render API              |
 | `VERCEL_TOKEN`          | Vercel API              |
 | `VERCEL_PROJECT`        | Vercel project ID       |
 | `VERCEL_SCOPE`          | Vercel team ID          |
@@ -195,7 +179,7 @@ See **api-proxy** skill for details.
 1. **Use Prisma for schema changes** - Never edit `supabase/migrations/` directly
 2. **Keep Supabase in sync** - `supabase db pull` after production deploys
 3. **Test seed data in PRs** - Run `supabase:validate-seed` against preview DB
-4. **Wait for all CI checks** - `validate-prs`, Supabase, Vercel, Render
+4. **Wait for all CI checks** - `validate-prs`, Supabase, Vercel
 
 ## Troubleshooting
 
@@ -212,4 +196,3 @@ See [troubleshooting.md](troubleshooting.md) for:
 - **api-proxy**: Preview authentication proxy
 - **prisma-migrate**: Database migration workflows
 - **application-environments**: Environment overview
-- **render**: Render deployment details

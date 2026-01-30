@@ -14,7 +14,7 @@ datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
-  schemas   = ["pgboss", "public"]
+  schemas   = ["public"]
 }
 
 model User {
@@ -314,7 +314,6 @@ model ToolJob {
   expiresAt      DateTime
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  pgBossJobId    String?       @unique
   newsAnalysisId String?       @unique
   audioFileUrl   String?       // S3/Supabase storage URL for audio files (speaker-separation)
   audioMetadata  Json?         // Audio file metadata: { filename, mimeType, duration, size }
@@ -528,112 +527,6 @@ model FileToTag {
   @@schema("public")
 }
 
-model archive {
-  id            String                  @db.Uuid
-  name          String
-  priority      Int
-  data          Json?
-  state         job_state
-  retry_limit   Int
-  retry_count   Int
-  retry_delay   Int
-  retry_backoff Boolean
-  start_after   DateTime                @db.Timestamptz(6)
-  started_on    DateTime?               @db.Timestamptz(6)
-  singleton_key String?
-  singleton_on  DateTime?               @db.Timestamp(6)
-  expire_in     Unsupported("interval")
-  created_on    DateTime                @db.Timestamptz(6)
-  completed_on  DateTime?               @db.Timestamptz(6)
-  keep_until    DateTime                @db.Timestamptz(6)
-  output        Json?
-  dead_letter   String?
-  policy        String?
-  archived_on   DateTime                @default(now()) @db.Timestamptz(6)
-
-  @@id([name, id])
-  @@index([archived_on], map: "archive_i1")
-  @@schema("pgboss")
-}
-
-model job {
-  id            String                  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String
-  priority      Int                     @default(0)
-  data          Json?
-  state         job_state               @default(created)
-  retry_limit   Int                     @default(2)
-  retry_count   Int                     @default(0)
-  retry_delay   Int                     @default(0)
-  retry_backoff Boolean                 @default(false)
-  start_after   DateTime                @default(now()) @db.Timestamptz(6)
-  started_on    DateTime?               @db.Timestamptz(6)
-  singleton_key String?
-  singleton_on  DateTime?               @db.Timestamp(6)
-  expire_in     Unsupported("interval") @default(dbgenerated("'00:15:00'::interval"))
-  created_on    DateTime                @default(now()) @db.Timestamptz(6)
-  completed_on  DateTime?               @db.Timestamptz(6)
-  keep_until    DateTime                @default(dbgenerated("(now() + '14 days'::interval)")) @db.Timestamptz(6)
-  output        Json?
-  dead_letter   String?
-  policy        String?
-
-  @@unique([name, id], map: "job_pkey")
-  @@schema("pgboss")
-}
-
-model queue {
-  name              String         @id
-  policy            String?
-  retry_limit       Int?
-  retry_delay       Int?
-  retry_backoff     Boolean?
-  expire_seconds    Int?
-  retention_minutes Int?
-  dead_letter       String?
-  partition_name    String?
-  created_on        DateTime       @default(now()) @db.Timestamptz(6)
-  updated_on        DateTime       @default(now()) @db.Timestamptz(6)
-  queue             queue?         @relation("queueToqueue", fields: [dead_letter], references: [name], onDelete: NoAction, onUpdate: NoAction)
-  other_queue       queue[]        @relation("queueToqueue")
-  schedule          schedule?
-  subscription      subscription[]
-
-  @@schema("pgboss")
-}
-
-model schedule {
-  name       String   @id
-  cron       String
-  timezone   String?
-  data       Json?
-  options    Json?
-  created_on DateTime @default(now()) @db.Timestamptz(6)
-  updated_on DateTime @default(now()) @db.Timestamptz(6)
-  queue      queue    @relation(fields: [name], references: [name], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("pgboss")
-}
-
-model subscription {
-  event      String
-  name       String
-  created_on DateTime @default(now()) @db.Timestamptz(6)
-  updated_on DateTime @default(now()) @db.Timestamptz(6)
-  queue      queue    @relation(fields: [name], references: [name], onDelete: Cascade, onUpdate: NoAction)
-
-  @@id([event, name])
-  @@schema("pgboss")
-}
-
-model version {
-  version       Int       @id
-  maintained_on DateTime? @db.Timestamptz(6)
-  cron_on       DateTime? @db.Timestamptz(6)
-  monitored_on  DateTime? @db.Timestamptz(6)
-
-  @@schema("pgboss")
-}
 
 enum PurchaseType {
   SUBSCRIPTION
@@ -680,15 +573,4 @@ enum AuditAction {
   PAYMENT
 
   @@schema("public")
-}
-
-enum job_state {
-  created
-  retry
-  active
-  completed
-  cancelled
-  failed
-
-  @@schema("pgboss")
 }

@@ -51,7 +51,6 @@ rm -f apps/web/.env.local.bak
 | App        | Port Range | Calculation                          |
 |------------|------------|--------------------------------------|
 | Web        | 3501-3999  | `hash(worktree_path) % 499 + 3501`   |
-| API Server | 4001-4499  | `web_port + 500` (via `--offset 500`)|
 
 **Port allocator features**:
 
@@ -68,23 +67,6 @@ tooling/scripts/src/worktree-port.sh .worktrees/feat-pra-35-auth --check-only
 
 # List all ports in use
 lsof -i :3500-3999 | grep LISTEN
-```
-
-## API Server Environment
-
-```bash
-cp ../../apps/api-server/.env.local apps/api-server/.env.local
-
-# Allocate with offset
-API_PORT=$(../../tooling/scripts/src/worktree-port.sh . --offset 500)
-echo "PORT=$API_PORT" >> apps/api-server/.env.local
-
-# Update CORS_ORIGIN to match web app
-sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$WEB_PORT|" apps/api-server/.env.local
-
-# Update BETTER_AUTH_URL
-sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$API_PORT|" apps/api-server/.env.local
-rm -f apps/api-server/.env.local.bak
 ```
 
 ## Integration Test Credentials
@@ -162,21 +144,11 @@ These are **required** for features that use Supabase storage (file uploads, spe
 **If storage features fail with "Storage is not configured"**:
 
 ```bash
-# Add to both apps/web/.env.local and apps/api-server/.env.local
+# Add to apps/web/.env.local
 echo 'SUPABASE_URL=http://127.0.0.1:54321' >> apps/web/.env.local
 echo 'SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU' >> apps/web/.env.local
 
 # Then restart dev servers
-```
-
-## Database URL Consistency
-
-The setup script verifies web app and api-server use the **same database URL**. If they differ, jobs created by web won't be processed by api-server workers.
-
-```bash
-# Verify URLs match
-grep "POSTGRES_PRISMA_URL" apps/web/.env.local
-grep "DATABASE_URL\|POSTGRES_PRISMA_URL" apps/api-server/.env.local
 ```
 
 ## Git Configuration

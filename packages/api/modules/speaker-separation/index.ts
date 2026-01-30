@@ -1,3 +1,4 @@
+export { downloadAudioFromStorage } from "./lib/audio-storage";
 export {
 	calculateSpeakerStats,
 	formatTranscriptWithSpeakers,

@@ -4,7 +4,7 @@ description: Start local dev servers for the current worktree with robust port c
 
 # Start Applications
 
-Start the local development servers (web app and api-server) for the current worktree or main repository.
+Start the local development server (web app) for the current worktree or main repository.
 
 ## Pre-flight Checks
 
@@ -33,14 +33,7 @@ Extract the PORT values from environment files:
 # Web app port
 WEB_PORT=$(grep "^PORT=" apps/web/.env.local 2>/dev/null | tail -1 | cut -d= -f2 | tr -d '"' || echo "")
 
-# API server port (if exists)
-if [ -f apps/api-server/.env.local ]; then
-  API_PORT=$(grep "^PORT=" apps/api-server/.env.local 2>/dev/null | tail -1 | cut -d= -f2 | tr -d '"' || echo "")
-else
-  API_PORT=""
-fi
-
-echo "Configured ports - Web: ${WEB_PORT:-default}, API: ${API_PORT:-N/A}"
+echo "Configured port - Web: ${WEB_PORT:-default}"
 ```
 
 ### 3. Check for Port Conflicts
@@ -68,10 +61,8 @@ check_port() {
 }
 
 WEB_CONFLICT=false
-API_CONFLICT=false
 
 [ -n "$WEB_PORT" ] && (check_port "$WEB_PORT" "web" || WEB_CONFLICT=true)
-[ -n "$API_PORT" ] && (check_port "$API_PORT" "api" || API_CONFLICT=true)
 ```
 
 ## Port Conflict Resolution
@@ -150,7 +141,6 @@ allocate_new_ports() {
   # Use port allocator if available
   if [ -x "$script_path" ]; then
     new_web_port=$("$script_path" "$(pwd)")
-    new_api_port=$("$script_path" "$(pwd)" --offset 500)
   else
     # Fallback: find available ports manually
     for port in $(seq 3501 3999); do
@@ -159,32 +149,19 @@ allocate_new_ports() {
         break
       fi
     done
-
-    for port in $(seq 4001 4499); do
-      if ! lsof -i ":$port" -t >/dev/null 2>&1; then
-        new_api_port=$port
-        break
-      fi
-    done
   fi
 
-  echo "New ports allocated - Web: $new_web_port, API: $new_api_port"
+  echo "New port allocated - Web: $new_web_port"
 
   # Update env files
   sed -i.bak "s/^PORT=.*/PORT=$new_web_port/" apps/web/.env.local
   rm -f apps/web/.env.local.bak
-
-  if [ -f apps/api-server/.env.local ]; then
-    sed -i.bak "s/^PORT=.*/PORT=$new_api_port/" apps/api-server/.env.local
-    rm -f apps/api-server/.env.local.bak
-  fi
 
   # Update site URL to match new web port
   sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$new_web_port\"|" apps/web/.env.local
   rm -f apps/web/.env.local.bak
 
   WEB_PORT=$new_web_port
-  API_PORT=$new_api_port
 }
 ```
 
@@ -234,7 +211,6 @@ Display a summary when servers are starting:
 
 Ports:
   • Web app:    http://localhost:<web-port>
-  • API server: http://localhost:<api-port>
 
 Starting dev servers...
 ```
@@ -283,7 +259,6 @@ Checking configured ports...
 ```text
 Configured ports:
   • Web:    3742
-  • API:    4242
 ```
 
 Checking for port conflicts...
@@ -301,14 +276,12 @@ User selects: Kill existing process
 
 Stopping processes on port 3742...
 ✓ Port 3742 is now free
-✓ Port 4242 is available
 
 🚀 Starting applications for: feat-pra-XX-feature-name
 
 ```text
 Ports:
   • Web app:    http://localhost:3742
-  • API server: http://localhost:4242
 ```
 
 Runs `pnpm dev`
