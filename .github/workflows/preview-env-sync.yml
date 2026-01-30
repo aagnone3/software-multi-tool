@@ -1,11 +1,11 @@
 name: Preview Environment Sync
 
-# Synchronize environment variables across Supabase, Vercel, and Render
-# preview environments when a PR has the 'render-preview' label.
+# Synchronize environment variables between Supabase and Vercel
+# preview environments when a PR has the 'preview' label.
 #
 # This workflow only runs when:
-# 1. The 'render-preview' label is added to a PR
-# 2. A PR with 'render-preview' label is updated (synchronize/reopened)
+# 1. The 'preview' label is added to a PR
+# 2. A PR with 'preview' label is updated (synchronize/reopened)
 # 3. Manually triggered via workflow_dispatch
 
 on:
@@ -40,13 +40,13 @@ jobs:
 
     # Only run if:
     # 1. workflow_dispatch (manual trigger)
-    # 2. PR has 'render-preview' label AND is not from a fork
+    # 2. PR has 'preview' label AND is not from a fork
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'pull_request' &&
         github.event.pull_request.head.repo.full_name == github.repository &&
-        contains(github.event.pull_request.labels.*.name, 'render-preview')
+        contains(github.event.pull_request.labels.*.name, 'preview')
       )
 
     steps:
@@ -91,8 +91,6 @@ jobs:
           # Supabase Management API
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-          # Render API
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           # Vercel API
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
@@ -112,10 +110,9 @@ jobs:
             const body = success
               ? `## Preview Environment Sync Complete
 
-            Environment variables have been synchronized across all preview services:
-            - **Supabase** branch database credentials synced to Render
-            - **Vercel** preview URL synced to Render (CORS)
-            - **Render** API URL synced to Vercel
+            Environment variables have been synchronized across preview services:
+            - **Supabase** branch database credentials synced to Vercel
+            - **Supabase** storage credentials synced to Vercel
 
             Preview environments should be fully functional within a few minutes.`
               : `## Preview Environment Sync Failed
