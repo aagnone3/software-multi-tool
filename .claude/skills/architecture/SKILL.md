@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Provides comprehensive codebase architecture overview including monorepo structure, hybrid backend (Next.js + Fastify), API layer (Hono + oRPC), frontend patterns (React 19 + TanStack Query), and deployment infrastructure. Use when navigating the codebase, understanding request flow, or learning integration patterns.
+description: Provides comprehensive codebase architecture overview including monorepo structure, Next.js serverless backend, API layer (Hono + oRPC), frontend patterns (React 19 + TanStack Query), background jobs (Inngest), real-time updates (Supabase Realtime), and deployment infrastructure. Use when navigating the codebase, understanding request flow, or learning integration patterns.
 allowed-tools:
   - Read
   - Grep
