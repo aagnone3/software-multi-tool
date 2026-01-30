@@ -1,24 +1,18 @@
-import { db } from "@repo/database";
 import { logger } from "@repo/logs";
-import { JOB_EXPIRE_IN_INTERVAL, RETRY_CONFIG } from "./job-config";
 
 /**
- * Job queue abstraction for submitting jobs to pg-boss
+ * Job queue abstraction (Inngest migration)
  *
- * This module provides a thin layer over pg-boss for submitting jobs
- * directly via SQL. The actual job processing is handled by the
- * api-server workers.
+ * This module previously provided pg-boss queue submission.
+ * Job processing is now handled by Inngest functions in apps/web/inngest/.
  *
  * Architecture:
- * - create-job.ts calls submitJobToQueue() after creating ToolJob
- * - Job is inserted into pgboss.job table
- * - api-server workers poll pgboss.job and process jobs
- * - Vercel Cron handles maintenance (stuck jobs, cleanup)
+ * - create-job.ts creates a ToolJob record
+ * - Inngest event is sent to trigger the appropriate function
+ * - Inngest functions poll and process jobs asynchronously
  *
- * Timeout Configuration:
- * - All timeout values are centralized in job-config.ts
- * - Job expiration defaults to JOB_EXPIRE_IN_INTERVAL (10 minutes)
- * - Retry configuration uses RETRY_CONFIG for consistency
+ * This file is kept for backwards compatibility with any code that may
+ * still reference these functions, but they now return no-ops.
  */
 
 interface SubmitJobOptions {
@@ -36,8 +30,7 @@ interface SubmitJobOptions {
 
 	/**
 	 * Job expiration interval (PostgreSQL interval format).
-	 * Jobs are marked "expired" if active longer than this.
-	 * @default JOB_EXPIRE_IN_INTERVAL from job-config.ts (10 minutes)
+	 * @default "10 minutes"
 	 */
 	expireIn?: string;
 
@@ -48,147 +41,27 @@ interface SubmitJobOptions {
 }
 
 /**
- * Submit a job to the pg-boss queue
- *
- * @param queueName - The queue/tool name (e.g., "news-analyzer")
- * @param toolJobId - The ID of the ToolJob in the database
- * @param options - Optional job configuration
- * @returns The pg-boss job ID (UUID), or null if submission failed
+ * @deprecated pg-boss queue has been replaced by Inngest.
+ * Jobs are now triggered via Inngest events. This function is a no-op.
  */
 export async function submitJobToQueue(
 	queueName: string,
 	toolJobId: string,
-	options: SubmitJobOptions = {},
+	_options: SubmitJobOptions = {},
 ): Promise<string | null> {
-	const {
-		priority = 0,
-		startAfter,
-		expireIn = JOB_EXPIRE_IN_INTERVAL,
-		singletonKey,
-	} = options;
-
-	const payload = { toolJobId };
-
-	try {
-		// Ensure the queue exists (pg-boss auto-creates partitions)
-		// This is idempotent - create_queue does nothing if queue already exists
-		await ensureQueueExists(queueName);
-
-		// Insert job directly into pgboss.job table
-		// pg-boss workers will pick it up via the `work()` function
-		const result = await db.$queryRaw<Array<{ id: string }>>`
-			INSERT INTO pgboss.job (
-				name,
-				data,
-				priority,
-				start_after,
-				expire_in,
-				singleton_key,
-				retry_limit,
-				retry_delay,
-				retry_backoff
-			) VALUES (
-				${queueName},
-				${JSON.stringify(payload)}::jsonb,
-				${priority},
-				${startAfter ?? new Date()},
-				${expireIn}::interval,
-				${singletonKey ?? null},
-				${RETRY_CONFIG.limit},
-				${RETRY_CONFIG.delay},
-				${RETRY_CONFIG.backoff}
-			)
-			RETURNING id::text
-		`;
-
-		const pgBossJobId = result[0]?.id;
-
-		if (pgBossJobId) {
-			logger.info(
-				`[Queue] Job submitted: queue=${queueName}, toolJobId=${toolJobId}, pgBossJobId=${pgBossJobId}`,
-			);
-
-			// Update ToolJob with the pg-boss job ID
-			await db.toolJob.update({
-				where: { id: toolJobId },
-				data: { pgBossJobId },
-			});
-		} else {
-			logger.warn(
-				`[Queue] Failed to submit job: queue=${queueName}, toolJobId=${toolJobId}`,
-			);
-		}
-
-		return pgBossJobId ?? null;
-	} catch (error) {
-		logger.error(
-			`[Queue] Error submitting job: queue=${queueName}, toolJobId=${toolJobId}`,
-			{ error: error instanceof Error ? error.message : String(error) },
-		);
-		return null;
-	}
+	logger.warn(
+		`[DEPRECATED] submitJobToQueue() called for queue=${queueName}, toolJobId=${toolJobId}. ` +
+			"Job submission is now handled by Inngest events.",
+	);
+	return null;
 }
 
 /**
- * Ensure a queue exists in pg-boss
- *
- * This is called before submitting jobs to ensure the queue partition exists.
- * The create_queue function is idempotent - it does nothing if queue already exists.
- */
-async function ensureQueueExists(queueName: string): Promise<void> {
-	try {
-		await db.$executeRaw`
-			SELECT pgboss.create_queue(${queueName}, '{}'::json)
-		`;
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-
-		// pg-boss create_queue is idempotent - "already exists" is expected
-		if (
-			message.includes("already exists") ||
-			message.includes("duplicate")
-		) {
-			logger.debug(`[Queue] Queue ${queueName} already exists`);
-		} else {
-			// Real error - log as warning (non-fatal, job submission may still work)
-			logger.warn(
-				`[Queue] Unexpected error creating queue ${queueName}`,
-				{
-					error: message,
-				},
-			);
-		}
-	}
-}
-
-/**
- * Check if pg-boss workers are active
- *
- * This can be used to determine if jobs should be submitted to pg-boss
- * or fall back to immediate processing.
- *
- * @returns true if workers appear to be active (have processed jobs recently)
+ * @deprecated pg-boss has been removed. This function is a no-op.
  */
 export async function arePgBossWorkersActive(): Promise<boolean> {
-	try {
-		// Check if there are any recently completed jobs in pg-boss
-		// This indicates workers are running
-		const result = await db.$queryRaw<Array<{ count: bigint }>>`
-			SELECT COUNT(*) as count
-			FROM pgboss.job
-			WHERE state IN ('active', 'completed')
-			AND created_on > NOW() - INTERVAL '5 minutes'
-		`;
-
-		return (result[0]?.count ?? BigInt(0)) > BigInt(0);
-	} catch (error) {
-		// If query fails, assume workers are not active but log the issue
-		logger.warn(
-			"[Queue] Failed to check worker status, assuming inactive",
-			{
-				error: error instanceof Error ? error.message : String(error),
-			},
-		);
-		return false;
-	}
+	logger.warn(
+		"[DEPRECATED] arePgBossWorkersActive() called. pg-boss has been removed.",
+	);
+	return false;
 }
