@@ -1,8 +1,10 @@
 import type { RouterClient } from "@orpc/server";
 import { adminRouter } from "../modules/admin/router";
+import { agentSessionsRouter } from "../modules/agent-sessions/router";
 import { aiRouter } from "../modules/ai/router";
 import { contactRouter } from "../modules/contact/router";
 import { creditsRouter } from "../modules/credits/router";
+import { feedbackRouter } from "../modules/feedback/router";
 import { filesRouter } from "../modules/files/router";
 import { gdprRouter } from "../modules/gdpr-exporter/router";
 import { invoiceProcessorRouter } from "../modules/invoice-processor/router";
@@ -20,9 +22,11 @@ export const router = publicProcedure
 	.prefix("/api")
 	.router({
 		admin: adminRouter,
+		agentSessions: agentSessionsRouter,
 		newsletter: newsletterRouter,
 		contact: contactRouter,
 		credits: creditsRouter,
+		feedback: feedbackRouter,
 		files: filesRouter,
 		notifications: notificationsRouter,
 		organizations: organizationsRouter,

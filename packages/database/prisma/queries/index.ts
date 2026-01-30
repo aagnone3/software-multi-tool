@@ -9,6 +9,7 @@ export * from "./notification-triggers";
 export * from "./notifications";
 export * from "./organizations";
 export * from "./purchases";
+export * from "./tool-feedback";
 export * from "./tool-jobs";
 export * from "./tools";
 export * from "./users";
