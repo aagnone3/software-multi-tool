@@ -5,6 +5,7 @@
 		"paths": {
 			"@analytics": ["./modules/analytics"],
 			"@marketing/*": ["./modules/marketing/*"],
+			"@realtime": ["./modules/realtime"],
 			"@saas/*": ["./modules/saas/*"],
 			"@tools/*": ["./modules/tools/*"],
 			"@ui/*": ["./modules/ui/*"],
