@@ -1,0 +1,22 @@
+{
+	"name": "@repo/e2e",
+	"version": "1.0.0",
+	"private": true,
+	"description": "End-to-end tests for the web application",
+	"scripts": {
+		"test": "playwright test",
+		"test:ui": "playwright test --ui",
+		"test:headed": "playwright test --headed",
+		"test:debug": "playwright test --debug",
+		"test:smoke": "playwright test --project=smoke",
+		"test:auth": "playwright test specs/auth/",
+		"test:tools": "playwright test specs/tools/",
+		"test:settings": "playwright test specs/settings/",
+		"report": "playwright show-report",
+		"codegen": "playwright codegen http://localhost:3500"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.52.0",
+		"dotenv": "^16.4.7"
+	}
+}

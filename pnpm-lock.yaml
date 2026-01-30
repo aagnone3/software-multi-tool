@@ -79,6 +79,15 @@ importers:
         specifier: 4.54.0
         version: 4.54.0
 
+  apps/e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.52.0
+        version: 1.57.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+
   apps/web:
     dependencies:
       '@ai-sdk/react':
@@ -16164,7 +16173,7 @@ snapshots:
 
   '@types/dotenv@8.2.3':
     dependencies:
-      dotenv: 17.2.3
+      dotenv: 16.6.1
 
   '@types/eslint-scope@3.7.7':
     dependencies:
