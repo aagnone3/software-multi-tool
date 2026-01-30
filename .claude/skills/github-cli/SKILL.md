@@ -1,6 +1,6 @@
 ---
 name: github-cli
-description: Provides GitHub operations support including creating pull requests, managing issues, and using the GitHub API. Enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
+description: Provides GitHub operations support including creating pull requests, managing issues, using the GitHub API, and account switching. Enforces using the aagnone3 GitHub account for all operations. Use when creating PRs, switching accounts, viewing issues, debugging authentication errors, or managing GitHub operations.
 allowed-tools:
   - Bash
   - Read
@@ -253,3 +253,10 @@ gh auth status && gh <command>
 ```bash
 gh repo view aagnone3/software-multi-tool
 ```
+
+## Related Skills
+
+- **git-worktrees**: Creating PRs from worktree branches
+- **linear-workflow**: Complete Linear→PR workflow
+- **linear**: Closing issues after PR merge
+- **cicd**: Understanding CI/CD pipeline checks
