@@ -54,34 +54,25 @@ describe("api-url", () => {
 		});
 	});
 
-	describe("shouldUseProxy", () => {
-		it("returns true for client-side in preview environment", async () => {
+	describe("shouldUseProxy (deprecated)", () => {
+		it("always returns false regardless of environment", async () => {
 			process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
 			const { shouldUseProxy } = await importModule();
-			expect(shouldUseProxy(true)).toBe(true);
-		});
-
-		it("returns false for server-side in preview environment", async () => {
-			process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-			const { shouldUseProxy } = await importModule();
+			// Deprecated function always returns false
+			expect(shouldUseProxy(true)).toBe(false);
 			expect(shouldUseProxy(false)).toBe(false);
 		});
 
-		it("returns false for client-side in production", async () => {
+		it("returns false in production", async () => {
 			process.env.NEXT_PUBLIC_VERCEL_ENV = "production";
 			const { shouldUseProxy } = await importModule();
 			expect(shouldUseProxy(true)).toBe(false);
-		});
-
-		it("returns false for server-side in production", async () => {
-			process.env.NEXT_PUBLIC_VERCEL_ENV = "production";
-			const { shouldUseProxy } = await importModule();
 			expect(shouldUseProxy(false)).toBe(false);
 		});
 	});
 
 	describe("getApiBaseUrl", () => {
-		describe("in non-preview environment", () => {
+		describe("in production environment (server-side)", () => {
 			it("uses NEXT_PUBLIC_SITE_URL if available", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "production";
 				process.env.NEXT_PUBLIC_SITE_URL = "https://myapp.com";
@@ -108,32 +99,8 @@ describe("api-url", () => {
 		});
 
 		describe("in preview environment (server-side)", () => {
-			// Note: These tests run in Node.js (server-side) by default
-			it("uses NEXT_PUBLIC_API_SERVER_URL for server-side requests", async () => {
+			it("uses base URL for server-side requests", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-				process.env.NEXT_PUBLIC_API_SERVER_URL =
-					"https://api-preview.onrender.com";
-				const { getApiBaseUrl } = await importModule();
-				expect(getApiBaseUrl()).toBe(
-					"https://api-preview.onrender.com/api",
-				);
-			});
-
-			it("uses API_SERVER_URL as fallback for server-side requests", async () => {
-				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-				delete process.env.NEXT_PUBLIC_API_SERVER_URL;
-				process.env.API_SERVER_URL =
-					"https://api-internal.onrender.com";
-				const { getApiBaseUrl } = await importModule();
-				expect(getApiBaseUrl()).toBe(
-					"https://api-internal.onrender.com/api",
-				);
-			});
-
-			it("falls back to base URL if no API server URL is set", async () => {
-				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-				delete process.env.NEXT_PUBLIC_API_SERVER_URL;
-				delete process.env.API_SERVER_URL;
 				process.env.NEXT_PUBLIC_SITE_URL = "https://preview.vercel.app";
 				const { getApiBaseUrl } = await importModule();
 				expect(getApiBaseUrl()).toBe("https://preview.vercel.app/api");
@@ -141,7 +108,7 @@ describe("api-url", () => {
 		});
 
 		describe("in preview environment (client-side)", () => {
-			it("uses window.location.origin for proxy route", async () => {
+			it("uses window.location.origin for same-origin requests", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
 				// Mock window to simulate client-side
 				// @ts-expect-error - mocking window
@@ -151,15 +118,16 @@ describe("api-url", () => {
 					},
 				};
 				const { getApiBaseUrl } = await importModule();
+				// No proxy - direct /api route
 				expect(getApiBaseUrl()).toBe(
-					"https://my-preview.vercel.app/api/proxy",
+					"https://my-preview.vercel.app/api",
 				);
 			});
 		});
 	});
 
 	describe("getOrpcUrl", () => {
-		describe("in non-preview environment", () => {
+		describe("in production environment (server-side)", () => {
 			it("uses NEXT_PUBLIC_SITE_URL if available", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "production";
 				process.env.NEXT_PUBLIC_SITE_URL = "https://myapp.com";
@@ -186,30 +154,16 @@ describe("api-url", () => {
 		});
 
 		describe("in preview environment (server-side)", () => {
-			it("uses NEXT_PUBLIC_API_SERVER_URL for server-side requests", async () => {
+			it("uses base URL for server-side requests", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-				process.env.NEXT_PUBLIC_API_SERVER_URL =
-					"https://api-preview.onrender.com";
+				process.env.NEXT_PUBLIC_SITE_URL = "https://preview.vercel.app";
 				const { getOrpcUrl } = await importModule();
-				expect(getOrpcUrl()).toBe(
-					"https://api-preview.onrender.com/api/rpc",
-				);
-			});
-
-			it("uses API_SERVER_URL as fallback for server-side requests", async () => {
-				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
-				delete process.env.NEXT_PUBLIC_API_SERVER_URL;
-				process.env.API_SERVER_URL =
-					"https://api-internal.onrender.com";
-				const { getOrpcUrl } = await importModule();
-				expect(getOrpcUrl()).toBe(
-					"https://api-internal.onrender.com/api/rpc",
-				);
+				expect(getOrpcUrl()).toBe("https://preview.vercel.app/api/rpc");
 			});
 		});
 
 		describe("in preview environment (client-side)", () => {
-			it("uses window.location.origin for proxy route", async () => {
+			it("uses window.location.origin for same-origin requests", async () => {
 				process.env.NEXT_PUBLIC_VERCEL_ENV = "preview";
 				// Mock window to simulate client-side
 				// @ts-expect-error - mocking window
@@ -219,8 +173,9 @@ describe("api-url", () => {
 					},
 				};
 				const { getOrpcUrl } = await importModule();
+				// No proxy - direct /api/rpc route
 				expect(getOrpcUrl()).toBe(
-					"https://my-preview.vercel.app/api/proxy/rpc",
+					"https://my-preview.vercel.app/api/rpc",
 				);
 			});
 		});
