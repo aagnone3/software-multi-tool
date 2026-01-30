@@ -45,6 +45,7 @@ model User {
   passkeys                Passkey[]
   purchases               Purchase[]
   sessions                Session[]
+  toolFeedback            ToolFeedback[]
   toolJobs                ToolJob[]
   twofactors              TwoFactor[]
 
@@ -297,29 +298,30 @@ model Tool {
 }
 
 model ToolJob {
-  id             String        @id @default(cuid())
+  id             String         @id @default(cuid())
   toolSlug       String
-  toolId         String?       // Optional FK for backwards compatibility
-  status         ToolJobStatus @default(PENDING)
-  priority       Int           @default(0)
+  toolId         String?        // Optional FK for backwards compatibility
+  status         ToolJobStatus  @default(PENDING)
+  priority       Int            @default(0)
   input          Json
   output         Json?
   error          String?
   userId         String?
   sessionId      String?
-  attempts       Int           @default(0)
-  maxAttempts    Int           @default(3)
+  attempts       Int            @default(0)
+  maxAttempts    Int            @default(3)
   startedAt      DateTime?
   completedAt    DateTime?
   expiresAt      DateTime
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  newsAnalysisId String?       @unique
-  audioFileUrl   String?       // S3/Supabase storage URL for audio files (speaker-separation)
-  audioMetadata  Json?         // Audio file metadata: { filename, mimeType, duration, size }
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  newsAnalysis   NewsAnalysis? @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
-  tool           Tool?         @relation(fields: [toolId], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  newsAnalysisId String?        @unique
+  audioFileUrl   String?        // S3/Supabase storage URL for audio files (speaker-separation)
+  audioMetadata  Json?          // Audio file metadata: { filename, mimeType, duration, size }
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsAnalysis   NewsAnalysis?  @relation(fields: [newsAnalysisId], references: [id], onDelete: SetNull)
+  tool           Tool?          @relation(fields: [toolId], references: [id], onDelete: SetNull)
+  feedback       ToolFeedback[]
 
   @@index([status, priority])
   @@index([toolSlug, status])
@@ -348,6 +350,30 @@ model RateLimitEntry {
   @@index([toolId])
   @@index([windowEnd])
   @@map("rate_limit_entry")
+  @@schema("public")
+}
+
+// Tool feedback collection for quality assurance and product improvement
+model ToolFeedback {
+  id             String         @id @default(cuid())
+  toolSlug       String         // FK-like to config (matches ToolJob pattern)
+  jobId          String?        // Optional link to specific ToolJob
+  userId         String         // Required - authenticated users only
+  rating         FeedbackRating // POSITIVE or NEGATIVE
+  chatTranscript String?        @db.Text // Raw AI conversation transcript
+  /// [ExtractedFeedbackData]
+  extractedData  Json?          // Structured insights from chat
+  createdAt      DateTime       @default(now())
+
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  ToolJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([toolSlug])
+  @@index([userId])
+  @@index([jobId])
+  @@index([rating])
+  @@index([createdAt])
+  @@map("tool_feedback")
   @@schema("public")
 }
 
@@ -541,6 +567,13 @@ enum ToolJobStatus {
   COMPLETED
   FAILED
   CANCELLED
+
+  @@schema("public")
+}
+
+enum FeedbackRating {
+  POSITIVE
+  NEGATIVE
 
   @@schema("public")
 }
