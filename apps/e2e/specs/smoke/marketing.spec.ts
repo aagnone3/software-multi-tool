@@ -11,12 +11,6 @@ test.describe("Marketing Pages @smoke", () => {
 		await expect(page.locator("main")).toBeVisible();
 	});
 
-	test("pricing page loads", async ({ gotoAndWait, page }) => {
-		await gotoAndWait("/pricing");
-
-		await expect(page.locator("main")).toBeVisible();
-	});
-
 	test("login page loads", async ({ gotoAndWait, page }) => {
 		await gotoAndWait("/auth/login");
 

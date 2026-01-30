@@ -33,13 +33,18 @@ test.describe("News Analyzer", () => {
 	});
 
 	test("shows error when analysis fails to start", async ({ page }) => {
-		// Mock the trigger endpoint to fail
-		await page.route("**/api/jobs/trigger", (route) => {
-			route.fulfill({
-				status: 500,
-				contentType: "application/json",
-				body: JSON.stringify({ error: "Test error" }),
-			});
+		// Mock the oRPC endpoint to fail - this intercepts the jobs.create call
+		await page.route("**/api/rpc/**", (route) => {
+			// Only mock the jobs.create request (POST requests that create jobs)
+			if (route.request().method() === "POST") {
+				route.fulfill({
+					status: 500,
+					contentType: "application/json",
+					body: JSON.stringify({ error: "Test error" }),
+				});
+			} else {
+				route.continue();
+			}
 		});
 
 		const newsAnalyzer = new NewsAnalyzerPage(page);

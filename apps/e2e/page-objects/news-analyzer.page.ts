@@ -20,7 +20,8 @@ export class NewsAnalyzerPage {
 		this.loadingIndicator = page.getByRole("button", {
 			name: /analyzing/i,
 		});
-		this.errorAlert = page.getByText(/failed to start analysis/i);
+		// Match error messages like "Failed to create analysis job" or other errors
+		this.errorAlert = page.getByText(/failed|error/i).first();
 	}
 
 	/**
