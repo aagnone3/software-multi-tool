@@ -209,7 +209,7 @@ jobs:
         env:
           POSTGRES_PRISMA_URL: ${{ steps.supabase.outputs.pooler_url }}
           POSTGRES_URL_NON_POOLING: ${{ steps.supabase.outputs.direct_url }}
-        run: pnpm --filter @repo/e2e test
+        run: pnpm --filter @repo/e2e e2e
       - name: Skip notice
         if: steps.supabase.outputs.skip == 'true'
         run: echo "::notice::E2E tests skipped - Supabase preview branch not ready"

@@ -33,10 +33,10 @@ pnpm install
 npx playwright install chromium
 
 # Run tests (starts dev server automatically)
-pnpm test
+pnpm e2e
 
 # Run with UI mode
-pnpm test:ui
+pnpm e2e:ui
 ```
 
 ## Running Tests
@@ -48,26 +48,26 @@ pnpm test:ui
 pnpm --filter web dev
 
 # Run all tests
-pnpm test
+pnpm e2e
 
 # Run specific test suites
-pnpm test:smoke      # Critical path tests
-pnpm test:auth       # Authentication tests
-pnpm test:tools      # Tool tests (news-analyzer, etc.)
-pnpm test:settings   # Settings page tests
+pnpm e2e:smoke      # Critical path tests
+pnpm e2e:auth       # Authentication tests
+pnpm e2e:tools      # Tool tests (news-analyzer, etc.)
+pnpm e2e:settings   # Settings page tests
 ```
 
 ### Against Preview Deployments
 
 ```bash
 # Run against a Vercel preview URL
-BASE_URL=https://your-preview.vercel.app pnpm test
+BASE_URL=https://your-preview.vercel.app pnpm e2e
 ```
 
 ### Against Production
 
 ```bash
-BASE_URL=https://your-domain.com pnpm test:smoke
+BASE_URL=https://your-domain.com pnpm e2e:smoke
 ```
 
 ## Test Fixtures
@@ -146,10 +146,10 @@ Tests can be tagged for selective execution:
 
 ```bash
 # Run with headed browser
-pnpm test:headed
+pnpm e2e:headed
 
 # Run in debug mode (step through)
-pnpm test:debug
+pnpm e2e:debug
 
 # Generate tests via codegen
 pnpm codegen
