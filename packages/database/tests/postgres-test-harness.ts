@@ -104,8 +104,8 @@ async function startContainer(): Promise<StartedPostgreSqlContainer> {
 async function preparePrismaClient(connectionString: string) {
 	// Deploy migrations to the test database container
 	// Note: We use `migrate deploy` instead of `db push` to ensure raw SQL migrations
-	// (like pg-boss schema) are properly applied. The Prisma client should already be
-	// generated during the build process.
+	// are properly applied. The Prisma client should already be generated during the
+	// build process.
 	await execFileAsync(
 		"pnpm",
 		["exec", "prisma", "migrate", "deploy", "--schema", prismaSchemaPath],

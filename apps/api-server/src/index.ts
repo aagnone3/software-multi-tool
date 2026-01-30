@@ -1,9 +1,7 @@
 import { db } from "@repo/database";
 import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
-import { startPgBoss, stopPgBoss } from "./lib/pg-boss.js";
 import { createServer } from "./lib/server.js";
-import { registerWorkers } from "./workers/index.js";
 
 async function main() {
 	try {
@@ -13,18 +11,6 @@ async function main() {
 		// Test database connection
 		await db.$connect();
 		logger.info("Database connected successfully");
-
-		// Start pg-boss workers if enabled
-		if (env.USE_PGBOSS_WORKERS) {
-			logger.info("USE_PGBOSS_WORKERS is enabled, starting pg-boss...");
-			await startPgBoss();
-			await registerWorkers();
-			logger.info("pg-boss workers started successfully");
-		} else {
-			logger.info(
-				"USE_PGBOSS_WORKERS is disabled, skipping pg-boss initialization",
-			);
-		}
 
 		// Start server
 		await server.listen({
@@ -36,21 +22,12 @@ async function main() {
 		logger.info(`Environment: ${env.NODE_ENV}`);
 		logger.info(`Health check: http://${env.HOST}:${env.PORT}/health`);
 		logger.info(`WebSocket: ws://${env.HOST}:${env.PORT}/ws`);
-		if (env.USE_PGBOSS_WORKERS) {
-			logger.info("pg-boss workers: ENABLED");
-		}
 
 		// Graceful shutdown handler
 		const shutdownHandler = async (signal: string) => {
 			logger.info(`${signal} received, starting graceful shutdown`);
 
 			try {
-				// Stop pg-boss first (allows in-flight jobs to complete)
-				if (env.USE_PGBOSS_WORKERS) {
-					await stopPgBoss();
-					logger.info("pg-boss stopped");
-				}
-
 				// Close server (stops accepting new connections)
 				await server.close();
 				logger.info("Server closed");

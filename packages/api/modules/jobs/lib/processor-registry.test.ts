@@ -81,7 +81,7 @@ describe("processor-registry", () => {
 
 	describe("DEFAULT_JOB_TIMEOUT_MS", () => {
 		it("should be 10 minutes (600000ms) - aligned with job-config", () => {
-			// Timeout was unified to 10 minutes for consistency with pg-boss expiration
+			// Timeout is 10 minutes for consistency with Inngest step timeout
 			expect(DEFAULT_JOB_TIMEOUT_MS).toBe(600000);
 		});
 	});

@@ -1,13 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { STUCK_JOB_TIMEOUT_MINUTES } from "./job-config";
-import {
-	handleStuckJobs,
-	processAllPendingJobs,
-	processNextJob,
-	reconcileJobStates,
-	retryFailedJobs,
-	runCleanup,
-} from "./job-runner";
+import { handleStuckJobs, runCleanup } from "./job-runner";
 
 // Mock database functions
 const markStuckJobsAsFailedMock = vi.hoisted(() => vi.fn());
@@ -34,142 +27,70 @@ describe("Job Runner", () => {
 		vi.clearAllMocks();
 	});
 
-	describe("Maintenance Functions", () => {
-		describe("handleStuckJobs", () => {
-			it("marks stuck jobs as failed", async () => {
-				markStuckJobsAsFailedMock.mockResolvedValue({ count: 3 });
+	describe("handleStuckJobs", () => {
+		it("marks stuck jobs as failed", async () => {
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 3 });
 
-				const result = await handleStuckJobs(30);
+			const result = await handleStuckJobs(30);
 
-				expect(result).toEqual({ count: 3 });
-				expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(30);
-			});
-
-			it("uses default timeout from job-config", async () => {
-				markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
-
-				await handleStuckJobs();
-
-				expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(
-					STUCK_JOB_TIMEOUT_MINUTES,
-				);
-			});
-
-			it("logs warning when stuck jobs are found", async () => {
-				markStuckJobsAsFailedMock.mockResolvedValue({ count: 5 });
-
-				await handleStuckJobs(30);
-
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("5 stuck jobs"),
-				);
-			});
-
-			it("does not log when no stuck jobs found", async () => {
-				markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
-
-				await handleStuckJobs(30);
-
-				expect(logger.warn).not.toHaveBeenCalled();
-			});
+			expect(result).toEqual({ count: 3 });
+			expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(30);
 		});
 
-		describe("runCleanup", () => {
-			it("cleans up expired jobs", async () => {
-				cleanupExpiredJobsMock.mockResolvedValue({ count: 5 });
+		it("uses default timeout from job-config", async () => {
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
 
-				const result = await runCleanup();
+			await handleStuckJobs();
 
-				expect(result).toEqual({ deleted: 5 });
-			});
+			expect(markStuckJobsAsFailedMock).toHaveBeenCalledWith(
+				STUCK_JOB_TIMEOUT_MINUTES,
+			);
+		});
 
-			it("logs info when jobs are cleaned up", async () => {
-				cleanupExpiredJobsMock.mockResolvedValue({ count: 10 });
+		it("logs warning when stuck jobs are found", async () => {
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 5 });
 
-				await runCleanup();
+			await handleStuckJobs(30);
 
-				expect(logger.info).toHaveBeenCalledWith(
-					expect.stringContaining("10 expired jobs"),
-				);
-			});
+			expect(logger.warn).toHaveBeenCalledWith(
+				expect.stringContaining("5 stuck jobs"),
+			);
+		});
 
-			it("does not log when no jobs cleaned up", async () => {
-				cleanupExpiredJobsMock.mockResolvedValue({ count: 0 });
+		it("does not log when no stuck jobs found", async () => {
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
 
-				await runCleanup();
+			await handleStuckJobs(30);
 
-				expect(logger.info).not.toHaveBeenCalled();
-			});
+			expect(logger.warn).not.toHaveBeenCalled();
 		});
 	});
 
-	describe("Deprecated Functions", () => {
-		describe("processNextJob", () => {
-			it("returns false and logs deprecation warning", async () => {
-				const result = await processNextJob();
+	describe("runCleanup", () => {
+		it("cleans up expired jobs", async () => {
+			cleanupExpiredJobsMock.mockResolvedValue({ count: 5 });
 
-				expect(result).toEqual({ processed: false });
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("DEPRECATED"),
-				);
-			});
+			const result = await runCleanup();
 
-			it("returns false regardless of toolSlug", async () => {
-				const result = await processNextJob("news-analyzer");
-
-				expect(result).toEqual({ processed: false });
-			});
+			expect(result).toEqual({ deleted: 5 });
 		});
 
-		describe("processAllPendingJobs", () => {
-			it("returns empty result and logs deprecation warning", async () => {
-				const result = await processAllPendingJobs();
+		it("logs info when jobs are cleaned up", async () => {
+			cleanupExpiredJobsMock.mockResolvedValue({ count: 10 });
 
-				expect(result).toEqual({ processed: 0, jobIds: [] });
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("DEPRECATED"),
-				);
-			});
+			await runCleanup();
 
-			it("returns empty result regardless of parameters", async () => {
-				const result = await processAllPendingJobs(
-					"news-analyzer",
-					100,
-				);
-
-				expect(result).toEqual({ processed: 0, jobIds: [] });
-			});
+			expect(logger.info).toHaveBeenCalledWith(
+				expect.stringContaining("10 expired jobs"),
+			);
 		});
 
-		describe("retryFailedJobs", () => {
-			it("returns zero and logs deprecation warning", async () => {
-				const result = await retryFailedJobs();
+		it("does not log when no jobs cleaned up", async () => {
+			cleanupExpiredJobsMock.mockResolvedValue({ count: 0 });
 
-				expect(result).toEqual({ retried: 0 });
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("DEPRECATED"),
-				);
-			});
-		});
+			await runCleanup();
 
-		describe("reconcileJobStates (deprecated)", () => {
-			it("returns success with zeros and logs deprecation warning", async () => {
-				const result = await reconcileJobStates();
-
-				expect(result).toEqual({
-					success: true,
-					synced: 0,
-					completed: 0,
-					failed: 0,
-					expired: 0,
-				});
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("DEPRECATED"),
-				);
-				expect(logger.warn).toHaveBeenCalledWith(
-					expect.stringContaining("pg-boss has been removed"),
-				);
-			});
+			expect(logger.info).not.toHaveBeenCalled();
 		});
 	});
 });

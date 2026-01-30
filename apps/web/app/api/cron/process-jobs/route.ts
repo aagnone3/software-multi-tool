@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
  * @deprecated Use /api/cron/job-maintenance instead
  *
  * This endpoint is kept for backwards compatibility during migration.
- * It now only performs maintenance tasks - pg-boss workers handle actual job processing.
+ * It now only performs maintenance tasks - Inngest functions handle actual job processing.
  *
  * Migration: Update vercel.json to use /api/cron/job-maintenance
  */
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 			"[Cron] DEPRECATED: /api/cron/process-jobs called. Use /api/cron/job-maintenance instead.",
 		);
 
-		// Only perform maintenance - pg-boss handles job processing now
+		// Only perform maintenance - Inngest handles job processing now
 		const stuckResult = await handleStuckJobs(30);
 		const cleanupResult = await runCleanup();
 

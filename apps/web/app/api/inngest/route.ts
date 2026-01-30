@@ -13,7 +13,7 @@ import { speakerSeparation } from "../../../inngest/functions/speaker-separation
  * Inngest serve endpoint for handling background jobs.
  *
  * This endpoint is called by Inngest to invoke functions when events are received.
- * All 8 job processors from the pg-boss migration are registered here.
+ * All 8 job processors are registered here.
  *
  * Local development:
  *   npx inngest-cli@latest dev
