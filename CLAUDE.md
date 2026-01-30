@@ -307,36 +307,6 @@ git add packages/database/prisma/zod/
 
 This prevents stale Prisma clients from being committed, catching sync issues before they reach CI or production.
 
-## Bundling Best Practices (api-server)
-
-The `api-server` uses esbuild to bundle all code into a single `dist/index.cjs` file for deployment. Some packages don't bundle correctly and will cause runtime errors.
-
-### Packages to Avoid in Bundled Code
-
-| Package                                                      | Problem                                              | Alternative                                  |
-| ------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------- |
-| `jsdom`                                                      | Uses worker files (`xhr-sync-worker.js`) can't bundle| `linkedom` or `happy-dom`                    |
-| Packages with native bindings                                | Binary files not included in bundle                  | Mark as external or find pure-JS alternative |
-| Packages using `require.resolve()` for runtime file loading  | Paths break after bundling                           | Find alternatives or mark as external        |
-
-### Bundle Smoke Testing
-
-CI runs a smoke test on every PR to catch bundling issues before deployment:
-
-```bash
-# Build and smoke test locally
-pnpm --filter @repo/api-server build:smoke-test
-```
-
-The smoke test verifies the bundle can be loaded without `MODULE_NOT_FOUND` errors.
-
-### If You Encounter a Bundling Issue
-
-1. **Identify the problematic package** from the error stack trace
-2. **Check if a bundle-friendly alternative exists** (e.g., `linkedom` instead of `jsdom`)
-3. **If no alternative**: Mark the package as external in the esbuild command and ensure it's installed in production
-4. **Add a test case** to prevent regression
-
 ## Code Style & Patterns
 
 ### TypeScript
@@ -407,8 +377,6 @@ node --version       # Should show v22.x.x
 - Node.js v24+ has compatibility issues with Zod v4's CJS/ESM module interop
 - v22 is the current LTS (Long Term Support) release with best stability
 - The `engines` field in `package.json` enforces `>=22.0.0 <23.0.0`
-
-**API Server Auto-Switch**: The `api-server` dev script automatically switches to Node.js v22 via nvm if you're on an incompatible version. Just run `pnpm dev` and it will handle the switch. See `apps/api-server/scripts/ensure-node-version.sh`.
 
 **Automatic version switching** (optional): Add to your `~/.zshrc` or `~/.bashrc`:
 

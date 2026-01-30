@@ -26,14 +26,11 @@ Generate and allocate a deterministic port for a git worktree.
 Arguments:
   worktree-path   Path to the worktree directory (e.g., .worktrees/feat-pra-35-auth)
   --check-only    Only check if port is available, don't allocate
-  --offset <num>  Add offset to the calculated port (useful for api-server: --offset 500)
+  --offset <num>  Add offset to the calculated port (for running multiple services)
 
 Examples:
   # Allocate port for web app
   $(basename "$0") .worktrees/feat-pra-35-auth
-
-  # Allocate port for api-server (offset by 500)
-  $(basename "$0") .worktrees/feat-pra-35-auth --offset 500
 
   # Check if port is available
   $(basename "$0") .worktrees/feat-pra-35-auth --check-only
@@ -44,7 +41,6 @@ Output:
 
 Port Ranges:
   Web app:    $PORT_MIN-$PORT_MAX ($PORT_RANGE ports available)
-  API server: Use --offset 500 for range 4001-4499
 EOF
 }
 
@@ -172,7 +168,7 @@ main() {
   local initial_port
   initial_port=$(generate_port_from_path "$worktree_path")
 
-  # Apply offset (for api-server use --offset 500)
+  # Apply offset if specified
   initial_port=$((initial_port + port_offset))
 
   if [ "$check_only" = true ]; then

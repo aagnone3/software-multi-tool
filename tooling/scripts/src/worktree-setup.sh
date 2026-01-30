@@ -6,7 +6,7 @@
 # Features:
 # - Creates worktree with proper branch naming
 # - Copies and configures environment files
-# - Allocates unique ports for web app and api-server
+# - Allocates unique ports for web app
 # - Generates Prisma client
 # - Runs baseline verification tests
 # - Supports cleanup/removal of worktrees
@@ -157,7 +157,7 @@ ${BOLD}Examples:${NC}
 ${BOLD}What this script automates:${NC}
   1. Creates the worktree with proper branch naming
   2. Copies environment files from parent repository
-  3. Allocates unique ports for web app (3501-3999) and api-server (4001-4499)
+  3. Allocates unique ports for web app (3501-3999)
   4. Installs/links dependencies (pnpm install)
   5. Generates Prisma client
   6. Runs baseline verification tests
@@ -360,16 +360,9 @@ setup_worktree_environment() {
     log_warning "No apps/web/.env.local found in parent repository"
   fi
 
-  # API server environment
-  if [ -f "$REPO_ROOT/apps/api-server/.env.local" ]; then
-    cp "$REPO_ROOT/apps/api-server/.env.local" "$worktree_path/apps/api-server/.env.local"
-    log_success "Copied apps/api-server/.env.local"
-  fi
-
   # Enforce Supabase Local database (NEVER use Homebrew Postgres)
   log_info "Enforcing Supabase Local database..."
   local web_env_tmp="$worktree_path/apps/web/.env.local"
-  local api_env_tmp="$worktree_path/apps/api-server/.env.local"
   local supabase_url="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
   # Check and fix web app database URL
@@ -388,30 +381,11 @@ setup_worktree_environment() {
     fi
   fi
 
-  # Check and fix api-server database URL
-  if [ -f "$api_env_tmp" ]; then
-    local current_api_db
-    current_api_db=$(grep "^DATABASE_URL=\|^POSTGRES_PRISMA_URL=" "$api_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
-    if echo "$current_api_db" | grep -q ":5432[^2]"; then
-      log_warning "Homebrew Postgres detected in api-server (port 5432)"
-      log_info "Switching to Supabase Local (port 54322)..."
-      sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=\"$supabase_url\"|" "$api_env_tmp"
-      sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$supabase_url\"|" "$api_env_tmp"
-      sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$supabase_url\"|" "$api_env_tmp"
-      rm -f "$api_env_tmp.bak"
-      log_success "API server database URL updated to Supabase Local"
-    elif echo "$current_api_db" | grep -q ":54322"; then
-      log_success "API server already using Supabase Local"
-    fi
-  fi
-
   # Step 3: Allocate unique ports
   log_step "Step 3: Allocating unique ports"
 
   local web_port
-  local api_port
   local web_env_file="$worktree_path/apps/web/.env.local"
-  local api_env_file="$worktree_path/apps/api-server/.env.local"
 
   # Check if web port is already configured (for resume/idempotency)
   if grep -q "^PORT=" "$web_env_file" 2>/dev/null; then
@@ -443,67 +417,6 @@ setup_worktree_environment() {
   if grep -q "^NEXT_PUBLIC_SITE_URL=" "$web_env_file"; then
     sed -i.bak "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"http://localhost:$web_port\"|" "$web_env_file"
     rm -f "$web_env_file.bak"
-  fi
-
-  # Allocate API server port if env exists
-  if [ -f "$api_env_file" ]; then
-    # Check if API port is already configured (for resume/idempotency)
-    if grep -q "^PORT=" "$api_env_file" 2>/dev/null; then
-      api_port=$(grep "^PORT=" "$api_env_file" | tail -1 | cut -d= -f2)
-      log_info "API port already configured: $api_port (preserving existing)"
-    else
-      # Allocate API port with proper error handling
-      local api_port_output
-      if ! api_port_output=$("$PORT_ALLOCATOR" "$worktree_path" --offset 500 2>&1); then
-        log_error "Failed to allocate API port: $api_port_output"
-        exit 1
-      fi
-      api_port=$(echo "$api_port_output" | grep -E '^[0-9]+$' | head -1)
-      if [ -z "$api_port" ]; then
-        log_error "Port allocator did not return a valid API port number"
-        log_error "Output: $api_port_output"
-        exit 1
-      fi
-      # Append port to env file using grouped redirect
-      {
-        echo ""
-        echo "# Worktree-specific port (auto-allocated by worktree-setup.sh)"
-        echo "PORT=$api_port"
-      } >> "$api_env_file"
-      log_success "API server port allocated: $api_port"
-    fi
-
-    # Update CORS_ORIGIN and BETTER_AUTH_URL
-    sed -i.bak "s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost:$web_port|" "$api_env_file"
-    sed -i.bak "s|^BETTER_AUTH_URL=.*|BETTER_AUTH_URL=http://localhost:$api_port|" "$api_env_file"
-    rm -f "$api_env_file.bak"
-
-    # Verify database URL consistency between web and api-server
-    log_info "Verifying database URL consistency..."
-    local web_db_url api_db_url
-    web_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
-    api_db_url=$(grep "^DATABASE_URL=" "$api_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
-    # Also check POSTGRES_PRISMA_URL in api-server if DATABASE_URL not found
-    if [ -z "$api_db_url" ]; then
-      api_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$api_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
-    fi
-
-    if [ -n "$web_db_url" ] && [ -n "$api_db_url" ]; then
-      if [ "$web_db_url" != "$api_db_url" ]; then
-        log_warning "Database URL mismatch detected!"
-        log_warning "  Web:        $web_db_url"
-        log_warning "  API Server: $api_db_url"
-        log_warning "This can cause jobs to be created in one database but workers polling another."
-        log_info "Syncing web database URL to match api-server..."
-        # Update web env file to use the same database as api-server
-        sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$api_db_url\"|" "$web_env_file"
-        sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$api_db_url\"|" "$web_env_file"
-        rm -f "$web_env_file.bak"
-        log_success "Database URLs synchronized"
-      else
-        log_success "Database URLs are consistent"
-      fi
-    fi
   fi
 
   # Step 4: Install dependencies
@@ -637,27 +550,6 @@ setup_worktree_environment() {
     fi
   fi
 
-  # Configure api-server storage
-  if [ -f "$api_env_file" ]; then
-    if ! grep -q "^SUPABASE_URL=" "$api_env_file" 2>/dev/null; then
-      {
-        echo ""
-        echo "# Supabase Local Storage Configuration (auto-configured by worktree-setup.sh)"
-        echo "SUPABASE_URL=$supabase_local_url"
-        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key"
-      } >> "$api_env_file"
-      log_success "API server Supabase storage configured"
-    else
-      # Update existing values to use local
-      sed -i.bak "s|^SUPABASE_URL=.*|SUPABASE_URL=$supabase_local_url|" "$api_env_file"
-      rm -f "$api_env_file.bak"
-      if ! grep -q "^SUPABASE_SERVICE_ROLE_KEY=" "$api_env_file" 2>/dev/null; then
-        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key" >> "$api_env_file"
-      fi
-      log_success "API server Supabase storage updated for local"
-    fi
-  fi
-
   # Step 8: Run baseline verification
   log_step "Step 8: Running baseline verification"
 
@@ -676,9 +568,6 @@ setup_worktree_environment() {
   echo ""
   echo -e "  ${BOLD}Directory:${NC} $worktree_path"
   echo -e "  ${BOLD}Web port:${NC} $web_port"
-  if [ -n "${api_port:-}" ]; then
-    echo -e "  ${BOLD}API port:${NC} $api_port"
-  fi
   echo ""
   echo -e "  ${BOLD}Next steps:${NC}"
   echo "    cd $worktree_path"
