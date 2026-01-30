@@ -168,28 +168,32 @@ describe("MyTool Database Operations", () => {
 });
 ```
 
-## Mocking Job Queue
+## Mocking Background Jobs (Inngest)
 
-For unit tests, mock pg-boss instead of running a real job queue:
+For unit tests, mock Inngest instead of running the actual job queue:
 
 ```typescript
 // packages/api/modules/my-tool/queue.test.ts
 import { describe, it, expect, vi } from "vitest";
 
-// Mock pg-boss
-vi.mock("pg-boss", () => ({
-  default: class {
-    async start() {}
-    async send() { return "mock-job-id"; }
-    async fetch() { return null; }
+// Mock Inngest client
+vi.mock("@/inngest/client", () => ({
+  inngest: {
+    send: vi.fn().mockResolvedValue({ ids: ["mock-event-id"] }),
   },
 }));
 
-describe("Job Queue", () => {
-  it("enqueues jobs", async () => {
-    // Test job enqueuing with mocked pg-boss
+describe("Background Job Queue", () => {
+  it("sends events to Inngest", async () => {
+    // Test job triggering with mocked Inngest
   });
 });
+```
+
+For integration testing with Inngest, use the Inngest Dev Server:
+
+```bash
+npx inngest-cli@latest dev
 ```
 
 ## Frontend Testing

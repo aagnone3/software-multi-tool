@@ -176,8 +176,8 @@ sudo launchctl load -w /Library/LaunchDaemons/limit.maxfiles.plist
 cd .worktrees/<worktree-name>
 # Pull real credentials from Vercel
 pnpm web:env:pull
-# Or copy from api-server
-grep "POSTHOG" ../../apps/api-server/.env.local >> apps/web/.env.local
+# Or copy from parent worktree
+grep "POSTHOG" ../../apps/web/.env.local >> apps/web/.env.local
 ```
 
 **Prevention**: Use `pnpm worktree:create` which copies configured env files.
@@ -186,13 +186,13 @@ grep "POSTHOG" ../../apps/api-server/.env.local >> apps/web/.env.local
 
 **Problem**: Jobs created but never picked up by workers.
 
-**Root cause**: Web app and api-server using different databases.
+**Root cause**: Using wrong database (Homebrew Postgres instead of Supabase local).
 
 ```bash
-# Check both database URLs
+# Check database URL (should be port 54322 for Supabase local)
 grep "POSTGRES_PRISMA_URL" apps/web/.env.local
-grep "DATABASE_URL\|POSTGRES_PRISMA_URL" apps/api-server/.env.local
-# Sync to use same URL, then restart
+# If showing port 5432, update to use Supabase local
+# Then restart
 pnpm dev
 ```
 

@@ -233,6 +233,7 @@ packages/api/modules/my-tool/
 ```
 
 **Key components:**
+
 - Define input/output schemas in `types.ts` using Zod
 - Implement procedures using `publicProcedure` or `protectedProcedure`
 - Export procedures from `router.ts` as an object
@@ -245,12 +246,14 @@ See [implementation-patterns.md](implementation-patterns.md) for complete code e
 Create processor logic in `packages/api/modules/my-tool/lib/processor.ts`:
 
 **Processor responsibilities:**
+
 - Fetch job by ID using `getToolJobById()`
 - Parse input and perform tool-specific processing
 - Mark job as completed with `markJobCompleted(jobId, output)`
 - Handle errors with `markJobFailed(jobId, errorMessage)`
 
 **Register processor** in `packages/api/modules/jobs/lib/processor-registry.ts`:
+
 ```typescript
 export const processorRegistry = {
   "my-tool": processMyToolJob,
@@ -262,10 +265,12 @@ See [implementation-patterns.md](implementation-patterns.md) for complete proces
 ### Step 6: Create Frontend UI
 
 Create tool page at `apps/web/app/(saas)/app/tools/my-tool/page.tsx`:
+
 - Use Server Component for the page
 - Import client component from `@/modules/saas/tools/my-tool/`
 
 **Client component patterns:**
+
 - Use `useApiMutation()` for creating jobs
 - Use `useApiQuery()` with polling for job status
 - Show loading states and error handling
@@ -326,19 +331,22 @@ For detailed implementation patterns and complete examples, see [implementation-
 
 ### Quick Pattern Reference
 
-**Pattern 1: Synchronous Tool (Fast Processing)**
+#### Pattern 1: Synchronous Tool (Fast Processing)
+
 - For operations < 500ms
 - Process directly in API procedure, return immediately
 - No job queue needed
 - Example: Text formatters, validators
 
-**Pattern 2: Async Tool with Job Queue (Long Processing)**
+#### Pattern 2: Async Tool with Job Queue (Long Processing)
+
 - For operations > 500ms or background processing
 - Create job, return ID, process in background
 - Client polls for results
 - Example: Image processing, ML inference
 
-**Pattern 3: Hybrid Tool (Fast Preview + Full Processing)**
+#### Pattern 3: Hybrid Tool (Fast Preview + Full Processing)
+
 - Return instant preview, create job for full results
 - Show preview while job completes
 - Example: SEO analyzers, data reports
@@ -352,7 +360,7 @@ For comprehensive testing patterns and detailed examples, see [testing-patterns.
 - **Unit tests**: Test API procedures in isolation using Vitest
 - **Integration tests**: Test job processors with real database using Testcontainers
 - **Database tests**: Use PostgreSQL container for isolated testing
-- **Mock strategy**: Mock pg-boss for job queue, mock external APIs
+- **Mock strategy**: Mock Inngest for background jobs, mock external APIs
 - **E2E tests**: Use Playwright for complete user flows
 - **Coverage**: Minimum thresholds enforced in CI (configured in `tooling/test/coverage-thresholds.ts`)
 
@@ -370,10 +378,9 @@ pnpm test:ci
 ## Related Skills
 
 - **tools**: For simple tool registration without backend implementation
-- **architecture**: Overall codebase structure and API patterns
+- **architecture**: Overall codebase structure, API patterns, and Inngest documentation
 - **prisma-migrate**: Database migration workflows
 - **better-auth**: User authentication for private tools
-- **async-jobs**: Detailed job queue and pg-boss documentation
 - **storage**: File upload patterns for tools
 
 ## Additional Resources

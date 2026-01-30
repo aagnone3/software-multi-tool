@@ -26,22 +26,11 @@ vercel env ls | grep DATABASE_URL    # Check specific var
 
 **Note**: Vercel bakes env vars at build time. Changes require redeploy.
 
-## Vercel API Proxy (Preview Only)
-
-Preview environments use `/api/proxy/*` to forward requests to Render (different domains can't share cookies).
-
-```bash
-# Verify proxy env vars
-vercel env ls preview | grep API_SERVER_URL
-
-# Check requests in browser DevTools → Network → filter "api/proxy"
-```
-
 ## Common Vercel Errors
 
 | Error | Cause | Fix |
 | ----- | ----- | --- |
-| `FUNCTION_INVOCATION_TIMEOUT` | Function >60s | Move to Render api-server |
+| `FUNCTION_INVOCATION_TIMEOUT` | Function >60s | Use Inngest for long-running jobs |
 | `EDGE_FUNCTION_INVOCATION_FAILED` | Edge crash | Check for Node.js-only APIs |
 | `MODULE_NOT_FOUND` | Missing dep | Check `package.json` |
-| `504 Gateway Timeout` | Upstream timeout | Check API server health |
+| `504 Gateway Timeout` | Upstream timeout | Check external service health |

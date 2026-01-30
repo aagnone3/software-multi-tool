@@ -393,7 +393,6 @@ try {
 
 | Skill | Use For |
 | ----- | ------- |
-| **api-proxy** | Preview authentication proxy details |
 | **cicd** | CI/CD pipeline, preview environment setup |
 | **architecture** | System architecture, request flow |
 | **better-auth** | Authentication configuration |

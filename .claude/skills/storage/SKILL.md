@@ -226,7 +226,7 @@ const uploadFile = async (file: File) => {
 
 ## File Upload + Job Processing Pattern
 
-When processing files asynchronously via a job queue (e.g., pg-boss), **always upload the file to storage first**, then pass the file path reference to the job. This pattern:
+When processing files asynchronously via Inngest background jobs, **always upload the file to storage first**, then pass the file path reference to the job. This pattern:
 
 - Avoids passing large base64-encoded data through the job queue
 - Allows the job processor to fetch the file when ready
