@@ -2,6 +2,20 @@
 
 This document provides comprehensive deployment infrastructure details for the software-multi-tool monorepo.
 
+## Architecture Overview
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                        Production                            │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│     Vercel      │     Inngest     │       Supabase          │
+│  (Next.js App)  │  (Job Queue)    │  (Postgres + Realtime)  │
+│  - SSR/SSG      │  - 8 functions  │  - Database             │
+│  - API routes   │  - Retries      │  - Storage              │
+│  - Edge funcs   │  - Observability│  - Realtime channels    │
+└─────────────────┴─────────────────┴─────────────────────────┘
+```
+
 ## Hosting: Vercel
 
 The application is deployed to **Vercel** (serverless):
@@ -10,6 +24,46 @@ The application is deployed to **Vercel** (serverless):
 - Automatic deployments on push to main
 - Preview deployments for pull requests
 - Environment targets: development, preview, production
+
+## Background Jobs: Inngest
+
+Background job processing via **Inngest** (Vercel Marketplace integration):
+
+| Environment | Dashboard | Event Delivery |
+| ----------- | --------- | -------------- |
+| Local | localhost:8288 | Inngest Dev Server |
+| Preview | app.inngest.com | Inngest Cloud |
+| Production | app.inngest.com | Inngest Cloud |
+
+### Local Development
+
+```bash
+npx inngest-cli@latest dev
+```
+
+### Inngest Environment Variables
+
+| Variable | Purpose |
+| -------- | ------- |
+| `INNGEST_EVENT_KEY` | API key for sending events |
+| `INNGEST_SIGNING_KEY` | Webhook signature verification |
+
+Note: In production, Inngest auto-detects Vercel environment via Marketplace integration.
+
+## Real-time: Supabase
+
+Real-time messaging via **Supabase Realtime**:
+
+- Broadcast channels for pub/sub
+- Presence for who's online
+- No separate WebSocket server needed
+
+### Supabase Environment Variables
+
+| Variable | Purpose |
+| -------- | ------- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key (client-safe) |
 
 ## CI/CD: GitHub Actions
 

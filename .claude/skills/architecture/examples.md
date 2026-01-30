@@ -11,7 +11,9 @@ This document provides practical examples for navigating and extending the codeb
 5. [Understanding Frontend Data Fetching](#5-understanding-frontend-data-fetching)
 6. [Extending Existing Modules](#6-extending-existing-modules)
 7. [Working with Deployment](#7-working-with-deployment)
-8. [Tips and Common Questions](#8-tips-and-common-questions)
+8. [Adding Background Jobs (Inngest)](#8-adding-background-jobs-inngest)
+9. [Adding Real-time Features (Supabase)](#9-adding-real-time-features-supabase)
+10. [Tips and Common Questions](#10-tips-and-common-questions)
 
 ---
 
@@ -509,7 +511,240 @@ vercel logs <deployment-url>
 
 ---
 
-## 8. Tips and Common Questions
+## 8. Adding Background Jobs (Inngest)
+
+### Creating a new job function
+
+**Example**: Adding a `document-processor` job
+
+#### Step 1: Add event type to client
+
+Edit `apps/web/inngest/client.ts`:
+
+```typescript
+export const inngest = new Inngest({
+  id: "software-multi-tool",
+  schemas: new EventSchemas().fromRecord<{
+    // ... existing events
+    "jobs/document-processor.requested": {
+      data: {
+        toolJobId: string;
+        input: {
+          fileUrl: string;
+          format: string;
+        };
+      };
+    };
+  }>(),
+});
+```
+
+#### Step 2: Create the function
+
+Create `apps/web/inngest/functions/document-processor.ts`:
+
+```typescript
+import { inngest } from "../client";
+import { getToolJobById, markJobCompleted, markJobFailed } from "@repo/database";
+import { logger } from "@repo/logs";
+
+export const documentProcessor = inngest.createFunction(
+  {
+    id: "document-processor",
+    name: "Document Processor",
+    retries: 3,
+  },
+  { event: "jobs/document-processor.requested" },
+  async ({ event, step }) => {
+    const { toolJobId } = event.data;
+
+    // Step 1: Validate job exists
+    await step.run("validate-job", async () => {
+      const job = await getToolJobById(toolJobId);
+      if (!job) {
+        throw new Error(`Tool job not found: ${toolJobId}`);
+      }
+      return { exists: true };
+    });
+
+    // Step 2: Process the document
+    const result = await step.run("process-document", async () => {
+      const job = await getToolJobById(toolJobId);
+      if (!job) throw new Error(`Job not found: ${toolJobId}`);
+
+      // Your processing logic here
+      return { success: true, output: { /* result data */ } };
+    });
+
+    // Step 3: Update job status
+    await step.run("update-job-status", async () => {
+      if (result.success) {
+        await markJobCompleted(toolJobId, result.output);
+      } else {
+        await markJobFailed(toolJobId, "Processing failed");
+      }
+    });
+
+    return { success: result.success, toolJobId };
+  }
+);
+```
+
+#### Step 3: Register in serve endpoint
+
+Edit `apps/web/app/api/inngest/route.ts`:
+
+```typescript
+import { documentProcessor } from "../../../inngest/functions/document-processor";
+
+export const { GET, POST, PUT } = serve({
+  client: inngest,
+  functions: [
+    // ... existing functions
+    documentProcessor,
+  ],
+});
+```
+
+#### Step 4: Trigger the job
+
+From your API procedure or action:
+
+```typescript
+import { inngest } from "../../../inngest/client";
+
+await inngest.send({
+  name: "jobs/document-processor.requested",
+  data: {
+    toolJobId: "job-123",
+    input: { fileUrl: "https://...", format: "pdf" },
+  },
+});
+```
+
+### Checklist for new jobs
+
+- [ ] Add event type to `apps/web/inngest/client.ts`
+- [ ] Create function in `apps/web/inngest/functions/`
+- [ ] Use 3-step pattern: validate → process → update-status
+- [ ] Configure retries (default: 3)
+- [ ] Register in `apps/web/app/api/inngest/route.ts`
+- [ ] For long-running jobs, break into multiple steps
+
+---
+
+## 9. Adding Real-time Features (Supabase)
+
+### Adding broadcast messaging
+
+**Example**: Adding real-time notifications
+
+#### Step 1: Create notification subscription hook
+
+Create `apps/web/modules/notifications/hooks.ts`:
+
+```typescript
+"use client";
+
+import { useEffect, useState } from "react";
+import { subscribeToBroadcast } from "@realtime";
+
+interface Notification {
+  id: string;
+  message: string;
+  type: "info" | "success" | "error";
+}
+
+export function useNotifications(channelName: string) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    const { unsubscribe } = subscribeToBroadcast<Notification>({
+      channelName,
+      event: "notification",
+      onMessage: (notification) => {
+        setNotifications((prev) => [...prev, notification]);
+      },
+    });
+
+    return () => unsubscribe();
+  }, [channelName]);
+
+  return notifications;
+}
+```
+
+#### Step 2: Send notifications from server
+
+```typescript
+import { broadcastMessage } from "@realtime";
+
+await broadcastMessage({
+  channelName: `user-${userId}`,
+  event: "notification",
+  payload: {
+    id: crypto.randomUUID(),
+    message: "Your job completed!",
+    type: "success",
+  },
+});
+```
+
+### Adding presence tracking
+
+**Example**: Who's viewing a document
+
+```typescript
+"use client";
+
+import { useEffect, useState } from "react";
+import { subscribeToPresence } from "@realtime";
+
+interface ViewerState {
+  name: string;
+  cursor?: { x: number; y: number };
+}
+
+export function useDocumentViewers(documentId: string, currentUser: string) {
+  const [viewers, setViewers] = useState<Record<string, ViewerState[]>>({});
+
+  useEffect(() => {
+    const { track, untrack, unsubscribe } = subscribeToPresence<ViewerState>({
+      channelName: `doc-${documentId}`,
+      presenceKey: currentUser,
+      onSync: (state) => setViewers(state),
+      onJoin: (key, current, newPresences) => {
+        console.log(`${key} started viewing`);
+      },
+      onLeave: (key, current, leftPresences) => {
+        console.log(`${key} stopped viewing`);
+      },
+    });
+
+    // Track this user
+    track({ name: currentUser });
+
+    return () => {
+      untrack();
+      unsubscribe();
+    };
+  }, [documentId, currentUser]);
+
+  return viewers;
+}
+```
+
+### Checklist for realtime features
+
+- [ ] Import from `@realtime` alias
+- [ ] Use `subscribeToBroadcast` for pub/sub messaging
+- [ ] Use `subscribeToPresence` for who's online
+- [ ] Clean up subscriptions in useEffect return
+- [ ] Mark components as `"use client"` (realtime is client-only)
+
+---
+
+## 10. Tips and Common Questions
 
 ### Where do I put...?
 
