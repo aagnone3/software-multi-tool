@@ -28,7 +28,6 @@
 		"env:unset": "tsx ./src/env/manage-vercel-env.ts unset",
 		"create:user": "dotenv -c -e ../../apps/web/.env -- tsx ./src/create-user.ts",
 		"linear": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/linear/index.mjs",
-		"render": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/render/index.mjs",
 		"prisma:validate": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/validate-migration.mjs",
 		"prisma:stage": "dotenv -c -e ../../apps/web/.env -- node ./src/prisma/stage-migration.mjs",
 		"stripe:validate": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- node ./src/stripe/validate-webhooks.mjs",

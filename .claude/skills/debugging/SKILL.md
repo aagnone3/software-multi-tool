@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Provides debugging capabilities for applications across platforms (Vercel, Supabase, Render) and environments (local, preview, production). Covers log access, error patterns, connection troubleshooting, and performance monitoring.
+description: Provides debugging capabilities for applications across platforms (Vercel, Supabase) and environments (local, preview, production). Covers log access, error patterns, connection troubleshooting, and performance monitoring.
 allowed-tools:
   - Read
   - Grep
@@ -11,7 +11,7 @@ allowed-tools:
 
 # Debugging Skill
 
-Debug applications across Vercel, Supabase, and Render in local, preview, and production environments.
+Debug applications across Vercel and Supabase in local, preview, and production environments.
 
 ## When to Use This Skill
 
@@ -32,9 +32,7 @@ Debug applications across Vercel, Supabase, and Render in local, preview, and pr
 | ------- | --- |
 | App not loading | `vercel logs <url>` to check for errors |
 | Database connection refused | Resume Supabase project or check `DATABASE_URL` |
-| API returning 502 | `curl https://<api-url>/health` - check if Render is running |
 | Session not persisting (preview) | Verify requests go through `/api/proxy/*` |
-| CORS error | Update `CORS_ORIGIN` on Render to match frontend URL |
 | Prisma client errors | `pnpm --filter @repo/database generate` |
 | Port already in use | `lsof -i :<port>` then `kill -9 <PID>` |
 | Env var not taking effect | Redeploy (Vercel bakes env vars at build time) |
@@ -52,9 +50,6 @@ vercel ls                 # For production
 
 # 2. Check logs for errors
 vercel logs <deployment-url> --follow
-
-# 3. Check API health
-curl https://<api-url>/health
 ```
 
 ### "Database queries are failing"
@@ -89,7 +84,7 @@ mcp__postgres-ro-local-dev__execute_sql --sql "SELECT * FROM session ORDER BY \"
 gh pr checks <pr-number>
 
 # Verify env vars synced
-vercel env ls preview | grep -E "API_SERVER|DATABASE"
+vercel env ls preview | grep DATABASE
 
 # Force redeploy after env changes
 git commit --allow-empty -m "chore: trigger redeploy" && git push
@@ -103,7 +98,6 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 | -------- | ------- |
 | **Vercel** | `vercel logs <url>` or `vercel logs <url> --follow` |
 | **Supabase** | `mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "postgres"` |
-| **Render** | Dashboard → Service → Logs tab, or `pnpm --filter @repo/scripts render deploys list` |
 | **Local** | Check terminal output, or `pnpm dev` logs |
 
 **Supabase log services**: `postgres`, `auth`, `api`, `edge-function`, `storage`, `realtime`
@@ -116,10 +110,10 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 
 | Error | Cause | Fix |
 | ----- | ----- | --- |
-| `FUNCTION_INVOCATION_TIMEOUT` | Function >60s | Move to Render api-server |
+| `FUNCTION_INVOCATION_TIMEOUT` | Function >60s | Use Inngest for long-running jobs |
 | `EDGE_FUNCTION_INVOCATION_FAILED` | Edge crash | Check for Node.js-only APIs |
 | `MODULE_NOT_FOUND` | Missing dep | Check `package.json` |
-| `504 Gateway Timeout` | Upstream timeout | Check API server health |
+| `504 Gateway Timeout` | Upstream timeout | Check external service health |
 
 ### Supabase Errors
 
@@ -131,34 +125,25 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 | `relation does not exist` | Missing migration | Run migrations |
 | `permission denied` | RLS blocking | Check RLS policies |
 
-### Render Errors
-
-| Error | Cause | Fix |
-| ----- | ----- | --- |
-| `Build failed` | Compile error | Check build logs |
-| `Health check failed` | App not responding | Verify `HOST=0.0.0.0` |
-| `502 Bad Gateway` | App crashed | Check runtime logs |
-| `CORS error` | Origin mismatch | Update `CORS_ORIGIN` |
-
 ---
 
 ## Environment Reference
 
 ### Service URLs by Environment
 
-| Environment | Frontend | API Server | Database |
-| ----------- | -------- | ---------- | -------- |
-| Local | `localhost:3500` | `localhost:4000` | `localhost:5432` |
-| Preview | `<branch>.vercel.app` | `<branch>-api.onrender.com` | Supabase branch DB |
-| Production | `your-domain.com` | `api.your-domain.com` | Supabase prod DB |
+| Environment | Frontend | Database |
+| ----------- | -------- | -------- |
+| Local | `localhost:3500` | Supabase local (port 54322) |
+| Preview | `<branch>.vercel.app` | Supabase branch DB |
+| Production | `your-domain.com` | Supabase prod DB |
 
 ### Connection Strings
 
 | Use Case | Variable |
 | -------- | -------- |
-| App runtime | `POSTGRES_PRISMA_URL` (pooled) |
-| Migrations | `POSTGRES_URL_NON_POOLING` (direct) |
-| Local dev | `DATABASE_URL` |
+| App runtime | `DATABASE_URL` (pooled) |
+| Migrations | `DIRECT_URL` (direct) |
+| Local dev | `DATABASE_URL` (Supabase local) |
 
 ---
 
@@ -168,7 +153,6 @@ For detailed platform-specific debugging guides, see:
 
 - [Vercel debugging](platform-vercel.md) - Logs, environment variables, API proxy
 - [Supabase debugging](platform-supabase.md) - Database logs, health checks, branch databases
-- [Render debugging](platform-render.md) - Service logs, health checks, deployments
 
 ### Quick Platform Reference
 
@@ -176,7 +160,6 @@ For detailed platform-specific debugging guides, see:
 | -------- | ---- | ------------ |
 | Vercel | `vercel logs <url>` | Dashboard → Deployments |
 | Supabase | MCP supabase__get_logs | MCP supabase__get_advisors |
-| Render | `pnpm render logs <service>` | `curl <url>/health` |
 
 ---
 
@@ -187,11 +170,10 @@ For detailed platform-specific debugging guides, see:
 ```bash
 # Check services running
 lsof -i :3500  # Frontend
-lsof -i :4000  # API
-lsof -i :5432  # Database
+lsof -i :54322 # Supabase local database
 
 # Test database
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c "SELECT 1;"
+PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "SELECT 1;"
 ```
 
 ### Local Common Fixes
@@ -201,13 +183,11 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -c 
 lsof -i :<port>
 kill -9 <PID>
 
-# Database not running (macOS)
-brew services start postgresql@17
-brew services list | grep postgres
+# Supabase local not running
+supabase start
 
-# Create database
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 \
-  -c "CREATE DATABASE local_softwaremultitool;"
+# Reset local database
+supabase db reset
 
 # Missing env vars
 cp apps/web/.env.local.example apps/web/.env.local
@@ -287,14 +267,13 @@ logger.info("Request started", { requestId, path, method });
 ### Trace Through System
 
 ```text
-Browser → Vercel Proxy [abc123] → Render API [abc123] → Database [abc123] → Response
+Browser → Vercel API Routes [abc123] → Database [abc123] → Response
 ```
 
 ### Searching Traced Logs
 
 ```bash
 vercel logs <url> | grep "abc123"
-# Render: Dashboard search "abc123"
 ```
 
 ---
@@ -388,11 +367,9 @@ try {
 
 ### Checklist: API Not Responding
 
-- [ ] API server running? (`curl <url>/health`)
-- [ ] CORS configured? (Check `CORS_ORIGIN`)
 - [ ] Auth working? (Check session/cookies)
 - [ ] Database connected? (Check logs)
-- [ ] Timeouts? (Long-running operations?)
+- [ ] Timeouts? (Long-running operations should use Inngest)
 
 ### Checklist: Database Error
 
@@ -405,7 +382,7 @@ try {
 ### Checklist: Preview Environment Issues
 
 - [ ] All services deployed? (`gh pr checks`)
-- [ ] Env vars synced? (Check Vercel/Render)
+- [ ] Env vars synced? (Check Vercel)
 - [ ] Proxy routing correctly? (Network tab)
 - [ ] Correct database? (Verify branch DB URL)
 - [ ] Redeployed after env changes?
@@ -419,6 +396,5 @@ try {
 | **api-proxy** | Preview authentication proxy details |
 | **cicd** | CI/CD pipeline, preview environment setup |
 | **architecture** | System architecture, request flow |
-| **render** | Render deployment details |
 | **better-auth** | Authentication configuration |
 | **prisma-migrate** | Database migration workflows |
