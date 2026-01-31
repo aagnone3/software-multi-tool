@@ -1,6 +1,6 @@
 ---
-name: sub-app
-description: Provides complete sub-application development workflows including database schema, API modules, job processing, and frontend UI. Use when building new tools from scratch, implementing async job patterns, or understanding the generic ToolJob architecture.
+name: building-sub-apps
+description: Builds complete sub-applications including database schema, API modules, job processing, and frontend UI. Covers building new tools from scratch, implementing async job patterns, and the generic ToolJob architecture.
 allowed-tools:
   - Bash
   - Read
@@ -10,7 +10,7 @@ allowed-tools:
   - Grep
 ---
 
-# Sub-App Development Skill
+# Building Sub-Apps
 
 This skill provides comprehensive guidance for creating new sub-applications (tools/utilities) within the multi-app architecture. Use this when building complete tools from scratch, not just registering them in the config.
 
