@@ -1,6 +1,6 @@
 ---
-name: better-auth
-description: Provides comprehensive Better Auth guidance covering authentication, user management, sessions, organizations, and auth configuration. Activated when working with auth-related features, login flows, or session handling.
+name: implementing-auth
+description: Implements authentication via Better Auth with passkeys, magic links, OAuth, and organizations. Covers session management, invitation-only signup, and multi-tenant RBAC. Use when building login flows, managing sessions, or debugging auth issues.
 allowed-tools:
   - Read
   - Edit
@@ -385,6 +385,12 @@ const isValid = await verifyPassword({ hash, password: "TestPassword123" });
 **Symptom**: `activeOrganizationId` is null after login
 
 **Explanation**: The `databaseHooks.session.create.before` hook automatically sets the first organization. If user has no organizations, it will be null.
+
+## Related Skills
+
+- **architecture**: Overall auth integration in the codebase
+- **prisma-migrate**: Auth database schema migrations
+- **tracking-analytics**: User identification for analytics
 
 ## Additional Resources
 
