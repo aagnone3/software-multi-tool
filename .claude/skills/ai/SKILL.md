@@ -1,6 +1,6 @@
 ---
-name: ai
-description: Provides guidance on AI/LLM integration including Claude (Anthropic SDK), OpenAI, AI processors, model selection, and chat systems. Use when implementing AI features, adding processors, configuring providers, debugging AI calls, or selecting models.
+name: ai-integration
+description: Integrates AI/LLM capabilities via Claude (Anthropic SDK) and OpenAI. Covers AI processors, model selection (Haiku/Sonnet/Opus), chat systems, and prompt engineering. Use when implementing AI features, debugging API calls, or selecting models for use cases.
 allowed-tools:
   - Bash
   - Read
