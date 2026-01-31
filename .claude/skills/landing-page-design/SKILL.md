@@ -1,6 +1,6 @@
 ---
-name: landing-page-design
-description: Provides landing page design guidance including animated backgrounds, decorative patterns, and visual enhancement techniques. Covers background effects, hero sections, and modern web design patterns.
+name: designing-landing-pages
+description: Designs landing pages with animated backgrounds, decorative patterns, and visual enhancement techniques. Covers background effects, hero sections, and modern web design patterns.
 allowed-tools:
   - Read
   - Write
@@ -10,7 +10,7 @@ allowed-tools:
   - WebFetch
 ---
 
-# Landing Page Design Skill
+# Designing Landing Pages
 
 > Create visually compelling landing pages with animated backgrounds, gradient orbs, geometric patterns, and modern design techniques.
 
@@ -39,7 +39,7 @@ allowed-tools:
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Designing landing page backgrounds
 - Creating animated hero sections

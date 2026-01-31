@@ -1,6 +1,6 @@
 ---
-name: cli
-description: Developer CLI (mt) providing commands for development workflows, feature flag inspection, and tooling automation. Use when running CLI commands, adding new commands, debugging CLI issues, or understanding the CLI architecture.
+name: using-cli
+description: Uses the developer CLI (mt) for development workflows, feature flag inspection, and tooling automation. Covers running commands, adding new commands, and debugging CLI issues.
 allowed-tools:
   - Read
   - Edit
@@ -10,7 +10,7 @@ allowed-tools:
   - Glob
 ---
 
-# CLI Skill
+# Using CLI
 
 Developer CLI (`mt`) for the software-multi-tool monorepo. Provides commands for development workflows, feature flag inspection, and tooling automation.
 

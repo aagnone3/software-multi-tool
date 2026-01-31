@@ -1,15 +1,36 @@
 ---
-name: stripe-webhooks
-description: Provides Stripe webhook testing and integration guidance covering local webhook forwarding, Stripe CLI configuration, and webhook event handling. Activated when testing webhooks locally, troubleshooting webhook issues, or understanding event flow.
+name: testing-stripe-webhooks
+description: Tests Stripe webhooks and integrations. Covers local webhook forwarding, Stripe CLI configuration, webhook event handling, and troubleshooting webhook issues.
 allowed-tools:
   - Bash
   - Read
   - Grep
 ---
 
-# Stripe Webhooks Skill
+# Testing Stripe Webhooks
 
 > Local webhook testing and Stripe integration guidance
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Testing webhooks locally with Stripe CLI
+- Troubleshooting webhook issues or delivery
+- Understanding event flow and handlers
+- Configuring webhook secrets and forwarding
+- Switching between Stripe accounts
+
+**Activation keywords**: Stripe, webhooks, Stripe CLI, webhook testing, payment events
+
+## Quick Reference
+
+| Command | Description |
+| ------- | ----------- |
+| `stripe listen --forward-to http://localhost:<PORT>/api/webhooks/payments` | Forward webhooks to local server |
+| `stripe config --list` | Check which Stripe account CLI is connected to |
+| `stripe trigger <event>` | Trigger test webhook event |
+| `pnpm --filter @repo/scripts stripe:test-credits` | Run credit webhook test script |
 
 ## Quick Start
 

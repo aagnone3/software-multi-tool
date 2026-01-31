@@ -1,6 +1,6 @@
 ---
-name: typography
-description: Provides typography configuration guidance covering Next.js font loading, Tailwind font utilities, CSS variables, and email template fonts. Activated when changing fonts, working with font utilities, or updating typography settings.
+name: configuring-typography
+description: Configures typography including Next.js font loading, Tailwind font utilities, CSS variables, and email template fonts. Covers changing fonts, font utilities, and typography settings.
 allowed-tools:
   - Read
   - Edit
@@ -10,7 +10,7 @@ allowed-tools:
   - Glob
 ---
 
-# Typography Skill
+# Configuring Typography
 
 This skill provides comprehensive guidance for managing typography across the project, including web fonts, email fonts, Tailwind integration, and the CSS variable system.
 
@@ -340,6 +340,8 @@ Invoke this skill when:
 - Optimizing font performance
 - Updating email typography
 - Working with Tailwind typography utilities
+
+**Activation keywords**: font, typography, Montserrat, Inter, font loading, Tailwind fonts, email fonts
 
 ## Related Skills
 

@@ -1,6 +1,6 @@
 ---
-name: tools
-description: Provides tool registry configuration and multi-app routing guidance. Use when registering new tools, configuring public access, setting credit costs, or understanding the tool listing page. Covers tool metadata, icon selection, and credit system integration.
+name: registering-tools
+description: Registers tools in the registry with configuration for public access, credit costs, and routing. Covers tool metadata, icon selection, and credit system integration.
 allowed-tools:
   - Read
   - Edit
@@ -10,9 +10,22 @@ allowed-tools:
   - Glob
 ---
 
-# Tools/Sub-Apps Skill
+# Registering Tools
 
 This skill provides comprehensive guidance for working with the multi-app tools architecture in this project. The system allows for multiple independent sub-apps (utilities) that share common infrastructure.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Registering new tools in the registry
+- Configuring public access for tools
+- Setting credit costs for tools
+- Understanding the tool listing page
+- Adding icons to tools
+- Configuring tool metadata
+
+**Note**: For building complete tool implementations (backend, database, frontend), use the `building-sub-apps` skill instead.
 
 ## Quick Reference
 

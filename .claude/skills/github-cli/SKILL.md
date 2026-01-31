@@ -1,13 +1,13 @@
 ---
-name: github-cli
-description: Provides GitHub operations support including creating pull requests, managing issues, and using the GitHub API. Enforces using the aagnone3 GitHub account for all operations in the aagnone3 organization.
+name: using-github-cli
+description: Uses the GitHub CLI (gh) for operations including creating pull requests, managing issues, and using the GitHub API. Enforces using the aagnone3 GitHub account for all operations.
 allowed-tools:
   - Bash
   - Read
   - Grep
 ---
 
-# GitHub CLI
+# Using GitHub CLI
 
 ## Overview
 
@@ -53,7 +53,7 @@ This system may have multiple GitHub accounts configured. Use:
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Creating or managing pull requests
 - Working with GitHub issues
@@ -62,6 +62,18 @@ Use this skill when:
 - Troubleshooting GitHub CLI authentication
 
 **Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api
+
+## Quick Reference
+
+| Command | Description |
+| ------- | ----------- |
+| `gh auth status` | Check active GitHub account |
+| `gh auth switch -u aagnone3` | Switch to aagnone3 account |
+| `gh pr create` | Create pull request |
+| `gh pr list` | List open pull requests |
+| `gh pr merge <PR>` | Merge pull request |
+| `gh issue list` | List issues |
+| `gh api <endpoint>` | Make GitHub API call |
 
 ## Common Workflows
 
@@ -253,3 +265,8 @@ gh auth status && gh <command>
 ```bash
 gh repo view aagnone3/software-multi-tool
 ```
+
+## Related Skills
+
+- **git-worktrees**: Creating feature branches and worktrees for PRs
+- **managing-cicd**: CI/CD pipeline and preview environments
