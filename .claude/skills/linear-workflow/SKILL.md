@@ -1,6 +1,6 @@
 ---
-name: linear-workflow
-description: Provides Linear issue implementation workflow using worktrees, feature branches, and pull requests. Covers working on tickets, starting features, picking up groomed issues, and creating PRs. Enforces worktree-based development and automatic PR creation.
+name: implementing-linear-workflow
+description: Implements Linear issues using worktrees, feature branches, and pull requests. Covers working on tickets, starting features, picking up groomed issues, and creating PRs. Enforces worktree-based development.
 allowed-tools:
   - Bash
   - Read
@@ -8,7 +8,7 @@ allowed-tools:
   - Glob
 ---
 
-# Linear Workflow Skill
+# Implementing Linear Workflow
 
 Guided workflow for implementing Linear issues with feature branches and pull requests.
 
@@ -23,6 +23,8 @@ Guided workflow for implementing Linear issues with feature branches and pull re
 | **Done**        | After PR is merged                  |
 
 ## When to Use This Skill
+
+Invoke this skill when:
 
 - User asks to work on a Linear issue (e.g., "work on PRA-19")
 - User wants to pick up groomed issues from Linear
