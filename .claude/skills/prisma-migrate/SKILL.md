@@ -1,6 +1,6 @@
 ---
 name: prisma-migrate
-description: Provides Prisma database migration workflows with safety checks and advisory locking. Use when creating migrations, validating schema changes, or debugging drift. Covers validation scripts, staging helpers, and migration review workflows.
+description: Creates and applies Prisma database migrations with safety checks and advisory locking. Covers creating migrations, validating schema changes, debugging drift, validation scripts, and staging helpers.
 allowed-tools:
   - Bash
   - Read
@@ -72,6 +72,16 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultit
 ```bash
 PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
 ```
+
+## Quick Reference
+
+| Command | Description |
+| ------- | ----------- |
+| `pnpm --filter @repo/scripts prisma:validate` | Validate migration environment |
+| `pnpm --filter @repo/scripts prisma:stage --name <name>` | Stage new migration |
+| `pnpm --filter @repo/database migrate:execute` | Execute staged migration |
+| `pnpm --filter @repo/database generate` | Generate Prisma client and Zod schemas |
+| `pnpm --filter @repo/database studio` | Open Prisma Studio GUI |
 
 ## Core Command Patterns
 
