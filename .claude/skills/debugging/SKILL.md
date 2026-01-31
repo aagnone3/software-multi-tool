@@ -15,6 +15,8 @@ Debug applications across Vercel and Supabase in local, preview, and production 
 
 ## When to Use This Skill
 
+Invoke this skill when:
+
 - App not loading or returning errors
 - Database connection issues
 - Authentication/session problems
