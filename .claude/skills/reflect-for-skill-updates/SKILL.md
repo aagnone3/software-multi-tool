@@ -1,6 +1,6 @@
 ---
-name: reflect-for-skill-updates
-description: Provides skill improvement guidance for identifying and fixing systemic problems in documentation, automation, and workflows. Activated when conversations reveal gaps that caused issues, confusion, or wasted time.
+name: reflecting-for-improvements
+description: Reflects on sessions to identify and fix systemic problems in documentation, automation, and workflows. Turns debugging and mistakes into permanent improvements.
 allowed-tools:
   - Read
   - Edit
@@ -10,7 +10,7 @@ allowed-tools:
   - Bash
 ---
 
-# Reflect for Skill Updates
+# Reflecting for Improvements
 
 > **Purpose**: Turn debugging sessions and mistakes into permanent improvements by updating skills, documentation, and automation.
 
@@ -26,6 +26,15 @@ Invoke this skill when:
 - The user explicitly asks: "Any skills need updating?"
 
 **Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned
+
+## Quick Reference
+
+| Step | Action |
+| ---- | ------ |
+| 1. Identify | What went wrong? Why? What knowledge would have prevented it? |
+| 2. Categorize | Is this automation, validation, skill, troubleshooting, or workflow? |
+| 3. Implement | Update skill, script, or documentation |
+| 4. Verify | Would this have prevented the original issue? |
 
 ## Reflection Process
 
