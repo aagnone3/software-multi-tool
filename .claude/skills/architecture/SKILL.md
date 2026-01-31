@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Provides comprehensive codebase architecture overview including monorepo structure, Next.js serverless backend, API layer (Hono + oRPC), frontend patterns (React 19 + TanStack Query), background jobs (Inngest), real-time updates (Supabase Realtime), and deployment infrastructure. Use when navigating the codebase, understanding request flow, or learning integration patterns.
+description: Documents codebase architecture including monorepo structure (pnpm/Turbo), API layer (Hono + oRPC), frontend (React 19 + TanStack Query), background jobs (Inngest), and real-time (Supabase). Use when navigating codebase, understanding request flow, or adding modules.
 allowed-tools:
   - Read
   - Grep
