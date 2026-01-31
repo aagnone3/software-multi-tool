@@ -1,11 +1,11 @@
 ---
-name: linear
-description: Provides Linear integration for project management tasks including listing/managing projects, creating/listing milestones, managing issue dependencies, closing issues, and assigning issues to milestones. Wraps the Linear CLI helpers and provides comprehensive Linear workflow support.
+name: managing-linear-projects
+description: Manages Linear projects, milestones, and issues. Covers listing/creating projects, managing milestones, issue dependencies, closing issues, and assigning issues to milestones. Wraps Linear CLI helpers.
 allowed-tools:
   - Bash
 ---
 
-# Linear Project Management Skill
+# Managing Linear Projects
 
 This skill provides comprehensive Linear integration for managing projects, milestones, and issues using the existing Linear CLI helpers in this repository.
 
@@ -41,9 +41,21 @@ All Linear operations use this base command:
 pnpm --filter @repo/scripts linear <resource> <action> [options]
 ```
 
+## Quick Reference
+
+| Command | Description |
+| ------- | ----------- |
+| `linear projects list` | List all projects |
+| `linear projects create --name <text>` | Create new project |
+| `linear milestones list --project <ref>` | List project milestones |
+| `linear issues view --issue <key>` | View issue details |
+| `linear issues start --issue <key>` | Move issue to In Progress |
+| `linear issues close --issue <key>` | Mark issue as Done (after PR merge) |
+| `linear views list-issues --view <id\|slug>` | List issues from custom view |
+
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - User mentions a Linear issue key (e.g., PRA-21, PRA-30)
 - Working with Linear projects, milestones, or issues
