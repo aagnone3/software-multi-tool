@@ -24,10 +24,15 @@ Guided workflow for implementing Linear issues with feature branches and pull re
 
 ## When to Use This Skill
 
-- User asks to work on a Linear issue (e.g., "work on PRA-19")
-- User wants to pick up groomed issues from Linear
-- User needs to create a PR for completed work
-- User wants to merge a PR and close the issue
+Invoke this skill when:
+
+- User asks to work on a Linear issue (e.g., "work on PRA-19", "start PRA-35")
+- User wants to pick up groomed issues from Linear backlog
+- User needs to create a pull request for completed work
+- User wants to merge a PR and close the associated issue
+- User mentions Linear issue keys or asks about workflow steps
+
+**Activation keywords**: work on PRA-, start issue, Linear ticket, create PR, close issue
 
 ## Core Workflow
 
@@ -44,7 +49,7 @@ pnpm --filter @repo/scripts linear issues start --issue PRA-19
 
 ### 2. Create Worktree
 
-**MANDATORY: Always use worktrees. Never `git checkout -b`.**
+This repository requires worktrees for all feature work. Standard branching with `git checkout -b` is not supported.
 
 ```bash
 pnpm worktree:create PRA-19 feat short-description

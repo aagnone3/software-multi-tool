@@ -386,6 +386,13 @@ const isValid = await verifyPassword({ hash, password: "TestPassword123" });
 
 **Explanation**: The `databaseHooks.session.create.before` hook automatically sets the first organization. If user has no organizations, it will be null.
 
+## Related Skills
+
+- **architecture**: Overall backend architecture and API integration
+- **prisma-migrate**: Database migrations for auth schema changes
+- **analytics**: User identification for analytics tracking
+- **application-environments**: Environment configuration for auth URLs
+
 ## Additional Resources
 
 - Better Auth docs: https://www.better-auth.com

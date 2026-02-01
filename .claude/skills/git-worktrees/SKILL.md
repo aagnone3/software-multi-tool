@@ -11,17 +11,9 @@ allowed-tools:
 
 # Git Worktrees Skill
 
-> **🚨 MANDATORY: This system requires worktrees for ALL feature work 🚨**
+Enables parallel development with isolated git worktrees for concurrent features, testing, and code review. This repository requires worktrees for all feature work to support multiple Claude Code instances working simultaneously.
 
-Enable parallel development with isolated git worktrees for concurrent features, testing, and code review.
-
-> **🚨 CRITICAL: Only use Supabase databases 🚨**
->
-> Worktrees must use **Supabase Local** (port 54322) or **Supabase Preview**.
->
-> **NEVER use Homebrew PostgreSQL** (port 5432). It lacks storage, proper seeding, and will cause auth failures.
->
-> The setup script automatically enforces Supabase Local. If you see port `5432` in your `.env.local`, the configuration is wrong.
+**Database Requirement**: Worktrees must use Supabase Local (port 54322) or Supabase Preview. Homebrew PostgreSQL (port 5432) lacks required storage and seeding functionality. The automated setup script enforces correct database configuration.
 
 ## Quick Reference
 
@@ -54,7 +46,7 @@ This repository is designed for **parallel development** with multiple Claude Co
 - **User freedom**: You can experiment on main without disrupting agent work
 - **Zero coordination overhead**: Add more parallel work without conflicts
 
-**DO NOT use `git checkout -b`** - standard branching violates this architecture. ALL feature work must use isolated worktrees.
+Standard branching with `git checkout -b` violates this architecture. All feature work must use isolated worktrees.
 
 ## Automated Worktree Setup
 

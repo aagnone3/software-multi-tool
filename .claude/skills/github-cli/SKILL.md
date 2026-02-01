@@ -53,7 +53,7 @@ This system may have multiple GitHub accounts configured. Use:
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Creating or managing pull requests
 - Working with GitHub issues

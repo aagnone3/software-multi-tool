@@ -14,30 +14,15 @@ allowed-tools:
 
 This project uses a **preview-first development model**: local development for fast frontend iteration, preview deployments for full-stack testing.
 
-## Skill Behavior: Setting Up Local Dev
+## Database Requirements
 
-**When the user asks to "set up local dev" or similar, you MUST:**
+This project requires **Supabase Local** (port 54322) or **Supabase Preview** for development. Homebrew PostgreSQL (port 5432) or standalone Postgres installations are not supported because they lack:
 
-1. Check if Supabase local is running (`supabase status`)
-2. Start Supabase if not running (`supabase start`)
-3. Verify `apps/web/.env.local` exists
-4. Create it from example if missing
-5. **Start the dev server** (`pnpm dev`)
-6. Report the URL where the application is available
+- Storage (S3-compatible file storage for uploads)
+- Proper seeding (test user won't work)
+- Schema compatibility (missing `storage` schema)
 
-Setup is **not complete** until `pnpm dev` is running and the user can access the application.
-
-> **🚨 CRITICAL: Only use Supabase databases 🚨**
->
-> This project requires **Supabase Local** (port 54322) or **Supabase Preview** for development.
->
-> **NEVER use Homebrew PostgreSQL** (port 5432) or standalone Postgres installations. They lack:
->
-> - Storage (S3-compatible file storage for uploads)
-> - Proper seeding (test user won't work)
-> - Schema compatibility (missing `storage` schema)
->
-> If your `.env.local` points to port `5432`, you're using the wrong database.
+If your `.env.local` points to port `5432`, the database configuration is incorrect.
 
 ## Quick Reference
 
@@ -57,11 +42,27 @@ Setup is **not complete** until `pnpm dev` is running and the user can access th
 
 ## When to Use This Skill
 
+Invoke this skill when:
+
 - Setting up local development environment
 - Understanding preview vs production deployments
 - Configuring environment variables
 - Troubleshooting environment-specific issues
 - Starting Supabase local for full-stack development
+
+**Activation keywords**: local dev, preview environment, environment setup, Supabase local, env variables
+
+### Complete Local Setup Workflow
+
+When setting up local development for the first time:
+
+1. Check if Supabase local is running: `supabase status`
+2. Start Supabase if needed: `supabase start`
+3. Verify `apps/web/.env.local` exists (create from `.env.local.example` if missing)
+4. Start the dev server: `pnpm dev`
+5. Verify the application is accessible at the reported URL
+
+Setup is complete when the dev server is running and accessible.
 
 ## Local Development
 
