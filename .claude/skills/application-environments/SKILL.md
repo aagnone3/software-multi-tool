@@ -56,22 +56,20 @@ Invoke this skill when:
 
 When setting up local development for the first time:
 
-1. Check if Supabase local is running: `supabase status`
-2. Start Supabase if needed: `supabase start`
-3. Verify `apps/web/.env.local` exists (create from `.env.local.example` if missing)
-4. Start the dev server: `pnpm dev`
-5. Verify the application is accessible at the reported URL
+1. Run `pnpm setup` to ensure environment is ready (starts Supabase, seeds database, creates env files)
+2. Start the dev server: `pnpm dev`
+3. Verify the application is accessible at the reported URL
 
 Setup is complete when the dev server is running and accessible.
 
 ## Local Development
 
-### Quick Start
+### Quick Start (Recommended)
 
 ```bash
 pnpm install
-cp apps/web/.env.local.example apps/web/.env.local
-pnpm dev
+pnpm setup    # Starts Supabase, seeds database, creates .env.local files
+pnpm dev      # Start Next.js dev server
 ```
 
 **IMPORTANT**: Always use `pnpm dev` from monorepo root. This starts:
@@ -88,13 +86,15 @@ For fast iteration without backend:
 
 ### Full-Stack Local (Supabase)
 
-For authentication, database, and API testing:
+For authentication, database, and API testing, `pnpm setup` handles everything automatically. For manual control:
 
 ```bash
-supabase start        # Start PostgreSQL + Storage + Auth
-supabase db reset     # Apply migrations and seed data
+pnpm supabase:start   # Start PostgreSQL + Storage + Auth
+pnpm supabase:reset   # Apply migrations and seed data (REQUIRED for test user!)
 pnpm dev              # Start Next.js dev server
 ```
+
+> **Note:** Running only `supabase start` does NOT seed the database. Use `pnpm setup` or `pnpm supabase:reset` to ensure the test user exists.
 
 **Service URLs (Local)**:
 
@@ -200,7 +200,13 @@ pnpm dev
 
 ### Login Fails with "Invalid credentials"
 
-Verify test user exists in local database:
+This usually means the database wasn't seeded. Run:
+
+```bash
+pnpm setup --force-reset
+```
+
+Or verify test user exists manually:
 
 ```bash
 PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c \

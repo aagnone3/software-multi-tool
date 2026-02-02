@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 
+- `pnpm setup` - **Run this first!** Sets up local development environment (Supabase, database seeding, env files)
 - `pnpm dev` - Start the hot-reloading development server (concurrency limited to 15)
 - `pnpm build` - Compile all apps and packages for production
 - `pnpm start` - Serve the production build locally
@@ -90,31 +91,18 @@ The sync script:
 
 **Use Supabase local** for development to match preview/production environments exactly.
 
-**Start Supabase local:**
+**Quick Start:**
 
 ```bash
-supabase start
+pnpm setup    # Starts Supabase, seeds database, creates .env.local
+pnpm dev
 ```
-
-This starts a local Supabase instance with:
-
-- PostgreSQL on port 54322
-- Studio UI at http://127.0.0.1:54323
-- Storage, Auth, and all Supabase services
 
 **Connection string:**
 
 ```text
 postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
-
-**Reset database (applies migrations + seed.sql):**
-
-```bash
-supabase db reset
-```
-
-This is the **same process** used in preview environments, ensuring consistency between local dev and deployed previews.
 
 **Test user credentials (Quick Login button):**
 
@@ -123,14 +111,7 @@ This is the **same process** used in preview environments, ensuring consistency 
 | Email    | test@preview.local    |
 | Password | TestPassword123       |
 
-The test user is automatically created by `supabase/seed.sql` which runs during `supabase db reset` and on preview branch creation.
-
-**Why Supabase local instead of standalone Postgres?**
-
-- Same seed.sql runs automatically (no manual seeding)
-- Storage buckets are created (seed.sql creates `avatars` and `files` buckets)
-- Identical environment to preview deployments
-- Supabase Studio provides visual database management
+The test user is created by `supabase/seed.sql` which runs during `pnpm setup` and on preview branch creation.
 
 ### Stripe Webhooks
 
