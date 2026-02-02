@@ -589,8 +589,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
       '@scalar/hono-api-reference':
-        specifier: 0.9.37
-        version: 0.9.37(hono@4.11.5)
+        specifier: 0.9.39
+        version: 0.9.39(hono@4.11.5)
       '@sindresorhus/slugify':
         specifier: 2.2.1
         version: 2.2.1
@@ -4609,22 +4609,22 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@scalar/core@0.3.34':
-    resolution: {integrity: sha512-dZnpkrnjiPvPLa/sIdjoaxdVoYowWUqC5nCCXJI+29laMIII6dCze8ThxLPGN1b9gJ8cYcQwBrwr+RNCjqJgdQ==}
+  '@scalar/core@0.3.36':
+    resolution: {integrity: sha512-gdgoF/XP2RkvhqGlI0l2MWTR/2522GPdaiQkWwS348Po8oCkJy2npxFuZbC2jtp6DIrWDrOD6qYgHssyzMmcrA==}
     engines: {node: '>=20'}
 
-  '@scalar/helpers@0.2.9':
-    resolution: {integrity: sha512-Y4ffJF0yELdwZ0BKgonqn3SumIgRn1WKyYCVHD+TDM7qRFChdGRypyt20+efHs26fmJeyBAIIv2laICj5uimiw==}
+  '@scalar/helpers@0.2.10':
+    resolution: {integrity: sha512-VS32setBEAGY9JifuDZKHIq8SUCUWLEfL1V+h3s5V4wcmE8OZVkzaJemsMq/YAM9e7gb9ZbkvJLL4zzEvPSrVg==}
     engines: {node: '>=20'}
 
-  '@scalar/hono-api-reference@0.9.37':
-    resolution: {integrity: sha512-eprpFplQoirRmfC5fWo90jLQX5x01H7QS2XrRDmNES207eaEvtUZHyW9vPV7Bi9ltjrnqG8WK2oPMd/uZClptg==}
+  '@scalar/hono-api-reference@0.9.39':
+    resolution: {integrity: sha512-ui1Z01GactnBy/2UCtgLgbr4OJSqJ5fm7l48nam19ROUskimValoHPB7DfqN/sr470jwq7DhcLncufxUWwS41w==}
     engines: {node: '>=20'}
     peerDependencies:
-      hono: ^4.10.3
+      hono: ^4.11.5
 
-  '@scalar/types@0.5.10':
-    resolution: {integrity: sha512-37qAHQC2J7O+Mt8u0HOZttTQPQ1OEWKWxo9SMbahYKTosL9k1KtTG2F3EB33EkW3WqEVQitkUKrM0+MVM2HeYQ==}
+  '@scalar/types@0.6.1':
+    resolution: {integrity: sha512-2u/pZTauRLoUDD2PpJF8XDflZX3PgaYSD72cFDBL1WVM/jb0IxoWggxWKm34OR03LnNYbTvXlwfyr2QZ0hm3Xg==}
     engines: {node: '>=20'}
 
   '@schummar/icu-type-parser@1.21.5':
@@ -14709,20 +14709,20 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.56.0':
     optional: true
 
-  '@scalar/core@0.3.34':
+  '@scalar/core@0.3.36':
     dependencies:
-      '@scalar/types': 0.5.10
+      '@scalar/types': 0.6.1
 
-  '@scalar/helpers@0.2.9': {}
+  '@scalar/helpers@0.2.10': {}
 
-  '@scalar/hono-api-reference@0.9.37(hono@4.11.5)':
+  '@scalar/hono-api-reference@0.9.39(hono@4.11.5)':
     dependencies:
-      '@scalar/core': 0.3.34
+      '@scalar/core': 0.3.36
       hono: 4.11.5
 
-  '@scalar/types@0.5.10':
+  '@scalar/types@0.6.1':
     dependencies:
-      '@scalar/helpers': 0.2.9
+      '@scalar/helpers': 0.2.10
       nanoid: 5.1.6
       type-fest: 5.4.1
       zod: 4.3.5
