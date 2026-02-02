@@ -27,7 +27,7 @@ BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # Get the repository root (handles being called from any directory)
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 
 # Configuration
 SUPABASE_DB_PORT=54322
