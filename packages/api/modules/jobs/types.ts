@@ -30,7 +30,7 @@ export const CreateJobInputSchema = z.object({
 });
 
 export const GetJobInputSchema = z.object({
-	jobId: z.string().cuid(),
+	jobId: z.string().min(1),
 });
 
 export const ListJobsInputSchema = z.object({
@@ -40,7 +40,7 @@ export const ListJobsInputSchema = z.object({
 });
 
 export const CancelJobInputSchema = z.object({
-	jobId: z.string().cuid(),
+	jobId: z.string().min(1),
 });
 
 export const JobOutputSchema = z.object({

@@ -106,6 +106,12 @@ export const RateLimitEntryScalarFieldEnumSchema = z.enum(['id', 'identifier', '
 
 export type RateLimitEntryScalarFieldEnumEnum = z.infer<typeof RateLimitEntryScalarFieldEnumSchema>;
 
+// File: ToolFeedbackScalarFieldEnum.schema.ts
+
+export const ToolFeedbackScalarFieldEnumSchema = z.enum(['id', 'toolSlug', 'jobId', 'userId', 'rating', 'chatTranscript', 'extractedData', 'createdAt'])
+
+export type ToolFeedbackScalarFieldEnumEnum = z.infer<typeof ToolFeedbackScalarFieldEnumSchema>;
+
 // File: CreditBalanceScalarFieldEnum.schema.ts
 
 export const CreditBalanceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'periodStart', 'periodEnd', 'included', 'used', 'overage', 'purchasedCredits', 'createdAt', 'updatedAt'])
@@ -201,6 +207,12 @@ export type PurchaseTypeEnum = z.infer<typeof PurchaseTypeSchema>;
 export const ToolJobStatusSchema = z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED'])
 
 export type ToolJobStatusEnum = z.infer<typeof ToolJobStatusSchema>;
+
+// File: FeedbackRating.schema.ts
+
+export const FeedbackRatingSchema = z.enum(['POSITIVE', 'NEGATIVE'])
+
+export type FeedbackRatingEnum = z.infer<typeof FeedbackRatingSchema>;
 
 // File: CreditTransactionType.schema.ts
 
@@ -501,6 +513,22 @@ export const RateLimitEntrySchema = z.object({
 });
 
 export type RateLimitEntryType = z.infer<typeof RateLimitEntrySchema>;
+
+
+// File: ToolFeedback.schema.ts
+
+export const ToolFeedbackSchema = z.object({
+  id: z.string(),
+  toolSlug: z.string(),
+  jobId: z.string().nullish(),
+  userId: z.string(),
+  rating: FeedbackRatingSchema,
+  chatTranscript: z.string().nullish(),
+  extractedData: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  createdAt: z.date(),
+});
+
+export type ToolFeedbackType = z.infer<typeof ToolFeedbackSchema>;
 
 
 // File: CreditBalance.schema.ts

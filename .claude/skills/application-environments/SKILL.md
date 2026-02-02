@@ -62,6 +62,26 @@ When setting up local development for the first time:
 
 Setup is complete when the dev server is running and accessible.
 
+### Working on Feature Branches with New Migrations
+
+**IMPORTANT**: When switching to a feature branch (or worktree) that introduces new database migrations, the local Supabase database won't have those migrations applied yet. This causes "table not found" or "column not found" errors.
+
+**Symptom**: API errors like "Failed to create X" when testing new features that added database tables.
+
+**Solution**: Reset the database to apply all migrations from the current branch:
+
+```bash
+pnpm supabase:reset
+```
+
+This re-applies all migrations from `supabase/migrations/` (which are synced from Prisma migrations) and re-seeds the database with test data.
+
+**When to reset:**
+
+- After switching to a branch with new migrations
+- After pulling changes that include new migrations
+- When you see database errors about missing tables/columns
+
 ## Local Development
 
 ### Quick Start (Recommended)
@@ -221,6 +241,17 @@ If missing, reset the database: `pnpm supabase:reset`
 pnpm supabase:status  # Check if running
 pnpm supabase:start   # Start if not
 ```
+
+### API Errors: "Failed to create X" or "Table not found"
+
+This typically means you're on a feature branch with new database migrations that haven't been applied to your local Supabase.
+
+```bash
+# Reset database to apply all migrations from current branch
+pnpm supabase:reset
+```
+
+**Common scenario**: You created a worktree for a feature branch that adds new database tables. The shared Supabase local instance still has the schema from `main`.
 
 ## Related Skills
 

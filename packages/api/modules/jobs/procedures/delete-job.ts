@@ -6,7 +6,7 @@ import { publicProcedure } from "../../../orpc/procedures";
 import { deleteAudioFromStorage } from "../../speaker-separation/lib/audio-storage";
 
 const DeleteJobInputSchema = z.object({
-	jobId: z.string().cuid(),
+	jobId: z.string().min(1),
 });
 
 export const deleteJob = publicProcedure

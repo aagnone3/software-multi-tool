@@ -4,6 +4,7 @@ import type {
 	SpeakerSegment,
 	SpeakerSeparationOutput,
 } from "@repo/api/modules/speaker-separation/types";
+import { ToolFeedback } from "@shared/components/ToolFeedback";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -941,6 +942,13 @@ export function SpeakerSeparationDetail({
 								</div>
 							</dl>
 						</div>
+
+						{/* Feedback */}
+						<ToolFeedback
+							toolSlug="speaker-separation"
+							jobId={job.id}
+							className="rounded-xl"
+						/>
 					</div>
 
 					{/* Right Column - Transcript */}

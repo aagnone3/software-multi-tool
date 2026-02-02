@@ -26,6 +26,10 @@ vi.mock("../modules/admin/router", () => ({
 	},
 }));
 
+vi.mock("../modules/agent-sessions/router", () => ({
+	agentSessionsRouter: {},
+}));
+
 vi.mock("../modules/users/router", () => ({
 	usersRouter: {
 		avatarUploadUrl: publicProcedure
@@ -69,6 +73,10 @@ vi.mock("../modules/credits/router", () => ({
 	creditsRouter: {},
 }));
 
+vi.mock("../modules/feedback/router", () => ({
+	feedbackRouter: {},
+}));
+
 vi.mock("../modules/notifications/router", () => ({
 	notificationsRouter: {},
 }));
@@ -95,9 +103,11 @@ describe("api router", () => {
 
 		expect(Object.keys(router)).toEqual([
 			"admin",
+			"agentSessions",
 			"newsletter",
 			"contact",
 			"credits",
+			"feedback",
 			"files",
 			"notifications",
 			"organizations",

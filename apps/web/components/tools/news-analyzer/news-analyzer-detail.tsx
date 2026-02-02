@@ -1,5 +1,6 @@
 "use client";
 
+import { ToolFeedback } from "@shared/components/ToolFeedback";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -561,16 +562,19 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 					<NewsAnalyzerResults output={job.output} />
 				) : null)}
 
-			{/* Share CTA at bottom */}
+			{/* Feedback - available for all completed jobs */}
+			{job.status === "COMPLETED" && (
+				<ToolFeedback toolSlug="news-analyzer" jobId={job.id} />
+			)}
+
+			{/* Share Section - only when newsAnalysis exists */}
 			{job.status === "COMPLETED" && job.newsAnalysis?.id && (
 				<Card className="bg-primary/5 border-primary/20">
-					<CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
+					<CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
 						<div className="text-center sm:text-left">
-							<p className="font-medium">
-								Found this analysis helpful?
-							</p>
+							<p className="font-medium">Share this analysis</p>
 							<p className="text-sm text-muted-foreground">
-								Share it with others to help them stay informed.
+								Help others stay informed with this analysis.
 							</p>
 						</div>
 						<Button
