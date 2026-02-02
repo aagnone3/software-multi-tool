@@ -489,13 +489,4 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 ## Related Skills
 
 - **sub-app**: Implementing file uploads in new tools
-- **architecture**: Understanding the storage layer in the overall architecture
-- **async-jobs**: File upload + job processing pattern
-
-## Environment Variables
-
-| Variable | Purpose | Required |
-| -------- | ------- | -------- |
-| `SUPABASE_URL` | Supabase project URL | For Supabase storage |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service key | For Supabase storage |
-| `NEXT_PUBLIC_AVATARS_BUCKET_NAME` | Avatar bucket name | No (defaults to "avatars") |
+- **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)

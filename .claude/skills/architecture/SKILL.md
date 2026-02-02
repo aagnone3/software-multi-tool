@@ -137,55 +137,23 @@ The application uses **Next.js with Hono + oRPC** for a unified serverless backe
 
 ### Real-time Updates (Supabase Realtime)
 
-Real-time functionality is powered by **Supabase Realtime**:
+Real-time functionality is powered by **Supabase Realtime** at `apps/web/modules/realtime/`:
 
-#### Realtime Module Files
-
-| File | Purpose |
-| ---- | ------- |
-| `apps/web/modules/realtime/client.ts` | Supabase client with typed channel helpers |
-| `apps/web/modules/realtime/types.ts` | TypeScript interfaces for subscriptions |
-| `apps/web/modules/realtime/hooks.ts` | React hooks (`useRealtimeEcho`, `useRealtimeBroadcast`) |
-| `apps/web/modules/realtime/echo.ts` | Echo/heartbeat for connection testing |
-
-#### Channel Types
-
-| Type | Use Case | Persistence |
-| ---- | -------- | ----------- |
-| Broadcast | Pub/sub between clients (chat, cursors) | None |
-| Presence | Who's online tracking | None |
-| postgres_changes | Database row changes | Persisted in DB |
-
-#### Example Usage
+- **Broadcast**: Pub/sub between clients (chat, cursors)
+- **Presence**: Who's online tracking
+- **postgres_changes**: Database row changes
 
 ```typescript
 import { subscribeToBroadcast, broadcastMessage } from "@realtime";
 
-// Subscribe to messages
 const { unsubscribe } = subscribeToBroadcast({
   channelName: "room-1",
   event: "message",
-  onMessage: (payload) => console.log("Received:", payload),
+  onMessage: (payload) => console.log(payload),
 });
-
-// Send a message
-await broadcastMessage({
-  channelName: "room-1",
-  event: "message",
-  payload: { text: "Hello!" },
-});
-
-// Clean up
-unsubscribe();
 ```
 
-#### Path Alias
-
-Import via `@realtime` alias (configured in `apps/web/tsconfig.json`):
-
-```typescript
-import { subscribeToBroadcast, subscribeToPresence } from "@realtime";
-```
+Import via `@realtime` alias for clean imports.
 
 ### Deployment
 
@@ -201,29 +169,7 @@ The backend uses **Hono** web framework with **oRPC** for end-to-end type safety
 
 ### Request Flow
 
-```text
-User Action (frontend)
-    ↓
-TanStack Query mutation/query
-    ↓
-oRPC client call to /api/rpc/module/procedure
-    ↓
-Next.js catch-all route (apps/web/app/api/[[...rest]]/route.ts)
-    ↓
-Hono middleware (logging, CORS, auth, payments)
-    ↓
-oRPC router dispatch
-    ↓
-API module procedure (public/protected/admin)
-    ↓
-Database interaction via Prisma
-    ↓
-Response with Zod-validated schema
-    ↓
-TanStack Query cache update
-    ↓
-UI re-renders
-```
+User Action → TanStack Query → oRPC client → Next.js catch-all (`apps/web/app/api/[[...rest]]/route.ts`) → Hono middleware → oRPC router → API module procedure → Prisma → Response → TanStack Query cache → UI re-render
 
 ### Module Organization
 
@@ -544,10 +490,4 @@ Invoke this skill when:
 
 ## Additional Resources
 
-**Progressive Disclosure**: For detailed implementation guidance, see:
-
-- **Skill-specific documentation**: Specialized skills for auth, storage, payments, etc.
-- **In-app docs**: `apps/web/content/docs`
-- **Testing docs**: `docs/postgres-integration-testing.md`
-- **Cursor rules**: `.cursor/rules/`
-- **Module READMEs**: `packages/*/README.md` for package-specific details
+For detailed implementation guidance, see skill-specific documentation (auth, storage, payments), in-app docs (`apps/web/content/docs`), testing docs (`docs/postgres-integration-testing.md`), and package READMEs (`packages/*/README.md`).
