@@ -944,12 +944,11 @@ export function SpeakerSeparationDetail({
 						</div>
 
 						{/* Feedback */}
-						<div className="rounded-xl border border-border/50 bg-card p-4">
-							<ToolFeedback
-								toolSlug="speaker-separation"
-								jobId={job.id}
-							/>
-						</div>
+						<ToolFeedback
+							toolSlug="speaker-separation"
+							jobId={job.id}
+							className="rounded-xl"
+						/>
 					</div>
 
 					{/* Right Column - Transcript */}

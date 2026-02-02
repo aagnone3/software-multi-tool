@@ -9,15 +9,33 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 interface ToolFeedbackProps {
+	/** The tool slug (e.g., "news-analyzer", "speaker-separation") */
 	toolSlug: string;
+	/** Optional job ID to link feedback to a specific job */
 	jobId?: string;
+	/** "inline" = just the buttons, "card" = styled container (default: "card") */
+	variant?: "inline" | "card";
+	/** Additional class names */
 	className?: string;
+	/** Callback when feedback is submitted */
 	onFeedbackSubmitted?: (rating: "POSITIVE" | "NEGATIVE") => void;
 }
 
+/**
+ * Drop-in feedback component for tool result pages.
+ *
+ * @example
+ * // Card variant (default) - includes styled container
+ * <ToolFeedback toolSlug="news-analyzer" jobId={job.id} />
+ *
+ * @example
+ * // Inline variant - just the feedback controls
+ * <ToolFeedback toolSlug="news-analyzer" jobId={job.id} variant="inline" />
+ */
 export function ToolFeedback({
 	toolSlug,
 	jobId,
+	variant = "card",
 	className,
 	onFeedbackSubmitted,
 }: ToolFeedbackProps) {
@@ -50,8 +68,8 @@ export function ToolFeedback({
 
 	const isLoading = feedbackMutation.isPending;
 
-	return (
-		<div className={cn("flex items-center gap-2", className)}>
+	const feedbackControls = (
+		<div className="flex items-center gap-2">
 			<span className="text-sm text-muted-foreground">
 				Was this helpful?
 			</span>
@@ -62,7 +80,7 @@ export function ToolFeedback({
 					className={cn(
 						"size-8 rounded-full transition-colors",
 						submittedRating === "POSITIVE" &&
-							"bg-emerald-100 text-emerald-600 hover:bg-emerald-100",
+							"bg-emerald-100 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-400",
 						submittedRating === "NEGATIVE" && "opacity-30",
 					)}
 					onClick={() => handleFeedback("POSITIVE")}
@@ -77,7 +95,7 @@ export function ToolFeedback({
 					className={cn(
 						"size-8 rounded-full transition-colors",
 						submittedRating === "NEGATIVE" &&
-							"bg-red-100 text-red-600 hover:bg-red-100",
+							"bg-red-100 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400",
 						submittedRating === "POSITIVE" && "opacity-30",
 					)}
 					onClick={() => handleFeedback("NEGATIVE")}
@@ -87,6 +105,22 @@ export function ToolFeedback({
 					<ThumbsDown className="size-4" />
 				</Button>
 			</div>
+		</div>
+	);
+
+	if (variant === "inline") {
+		return <div className={className}>{feedbackControls}</div>;
+	}
+
+	// Card variant - styled container
+	return (
+		<div
+			className={cn(
+				"rounded-lg border border-border/50 bg-muted/30 p-4",
+				className,
+			)}
+		>
+			{feedbackControls}
 		</div>
 	);
 }
