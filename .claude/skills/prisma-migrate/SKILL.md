@@ -51,26 +51,28 @@ pnpm test
 
 ### Local Database Setup
 
-Local PostgreSQL runs on Homebrew installation:
+**CRITICAL: Use Supabase Local (port 54322)** - This matches preview and production environments.
+
+See **application-environments** skill for complete Supabase Local setup via `pnpm setup`.
 
 | Setting  | Value                   |
 | -------- | ----------------------- |
 | Host     | localhost               |
-| Port     | 5432                    |
-| Database | local_softwaremultitool |
+| Port     | 54322 (Supabase Local)  |
+| Database | postgres                |
 | User     | postgres                |
 | Password | postgres                |
 
 **Connection string for `.env.local`:**
 
 ```text
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 ```
 
-**Create database (if needed):**
+**Setup (runs Supabase Local):**
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+pnpm setup    # Starts Supabase, seeds database, creates .env.local
 ```
 
 ## Core Command Patterns
