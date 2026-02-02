@@ -402,8 +402,56 @@ load-nvmrc
 - All commands use `dotenv -c` to auto-load `apps/web/.env.local` variables
 - Turbo tracks `.env.*local` files as global dependencies
 
+## Dev Lifecycle Plugin
+
+The **dev-lifecycle plugin** provides complete development lifecycle orchestration. See `.claude/plugins/dev-lifecycle/` for full documentation.
+
+### Workflow Commands
+
+| Command | Description |
+|---------|-------------|
+| `/workflows:plan` | Research and groom a Linear ticket |
+| `/workflows:work` | Execute work on a Linear ticket |
+| `/workflows:auto-work` | Auto-pick highest priority ticket |
+| `/workflows:review` | Run multi-agent code review |
+| `/workflows:brainstorm` | Explore requirements before planning |
+| `/workflows:compound` | Document learnings after challenging work |
+
+### Dev Commands
+
+| Command | Description |
+|---------|-------------|
+| `/dev:pull-request` | Create or update a pull request |
+| `/dev:merge` | Merge PR and close Linear issue |
+| `/dev:migrate-database` | Run Prisma migrations |
+| `/dev:start-apps` | Start local dev servers |
+| `/dev:stop-apps` | Stop local dev servers |
+| `/dev:document` | Generate documentation |
+| `/dev:report-bug` | Create bug ticket in Linear |
+
+### CI Commands
+
+| Command | Description |
+|---------|-------------|
+| `/ci:resolve` | Diagnose and fix CI failures |
+
+### Available Agents
+
+| Category | Agents |
+|----------|--------|
+| **Research** | `framework-docs`, `best-practices`, `git-history-analyzer`, `learnings` |
+| **Review** | `typescript-reviewer`, `security-sentinel`, `performance-oracle`, `architecture-strategist`, `migration-guardian` |
+| **Workflow** | `linear-orchestrator`, `worktree-coordinator`, `ci-monitor` |
+
+### Typical Development Flow
+
+```text
+/workflows:plan → /workflows:work → /workflows:review → /dev:pull-request → /ci:resolve → /dev:merge → /workflows:compound
+```
+
 ## Additional Resources
 
+- **Dev Lifecycle Plugin**: `.claude/plugins/dev-lifecycle/` (development workflow orchestration)
 - **Architecture skill**: `.claude/skills/architecture/` (codebase structure, integrations, how-to guides)
 - **Analytics skill**: `.claude/skills/analytics/` (PostHog, event tracking, provider system)
 - **Auth skill**: `.claude/skills/better-auth/` (authentication implementation)
