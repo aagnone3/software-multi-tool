@@ -97,6 +97,17 @@ cd ../..
 pnpm worktree:remove feat-pra-163-improve-auth-flow
 ```
 
+### Working on Branches with New Migrations
+
+**IMPORTANT**: All worktrees share the same local Supabase database. If your feature branch introduces new database migrations, you must apply them:
+
+```bash
+# After switching to worktree with new migrations
+pnpm supabase:reset
+```
+
+This re-applies all migrations from `supabase/migrations/` and re-seeds test data. Without this step, you'll get "table not found" errors when testing new features.
+
 ## Prerequisites
 
 - **Git 2.5+**: Worktree support (check: `git --version`)
