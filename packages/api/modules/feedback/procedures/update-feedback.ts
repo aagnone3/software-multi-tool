@@ -1,5 +1,9 @@
 import { ORPCError } from "@orpc/client";
-import { getToolFeedbackById, updateToolFeedback } from "@repo/database";
+import {
+	getToolFeedbackById,
+	updateToolFeedback,
+	zodSchemas,
+} from "@repo/database";
 import { logger } from "@repo/logs";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -18,6 +22,7 @@ const JsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
 
 const updateFeedbackInputSchema = z.object({
 	feedbackId: z.string(),
+	rating: zodSchemas.FeedbackRatingSchema.optional(),
 	chatTranscript: z.string().optional(),
 	extractedData: z.record(z.string(), JsonValueSchema).optional(),
 });
@@ -34,7 +39,7 @@ export const updateFeedbackProcedure = protectedProcedure
 	.input(updateFeedbackInputSchema)
 	.handler(
 		async ({
-			input: { feedbackId, chatTranscript, extractedData },
+			input: { feedbackId, rating, chatTranscript, extractedData },
 			context: { user },
 		}) => {
 			// Verify feedback exists and belongs to the user
@@ -53,6 +58,7 @@ export const updateFeedbackProcedure = protectedProcedure
 
 			try {
 				await updateToolFeedback(feedbackId, user.id, {
+					rating,
 					chatTranscript,
 					extractedData,
 				});

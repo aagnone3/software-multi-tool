@@ -136,6 +136,12 @@ export async function getToolFeedbackByJobId(jobId: string) {
 	});
 }
 
+export async function getUserFeedbackForJob(userId: string, jobId: string) {
+	return await db.toolFeedback.findFirst({
+		where: { userId, jobId },
+	});
+}
+
 export async function getToolFeedbackStats(toolSlug?: string) {
 	const where: Prisma.ToolFeedbackWhereInput = {};
 
@@ -167,11 +173,15 @@ export async function updateToolFeedback(
 	feedbackId: string,
 	userId: string,
 	data: {
+		rating?: FeedbackRating;
 		chatTranscript?: string;
 		extractedData?: unknown;
 	},
 ) {
 	const updateData: Prisma.ToolFeedbackUpdateInput = {};
+	if (data.rating !== undefined) {
+		updateData.rating = data.rating;
+	}
 	if (data.chatTranscript !== undefined) {
 		updateData.chatTranscript = data.chatTranscript;
 	}

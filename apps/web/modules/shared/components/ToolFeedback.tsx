@@ -1,11 +1,11 @@
 "use client";
 
 import { orpc } from "@shared/lib/orpc-query-utils";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ToolFeedbackProps {
@@ -39,34 +39,70 @@ export function ToolFeedback({
 	className,
 	onFeedbackSubmitted,
 }: ToolFeedbackProps) {
-	const [submittedRating, setSubmittedRating] = useState<
+	const [currentRating, setCurrentRating] = useState<
 		"POSITIVE" | "NEGATIVE" | null
 	>(null);
+	const [feedbackId, setFeedbackId] = useState<string | null>(null);
 
-	const feedbackMutation = useMutation(
-		orpc.feedback.create.mutationOptions(),
-	);
+	// Fetch existing feedback for this job
+	const { data: existingFeedback, isLoading: isLoadingExisting } = useQuery({
+		...orpc.feedback.getForJob.queryOptions({
+			input: { jobId: jobId ?? "" },
+		}),
+		enabled: !!jobId,
+	});
+
+	// Initialize state from existing feedback
+	useEffect(() => {
+		if (existingFeedback?.feedback) {
+			setCurrentRating(existingFeedback.feedback.rating);
+			setFeedbackId(existingFeedback.feedback.id);
+		}
+	}, [existingFeedback]);
+
+	const createMutation = useMutation(orpc.feedback.create.mutationOptions());
+	const updateMutation = useMutation(orpc.feedback.update.mutationOptions());
 
 	const handleFeedback = async (rating: "POSITIVE" | "NEGATIVE") => {
-		if (submittedRating) {
-			return; // Already submitted
+		// If clicking the same rating, do nothing
+		if (currentRating === rating) {
+			return;
 		}
 
 		try {
-			await feedbackMutation.mutateAsync({
-				toolSlug,
-				rating,
-				jobId,
-			});
-			setSubmittedRating(rating);
-			onFeedbackSubmitted?.(rating);
-			toast.success("Thank you for your feedback!");
+			if (feedbackId) {
+				// Update existing feedback
+				const result = await updateMutation.mutateAsync({
+					feedbackId,
+					rating,
+				});
+				setCurrentRating(rating);
+				if (result.feedback) {
+					setFeedbackId(result.feedback.id);
+				}
+				onFeedbackSubmitted?.(rating);
+				toast.success("Feedback updated!");
+			} else {
+				// Create new feedback
+				const result = await createMutation.mutateAsync({
+					toolSlug,
+					rating,
+					jobId,
+				});
+				setCurrentRating(rating);
+				setFeedbackId(result.feedback.id);
+				onFeedbackSubmitted?.(rating);
+				toast.success("Thank you for your feedback!");
+			}
 		} catch {
 			toast.error("Failed to submit feedback. Please try again.");
 		}
 	};
 
-	const isLoading = feedbackMutation.isPending;
+	const isLoading =
+		createMutation.isPending ||
+		updateMutation.isPending ||
+		isLoadingExisting;
 
 	const feedbackControls = (
 		<div className="flex items-center gap-2">
@@ -79,12 +115,12 @@ export function ToolFeedback({
 					size="icon"
 					className={cn(
 						"size-8 rounded-full transition-colors",
-						submittedRating === "POSITIVE" &&
+						currentRating === "POSITIVE" &&
 							"bg-emerald-100 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-400",
-						submittedRating === "NEGATIVE" && "opacity-30",
+						currentRating === "NEGATIVE" && "opacity-30",
 					)}
 					onClick={() => handleFeedback("POSITIVE")}
-					disabled={isLoading || submittedRating !== null}
+					disabled={isLoading}
 					title="This was helpful"
 				>
 					<ThumbsUp className="size-4" />
@@ -94,12 +130,12 @@ export function ToolFeedback({
 					size="icon"
 					className={cn(
 						"size-8 rounded-full transition-colors",
-						submittedRating === "NEGATIVE" &&
+						currentRating === "NEGATIVE" &&
 							"bg-red-100 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400",
-						submittedRating === "POSITIVE" && "opacity-30",
+						currentRating === "POSITIVE" && "opacity-30",
 					)}
 					onClick={() => handleFeedback("NEGATIVE")}
-					disabled={isLoading || submittedRating !== null}
+					disabled={isLoading}
 					title="This wasn't helpful"
 				>
 					<ThumbsDown className="size-4" />
