@@ -563,41 +563,45 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 				) : null)}
 
 			{/* Feedback and Share CTA at bottom */}
-			{job.status === "COMPLETED" && job.newsAnalysis?.id && (
+			{job.status === "COMPLETED" && (
 				<Card className="bg-primary/5 border-primary/20">
 					<CardContent className="flex flex-col gap-4 py-6">
-						{/* Feedback Section */}
-						<div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-primary/10">
+						{/* Feedback Section - available for all completed jobs */}
+						<div
+							className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${job.newsAnalysis?.id ? "pb-4 border-b border-primary/10" : ""}`}
+						>
 							<ToolFeedback
 								toolSlug="news-analyzer"
 								jobId={job.id}
 							/>
 						</div>
 
-						{/* Share Section */}
-						<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-							<div className="text-center sm:text-left">
-								<p className="font-medium">
-									Share this analysis
-								</p>
-								<p className="text-sm text-muted-foreground">
-									Help others stay informed with this
-									analysis.
-								</p>
+						{/* Share Section - only when newsAnalysis exists */}
+						{job.newsAnalysis?.id && (
+							<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+								<div className="text-center sm:text-left">
+									<p className="font-medium">
+										Share this analysis
+									</p>
+									<p className="text-sm text-muted-foreground">
+										Help others stay informed with this
+										analysis.
+									</p>
+								</div>
+								<Button
+									onClick={() => {
+										const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
+										navigator.clipboard.writeText(shareUrl);
+										toast.success(
+											"Share link copied to clipboard",
+										);
+									}}
+								>
+									<Share2 className="mr-2 size-4" />
+									Copy Share Link
+								</Button>
 							</div>
-							<Button
-								onClick={() => {
-									const shareUrl = `${window.location.origin}/share/news-analyzer/${job.newsAnalysis?.id}`;
-									navigator.clipboard.writeText(shareUrl);
-									toast.success(
-										"Share link copied to clipboard",
-									);
-								}}
-							>
-								<Share2 className="mr-2 size-4" />
-								Copy Share Link
-							</Button>
-						</div>
+						)}
 					</CardContent>
 				</Card>
 			)}
