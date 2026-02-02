@@ -172,7 +172,7 @@ Preview environments use `/api/proxy/*` to forward requests (different domains c
 - Proxy: `apps/web/app/api/proxy/[...path]/route.ts`
 - URL detection: `packages/utils/lib/api-url.ts`
 
-See **api-proxy** skill for details.
+For details, see the **architecture** skill's deployment section.
 
 ## Best Practices
 
@@ -193,6 +193,6 @@ See [troubleshooting.md](troubleshooting.md) for:
 
 ## Related Skills
 
-- **api-proxy**: Preview authentication proxy
+- **architecture**: API proxy implementation details
 - **prisma-migrate**: Database migration workflows
 - **application-environments**: Environment overview
