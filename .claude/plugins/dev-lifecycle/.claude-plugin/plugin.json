@@ -1,0 +1,24 @@
+{
+	"name": "dev-lifecycle",
+	"version": "1.0.0",
+	"description": "Complete development lifecycle orchestration for Linear-based workflows with git-worktrees, Prisma, and Supabase",
+	"author": "aagnone3",
+	"repository": "aagnone3/software-multi-tool",
+	"dependencies": {
+		"skills": [
+			"git-worktrees",
+			"linear",
+			"linear-workflow",
+			"prisma-migrate",
+			"github-cli",
+			"cicd",
+			"debugging"
+		]
+	},
+	"config": {
+		"linearTeam": "PRA",
+		"readyForWorkView": "ready-for-work-6ec4d06793a6",
+		"defaultBranch": "main",
+		"worktreeDir": ".worktrees"
+	}
+}

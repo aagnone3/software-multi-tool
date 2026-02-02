@@ -4,6 +4,9 @@
 		"deny": [],
 		"ask": []
 	},
+	"enabledPlugins": {
+		"dev-lifecycle@local": true
+	},
 	"hooks": {
 		"PreToolUse": [
 			{
