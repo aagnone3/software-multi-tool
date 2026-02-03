@@ -12,7 +12,6 @@ import {
 import { Textarea } from "@ui/components/textarea";
 import { RotateCcw } from "lucide-react";
 import {
-	DEFAULT_DIAGRAM_TYPE,
 	DIAGRAM_TYPE_LABELS,
 	type DiagramType,
 	SAMPLE_DIAGRAMS,
@@ -36,6 +35,11 @@ export function DiagramEditorInput({
 	};
 
 	const handleTypeChange = (type: string) => {
+		// Validate type at runtime before casting
+		if (!(type in SAMPLE_DIAGRAMS)) {
+			console.error(`Invalid diagram type: ${type}`);
+			return;
+		}
 		const diagramType = type as DiagramType;
 		onTypeChange(diagramType);
 		onChange(SAMPLE_DIAGRAMS[diagramType]);
@@ -106,5 +110,3 @@ export function DiagramEditorInput({
 		</div>
 	);
 }
-
-export { DEFAULT_DIAGRAM_TYPE, SAMPLE_DIAGRAMS };

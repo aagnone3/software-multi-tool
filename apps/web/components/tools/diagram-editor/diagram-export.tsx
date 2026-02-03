@@ -8,9 +8,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
-import { Check, ChevronDown, Copy, Download, Image } from "lucide-react";
+import { ChevronDown, Copy, Download, Image } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
 import { toast } from "sonner";
 import {
 	copyPngToClipboard,
@@ -26,7 +25,6 @@ interface DiagramExportProps {
 
 export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 	const { resolvedTheme } = useTheme();
-	const [recentAction, setRecentAction] = useState<string | null>(null);
 
 	const getBackgroundColor = () => {
 		return resolvedTheme === "dark" ? "#1a1a1a" : "#ffffff";
@@ -35,7 +33,6 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 	const handleAction = async (
 		action: () => Promise<void> | void,
 		successMessage: string,
-		actionKey: string,
 	) => {
 		if (!containerRef.current) {
 			toast.error("No diagram to export");
@@ -45,8 +42,6 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		try {
 			await action();
 			toast.success(successMessage);
-			setRecentAction(actionKey);
-			setTimeout(() => setRecentAction(null), 2000);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Export failed");
 		}
@@ -63,7 +58,6 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 					backgroundColor: getBackgroundColor(),
 				}),
 			"PNG copied to clipboard",
-			"copy-png",
 		);
 	};
 
@@ -75,7 +69,6 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		handleAction(
 			() => copySvgToClipboard(container),
 			"SVG copied to clipboard",
-			"copy-svg",
 		);
 	};
 
@@ -90,7 +83,6 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 					backgroundColor: getBackgroundColor(),
 				}),
 			"PNG downloaded",
-			"download-png",
 		);
 	};
 
@@ -99,11 +91,7 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		if (!container) {
 			return;
 		}
-		handleAction(
-			() => downloadSvg(container),
-			"SVG downloaded",
-			"download-svg",
-		);
+		handleAction(() => downloadSvg(container), "SVG downloaded");
 	};
 
 	return (
@@ -120,16 +108,10 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 					<DropdownMenuItem onClick={handleCopyPng}>
 						<Image className="mr-2 h-4 w-4" />
 						Copy as PNG
-						{recentAction === "copy-png" && (
-							<Check className="ml-auto h-4 w-4 text-green-500" />
-						)}
 					</DropdownMenuItem>
 					<DropdownMenuItem onClick={handleCopySvg}>
 						<Copy className="mr-2 h-4 w-4" />
 						Copy as SVG
-						{recentAction === "copy-svg" && (
-							<Check className="ml-auto h-4 w-4 text-green-500" />
-						)}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -146,17 +128,11 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 					<DropdownMenuItem onClick={handleDownloadPng}>
 						<Image className="mr-2 h-4 w-4" />
 						Download PNG
-						{recentAction === "download-png" && (
-							<Check className="ml-auto h-4 w-4 text-green-500" />
-						)}
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onClick={handleDownloadSvg}>
 						<Download className="mr-2 h-4 w-4" />
 						Download SVG
-						{recentAction === "download-svg" && (
-							<Check className="ml-auto h-4 w-4 text-green-500" />
-						)}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

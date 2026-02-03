@@ -2,11 +2,19 @@
  * Export utilities for diagram images
  */
 
+import DOMPurify from "dompurify";
+
 export interface ExportOptions {
 	filename?: string;
 	scale?: number;
 	backgroundColor?: string;
 }
+
+/** Maximum scale factor to prevent memory exhaustion */
+const MAX_SCALE = 4;
+
+/** Timeout for blob URL cleanup (30 seconds) */
+const CLEANUP_TIMEOUT_MS = 30000;
 
 /**
  * Get the SVG element from a container
@@ -16,11 +24,19 @@ function getSvgElement(container: HTMLElement): SVGSVGElement | null {
 }
 
 /**
- * Serialize an SVG element to a string
+ * Serialize and sanitize an SVG element to a string
  */
-function serializeSvg(svg: SVGSVGElement): string {
+function serializeAndSanitizeSvg(svg: SVGSVGElement): string {
 	const serializer = new XMLSerializer();
-	return serializer.serializeToString(svg);
+	const svgString = serializer.serializeToString(svg);
+
+	// Sanitize SVG to remove potential XSS vectors
+	return DOMPurify.sanitize(svgString, {
+		USE_PROFILES: { svg: true, svgFilters: true },
+		ADD_TAGS: ["use"],
+		FORBID_TAGS: ["script"],
+		FORBID_ATTR: ["onclick", "onload", "onerror", "onmouseover"],
+	});
 }
 
 /**
@@ -34,7 +50,7 @@ export async function copySvgToClipboard(
 		throw new Error("No SVG element found");
 	}
 
-	const svgString = serializeSvg(svg);
+	const svgString = serializeAndSanitizeSvg(svg);
 	await navigator.clipboard.writeText(svgString);
 }
 
@@ -51,7 +67,7 @@ export function downloadSvg(
 	}
 
 	const filename = options.filename || "diagram.svg";
-	const svgString = serializeSvg(svg);
+	const svgString = serializeAndSanitizeSvg(svg);
 	const blob = new Blob([svgString], { type: "image/svg+xml" });
 	const url = URL.createObjectURL(blob);
 
@@ -71,7 +87,8 @@ async function svgToPngDataUrl(
 	svg: SVGSVGElement,
 	options: ExportOptions = {},
 ): Promise<string> {
-	const scale = options.scale || 2;
+	// Cap scale to prevent memory exhaustion
+	const scale = Math.min(options.scale || 2, MAX_SCALE);
 	const backgroundColor = options.backgroundColor || "white";
 
 	// Get SVG dimensions
@@ -84,14 +101,23 @@ async function svgToPngDataUrl(
 	clonedSvg.setAttribute("width", String(width));
 	clonedSvg.setAttribute("height", String(height));
 
-	// Serialize SVG
-	const svgString = serializeSvg(clonedSvg);
+	// Serialize and sanitize SVG
+	const svgString = serializeAndSanitizeSvg(clonedSvg);
 	const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
 	const svgUrl = URL.createObjectURL(svgBlob);
 
 	return new Promise((resolve, reject) => {
+		// Set up cleanup timeout to prevent memory leaks
+		const cleanup = () => URL.revokeObjectURL(svgUrl);
+		const timeoutId = setTimeout(() => {
+			cleanup();
+			reject(new Error("Image load timeout"));
+		}, CLEANUP_TIMEOUT_MS);
+
 		const img = new Image();
 		img.onload = () => {
+			clearTimeout(timeoutId);
+
 			// Create canvas
 			const canvas = document.createElement("canvas");
 			canvas.width = width;
@@ -99,7 +125,7 @@ async function svgToPngDataUrl(
 
 			const ctx = canvas.getContext("2d");
 			if (!ctx) {
-				URL.revokeObjectURL(svgUrl);
+				cleanup();
 				reject(new Error("Failed to get canvas context"));
 				return;
 			}
@@ -111,12 +137,22 @@ async function svgToPngDataUrl(
 			// Draw SVG
 			ctx.drawImage(img, 0, 0, width, height);
 
-			URL.revokeObjectURL(svgUrl);
-			resolve(canvas.toDataURL("image/png"));
+			// Get data URL before cleanup
+			const dataUrl = canvas.toDataURL("image/png");
+
+			// Clean up resources
+			cleanup();
+
+			// Help garbage collection
+			canvas.width = 0;
+			canvas.height = 0;
+
+			resolve(dataUrl);
 		};
 
 		img.onerror = () => {
-			URL.revokeObjectURL(svgUrl);
+			clearTimeout(timeoutId);
+			cleanup();
 			reject(new Error("Failed to load SVG image"));
 		};
 

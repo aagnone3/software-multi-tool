@@ -3,15 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { GitBranch } from "lucide-react";
 import { useRef, useState } from "react";
-import {
-	DEFAULT_DIAGRAM_TYPE,
-	DiagramEditorInput,
-	SAMPLE_DIAGRAMS,
-} from "./diagram-editor-input";
+import { useDebounceValue } from "usehooks-ts";
+import { DiagramEditorInput } from "./diagram-editor-input";
 import { DiagramExport } from "./diagram-export";
 import { DiagramPreview } from "./diagram-preview";
-import type { DiagramType } from "./lib/sample-diagrams";
-import { useDebounce } from "./lib/use-debounce";
+import {
+	DEFAULT_DIAGRAM_TYPE,
+	type DiagramType,
+	SAMPLE_DIAGRAMS,
+} from "./lib/sample-diagrams";
 
 const DEBOUNCE_DELAY_MS = 300;
 
@@ -21,7 +21,7 @@ export function DiagramEditor() {
 	const [code, setCode] = useState<string>(
 		SAMPLE_DIAGRAMS[DEFAULT_DIAGRAM_TYPE],
 	);
-	const debouncedCode = useDebounce(code, DEBOUNCE_DELAY_MS);
+	const [debouncedCode] = useDebounceValue(code, DEBOUNCE_DELAY_MS);
 	const previewRef = useRef<HTMLDivElement>(null);
 
 	const hasValidCode = debouncedCode.trim().length > 0;

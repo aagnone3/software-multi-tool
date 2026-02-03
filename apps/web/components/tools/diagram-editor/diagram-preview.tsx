@@ -25,7 +25,7 @@ export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
 			mermaid.initialize({
 				startOnLoad: false,
 				theme: resolvedTheme === "dark" ? "dark" : "default",
-				securityLevel: "loose",
+				securityLevel: "strict",
 				fontFamily: "inherit",
 			});
 		}, [resolvedTheme]);
@@ -45,15 +45,7 @@ export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
 					// Clear previous content
 					container.innerHTML = "";
 
-					// Validate syntax first
-					const isValid = await mermaid.parse(code);
-					if (!isValid) {
-						setError("Invalid Mermaid syntax");
-						setIsRendering(false);
-						return;
-					}
-
-					// Render the diagram
+					// Render the diagram (parse is called internally by render)
 					const { svg } = await mermaid.render(
 						`mermaid-${containerId.replace(/:/g, "-")}`,
 						code,
@@ -80,16 +72,15 @@ export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
 			renderDiagram();
 		}, [code, containerId, resolvedTheme]);
 
-		// Forward ref to the container for export functionality
-		useEffect(() => {
-			if (ref && containerRef.current) {
-				if (typeof ref === "function") {
-					ref(containerRef.current);
-				} else {
-					ref.current = containerRef.current;
-				}
+		// Callback ref to merge containerRef and forwarded ref
+		const setRefs = (node: HTMLDivElement | null) => {
+			containerRef.current = node;
+			if (typeof ref === "function") {
+				ref(node);
+			} else if (ref) {
+				ref.current = node;
 			}
-		}, [ref]);
+		};
 
 		if (!code.trim()) {
 			return (
@@ -132,8 +123,8 @@ export const DiagramPreview = forwardRef<HTMLDivElement, DiagramPreviewProps>(
 					</div>
 				)}
 				<div
-					ref={containerRef}
-					className="flex items-center justify-center overflow-auto rounded-lg border bg-card p-4"
+					ref={setRefs}
+					className="flex min-h-[350px] items-center justify-center overflow-auto rounded-lg border bg-card p-4"
 				/>
 			</div>
 		);
