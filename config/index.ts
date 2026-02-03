@@ -117,6 +117,20 @@ export const config = {
 					authenticated: { requests: 50, window: "1h" },
 				},
 			},
+			{
+				slug: "diagram-editor",
+				name: "Diagram Editor",
+				description:
+					"Create and visualize diagrams with Mermaid syntax and live preview",
+				icon: "git-branch",
+				public: true,
+				enabled: true,
+				creditCost: 0, // Client-side only, no credits consumed
+				rateLimits: {
+					anonymous: { requests: 1000, window: "1d" },
+					authenticated: { requests: 10000, window: "1h" },
+				},
+			},
 		],
 	},
 	// Organizations
