@@ -174,8 +174,15 @@ describe("plan pricing configuration", () => {
 describe("tool credit costs", () => {
 	it("all tools have credit costs defined", () => {
 		for (const tool of config.tools.registry) {
-			expect(tool.creditCost).toBeGreaterThan(0);
+			expect(tool.creditCost).toBeGreaterThanOrEqual(0);
 		}
+	});
+
+	it("client-side only tools have zero credit cost", () => {
+		const diagramEditor = config.tools.registry.find(
+			(t) => t.slug === "diagram-editor",
+		);
+		expect(diagramEditor?.creditCost).toBe(0);
 	});
 
 	it("getToolCreditCost returns correct cost for known tools", () => {

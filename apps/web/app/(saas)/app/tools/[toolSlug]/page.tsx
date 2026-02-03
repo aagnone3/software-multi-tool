@@ -7,6 +7,7 @@ import { InvoiceProcessorTool } from "@tools/components/InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
 import { notFound, redirect } from "next/navigation";
+import { DiagramEditor } from "../../../../../components/tools/diagram-editor";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
 
 interface ToolPageProps {
@@ -47,6 +48,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
 	"expense-categorizer": ExpenseCategorizerTool,
 	"meeting-summarizer": MeetingSummarizerTool,
 	"speaker-separation": SpeakerSeparationTool,
+	"diagram-editor": DiagramEditor,
 };
 
 // Tools with dedicated routes (not handled by this generic page)
