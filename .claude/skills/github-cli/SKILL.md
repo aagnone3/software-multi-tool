@@ -253,3 +253,9 @@ gh auth status && gh <command>
 ```bash
 gh repo view aagnone3/software-multi-tool
 ```
+
+## Related Skills
+
+- **linear-workflow**: Workflow for implementing Linear tickets with PR creation
+- **git-worktrees**: Worktree-based development for parallel work
+- **cicd**: CI/CD pipeline and GitHub Actions workflows
