@@ -1,6 +1,6 @@
 ---
 name: better-auth
-description: Provides comprehensive Better Auth guidance covering authentication, user management, sessions, organizations, and auth configuration. Activated when working with auth-related features, login flows, or session handling.
+description: Provides Better Auth guidance covering passkeys, magic links, OAuth providers, multi-tenant organizations, session management, and invitation-only signup patterns. Use when implementing authentication flows, configuring auth providers, managing user sessions, debugging auth issues, or working with organization invitations.
 allowed-tools:
   - Read
   - Edit
