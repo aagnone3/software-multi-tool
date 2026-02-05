@@ -1,6 +1,6 @@
 ---
 name: landing-page-design
-description: Provides landing page design guidance including animated backgrounds, decorative patterns, and visual enhancement techniques. Covers background effects, hero sections, and modern web design patterns.
+description: Provides landing page design guidance including animated gradient orbs, floating geometric shapes, dot grid patterns, and organic drift animations. Covers CSS keyframe animations, blur effects, and performance optimization. Use when designing hero sections, adding background animations, implementing marketing page visuals, or optimizing animation performance.
 allowed-tools:
   - Read
   - Write

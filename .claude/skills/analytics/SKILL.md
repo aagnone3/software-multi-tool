@@ -1,6 +1,6 @@
 ---
 name: analytics
-description: Provides event tracking implementation guidance, PostHog analytics integration, and provider swapping patterns. Activated when working with analytics, tracking events, or switching providers.
+description: Provides event tracking implementation guidance using PostHog analytics, including feature flags, A/B testing, and pluggable provider architecture. Use when implementing analytics events, tracking conversions, configuring PostHog, or switching analytics providers.
 allowed-tools:
   - Read
   - Edit
