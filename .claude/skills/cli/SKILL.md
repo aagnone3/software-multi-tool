@@ -1,5 +1,5 @@
 ---
-name: cli
+name: using-cli
 description: Developer CLI (mt) providing commands for development workflows, feature flag inspection, and tooling automation. Use when running CLI commands, adding new commands, debugging CLI issues, or understanding the CLI architecture.
 allowed-tools:
   - Read
