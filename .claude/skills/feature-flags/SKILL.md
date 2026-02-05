@@ -1,5 +1,5 @@
 ---
-name: feature-flags
+name: managing-feature-flags
 description: Provides feature flag implementation guidance for A/B testing, progressive rollouts, and conditional feature access. Covers PostHog feature flag integration for both server-side (SSR/API) and client-side (React hooks) evaluation.
 allowed-tools:
   - Read
