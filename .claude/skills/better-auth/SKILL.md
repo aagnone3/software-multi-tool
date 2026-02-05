@@ -1,5 +1,5 @@
 ---
-name: better-auth
+name: implementing-auth
 description: Provides Better Auth guidance covering passkeys, magic links, OAuth providers, multi-tenant organizations, session management, and invitation-only signup patterns. Use when implementing authentication flows, configuring auth providers, managing user sessions, debugging auth issues, or working with organization invitations.
 allowed-tools:
   - Read

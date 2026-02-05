@@ -1,6 +1,6 @@
 ---
-name: cicd
-description: Provides CI/CD pipeline management guidance covering GitHub Actions, preview environments, database branching, and migration sync. Activated when working with Vercel deployments, Supabase branches, or Prisma migration sync.
+name: managing-cicd
+description: Manages CI/CD pipelines including GitHub Actions, Vercel preview deployments, Supabase database branching, and Prisma migration sync. Use when working with preview environments, debugging deployments, or syncing migrations.
 allowed-tools:
   - Read
   - Grep

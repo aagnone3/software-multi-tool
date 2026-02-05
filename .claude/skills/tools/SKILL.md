@@ -1,5 +1,5 @@
 ---
-name: tools
+name: configuring-tools
 description: Provides tool registry configuration, credit cost management, and public/private access control. Covers tool registration, icon selection, multi-app routing, and credit pack system integration. Use when registering new tools, configuring access controls, setting credit costs, or understanding the tool listing page.
 allowed-tools:
   - Read

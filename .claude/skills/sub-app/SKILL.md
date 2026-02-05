@@ -1,5 +1,5 @@
 ---
-name: sub-app
+name: developing-sub-apps
 description: Provides complete sub-application development workflows including database schema, API modules, job processing, and frontend UI. Use when building new tools from scratch, implementing async job patterns, or understanding the generic ToolJob architecture.
 allowed-tools:
   - Bash

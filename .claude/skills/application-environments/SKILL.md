@@ -1,5 +1,5 @@
 ---
-name: application-environments
+name: configuring-application-environments
 description: Configures local Supabase development, Vercel preview environments, and production deployments. Covers database setup (Supabase Local port 54322), environment variables, and troubleshooting. Use when setting up local dev, configuring preview branches, resolving database connection issues, or managing environment-specific configuration.
 allowed-tools:
   - Bash

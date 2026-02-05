@@ -1,5 +1,5 @@
 ---
-name: analytics
+name: tracking-analytics
 description: Provides event tracking implementation guidance using PostHog analytics, including feature flags, A/B testing, and pluggable provider architecture. Use when implementing analytics events, tracking conversions, configuring PostHog, or switching analytics providers.
 allowed-tools:
   - Read

@@ -1,5 +1,5 @@
 ---
-name: github-cli
+name: using-github-cli
 description: Provides GitHub operations support including pull requests, issues, and API access. CRITICAL: Always verify and switch to the aagnone3 GitHub account before any operations. Use when creating PRs, managing issues, switching accounts, or troubleshooting GitHub CLI authentication.
 allowed-tools:
   - Bash
