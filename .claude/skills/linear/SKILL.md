@@ -1,6 +1,6 @@
 ---
-name: linear
-description: Provides Linear integration for project management tasks including listing/managing projects, creating/listing milestones, managing issue dependencies, closing issues, and assigning issues to milestones. Wraps the Linear CLI helpers and provides comprehensive Linear workflow support.
+name: managing-linear
+description: Manages Linear project tasks including listing projects, creating milestones, managing dependencies, starting issues, and closing completed work. Use when mentioning Linear issue keys (PRA-XX), managing projects/milestones, or working on tickets.
 allowed-tools:
   - Bash
 ---
