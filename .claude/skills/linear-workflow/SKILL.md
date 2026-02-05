@@ -1,5 +1,5 @@
 ---
-name: linear-workflow
+name: implementing-linear-workflow
 description: Provides Linear issue implementation workflow using worktrees, feature branches, and pull requests. Covers working on tickets, starting features, picking up groomed issues, and creating PRs. Enforces worktree-based development and automatic PR creation.
 allowed-tools:
   - Bash
