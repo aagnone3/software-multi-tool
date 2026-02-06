@@ -253,3 +253,11 @@ gh auth status && gh <command>
 ```bash
 gh repo view aagnone3/software-multi-tool
 ```
+
+## Related Skills
+
+- **linear-workflow**: Creating PRs as part of Linear workflow
+- **git-worktrees**: Creating PRs from worktree branches
+- **cicd**: GitHub Actions and PR validation workflows
+- **linear**: Closing Linear issues after PR merge
+- **debugging**: Troubleshooting GitHub operations
