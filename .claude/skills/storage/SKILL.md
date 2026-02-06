@@ -1,6 +1,6 @@
 ---
 name: storage
-description: Provides file upload and storage management guidance covering multi-tenant path conventions, storage providers (Supabase, S3), and the @repo/storage package. Activated when implementing uploads, adding new upload types, or debugging file access issues.
+description: Provides file upload and storage management using Supabase Storage (primary) or S3-compatible providers. Covers multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and @repo/storage package. Use when implementing uploads, adding new upload types, configuring storage providers, debugging file access issues, or working with multi-tenant file paths.
 allowed-tools:
   - Read
   - Edit
@@ -291,3 +291,6 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 
 - **sub-app**: Implementing file uploads in new tools
 - **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)
+- **better-auth**: User authentication for multi-tenant path isolation
+- **application-environments**: Supabase storage configuration
+- **debugging**: Troubleshooting file upload and storage issues

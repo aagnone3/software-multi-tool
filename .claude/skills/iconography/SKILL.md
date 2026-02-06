@@ -1,6 +1,6 @@
 ---
 name: iconography
-description: Provides icon implementation guidance for UI components including size selection, semantic color application, and consistent usage patterns. Covers the Icon component, Lucide React integration, and size/color systems.
+description: Provides icon implementation guidance using Lucide React including size selection (xs to 2xl), semantic color application (primary, success, destructive), and consistent usage patterns. Use when adding icons to components, choosing icon sizes, applying semantic colors, or ensuring icon consistency.
 allowed-tools:
   - Read
   - Grep
@@ -269,3 +269,5 @@ The icon color system integrates with the brand color palette defined in `toolin
 - **typography**: Font system and text styling
 - **architecture**: UI component organization
 - **landing-page-design**: Visual design patterns
+- **tools**: Tool icon configuration in registry
+- **sub-app**: Adding icons to new tools

@@ -347,6 +347,7 @@ Invoke this skill when:
 - **sub-app**: Implementing typography in new tools
 - **landing-page-design**: Typography in marketing pages
 - **iconography**: Complementary visual design system
+- **better-auth**: Email templates with proper typography
 
 ## Additional Resources
 

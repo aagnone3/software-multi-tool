@@ -256,6 +256,8 @@ See `tool-analytics.md` for detailed implementation guide and examples.
 - **architecture**: Overall codebase structure and module organization
 - **better-auth**: User session integration for analytics identification
 - **sub-app**: Adding analytics to new sub-applications/tools
+- **feature-flags**: PostHog feature flags and A/B testing integration
+- **cli**: CLI commands for inspecting feature flags via PostHog
 
 ## Additional Resources
 

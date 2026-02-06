@@ -177,6 +177,8 @@ Use this template to structure your reflection:
 - **agent-skills**: Best practices for creating and improving skills
 - **git-worktrees**: Often needs updates based on environment issues
 - **architecture**: Central documentation that requires ongoing updates
+- **debugging**: Troubleshooting patterns that inform skill improvements
+- **cicd**: CI/CD workflows that may need documentation updates
 
 ## Related Resources
 

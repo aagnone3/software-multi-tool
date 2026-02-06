@@ -411,3 +411,6 @@ Invoke this skill when:
 - **analytics**: PostHog event tracking and user identification
 - **better-auth**: User session for distinctId
 - **architecture**: Overall system design
+- **cli**: CLI commands for inspecting feature flags
+- **tools**: Feature gating for tools by plan tier
+- **sub-app**: Adding feature flags to new tools

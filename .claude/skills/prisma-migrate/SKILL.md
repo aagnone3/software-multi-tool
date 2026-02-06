@@ -403,3 +403,6 @@ Invoke this skill when:
 - **git-worktrees**: Database configuration in isolated worktree environments
 - **sub-app**: Creating database models for new tools
 - **dev:migrate-database**: Skill for executing migrations in workflow context
+- **cicd**: Prisma-to-Supabase migration sync in CI
+- **debugging**: Troubleshooting migration and database issues
+- **better-auth**: Auth schema management and migrations

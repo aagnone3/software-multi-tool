@@ -207,3 +207,11 @@ pnpm --filter @repo/scripts linear views list-issues --view <id|slug>
 - NEVER commit directly to main - always use worktrees
 - DO NOT close the Linear issue until PR is merged
 - Work is NOT complete until there is a PR URL
+
+## Related Skills
+
+- **linear-workflow**: Complete Linear-based development workflow
+- **git-worktrees**: Creating worktrees for Linear issues
+- **github-cli**: Creating PRs linked to Linear issues
+- **architecture**: Overall project structure and CLI tooling location
+- **debugging**: Troubleshooting Linear CLI issues

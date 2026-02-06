@@ -178,3 +178,5 @@ For comprehensive details, see these supporting files:
 - **`github-cli`**: Create pull requests from worktree branches
 - **`prisma-migrate`**: Database migrations in isolated worktrees
 - **`better-auth`**: Authentication development in dedicated worktrees
+- **`cicd`**: Preview environment creation for worktree branches
+- **`debugging`**: Troubleshooting worktree environment issues
