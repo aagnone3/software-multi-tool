@@ -1,6 +1,6 @@
 ---
 name: configuring-application-environments
-description: Configures local Supabase development, Vercel preview environments, and production deployments. Covers database setup (Supabase Local port 54322), environment variables, and troubleshooting. Use when setting up local dev, configuring preview branches, resolving database connection issues, or managing environment-specific configuration.
+description: Configures local Supabase development (port 54322), Vercel preview environments, and production deployments. Enforces Supabase Local database (NOT Homebrew Postgres on 5432) with storage and auth. Use when setting up local dev, configuring preview branches, resolving database connection issues, managing environment variables, or troubleshooting "table not found" errors.
 allowed-tools:
   - Bash
   - Read
@@ -255,6 +255,10 @@ pnpm supabase:reset
 
 ## Related Skills
 
-- **git-worktrees**: Parallel development with isolated worktrees
+- **git-worktrees**: Parallel development with isolated worktrees and port allocation
 - **cicd**: CI/CD pipelines and preview environment automation
 - **debugging**: Comprehensive troubleshooting across platforms
+- **prisma-migrate**: Database migrations and schema management
+- **better-auth**: Authentication configuration requiring proper database setup
+- **architecture**: Overall deployment infrastructure
+- **storage**: Supabase storage configuration for file uploads
