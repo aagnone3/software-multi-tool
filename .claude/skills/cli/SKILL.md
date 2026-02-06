@@ -338,3 +338,5 @@ pnpm exec tsc --noEmit -p tooling/cli/tsconfig.json
 - **analytics**: PostHog integration and feature flag concepts
 - **feature-flags**: Feature flag implementation patterns and PostHog configuration
 - **architecture**: Overall monorepo structure and tooling organization
+- **debugging**: Troubleshooting CLI issues and environment problems
+- **tools**: Tool registry configuration that CLI commands interact with

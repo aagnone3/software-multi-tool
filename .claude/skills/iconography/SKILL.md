@@ -269,3 +269,5 @@ The icon color system integrates with the brand color palette defined in `toolin
 - **typography**: Font system and text styling
 - **architecture**: UI component organization
 - **landing-page-design**: Visual design patterns
+- **tools**: Tool icon configuration in registry
+- **sub-app**: Adding icons to new tools

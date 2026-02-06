@@ -250,6 +250,8 @@ When switching between Stripe accounts (e.g., personal → company):
 - **architecture**: Understanding the payments integration
 - **debugging**: Troubleshooting webhook delivery and processing issues
 - **tools**: Understanding credit costs for tools
+- **better-auth**: User and organization authentication for subscriptions
+- **application-environments**: Local development environment setup
 
 ## Related Files
 

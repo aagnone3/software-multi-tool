@@ -291,3 +291,6 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 
 - **sub-app**: Implementing file uploads in new tools
 - **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)
+- **better-auth**: User authentication for multi-tenant path isolation
+- **application-environments**: Supabase storage configuration
+- **debugging**: Troubleshooting file upload and storage issues

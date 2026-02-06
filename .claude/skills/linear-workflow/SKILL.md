@@ -170,3 +170,5 @@ Claude: [Fetches issue, moves to In Progress]
 - **github-cli**: PR creation and GitHub operations
 - **prisma-migrate**: Database migrations during feature development
 - **debugging**: Troubleshooting issues during implementation
+- **cicd**: Preview environment testing for PRs
+- **application-environments**: Local development environment setup

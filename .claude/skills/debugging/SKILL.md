@@ -397,3 +397,6 @@ try {
 | **architecture** | System architecture, request flow |
 | **better-auth** | Authentication configuration |
 | **prisma-migrate** | Database migration workflows |
+| **application-environments** | Environment setup and configuration |
+| **github-cli** | GitHub operations for debugging PRs |
+| **stripe-webhooks** | Payment webhook troubleshooting |

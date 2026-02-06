@@ -394,6 +394,11 @@ Invoke this skill when:
 - **prisma-migrate**: Database migration workflows
 - **linear**: Project management integration
 - **github-cli**: GitHub operations
+- **analytics**: Event tracking and user identification
+- **feature-flags**: A/B testing and progressive rollouts
+- **storage**: File upload and storage patterns
+- **sub-app**: Creating new tools in the architecture
+- **tools**: Tool registry and credit system
 
 ## Additional Resources
 

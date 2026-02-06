@@ -193,6 +193,9 @@ See [troubleshooting.md](troubleshooting.md) for:
 
 ## Related Skills
 
-- **architecture**: API proxy implementation details
-- **prisma-migrate**: Database migration workflows
-- **application-environments**: Environment overview
+- **architecture**: API proxy implementation details and deployment infrastructure
+- **prisma-migrate**: Database migration workflows and Prisma-to-Supabase sync
+- **application-environments**: Environment overview and configuration
+- **git-worktrees**: Worktree-based development and branch workflows
+- **debugging**: Troubleshooting preview environment and deployment issues
+- **github-cli**: GitHub operations and PR management

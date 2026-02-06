@@ -325,4 +325,4 @@ const prefersReducedMotion =
 
 - **iconography**: Icon sizing and color system
 - **typography**: Font system and text styling
-- **architecture**: Component organization patterns
+- **architecture**: Component organization patterns and marketing layout structure

@@ -262,6 +262,9 @@ export default function PdfConverterPage() {
 - **better-auth**: User authentication for private tools
 - **analytics**: Event tracking for tool usage
 - **iconography**: Icon component and Lucide icon usage
+- **feature-flags**: Feature gating for tools
+- **storage**: File upload patterns for tools
+- **debugging**: Troubleshooting tool issues
 
 ## Credit System
 
