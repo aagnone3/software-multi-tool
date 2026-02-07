@@ -1,6 +1,6 @@
 ---
 name: agent-skills
-description: Use this skill when creating, reviewing, or improving Claude skills. Provides best practices from Anthropic's official skill authoring guide including conciseness, degrees of freedom, naming conventions, description writing, progressive disclosure, and quality evaluation criteria.
+description: Provides skill authoring best practices including token-efficient writing, progressive disclosure patterns, description optimization for discovery, and quality evaluation. Use when creating skills, reviewing existing skills, or improving skill discoverability.
 allowed-tools:
   - Read
   - Grep
