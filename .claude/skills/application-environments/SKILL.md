@@ -1,6 +1,6 @@
 ---
-name: configuring-application-environments
-description: Configures local Supabase development (port 54322), Vercel preview environments, and production deployments. Enforces Supabase Local database (NOT Homebrew Postgres on 5432) with storage and auth. Use when setting up local dev, configuring preview branches, resolving database connection issues, managing environment variables, or troubleshooting "table not found" errors.
+name: application-environments
+description: Configures development environments using Supabase Local (port 54322), Vercel preview, and production. Covers local setup, preview branch creation, environment variables, and database connection troubleshooting. Use when setting up local dev, fixing connection errors, configuring previews, or resolving "table not found" errors.
 allowed-tools:
   - Bash
   - Read

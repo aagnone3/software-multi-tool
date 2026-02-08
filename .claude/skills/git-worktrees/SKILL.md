@@ -1,6 +1,6 @@
 ---
 name: git-worktrees
-description: MANDATORY skill for ALL feature work. Provides git worktree creation, isolation patterns, and cleanup workflows optimized for pnpm monorepos with Turbo. Supports parallel development with multiple Claude Code instances working simultaneously. Enforces worktree-based development instead of traditional branching.
+description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique ports and Supabase Local (port 54322). Covers automated setup, environment configuration, and cleanup. Use when starting feature work, reviewing PRs locally, creating hotfixes, or debugging parallel development issues.
 allowed-tools:
   - Bash
   - Read

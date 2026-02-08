@@ -1,6 +1,6 @@
 ---
-name: reflect-for-skill-updates
-description: Provides skill improvement guidance for identifying and fixing systemic problems in documentation, automation, and workflows. Activated when conversations reveal gaps that caused issues, confusion, or wasted time.
+name: reflect-for-improvements
+description: Improves skills and documentation by analyzing gaps that caused issues or wasted time. Covers root cause analysis, categorization, and systematic fixes. Use when bugs reveal missing docs, debugging exposes skill gaps, or workflows have missing steps.
 allowed-tools:
   - Read
   - Edit

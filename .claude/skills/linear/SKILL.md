@@ -1,6 +1,6 @@
 ---
 name: managing-linear
-description: Manages Linear project tasks including listing projects, creating milestones, managing dependencies, starting issues, and closing completed work. Use when mentioning Linear issue keys (PRA-XX), managing projects/milestones, or working on tickets.
+description: Manages Linear projects, milestones, and issues using CLI helpers. Covers state workflow (Inbox→Ready→In Progress→Done), dependency management, and issue operations. Use when working with Linear tickets (PRA-XX), creating milestones, managing dependencies, starting issues, or closing completed work.
 allowed-tools:
   - Bash
 ---
