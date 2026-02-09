@@ -1,6 +1,6 @@
 ---
 name: reflect-for-improvements
-description: Improves skills and documentation by analyzing gaps that caused issues or wasted time. Covers root cause analysis, categorization, and systematic fixes. Use when bugs reveal missing docs, debugging exposes skill gaps, or workflows have missing steps.
+description: Improves skills and documentation by analyzing gaps that caused issues or wasted time with root cause analysis, categorization, and systematic fixes. Use when bugs reveal missing docs, debugging exposes skill gaps, workflows have missing steps, or documentation needs updating after learning.
 allowed-tools:
   - Read
   - Edit
