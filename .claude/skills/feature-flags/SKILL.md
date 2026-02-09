@@ -1,6 +1,6 @@
 ---
 name: managing-feature-flags
-description: Provides feature flag implementation guidance for A/B testing, progressive rollouts, and conditional feature access. Covers PostHog feature flag integration for both server-side (SSR/API) and client-side (React hooks) evaluation.
+description: Implements feature flags for A/B testing, progressive rollouts, and conditional feature access using PostHog with both server-side (SSR/API) and client-side (React hooks) evaluation. Use when adding feature flags, implementing A/B tests, configuring rollout percentages, bootstrapping flags for SSR, or toggling features conditionally.
 allowed-tools:
   - Read
   - Edit
