@@ -1,6 +1,6 @@
 ---
 name: developing-sub-apps
-description: Develops complete tools including ToolJob database pattern, API modules, Inngest job processing, and frontend UI. Covers synchronous/async patterns, registry configuration, and testing. Use when building new tools, implementing job queues, understanding ToolJob architecture, or adding tool routes.
+description: Develops complete tools including ToolJob database pattern, API modules, Inngest job processing, frontend UI, synchronous/async patterns, registry configuration, and testing. Use when building new tools, implementing job queues, understanding ToolJob architecture, or adding tool routes.
 allowed-tools:
   - Bash
   - Read
