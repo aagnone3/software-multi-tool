@@ -1,6 +1,6 @@
 ---
 name: stripe-webhooks
-description: Tests Stripe webhooks locally with Stripe CLI forwarding, Test Clock simulation, and account alignment. Covers webhook events, subscription renewals, and account mismatch troubleshooting. Use when testing webhooks, debugging delivery, validating integration, fixing account errors, or testing renewals.
+description: Tests Stripe webhooks locally with Stripe CLI forwarding, Test Clock simulation, account alignment, webhook events, subscription renewals, and account mismatch troubleshooting. Use when testing webhooks, debugging delivery, validating integration, fixing account errors, or testing renewals.
 allowed-tools:
   - Bash
   - Read
