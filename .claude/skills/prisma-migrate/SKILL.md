@@ -1,6 +1,6 @@
 ---
 name: managing-prisma-migrations
-description: Provides Prisma database migration workflows with safety checks and advisory locking. Use when creating migrations, validating schema changes, or debugging drift. Covers validation scripts, staging helpers, and migration review workflows.
+description: Manages Prisma database migrations with safety checks, advisory locking, validation scripts, staging helpers, and migration review workflows. Use when creating migrations, validating schema changes, debugging drift, or reviewing migration SQL.
 allowed-tools:
   - Bash
   - Read
