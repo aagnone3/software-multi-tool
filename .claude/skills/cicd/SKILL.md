@@ -1,6 +1,6 @@
 ---
 name: managing-cicd
-description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Supabase database branching, and Prisma-to-Supabase migration sync. Covers preview environment creation, env var syncing, and API proxy patterns. Use when debugging deployments, syncing migrations, troubleshooting GitHub Actions, configuring preview environments, or resolving CI failures.
+description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Supabase database branching, Prisma-to-Supabase migration sync, preview environment creation, env var syncing, and API proxy patterns. Use when debugging deployments, syncing migrations, troubleshooting GitHub Actions, configuring preview environments, or resolving CI failures.
 allowed-tools:
   - Read
   - Grep
