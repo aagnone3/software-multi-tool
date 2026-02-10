@@ -11,6 +11,20 @@ allowed-tools:
 
 > Local webhook testing and Stripe integration guidance
 
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Testing Stripe webhooks locally with the Stripe CLI
+- Debugging webhook delivery or processing issues
+- Validating webhook integration with your application
+- Fixing "account mismatch" errors between CLI and API keys
+- Testing subscription renewals with Stripe Test Clock
+- Simulating time advancement for subscription testing
+- Troubleshooting "No such price" or payment source errors
+
+**Activation keywords**: stripe webhooks, webhook testing, stripe listen, test clock, stripe account mismatch, subscription renewal testing
+
 ## Quick Start
 
 ### Prerequisites
