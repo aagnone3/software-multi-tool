@@ -1,6 +1,6 @@
 ---
 name: implementing-auth
-description: Implements Better Auth with passkeys, magic links, OAuth (Google/GitHub), multi-tenant organizations, invitation-only signup, session management, organization helpers, and database integration. Use when implementing auth flows, managing sessions, configuring providers, debugging auth issues, or handling organization invitations.
+description: Implements Better Auth with passkeys, magic links, OAuth (Google/GitHub), multi-tenant organizations, invitation-only signup, session management, organization helpers, and database integration.
 allowed-tools:
   - Read
   - Edit
