@@ -381,7 +381,7 @@ pnpm test:ci
 - **architecture**: Overall codebase structure, API patterns, and Inngest documentation
 - **prisma-migrate**: Database migration workflows
 - **better-auth**: User authentication for private tools
-- **storage**: File upload patterns for tools
+- **managing-storage**: File upload patterns for tools
 - **analytics**: Event tracking for tool usage
 - **feature-flags**: A/B testing tool features
 - **debugging**: Troubleshooting tool implementation issues

@@ -346,7 +346,7 @@ Invoke this skill when:
 - **architecture**: Overall codebase structure and theming
 - **sub-app**: Implementing typography in new tools
 - **landing-page-design**: Typography in marketing pages
-- **iconography**: Complementary visual design system
+- **implementing-icons**: Complementary visual design system
 - **better-auth**: Email templates with proper typography
 
 ## Additional Resources

@@ -396,7 +396,7 @@ Invoke this skill when:
 - **github-cli**: GitHub operations
 - **analytics**: Event tracking and user identification
 - **feature-flags**: A/B testing and progressive rollouts
-- **storage**: File upload and storage patterns
+- **managing-storage**: File upload and storage patterns
 - **sub-app**: Creating new tools in the architecture
 - **tools**: Tool registry and credit system
 

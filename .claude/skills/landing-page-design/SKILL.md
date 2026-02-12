@@ -323,6 +323,6 @@ const prefersReducedMotion =
 
 ## Related Skills
 
-- **iconography**: Icon sizing and color system
-- **typography**: Font system and text styling
+- **implementing-icons**: Icon sizing and color system
+- **managing-typography**: Font system and text styling
 - **architecture**: Component organization patterns and marketing layout structure

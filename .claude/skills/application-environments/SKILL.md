@@ -261,4 +261,4 @@ pnpm supabase:reset
 - **prisma-migrate**: Database migrations and schema management
 - **better-auth**: Authentication configuration requiring proper database setup
 - **architecture**: Overall deployment infrastructure
-- **storage**: Supabase storage configuration for file uploads
+- **managing-storage**: Supabase storage configuration for file uploads
