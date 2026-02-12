@@ -1,6 +1,6 @@
 ---
 name: implementing-linear-workflow
-description: Implements Linear workflow with MANDATORY worktrees (no git checkout -b), automated PR creation, state management (Ready→In Progress→Done), issue selection, implementation, testing, and PR creation.
+description: Complete Linear development workflow including issue selection from Ready state, mandatory worktree creation, implementation with testing, automated PR creation, and issue closure after merge. Use when starting Linear issues, creating PRs, or following the development workflow.
 allowed-tools:
   - Bash
   - Read

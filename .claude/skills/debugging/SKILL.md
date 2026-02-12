@@ -399,4 +399,4 @@ try {
 | **prisma-migrate** | Database migration workflows |
 | **application-environments** | Environment setup and configuration |
 | **github-cli** | GitHub operations for debugging PRs |
-| **stripe-webhooks** | Payment webhook troubleshooting |
+| **testing-stripe-webhooks** | Payment webhook troubleshooting |

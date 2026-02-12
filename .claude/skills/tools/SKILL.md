@@ -1,6 +1,6 @@
 ---
 name: configuring-tools
-description: Configures tool registry, credit costs, access control (public/private), tool registration, icon selection, credit pack system, and middleware routing.
+description: Tool registry and credit configuration including credit costs, public/private access control, icon selection (Lucide), credit pack system, and middleware routing. Use when registering tools in config (not implementing backends - see developing-sub-apps skill).
 allowed-tools:
   - Read
   - Edit
@@ -276,9 +276,9 @@ export default function PdfConverterPage() {
 - **architecture**: Overall codebase structure and routing
 - **better-auth**: User authentication for private tools
 - **analytics**: Event tracking for tool usage
-- **iconography**: Icon component and Lucide icon usage
+- **implementing-icons**: Icon component and Lucide icon usage
 - **feature-flags**: Feature gating for tools
-- **storage**: File upload patterns for tools
+- **managing-storage**: File upload patterns for tools
 - **debugging**: Troubleshooting tool issues
 
 ## Credit System
