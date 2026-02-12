@@ -1,6 +1,6 @@
 ---
 name: configuring-tools
-description: Configures tool registry, credit costs, access control (public/private), tool registration, icon selection, credit pack system, and middleware routing.
+description: Tool registry and credit configuration including credit costs, public/private access control, icon selection (Lucide), credit pack system, and middleware routing. Use when registering tools in config (not implementing backends - see developing-sub-apps skill).
 allowed-tools:
   - Read
   - Edit

@@ -1,6 +1,6 @@
 ---
-name: typography
-description: Configures typography with Next.js font loading, Tailwind font utilities, CSS variables, and email template fonts.
+name: managing-typography
+description: Typography system with Next.js font loading, Tailwind integration, CSS variables (--font-sans), and email fonts. Use when changing fonts, optimizing font performance, working with Tailwind typography, or configuring email typography.
 allowed-tools:
   - Read
   - Edit

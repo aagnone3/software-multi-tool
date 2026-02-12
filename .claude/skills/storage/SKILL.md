@@ -1,6 +1,6 @@
 ---
-name: storage
-description: Manages file uploads and storage using Supabase Storage (primary) or S3-compatible providers with multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and @repo/storage package.
+name: managing-storage
+description: File storage with Supabase Storage or S3 providing multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and validation via @repo/storage package. Use when implementing file uploads, working with storage providers, or managing multi-tenant file access.
 allowed-tools:
   - Read
   - Edit
