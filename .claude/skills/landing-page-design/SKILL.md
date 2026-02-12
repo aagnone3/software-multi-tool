@@ -1,6 +1,6 @@
 ---
 name: designing-landing-pages
-description: Designs landing pages with animated gradient orbs, floating geometric shapes, dot grid patterns, organic drift animations, CSS keyframe animations, blur effects, and performance optimization.
+description: Landing page visual design with animated backgrounds (gradient orbs, geometric shapes, dot grids), organic drift animations, and performance-optimized CSS keyframes. Use when creating marketing pages, hero sections, or animated backgrounds.
 allowed-tools:
   - Read
   - Write

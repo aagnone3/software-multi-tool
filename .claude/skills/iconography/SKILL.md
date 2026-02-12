@@ -1,6 +1,6 @@
 ---
-name: iconography
-description: Implements icons using Lucide React with size selection (xs to 2xl), semantic color application (primary, success, destructive), and consistent usage patterns.
+name: implementing-icons
+description: Icon system with Lucide React providing standardized sizes (xs to 2xl), semantic colors (primary, success, destructive), and consistent component integration. Use when adding icons to UI components, choosing sizes for contexts, or applying semantic colors.
 allowed-tools:
   - Read
   - Grep
