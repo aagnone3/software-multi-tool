@@ -1,6 +1,6 @@
 ---
 name: integrating-ai
-description: Implements AI/LLM features using Claude (Anthropic SDK) and OpenAI for document analysis, streaming chat, and text generation with model selection (Haiku/Sonnet/Opus), AI processors, and token optimization.
+description: AI/LLM integration using Claude (Anthropic SDK) and OpenAI for document analysis, streaming chat, and text generation with model selection (Haiku/Sonnet/Opus), AI processors, and token optimization. Use when implementing AI features, adding processors, or selecting models for use cases.
 allowed-tools:
   - Bash
   - Read
