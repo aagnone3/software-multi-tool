@@ -47,7 +47,7 @@ export function DiagramEditorInput({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between gap-4">
+			<div className="flex items-end gap-2">
 				<div className="flex-1">
 					<Label htmlFor="diagram-type">Diagram Type</Label>
 					<Select
@@ -71,17 +71,14 @@ export function DiagramEditorInput({
 						</SelectContent>
 					</Select>
 				</div>
-				<div className="flex items-end">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleReset}
-						className="gap-2"
-					>
-						<RotateCcw className="h-4 w-4" />
-						Reset
-					</Button>
-				</div>
+				<Button
+					variant="outline"
+					size="icon"
+					onClick={handleReset}
+					aria-label="Reset diagram"
+				>
+					<RotateCcw className="h-4 w-4" />
+				</Button>
 			</div>
 
 			<div>
