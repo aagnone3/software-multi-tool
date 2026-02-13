@@ -148,7 +148,9 @@ export interface ExtractedFeedback {
  * Type guard to check if extracted data is valid feedback
  */
 export function isExtractedFeedback(data: unknown): data is ExtractedFeedback {
-	if (!data || typeof data !== "object") return false;
+	if (!data || typeof data !== "object") {
+		return false;
+	}
 	const obj = data as Record<string, unknown>;
 
 	return (

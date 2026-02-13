@@ -148,7 +148,7 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: latest
+          version: "2.3.13"
       - name: Run Biome
         run: biome ci .
   e2e:
@@ -280,4 +280,5 @@ jobs:
           TURBO_TELEMETRY_DISABLED: "1"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASSEMBLYAI_API_KEY: ${{ secrets.ASSEMBLYAI_API_KEY }}
+          TESTCONTAINERS_RYUK_DISABLED: "true"
         run: pnpm test:ci

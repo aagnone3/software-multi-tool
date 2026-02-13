@@ -86,7 +86,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 	const router = useRouter();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
-	const { enabledTools, visibleTools, isToolEnabled } = useTools();
+	const { enabledTools, visibleTools } = useTools();
 	const [search, setSearch] = useState("");
 	const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);

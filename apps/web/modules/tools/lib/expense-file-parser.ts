@@ -119,7 +119,9 @@ export function detectDelimiter(csvContent: string): string {
 			.filter((line) => line.trim().length > 0)
 			.map((line) => line.split(delimiter).length);
 
-		if (columnCounts.length === 0) continue;
+		if (columnCounts.length === 0) {
+			continue;
+		}
 
 		// Check consistency of column counts
 		const firstCount = columnCounts[0];
@@ -312,7 +314,9 @@ const COLUMN_PATTERNS: Record<ExpenseField, RegExp[]> = {
  * Detect if a value looks like a monetary amount.
  */
 function isMoneyValue(value: string | number | null): boolean {
-	if (value === null) return false;
+	if (value === null) {
+		return false;
+	}
 	const strValue = String(value);
 	// Matches: $123.45, 123.45, -$123.45, (123.45), 1,234.56, etc.
 	return /^[$£€]?[\s]*[-(]?[\d,]+\.?\d*[)]?$/.test(strValue.trim());
@@ -322,7 +326,9 @@ function isMoneyValue(value: string | number | null): boolean {
  * Detect if a value looks like a date.
  */
 function isDateValue(value: string | number | null): boolean {
-	if (value === null) return false;
+	if (value === null) {
+		return false;
+	}
 	const strValue = String(value);
 	// Common date patterns
 	const datePatterns = [
@@ -466,7 +472,9 @@ export function detectColumnMappings(
  * Parse a monetary value string to a number.
  */
 export function parseAmount(value: string | number | null): number | null {
-	if (value === null) return null;
+	if (value === null) {
+		return null;
+	}
 
 	const strValue = String(value);
 
@@ -475,7 +483,7 @@ export function parseAmount(value: string | number | null): number | null {
 
 	// Handle parentheses for negative values: (123.45) -> -123.45
 	if (cleaned.startsWith("(") && cleaned.endsWith(")")) {
-		cleaned = "-" + cleaned.slice(1, -1);
+		cleaned = `-${cleaned.slice(1, -1)}`;
 	}
 
 	const parsed = Number.parseFloat(cleaned);
@@ -486,7 +494,9 @@ export function parseAmount(value: string | number | null): number | null {
  * Normalize a date string to YYYY-MM-DD format.
  */
 export function normalizeDate(value: string | number | null): string | null {
-	if (value === null) return null;
+	if (value === null) {
+		return null;
+	}
 
 	const strValue = String(value).trim();
 
@@ -502,7 +512,7 @@ export function normalizeDate(value: string | number | null): string | null {
 	if (slashMatch) {
 		let [, part1, part2, year] = slashMatch;
 		if (year.length === 2) {
-			year = (Number.parseInt(year) > 50 ? "19" : "20") + year;
+			year = (Number.parseInt(year, 10) > 50 ? "19" : "20") + year;
 		}
 		// Assume MM/DD/YYYY for US format
 		const month = part1.padStart(2, "0");
@@ -622,7 +632,7 @@ export function exportToCSV(
 		expense.taxInfo?.scheduleLocation ?? "",
 		expense.taxInfo?.isDeductible ? "Yes" : "No",
 		expense.taxInfo?.deductionPercentage?.toString() ?? "",
-		expense.confidence ? (expense.confidence * 100).toFixed(0) + "%" : "",
+		expense.confidence ? `${(expense.confidence * 100).toFixed(0)}%` : "",
 	]);
 
 	return Papa.unparse({

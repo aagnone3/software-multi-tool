@@ -106,7 +106,9 @@ function isORPCError(error: unknown): error is ORPCError {
  * @returns true if the API appears to be initializing
  */
 export function isApiInitializing(error: unknown): boolean {
-	if (!isPreviewEnvironment()) return false;
+	if (!isPreviewEnvironment()) {
+		return false;
+	}
 
 	const code = classifyError(error);
 	return code === "API_NOT_CONFIGURED" || code === "API_UNREACHABLE";

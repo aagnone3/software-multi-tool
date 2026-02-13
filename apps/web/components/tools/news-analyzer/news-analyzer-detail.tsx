@@ -128,7 +128,9 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 	// Re-analyze mutation
 	const reanalyzeMutation = useMutation({
 		mutationFn: async () => {
-			if (!job) throw new Error("No job data");
+			if (!job) {
+				throw new Error("No job data");
+			}
 
 			const sessionId =
 				typeof window !== "undefined"
@@ -393,7 +395,9 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 									job.newsAnalysis?.analysis?.articleMetadata
 										?.title ||
 									job.newsAnalysis?.title;
-								if (!rawTitle) return null;
+								if (!rawTitle) {
+									return null;
+								}
 								const displayTitle =
 									cleanArticleTitle(rawTitle);
 								return isUrl ? (

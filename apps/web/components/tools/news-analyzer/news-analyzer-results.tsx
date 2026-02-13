@@ -201,8 +201,12 @@ export function SensationalismRadial({ value }: { value: number }) {
 
 	// Get color based on value
 	const getColor = () => {
-		if (value <= 3) return "#22c55e"; // green
-		if (value <= 6) return "#eab308"; // amber
+		if (value <= 3) {
+			return "#22c55e"; // green
+		}
+		if (value <= 6) {
+			return "#eab308"; // amber
+		}
 		return "#ef4444"; // red
 	};
 
