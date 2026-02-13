@@ -123,12 +123,7 @@ describe("Dashboard Widgets", () => {
 
 			render(React.createElement(GettingStartedChecklist), {
 				wrapper: createWrapper({
-					usageStats: {
-						totalUsed: 0,
-						totalOverage: 0,
-						byTool: [],
-						byPeriod: [],
-					},
+					jobs: { jobs: [] },
 				}),
 			});
 
@@ -140,12 +135,7 @@ describe("Dashboard Widgets", () => {
 
 			render(React.createElement(GettingStartedChecklist), {
 				wrapper: createWrapper({
-					usageStats: {
-						totalUsed: 0,
-						totalOverage: 0,
-						byTool: [],
-						byPeriod: [],
-					},
+					jobs: { jobs: [] },
 				}),
 			});
 
@@ -157,12 +147,7 @@ describe("Dashboard Widgets", () => {
 		it("shows complete profile step as complete when user has name", () => {
 			render(React.createElement(GettingStartedChecklist), {
 				wrapper: createWrapper({
-					usageStats: {
-						totalUsed: 0,
-						totalOverage: 0,
-						byTool: [],
-						byPeriod: [],
-					},
+					jobs: { jobs: [] },
 				}),
 			});
 
