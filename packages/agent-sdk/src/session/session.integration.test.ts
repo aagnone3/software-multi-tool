@@ -194,7 +194,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 
 			// Restore session from state
 			const session2 = await AgentSession.restore(
-				savedState!,
+				savedState as NonNullable<typeof savedState>,
 				simpleSessionConfig,
 				persistence,
 			);

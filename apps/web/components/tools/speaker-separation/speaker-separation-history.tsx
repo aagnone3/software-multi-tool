@@ -108,7 +108,9 @@ export function SpeakerSeparationHistory() {
 
 	// Get session ID for anonymous users
 	const sessionId = useMemo(() => {
-		if (typeof window === "undefined") return undefined;
+		if (typeof window === "undefined") {
+			return undefined;
+		}
 		return (
 			localStorage.getItem("speaker-separation-session-id") ?? undefined
 		);

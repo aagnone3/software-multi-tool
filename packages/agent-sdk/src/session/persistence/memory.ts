@@ -28,7 +28,9 @@ export class InMemorySessionPersistence implements SessionPersistenceAdapter {
 
 	async load(sessionId: string): Promise<AgentSessionState | null> {
 		const state = this.sessions.get(sessionId);
-		if (!state) return null;
+		if (!state) {
+			return null;
+		}
 
 		// Deep clone and restore Date objects
 		const cloned = JSON.parse(JSON.stringify(state));

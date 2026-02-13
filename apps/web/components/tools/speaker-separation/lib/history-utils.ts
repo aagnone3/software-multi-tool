@@ -85,7 +85,9 @@ export function getSpeakerCount(job: SpeakerSeparationJob): number | null {
  * Returns "-" for null/undefined values.
  */
 export function formatDuration(seconds: number | null | undefined): string {
-	if (seconds == null) return "-";
+	if (seconds == null) {
+		return "-";
+	}
 	return formatDurationBase(seconds);
 }
 
@@ -96,11 +98,15 @@ export function formatProcessingDuration(
 	startedAt: Date | null | undefined,
 	completedAt: Date | null | undefined,
 ): string {
-	if (!startedAt || !completedAt) return "-";
+	if (!startedAt || !completedAt) {
+		return "-";
+	}
 	const durationMs =
 		new Date(completedAt).getTime() - new Date(startedAt).getTime();
 	const seconds = Math.floor(durationMs / 1000);
-	if (seconds < 60) return `${seconds}s`;
+	if (seconds < 60) {
+		return `${seconds}s`;
+	}
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = seconds % 60;
 	return `${minutes}m ${remainingSeconds}s`;
@@ -113,7 +119,9 @@ export function filterJobsBySearch(
 	jobs: SpeakerSeparationJob[],
 	searchTerm: string,
 ): SpeakerSeparationJob[] {
-	if (!searchTerm) return jobs;
+	if (!searchTerm) {
+		return jobs;
+	}
 
 	const search = searchTerm.toLowerCase();
 	return jobs.filter((job) => {
@@ -129,7 +137,9 @@ export function filterJobsByStatus(
 	jobs: SpeakerSeparationJob[],
 	status: JobStatus | "",
 ): SpeakerSeparationJob[] {
-	if (!status) return jobs;
+	if (!status) {
+		return jobs;
+	}
 	return jobs.filter((job) => job.status === status);
 }
 

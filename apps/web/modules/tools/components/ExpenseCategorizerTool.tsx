@@ -598,7 +598,9 @@ export function ExpenseCategorizerTool() {
 	// File dropzone
 	const onDrop = useCallback(async (acceptedFiles: File[]) => {
 		const file = acceptedFiles[0];
-		if (!file) return;
+		if (!file) {
+			return;
+		}
 
 		setFileError(null);
 
@@ -646,7 +648,9 @@ export function ExpenseCategorizerTool() {
 	});
 
 	const handleMappingConfirm = () => {
-		if (!parseResult) return;
+		if (!parseResult) {
+			return;
+		}
 
 		const expenses = transformToExpenses(parseResult.data, currentMappings);
 		if (expenses.length === 0) {
@@ -661,7 +665,9 @@ export function ExpenseCategorizerTool() {
 	};
 
 	const handleFileSubmit = async () => {
-		if (parsedExpenses.length === 0) return;
+		if (parsedExpenses.length === 0) {
+			return;
+		}
 
 		setResult(null);
 		try {
@@ -731,7 +737,9 @@ export function ExpenseCategorizerTool() {
 	};
 
 	const handleExportCSV = () => {
-		if (!result) return;
+		if (!result) {
+			return;
+		}
 
 		const csv = exportToCSV(result.categorizedExpenses);
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

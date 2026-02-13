@@ -1,28 +1,28 @@
 {
-  "permissions": {
-    "allow": [],
-    "deny": [],
-    "ask": []
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/block-no-verify.py"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/github-auth-switch.sh"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/block-db-push.py"
-          }
-        ]
-      }
-    ]
-  }
+	"permissions": {
+		"allow": [],
+		"deny": [],
+		"ask": []
+	},
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": ".claude/hooks/block-no-verify.py"
+					},
+					{
+						"type": "command",
+						"command": ".claude/hooks/github-auth-switch.sh"
+					},
+					{
+						"type": "command",
+						"command": ".claude/hooks/block-db-push.py"
+					}
+				]
+			}
+		]
+	}
 }

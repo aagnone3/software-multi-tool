@@ -106,6 +106,16 @@ try {
 }
 ```
 
+## Common Path Mistakes
+
+| Mistake | Fix |
+| ------- | --- |
+| Not validating UUIDs before building paths | Always validate organizationId and userId are valid UUIDs before calling path builders |
+| Using relative paths in storage references | Always use absolute paths from bucket root (e.g., `organizations/abc123/logo.png`) |
+| Forgetting to set bucket in upload requests | Always specify bucket name from `config.storage.bucketNames` |
+| Path traversal attempts (`../`) | Path builders automatically block `../` patterns - trust the validation |
+| Hardcoding organization IDs | Always get organizationId from session context, never hardcode |
+
 ## Storage Provider Architecture
 
 ```text

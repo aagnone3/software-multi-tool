@@ -28,7 +28,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"deletes job from database",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Create a job
 			const job = await toolJobQueries.createToolJob({
@@ -61,7 +63,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"deletes job with completed status",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Create a completed job
 			const job = await toolJobQueries.createToolJob({
@@ -98,7 +102,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"deletes job with failed status",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Create a job
 			const job = await toolJobQueries.createToolJob({
@@ -132,7 +138,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"deletes job with processing status",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Create a job
 			const job = await toolJobQueries.createToolJob({
@@ -171,7 +179,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"throws error when deleting non-existent job",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Try to delete a job that doesn't exist
 			const nonExistentId = "clz00000000000000000000000";
@@ -186,7 +196,9 @@ describe.sequential("deleteJob integration", () => {
 	it(
 		"does not affect other jobs when deleting",
 		async () => {
-			if (!harness) throw new Error("Test harness not initialized");
+			if (!harness) {
+				throw new Error("Test harness not initialized");
+			}
 
 			// Create multiple jobs
 			const job1 = await toolJobQueries.createToolJob({

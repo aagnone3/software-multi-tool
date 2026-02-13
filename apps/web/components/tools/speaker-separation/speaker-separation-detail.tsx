@@ -381,7 +381,9 @@ function AudioPlayer({
 	const audioRef = useRef<HTMLAudioElement>(null);
 
 	useEffect(() => {
-		if (!audioRef.current) return;
+		if (!audioRef.current) {
+			return;
+		}
 		if (isPlaying) {
 			audioRef.current.play().catch(() => {});
 		} else {
@@ -593,7 +595,9 @@ export function SpeakerSeparationDetail({
 	// Fetch signed URL for audio playback
 	useEffect(() => {
 		async function fetchAudioUrl() {
-			if (!job?.audioFileUrl) return;
+			if (!job?.audioFileUrl) {
+				return;
+			}
 			try {
 				const response = await fetch(
 					`/api/tools/speaker-separation/audio/${jobId}`,
@@ -615,7 +619,9 @@ export function SpeakerSeparationDetail({
 	// Re-analyze mutation
 	const reanalyzeMutation = useMutation({
 		mutationFn: async () => {
-			if (!job) throw new Error("No job data");
+			if (!job) {
+				throw new Error("No job data");
+			}
 			const sessionId =
 				typeof window !== "undefined"
 					? (localStorage.getItem("speaker-separation-session-id") ??

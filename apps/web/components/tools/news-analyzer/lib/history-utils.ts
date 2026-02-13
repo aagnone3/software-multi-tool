@@ -91,11 +91,15 @@ export function formatDuration(
 	startedAt: Date | null | undefined,
 	completedAt: Date | null | undefined,
 ): string {
-	if (!startedAt || !completedAt) return "-";
+	if (!startedAt || !completedAt) {
+		return "-";
+	}
 	const durationMs =
 		new Date(completedAt).getTime() - new Date(startedAt).getTime();
 	const seconds = Math.floor(durationMs / 1000);
-	if (seconds < 60) return `${seconds}s`;
+	if (seconds < 60) {
+		return `${seconds}s`;
+	}
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = seconds % 60;
 	return `${minutes}m ${remainingSeconds}s`;
@@ -108,7 +112,9 @@ export function filterJobsBySearch(
 	jobs: NewsAnalyzerJob[],
 	searchTerm: string,
 ): NewsAnalyzerJob[] {
-	if (!searchTerm) return jobs;
+	if (!searchTerm) {
+		return jobs;
+	}
 
 	const search = searchTerm.toLowerCase();
 	return jobs.filter((job) => {
@@ -130,7 +136,9 @@ export function filterJobsByStatus(
 	jobs: NewsAnalyzerJob[],
 	status: JobStatus | "",
 ): NewsAnalyzerJob[] {
-	if (!status) return jobs;
+	if (!status) {
+		return jobs;
+	}
 	return jobs.filter((job) => job.status === status);
 }
 

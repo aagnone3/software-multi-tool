@@ -40,7 +40,7 @@ describe("history-utils", () => {
 			const longUrl = "a".repeat(100);
 			const input = { articleUrl: longUrl };
 			const result = getArticleTitle(input);
-			expect(result).toBe("a".repeat(50) + "...");
+			expect(result).toBe(`${"a".repeat(50)}...`);
 		});
 
 		it("returns truncated text for articleText input", () => {
@@ -55,7 +55,7 @@ describe("history-utils", () => {
 			const longText = "x".repeat(100);
 			const input = { articleText: longText };
 			const result = getArticleTitle(input);
-			expect(result).toBe("x".repeat(50) + "...");
+			expect(result).toBe(`${"x".repeat(50)}...`);
 		});
 
 		it('returns "Unknown" when no input provided', () => {

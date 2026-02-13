@@ -116,7 +116,7 @@ describe("tool feedback queries", () => {
 			name: "Test User",
 			email: "test@example.com",
 		};
-		const mockJob = {
+		const _mockJob = {
 			id: "job-1",
 			toolSlug: "news-analyzer",
 			status: "completed",
