@@ -15,7 +15,7 @@ import { cn } from "@ui/lib";
 import { CheckCircle2Icon, CircleIcon, RocketIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { useUsageStats } from "../../credits/hooks/use-usage-stats";
+import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface ChecklistItem {
 	id: string;
@@ -36,7 +36,7 @@ export function GettingStartedChecklist({
 }: GettingStartedChecklistProps) {
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
-	const { totalOperations, isLoading: usageLoading } = useUsageStats();
+	const { jobs, isLoading: jobsLoading } = useRecentJobs(1);
 	const [isDismissed, setIsDismissed] = useState(false);
 
 	// Load dismissed state from localStorage
@@ -75,7 +75,7 @@ export function GettingStartedChecklist({
 			label: "Try your first tool",
 			description: "Run any AI-powered tool",
 			href: "/app/tools",
-			isComplete: totalOperations > 0,
+			isComplete: jobs.length > 0,
 		},
 		{
 			id: "billing",
@@ -97,7 +97,7 @@ export function GettingStartedChecklist({
 	const isAllComplete = completedCount === checklistItems.length;
 
 	// Don't show if dismissed, loading, or 100% complete
-	if (isDismissed || usageLoading || isAllComplete) {
+	if (isDismissed || jobsLoading || isAllComplete) {
 		return null;
 	}
 
