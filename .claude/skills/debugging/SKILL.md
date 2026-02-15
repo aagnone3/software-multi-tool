@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Debugs applications across platforms (Vercel, Supabase) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring.
+description: Debugs applications across platforms (Vercel, Supabase) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring. Use when apps fail to load, database connections fail, authentication breaks, or investigating performance issues.
 allowed-tools:
   - Read
   - Grep

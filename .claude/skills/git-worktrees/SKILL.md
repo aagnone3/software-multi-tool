@@ -1,6 +1,6 @@
 ---
 name: git-worktrees
-description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique ports, Supabase Local (port 54322), automated setup, environment configuration, and cleanup.
+description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique ports, Supabase Local (port 54322), automated setup, environment configuration, and cleanup. Use when starting feature work, creating branches, or setting up parallel development environments.
 allowed-tools:
   - Bash
   - Read
