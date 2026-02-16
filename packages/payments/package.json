@@ -10,7 +10,7 @@
 		"chargebee-typescript": "2.53.0",
 		"dodopayments": "1.53.2",
 		"stripe": "18.5.0",
-		"ufo": "1.6.1",
+		"ufo": "1.6.3",
 		"zod": "4.3.5"
 	},
 	"devDependencies": {
