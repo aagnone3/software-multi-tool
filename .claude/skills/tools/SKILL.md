@@ -343,10 +343,3 @@ When adding a new tool, always specify `creditCost`:
 }
 ```
 
-## Future Considerations
-
-These features are planned but not yet implemented:
-
-- Rate limiting infrastructure
-- Async job queue for long-running operations
-- Plan-based access control (restrict tools by plan tier)

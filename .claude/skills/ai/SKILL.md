@@ -323,10 +323,10 @@ await new Promise(resolve => setTimeout(resolve, 1000));
 
 ## Related Skills
 
-- **architecture** - Overall codebase structure and module organization (includes Inngest background jobs)
-- **tools** - Adding new tool modules that use AI processors
-- **feature-flags** - A/B testing AI features and gradual rollouts
-- **managing-storage** - Storing AI-generated content and uploaded files for processing
+- **architecture**: Overall codebase structure and module organization (includes Inngest background jobs)
+- **tools**: Adding new tool modules that use AI processors
+- **feature-flags**: A/B testing AI features and gradual rollouts
+- **managing-storage**: Storing AI-generated content and uploaded files for processing
 
 ## Additional Resources
 
