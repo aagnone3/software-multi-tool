@@ -342,4 +342,3 @@ When adding a new tool, always specify `creditCost`:
   creditUnit: "page",  // Optional: for variable-cost tools
 }
 ```
-
