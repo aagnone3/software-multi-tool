@@ -29,6 +29,15 @@ Invoke this skill when:
 
 ## Quick Reference
 
+| Component | Location |
+| --------- | -------- |
+| Server auth instance | `packages/auth/auth.ts` |
+| Client instance | `packages/auth/client.ts` |
+| Auth config | `config/index.ts` (auth section) |
+| Custom plugin | `packages/auth/plugins/invitation-only/` |
+| Organization helpers | `packages/auth/lib/organization.ts` |
+| Exported types | `packages/auth/index.ts` |
+
 For deep Better Auth documentation, reference: https://www.better-auth.com/llms.txt
 
 ## Project Configuration
