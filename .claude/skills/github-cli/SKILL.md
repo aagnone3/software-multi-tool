@@ -51,6 +51,15 @@ This system may have multiple GitHub accounts configured. Use:
 - **Repository:** `software-multi-tool`
 - **Remote URL:** `git@github.com:aagnone3/software-multi-tool.git`
 
+## Quick Reference
+
+| Task | Command |
+| ---- | ------- |
+| Check active account | `gh auth status` |
+| Switch to aagnone3 | `gh auth switch -u aagnone3` |
+| Verify repo access | `gh repo view aagnone3/software-multi-tool` |
+| Standard pre-flight | `gh auth status && gh <command>` |
+
 ## When to Use This Skill
 
 Invoke this skill when:
@@ -233,26 +242,6 @@ If the GitHub CLI persistently fails, provide the user with the manual URL:
 - **View repo:** `https://github.com/aagnone3/software-multi-tool`
 - **View PRs:** `https://github.com/aagnone3/software-multi-tool/pulls`
 - **View issues:** `https://github.com/aagnone3/software-multi-tool/issues`
-
-## Quick Reference
-
-### Account Switch Command
-
-```bash
-gh auth switch -u aagnone3
-```
-
-### Common Command Pattern
-
-```bash
-gh auth status && gh <command>
-```
-
-### Verify Repository Access
-
-```bash
-gh repo view aagnone3/software-multi-tool
-```
 
 ## Related Skills
 

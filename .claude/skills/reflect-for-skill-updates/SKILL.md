@@ -14,6 +14,17 @@ allowed-tools:
 
 > **Purpose**: Turn debugging sessions and mistakes into permanent improvements by updating skills, documentation, and automation.
 
+## Quick Reference
+
+| Fix Category | Where to Update |
+| ------------ | --------------- |
+| Missing automation | `tooling/scripts/src/` |
+| Missing validation | Setup scripts, pre-commit hooks |
+| Incomplete skill | `.claude/skills/<skill>/SKILL.md` |
+| Common troubleshooting | Add to skill's Troubleshooting section |
+| Missing workflow step | Update skill's workflow steps |
+| Configuration drift | Add consistency checks to setup scripts |
+
 ## When to Use This Skill
 
 Invoke this skill when:
