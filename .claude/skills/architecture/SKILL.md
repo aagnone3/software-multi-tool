@@ -1,5 +1,5 @@
 ---
-name: architecture
+name: navigating-architecture
 description: Documents codebase architecture including pnpm+Turbo monorepo, Next.js 15 App Router, Hono+oRPC API, React 19+TanStack Query frontend, Inngest background jobs, and Supabase Realtime. Use when navigating the codebase, understanding request flow, adding modules, or learning integration patterns.
 allowed-tools:
   - Read
