@@ -1,5 +1,5 @@
 ---
-name: cli
+name: using-developer-cli
 description: Developer CLI (mt) for workflow automation, feature flag inspection, command creation, error handling patterns, and JSON output support. Use when running CLI commands, creating new commands, debugging CLI issues, scripting with JSON output, or inspecting PostHog feature flags.
 allowed-tools:
   - Read
