@@ -35,6 +35,17 @@ This repository uses the following state meanings:
 > - Issues in **Inbox** need grooming first - use `/dev:groom-work`.
 > - Issues in **Backlog** are groomed but waiting - move them to Ready when they're workable.
 
+## Quick Reference
+
+| Task | Command |
+| ---- | ------- |
+| View issue details | `pnpm --filter @repo/scripts linear issues view --issue PRA-XX` |
+| Start issue (→ In Progress) | `pnpm --filter @repo/scripts linear issues start --issue PRA-XX` |
+| Close issue (→ Done) | `pnpm --filter @repo/scripts linear issues close --issue PRA-XX` |
+| List projects | `pnpm --filter @repo/scripts linear projects list` |
+| List milestones | `pnpm --filter @repo/scripts linear milestones list --project <ref>` |
+| List issues from view | `pnpm --filter @repo/scripts linear views list-issues --view <id>` |
+
 ## Core Command Pattern
 
 All Linear operations use this base command:
