@@ -11,6 +11,18 @@ allowed-tools:
 
 > Local webhook testing and Stripe integration guidance
 
+## Quick Reference
+
+| Task | Command / Resource |
+| ---- | ------------------ |
+| Validate config | `pnpm --filter @repo/scripts stripe:validate` |
+| Forward webhooks locally | `stripe listen --forward-to http://localhost:3002/api/webhooks/payments` |
+| Run test script | `pnpm --filter @repo/scripts stripe:test-credits` |
+| Check CLI account | `stripe config --list` |
+| Webhook handler | `packages/payments/provider/stripe/index.ts` |
+| Test script | `tooling/scripts/src/stripe/test-credit-webhooks.ts` |
+| Credit service | `packages/database/src/lib/credits.ts` |
+
 ## When to Use This Skill
 
 Invoke this skill when:
