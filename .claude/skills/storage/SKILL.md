@@ -14,6 +14,18 @@ allowed-tools:
 
 Multi-tenant file storage patterns and path conventions for the `@repo/storage` package.
 
+## Quick Reference
+
+| Component | Location |
+| --------- | -------- |
+| Path utilities | `packages/storage/paths.ts` |
+| Package import | `import { buildOrgPath, buildUserPath, buildSystemPath } from "@repo/storage"` |
+| Bucket config | `config/index.ts` (`storage.bucketNames`) |
+| Image proxy route | `apps/web/app/image-proxy/[...path]/route.ts` |
+| Supabase provider | `packages/storage/provider/supabase/` |
+| S3 provider | `packages/storage/provider/s3/` |
+| Job upload patterns | [job-upload-patterns.md](job-upload-patterns.md) |
+
 ## When to Use This Skill
 
 Use this skill when:
