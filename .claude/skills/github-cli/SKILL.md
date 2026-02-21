@@ -9,9 +9,7 @@ allowed-tools:
 
 # GitHub CLI
 
-## Overview
-
-This skill provides guidance for using the GitHub CLI (`gh`) and GitHub API in this project. The critical requirement is to **always use the aagnone3 GitHub account** for all GitHub operations, as the aagnone3 organization repositories are only accessible through this account.
+**Critical requirement**: Always use the `aagnone3` GitHub account for all operations — aagnone3 organization repositories are only accessible through this account.
 
 ## Core Requirements
 
