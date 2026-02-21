@@ -11,6 +11,17 @@ allowed-tools:
 
 This skill provides comprehensive Linear integration for managing projects, milestones, and issues using the existing Linear CLI helpers in this repository.
 
+## Quick Reference
+
+| Operation | Command |
+| --------- | ------- |
+| **View issue** | `pnpm --filter @repo/scripts linear issues view --issue <key>` |
+| **Start issue** | `pnpm --filter @repo/scripts linear issues start --issue <key>` |
+| **Close issue** | `pnpm --filter @repo/scripts linear issues close --issue <key>` |
+| **List projects** | `pnpm --filter @repo/scripts linear projects list` |
+| **List milestones** | `pnpm --filter @repo/scripts linear milestones list --project <ref>` |
+| **List view issues** | `pnpm --filter @repo/scripts linear views list-issues --view <id\|slug>` |
+
 ## Prerequisites
 
 - `LINEAR_API_KEY` must be set in `apps/web/.env.local`
