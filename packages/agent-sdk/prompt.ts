@@ -73,7 +73,7 @@ export interface PromptResult {
  * @example
  * ```typescript
  * const result = await executePrompt("Explain quantum computing", {
- *   model: "claude-3-5-haiku-20241022",
+ *   model: "claude-3-5-haiku-latest",
  *   maxTokens: 500,
  *   system: "You are a helpful physics teacher."
  * });

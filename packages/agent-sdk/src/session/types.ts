@@ -86,7 +86,7 @@ export interface AgentSessionConfig {
 
 	/**
 	 * Model to use for this session
-	 * @default "claude-3-5-haiku-20241022"
+	 * @default "claude-3-5-haiku-latest"
 	 */
 	model?: ClaudeModel;
 

@@ -56,7 +56,7 @@ console.log(result.content); // "The capital of France is Paris."
 import { executePrompt } from "@repo/agent-sdk";
 
 const result = await executePrompt("Explain quantum computing", {
-  model: "claude-3-5-haiku-20241022",
+  model: "claude-3-5-haiku-latest",
   maxTokens: 500,
   system: "You are a helpful physics teacher.",
   temperature: 0.7,
