@@ -11,6 +11,18 @@ allowed-tools:
 
 This skill provides comprehensive Prisma migration support with safety checks, advisory locking, and automated workflows.
 
+## Quick Reference
+
+| Resource | Location |
+| -------- | -------- |
+| Prisma schema | `packages/database/prisma/schema.prisma` |
+| Prisma migrations | `packages/database/prisma/migrations/` |
+| Supabase migrations | `supabase/migrations/` |
+| Validate script | `pnpm --filter @repo/scripts prisma:validate` |
+| Stage script | `pnpm --filter @repo/scripts prisma:stage --name <name>` |
+| Execute migration | `pnpm --filter @repo/database migrate:execute` |
+| Generate client | `pnpm --filter @repo/database generate` |
+
 ## ⚠️ CRITICAL: Migration Commands - Know the Difference
 
 > **🚨 NEVER use `prisma db push` for schema changes 🚨**

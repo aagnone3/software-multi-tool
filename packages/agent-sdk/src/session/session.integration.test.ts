@@ -45,7 +45,7 @@ When the user says "complete", respond with exactly this format:
 [/SESSION_COMPLETE]
 
 Otherwise, just respond with a brief acknowledgment.`,
-		model: "claude-3-5-haiku-20241022",
+		model: "claude-haiku-4-5-20251001",
 		maxTokens: 256,
 		temperature: 0.3,
 		maxTurns: 5,

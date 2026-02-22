@@ -14,6 +14,18 @@ allowed-tools:
 
 Multi-tenant file storage patterns and path conventions for the `@repo/storage` package.
 
+## Quick Reference
+
+| Component | Location |
+| --------- | -------- |
+| Path builders | `packages/storage/paths.ts` |
+| Storage provider interface | `packages/storage/types.ts` |
+| Supabase provider | `packages/storage/provider/supabase/` |
+| S3 provider | `packages/storage/provider/s3/` |
+| Package import | `@repo/storage` |
+| Image proxy route | `apps/web/app/image-proxy/[...path]/route.ts` |
+| Bucket config | `config/index.ts` (storage.bucketNames) |
+
 ## When to Use This Skill
 
 Use this skill when:

@@ -49,7 +49,7 @@ describe("FeedbackCollector", () => {
 
 		it("should use Haiku model by default", () => {
 			const config = createFeedbackCollectorConfig();
-			expect(config.model).toBe("claude-3-5-haiku-20241022");
+			expect(config.model).toBe("claude-haiku-4-5-20251001");
 		});
 	});
 

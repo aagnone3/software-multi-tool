@@ -42,14 +42,6 @@ For deep Better Auth documentation, reference: https://www.better-auth.com/llms.
 
 ## Project Configuration
 
-### Location
-
-- **Server auth instance**: `packages/auth/auth.ts`
-- **Client instance**: `packages/auth/client.ts`
-- **Auth config**: `config/index.ts` (auth section)
-- **Custom plugin**: `packages/auth/plugins/invitation-only/`
-- **Organization helpers**: `packages/auth/lib/organization.ts`
-
 ### Environment Variables
 
 Required in `apps/web/.env.local`:
