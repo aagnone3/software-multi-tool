@@ -276,9 +276,9 @@ export default function PdfConverterPage() {
 - **architecture**: Overall codebase structure and routing
 - **better-auth**: User authentication for private tools
 - **analytics**: Event tracking for tool usage
-- **implementing-icons**: Icon component and Lucide icon usage
+- **iconography**: Icon component and Lucide icon usage
 - **feature-flags**: Feature gating for tools
-- **managing-storage**: File upload patterns for tools
+- **storage**: File upload patterns for tools
 - **debugging**: Troubleshooting tool issues
 
 ## Credit System
