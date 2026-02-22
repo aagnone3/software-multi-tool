@@ -6,7 +6,7 @@
  */
 export const CLAUDE_MODELS = {
 	// Haiku models (fastest, most cost-effective)
-	HAIKU_3_5: "claude-3-5-haiku-latest",
+	HAIKU_3_5: "claude-haiku-4-5-20251001",
 
 	// Sonnet models (balanced performance and capability)
 	// Note: Requires appropriate API tier
