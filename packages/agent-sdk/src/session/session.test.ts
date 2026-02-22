@@ -28,7 +28,7 @@ describe("AgentSession", () => {
 		description: "A test session for unit testing",
 		systemPrompt: "You are a helpful test assistant.",
 		initialMessage: "Hello! How can I help you today?",
-		model: "claude-3-5-haiku-latest",
+		model: "claude-haiku-4-5-20251001",
 		maxTokens: 512,
 		temperature: 0.7,
 		maxTurns: 5,
@@ -135,7 +135,7 @@ describe("AgentSession", () => {
 						text: "I understand. How can I assist you?",
 					},
 				],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 50, output_tokens: 20 },
 				stop_reason: "end_turn",
 			});
@@ -181,7 +181,7 @@ describe("AgentSession", () => {
 [/SESSION_COMPLETE]`,
 					},
 				],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 100, output_tokens: 50 },
 				stop_reason: "end_turn",
 			});
@@ -219,7 +219,7 @@ describe("AgentSession", () => {
 [/SESSION_COMPLETE]`,
 					},
 				],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 50, output_tokens: 20 },
 				stop_reason: "end_turn",
 			});
@@ -248,7 +248,7 @@ describe("AgentSession", () => {
 
 			mockMessagesCreate.mockResolvedValue({
 				content: [{ type: "text", text: "Response" }],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 10, output_tokens: 5 },
 				stop_reason: "end_turn",
 			});
@@ -275,7 +275,7 @@ describe("AgentSession", () => {
 
 			mockMessagesCreate.mockResolvedValue({
 				content: [{ type: "text", text: "Response" }],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 30, output_tokens: 10 },
 				stop_reason: "end_turn",
 			});
@@ -302,13 +302,13 @@ describe("AgentSession", () => {
 			mockMessagesCreate
 				.mockResolvedValueOnce({
 					content: [{ type: "text", text: "Response 1" }],
-					model: "claude-3-5-haiku-latest",
+					model: "claude-haiku-4-5-20251001",
 					usage: { input_tokens: 30, output_tokens: 10 },
 					stop_reason: "end_turn",
 				})
 				.mockResolvedValueOnce({
 					content: [{ type: "text", text: "Response 2" }],
-					model: "claude-3-5-haiku-latest",
+					model: "claude-haiku-4-5-20251001",
 					usage: { input_tokens: 50, output_tokens: 20 },
 					stop_reason: "end_turn",
 				});
@@ -445,7 +445,7 @@ describe("AgentSession", () => {
 		it("should return formatted transcript", async () => {
 			mockMessagesCreate.mockResolvedValueOnce({
 				content: [{ type: "text", text: "Nice to meet you!" }],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 20, output_tokens: 10 },
 				stop_reason: "end_turn",
 			});
@@ -502,7 +502,7 @@ describe("AgentSession", () => {
 		it("should include tool context in system prompt", async () => {
 			mockMessagesCreate.mockResolvedValueOnce({
 				content: [{ type: "text", text: "Response" }],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 50, output_tokens: 20 },
 				stop_reason: "end_turn",
 			});
@@ -541,7 +541,7 @@ describe("AgentSession", () => {
 
 			mockMessagesCreate.mockResolvedValueOnce({
 				content: [{ type: "text", text: "Response" }],
-				model: "claude-3-5-haiku-latest",
+				model: "claude-haiku-4-5-20251001",
 				usage: { input_tokens: 50, output_tokens: 20 },
 				stop_reason: "end_turn",
 			});
