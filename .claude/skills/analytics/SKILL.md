@@ -23,7 +23,7 @@ This skill provides comprehensive guidance for working with the pluggable analyt
 | Client Instrumentation | `apps/web/instrumentation-client.js`                     |
 | Provider Integration   | `apps/web/modules/shared/components/ClientProviders.tsx` |
 | TypeScript Alias       | `@analytics` -> `./modules/analytics`                    |
-| Package Dependency     | `posthog-js` v1.280.1                                    |
+| Package Dependency     | `posthog-js`                                             |
 | **Tool Analytics**     | `apps/web/modules/tools/analytics/`                      |
 | **Server Analytics**   | `packages/api/lib/analytics/`                            |
 
