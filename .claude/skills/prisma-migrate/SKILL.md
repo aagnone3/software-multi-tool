@@ -407,7 +407,7 @@ Invoke this skill when:
 - User encounters migration errors or drift
 - User asks about database changes
 
-**Note**: Background jobs are now handled by **Inngest** (not pg-boss). See the architecture skill for Inngest documentation.
+**Note**: Background jobs are handled by **Inngest**. See the architecture skill for Inngest documentation.
 
 ## Related Skills
 
