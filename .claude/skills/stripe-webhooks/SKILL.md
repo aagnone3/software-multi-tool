@@ -11,6 +11,17 @@ allowed-tools:
 
 > Local webhook testing and Stripe integration guidance
 
+## Quick Reference
+
+| Component | Location |
+| --------- | -------- |
+| Webhook handler | `packages/payments/provider/stripe/index.ts` |
+| Test script | `tooling/scripts/src/stripe/test-credit-webhooks.ts` |
+| Credit service | `packages/database/src/lib/credits.ts` |
+| Config (plans/prices) | `config/index.ts` |
+| Webhook endpoint | `POST /api/webhooks/payments` |
+| Environment file | `apps/web/.env.local` |
+
 ## When to Use This Skill
 
 Invoke this skill when:
