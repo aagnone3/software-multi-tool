@@ -270,17 +270,6 @@ export default function PdfConverterPage() {
 }
 ```
 
-## Related Skills
-
-- **sub-app**: Complete tool implementation (backend, database, frontend)
-- **architecture**: Overall codebase structure and routing
-- **better-auth**: User authentication for private tools
-- **analytics**: Event tracking for tool usage
-- **iconography**: Icon component and Lucide icon usage
-- **feature-flags**: Feature gating for tools
-- **storage**: File upload patterns for tools
-- **debugging**: Troubleshooting tool issues
-
 ## Credit System
 
 Tools consume credits when used. The credit system uses a **credit pack model** (no overage billing).
@@ -342,3 +331,14 @@ When adding a new tool, always specify `creditCost`:
   creditUnit: "page",  // Optional: for variable-cost tools
 }
 ```
+
+## Related Skills
+
+- **sub-app**: Complete tool implementation (backend, database, frontend)
+- **architecture**: Overall codebase structure and routing
+- **better-auth**: User authentication for private tools
+- **analytics**: Event tracking for tool usage
+- **iconography**: Icon component and Lucide icon usage
+- **feature-flags**: Feature gating for tools
+- **storage**: File upload patterns for tools
+- **debugging**: Troubleshooting tool issues
