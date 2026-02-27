@@ -5,6 +5,8 @@ allowed-tools:
   - Bash
   - Read
   - Edit
+  - Grep
+  - Glob
 ---
 
 # Prisma Migration Skill
