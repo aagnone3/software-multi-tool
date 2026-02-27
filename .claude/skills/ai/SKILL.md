@@ -91,7 +91,7 @@ The core function for calling Claude:
 
 ```typescript
 interface PromptOptions {
-  model?: string;        // Model to use (default: sonnet-3-5-v2)
+  model?: string;        // Model to use (defaults to DEFAULT_MODEL)
   maxTokens?: number;    // Max response tokens (default: 1024)
   system?: string;       // System prompt
   temperature?: number;  // Randomness 0-1 (default: 1)
@@ -110,6 +110,8 @@ interface PromptResult {
 ```
 
 ### Available Models
+
+> **Note**: Model version strings below reflect the codebase at the time of writing and may be outdated as new Claude versions are released. Verify current constants in `packages/agent-sdk/src/` before use.
 
 ```typescript
 const CLAUDE_MODELS = {
