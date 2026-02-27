@@ -80,8 +80,11 @@ import {
   createAnthropicClient,   // Create new client instance
   getAnthropicClient,      // Get singleton client
   CLAUDE_MODELS,           // Available model constants
-  DEFAULT_MODEL,           // Default model (Haiku 3.5)
+  DEFAULT_MODEL,           // Default model (Haiku 4.5, via HAIKU_3_5 constant)
   MODEL_RECOMMENDATIONS,   // Model recommendations by use case
+  AgentSession,            // Multi-turn conversational sessions
+  listSkills,              // List available skill documentation
+  readSkillDocs,           // Read skill documentation
 } from "@repo/agent-sdk";
 ```
 
@@ -115,7 +118,7 @@ interface PromptResult {
 
 ```typescript
 const CLAUDE_MODELS = {
-  HAIKU_3_5: "claude-3-5-haiku-20241022",      // Fast, cost-effective
+  HAIKU_3_5: "claude-haiku-4-5-20251001",      // Fast, cost-effective (Haiku 4.5)
   SONNET_3: "claude-3-sonnet-20240229",
   SONNET_3_5_V1: "claude-3-5-sonnet-20240620",
   SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Balanced
@@ -153,7 +156,7 @@ import { useChat } from "@repo/ai/client";
 
 | Model | Speed | Cost | Temperature | Best For |
 | ----- | ----- | ---- | ----------- | -------- |
-| **Haiku 3.5** | Fast | Low | 0.1 | Structured extraction, JSON, classification |
+| **Haiku 4.5** | Fast | Low | 0.1 | Structured extraction, JSON, classification |
 | **Sonnet 3.5 v2** | Medium | Medium | 0.2-0.3 | Complex analysis, reasoning, summarization |
 | **Opus 3** | Slow | High | 0.5-1.0 | Creative writing, nuanced tasks |
 
@@ -225,12 +228,12 @@ Input to process:
 ### Step 3: Call executePrompt
 
 ```typescript
-import { executePrompt } from "@repo/agent-sdk";
+import { executePrompt, CLAUDE_MODELS } from "@repo/agent-sdk";
 
 const result = await executePrompt(
   `${EXTRACTION_PROMPT}\n\n${inputText}`,
   {
-    model: "claude-3-5-haiku-20241022",
+    model: CLAUDE_MODELS.HAIKU_3_5, // claude-haiku-4-5-20251001
     maxTokens: 4096,
     temperature: 0.1,
     system: "You are a precise extraction assistant. Output only valid JSON.",
