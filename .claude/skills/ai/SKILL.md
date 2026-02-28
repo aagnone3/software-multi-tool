@@ -114,23 +114,31 @@ interface PromptResult {
 
 ### Available Models
 
-> **Note**: Model version strings below reflect the codebase at the time of writing and may be outdated as new Claude versions are released. Verify current constants in `packages/agent-sdk/src/` before use.
+> **Note**: `CLAUDE_MODELS` constants in the codebase may reference older model IDs. For new processors, prefer the latest Claude 4.x models. Check `packages/agent-sdk/src/` for current constants and update when adding new processors.
 
 ```typescript
 const CLAUDE_MODELS = {
   HAIKU_3_5: "claude-haiku-4-5-20251001",      // Fast, cost-effective (Haiku 4.5)
-  SONNET_3: "claude-3-sonnet-20240229",
-  SONNET_3_5_V1: "claude-3-5-sonnet-20240620",
-  SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Balanced
-  OPUS_3: "claude-3-opus-20240229",            // Most capable
+  SONNET_3: "claude-3-sonnet-20240229",         // Legacy
+  SONNET_3_5_V1: "claude-3-5-sonnet-20240620", // Legacy
+  SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Legacy — prefer Sonnet 4.x
+  OPUS_3: "claude-3-opus-20240229",            // Legacy — prefer Opus 4.x
 };
 
 const MODEL_RECOMMENDATIONS = {
   structured: CLAUDE_MODELS.HAIKU_3_5,   // JSON, classification
-  analysis: CLAUDE_MODELS.SONNET_3_5_V2, // Complex reasoning
-  creative: CLAUDE_MODELS.OPUS_3,        // Creative writing
+  analysis: CLAUDE_MODELS.SONNET_3_5_V2, // Complex reasoning (update to Sonnet 4.x for new work)
+  creative: CLAUDE_MODELS.OPUS_3,        // Creative writing (update to Opus 4.x for new work)
 };
 ```
+
+**Current Claude model IDs for new development:**
+
+| Tier | Model ID | Use Case |
+| ---- | -------- | -------- |
+| Haiku 4.5 | `claude-haiku-4-5-20251001` | Fast structured extraction |
+| Sonnet 4.6 | `claude-sonnet-4-6` | Balanced analysis |
+| Opus 4.6 | `claude-opus-4-6` | Complex/creative tasks |
 
 ## @repo/ai Package
 
@@ -154,11 +162,13 @@ import { useChat } from "@repo/ai/client";
 
 ## Model Selection Guide
 
-| Model | Speed | Cost | Temperature | Best For |
-| ----- | ----- | ---- | ----------- | -------- |
-| **Haiku 4.5** | Fast | Low | 0.1 | Structured extraction, JSON, classification |
-| **Sonnet 3.5 v2** | Medium | Medium | 0.2-0.3 | Complex analysis, reasoning, summarization |
-| **Opus 3** | Slow | High | 0.5-1.0 | Creative writing, nuanced tasks |
+Use `MODEL_RECOMMENDATIONS` from `@repo/agent-sdk` — it maps capability tiers to the codebase's configured model IDs. For new processors, use the latest Claude 4.x model IDs (see table above).
+
+| Capability Tier | Speed | Cost | Temperature | Best For |
+| --------------- | ----- | ---- | ----------- | -------- |
+| **Haiku** (fast) | Fast | Low | 0.1 | Structured extraction, JSON, classification |
+| **Sonnet** (balanced) | Medium | Medium | 0.2-0.3 | Complex analysis, reasoning, summarization |
+| **Opus** (most capable) | Slow | High | 0.5-1.0 | Creative writing, nuanced tasks |
 
 ### Temperature Guidelines
 
@@ -191,17 +201,22 @@ Seven AI-powered processors using Claude via `executePrompt()`:
 
 ### Step 1: Choose the Right Model
 
+Use `MODEL_RECOMMENDATIONS` for the codebase defaults, or specify a Claude 4.x model ID directly for new processors:
+
 ```typescript
 import { MODEL_RECOMMENDATIONS, CLAUDE_MODELS } from "@repo/agent-sdk";
 
-// For structured extraction (invoices, forms)
-const model = MODEL_RECOMMENDATIONS.structured; // Haiku
+// For structured extraction (invoices, forms) — Haiku tier
+const model = MODEL_RECOMMENDATIONS.structured;        // codebase default
+const model = "claude-haiku-4-5-20251001";            // explicit current ID
 
-// For complex analysis (contracts, feedback)
-const model = MODEL_RECOMMENDATIONS.analysis;   // Sonnet
+// For complex analysis (contracts, feedback) — Sonnet tier
+const model = MODEL_RECOMMENDATIONS.analysis;          // codebase default (older)
+const model = "claude-sonnet-4-6";                    // explicit current ID
 
-// For creative tasks
-const model = MODEL_RECOMMENDATIONS.creative;   // Opus
+// For creative tasks — Opus tier
+const model = MODEL_RECOMMENDATIONS.creative;          // codebase default (older)
+const model = "claude-opus-4-6";                      // explicit current ID
 ```
 
 ### Step 2: Define Your Prompt
