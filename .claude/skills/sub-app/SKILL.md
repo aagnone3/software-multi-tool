@@ -39,6 +39,8 @@ Invoke this skill when:
 - Building tool-specific UI components
 - Questions like "How do I create a new tool?" or "What's the pattern for tool database models?"
 
+**Activation keywords**: new tool, sub-app, tool development, build a tool, create tool, async job, job queue, ToolJob, tool backend, tool implementation
+
 **Note**: For just registering an existing tool in the config, use the `tools` skill instead. This skill is for complete implementations.
 
 ## Architecture Overview

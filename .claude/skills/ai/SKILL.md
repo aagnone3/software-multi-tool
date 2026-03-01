@@ -28,6 +28,8 @@ Invoke this skill when:
 - Working with the chat system
 - Troubleshooting AI integration issues
 
+**Activation keywords**: AI, LLM, Claude, Anthropic, OpenAI, processor, model selection, streaming, executePrompt, agent-sdk
+
 ## Quick Reference
 
 | Resource | Location |

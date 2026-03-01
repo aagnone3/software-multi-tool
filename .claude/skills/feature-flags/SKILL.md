@@ -406,6 +406,8 @@ Invoke this skill when:
 - Understanding the bootstrapping flow
 - Writing tests involving feature flags
 
+**Activation keywords**: feature flag, flag, A/B test, experiment, rollout, PostHog flag, toggle, isFeatureEnabled, useFeatureFlag, progressive rollout
+
 ## Related Skills
 
 - **analytics**: PostHog event tracking and user identification

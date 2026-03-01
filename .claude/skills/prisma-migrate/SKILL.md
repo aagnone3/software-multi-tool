@@ -409,6 +409,8 @@ Invoke this skill when:
 - User encounters migration errors or drift
 - User asks about database changes
 
+**Activation keywords**: migration, prisma, schema.prisma, database schema, prisma migrate, schema change, add column, add table, migrate
+
 **Note**: Background jobs are handled by **Inngest**. See the architecture skill for Inngest documentation.
 
 ## Related Skills

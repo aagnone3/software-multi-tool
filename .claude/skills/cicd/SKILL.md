@@ -24,6 +24,8 @@ Invoke this skill when:
 - Troubleshooting GitHub Actions workflows
 - Understanding Vercel/Supabase integration
 
+**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Supabase branch, migration sync, PR checks, pipeline
+
 ## Quick Reference
 
 | Component           | Location                                              |

@@ -33,6 +33,8 @@ Invoke this skill when:
 - Working with PostHog feature flags via CLI
 - Creating scripting workflows with JSON output
 
+**Activation keywords**: CLI, mt command, pnpm mt, developer tooling, command line, feature flags inspection, JSON output, scripting
+
 ## Architecture
 
 The CLI lives in `tooling/cli/` and uses:
