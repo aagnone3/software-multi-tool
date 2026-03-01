@@ -341,6 +341,8 @@ Invoke this skill when:
 - Updating email typography
 - Working with Tailwind typography utilities
 
+**Activation keywords**: font, typography, typeface, font loading, text style, web font, Montserrat, Google Fonts, next/font, email font
+
 ## Related Skills
 
 - **architecture**: Overall codebase structure and theming
