@@ -27,6 +27,8 @@ Invoke this skill when:
 - Adding protected routes
 - Integrating with payment systems (subscription seats)
 
+**Activation keywords**: auth, authentication, login, signup, sign in, session, OAuth, passkey, magic link, organization, invitation, better-auth, protected route
+
 ## Quick Reference
 
 | Component | Location |
