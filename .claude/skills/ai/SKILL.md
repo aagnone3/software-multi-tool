@@ -12,8 +12,6 @@ allowed-tools:
 
 # AI/LLM Skill
 
-This skill documents the AI architecture, providers, and patterns used in this codebase.
-
 ## When to Use This Skill
 
 Invoke this skill when:
