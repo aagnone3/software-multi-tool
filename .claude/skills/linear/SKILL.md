@@ -9,8 +9,6 @@ allowed-tools:
 
 # Linear Project Management Skill
 
-This skill provides comprehensive Linear integration for managing projects, milestones, and issues using the existing Linear CLI helpers in this repository.
-
 ## Quick Reference
 
 | Operation | Command |
