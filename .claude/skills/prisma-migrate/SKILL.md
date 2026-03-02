@@ -11,8 +11,6 @@ allowed-tools:
 
 # Prisma Migration Skill
 
-This skill provides comprehensive Prisma migration support with safety checks, advisory locking, and automated workflows.
-
 ## Quick Reference
 
 | Resource | Location |
