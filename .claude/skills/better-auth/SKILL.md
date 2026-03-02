@@ -12,8 +12,6 @@ allowed-tools:
 
 # Better Auth Skill
 
-This skill provides comprehensive guidance for working with Better Auth in this project, including configuration, plugins, and common patterns.
-
 ## When to Use This Skill
 
 Invoke this skill when:
