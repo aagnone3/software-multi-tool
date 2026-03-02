@@ -12,8 +12,6 @@ allowed-tools:
 
 # Typography Skill
 
-This skill provides comprehensive guidance for managing typography across the project, including web fonts, email fonts, Tailwind integration, and the CSS variable system.
-
 ## Quick Reference
 
 | Component                | Location                                                  |
