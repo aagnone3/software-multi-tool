@@ -12,7 +12,7 @@ allowed-tools:
 
 # Sub-App Development Skill
 
-This skill provides comprehensive guidance for creating new sub-applications (tools/utilities) within the multi-app architecture. Use this when building complete tools from scratch, not just registering them in the config.
+Use this when building complete tools from scratch, not just registering them in config (see `tools` skill for registry-only changes).
 
 ## Quick Reference
 
