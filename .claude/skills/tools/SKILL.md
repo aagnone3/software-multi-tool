@@ -12,8 +12,6 @@ allowed-tools:
 
 # Tools/Sub-Apps Skill
 
-This skill provides comprehensive guidance for working with the multi-app tools architecture in this project. The system allows for multiple independent sub-apps (utilities) that share common infrastructure.
-
 ## When to Use This Skill
 
 Invoke this skill when:

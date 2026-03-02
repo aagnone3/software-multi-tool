@@ -12,8 +12,6 @@ allowed-tools:
 
 # Analytics Skill
 
-This skill provides comprehensive guidance for working with the pluggable analytics system in this project, with PostHog as the default provider.
-
 ## Quick Reference
 
 | Component              | Location                                                 |
