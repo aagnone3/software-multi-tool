@@ -12,7 +12,7 @@ allowed-tools:
 
 # Feature Flags Skill
 
-This skill provides comprehensive guidance for implementing feature flags using PostHog in this project. The system supports both server-side evaluation (for SSR and API routes) and client-side evaluation (React hooks with bootstrapping to prevent UI flicker).
+Supports both server-side evaluation (SSR/API routes) and client-side evaluation (React hooks with bootstrapping to prevent UI flicker).
 
 ## Quick Reference
 
