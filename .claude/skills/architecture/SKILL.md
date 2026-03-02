@@ -9,8 +9,6 @@ allowed-tools:
 
 # Architecture Skill
 
-This skill provides comprehensive guidance for understanding and navigating the codebase architecture, including the monorepo structure, API layer, frontend patterns, and external integrations.
-
 ## Quick Reference
 
 | Component        | Entry Point                               |
