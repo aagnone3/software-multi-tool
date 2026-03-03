@@ -56,6 +56,7 @@ tools: {
       icon: "image-minus",
       public: true,
       enabled: true,
+      creditCost: 1,        // Required: credits consumed per use
     },
     // ... more tools
   ],
@@ -100,9 +101,11 @@ tools: {
       slug: "my-new-tool",
       name: "My New Tool",
       description: "What this tool does",
-      icon: "wrench",  // See lucide-react icons
-      public: true,    // Set to false if auth required
+      icon: "wrench",       // See lucide-react icons
+      public: true,         // Set to false if auth required
       enabled: true,
+      creditCost: 1,        // Required: credits consumed per use
+      creditUnit: "request", // Optional: "request" | "minute" | "page"
     },
   ],
 }
