@@ -82,9 +82,9 @@ import {
   CLAUDE_MODELS,           // Available model constants
   DEFAULT_MODEL,           // Default model (Haiku 4.5, via HAIKU_3_5 constant)
   MODEL_RECOMMENDATIONS,   // Model recommendations by use case
-  AgentSession,            // Multi-turn conversational sessions
-  listSkills,              // List available skill documentation
-  readSkillDocs,           // Read skill documentation
+  AgentSession,            // Multi-turn conversational sessions with message history
+  listSkills,              // List all skill names available in .claude/skills/
+  readSkillDocs,           // Read SKILL.md content for a specific skill by name
 } from "@repo/agent-sdk";
 ```
 
