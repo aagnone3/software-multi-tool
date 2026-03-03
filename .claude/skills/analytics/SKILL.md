@@ -208,7 +208,7 @@ Invoke this skill when:
 - Configuring PostHog options (EU hosting, person profiles)
 - Adding analytics to new tools (see `tool-analytics.md`)
 
-**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, A/B test, user identification, analytics provider
+**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, A/B test, user identification, analytics provider, usage tracking, tool analytics, server analytics
 
 ## Common Event Patterns
 
