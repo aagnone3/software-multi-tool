@@ -10,7 +10,7 @@ allowed-tools:
   - Glob
 ---
 
-# Tools/Sub-Apps Skill
+# Configuring Tools Skill
 
 ## When to Use This Skill
 
