@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - Read
   - Edit
+  - Write
   - Grep
   - Glob
 ---

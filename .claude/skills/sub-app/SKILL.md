@@ -79,7 +79,8 @@ Add the tool to `config/index.ts` in the `tools.registry` array:
   icon: "wrench",                // Lucide icon name
   public: true,                  // Whether accessible without auth
   enabled: true,                 // Whether currently active
-  rateLimits: {
+  creditCost: 1,                 // Required: credits consumed per use
+  rateLimits: {                  // Optional: per-tool rate limits
     anonymous: { requests: 5, window: "1d" },      // Unauthenticated users
     authenticated: { requests: 60, window: "1h" }, // Authenticated users
   },
