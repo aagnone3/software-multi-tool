@@ -4,6 +4,7 @@ description: Stripe webhook testing and integration with Stripe CLI forwarding, 
 allowed-tools:
   - Bash
   - Read
+  - Edit
   - Grep
 ---
 
