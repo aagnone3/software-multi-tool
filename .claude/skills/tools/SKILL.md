@@ -73,8 +73,12 @@ interface ToolConfig {
   icon: string;           // Lucide icon name (e.g., "image-minus")
   public: boolean;        // Whether accessible without authentication
   enabled: boolean;       // Whether currently active
-  creditCost: number;     // Credits consumed per use
+  creditCost: number;     // Credits consumed per use (required)
   creditUnit?: CreditUnit; // Unit for variable-cost tools ("request" | "minute" | "page")
+  rateLimits?: {          // Optional per-tool rate limits
+    anonymous: { requests: number; window: string };
+    authenticated: { requests: number; window: string };
+  };
 }
 ```
 
@@ -113,13 +117,13 @@ tools: {
 
 ### Step 2: Create Tool-Specific Page (Optional)
 
-For custom tool UI, create a dedicated page:
+For custom tool UI, create a dedicated static page (sibling to the `[toolSlug]` dynamic route):
 
 ```text
-apps/web/app/(saas)/app/tools/[toolSlug]/my-tool/page.tsx
+apps/web/app/(saas)/app/tools/my-tool/page.tsx
 ```
 
-Or implement the tool's UI directly in the dynamic route by checking the slug.
+Next.js static routes take priority over `[toolSlug]`, so `/app/tools/my-tool` will use this dedicated page. See `news-analyzer/page.tsx` and `speaker-separation/page.tsx` for real examples.
 
 ### Step 3: Add Tool Icon
 
@@ -258,6 +262,7 @@ Add tool-related translations to `packages/i18n/translations/`:
   icon: "file-text",
   public: true,
   enabled: true,
+  creditCost: 1,  // Required: credits consumed per use
 }
 
 // 2. Create custom page (optional)
