@@ -12,22 +12,6 @@ allowed-tools:
 
 # AI/LLM Skill
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Implementing AI-powered features or processors
-- Adding new AI processors for document analysis
-- Configuring Anthropic or OpenAI API keys
-- Selecting appropriate models for use cases
-- Debugging AI API calls or response parsing
-- Understanding model pricing and token limits
-- Implementing streaming AI responses
-- Working with the chat system
-- Troubleshooting AI integration issues
-
-**Activation keywords**: AI, LLM, Claude, Anthropic, OpenAI, processor, model selection, streaming, executePrompt, agent-sdk
-
 ## Quick Reference
 
 | Resource | Location |
@@ -340,6 +324,22 @@ The news analyzer includes rate limit detection. For high-volume use:
 // Add delay between requests
 await new Promise(resolve => setTimeout(resolve, 1000));
 ```
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Implementing AI-powered features or processors
+- Adding new AI processors for document analysis
+- Configuring Anthropic or OpenAI API keys
+- Selecting appropriate models for use cases
+- Debugging AI API calls or response parsing
+- Understanding model pricing and token limits
+- Implementing streaming AI responses
+- Working with the chat system
+- Troubleshooting AI integration issues
+
+**Activation keywords**: AI, LLM, Claude, Anthropic, OpenAI, processor, model selection, streaming, executePrompt, agent-sdk
 
 ## Related Skills
 
