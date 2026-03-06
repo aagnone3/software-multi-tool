@@ -12,21 +12,6 @@ allowed-tools:
 
 # Better Auth Skill
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Implementing login/signup flows
-- Adding new authentication methods
-- Working with user sessions
-- Managing organizations and invitations
-- Modifying auth configuration
-- Debugging auth issues
-- Adding protected routes
-- Integrating with payment systems (subscription seats)
-
-**Activation keywords**: auth, authentication, login, signup, sign in, session, OAuth, passkey, magic link, organization, invitation, better-auth, protected route
-
 ## Quick Reference
 
 | Component | Location |
@@ -386,6 +371,21 @@ const isValid = await verifyPassword({ hash, password: "TestPassword123" });
 **Symptom**: `activeOrganizationId` is null after login
 
 **Explanation**: The `databaseHooks.session.create.before` hook automatically sets the first organization. If user has no organizations, it will be null.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Implementing login/signup flows
+- Adding new authentication methods
+- Working with user sessions
+- Managing organizations and invitations
+- Modifying auth configuration
+- Debugging auth issues
+- Adding protected routes
+- Integrating with payment systems (subscription seats)
+
+**Activation keywords**: auth, authentication, login, signup, sign in, session, OAuth, passkey, magic link, organization, invitation, better-auth, protected route
 
 ## Related Skills
 
