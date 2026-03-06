@@ -12,21 +12,6 @@ allowed-tools:
 
 # Configuring Tools Skill
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Registering a new tool in the tool registry
-- Configuring tool credit costs and credit units
-- Setting up public vs private tool access control
-- Selecting icons for tools (Lucide icons)
-- Managing tool listings and navigation
-- Understanding the credit pack system
-- Configuring middleware routing for public tools
-- Working with the tool registry configuration
-
-**Activation keywords**: tool registry, register tool, credit costs, public tools, private tools, tool access, credit packs, tool configuration
-
 ## Quick Reference
 
 | Component                  | Location                                                 |
@@ -337,6 +322,21 @@ When adding a new tool, always specify `creditCost`:
   creditUnit: "page",  // Optional: for variable-cost tools
 }
 ```
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Registering a new tool in the tool registry
+- Configuring tool credit costs and credit units
+- Setting up public vs private tool access control
+- Selecting icons for tools (Lucide icons)
+- Managing tool listings and navigation
+- Understanding the credit pack system
+- Configuring middleware routing for public tools
+- Working with the tool registry configuration
+
+**Activation keywords**: tool registry, register tool, credit costs, public tools, private tools, tool access, credit packs, tool configuration
 
 ## Related Skills
 

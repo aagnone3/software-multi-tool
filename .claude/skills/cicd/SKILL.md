@@ -12,20 +12,6 @@ allowed-tools:
 
 CI/CD pipeline, preview environments, and database branching workflow.
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Understanding CI/CD pipeline flow
-- Debugging preview environment issues
-- Working with database branching
-- Syncing Prisma and Supabase migrations
-- Configuring environment variables for deployments
-- Troubleshooting GitHub Actions workflows
-- Understanding Vercel/Supabase integration
-
-**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Supabase branch, migration sync, PR checks, pipeline
-
 ## Quick Reference
 
 | Component           | Location                                              |
@@ -192,6 +178,20 @@ See [troubleshooting.md](troubleshooting.md) for:
 - Storage upload failures
 - Seed validation failures
 - E2E test blocking
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Understanding CI/CD pipeline flow
+- Debugging preview environment issues
+- Working with database branching
+- Syncing Prisma and Supabase migrations
+- Configuring environment variables for deployments
+- Troubleshooting GitHub Actions workflows
+- Understanding Vercel/Supabase integration
+
+**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Supabase branch, migration sync, PR checks, pipeline
 
 ## Related Skills
 
