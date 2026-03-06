@@ -13,19 +13,6 @@ allowed-tools:
 
 Debug applications across Vercel and Supabase in local, preview, and production environments.
 
-## When to Use This Skill
-
-- App not loading or returning errors
-- Database connection issues
-- Authentication/session problems
-- Preview environment misconfiguration
-- Performance investigation
-- Tracing requests across services
-
-**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout
-
----
-
 ## Quick Fixes
 
 **Most common issues and their one-liner solutions.**
@@ -390,6 +377,17 @@ try {
 - [ ] Redeployed after env changes?
 
 ---
+
+## When to Use This Skill
+
+- App not loading or returning errors
+- Database connection issues
+- Authentication/session problems
+- Preview environment misconfiguration
+- Performance investigation
+- Tracing requests across services
+
+**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout
 
 ## Related Skills
 
