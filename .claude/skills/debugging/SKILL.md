@@ -28,6 +28,16 @@ Debug applications across Vercel and Supabase in local, preview, and production 
 
 ---
 
+## Prerequisites
+
+**MCP Tools**: Commands prefixed with `mcp__postgres-ro-local-dev__` require the `postgres-ro-local-dev` MCP server to be configured. Without it, use `psql` directly:
+
+```bash
+PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "YOUR SQL HERE"
+```
+
+---
+
 ## Common Scenarios
 
 ### "The app is broken - where do I start?"
