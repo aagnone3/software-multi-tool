@@ -20,7 +20,7 @@ allowed-tools:
 | Supabase migrations | `supabase/migrations/` |
 | Validate script | `pnpm --filter @repo/scripts prisma:validate` |
 | Stage script | `pnpm --filter @repo/scripts prisma:stage --name <name>` |
-| Execute migration | `pnpm --filter @repo/database migrate:execute` |
+| Execute migration | `pnpm --filter @repo/database migrate:execute` *(run after staging)* |
 | Generate client | `pnpm --filter @repo/database generate` |
 
 ## ⚠️ CRITICAL: Migration Commands - Know the Difference
@@ -31,7 +31,8 @@ allowed-tools:
 
 | Command | Purpose | Creates Migration? | Use When |
 | ------- | ------- | ------------------ | -------- |
-| `pnpm --filter @repo/database migrate` | Create and apply migrations | ✅ Yes | **ALWAYS** for schema changes |
+| `pnpm --filter @repo/scripts prisma:stage --name <n>` | Create migration file only (no apply) | ✅ Yes | Step 3 of the migration workflow |
+| `pnpm --filter @repo/database migrate:execute` | Apply staged migration | ❌ No | Step 5, after reviewing the migration file |
 | `pnpm --filter @repo/database push` | ❌ **BLOCKED** | ❌ No | Never use for schema changes |
 | `pnpm --filter @repo/database generate` | Regenerate Prisma client types | ❌ No | After pulling changes, or types are stale |
 
