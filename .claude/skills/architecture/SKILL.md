@@ -274,7 +274,7 @@ export type ApiRouterClient = typeof apiRouter;
 
 ### Secondary ORM: Drizzle
 
-Dual-ORM setup for flexibility. Drizzle available alongside Prisma.
+Dual-ORM setup for flexibility. Drizzle available alongside Prisma. **Default to Prisma** for all new development — it is the source of truth for schema, migrations, and generated types. Drizzle may be used for specific query patterns but Prisma migrations remain the canonical schema management tool.
 
 ### Client-Side Data Fetching
 
