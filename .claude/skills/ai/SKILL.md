@@ -98,7 +98,17 @@ interface PromptResult {
 
 ### Available Models
 
-> **Note**: `CLAUDE_MODELS` constants in the codebase may reference older model IDs. For new processors, prefer the latest Claude 4.x models. Check `packages/agent-sdk/src/` for current constants and update when adding new processors.
+**For new processors, use these model IDs directly:**
+
+| Tier | Model ID | Use Case |
+| ---- | -------- | -------- |
+| Haiku 4.5 | `claude-haiku-4-5-20251001` | Fast structured extraction |
+| Sonnet 4.6 | `claude-sonnet-4-6` | Balanced analysis |
+| Opus 4.6 | `claude-opus-4-6` | Complex/creative tasks |
+
+**Codebase constants** (from `packages/agent-sdk/src/`):
+
+> **Note**: `CLAUDE_MODELS` constants may reference older model IDs. Prefer the model IDs in the table above for new processors.
 
 ```typescript
 const CLAUDE_MODELS = {
@@ -115,14 +125,6 @@ const MODEL_RECOMMENDATIONS = {
   creative: CLAUDE_MODELS.OPUS_3,        // Creative writing (update to Opus 4.x for new work)
 };
 ```
-
-**Current Claude model IDs for new development:**
-
-| Tier | Model ID | Use Case |
-| ---- | -------- | -------- |
-| Haiku 4.5 | `claude-haiku-4-5-20251001` | Fast structured extraction |
-| Sonnet 4.6 | `claude-sonnet-4-6` | Balanced analysis |
-| Opus 4.6 | `claude-opus-4-6` | Complex/creative tasks |
 
 ## @repo/ai Package
 
@@ -146,7 +148,7 @@ import { useChat } from "@repo/ai/client";
 
 ## Model Selection Guide
 
-Use `MODEL_RECOMMENDATIONS` from `@repo/agent-sdk` — it maps capability tiers to the codebase's configured model IDs. For new processors, use the latest Claude 4.x model IDs (see table above).
+For new processors, use the current model IDs in the table above. `MODEL_RECOMMENDATIONS` from `@repo/agent-sdk` maps to legacy constants — prefer explicit model ID strings for new work.
 
 | Capability Tier | Speed | Cost | Temperature | Best For |
 | --------------- | ----- | ---- | ----------- | -------- |
