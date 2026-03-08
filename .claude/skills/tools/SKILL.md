@@ -338,6 +338,10 @@ Invoke this skill when:
 
 **Activation keywords**: tool registry, register tool, credit costs, public tools, private tools, tool access, credit packs, tool configuration
 
+## Additional Resources
+
+See [examples.md](examples.md) for additional tool registry configuration examples.
+
 ## Related Skills
 
 - **sub-app**: Complete tool implementation (backend, database, frontend)
