@@ -352,6 +352,7 @@ Invoke this skill when:
 
 ## Additional Resources
 
+- See [examples.md](examples.md) for usage examples and patterns
 - [Anthropic API Documentation](https://docs.anthropic.com/)
 - [Vercel AI SDK](https://sdk.vercel.ai/docs)
 - [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
