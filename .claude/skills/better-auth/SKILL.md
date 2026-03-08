@@ -290,7 +290,7 @@ emailAndPassword: {
 
 ## Common Workflows
 
-See `examples.md` in this skill directory for detailed examples of:
+See [examples.md](examples.md) for detailed examples of:
 
 - Setting up new auth methods
 - Creating custom plugins
