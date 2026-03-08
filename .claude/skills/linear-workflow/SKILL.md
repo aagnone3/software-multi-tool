@@ -163,6 +163,10 @@ Claude: [Fetches issue, moves to In Progress]
         ✅ PR created: https://github.com/org/repo/pull/123
 ```
 
+## Additional Resources
+
+See [examples.md](examples.md) for detailed workflow examples and edge cases.
+
 ## Related Skills
 
 - **git-worktrees**: Worktree creation and management
