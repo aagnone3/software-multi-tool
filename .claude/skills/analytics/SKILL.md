@@ -240,7 +240,7 @@ trackEvent("error_occurred", { code: "PAYMENT_FAILED", message: "Card declined" 
 
 ## Tool Usage Analytics
 
-For comprehensive documentation on tracking tool usage for anonymous and authenticated users, see `tool-analytics.md` in this skill directory.
+For comprehensive documentation on tracking tool usage for anonymous and authenticated users, see [tool-analytics.md](tool-analytics.md).
 
 **Quick overview:**
 
@@ -249,7 +249,7 @@ For comprehensive documentation on tracking tool usage for anonymous and authent
 - **Anonymous users**: localStorage session IDs for tracking before authentication
 - **Conversion tracking**: Track signup and purchase events from tools
 
-See `tool-analytics.md` for detailed implementation guide and examples.
+See [tool-analytics.md](tool-analytics.md) for detailed implementation guide and examples.
 
 ## Related Skills
 
@@ -263,4 +263,4 @@ See `tool-analytics.md` for detailed implementation guide and examples.
 
 - PostHog docs: https://posthog.com/docs
 - PostHog JS SDK: https://posthog.com/docs/libraries/js
-- See `examples.md` in this skill directory for detailed usage examples
+- See [examples.md](examples.md) for detailed usage examples

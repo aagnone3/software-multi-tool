@@ -219,6 +219,10 @@ pnpm --filter @repo/scripts linear views list-issues --view <id|slug>
 - DO NOT close the Linear issue until PR is merged
 - Work is NOT complete until there is a PR URL
 
+## Additional Resources
+
+See [examples.md](examples.md) for detailed CLI usage examples and common command patterns.
+
 ## Related Skills
 
 - **linear-workflow**: Complete Linear-based development workflow

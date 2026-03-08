@@ -321,6 +321,10 @@ const prefersReducedMotion =
 | Light Effects | Glow, dispersion, spectral |
 | Geometric | Abstract shapes, grid compositions |
 
+## Additional Resources
+
+See [examples.md](examples.md) for complete landing page examples with annotated source code.
+
 ## Related Skills
 
 - **iconography**: Icon sizing and color system
