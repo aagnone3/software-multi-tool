@@ -309,10 +309,11 @@ Check font loading performance:
 
 ### Font Not Loading
 
-1. **Check import name**: Must exactly match `next/font/google` export
-2. **Verify weights exist**: Not all fonts have all weights
-3. **Check console**: Look for font loading errors
-4. **Verify CSS variable**: Inspect `<html>` element for `--font-sans`
+1. **Verify font loaded**: Open DevTools (F12) → Network tab → filter by "Font" → check all font files return 200 status
+2. **Check import name**: Must exactly match `next/font/google` export
+3. **Verify weights exist**: Not all fonts have all weights
+4. **Check console**: Look for font loading errors in the browser console
+5. **Verify CSS variable**: Inspect `<html>` element in DevTools → Computed styles → search `--font-sans`
 
 ### Font Looks Wrong
 

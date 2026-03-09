@@ -28,6 +28,8 @@ allowed-tools:
 | Aurora/Glow | Flowing color waves | Dreamy, premium feel |
 | Noise Texture | Organic grain effect | Depth, tactile quality |
 
+**Combination guidance:** Use 1-2 pattern types per page for best results. Recommended pairings: Orbs + Dot Grid (soft + structure), Geometric Shapes + Grid Pattern (wireframe feel). Avoid combining more than 2 animation types — it creates visual noise.
+
 ### Animation Patterns
 
 | Pattern | CSS Technique | Duration | Use Case |

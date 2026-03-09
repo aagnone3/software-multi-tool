@@ -118,6 +118,8 @@ try {
 }
 ```
 
+**PathValidationError codes:** `INVALID_ORG_ID`, `INVALID_USER_ID`, `INVALID_FILE_TYPE`, `INVALID_PATH_TYPE`, `PATH_TRAVERSAL_BLOCKED`
+
 ## Common Path Mistakes
 
 | Mistake | Fix |

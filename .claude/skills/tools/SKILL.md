@@ -201,7 +201,9 @@ The `ToolsNavBar` component provides:
 
 ## Icon System
 
-Tools use Lucide React icons. Common tool icons:
+Tools use Lucide React icons. Browse all available icons at **https://lucide.dev** — search for a relevant action or object name to find the icon slug to use in code.
+
+Common tool icons:
 
 | Icon Name     | Use Case                      |
 | ------------- | ----------------------------- |

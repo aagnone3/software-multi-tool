@@ -326,6 +326,8 @@ For local development, a test user enables Quick Login on the login page:
 | Email    | test@preview.local |
 | Password | TestPassword123    |
 
+**To use test credentials:** Navigate to `/auth/login` → click the "Quick Login" button → credentials are pre-filled automatically. The button only appears in development mode.
+
 **Seeding the test user:**
 
 ```bash

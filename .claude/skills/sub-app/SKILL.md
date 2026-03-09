@@ -305,7 +305,7 @@ Import the icon from Lucide React and add to `getToolIcon()` in `apps/web/module
 
 ### Job Processing
 
-1. **Idempotent Operations**: Design processors to be safely retryable
+1. **Idempotent Operations**: Design processors to be safely retryable — e.g., `UPDATE jobs SET status = 'completed' WHERE id = ? AND status = 'processing'` rather than blind updates
 2. **Timeouts**: Set reasonable `maxAttempts` for job retry logic
 3. **Expiration**: Set appropriate `expiresAt` for job cleanup
 4. **Progress Updates**: For long jobs, consider storing progress in job output
