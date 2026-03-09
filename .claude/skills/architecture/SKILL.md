@@ -389,16 +389,18 @@ Invoke this skill when:
 
 ## Related Skills
 
+**Start with this skill** to understand where things live, then use domain-specific skills for implementation:
+
+- **sub-app**: Creating new tools end-to-end (database → API → UI)
+- **tools**: Tool registry and credit system configuration
 - **better-auth**: Authentication implementation details
-- **cicd**: CI/CD pipeline and preview environments
 - **prisma-migrate**: Database migration workflows
-- **linear**: Project management integration
-- **github-cli**: GitHub operations
+- **cicd**: CI/CD pipeline and preview environments
 - **analytics**: Event tracking and user identification
 - **feature-flags**: A/B testing and progressive rollouts
 - **storage**: File upload and storage patterns
-- **sub-app**: Creating new tools in the architecture
-- **tools**: Tool registry and credit system
+- **linear**: Project management integration
+- **github-cli**: GitHub operations
 
 ## Additional Resources
 
