@@ -150,6 +150,8 @@ import { useChat } from "@repo/ai/client";
 
 For new processors, use the current model IDs in the table above. `MODEL_RECOMMENDATIONS` from `@repo/agent-sdk` maps to legacy constants — prefer explicit model ID strings for new work.
 
+**Quick decision:** If unsure which tier to use, start with **Sonnet** — it handles most tasks well and is only moderately more expensive than Haiku. Move to Haiku when latency/cost is critical; move to Opus only for tasks requiring deep reasoning or creativity.
+
 | Capability Tier | Speed | Cost | Temperature | Best For |
 | --------------- | ----- | ---- | ----------- | -------- |
 | **Haiku** (fast) | Fast | Low | 0.1 | Structured extraction, JSON, classification |
@@ -158,10 +160,12 @@ For new processors, use the current model IDs in the table above. `MODEL_RECOMME
 
 ### Temperature Guidelines
 
-- `0.1` - Precise, consistent (structured data extraction)
-- `0.2-0.3` - Balanced (analysis tasks)
-- `0.5-0.7` - Creative but controlled
-- `1.0` - Maximum creativity (default)
+Lower values produce more deterministic, repeatable output. Higher values introduce variability and creativity.
+
+- `0.1` - Precise, consistent (structured data extraction, JSON output)
+- `0.2-0.3` - Balanced (analysis tasks, summaries)
+- `0.5-0.7` - Creative but controlled (varied phrasing, brainstorming)
+- `1.0` - Maximum creativity/randomness (default — reduce for production extractors)
 
 ### Max Tokens Guidelines
 
@@ -346,7 +350,8 @@ Invoke this skill when:
 ## Related Skills
 
 - **architecture**: Overall codebase structure and module organization (includes Inngest background jobs)
-- **tools**: Adding new tool modules that use AI processors
+- **sub-app**: Building complete tools that include AI processors (database patterns, job processing)
+- **tools**: Registering AI-powered tools in the tool registry
 - **feature-flags**: A/B testing AI features and gradual rollouts
 - **storage**: Storing AI-generated content and uploaded files for processing
 
