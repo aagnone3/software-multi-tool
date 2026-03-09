@@ -323,6 +323,18 @@ cd /path/to/software-multi-tool
 pnpm mt features
 ```
 
+### Dependencies Not Found
+
+If the CLI can't resolve internal packages:
+
+```bash
+# Reinstall all workspace dependencies
+pnpm install
+
+# Then retry your command
+pnpm mt features
+```
+
 ### TypeScript Errors
 
 The CLI uses tsx for direct TypeScript execution. If you encounter issues:
