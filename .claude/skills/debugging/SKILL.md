@@ -36,6 +36,14 @@ Debug applications across Vercel and Supabase in local, preview, and production 
 PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "YOUR SQL HERE"
 ```
 
+**Available MCP database commands:**
+
+| MCP Tool | Purpose |
+| -------- | ------- |
+| `mcp__postgres-ro-local-dev__execute_sql` | Run read-only SQL against local Supabase |
+| `mcp__plugin_supabase_supabase__get_logs` | Fetch logs from Supabase cloud projects |
+| `mcp__plugin_supabase_supabase__execute_sql` | Run SQL against Supabase cloud project |
+
 ---
 
 ## Common Scenarios
