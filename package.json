@@ -37,7 +37,7 @@
 		"mt": "pnpm --filter @repo/cli mt"
 	},
 	"engines": {
-		"node": "v22.22.0"
+		"node": "22.22.1"
 	},
 	"packageManager": "pnpm@10.27.0",
 	"optionalDependencies": {
