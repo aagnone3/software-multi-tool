@@ -123,7 +123,7 @@
 		"dotenv": "17.2.3",
 		"jsdom": "27.4.0",
 		"mdx": "0.3.1",
-		"postcss": "8.5.6",
+		"postcss": "8.5.8",
 		"start-server-and-test": "2.1.5",
 		"storybook": "8.6.18",
 		"tailwindcss": "4.1.18",
