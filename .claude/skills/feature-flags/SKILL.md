@@ -84,6 +84,14 @@ POSTHOG_API_KEY=phc_your_project_key
 
 ## Server-Side Usage
 
+### Server Function Reference
+
+| Function | Returns | Use Case |
+| -------- | ------- | -------- |
+| `getFeatureFlag(key, userId, opts)` | `string \| boolean` | A/B test variants, multi-variant flags |
+| `isFeatureEnabled(key, userId, opts)` | `boolean` | Simple on/off flags |
+| `getAllFeatureFlags(userId)` | `Record<string, string \| boolean>` | Bootstrap client-side flags |
+
 ### Basic Flag Evaluation
 
 ```typescript
