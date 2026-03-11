@@ -40,7 +40,7 @@ Invoke this skill when:
 
 ```bash
 # Get issue details
-pnpm --filter @repo/scripts linear issues get --issue PRA-19
+pnpm --filter @repo/scripts linear issues view --issue PRA-19
 
 # Verify issue is in Ready state (not Inbox or Backlog)
 # Move to In Progress
