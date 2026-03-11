@@ -170,8 +170,10 @@ After adding models, run:
 # Generate Prisma client and Zod schemas
 pnpm --filter @repo/database generate
 
-# Create migration (required - never use push for schema changes)
-pnpm --filter @repo/database migrate
+# Create and apply migration (follow prisma-migrate skill for full workflow)
+# Never use push for schema changes - use the staging script instead:
+pnpm --filter @repo/scripts prisma:stage --name add-my-tool-models
+pnpm --filter @repo/database migrate:execute
 ```
 
 ### Step 3: Create Query Helpers
