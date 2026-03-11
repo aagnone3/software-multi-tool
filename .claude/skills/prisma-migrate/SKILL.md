@@ -48,11 +48,17 @@ When developers use `push` during local development:
 
 ```bash
 # 1. Edit schema.prisma
-# 2. Create migration (NEVER use push!)
-pnpm --filter @repo/database migrate dev --name add-user-preferences
+# 2. Validate environment
+pnpm --filter @repo/scripts prisma:validate
 
-# 3. Review the generated migration file
-# 4. Run tests to verify
+# 3. Stage migration (NEVER use push!)
+pnpm --filter @repo/scripts prisma:stage --name add-user-preferences
+
+# 4. Review the generated migration file
+# 5. Execute the staged migration
+pnpm --filter @repo/database migrate:execute
+
+# 6. Run tests to verify
 pnpm test
 ```
 
