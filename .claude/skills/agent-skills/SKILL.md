@@ -186,6 +186,8 @@ Invoke this skill when:
 - Optimizing skill descriptions for discovery
 - Structuring skill content for progressive disclosure
 
+**Activation keywords**: create skill, write skill, skill authoring, skill best practices, improve skill, skill review, skill quality, skill discoverability, SKILL.md, progressive disclosure
+
 ## Related Skills
 
 - **architecture**: Understand codebase structure when documenting
