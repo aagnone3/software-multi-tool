@@ -110,7 +110,7 @@ if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
 }
 ```
 
-1. Run tests:
+3. Run tests:
 
 ```bash
 VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
