@@ -24,6 +24,7 @@ Enables parallel development with isolated git worktrees for concurrent features
 | **Remove worktree** | `pnpm worktree:remove <worktree-name>` |
 | **List worktrees** | `pnpm worktree:list` |
 | Prune stale refs | `git worktree prune` |
+| **⚠ New migrations** | `pnpm supabase:reset` (all worktrees share one DB) |
 
 ## When to Use This Skill
 
