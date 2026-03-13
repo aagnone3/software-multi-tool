@@ -17,31 +17,15 @@ allowed-tools:
 
 **CRITICAL:** Before ANY GitHub CLI or API operation, ensure the aagnone3 account is active.
 
-#### Checking Active Account
-
-Always check which account is currently active before performing GitHub operations:
-
 ```bash
+# Check active account (look for "Active account: true")
 gh auth status
-```
 
-Look for the line that says `- Active account: true` to identify which account is currently active.
-
-#### Switching to aagnone3 Account
-
-If the active account is not aagnone3, switch to it:
-
-```bash
+# Switch if not aagnone3
 gh auth switch -u aagnone3
 ```
 
-Verify the switch succeeded by running `gh auth status` again.
-
-#### Available Accounts
-
-This system may have multiple GitHub accounts configured. Use:
-
-- `aagnone3` - **USE THIS ACCOUNT** (has access to aagnone3 repositories)
+This system may have multiple GitHub accounts configured. Only `aagnone3` has access to aagnone3 repositories.
 
 ### Repository Information
 

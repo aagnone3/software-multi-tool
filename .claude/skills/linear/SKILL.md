@@ -56,11 +56,12 @@ pnpm --filter @repo/scripts linear <resource> <action> [options]
 
 Use this skill when:
 
-- User mentions a Linear issue key (e.g., PRA-21, PRA-30)
-- Working with Linear projects, milestones, or issues
-- Starting work on an issue
-- Closing completed work (after PR merge)
+- Querying or updating Linear issues, projects, milestones, or dependencies via CLI
+- Looking up issue details or state (e.g., "what's in PRA-21?")
+- Closing completed issues after PR merge
 - Managing project dependencies and milestones
+
+**For full development workflow** (implement → PR → merge), use the **linear-workflow** skill instead.
 
 **Activation keywords**: Linear, PRA-, issue, project, milestone, dependency, close issue
 
