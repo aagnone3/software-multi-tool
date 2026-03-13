@@ -191,22 +191,17 @@ Seven AI-powered processors using Claude via `executePrompt()`:
 
 ### Step 1: Choose the Right Model
 
-Use `MODEL_RECOMMENDATIONS` for the codebase defaults, or specify a Claude 4.x model ID directly for new processors:
+**Prefer explicit model ID strings for new processors.** `MODEL_RECOMMENDATIONS` maps to legacy constants; use current IDs directly:
 
 ```typescript
-import { MODEL_RECOMMENDATIONS, CLAUDE_MODELS } from "@repo/agent-sdk";
-
 // For structured extraction (invoices, forms) — Haiku tier
-const model = MODEL_RECOMMENDATIONS.structured;        // codebase default
-const model = "claude-haiku-4-5-20251001";            // explicit current ID
+const model = "claude-haiku-4-5-20251001";
 
 // For complex analysis (contracts, feedback) — Sonnet tier
-const model = MODEL_RECOMMENDATIONS.analysis;          // codebase default (older)
-const model = "claude-sonnet-4-6";                    // explicit current ID
+const model = "claude-sonnet-4-6";
 
 // For creative tasks — Opus tier
-const model = MODEL_RECOMMENDATIONS.creative;          // codebase default (older)
-const model = "claude-opus-4-6";                      // explicit current ID
+const model = "claude-opus-4-6";
 ```
 
 ### Step 2: Define Your Prompt
