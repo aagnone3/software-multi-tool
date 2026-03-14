@@ -317,4 +317,5 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 - **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)
 - **better-auth**: User authentication for multi-tenant path isolation
 - **application-environments**: Supabase storage configuration
+- **cicd**: Configuring storage buckets in seed.sql for preview branch environments
 - **debugging**: Troubleshooting file upload and storage issues
