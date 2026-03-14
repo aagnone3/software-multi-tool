@@ -40,18 +40,6 @@ If your `.env.local` points to port `5432`, the database configuration is incorr
 | Supabase Preview      | Remote   | PR testing, integration     |
 | ~~Homebrew Postgres~~ | ~~5432~~ | ❌ **Never use**            |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Setting up local development environment
-- Understanding preview vs production deployments
-- Configuring environment variables
-- Troubleshooting environment-specific issues
-- Starting Supabase local for full-stack development
-
-**Activation keywords**: local dev, preview environment, environment setup, Supabase local, env variables
-
 ### Complete Local Setup Workflow
 
 When setting up local development for the first time:
@@ -252,6 +240,18 @@ pnpm supabase:reset
 ```
 
 **Common scenario**: You created a worktree for a feature branch that adds new database tables. The shared Supabase local instance still has the schema from `main`.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Setting up local development environment
+- Understanding preview vs production deployments
+- Configuring environment variables
+- Troubleshooting environment-specific issues
+- Starting Supabase local for full-stack development
+
+**Activation keywords**: local dev, preview environment, environment setup, Supabase local, env variables, supabase start, pnpm setup, database connection
 
 ## Related Skills
 
