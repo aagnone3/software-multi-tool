@@ -34,7 +34,7 @@ Use git worktrees when you need to:
 - **Hotfix workflow**: Create urgent fixes from main while continuing feature development
 - **Isolated testing**: Run integration tests in parallel across different branches
 
-**Activation keywords**: parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work
+**Activation keywords**: worktree, worktrees, git worktree, parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work
 
 ## Why Worktrees Are Mandatory
 
