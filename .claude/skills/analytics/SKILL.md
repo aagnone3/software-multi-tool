@@ -1,6 +1,6 @@
 ---
 name: tracking-analytics
-description: Event tracking with PostHog including user identification, feature flags, A/B testing, and pluggable provider architecture with client hooks, server-side tracking, and PostHog configuration. Use when implementing event tracking, setting up PostHog, switching analytics providers, or debugging analytics.
+description: Event tracking with PostHog including user identification, pluggable provider architecture with client hooks, server-side tracking, tool usage analytics, and PostHog configuration. Use when implementing event tracking, setting up PostHog, switching analytics providers, debugging analytics, or tracking tool usage.
 allowed-tools:
   - Read
   - Edit
@@ -208,7 +208,7 @@ Invoke this skill when:
 - Configuring PostHog options (EU hosting, person profiles)
 - Adding analytics to new tools (see `tool-analytics.md`)
 
-**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, A/B test, user identification, analytics provider, usage tracking, tool analytics, server analytics
+**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, user identification, analytics provider, usage tracking, tool analytics, server analytics
 
 ## Common Event Patterns
 
