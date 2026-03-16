@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,8 +65,8 @@ jobs:
           Automatically synced by CI to enable Supabase preview branch validation.
 
           🤖 Generated with GitHub Actions"
-          if ! git push; then
-            echo "::warning::Failed to push synced migrations. This may be due to branch protection rules."
+          if ! git push origin HEAD:${{ github.event.pull_request.head.ref }}; then
+            echo "::warning::Failed to push synced migrations back to the PR branch '${{ github.event.pull_request.head.ref }}'. This may be due to branch protection rules or token permissions."
             echo "::warning::Please run './tooling/scripts/src/supabase/sync-prisma-to-supabase.sh' locally and commit the changes."
             exit 1
           fi
