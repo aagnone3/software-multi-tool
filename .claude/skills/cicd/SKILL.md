@@ -201,3 +201,4 @@ Invoke this skill when:
 - **git-worktrees**: Worktree-based development and branch workflows
 - **debugging**: Troubleshooting preview environment and deployment issues
 - **github-cli**: GitHub operations and PR management
+- **storage**: Storage bucket configuration in seed.sql for preview branches

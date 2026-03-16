@@ -407,7 +407,7 @@ Invoke this skill when:
 - Performance investigation
 - Tracing requests across services
 
-**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout
+**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout, migration error, database query, prisma error, database failing
 
 ## Related Skills
 
