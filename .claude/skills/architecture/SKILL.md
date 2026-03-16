@@ -68,16 +68,17 @@ All backend logic lives in `packages/`:
 
 | Package          | Purpose                                               | Key Files                                |
 | ---------------- | ----------------------------------------------------- | ---------------------------------------- |
-| `@repo/api`      | Hono + oRPC typed API routes                          | `index.ts`, `orpc/router.ts`, `modules/` |
-| `@repo/auth`     | better-auth with passkeys, magic links, organizations | `auth.ts`, `client.ts`                   |
-| `@repo/database` | Prisma schema, generated types, Zod schemas           | `prisma/schema.prisma`                   |
-| `@repo/payments` | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
-| `@repo/mail`     | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
-| `@repo/storage`  | Supabase file/image storage                           | `index.ts`                               |
-| `@repo/ai`        | Vercel AI SDK (OpenAI chat, image, audio streaming)   | `index.ts`                               |
-| `@repo/agent-sdk` | Anthropic/Claude SDK for AI processors               | `index.ts`, `src/`                       |
-| `@repo/logs`      | Centralized logging (consola)                         | `index.ts`                               |
-| `@repo/utils`     | Shared utility functions                              | `index.ts`                               |
+| `@repo/api`        | Hono + oRPC typed API routes                          | `index.ts`, `orpc/router.ts`, `modules/` |
+| `@repo/auth`       | better-auth with passkeys, magic links, organizations | `auth.ts`, `client.ts`                   |
+| `@repo/database`   | Prisma schema, generated types, Zod schemas           | `prisma/schema.prisma`                   |
+| `@repo/payments`   | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
+| `@repo/mail`       | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
+| `@repo/storage`    | Supabase file/image storage                           | `index.ts`                               |
+| `@repo/agent-sdk`  | Anthropic/Claude SDK with executePrompt and AI processors | `src/`                               |
+| `@repo/ai`         | Vercel AI SDK (OpenAI chat, image, audio streaming)   | `index.ts`                               |
+| `@repo/logs`       | Centralized logging (consola)                         | `index.ts`                               |
+| `@repo/utils`      | Shared utility functions                              | `index.ts`                               |
+
 
 ### Configuration
 
