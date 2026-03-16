@@ -32,7 +32,7 @@ Invoke this skill when:
 - User wants to merge a PR and close the associated issue
 - User mentions Linear issue keys or asks about workflow steps
 
-**Activation keywords**: work on PRA-, start issue, Linear ticket, create PR, close issue
+**Activation keywords**: work on PRA-, start issue, Linear ticket, create PR, close issue, implement, implementing, development workflow
 
 ## Core Workflow
 
