@@ -10,7 +10,7 @@ allowed-tools:
   - Glob
 ---
 
-# AI/LLM Skill
+# AI Integration Skill
 
 ## Quick Reference
 
