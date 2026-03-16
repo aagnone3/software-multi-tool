@@ -949,8 +949,8 @@ importers:
         specifier: 2.91.1
         version: 2.91.1
       file-type:
-        specifier: 21.3.0
-        version: 21.3.0
+        specifier: 21.3.2
+        version: 21.3.2
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.13
@@ -7035,8 +7035,8 @@ packages:
     resolution: {integrity: sha512-QgXo+mXTe8ljeqUFaX3QVHc5osSItJ/Km+xpocx0aSqWGMSCf6qYs/VnzZgS864Pjn5iceMRFigeAV7AfTlaig==}
     engines: {node: '>= 12'}
 
-  file-type@21.3.0:
-    resolution: {integrity: sha512-8kPJMIGz1Yt/aPEwOsrR97ZyZaD1Iqm8PClb1nYFclUCkBi0Ma5IsYNQzvSFS9ib51lWyIw5mIT9rWzI/xjpzA==}
+  file-type@21.3.2:
+    resolution: {integrity: sha512-DLkUvGwep3poOV2wpzbHCOnSKGk1LzyXTv+aHFgN2VFl96wnp8YA9YjO2qPzg5PuL8q/SW9Pdi6WTkYOIh995w==}
     engines: {node: '>=20'}
 
   fill-range@7.1.1:
@@ -17181,7 +17181,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  file-type@21.3.0:
+  file-type@21.3.2:
     dependencies:
       '@tokenizer/inflate': 0.4.1
       strtok3: 10.3.4
