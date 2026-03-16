@@ -129,10 +129,10 @@ gh pr status  # Check PR status
 ### Step 2: Remove Worktree
 
 ```bash
-# From parent repository
-git worktree remove .worktrees/feat-pra-35-auth
+# From parent repository (uses pnpm script for clean removal)
+pnpm worktree:remove feat-pra-35-auth
 
-# Force removal (if uncommitted changes exist)
+# Or manually if script is unavailable
 git worktree remove .worktrees/feat-pra-35-auth --force
 ```
 

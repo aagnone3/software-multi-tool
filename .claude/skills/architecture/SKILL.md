@@ -74,9 +74,10 @@ All backend logic lives in `packages/`:
 | `@repo/payments` | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
 | `@repo/mail`     | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
 | `@repo/storage`  | Supabase file/image storage                           | `index.ts`                               |
-| `@repo/ai`       | Vercel AI SDK integration                             | `index.ts`                               |
-| `@repo/logs`     | Centralized logging (consola)                         | `index.ts`                               |
-| `@repo/utils`    | Shared utility functions                              | `index.ts`                               |
+| `@repo/ai`        | Vercel AI SDK (OpenAI chat, image, audio streaming)   | `index.ts`                               |
+| `@repo/agent-sdk` | Anthropic/Claude SDK for AI processors               | `index.ts`, `src/`                       |
+| `@repo/logs`      | Centralized logging (consola)                         | `index.ts`                               |
+| `@repo/utils`     | Shared utility functions                              | `index.ts`                               |
 
 ### Configuration
 
