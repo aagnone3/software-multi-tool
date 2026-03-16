@@ -619,8 +619,8 @@ importers:
         specifier: 1.11.0
         version: 1.11.0
       nanoid:
-        specifier: 5.1.6
-        version: 5.1.6
+        specifier: 5.1.7
+        version: 5.1.7
       openai:
         specifier: 6.16.0
         version: 6.16.0(ws@8.19.0)(zod@4.3.5)
@@ -1054,8 +1054,8 @@ importers:
         specifier: 4.0.18
         version: 4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       nanoid:
-        specifier: 5.1.6
-        version: 5.1.6
+        specifier: 5.1.7
+        version: 5.1.7
       tsx:
         specifier: 4.21.0
         version: 4.21.0
@@ -8300,8 +8300,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.6:
-    resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
+  nanoid@5.1.7:
+    resolution: {integrity: sha512-ua3NDgISf6jdwezAheMOk4mbE1LXjm1DfMUDMuJf4AqxLFK3ccGpgWizwa5YV7Yz9EpXwEaWoRXSb/BnV0t5dQ==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -14044,7 +14044,7 @@ snapshots:
   '@scalar/types@0.6.9':
     dependencies:
       '@scalar/helpers': 0.2.17
-      nanoid: 5.1.6
+      nanoid: 5.1.7
       type-fest: 5.4.4
       zod: 4.3.5
 
@@ -18818,7 +18818,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  nanoid@5.1.6: {}
+  nanoid@5.1.7: {}
 
   nanostores@1.1.1: {}
 
