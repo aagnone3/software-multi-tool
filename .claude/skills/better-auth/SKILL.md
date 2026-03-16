@@ -395,6 +395,7 @@ Invoke this skill when:
 - **prisma-migrate**: Database migrations for auth schema changes
 - **analytics**: User identification for analytics tracking
 - **application-environments**: Environment configuration for auth URLs
+- **stripe-webhooks**: Subscription management requires auth for customer/organization lookup
 
 ## Additional Resources
 
