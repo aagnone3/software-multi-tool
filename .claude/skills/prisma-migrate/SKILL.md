@@ -416,8 +416,6 @@ Invoke this skill when:
 
 **Activation keywords**: migration, prisma, schema.prisma, database schema, prisma migrate, schema change, add column, add table, migrate
 
-**Note**: Background jobs are handled by **Inngest**. See the architecture skill for Inngest documentation.
-
 ## Related Skills
 
 - **architecture**: Overall database and backend architecture
