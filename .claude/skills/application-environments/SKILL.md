@@ -86,11 +86,16 @@ pnpm dev      # Start Next.js dev server
 
 ### Frontend-Only Development
 
-For fast iteration without backend:
+For fast iteration on UI without a running database:
 
+```bash
+pnpm dev   # Start Next.js without Supabase (API calls will fail)
+```
+
+Suitable for:
 - Component development and styling
 - TypeScript checking and linting
-- Hot reload
+- Storybook (`pnpm --filter web storybook`)
 
 ### Full-Stack Local (Supabase)
 

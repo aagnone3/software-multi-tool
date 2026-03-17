@@ -98,31 +98,25 @@ interface PromptResult {
 
 ### Available Models
 
-**For new processors, use these model IDs directly:**
+**For new processors, use explicit model ID strings:**
 
 | Tier | Model ID | Use Case |
 | ---- | -------- | -------- |
-| Haiku 4.5 | `claude-haiku-4-5-20251001` | Fast structured extraction |
-| Sonnet 4.6 | `claude-sonnet-4-6` | Balanced analysis |
-| Opus 4.6 | `claude-opus-4-6` | Complex/creative tasks |
+| Haiku | `claude-haiku-4-5-20251001` | Fast structured extraction |
+| Sonnet | `claude-sonnet-4-6` | Balanced analysis |
+| Opus | `claude-opus-4-6` | Complex/creative tasks |
+
+> **Model IDs change as new versions release.** Always verify current IDs in `packages/agent-sdk/src/` or at [docs.anthropic.com](https://docs.anthropic.com/en/docs/about-claude/models) before adding a new processor.
 
 **Codebase constants** (from `packages/agent-sdk/src/`):
 
-> **Note**: `CLAUDE_MODELS` constants may reference older model IDs. Prefer the model IDs in the table above for new processors.
+> **Note**: `CLAUDE_MODELS` constant names use older Claude generation naming (e.g., `HAIKU_3_5` currently maps to Haiku 4.5). Prefer explicit model ID strings for new processors.
 
 ```typescript
 const CLAUDE_MODELS = {
-  HAIKU_3_5: "claude-haiku-4-5-20251001",      // Fast, cost-effective (Haiku 4.5)
-  SONNET_3: "claude-3-sonnet-20240229",         // Legacy
-  SONNET_3_5_V1: "claude-3-5-sonnet-20240620", // Legacy
-  SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Legacy — prefer Sonnet 4.x
-  OPUS_3: "claude-3-opus-20240229",            // Legacy — prefer Opus 4.x
-};
-
-const MODEL_RECOMMENDATIONS = {
-  structured: CLAUDE_MODELS.HAIKU_3_5,   // JSON, classification
-  analysis: CLAUDE_MODELS.SONNET_3_5_V2, // Complex reasoning (update to Sonnet 4.x for new work)
-  creative: CLAUDE_MODELS.OPUS_3,        // Creative writing (update to Opus 4.x for new work)
+  HAIKU_3_5: "claude-haiku-4-5-20251001",      // Currently Haiku 4.5 (name is legacy)
+  SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Legacy — use claude-sonnet-4-6 for new work
+  OPUS_3: "claude-3-opus-20240229",            // Legacy — use claude-opus-4-6 for new work
 };
 ```
 
@@ -154,9 +148,9 @@ For new processors, use the current model IDs in the table above. `MODEL_RECOMME
 
 | Capability Tier | Speed | Cost | Temperature | Best For |
 | --------------- | ----- | ---- | ----------- | -------- |
-| **Haiku** (fast) | Fast | Low | 0.1 | Structured extraction, JSON, classification |
-| **Sonnet** (balanced) | Medium | Medium | 0.2-0.3 | Complex analysis, reasoning, summarization |
-| **Opus** (most capable) | Slow | High | 0.5-1.0 | Creative writing, nuanced tasks |
+| **Haiku** | Fast | Low | 0.1 | Structured extraction, JSON, classification |
+| **Sonnet** | Medium | Medium | 0.2-0.3 | Complex analysis, reasoning, summarization |
+| **Opus** | Slow | High | 0.5-1.0 | Creative writing, nuanced tasks |
 
 ### Temperature Guidelines
 
