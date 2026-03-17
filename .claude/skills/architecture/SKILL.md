@@ -74,8 +74,8 @@ All backend logic lives in `packages/`:
 | `@repo/payments`   | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
 | `@repo/mail`       | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
 | `@repo/storage`    | Supabase file/image storage                           | `index.ts`                               |
-| `@repo/agent-sdk`  | Anthropic/Claude SDK with executePrompt and AI processors | `src/`                               |
-| `@repo/ai`         | Vercel AI SDK (OpenAI chat, image, audio streaming)   | `index.ts`                               |
+| `@repo/agent-sdk`  | Anthropic/Claude SDK with `executePrompt` and AI processors | `src/`                           |
+| `@repo/ai`         | Vercel AI SDK (OpenAI chat, image, audio streaming)         | `index.ts`                       |
 | `@repo/logs`       | Centralized logging (consola)                         | `index.ts`                               |
 | `@repo/utils`      | Shared utility functions                              | `index.ts`                               |
 
@@ -346,9 +346,11 @@ See the **tools skill** for detailed credit system documentation.
 
 ### AI
 
-- **Vercel AI SDK** for LLM abstraction
-- Providers: OpenAI (GPT), Anthropic (Claude)
-- Configuration: `packages/ai/`
+**Skill available**: Use the `ai` skill for detailed AI integration guidance.
+
+- **@repo/agent-sdk**: Anthropic/Claude integration with `executePrompt()` and AI processors
+- **@repo/ai**: Vercel AI SDK for OpenAI chat, image, and audio streaming
+- Configuration: `packages/agent-sdk/`, `packages/ai/`
 
 ## Deployment Infrastructure
 
@@ -401,6 +403,7 @@ Invoke this skill when:
 - **analytics**: Event tracking and user identification
 - **feature-flags**: A/B testing and progressive rollouts
 - **storage**: File upload and storage patterns
+- **ai**: AI/LLM processor implementation and model selection
 - **linear**: Project management integration
 - **github-cli**: GitHub operations
 
