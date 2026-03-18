@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import {
 	buildVitestArgs,
 	hasWorkingContainerRuntime,
+	shouldWarnAboutDockerlessFallback,
 } from "@repo/database/tests/container-runtime.mjs";
 
 const includeIntegration = hasWorkingContainerRuntime();
@@ -14,7 +15,7 @@ const vitestArgs = [
 	...passthroughArgs,
 ];
 
-if (!includeIntegration) {
+if (shouldWarnAboutDockerlessFallback({ includeIntegration })) {
 	console.warn(
 		"[api:test] No working Docker/Podman runtime detected. Running the non-integration Vitest slice only. Use `pnpm --filter @repo/api test:integration` in a Docker/Podman-capable environment to exercise the Postgres harness-backed tests.",
 	);

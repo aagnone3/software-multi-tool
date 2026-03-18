@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildVitestArgs,
 	hasWorkingContainerRuntime,
+	shouldWarnAboutDockerlessFallback,
 } from "./container-runtime.mjs";
 
 describe("database test runtime detection", () => {
@@ -57,5 +58,34 @@ describe("database Vitest argument builder", () => {
 			"--exclude",
 			"**/*.integration.test.ts",
 		]);
+	});
+});
+
+describe("Dockerless fallback warnings", () => {
+	it("stays quiet by default in Dockerless runners", () => {
+		expect(
+			shouldWarnAboutDockerlessFallback({
+				includeIntegration: false,
+				env: {},
+			}),
+		).toBe(false);
+	});
+
+	it("allows an explicit opt-in warning when needed", () => {
+		expect(
+			shouldWarnAboutDockerlessFallback({
+				includeIntegration: false,
+				env: { REPO_TEST_RUNTIME_NOTICE: "1" },
+			}),
+		).toBe(true);
+	});
+
+	it("never warns when integration tests are actually in scope", () => {
+		expect(
+			shouldWarnAboutDockerlessFallback({
+				includeIntegration: true,
+				env: { REPO_TEST_RUNTIME_NOTICE: "1" },
+			}),
+		).toBe(false);
 	});
 });

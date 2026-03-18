@@ -39,3 +39,14 @@ export function buildVitestArgs({ includeIntegration }) {
 
 	return args;
 }
+
+export function shouldWarnAboutDockerlessFallback({
+	includeIntegration,
+	env = process.env,
+}) {
+	if (includeIntegration) {
+		return false;
+	}
+
+	return env.REPO_TEST_RUNTIME_NOTICE === "1";
+}
