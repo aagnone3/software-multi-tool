@@ -6,7 +6,6 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -70,20 +69,16 @@ import { InvoiceProcessorTool } from "./InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "./MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "./SpeakerSeparationTool";
 
-// Helper to create a wrapper with QueryClientProvider for components that use React Query
-const createQueryWrapper = () => {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: { retry: false },
-			mutations: { retry: false },
-		},
-	});
-	return ({ children }: { children: React.ReactNode }) => (
-		<QueryClientProvider client={queryClient}>
-			{children}
-		</QueryClientProvider>
-	);
-};
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: { retry: false },
+		mutations: { retry: false },
+	},
+});
+
+const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
+	<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 describe("InvoiceProcessorTool", () => {
 	beforeEach(() => {
@@ -91,7 +86,7 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("renders the invoice processor form with tabs", () => {
-		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+		render(<InvoiceProcessorTool />, { wrapper: QueryWrapper });
 
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
 		// Default tab is Upload File
@@ -104,7 +99,7 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("shows validation error when no file is uploaded", () => {
-		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+		render(<InvoiceProcessorTool />, { wrapper: QueryWrapper });
 
 		// File upload tab is active by default, submit button should be disabled
 		// when no file is selected in file mode
@@ -115,16 +110,15 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("submits form with correct tool slug using text input", async () => {
-		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-123" } });
 
-		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+		render(<InvoiceProcessorTool />, { wrapper: QueryWrapper });
 
 		// Switch to Paste Text mode using the button toggle
 		const pasteTextButton = screen.getByRole("button", {
 			name: /Paste Text/i,
 		});
-		await user.click(pasteTextButton);
+		fireEvent.click(pasteTextButton);
 
 		// Wait for the textarea to appear after mode switch
 		await waitFor(() => {
@@ -136,12 +130,14 @@ describe("InvoiceProcessorTool", () => {
 		const textarea = screen.getByPlaceholderText(
 			"Paste your invoice text here...",
 		);
-		await user.type(textarea, "Test invoice content");
+		fireEvent.change(textarea, {
+			target: { value: "Test invoice content" },
+		});
 
 		const submitButton = screen.getByRole("button", {
 			name: "Process Invoice",
 		});
-		await user.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -161,7 +157,7 @@ describe("InvoiceProcessorTool", () => {
 	});
 
 	it("shows upload tab by default", () => {
-		render(<InvoiceProcessorTool />, { wrapper: createQueryWrapper() });
+		render(<InvoiceProcessorTool />, { wrapper: QueryWrapper });
 
 		// The upload tab should be active by default with drag & drop area
 		expect(
@@ -192,13 +188,12 @@ describe("ContractAnalyzerTool", () => {
 	});
 
 	it("shows validation error when no file or text is provided", async () => {
-		const user = userEvent.setup();
 		render(<ContractAnalyzerTool />);
 
 		const submitButton = screen.getByRole("button", {
 			name: "Analyze Contract",
 		});
-		await user.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(
@@ -208,31 +203,27 @@ describe("ContractAnalyzerTool", () => {
 	});
 
 	it("submits form with correct tool slug using text input", async () => {
-		const user = userEvent.setup();
 		mockMutateAsync.mockResolvedValue({ job: { id: "job-456" } });
 
 		render(<ContractAnalyzerTool />);
 
-		// Switch to Paste Text tab using userEvent for Radix tabs
 		const pasteTextTab = screen.getByRole("tab", { name: /Paste Text/i });
-		await user.click(pasteTextTab);
-
-		// Wait for the textarea to appear after tab switch
-		await waitFor(() => {
-			expect(
-				screen.getByPlaceholderText("Paste your contract text here..."),
-			).toBeInTheDocument();
+		await act(async () => {
+			fireEvent.mouseDown(pasteTextTab);
+			fireEvent.click(pasteTextTab);
 		});
 
-		const textarea = screen.getByPlaceholderText(
+		const textarea = await screen.findByPlaceholderText(
 			"Paste your contract text here...",
 		);
-		await user.type(textarea, "Test contract content");
+		fireEvent.change(textarea, {
+			target: { value: "Test contract content" },
+		});
 
 		const submitButton = screen.getByRole("button", {
 			name: "Analyze Contract",
 		});
-		await user.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mockMutateAsync).toHaveBeenCalledWith({
