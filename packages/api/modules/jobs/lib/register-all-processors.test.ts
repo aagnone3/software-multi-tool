@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as processorRegistry from "./processor-registry";
+import { registerContractProcessor } from "../../contract-analyzer";
+import { registerExpenseProcessor } from "../../expense-categorizer";
+import { registerFeedbackProcessor } from "../../feedback-analyzer";
+import { registerGdprExporterProcessor } from "../../gdpr-exporter";
+import { registerInvoiceProcessor } from "../../invoice-processor";
+import { registerMeetingProcessor } from "../../meeting-summarizer";
+import { registerSpeakerSeparationProcessor } from "../../speaker-separation";
 
-// Mock the processor registration functions
 vi.mock("../../invoice-processor", () => ({
 	registerInvoiceProcessor: vi.fn(),
 }));
@@ -20,56 +25,46 @@ vi.mock("../../meeting-summarizer", () => ({
 vi.mock("../../gdpr-exporter", () => ({
 	registerGdprExporterProcessor: vi.fn(),
 }));
+vi.mock("../../speaker-separation", () => ({
+	registerSpeakerSeparationProcessor: vi.fn(),
+}));
+
+const loadSubject = async () => {
+	vi.resetModules();
+	return import("./register-all-processors");
+};
 
 describe("registerAllProcessors", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.resetModules();
 	});
 
 	it("registers all processors", async () => {
-		const registerProcessorSpy = vi.spyOn(
-			processorRegistry,
-			"registerProcessor",
-		);
-
-		const { registerAllProcessors } = await import(
-			"./register-all-processors"
-		);
+		const { registerAllProcessors } = await loadSubject();
 		registerAllProcessors();
 
-		// Verify each tool's register function was called
-		const invoiceProcessor = await import("../../invoice-processor");
-		const contractAnalyzer = await import("../../contract-analyzer");
-		const feedbackAnalyzer = await import("../../feedback-analyzer");
-		const expenseCategorizer = await import("../../expense-categorizer");
-		const meetingSummarizer = await import("../../meeting-summarizer");
-		const gdprExporter = await import("../../gdpr-exporter");
-
-		expect(invoiceProcessor.registerInvoiceProcessor).toHaveBeenCalled();
-		expect(contractAnalyzer.registerContractProcessor).toHaveBeenCalled();
-		expect(feedbackAnalyzer.registerFeedbackProcessor).toHaveBeenCalled();
-		expect(expenseCategorizer.registerExpenseProcessor).toHaveBeenCalled();
-		expect(meetingSummarizer.registerMeetingProcessor).toHaveBeenCalled();
-		expect(gdprExporter.registerGdprExporterProcessor).toHaveBeenCalled();
-
-		registerProcessorSpy.mockRestore();
+		expect(registerInvoiceProcessor).toHaveBeenCalledTimes(1);
+		expect(registerContractProcessor).toHaveBeenCalledTimes(1);
+		expect(registerFeedbackProcessor).toHaveBeenCalledTimes(1);
+		expect(registerExpenseProcessor).toHaveBeenCalledTimes(1);
+		expect(registerMeetingProcessor).toHaveBeenCalledTimes(1);
+		expect(registerGdprExporterProcessor).toHaveBeenCalledTimes(1);
+		expect(registerSpeakerSeparationProcessor).toHaveBeenCalledTimes(1);
 	});
 
 	it("only registers processors once", async () => {
-		vi.resetModules();
-
-		const { registerAllProcessors } = await import(
-			"./register-all-processors"
-		);
+		const { registerAllProcessors } = await loadSubject();
 
 		registerAllProcessors();
 		registerAllProcessors();
 		registerAllProcessors();
 
-		const invoiceProcessor = await import("../../invoice-processor");
-		expect(invoiceProcessor.registerInvoiceProcessor).toHaveBeenCalledTimes(
-			1,
-		);
+		expect(registerInvoiceProcessor).toHaveBeenCalledTimes(1);
+		expect(registerContractProcessor).toHaveBeenCalledTimes(1);
+		expect(registerFeedbackProcessor).toHaveBeenCalledTimes(1);
+		expect(registerExpenseProcessor).toHaveBeenCalledTimes(1);
+		expect(registerMeetingProcessor).toHaveBeenCalledTimes(1);
+		expect(registerGdprExporterProcessor).toHaveBeenCalledTimes(1);
+		expect(registerSpeakerSeparationProcessor).toHaveBeenCalledTimes(1);
 	});
 });
