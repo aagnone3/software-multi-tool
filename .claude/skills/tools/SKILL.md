@@ -338,7 +338,7 @@ Invoke this skill when:
 - Configuring middleware routing for public tools
 - Working with the tool registry configuration
 
-**Activation keywords**: tool registry, register tool, credit costs, public tools, private tools, tool access, credit packs, tool configuration
+**Activation keywords**: tool registry, register tool, credit costs, public tools, private tools, tool access, credit packs, tool configuration, add tool, tool slug, creditCost, tool enabled, tool icon, config/index.ts tools, ToolConfig
 
 ## Additional Resources
 

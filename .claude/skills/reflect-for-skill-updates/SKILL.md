@@ -36,7 +36,7 @@ Invoke this skill when:
 - You discovered a **gotcha** that others will likely hit too
 - The user explicitly asks: "Any skills need updating?"
 
-**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned
+**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, lessons learned, post-mortem
 
 ## Reflection Process
 
@@ -178,10 +178,15 @@ Use this template to structure your reflection:
 | Skill | Common Gaps |
 | ----- | ----------- |
 | `git-worktrees` | Environment setup, port conflicts, database URLs |
-| `architecture` | New integrations, changed patterns |
-| `prisma-migrate` | Migration edge cases, schema changes |
-| `better-auth` | Auth configuration, session handling |
+| `architecture` | New integrations, changed patterns, new packages |
+| `prisma-migrate` | Migration edge cases, schema changes, new commands |
+| `better-auth` | Auth configuration, session handling, new plugins |
 | `linear-workflow` | Workflow steps, Linear API changes |
+| `application-environments` | New services, environment variables, setup steps |
+| `debugging` | New error patterns, new platform quirks |
+| `cicd` | New GitHub Actions workflows, new CI checks |
+| `sub-app` | New tool patterns, job queue changes |
+| `ai` | Model ID changes, new SDK exports, new processors |
 
 ## Related Skills
 

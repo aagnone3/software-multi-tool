@@ -52,7 +52,7 @@ Invoke this skill when:
 - Switching between GitHub accounts
 - Troubleshooting GitHub CLI authentication
 
-**Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api
+**Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api, merge PR, close PR, gh pr create, gh pr merge, gh issue, repo, repository, gh auth, authentication, aagnone3
 
 ## Common Workflows
 

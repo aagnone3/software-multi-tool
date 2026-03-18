@@ -35,7 +35,7 @@ Invoke this skill when:
 - Simulating time advancement for subscription testing
 - Troubleshooting "No such price" or payment source errors
 
-**Activation keywords**: stripe webhooks, webhook testing, stripe listen, test clock, stripe account mismatch, subscription renewal testing
+**Activation keywords**: stripe webhooks, webhook testing, stripe listen, test clock, stripe account mismatch, subscription renewal testing, payment webhook, invoice webhook, subscription webhook, stripe CLI, STRIPE_WEBHOOK_SECRET, whsec_, stripe trigger, checkout.session.completed, customer.subscription
 
 ## Quick Start
 
