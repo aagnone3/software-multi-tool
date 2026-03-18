@@ -8,6 +8,18 @@ import {
 } from "../../../../tests/fixtures/external-services";
 import { contactRouter } from "./router";
 
+const { mockLoggerError, mockLoggerLog } = vi.hoisted(() => ({
+	mockLoggerError: vi.fn(),
+	mockLoggerLog: vi.fn(),
+}));
+
+vi.mock("@repo/logs", () => ({
+	logger: {
+		error: mockLoggerError,
+		log: mockLoggerLog,
+	},
+}));
+
 vi.mock("@repo/mail", () => mockMailModule());
 
 describe("Contact Router", () => {
