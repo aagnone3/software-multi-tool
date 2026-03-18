@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetExternalServicesMocks } from "../../tests/fixtures/external-services";
 
-const mockGenerateOpenApi = vi.fn(async () => ({
-	paths: {
-		"/session": {
-			get: {},
+const { mockGenerateOpenApi, mockLog } = vi.hoisted(() => ({
+	mockGenerateOpenApi: vi.fn(async () => ({
+		paths: {
+			"/session": {
+				get: {},
+			},
 		},
-	},
+	})),
+	mockLog: vi.fn(),
 }));
 
 vi.mock("@repo/auth", () => ({
@@ -17,8 +20,6 @@ vi.mock("@repo/auth", () => ({
 		},
 	},
 }));
-
-const mockLog = vi.fn();
 
 vi.mock("@repo/logs", () => ({
 	logger: {
@@ -93,6 +94,8 @@ vi.mock("./orpc/router", () => ({
 	router: {},
 }));
 
+import { app } from "./index";
+
 describe("api app", () => {
 	beforeEach(() => {
 		resetExternalServicesMocks();
@@ -103,8 +106,6 @@ describe("api app", () => {
 	});
 
 	it("responds to /api/health requests", async () => {
-		const { app } = await import("./index");
-
 		const res = await app.request("/api/health");
 
 		expect(res.status).toBe(200);
@@ -112,8 +113,6 @@ describe("api app", () => {
 	}, 30000);
 
 	it("exposes merged OpenAPI schema with base URL server entry", async () => {
-		const { app } = await import("./index");
-
 		const res = await app.request("/api/openapi");
 		expect(res.status).toBe(200);
 		const body = await res.json();
