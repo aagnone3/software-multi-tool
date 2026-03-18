@@ -29,18 +29,18 @@ vi.mock("../../speaker-separation", () => ({
 	registerSpeakerSeparationProcessor: vi.fn(),
 }));
 
-const loadSubject = async () => {
-	vi.resetModules();
-	return import("./register-all-processors");
-};
+import {
+	registerAllProcessors,
+	resetRegisteredProcessorsForTests,
+} from "./register-all-processors";
 
 describe("registerAllProcessors", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		resetRegisteredProcessorsForTests();
 	});
 
-	it("registers all processors", async () => {
-		const { registerAllProcessors } = await loadSubject();
+	it("registers all processors", () => {
 		registerAllProcessors();
 
 		expect(registerInvoiceProcessor).toHaveBeenCalledTimes(1);
@@ -52,9 +52,7 @@ describe("registerAllProcessors", () => {
 		expect(registerSpeakerSeparationProcessor).toHaveBeenCalledTimes(1);
 	});
 
-	it("only registers processors once", async () => {
-		const { registerAllProcessors } = await loadSubject();
-
+	it("only registers processors once", () => {
 		registerAllProcessors();
 		registerAllProcessors();
 		registerAllProcessors();
