@@ -436,12 +436,11 @@ describe("toolMiddleware", () => {
 	it("should stop at rate limit if exceeded", async () => {
 		const app = new Hono();
 
-		// Mock rate limit to reject - don't call next(), which blocks the request
+		// Mock rate limit to reject and return a response to keep Hono finalized
 		vi.mocked(
 			rateLimitMiddlewareModule.rateLimitMiddleware,
-		).mockReturnValue(async (_c, _next) => {
-			// Don't call next() to simulate rate limit blocking
-			// The toolMiddleware checks if rateLimitPassed is false
+		).mockReturnValue(async (c, _next) => {
+			c.res = c.json({ error: "Rate limit exceeded" }, 429);
 		});
 
 		app.use("*", async (c, next) => {
@@ -455,11 +454,10 @@ describe("toolMiddleware", () => {
 			(c) => c.json({ success: true }),
 		);
 
-		await app.request("/test");
+		const res = await app.request("/test");
 
-		// When rate limit blocks, toolMiddleware returns early without response
-		// This causes Hono to return 404 (no matching route completed)
-		// The key assertion is that credit check should not have been called
+		expect(res.status).toBe(429);
+		// When rate limit blocks, credit checks should not run.
 		expect(creditsModule.hasCredits).not.toHaveBeenCalled();
 	});
 });
