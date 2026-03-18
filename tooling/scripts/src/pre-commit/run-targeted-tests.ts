@@ -34,6 +34,7 @@ const GLOBAL_FILES = new Set([
 ]);
 
 const GLOBAL_PREFIXES = ["tests/", "tooling/test/"];
+const NO_TEST_PREFIXES = ["apps/web/.env.local.example"];
 const WORKSPACE_ROOTS = new Set(["apps", "packages", "tooling", "config"]);
 const WORKSPACE_PATH_OVERRIDES: Array<{ prefix: string; workspace: string }> = [
 	{
@@ -156,9 +157,32 @@ function tryStat(target: string) {
 	}
 }
 
+function getIndentDepth(indent: string): number {
+	let depth = 0;
+	let pendingSpaces = 0;
+
+	for (const char of indent) {
+		if (char === "\t") {
+			depth += 1;
+			pendingSpaces = 0;
+			continue;
+		}
+
+		if (char === " ") {
+			pendingSpaces += 1;
+			if (pendingSpaces === 2) {
+				depth += 1;
+				pendingSpaces = 0;
+			}
+		}
+	}
+
+	return depth;
+}
+
 function extractChangedTopLevelPackageJsonKeys(diffText: string): string[] {
 	const changedKeys = new Set<string>();
-	let depth = 0;
+	let activeTopLevelKey: string | null = null;
 
 	for (const line of diffText.split("\n")) {
 		if (
@@ -179,17 +203,19 @@ function extractChangedTopLevelPackageJsonKeys(diffText: string): string[] {
 		const content = line.slice(1);
 		const keyMatch = content.match(/^(\s*)"([^"]+)":/);
 		if (keyMatch) {
-			const indent = keyMatch[1].length;
-			depth = Math.floor(indent / 2);
-			if (prefix !== " " && depth === 1) {
-				changedKeys.add(keyMatch[2]);
+			const keyDepth = getIndentDepth(keyMatch[1]);
+			if (keyDepth === 1) {
+				activeTopLevelKey = keyMatch[2];
+				if (prefix !== " ") {
+					changedKeys.add(keyMatch[2]);
+				}
+				continue;
 			}
-			continue;
 		}
 
-		const openBraces = (content.match(/\{/g) ?? []).length;
-		const closeBraces = (content.match(/\}/g) ?? []).length;
-		depth += openBraces - closeBraces;
+		if (prefix !== " " && activeTopLevelKey) {
+			changedKeys.add(activeTopLevelKey);
+		}
 	}
 
 	return Array.from(changedKeys).sort();
@@ -221,7 +247,7 @@ function resolveRootPackageJsonImpact(diffText: string): RootPackageJsonImpact {
 		};
 		const scripts = parsed.scripts ?? {};
 		const changedScriptNames = Array.from(
-			diffText.matchAll(/^[+-]\s{2}"([^"]+)":\s*".*"/gm),
+			diffText.matchAll(/^[+-]\s+"([^"]+)":\s*".*"/gm),
 		)
 			.map((match) => match[1])
 			.filter(
@@ -291,6 +317,12 @@ function classifyFile(relativeFile: string): WorkspaceResolution {
 	for (const prefix of GLOBAL_PREFIXES) {
 		if (normalized.startsWith(prefix)) {
 			return { workspaces: [], global: true };
+		}
+	}
+
+	for (const prefix of NO_TEST_PREFIXES) {
+		if (normalized.startsWith(prefix)) {
+			return { workspaces: [], global: false };
 		}
 	}
 

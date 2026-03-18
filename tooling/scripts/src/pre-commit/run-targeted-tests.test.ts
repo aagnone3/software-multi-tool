@@ -62,11 +62,20 @@ describe("resolveImpactedWorkspaces", () => {
 		expect(result.workspaces).toEqual([]);
 	});
 
-	it("treats the current root package.json change set as global", () => {
+	it("skips tests for apps/web env example updates", () => {
+		const result = resolveImpactedWorkspaces([
+			"apps/web/.env.local.example",
+		]);
+
+		expect(result.global).toBe(false);
+		expect(result.workspaces).toEqual([]);
+	});
+
+	it("scopes the current root package.json change set to @repo/scripts", () => {
 		const result = resolveImpactedWorkspaces(["package.json"]);
 
-		expect(result.global).toBe(true);
-		expect(result.workspaces).toEqual([]);
+		expect(result.global).toBe(false);
+		expect(result.workspaces).toEqual(["@repo/scripts"]);
 	});
 
 	it("still treats root package.json plus global config as global", () => {
@@ -76,7 +85,7 @@ describe("resolveImpactedWorkspaces", () => {
 		]);
 
 		expect(result.global).toBe(true);
-		expect(result.workspaces).toEqual([]);
+		expect(result.workspaces).toEqual(["@repo/scripts"]);
 	});
 
 	it("ignores files outside the repo root", () => {
