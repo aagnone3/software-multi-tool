@@ -31,6 +31,16 @@ vi.mock("@repo/database", () => ({
 		.mockResolvedValue({ id: "mock-news-analysis-id" }),
 }));
 
+// Mock logging to keep expected error-path tests quiet
+vi.mock("@repo/logs", () => ({
+	logger: {
+		debug: vi.fn(),
+		info: vi.fn(),
+		warn: vi.fn(),
+		error: vi.fn(),
+	},
+}));
+
 import { executePrompt } from "@repo/agent-sdk";
 import { createNewsAnalysis } from "@repo/database";
 import {
