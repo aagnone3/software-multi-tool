@@ -214,13 +214,10 @@ describe("CommandPalette", () => {
 				testTools.some((tool) => tool.slug === slug && tool.enabled),
 		});
 		localStorageMock.clear();
-		vi.useFakeTimers();
 	});
 
 	afterEach(() => {
 		localStorageMock.clear();
-		vi.runOnlyPendingTimers();
-		vi.useRealTimers();
 	});
 
 	it("renders nothing when closed", () => {
@@ -232,7 +229,6 @@ describe("CommandPalette", () => {
 
 	it("renders command palette when open", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 		expect(
 			screen.getByPlaceholderText("Search pages and tools..."),
 		).toBeInTheDocument();
@@ -240,7 +236,6 @@ describe("CommandPalette", () => {
 
 	it("displays enabled tools only", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 		expect(screen.getByText("Test Tool 1")).toBeInTheDocument();
 		expect(screen.getByText("Test Tool 2")).toBeInTheDocument();
 		expect(screen.queryByText("Disabled Tool")).not.toBeInTheDocument();
@@ -248,7 +243,6 @@ describe("CommandPalette", () => {
 
 	it("filters tools based on search input", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		const searchInput = screen.getByPlaceholderText(
 			"Search pages and tools...",
@@ -260,7 +254,6 @@ describe("CommandPalette", () => {
 
 	it("navigates to tool when selected", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		const tool = screen.getByText("Test Tool 1");
 		fireEvent.click(tool);
@@ -271,7 +264,6 @@ describe("CommandPalette", () => {
 
 	it("stores recently used items in localStorage", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		const tool = screen.getByText("Test Tool 1");
 		fireEvent.click(tool);
@@ -299,14 +291,12 @@ describe("CommandPalette", () => {
 		);
 
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		expect(screen.getByText("Recently Used")).toBeInTheDocument();
 	});
 
 	it("closes when clicking backdrop", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		const backdrop = screen
 			.getByPlaceholderText("Search pages and tools...")
@@ -320,7 +310,6 @@ describe("CommandPalette", () => {
 
 	it("closes on Escape key", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		fireEvent.keyDown(document, { key: "Escape" });
 
@@ -365,7 +354,6 @@ describe("CommandPalette", () => {
 
 	it("displays navigation pages", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		expect(screen.getByText("Home")).toBeInTheDocument();
 		expect(screen.getByText("Chat")).toBeInTheDocument();
@@ -375,7 +363,6 @@ describe("CommandPalette", () => {
 
 	it("navigates to page when selected", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		const page = screen.getByText("Chat");
 		fireEvent.click(page);
@@ -386,7 +373,6 @@ describe("CommandPalette", () => {
 
 	it("shows keyboard navigation hints", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		expect(screen.getByText(/to navigate/i)).toBeInTheDocument();
 		expect(screen.getByText(/to select/i)).toBeInTheDocument();
@@ -395,7 +381,6 @@ describe("CommandPalette", () => {
 
 	it("displays tool descriptions", () => {
 		renderCommandPalette();
-		vi.runAllTimers();
 
 		expect(screen.getByText("First test tool")).toBeInTheDocument();
 		expect(screen.getByText("Second test tool")).toBeInTheDocument();

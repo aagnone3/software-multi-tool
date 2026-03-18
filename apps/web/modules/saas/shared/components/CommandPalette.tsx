@@ -162,11 +162,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
 	// Auto-focus input when palette opens
 	useEffect(() => {
-		if (isOpen && inputRef.current) {
-			// Small timeout to ensure the component is fully rendered
-			setTimeout(() => {
-				inputRef.current?.focus();
-			}, 0);
+		if (isOpen) {
+			inputRef.current?.focus();
 		}
 	}, [isOpen]);
 
