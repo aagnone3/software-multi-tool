@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildTurboFilters,
 	resolveImpactedWorkspaces,
+	shouldPrepareDatabase,
 } from "./run-targeted-tests";
 
 const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
@@ -27,6 +28,24 @@ describe("resolveImpactedWorkspaces", () => {
 		expect(result.workspaces).toEqual(["@repo/utils", "@repo/web"]);
 	});
 
+	it("keeps Prisma schema changes scoped to @repo/database", () => {
+		const result = resolveImpactedWorkspaces([
+			"packages/database/prisma/schema.prisma",
+		]);
+
+		expect(result.global).toBe(false);
+		expect(result.workspaces).toEqual(["@repo/database"]);
+	});
+
+	it("routes database helper scripts through @repo/scripts coverage", () => {
+		const result = resolveImpactedWorkspaces([
+			"packages/database/scripts/seed-local.sh",
+		]);
+
+		expect(result.global).toBe(false);
+		expect(result.workspaces).toEqual(["@repo/scripts"]);
+	});
+
 	it("marks tooling test config as global", () => {
 		const result = resolveImpactedWorkspaces([
 			"tooling/test/vitest.workspace.ts",
@@ -43,8 +62,18 @@ describe("resolveImpactedWorkspaces", () => {
 		expect(result.workspaces).toEqual([]);
 	});
 
-	it("treats root package.json as global", () => {
+	it("treats the current root package.json change set as global", () => {
 		const result = resolveImpactedWorkspaces(["package.json"]);
+
+		expect(result.global).toBe(true);
+		expect(result.workspaces).toEqual([]);
+	});
+
+	it("still treats root package.json plus global config as global", () => {
+		const result = resolveImpactedWorkspaces([
+			"package.json",
+			"turbo.json",
+		]);
 
 		expect(result.global).toBe(true);
 		expect(result.workspaces).toEqual([]);
@@ -64,9 +93,22 @@ describe("buildTurboFilters", () => {
 	it("generates filter flags for workspaces", () => {
 		const filters = buildTurboFilters(["@repo/utils", "@repo/web"]);
 
-		expect(filters).toEqual([
-			"--filter=@repo/utils...",
-			"--filter=@repo/web...",
-		]);
+		expect(filters).toEqual(["--filter=@repo/utils", "--filter=@repo/web"]);
+	});
+});
+
+describe("shouldPrepareDatabase", () => {
+	it("returns true for global test runs", () => {
+		expect(shouldPrepareDatabase(true, [])).toBe(true);
+	});
+
+	it("returns true when @repo/database is directly impacted", () => {
+		expect(shouldPrepareDatabase(false, ["@repo/database"])).toBe(true);
+	});
+
+	it("returns false when database is not in scope", () => {
+		expect(
+			shouldPrepareDatabase(false, ["@repo/scripts", "@repo/web"]),
+		).toBe(false);
 	});
 });

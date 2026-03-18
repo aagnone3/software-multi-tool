@@ -77,14 +77,23 @@ describe("setup-local.sh", () => {
 			expect(stdout).toContain("main()");
 		});
 
-		it("should check for supabase CLI", async () => {
+		it("should use the repo-owned Supabase CLI runner", async () => {
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
-			expect(stdout).toContain("command_exists supabase");
+			expect(stdout).toContain(
+				'SUPABASE_CLI_RUNNER="$REPO_ROOT/tooling/scripts/src/supabase/run-supabase-cli.sh"',
+			);
+			expect(stdout).toContain("run_supabase_cli start");
+			expect(stdout).toContain("run_supabase_cli db reset");
 		});
 
-		it("should check for psql CLI", async () => {
+		it("should check for pnpm because setup uses repo-owned validation and Supabase fallback", async () => {
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
-			expect(stdout).toContain("command_exists psql");
+			expect(stdout).toContain(
+				'ensure_command pnpm "used to run the repo-owned preview-user validation checks and Supabase CLI fallback"',
+			);
+			expect(stdout).toContain(
+				"pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs",
+			);
 		});
 
 		it("should use correct test user ID", async () => {

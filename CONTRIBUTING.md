@@ -22,6 +22,17 @@ Coverage thresholds are configured per workspace in `tooling/test/coverage-thres
 
 - `pnpm --filter web run type-check` – validates the Next.js app's TypeScript project references.
 
+## Parallel Worktrees
+
+For parallel feature work, use `pnpm worktree:create`, `pnpm worktree:resume`, `pnpm worktree:list`, and `pnpm worktree:remove` for the repo-managed git worktree flow.
+
+Practical prerequisites for that helper:
+
+- `pnpm`
+- Docker with the daemon running
+
+A global Supabase CLI install is optional. When `supabase` is not already installed, the helper falls back to the repo-owned pinned CLI path instead of requiring contributors to install the tool globally first.
+
 ## Pre-commit Hooks
 
 Install hooks with:

@@ -5,6 +5,16 @@ import { pathToFileURL } from "node:url";
 
 type WorkspaceResolution = { workspaces: string[]; global: boolean };
 
+type RootPackageJsonImpact = {
+	workspaces: string[];
+	global: boolean;
+	reason:
+		| "non-package-json"
+		| "package-json-read-failed"
+		| "package-json-global"
+		| "package-json-scripts-only";
+};
+
 const MARKER_FILES = ["pnpm-workspace.yaml", "turbo.json"];
 
 const REPO_ROOT =
@@ -15,7 +25,6 @@ const REPO_ROOT =
 
 const GLOBAL_FILES = new Set([
 	"biome.json",
-	"package.json",
 	"pnpm-lock.yaml",
 	"pnpm-workspace.yaml",
 	"turbo.json",
@@ -26,6 +35,21 @@ const GLOBAL_FILES = new Set([
 
 const GLOBAL_PREFIXES = ["tests/", "tooling/test/"];
 const WORKSPACE_ROOTS = new Set(["apps", "packages", "tooling", "config"]);
+const WORKSPACE_PATH_OVERRIDES: Array<{ prefix: string; workspace: string }> = [
+	{
+		prefix: "packages/database/scripts/",
+		workspace: "@repo/scripts",
+	},
+];
+const ROOT_PACKAGE_JSON_SCOPED_SCRIPT_PATTERNS = [
+	"@repo/scripts",
+	"./tooling/scripts/",
+	"tooling/scripts/",
+];
+const ROOT_PACKAGE_JSON_ALLOWED_TOP_LEVEL_KEYS = new Set([
+	"scripts",
+	"engines",
+]);
 
 const packageCache = new Map<string, string | null>();
 
@@ -132,10 +156,132 @@ function tryStat(target: string) {
 	}
 }
 
+function extractChangedTopLevelPackageJsonKeys(diffText: string): string[] {
+	const changedKeys = new Set<string>();
+	let depth = 0;
+
+	for (const line of diffText.split("\n")) {
+		if (
+			line.startsWith("diff --git") ||
+			line.startsWith("index ") ||
+			line.startsWith("---") ||
+			line.startsWith("+++") ||
+			line.startsWith("@@")
+		) {
+			continue;
+		}
+
+		const prefix = line[0];
+		if (!["+", "-", " "].includes(prefix)) {
+			continue;
+		}
+
+		const content = line.slice(1);
+		const keyMatch = content.match(/^(\s*)"([^"]+)":/);
+		if (keyMatch) {
+			const indent = keyMatch[1].length;
+			depth = Math.floor(indent / 2);
+			if (prefix !== " " && depth === 1) {
+				changedKeys.add(keyMatch[2]);
+			}
+			continue;
+		}
+
+		const openBraces = (content.match(/\{/g) ?? []).length;
+		const closeBraces = (content.match(/\}/g) ?? []).length;
+		depth += openBraces - closeBraces;
+	}
+
+	return Array.from(changedKeys).sort();
+}
+
+function resolveRootPackageJsonImpact(diffText: string): RootPackageJsonImpact {
+	if (!diffText.trim()) {
+		return {
+			global: true,
+			workspaces: [],
+			reason: "package-json-read-failed",
+		};
+	}
+
+	const changedTopLevelKeys = extractChangedTopLevelPackageJsonKeys(diffText);
+	if (
+		changedTopLevelKeys.length === 0 ||
+		changedTopLevelKeys.some(
+			(key) => !ROOT_PACKAGE_JSON_ALLOWED_TOP_LEVEL_KEYS.has(key),
+		)
+	) {
+		return { global: true, workspaces: [], reason: "package-json-global" };
+	}
+
+	try {
+		const packageJsonPath = path.join(REPO_ROOT, "package.json");
+		const parsed = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
+			scripts?: Record<string, string>;
+		};
+		const scripts = parsed.scripts ?? {};
+		const changedScriptNames = Array.from(
+			diffText.matchAll(/^[+-]\s{2}"([^"]+)":\s*".*"/gm),
+		)
+			.map((match) => match[1])
+			.filter(
+				(name) =>
+					name !== "scripts" &&
+					name !== "engines" &&
+					Object.hasOwn(scripts, name),
+			);
+
+		if (
+			changedScriptNames.length === 0 ||
+			changedScriptNames.every((name) => {
+				const script = scripts[name];
+				return (
+					typeof script === "string" &&
+					ROOT_PACKAGE_JSON_SCOPED_SCRIPT_PATTERNS.some((pattern) =>
+						script.includes(pattern),
+					)
+				);
+			})
+		) {
+			return {
+				global: false,
+				workspaces: ["@repo/scripts"],
+				reason: "package-json-scripts-only",
+			};
+		}
+	} catch {
+		return {
+			global: true,
+			workspaces: [],
+			reason: "package-json-read-failed",
+		};
+	}
+
+	return { global: true, workspaces: [], reason: "package-json-global" };
+}
+
+function classifyRootPackageJson(): WorkspaceResolution {
+	const diff = spawnSync("git", ["diff", "--cached", "--", "package.json"], {
+		cwd: REPO_ROOT,
+		encoding: "utf8",
+	});
+
+	if (diff.status !== 0 || typeof diff.stdout !== "string") {
+		return { workspaces: [], global: true };
+	}
+
+	const impact = resolveRootPackageJsonImpact(diff.stdout);
+	return { workspaces: impact.workspaces, global: impact.global };
+}
+
 function classifyFile(relativeFile: string): WorkspaceResolution {
 	const normalized = normalizeFilePath(relativeFile);
 	if (!normalized) {
 		return { workspaces: [], global: false };
+	}
+
+	if (normalized === "package.json") {
+		return classifyRootPackageJson();
 	}
 
 	if (GLOBAL_FILES.has(normalized)) {
@@ -145,6 +291,12 @@ function classifyFile(relativeFile: string): WorkspaceResolution {
 	for (const prefix of GLOBAL_PREFIXES) {
 		if (normalized.startsWith(prefix)) {
 			return { workspaces: [], global: true };
+		}
+	}
+
+	for (const override of WORKSPACE_PATH_OVERRIDES) {
+		if (normalized.startsWith(override.prefix)) {
+			return { workspaces: [override.workspace], global: false };
 		}
 	}
 
@@ -186,59 +338,153 @@ export function resolveImpactedWorkspaces(files: string[]) {
 }
 
 export function buildTurboFilters(workspaces: string[]): string[] {
-	return workspaces.map((workspace) => `--filter=${workspace}...`);
+	return workspaces.map((workspace) => `--filter=${workspace}`);
 }
 
-function runTests(filters: string[], global: boolean) {
-	const baseArgs = [
-		"exec",
-		"dotenv",
-		"-c",
-		"-e",
-		"apps/web/.env.local",
-		"--",
-		"turbo",
-		"run",
-		"test",
-		"--concurrency=1",
-	];
-	const args = global ? baseArgs : [...baseArgs, ...filters];
+export function shouldPrepareDatabase(
+	global: boolean,
+	workspaces: string[],
+): boolean {
+	return global || workspaces.includes("@repo/database");
+}
+
+function prepareDatabaseIfNeeded(global: boolean, workspaces: string[]) {
+	if (!shouldPrepareDatabase(global, workspaces)) {
+		return true;
+	}
+
+	console.log(
+		"[pre-commit] Preparing Prisma client for @repo/database before tests...",
+	);
+	const child = spawnSync(
+		"pnpm",
+		["--filter", "@repo/database", "generate"],
+		{
+			cwd: REPO_ROOT,
+			stdio: "inherit",
+		},
+	);
+
+	if (typeof child.status === "number") {
+		if (child.status === 0) {
+			return true;
+		}
+		process.exitCode = child.status;
+		return false;
+	}
+
+	if (child.error) {
+		console.error(
+			"[pre-commit] Failed to generate Prisma client for @repo/database:",
+			child.error,
+		);
+		process.exitCode = 1;
+		return false;
+	}
+
+	if (child.signal) {
+		console.error(
+			`[pre-commit] Prisma client generation terminated by signal ${child.signal}`,
+		);
+		process.exitCode = 1;
+		return false;
+	}
+
+	return false;
+}
+
+function runTests(filters: string[], global: boolean, workspaces: string[]) {
+	if (!prepareDatabaseIfNeeded(global, workspaces)) {
+		return;
+	}
 
 	if (global) {
 		console.log(
 			"[pre-commit] Running full test suite sequentially (equivalent to `pnpm test -- --runInBand`).",
 		);
-	} else {
-		console.log(
-			`[pre-commit] Running tests sequentially for workspaces: ${filters
-				.map((filter) =>
-					filter.replace(/^--filter=/, "").replace(/\.\.\.$/, ""),
-				)
-				.join(", ")}`,
+
+		const child = spawnSync(
+			"pnpm",
+			[
+				"exec",
+				"dotenv",
+				"-c",
+				"-e",
+				"apps/web/.env.local",
+				"--",
+				"turbo",
+				"run",
+				"test",
+				"--concurrency=1",
+			],
+			{
+				cwd: REPO_ROOT,
+				stdio: "inherit",
+			},
 		);
-	}
 
-	const child = spawnSync("pnpm", args, {
-		cwd: REPO_ROOT,
-		stdio: "inherit",
-	});
+		if (typeof child.status === "number") {
+			process.exitCode = child.status;
+			return;
+		}
 
-	if (typeof child.status === "number") {
-		process.exitCode = child.status;
+		if (child.error) {
+			console.error(
+				"[pre-commit] Failed to execute pnpm test:",
+				child.error,
+			);
+			process.exitCode = 1;
+			return;
+		}
+
+		if (child.signal) {
+			console.error(
+				`[pre-commit] pnpm test terminated by signal ${child.signal}`,
+			);
+			process.exitCode = 1;
+		}
+
 		return;
 	}
 
-	if (child.error) {
-		console.error("[pre-commit] Failed to execute pnpm test:", child.error);
-		process.exitCode = 1;
-		return;
-	}
+	console.log(
+		`[pre-commit] Running tests for workspaces: ${filters
+			.map((filter) => filter.replace(/^--filter=/, ""))
+			.join(", ")}`,
+	);
 
-	if (child.signal) {
-		console.error(
-			`[pre-commit] pnpm test terminated by signal ${child.signal}`,
-		);
-		process.exitCode = 1;
+	for (const workspace of workspaces) {
+		const child = spawnSync("pnpm", ["--filter", workspace, "test"], {
+			cwd: REPO_ROOT,
+			stdio: "inherit",
+		});
+
+		if (typeof child.status === "number") {
+			if (child.status !== 0) {
+				process.exitCode = child.status;
+			}
+			if (child.status === 0) {
+				continue;
+			}
+			return;
+		}
+
+		if (child.error) {
+			console.error(
+				`[pre-commit] Failed to execute pnpm test for ${workspace}:`,
+				child.error,
+			);
+			process.exitCode = 1;
+			return;
+		}
+
+		if (child.signal) {
+			console.error(
+				`[pre-commit] pnpm test for ${workspace} terminated by signal ${child.signal}`,
+			);
+			process.exitCode = 1;
+			return;
+		}
 	}
 }
 
@@ -246,7 +492,7 @@ export function main(argv: string[]) {
 	const { global, workspaces } = resolveImpactedWorkspaces(argv);
 
 	if (global) {
-		runTests([], true);
+		runTests([], true, workspaces);
 		return;
 	}
 
@@ -258,7 +504,7 @@ export function main(argv: string[]) {
 	}
 
 	const filters = buildTurboFilters(workspaces);
-	runTests(filters, false);
+	runTests(filters, false, workspaces);
 }
 
 const modulePathArg = process.argv[1];

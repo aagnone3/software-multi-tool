@@ -25,6 +25,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 
 # Minimum required Supabase CLI version
 MIN_VERSION="2.0.0"
+SUPABASE_CLI_RUNNER="$REPO_ROOT/tooling/scripts/src/supabase/run-supabase-cli.sh"
 
 # Helper functions
 info() {
@@ -41,6 +42,14 @@ warn() {
 
 error() {
     echo -e "${RED}✗${NC} $1" >&2
+}
+
+run_supabase_cli() {
+    "$SUPABASE_CLI_RUNNER" "$@"
+}
+
+has_global_supabase() {
+    command -v supabase >/dev/null 2>&1
 }
 
 # Compare semantic versions
@@ -67,22 +76,15 @@ cmd_check() {
     echo "=== Supabase CLI Check ==="
     echo ""
 
-    # Check if supabase is installed
-    if ! command -v supabase &> /dev/null; then
-        error "Supabase CLI is not installed"
-        echo ""
-        echo "Install with:"
-        echo "  brew install supabase/tap/supabase"
-        echo ""
-        echo "Or see: https://supabase.com/docs/guides/local-development/cli/getting-started"
-        exit 1
+    if has_global_supabase; then
+        success "Supabase CLI is installed globally"
+    else
+        warn "Supabase CLI is not installed globally; using the repo-owned pnpm dlx fallback"
     fi
-
-    success "Supabase CLI is installed"
 
     # Get version
     local version
-    version=$(supabase --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+    version=$(run_supabase_cli --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
 
     if [[ "$version" == "unknown" ]]; then
         warn "Could not determine Supabase CLI version"
@@ -117,17 +119,11 @@ cmd_start() {
 
     cd "$REPO_ROOT"
 
-    # First verify CLI
-    if ! command -v supabase &> /dev/null; then
-        error "Supabase CLI is not installed. Run 'pnpm supabase:check' for installation instructions."
-        exit 1
-    fi
-
     info "Starting Supabase services..."
     echo ""
 
     # Start supabase with all services
-    if supabase start; then
+    if run_supabase_cli start; then
         echo ""
         success "Supabase local stack is running!"
         echo ""
@@ -151,15 +147,9 @@ cmd_stop() {
 
     cd "$REPO_ROOT"
 
-    # Verify CLI
-    if ! command -v supabase &> /dev/null; then
-        error "Supabase CLI is not installed"
-        exit 1
-    fi
-
     info "Stopping Supabase services..."
 
-    if supabase stop; then
+    if run_supabase_cli stop; then
         echo ""
         success "Supabase local stack stopped"
     else
@@ -177,16 +167,10 @@ cmd_status() {
 
     cd "$REPO_ROOT"
 
-    # Verify CLI
-    if ! command -v supabase &> /dev/null; then
-        error "Supabase CLI is not installed"
-        exit 1
-    fi
-
     # Get status - capture both stdout and stderr
     local status_output
     local exit_code=0
-    status_output=$(supabase status 2>&1) || exit_code=$?
+    status_output=$(run_supabase_cli status 2>&1) || exit_code=$?
 
     if [[ $exit_code -ne 0 ]]; then
         # Check if the error is because services aren't running
@@ -223,18 +207,12 @@ cmd_reset() {
 
     cd "$REPO_ROOT"
 
-    # Verify CLI
-    if ! command -v supabase &> /dev/null; then
-        error "Supabase CLI is not installed"
-        exit 1
-    fi
-
     warn "This will drop and recreate the database, applying all migrations and seeds"
     echo ""
 
     info "Resetting database..."
 
-    if supabase db reset; then
+    if run_supabase_cli db reset; then
         echo ""
         success "Database reset complete"
         echo ""
