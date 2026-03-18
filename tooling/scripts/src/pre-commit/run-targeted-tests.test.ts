@@ -6,6 +6,7 @@ import {
 	buildTurboFilters,
 	resolveImpactedWorkspaces,
 	resolveRootPackageJsonImpact,
+	resolveWorkspaceTestCommand,
 	shouldPrepareDatabase,
 } from "./run-targeted-tests";
 
@@ -133,6 +134,36 @@ describe("buildTurboFilters", () => {
 		const filters = buildTurboFilters(["@repo/utils", "@repo/web"]);
 
 		expect(filters).toEqual(["--filter=@repo/utils", "--filter=@repo/web"]);
+	});
+});
+
+describe("resolveWorkspaceTestCommand", () => {
+	it("scopes database harness-only changes to unit vitest targets", () => {
+		const result = resolveWorkspaceTestCommand("@repo/database", [
+			"packages/database/tests/postgres-test-harness.ts",
+			"packages/database/tests/postgres-test-harness.test.ts",
+		]);
+
+		expect(result.command).toBe("pnpm");
+		expect(result.args).toEqual([
+			"--filter",
+			"@repo/database",
+			"exec",
+			"vitest",
+			"run",
+			"--config",
+			"./vitest.config.ts",
+			"tests/postgres-test-harness.test.ts",
+		]);
+	});
+
+	it("keeps database integration changes on the full package test command", () => {
+		const result = resolveWorkspaceTestCommand("@repo/database", [
+			"packages/database/tests/credit-balance.integration.test.ts",
+		]);
+
+		expect(result.command).toBe("pnpm");
+		expect(result.args).toEqual(["--filter", "@repo/database", "test"]);
 	});
 });
 

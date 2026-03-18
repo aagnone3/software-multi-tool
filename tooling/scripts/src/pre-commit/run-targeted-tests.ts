@@ -5,6 +5,12 @@ import { pathToFileURL } from "node:url";
 
 type WorkspaceResolution = { workspaces: string[]; global: boolean };
 
+type WorkspaceTestCommand = {
+	command: string;
+	args: string[];
+	description: string;
+};
+
 type RootPackageJsonImpact = {
 	workspaces: string[];
 	global: boolean;
@@ -427,7 +433,90 @@ function prepareDatabaseIfNeeded(global: boolean, workspaces: string[]) {
 	return false;
 }
 
-function runTests(filters: string[], global: boolean, workspaces: string[]) {
+function collectDatabaseUnitTestTargets(files: string[]): string[] {
+	const databaseFiles = files
+		.map((file) => normalizeFilePath(file))
+		.filter(
+			(file): file is string =>
+				typeof file === "string" &&
+				file.startsWith("packages/database/"),
+		);
+
+	if (databaseFiles.length === 0) {
+		return [];
+	}
+
+	if (
+		databaseFiles.some(
+			(file) =>
+				!file.startsWith("packages/database/tests/") ||
+				file.endsWith(".integration.test.ts"),
+		)
+	) {
+		return [];
+	}
+
+	const targets = new Set<string>();
+
+	for (const file of databaseFiles) {
+		const relative = file.replace(/^packages\/database\//, "");
+		if (relative.endsWith(".test.ts")) {
+			targets.add(relative);
+			continue;
+		}
+
+		if (relative.endsWith(".ts")) {
+			const siblingTest = relative.replace(/\.ts$/, ".test.ts");
+			if (
+				fs.existsSync(
+					path.join(REPO_ROOT, "packages/database", siblingTest),
+				)
+			) {
+				targets.add(siblingTest);
+			}
+		}
+	}
+
+	return Array.from(targets).sort();
+}
+
+export function resolveWorkspaceTestCommand(
+	workspace: string,
+	files: string[],
+): WorkspaceTestCommand {
+	if (workspace === "@repo/database") {
+		const unitTargets = collectDatabaseUnitTestTargets(files);
+		if (unitTargets.length > 0) {
+			return {
+				command: "pnpm",
+				args: [
+					"--filter",
+					"@repo/database",
+					"exec",
+					"vitest",
+					"run",
+					"--config",
+					"./vitest.config.ts",
+					...unitTargets,
+				],
+				description: `pnpm --filter @repo/database exec vitest run --config ./vitest.config.ts ${unitTargets.join(" ")}`,
+			};
+		}
+	}
+
+	return {
+		command: "pnpm",
+		args: ["--filter", workspace, "test"],
+		description: `pnpm --filter ${workspace} test`,
+	};
+}
+
+function runTests(
+	files: string[],
+	filters: string[],
+	global: boolean,
+	workspaces: string[],
+) {
 	if (!prepareDatabaseIfNeeded(global, workspaces)) {
 		return;
 	}
@@ -488,7 +577,9 @@ function runTests(filters: string[], global: boolean, workspaces: string[]) {
 	);
 
 	for (const workspace of workspaces) {
-		const child = spawnSync("pnpm", ["--filter", workspace, "test"], {
+		const testCommand = resolveWorkspaceTestCommand(workspace, files);
+		console.log(`[pre-commit] Executing ${testCommand.description}`);
+		const child = spawnSync(testCommand.command, testCommand.args, {
 			cwd: REPO_ROOT,
 			stdio: "inherit",
 		});
@@ -526,7 +617,7 @@ export function main(argv: string[]) {
 	const { global, workspaces } = resolveImpactedWorkspaces(argv);
 
 	if (global) {
-		runTests([], true, workspaces);
+		runTests(argv, [], true, workspaces);
 		return;
 	}
 
@@ -538,7 +629,7 @@ export function main(argv: string[]) {
 	}
 
 	const filters = buildTurboFilters(workspaces);
-	runTests(filters, false, workspaces);
+	runTests(argv, filters, false, workspaces);
 }
 
 const modulePathArg = process.argv[1];

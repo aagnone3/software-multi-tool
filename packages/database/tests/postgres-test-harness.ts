@@ -12,12 +12,22 @@ const execFileAsync = promisify(execFile);
 
 type TearDown = () => Promise<void>;
 
+export const CONTAINER_RUNTIME_REQUIRED_MESSAGE =
+	"Database integration tests require a working Docker or Podman container runtime. Start Docker/Podman, or skip this package's integration tests in Dockerless runners instead of treating this as an app regression.";
+
 export type PostgresTestHarness = {
 	prisma: PrismaClient;
 	connectionString: string;
 	resetDatabase: () => Promise<void>;
 	cleanup: TearDown;
 };
+
+export class ContainerRuntimeUnavailableError extends Error {
+	constructor(options?: { cause?: unknown }) {
+		super(CONTAINER_RUNTIME_REQUIRED_MESSAGE, options);
+		this.name = "ContainerRuntimeUnavailableError";
+	}
+}
 
 const workspaceRoot = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
@@ -94,11 +104,30 @@ export async function createPostgresTestHarness(): Promise<PostgresTestHarness> 
 
 async function startContainer(): Promise<StartedPostgreSqlContainer> {
 	const databaseName = `test_${randomUUID().replace(/-/g, "")}`;
-	return new PostgreSqlContainer("postgres:17-alpine")
-		.withDatabase(databaseName)
-		.withUsername("postgres")
-		.withPassword("postgres")
-		.start();
+
+	try {
+		return await new PostgreSqlContainer("postgres:17-alpine")
+			.withDatabase(databaseName)
+			.withUsername("postgres")
+			.withPassword("postgres")
+			.start();
+	} catch (error) {
+		if (isMissingContainerRuntimeError(error)) {
+			throw new ContainerRuntimeUnavailableError({ cause: error });
+		}
+
+		throw error;
+	}
+}
+
+export function isMissingContainerRuntimeError(error: unknown): boolean {
+	if (!(error instanceof Error)) {
+		return false;
+	}
+
+	return error.message.includes(
+		"Could not find a working container runtime strategy",
+	);
 }
 
 async function preparePrismaClient(connectionString: string) {
