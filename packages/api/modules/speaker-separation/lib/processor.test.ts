@@ -29,6 +29,17 @@ vi.mock("./audio-storage", () => ({
 	downloadAudioFromStorage: mockDownloadAudioFromStorage,
 }));
 
+// Mock logger to keep expected info/error paths quiet in passing tests
+const mockLoggerInfo = vi.hoisted(() => vi.fn());
+const mockLoggerError = vi.hoisted(() => vi.fn());
+
+vi.mock("@repo/logs", () => ({
+	logger: {
+		info: mockLoggerInfo,
+		error: mockLoggerError,
+	},
+}));
+
 describe("Speaker Separation Processor", () => {
 	const originalEnv = process.env;
 

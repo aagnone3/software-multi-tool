@@ -9,6 +9,17 @@ const getToolJobByIdMock = vi.hoisted(() => vi.fn());
 const getToolJobsByUserIdMock = vi.hoisted(() => vi.fn());
 const getToolJobsBySessionIdMock = vi.hoisted(() => vi.fn());
 const cancelToolJobMock = vi.hoisted(() => vi.fn());
+const mockLoggerInfo = vi.hoisted(() => vi.fn());
+const mockLoggerDebug = vi.hoisted(() => vi.fn());
+const mockLoggerError = vi.hoisted(() => vi.fn());
+
+vi.mock("@repo/logs", () => ({
+	logger: {
+		info: mockLoggerInfo,
+		debug: mockLoggerDebug,
+		error: mockLoggerError,
+	},
+}));
 
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
