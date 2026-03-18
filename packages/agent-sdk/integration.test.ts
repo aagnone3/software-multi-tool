@@ -57,13 +57,7 @@ describe("Claude Agent SDK Integration", () => {
 			// Verify stop reason
 			expect(result.stopReason).toBeDefined();
 
-			// Log for debugging (will show in CI logs)
-			console.log("Integration test passed:");
-			console.log(`- Model: ${result.model}`);
-			console.log(`- Response: ${result.content}`);
-			console.log(
-				`- Tokens used: ${result.usage.inputTokens} input, ${result.usage.outputTokens} output`,
-			);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 
@@ -86,9 +80,7 @@ describe("Claude Agent SDK Integration", () => {
 			const wordCount = result.content.trim().split(/\s+/).length;
 			expect(wordCount).toBeLessThanOrEqual(3); // Allow some flexibility
 
-			console.log("System prompt test passed:");
-			console.log(`- Response: ${result.content}`);
-			console.log(`- Word count: ${wordCount}`);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 });
