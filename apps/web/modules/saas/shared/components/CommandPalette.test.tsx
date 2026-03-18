@@ -6,16 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommandPalette } from "./CommandPalette";
 
 vi.mock("cmdk", () => {
-	const CommandRoot = ({
-		children,
-		onClick,
-	}: {
-		children: React.ReactNode;
-		onClick?: React.MouseEventHandler<HTMLButtonElement>;
-	}) => (
-		<button onClick={onClick} type="button">
-			{children}
-		</button>
+	const CommandRoot = ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
 	);
 
 	const CommandInput = React.forwardRef<
