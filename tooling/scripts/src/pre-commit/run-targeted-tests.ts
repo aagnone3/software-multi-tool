@@ -221,7 +221,9 @@ function extractChangedTopLevelPackageJsonKeys(diffText: string): string[] {
 	return Array.from(changedKeys).sort();
 }
 
-function resolveRootPackageJsonImpact(diffText: string): RootPackageJsonImpact {
+export function resolveRootPackageJsonImpact(
+	diffText: string,
+): RootPackageJsonImpact {
 	if (!diffText.trim()) {
 		return {
 			global: true,

@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildTurboFilters,
 	resolveImpactedWorkspaces,
+	resolveRootPackageJsonImpact,
 	shouldPrepareDatabase,
 } from "./run-targeted-tests";
 
@@ -71,21 +72,50 @@ describe("resolveImpactedWorkspaces", () => {
 		expect(result.workspaces).toEqual([]);
 	});
 
-	it("scopes the current root package.json change set to @repo/scripts", () => {
-		const result = resolveImpactedWorkspaces(["package.json"]);
+	it("treats root package.json with only scripts/engines changes as @repo/scripts-scoped", () => {
+		const result =
+			resolveRootPackageJsonImpact(`diff --git a/package.json b/package.json
+index 1111111..2222222 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "software-multi-tool",
+   "scripts": {
+-    "repo:feedback": "old command"
++    "repo:feedback": "pnpm --filter @repo/scripts repo:feedback"
+   },
+   "engines": {
+     "node": ">=22.22.0 <23"
+`);
 
 		expect(result.global).toBe(false);
 		expect(result.workspaces).toEqual(["@repo/scripts"]);
+		expect(result.reason).toBe("package-json-scripts-only");
 	});
 
 	it("still treats root package.json plus global config as global", () => {
-		const result = resolveImpactedWorkspaces([
-			"package.json",
-			"turbo.json",
-		]);
+		const packageJsonImpact =
+			resolveRootPackageJsonImpact(`diff --git a/package.json b/package.json
+index 1111111..2222222 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "software-multi-tool",
+   "scripts": {
+-    "repo:feedback": "old command"
++    "repo:feedback": "pnpm --filter @repo/scripts repo:feedback"
+   },
+   "engines": {
+     "node": ">=22.22.0 <23"
+`);
+		const result = resolveImpactedWorkspaces(["turbo.json"]);
 
+		expect(packageJsonImpact.global).toBe(false);
+		expect(packageJsonImpact.workspaces).toEqual(["@repo/scripts"]);
 		expect(result.global).toBe(true);
-		expect(result.workspaces).toEqual(["@repo/scripts"]);
+		expect(result.workspaces).toEqual([]);
 	});
 
 	it("ignores files outside the repo root", () => {
