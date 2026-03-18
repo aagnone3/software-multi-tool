@@ -22,6 +22,10 @@ if (!includeIntegration) {
 
 const result = spawnSync("vitest", vitestArgs, {
 	stdio: "inherit",
+	env: {
+		...process.env,
+		DOTENV_CONFIG_QUIET: process.env.DOTENV_CONFIG_QUIET ?? "true",
+	},
 });
 
 if (typeof result.status === "number") {
