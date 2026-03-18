@@ -13,6 +13,35 @@ import {
 	AlertDialogTrigger,
 } from "./alert-dialog";
 
+function renderAlertDialog(
+	content: React.ReactNode,
+	options?: {
+		includeTrigger?: boolean;
+		onOpenChange?: (open: boolean) => void;
+	},
+) {
+	const { includeTrigger = false, onOpenChange } = options ?? {};
+
+	return render(
+		<AlertDialog defaultOpen={!includeTrigger} onOpenChange={onOpenChange}>
+			{includeTrigger ? (
+				<AlertDialogTrigger data-testid="trigger">
+					Open
+				</AlertDialogTrigger>
+			) : null}
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Test Title</AlertDialogTitle>
+					<AlertDialogDescription>
+						Test Description
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				{content}
+			</AlertDialogContent>
+		</AlertDialog>,
+	);
+}
+
 describe("AlertDialog", () => {
 	describe("AlertDialogContent", () => {
 		it("renders with theme-based overlay using backdrop blur", async () => {
@@ -42,14 +71,10 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogHeader", () => {
 		it("renders with proper spacing and alignment", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogHeader data-testid="header">
-							<AlertDialogTitle>Title</AlertDialogTitle>
-						</AlertDialogHeader>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogHeader data-testid="header">
+					<AlertDialogTitle>Title</AlertDialogTitle>
+				</AlertDialogHeader>,
 			);
 
 			await waitFor(() => {
@@ -65,16 +90,12 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogTitle", () => {
 		it("renders with proper typography", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle data-testid="title">
-								Test Title
-							</AlertDialogTitle>
-						</AlertDialogHeader>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogHeader>
+					<AlertDialogTitle data-testid="title">
+						Test Title
+					</AlertDialogTitle>
+				</AlertDialogHeader>,
 			);
 
 			await waitFor(() => {
@@ -89,14 +110,10 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogDescription", () => {
 		it("renders with muted foreground color", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogDescription data-testid="description">
-							Test Description
-						</AlertDialogDescription>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogDescription data-testid="description">
+					Test Description
+				</AlertDialogDescription>,
 			);
 
 			await waitFor(() => {
@@ -111,15 +128,11 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogFooter", () => {
 		it("renders with responsive layout", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogFooter data-testid="footer">
-							<AlertDialogCancel>Cancel</AlertDialogCancel>
-							<AlertDialogAction>Continue</AlertDialogAction>
-						</AlertDialogFooter>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogFooter data-testid="footer">
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction>Continue</AlertDialogAction>
+				</AlertDialogFooter>,
 			);
 
 			await waitFor(() => {
@@ -136,14 +149,10 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogAction", () => {
 		it("uses button variant styles", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogAction data-testid="action">
-							Continue
-						</AlertDialogAction>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogAction data-testid="action">
+					Continue
+				</AlertDialogAction>,
 			);
 
 			await waitFor(() => {
@@ -160,14 +169,10 @@ describe("AlertDialog", () => {
 
 	describe("AlertDialogCancel", () => {
 		it("uses outline button variant styles", async () => {
-			render(
-				<AlertDialog defaultOpen>
-					<AlertDialogContent>
-						<AlertDialogCancel data-testid="cancel">
-							Cancel
-						</AlertDialogCancel>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogCancel data-testid="cancel">
+					Cancel
+				</AlertDialogCancel>,
 			);
 
 			await waitFor(() => {
@@ -185,21 +190,12 @@ describe("AlertDialog", () => {
 		it("opens and closes correctly", async () => {
 			const onOpenChange = vi.fn();
 
-			render(
-				<AlertDialog onOpenChange={onOpenChange}>
-					<AlertDialogTrigger data-testid="trigger">
-						Open
-					</AlertDialogTrigger>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-						</AlertDialogHeader>
-						<AlertDialogFooter>
-							<AlertDialogCancel>Cancel</AlertDialogCancel>
-							<AlertDialogAction>Continue</AlertDialogAction>
-						</AlertDialogFooter>
-					</AlertDialogContent>
-				</AlertDialog>,
+			renderAlertDialog(
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction>Continue</AlertDialogAction>
+				</AlertDialogFooter>,
+				{ includeTrigger: true, onOpenChange },
 			);
 
 			// Click trigger to open

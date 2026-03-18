@@ -10,7 +10,16 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			history: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "history"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							transactions: [],
+							pagination: {
+								total: 0,
+								limit: 50,
+								offset: 0,
+								hasMore: false,
+							},
+						}),
 				})),
 			},
 		},
@@ -108,7 +117,12 @@ describe("useCreditsHistory", () => {
 		});
 
 		expect(result.current.transactions).toEqual([]);
-		expect(result.current.pagination).toBeUndefined();
+		expect(result.current.pagination).toEqual({
+			total: 0,
+			limit: 50,
+			offset: 0,
+			hasMore: false,
+		});
 	});
 
 	it("provides pagination info correctly", async () => {

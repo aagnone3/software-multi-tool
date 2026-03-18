@@ -10,7 +10,19 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			balance: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "balance"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							included: 0,
+							used: 0,
+							remaining: 0,
+							overage: 0,
+							purchasedCredits: 0,
+							totalAvailable: 0,
+							periodStart: "2025-01-01T00:00:00.000Z",
+							periodEnd: "2025-02-01T00:00:00.000Z",
+							plan: { id: "free", name: "Free" },
+							purchases: [],
+						}),
 				})),
 			},
 		},
