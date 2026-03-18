@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { processNewsAnalyzerJob } from "./processor";
 
+const VERBOSE_INTEGRATION_TESTS =
+	process.env.SMT_VERBOSE_INTEGRATION_TESTS === "1";
+
+function logIntegrationDetails(...args: unknown[]) {
+	if (VERBOSE_INTEGRATION_TESTS) {
+		console.log(...args);
+	}
+}
+
+function logIntegrationFailure(...args: unknown[]) {
+	if (VERBOSE_INTEGRATION_TESTS) {
+		console.error(...args);
+	}
+}
+
 /**
  * Integration tests for the news analyzer processor with real Claude API calls
  *
@@ -38,9 +53,12 @@ describe("News Analyzer Processor (integration)", () => {
 
 				const result = await processNewsAnalyzerJob(job);
 
-				// Log error if failed for debugging
+				// Keep routine runs quiet; opt in with SMT_VERBOSE_INTEGRATION_TESTS=1.
 				if (!result.success) {
-					console.error("❌ Integration test failed:", result.error);
+					logIntegrationFailure(
+						"❌ Integration test failed:",
+						result.error,
+					);
 				}
 
 				// Should succeed
@@ -70,13 +88,13 @@ describe("News Analyzer Processor (integration)", () => {
 					expect(output.sentiment).toBeDefined();
 					expect(output.sourceCredibility).toBeDefined();
 
-					// Log results for manual verification
-					console.log("\n=== Integration Test Results ===");
-					console.log("Summary:", output.summary);
-					console.log("Bias:", output.bias);
-					console.log("Entities:", output.entities);
-					console.log("Sentiment:", output.sentiment);
-					console.log(
+					// Manual inspection stays available, but only when explicitly requested.
+					logIntegrationDetails("\n=== Integration Test Results ===");
+					logIntegrationDetails("Summary:", output.summary);
+					logIntegrationDetails("Bias:", output.bias);
+					logIntegrationDetails("Entities:", output.entities);
+					logIntegrationDetails("Sentiment:", output.sentiment);
+					logIntegrationDetails(
 						"Source Credibility:",
 						output.sourceCredibility,
 					);
@@ -129,9 +147,12 @@ describe("News Analyzer Processor (integration)", () => {
 
 				const result = await processNewsAnalyzerJob(job);
 
-				// Log error if failed for debugging
+				// Keep routine runs quiet; opt in with SMT_VERBOSE_INTEGRATION_TESTS=1.
 				if (!result.success) {
-					console.error("❌ Integration test failed:", result.error);
+					logIntegrationFailure(
+						"❌ Integration test failed:",
+						result.error,
+					);
 				}
 
 				// Should succeed
@@ -145,9 +166,9 @@ describe("News Analyzer Processor (integration)", () => {
 					expect(output.bias).toBeDefined();
 					expect(output.sentiment).toBeDefined();
 
-					console.log("\n=== Text Input Results ===");
-					console.log("Summary:", output.summary);
-					console.log("Sentiment:", output.sentiment);
+					logIntegrationDetails("\n=== Text Input Results ===");
+					logIntegrationDetails("Summary:", output.summary);
+					logIntegrationDetails("Sentiment:", output.sentiment);
 				}
 			},
 			TIMEOUT,

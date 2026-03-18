@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { extractContentFromUrl } from "./content-extractor";
 
+const VERBOSE_INTEGRATION_TESTS =
+	process.env.SMT_VERBOSE_INTEGRATION_TESTS === "1";
+
+function logIntegrationDetails(...args: unknown[]) {
+	if (VERBOSE_INTEGRATION_TESTS) {
+		console.log(...args);
+	}
+}
+
 /**
  * Integration tests for content extraction with real HTTP requests
  *
@@ -43,10 +52,10 @@ describe("content-extractor (integration)", () => {
 					expect(data.siteName).toBeTruthy();
 					expect(data.siteName).toContain("Fox");
 
-					// Log extracted data for manual verification
-					console.log("Extracted title:", data.title);
-					console.log("Extracted byline:", data.byline);
-					console.log(
+					// Manual inspection stays available, but only when explicitly requested.
+					logIntegrationDetails("Extracted title:", data.title);
+					logIntegrationDetails("Extracted byline:", data.byline);
+					logIntegrationDetails(
 						"Content length:",
 						data.textContent.length,
 						"characters",

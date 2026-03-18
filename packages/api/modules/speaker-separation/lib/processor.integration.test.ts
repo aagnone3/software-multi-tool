@@ -5,6 +5,20 @@ import { describe, expect, it } from "vitest";
 import { processSpeakerSeparationJob } from "./processor";
 
 const hasApiKey = !!process.env.ASSEMBLYAI_API_KEY;
+const VERBOSE_INTEGRATION_TESTS =
+	process.env.SMT_VERBOSE_INTEGRATION_TESTS === "1";
+
+function logIntegrationDetails(...args: unknown[]) {
+	if (VERBOSE_INTEGRATION_TESTS) {
+		console.log(...args);
+	}
+}
+
+function logIntegrationFailure(...args: unknown[]) {
+	if (VERBOSE_INTEGRATION_TESTS) {
+		console.error(...args);
+	}
+}
 
 /**
  * Helper to create a mock job object for testing.
@@ -75,19 +89,19 @@ describe.skipIf(!hasApiKey)(
 			it.skipIf(!hasFixture)(
 				"should process a real WAV audio file with speaker separation",
 				async () => {
-					console.log(
+					logIntegrationDetails(
 						"\n=== Starting Speaker Separation Integration Test (Local Fixture) ===",
 					);
-					console.log("Fixture path:", FIXTURE_PATH);
+					logIntegrationDetails("Fixture path:", FIXTURE_PATH);
 
 					// Read the audio file and convert to base64
 					const base64Content = fileToBase64(FIXTURE_PATH);
-					console.log(
+					logIntegrationDetails(
 						"Audio file size:",
 						(base64Content.length / 1024 / 1024).toFixed(2),
 						"MB (base64)",
 					);
-					console.log(
+					logIntegrationDetails(
 						"This may take 2-5 minutes for AssemblyAI processing...\n",
 					);
 
@@ -101,9 +115,9 @@ describe.skipIf(!hasApiKey)(
 
 					const result = await processSpeakerSeparationJob(job);
 
-					// Log error if failed for debugging
+					// Keep routine runs quiet; opt in with SMT_VERBOSE_INTEGRATION_TESTS=1.
 					if (!result.success) {
-						console.error(
+						logIntegrationFailure(
 							"❌ Integration test failed:",
 							result.error,
 						);
@@ -181,24 +195,33 @@ describe.skipIf(!hasApiKey)(
 						expect(totalPercentage).toBeGreaterThan(50); // At least half should be speech
 						expect(totalPercentage).toBeLessThanOrEqual(100.5);
 
-						// Log results for manual verification
-						console.log("\n=== Integration Test Results ===");
-						console.log("Speaker Count:", output.speakerCount);
-						console.log("Duration:", output.duration, "seconds");
-						console.log("\nSpeakers:");
+						// Manual inspection stays available, but only when explicitly requested.
+						logIntegrationDetails(
+							"\n=== Integration Test Results ===",
+						);
+						logIntegrationDetails(
+							"Speaker Count:",
+							output.speakerCount,
+						);
+						logIntegrationDetails(
+							"Duration:",
+							output.duration,
+							"seconds",
+						);
+						logIntegrationDetails("\nSpeakers:");
 						for (const speaker of output.speakers) {
-							console.log(
+							logIntegrationDetails(
 								`  ${speaker.label}: ${speaker.totalTime.toFixed(2)}s (${speaker.percentage.toFixed(1)}%), ${speaker.segmentCount} segments`,
 							);
 						}
-						console.log("\nFirst 5 segments:");
+						logIntegrationDetails("\nFirst 5 segments:");
 						for (const segment of output.segments.slice(0, 5)) {
-							console.log(
+							logIntegrationDetails(
 								`  [${segment.startTime.toFixed(2)}s - ${segment.endTime.toFixed(2)}s] ${segment.speaker}: "${segment.text.substring(0, 80)}..."`,
 							);
 						}
-						console.log("\nTranscript preview:");
-						console.log(
+						logIntegrationDetails("\nTranscript preview:");
+						logIntegrationDetails(
 							`${output.transcript.substring(0, 1000)}...`,
 						);
 					}
