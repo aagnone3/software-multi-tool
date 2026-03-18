@@ -51,8 +51,9 @@ describeWithContainerRuntime("Password hashing integration tests", () => {
 				// Hash the password using Better Auth's crypto
 				const hashedPassword = await hashPassword(password);
 
-				console.log("Hashed password:", hashedPassword);
-				console.log("Hash length:", hashedPassword.length);
+				expect(hashedPassword).toBeTruthy();
+				expect(hashedPassword.length).toBeGreaterThan(0);
+				expect(hashedPassword).not.toBe(password);
 
 				// Verify the password matches
 				const isValid = await verifyPassword({
@@ -125,6 +126,7 @@ describeWithContainerRuntime("Password hashing integration tests", () => {
 
 				expect(account).not.toBeNull();
 				expect(account?.password).toBe(hashedPassword);
+				expect(account?.password).not.toBe(password);
 
 				// Verify the password can be validated
 				const isValid = await verifyPassword({
@@ -133,12 +135,6 @@ describeWithContainerRuntime("Password hashing integration tests", () => {
 				});
 
 				expect(isValid).toBe(true);
-
-				// Output the hash for use in seed.sql
-				console.log("\n=== Use this hash in seed.sql ===");
-				console.log(`Password: ${password}`);
-				console.log(`Hash: ${hashedPassword}`);
-				console.log("================================\n");
 			},
 			TEST_TIMEOUT,
 		);
