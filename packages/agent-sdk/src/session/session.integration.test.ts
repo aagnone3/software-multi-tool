@@ -15,7 +15,7 @@ import type { AgentSessionConfig, SessionContext } from "./types";
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-describe("Agent Session Integration", () => {
+describe.concurrent("Agent Session Integration", () => {
 	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
 			throw new Error(

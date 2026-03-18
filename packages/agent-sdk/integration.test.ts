@@ -18,7 +18,7 @@ import { CLAUDE_MODELS } from "./src/models";
  * - Max tokens: 50 (minimal response)
  * - Prompt: Simple greeting (minimal input tokens)
  */
-describe("Claude Agent SDK Integration", () => {
+describe.concurrent("Claude Agent SDK Integration", () => {
 	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
 			throw new Error(
