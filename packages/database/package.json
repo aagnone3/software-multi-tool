@@ -30,7 +30,7 @@
 		"migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
 		"studio": "dotenv -c -e ../../apps/web/.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit",
-		"test": "vitest run --config ./vitest.config.ts",
+		"test": "node ./tests/run-vitest.mjs",
 		"test:integration": "vitest run --config ./vitest.config.ts \"**/*.integration.test.ts\"",
 		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest run --config ./vitest.config.ts",
 		"db:pull": "dotenv -c -e ../../apps/web/.env -- prisma db pull --schema=./prisma/schema.prisma"
