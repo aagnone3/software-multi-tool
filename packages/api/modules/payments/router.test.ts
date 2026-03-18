@@ -7,6 +7,18 @@ import {
 } from "../../../../tests/fixtures/external-services";
 import { paymentsRouter } from "./router";
 
+const { mockLoggerError, mockLoggerInfo } = vi.hoisted(() => ({
+	mockLoggerError: vi.fn(),
+	mockLoggerInfo: vi.fn(),
+}));
+
+vi.mock("@repo/logs", () => ({
+	logger: {
+		error: mockLoggerError,
+		info: mockLoggerInfo,
+	},
+}));
+
 // Mock dependencies
 const getSessionMock = vi.hoisted(() => vi.fn());
 const getOrganizationByIdMock = vi.hoisted(() => vi.fn());
