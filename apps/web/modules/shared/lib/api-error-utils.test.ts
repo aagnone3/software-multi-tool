@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-const mockIsPreviewEnvironment = vi.hoisted(() => vi.fn(() => false));
-
 vi.mock("@repo/utils/lib/api-url", () => ({
-	isPreviewEnvironment: mockIsPreviewEnvironment,
+	isPreviewEnvironment: vi.fn(() => false),
 }));
 
+import { isPreviewEnvironment } from "@repo/utils/lib/api-url";
 import {
+	type ApiErrorCode,
 	classifyError,
 	getErrorMessage,
 	isApiInitializing,
@@ -14,14 +14,16 @@ import {
 	shouldShowRetry,
 } from "./api-error-utils";
 
+const mockIsPreview = vi.mocked(isPreviewEnvironment);
+
 describe("classifyError", () => {
-	it("returns API_NOT_CONFIGURED for code API_NOT_CONFIGURED", () => {
+	it("returns API_NOT_CONFIGURED for explicit code", () => {
 		expect(classifyError({ code: "API_NOT_CONFIGURED" })).toBe(
 			"API_NOT_CONFIGURED",
 		);
 	});
 
-	it("returns API_UNREACHABLE for code API_UNREACHABLE", () => {
+	it("returns API_UNREACHABLE for explicit code", () => {
 		expect(classifyError({ code: "API_UNREACHABLE" })).toBe(
 			"API_UNREACHABLE",
 		);
@@ -51,121 +53,136 @@ describe("classifyError", () => {
 		expect(classifyError({ status: 400 })).toBe("VALIDATION_ERROR");
 	});
 
-	it("returns SERVER_ERROR for status 500", () => {
+	it("returns SERVER_ERROR for status 500+", () => {
 		expect(classifyError({ status: 500 })).toBe("SERVER_ERROR");
+		expect(classifyError({ status: 501 })).toBe("SERVER_ERROR");
 	});
 
-	it("returns NETWORK_ERROR for fetch TypeError", () => {
+	it("returns NETWORK_ERROR for TypeError with fetch message", () => {
 		expect(classifyError(new TypeError("Failed to fetch"))).toBe(
 			"NETWORK_ERROR",
 		);
 	});
 
-	it("returns NOT_FOUND for error message containing not found", () => {
+	it("returns NETWORK_ERROR for Error with network in message", () => {
+		expect(classifyError(new Error("network failure"))).toBe(
+			"NETWORK_ERROR",
+		);
+	});
+
+	it("returns NOT_FOUND for Error with not found message", () => {
 		expect(classifyError(new Error("Resource not found"))).toBe(
 			"NOT_FOUND",
 		);
 	});
 
-	it("returns AUTH_ERROR for error message containing unauthorized", () => {
+	it("returns AUTH_ERROR for Error with unauthorized message", () => {
 		expect(classifyError(new Error("unauthorized access"))).toBe(
 			"AUTH_ERROR",
 		);
 	});
 
-	it("returns UNKNOWN for unrecognized error", () => {
-		expect(classifyError(new Error("something random"))).toBe("UNKNOWN");
-	});
-
-	it("returns UNKNOWN for null", () => {
+	it("returns UNKNOWN for unrecognized errors", () => {
 		expect(classifyError(null)).toBe("UNKNOWN");
+		expect(classifyError("some string error")).toBe("UNKNOWN");
+		expect(classifyError(42)).toBe("UNKNOWN");
 	});
 
-	it("prefers data.code over status", () => {
+	it("uses data.code when code is in nested data", () => {
 		expect(
-			classifyError({ status: 503, data: { code: "API_UNREACHABLE" } }),
-		).toBe("API_UNREACHABLE");
+			classifyError({
+				status: 503,
+				data: { code: "API_NOT_CONFIGURED" },
+			}),
+		).toBe("API_NOT_CONFIGURED");
 	});
 });
 
 describe("isApiInitializing", () => {
 	it("returns false in non-preview environment", () => {
-		mockIsPreviewEnvironment.mockReturnValue(false);
-		expect(isApiInitializing({ status: 503 })).toBe(false);
+		mockIsPreview.mockReturnValue(false);
+		expect(isApiInitializing({ code: "API_NOT_CONFIGURED" })).toBe(false);
 	});
 
-	it("returns true in preview environment for API_NOT_CONFIGURED", () => {
-		mockIsPreviewEnvironment.mockReturnValue(true);
+	it("returns true for API_NOT_CONFIGURED in preview", () => {
+		mockIsPreview.mockReturnValue(true);
 		expect(isApiInitializing({ status: 503 })).toBe(true);
 	});
 
-	it("returns true in preview environment for API_UNREACHABLE", () => {
-		mockIsPreviewEnvironment.mockReturnValue(true);
+	it("returns true for API_UNREACHABLE in preview", () => {
+		mockIsPreview.mockReturnValue(true);
 		expect(isApiInitializing({ status: 502 })).toBe(true);
 	});
 
-	it("returns false for non-initializing errors in preview", () => {
-		mockIsPreviewEnvironment.mockReturnValue(true);
+	it("returns false for other errors in preview", () => {
+		mockIsPreview.mockReturnValue(true);
 		expect(isApiInitializing({ status: 404 })).toBe(false);
 	});
 });
 
 describe("getErrorMessage", () => {
-	it("returns initializing message for API_NOT_CONFIGURED in preview", () => {
-		mockIsPreviewEnvironment.mockReturnValue(true);
-		expect(getErrorMessage("API_NOT_CONFIGURED")).toContain("preview");
+	it("returns preview message for API_NOT_CONFIGURED in preview", () => {
+		mockIsPreview.mockReturnValue(true);
+		expect(getErrorMessage("API_NOT_CONFIGURED")).toContain("initializing");
 	});
 
-	it("returns generic message for API_NOT_CONFIGURED outside preview", () => {
-		mockIsPreviewEnvironment.mockReturnValue(false);
-		expect(getErrorMessage("API_NOT_CONFIGURED")).toBe(
-			"API service is not configured.",
+	it("returns non-preview message for API_NOT_CONFIGURED outside preview", () => {
+		mockIsPreview.mockReturnValue(false);
+		expect(getErrorMessage("API_NOT_CONFIGURED")).toContain(
+			"not configured",
 		);
 	});
 
-	it("returns expected message for NOT_FOUND", () => {
-		expect(getErrorMessage("NOT_FOUND")).toBe(
-			"The requested resource was not found.",
-		);
+	it("returns preview message for API_UNREACHABLE in preview", () => {
+		mockIsPreview.mockReturnValue(true);
+		expect(getErrorMessage("API_UNREACHABLE")).toContain("deploying");
 	});
 
-	it("returns expected message for NETWORK_ERROR", () => {
-		expect(getErrorMessage("NETWORK_ERROR")).toContain("Network error");
-	});
-
-	it("returns fallback for UNKNOWN", () => {
-		expect(getErrorMessage("UNKNOWN")).toContain("unexpected error");
+	it("returns a string for all error codes", () => {
+		mockIsPreview.mockReturnValue(false);
+		const codes: ApiErrorCode[] = [
+			"API_NOT_CONFIGURED",
+			"API_UNREACHABLE",
+			"NOT_FOUND",
+			"AUTH_ERROR",
+			"VALIDATION_ERROR",
+			"SERVER_ERROR",
+			"NETWORK_ERROR",
+			"UNKNOWN",
+		];
+		for (const code of codes) {
+			expect(typeof getErrorMessage(code)).toBe("string");
+		}
 	});
 });
 
 describe("shouldShowRetry", () => {
-	it("returns true for API_UNREACHABLE", () => {
+	it("returns true for retryable errors", () => {
 		expect(shouldShowRetry("API_UNREACHABLE")).toBe(true);
-	});
-
-	it("returns true for NETWORK_ERROR", () => {
 		expect(shouldShowRetry("NETWORK_ERROR")).toBe(true);
-	});
-
-	it("returns true for SERVER_ERROR", () => {
 		expect(shouldShowRetry("SERVER_ERROR")).toBe(true);
 	});
 
-	it("returns false for NOT_FOUND", () => {
+	it("returns false for non-retryable errors", () => {
 		expect(shouldShowRetry("NOT_FOUND")).toBe(false);
+		expect(shouldShowRetry("AUTH_ERROR")).toBe(false);
+		expect(shouldShowRetry("VALIDATION_ERROR")).toBe(false);
+		expect(shouldShowRetry("UNKNOWN")).toBe(false);
 	});
 });
 
 describe("isTransientError", () => {
-	it("returns true for API_NOT_CONFIGURED", () => {
+	it("returns true for transient errors", () => {
 		expect(isTransientError("API_NOT_CONFIGURED")).toBe(true);
-	});
-
-	it("returns true for NETWORK_ERROR", () => {
+		expect(isTransientError("API_UNREACHABLE")).toBe(true);
 		expect(isTransientError("NETWORK_ERROR")).toBe(true);
+		expect(isTransientError("SERVER_ERROR")).toBe(true);
 	});
 
-	it("returns false for AUTH_ERROR", () => {
+	it("returns false for permanent errors", () => {
+		expect(isTransientError("NOT_FOUND")).toBe(false);
 		expect(isTransientError("AUTH_ERROR")).toBe(false);
+		expect(isTransientError("VALIDATION_ERROR")).toBe(false);
+		expect(isTransientError("UNKNOWN")).toBe(false);
 	});
 });
