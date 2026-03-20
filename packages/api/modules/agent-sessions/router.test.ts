@@ -303,3 +303,59 @@ describe("agentSessionsRouter.executeTurn", () => {
 		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
 	});
 });
+
+describe("agentSessionsRouter.create", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		getSessionMock.mockResolvedValue(mockSession);
+		createFeedbackCollectorConfigMock.mockReturnValue({
+			initialMessage: "How was your experience?",
+		});
+		AgentSessionMock.create = vi.fn().mockResolvedValue({
+			getState: vi.fn().mockReturnValue({
+				context: { sessionId: "session_new" },
+				sessionType: "feedback-collector",
+				isComplete: false,
+				messages: [],
+			}),
+		});
+	});
+
+	function makeCreateClient() {
+		return createProcedureClient(agentSessionsRouter.create, {
+			context: authenticatedContext,
+		});
+	}
+
+	it("creates a feedback-collector session successfully", async () => {
+		const client = makeCreateClient();
+		const result = await client({
+			sessionType: "feedback-collector",
+			toolSlug: "my-tool",
+			toolName: "My Tool",
+		});
+
+		expect(result.session.id).toBe("session_new");
+		expect(result.session.sessionType).toBe("feedback-collector");
+		expect(result.session.isComplete).toBe(false);
+		expect(result.session.initialMessage).toBe("How was your experience?");
+	});
+
+	it("throws UNAUTHORIZED when no auth session", async () => {
+		getSessionMock.mockResolvedValue(null);
+		const client = makeCreateClient();
+		await expect(
+			client({ sessionType: "feedback-collector" }),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	it("throws INTERNAL_SERVER_ERROR on unexpected error", async () => {
+		AgentSessionMock.create = vi
+			.fn()
+			.mockRejectedValue(new Error("db failure"));
+		const client = makeCreateClient();
+		await expect(
+			client({ sessionType: "feedback-collector" }),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+	});
+});
