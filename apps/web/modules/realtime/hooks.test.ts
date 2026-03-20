@@ -2,6 +2,10 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useRealtimeBroadcast, useRealtimeEcho } from "./hooks";
 
+// Stub required env vars so the realtime client module doesn't throw
+// if the dynamic import in useRealtimeBroadcast bypasses vi.mock
+vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+
 // Mock echo module
 const subscribeToEchoMock = vi.hoisted(() => vi.fn());
 const sendEchoMessageMock = vi.hoisted(() => vi.fn());
