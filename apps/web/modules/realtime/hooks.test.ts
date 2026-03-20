@@ -5,6 +5,7 @@ import { useRealtimeBroadcast, useRealtimeEcho } from "./hooks";
 // Stub required env vars so the realtime client module doesn't throw
 // if the dynamic import in useRealtimeBroadcast bypasses vi.mock
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-anon-key");
 
 // Mock echo module
 const subscribeToEchoMock = vi.hoisted(() => vi.fn());
