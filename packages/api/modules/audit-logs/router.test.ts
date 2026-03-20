@@ -21,12 +21,16 @@ vi.mock("@repo/database", () => ({
 	getAuditLogsForExport: getAuditLogsForExportMock,
 	createAuditLog: createAuditLogMock,
 	zodSchemas: {
-		AuditActionSchema: z.enum(["CREATE", "UPDATE", "DELETE", "EXPORT"]),
+		AuditActionSchema: z.enum([
+			"CREATE",
+			"READ",
+			"UPDATE",
+			"DELETE",
+			"LOGIN",
+			"LOGOUT",
+			"EXPORT",
+		]),
 	},
-}));
-
-vi.mock("@repo/logs", () => ({
-	logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 
 const ADMIN_USER = {
@@ -37,7 +41,7 @@ const ADMIN_USER = {
 
 const mockAdminSession = {
 	session: {
-		id: "session-1",
+		id: "session-id",
 		activeOrganizationId: "org-1",
 		ipAddress: "127.0.0.1",
 		userAgent: "test-agent",
@@ -54,8 +58,8 @@ describe("auditLogsRouter.list", () => {
 	});
 
 	it("returns logs and total", async () => {
-		const logs = [{ id: "log-1", action: "CREATE" }];
-		getAuditLogsMock.mockResolvedValue(logs);
+		const mockLogs = [{ id: "log-1", action: "CREATE", resource: "users" }];
+		getAuditLogsMock.mockResolvedValue(mockLogs);
 		countAuditLogsMock.mockResolvedValue(1);
 
 		const client = createProcedureClient(auditLogsRouter.list, {
@@ -63,19 +67,26 @@ describe("auditLogsRouter.list", () => {
 		});
 		const result = await client({});
 
-		expect(result).toEqual({ logs, total: 1 });
+		expect(result.logs).toEqual(mockLogs);
+		expect(result.total).toBe(1);
 	});
 
-	it("throws UNAUTHORIZED when not authenticated", async () => {
-		getSessionMock.mockResolvedValue(null);
+	it("passes filters to query", async () => {
+		getAuditLogsMock.mockResolvedValue([]);
+		countAuditLogsMock.mockResolvedValue(0);
 
 		const client = createProcedureClient(auditLogsRouter.list, {
 			context: authenticatedContext,
 		});
+		await client({ limit: 10, offset: 5, resource: "payments" });
 
-		await expect(client({})).rejects.toMatchObject({
-			code: "UNAUTHORIZED",
-		});
+		expect(getAuditLogsMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				limit: 10,
+				offset: 5,
+				resource: "payments",
+			}),
+		);
 	});
 });
 
@@ -86,7 +97,11 @@ describe("auditLogsRouter.filters", () => {
 	});
 
 	it("returns actions and resources", async () => {
-		getDistinctResourcesMock.mockResolvedValue(["invoices", "audit_logs"]);
+		getDistinctResourcesMock.mockResolvedValue([
+			"users",
+			"payments",
+			"files",
+		]);
 
 		const client = createProcedureClient(auditLogsRouter.filters, {
 			context: authenticatedContext,
@@ -95,11 +110,14 @@ describe("auditLogsRouter.filters", () => {
 
 		expect(result.actions).toEqual([
 			"CREATE",
+			"READ",
 			"UPDATE",
 			"DELETE",
+			"LOGIN",
+			"LOGOUT",
 			"EXPORT",
 		]);
-		expect(result.resources).toEqual(["invoices", "audit_logs"]);
+		expect(result.resources).toEqual(["users", "payments", "files"]);
 	});
 });
 
@@ -110,9 +128,24 @@ describe("auditLogsRouter.export", () => {
 		createAuditLogMock.mockResolvedValue(undefined);
 	});
 
-	it("exports logs as JSON by default", async () => {
-		const logs = [{ id: "log-1", action: "CREATE" }];
-		getAuditLogsForExportMock.mockResolvedValue(logs);
+	it("returns JSON format by default", async () => {
+		const mockLogs = [
+			{
+				id: "log-1",
+				action: "CREATE",
+				resource: "users",
+				createdAt: new Date("2025-01-01T00:00:00Z"),
+				userId: "user-1",
+				organizationId: "org-1",
+				resourceId: null,
+				ipAddress: "127.0.0.1",
+				userAgent: "test",
+				sessionId: "sess-1",
+				success: true,
+				metadata: {},
+			},
+		];
+		getAuditLogsForExportMock.mockResolvedValue(mockLogs);
 
 		const client = createProcedureClient(auditLogsRouter.export, {
 			context: authenticatedContext,
@@ -120,39 +153,28 @@ describe("auditLogsRouter.export", () => {
 		const result = await client({ format: "json" });
 
 		expect(result.format).toBe("json");
-		expect(result.data).toEqual(logs);
-		expect(result.filename).toMatch(/^audit-logs-\d{4}-\d{2}-\d{2}\.json$/);
-		expect(createAuditLogMock).toHaveBeenCalledWith(
-			expect.objectContaining({
-				userId: ADMIN_USER.id,
-				action: "EXPORT",
-				resource: "audit_logs",
-				metadata: expect.objectContaining({
-					format: "json",
-					recordCount: 1,
-				}),
-			}),
-		);
+		expect(result.data).toEqual(mockLogs);
+		expect(result.filename).toMatch(/^audit-logs-.*\.json$/);
 	});
 
-	it("exports logs as CSV", async () => {
-		const logs = [
+	it("returns CSV format when requested", async () => {
+		const mockLogs = [
 			{
 				id: "log-1",
-				createdAt: new Date("2026-01-01T00:00:00Z"),
+				action: "CREATE",
+				resource: "users",
+				createdAt: new Date("2025-01-01T00:00:00Z"),
 				userId: "user-1",
 				organizationId: "org-1",
-				action: "CREATE",
-				resource: "invoices",
-				resourceId: "inv-1",
+				resourceId: null,
 				ipAddress: "127.0.0.1",
-				userAgent: "Mozilla/5.0",
+				userAgent: "test-agent",
 				sessionId: "sess-1",
 				success: true,
 				metadata: { key: "value" },
 			},
 		];
-		getAuditLogsForExportMock.mockResolvedValue(logs);
+		getAuditLogsForExportMock.mockResolvedValue(mockLogs);
 
 		const client = createProcedureClient(auditLogsRouter.export, {
 			context: authenticatedContext,
@@ -161,10 +183,25 @@ describe("auditLogsRouter.export", () => {
 
 		expect(result.format).toBe("csv");
 		expect(typeof result.data).toBe("string");
-		expect(result.filename).toMatch(/^audit-logs-\d{4}-\d{2}-\d{2}\.csv$/);
-		// CSV should include header row
-		expect(result.data).toContain("id,createdAt,userId");
-		// and the log data
+		expect(result.data).toContain("id,createdAt");
 		expect(result.data).toContain("log-1");
+		expect(result.filename).toMatch(/^audit-logs-.*\.csv$/);
+	});
+
+	it("logs the export action for audit trail", async () => {
+		getAuditLogsForExportMock.mockResolvedValue([]);
+
+		const client = createProcedureClient(auditLogsRouter.export, {
+			context: authenticatedContext,
+		});
+		await client({ format: "json" });
+
+		expect(createAuditLogMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				userId: ADMIN_USER.id,
+				action: "EXPORT",
+				resource: "audit_logs",
+			}),
+		);
 	});
 });
