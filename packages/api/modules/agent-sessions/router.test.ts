@@ -171,3 +171,135 @@ describe("agentSessionsRouter.create", () => {
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 	});
 });
+
+describe("agentSessionsRouter.executeTurn", () => {
+	const mockSessionRecord = {
+		id: TEST_SESSION_ID,
+		userId: TEST_USER_ID,
+		organizationId: null,
+		toolSlug: "expense-tracker",
+		jobId: null,
+		sessionType: "feedback-collector",
+		isComplete: false,
+		messages: [],
+		extractedData: null,
+		context: {},
+		totalInputTokens: 0,
+		totalOutputTokens: 0,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+
+	const mockTurnResult = {
+		response: "Hello from assistant",
+		isComplete: false,
+		extractedData: null,
+		usage: { inputTokens: 10, outputTokens: 5 },
+	};
+
+	const AgentSessionRestoreMock = vi.hoisted(() => vi.fn());
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		getSessionMock.mockResolvedValue(mockSession);
+		getAgentSessionByIdMock.mockResolvedValue(mockSessionRecord);
+		createFeedbackCollectorConfigMock.mockReturnValue({
+			initialMessage: "Hi",
+		});
+		AgentSessionRestoreMock.mockResolvedValue({
+			executeTurn: vi.fn().mockResolvedValue(mockTurnResult),
+			getTranscript: vi.fn().mockReturnValue([]),
+		});
+		AgentSessionMock.restore = AgentSessionRestoreMock;
+	});
+
+	function makeExecuteTurnClient() {
+		return createProcedureClient(agentSessionsRouter.executeTurn, {
+			context: authenticatedContext,
+		});
+	}
+
+	it("executes a turn successfully", async () => {
+		const client = makeExecuteTurnClient();
+		const result = await client({
+			sessionId: TEST_SESSION_ID,
+			message: "Hello",
+		});
+
+		expect(result.turn.response).toBe("Hello from assistant");
+		expect(result.turn.isComplete).toBe(false);
+	});
+
+	it("throws UNAUTHORIZED when no auth session", async () => {
+		getSessionMock.mockResolvedValue(null);
+		const client = makeExecuteTurnClient();
+		await expect(
+			client({ sessionId: TEST_SESSION_ID, message: "Hello" }),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	it("throws NOT_FOUND when session does not exist", async () => {
+		getAgentSessionByIdMock.mockResolvedValue(null);
+		const client = makeExecuteTurnClient();
+		await expect(
+			client({ sessionId: TEST_SESSION_ID, message: "Hello" }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+
+	it("throws FORBIDDEN when session belongs to another user", async () => {
+		getAgentSessionByIdMock.mockResolvedValue({
+			...mockSessionRecord,
+			userId: "other-user-id",
+		});
+		const client = makeExecuteTurnClient();
+		await expect(
+			client({ sessionId: TEST_SESSION_ID, message: "Hello" }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	it("throws BAD_REQUEST for unknown session type", async () => {
+		getAgentSessionByIdMock.mockResolvedValue({
+			...mockSessionRecord,
+			sessionType: "unknown-type",
+		});
+		const client = makeExecuteTurnClient();
+		await expect(
+			client({ sessionId: TEST_SESSION_ID, message: "Hello" }),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+	});
+
+	it("updates tool feedback when session completes with feedbackId", async () => {
+		const completedResult = {
+			...mockTurnResult,
+			isComplete: true,
+			extractedData: { rating: "POSITIVE" },
+		};
+		getAgentSessionByIdMock.mockResolvedValue({
+			...mockSessionRecord,
+			context: { feedbackId: "feedback-123" },
+		});
+		isExtractedFeedbackMock.mockReturnValue(true);
+		AgentSessionRestoreMock.mockResolvedValue({
+			executeTurn: vi.fn().mockResolvedValue(completedResult),
+			getTranscript: vi.fn().mockReturnValue([]),
+		});
+		updateToolFeedbackMock.mockResolvedValue({});
+
+		const client = makeExecuteTurnClient();
+		await client({ sessionId: TEST_SESSION_ID, message: "Done" });
+
+		expect(updateToolFeedbackMock).toHaveBeenCalledWith(
+			"feedback-123",
+			TEST_USER_ID,
+			expect.objectContaining({ extractedData: { rating: "POSITIVE" } }),
+		);
+	});
+
+	it("throws INTERNAL_SERVER_ERROR on unexpected error", async () => {
+		AgentSessionRestoreMock.mockRejectedValue(new Error("boom"));
+		const client = makeExecuteTurnClient();
+		await expect(
+			client({ sessionId: TEST_SESSION_ID, message: "Hello" }),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+	});
+});
