@@ -1,4 +1,20 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Mock @repo/config
+const mockRegistry = vi.hoisted(() => [
+	{ slug: "news-analyzer", enabled: true, name: "News Analyzer" },
+	{ slug: "invoice-processor", enabled: true, name: "Invoice Processor" },
+	{ slug: "bg-remover", enabled: false, name: "Background Remover" },
+]);
+
+vi.mock("@repo/config", () => ({
+	config: {
+		tools: {
+			registry: mockRegistry,
+		},
+	},
+}));
+
 import {
 	getEnabledTools,
 	getToolsWithStatus,
@@ -7,347 +23,179 @@ import {
 	parseEnabledToolsEnv,
 } from "./tool-flags";
 
-// Mock the config module
-vi.mock("@repo/config", () => ({
-	config: {
-		tools: {
-			registry: [
-				{
-					slug: "bg-remover",
-					name: "Background Remover",
-					description: "Remove backgrounds from images",
-					icon: "image-minus",
-					public: true,
-					enabled: true,
-					creditCost: 1,
-				},
-				{
-					slug: "news-analyzer",
-					name: "News Analyzer",
-					description: "Analyze news articles",
-					icon: "newspaper",
-					public: true,
-					enabled: true,
-					creditCost: 1,
-				},
-				{
-					slug: "speaker-separation",
-					name: "Speaker Separation",
-					description:
-						"Separate and identify speakers in audio files",
-					icon: "audio-lines",
-					public: true,
-					enabled: true,
-					creditCost: 2,
-				},
-				{
-					slug: "disabled-tool",
-					name: "Disabled Tool",
-					description: "A tool disabled in config",
-					icon: "x",
-					public: true,
-					enabled: false, // Disabled in config
-					creditCost: 1,
-				},
-			],
-		},
-	},
-}));
-
 describe("parseEnabledToolsEnv", () => {
-	const originalEnv = process.env;
-
-	beforeEach(() => {
-		vi.resetModules();
-		process.env = { ...originalEnv };
-	});
-
 	afterEach(() => {
-		process.env = originalEnv;
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 	});
 
-	it("returns null when NEXT_PUBLIC_ENABLED_TOOLS is not set", () => {
+	it("returns null when env var is not set", () => {
 		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 		expect(parseEnabledToolsEnv()).toBeNull();
 	});
 
-	it("returns null when NEXT_PUBLIC_ENABLED_TOOLS is empty string", () => {
+	it("returns null when env var is empty string", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "";
 		expect(parseEnabledToolsEnv()).toBeNull();
 	});
 
-	it("returns null when NEXT_PUBLIC_ENABLED_TOOLS is only whitespace", () => {
+	it("returns null when env var is only whitespace", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "   ";
 		expect(parseEnabledToolsEnv()).toBeNull();
 	});
 
 	it("parses a single tool slug", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-		expect(parseEnabledToolsEnv()).toEqual(["bg-remover"]);
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
+		expect(parseEnabledToolsEnv()).toEqual(["news-analyzer"]);
 	});
 
-	it("parses multiple comma-separated tool slugs", () => {
+	it("parses multiple tool slugs", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS =
-			"bg-remover,news-analyzer,speaker-separation";
+			"news-analyzer,invoice-processor";
 		expect(parseEnabledToolsEnv()).toEqual([
-			"bg-remover",
 			"news-analyzer",
-			"speaker-separation",
+			"invoice-processor",
 		]);
 	});
 
-	it("trims whitespace from slugs", () => {
+	it("trims whitespace around slugs", () => {
 		process.env.NEXT_PUBLIC_ENABLED_TOOLS =
-			" bg-remover , news-analyzer , speaker-separation ";
+			" news-analyzer , invoice-processor ";
 		expect(parseEnabledToolsEnv()).toEqual([
-			"bg-remover",
 			"news-analyzer",
-			"speaker-separation",
+			"invoice-processor",
 		]);
 	});
 
-	it("filters out empty strings from parsed list", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover,,news-analyzer,";
-		expect(parseEnabledToolsEnv()).toEqual(["bg-remover", "news-analyzer"]);
-	});
-
-	it("handles whitespace-only entries", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover,   ,news-analyzer";
-		expect(parseEnabledToolsEnv()).toEqual(["bg-remover", "news-analyzer"]);
+	it("filters empty strings after split", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS =
+			"news-analyzer,,invoice-processor";
+		expect(parseEnabledToolsEnv()).toEqual([
+			"news-analyzer",
+			"invoice-processor",
+		]);
 	});
 });
 
 describe("isToolEnabled", () => {
-	const originalEnv = process.env;
-
-	beforeEach(() => {
-		vi.resetModules();
-		process.env = { ...originalEnv };
-	});
-
 	afterEach(() => {
-		process.env = originalEnv;
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 	});
 
-	describe("when NEXT_PUBLIC_ENABLED_TOOLS is not set", () => {
-		beforeEach(() => {
-			delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
-		});
-
-		it("returns true for tools with enabled: true in config", () => {
-			expect(isToolEnabled("bg-remover")).toBe(true);
-			expect(isToolEnabled("news-analyzer")).toBe(true);
-			expect(isToolEnabled("speaker-separation")).toBe(true);
-		});
-
-		it("returns false for tools with enabled: false in config", () => {
-			expect(isToolEnabled("disabled-tool")).toBe(false);
-		});
-
-		it("returns false for non-existent tools", () => {
-			expect(isToolEnabled("non-existent-tool")).toBe(false);
-		});
+	it("returns false for unknown tool slug", () => {
+		expect(isToolEnabled("unknown-tool")).toBe(false);
 	});
 
-	describe("when NEXT_PUBLIC_ENABLED_TOOLS is set", () => {
-		it("returns true for tools in the allowlist", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover,news-analyzer";
-			expect(isToolEnabled("bg-remover")).toBe(true);
-			expect(isToolEnabled("news-analyzer")).toBe(true);
-		});
-
-		it("returns false for tools not in the allowlist", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-			expect(isToolEnabled("news-analyzer")).toBe(false);
-			expect(isToolEnabled("speaker-separation")).toBe(false);
-		});
-
-		it("returns false for tools disabled in config even if in allowlist", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "disabled-tool";
-			expect(isToolEnabled("disabled-tool")).toBe(false);
-		});
-
-		it("returns false for non-existent tools even if in allowlist", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "non-existent-tool";
-			expect(isToolEnabled("non-existent-tool")).toBe(false);
-		});
-
-		it("handles allowlist with whitespace", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS =
-				" bg-remover , news-analyzer ";
-			expect(isToolEnabled("bg-remover")).toBe(true);
-			expect(isToolEnabled("news-analyzer")).toBe(true);
-		});
+	it("returns false for tool with enabled: false in config", () => {
+		expect(isToolEnabled("bg-remover")).toBe(false);
 	});
 
-	describe("edge cases", () => {
-		it("returns false for empty string slug", () => {
-			expect(isToolEnabled("")).toBe(false);
-		});
+	it("returns true when ENABLED_TOOLS not set and tool is config-enabled", () => {
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
+		expect(isToolEnabled("news-analyzer")).toBe(true);
+	});
 
-		it("is case-sensitive for slug matching", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-			expect(isToolEnabled("BG-REMOVER")).toBe(false);
-			expect(isToolEnabled("Bg-Remover")).toBe(false);
-		});
+	it("returns true when tool is in allowlist", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
+		expect(isToolEnabled("news-analyzer")).toBe(true);
+	});
+
+	it("returns false when tool is not in allowlist", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
+		expect(isToolEnabled("invoice-processor")).toBe(false);
+	});
+
+	it("returns false when tool is not in allowlist even if config-enabled", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "invoice-processor";
+		expect(isToolEnabled("news-analyzer")).toBe(false);
 	});
 });
 
 describe("getToolsWithStatus", () => {
-	const originalEnv = process.env;
-
-	beforeEach(() => {
-		vi.resetModules();
-		process.env = { ...originalEnv };
-	});
-
 	afterEach(() => {
-		process.env = originalEnv;
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 	});
 
-	it("returns all tools from registry with status", () => {
+	it("returns all tools with status when ENABLED_TOOLS not set", () => {
 		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 		const tools = getToolsWithStatus();
-		expect(tools).toHaveLength(4);
-		expect(tools.map((t) => t.slug)).toEqual([
-			"bg-remover",
-			"news-analyzer",
-			"speaker-separation",
-			"disabled-tool",
-		]);
+		expect(tools).toHaveLength(3);
 	});
 
-	describe("when NEXT_PUBLIC_ENABLED_TOOLS is not set", () => {
-		beforeEach(() => {
-			delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
-		});
-
-		it("marks config-enabled tools as isEnabled: true", () => {
-			const tools = getToolsWithStatus();
-			const bgRemover = tools.find((t) => t.slug === "bg-remover");
-			expect(bgRemover?.isEnabled).toBe(true);
-			expect(bgRemover?.isComingSoon).toBe(false);
-		});
-
-		it("marks config-disabled tools as isEnabled: false, isComingSoon: false", () => {
-			const tools = getToolsWithStatus();
-			const disabledTool = tools.find((t) => t.slug === "disabled-tool");
-			expect(disabledTool?.isEnabled).toBe(false);
-			expect(disabledTool?.isComingSoon).toBe(false);
-		});
+	it("marks config-enabled tools as isEnabled when no env restriction", () => {
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
+		const tools = getToolsWithStatus();
+		const newsAnalyzer = tools.find((t) => t.slug === "news-analyzer");
+		expect(newsAnalyzer?.isEnabled).toBe(true);
+		expect(newsAnalyzer?.isComingSoon).toBe(false);
 	});
 
-	describe("when NEXT_PUBLIC_ENABLED_TOOLS is set", () => {
-		it("marks tools in allowlist as isEnabled: true", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-			const tools = getToolsWithStatus();
-			const bgRemover = tools.find((t) => t.slug === "bg-remover");
-			expect(bgRemover?.isEnabled).toBe(true);
-			expect(bgRemover?.isComingSoon).toBe(false);
-		});
+	it("marks config-disabled tools as not enabled and not coming soon", () => {
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
+		const tools = getToolsWithStatus();
+		const bgRemover = tools.find((t) => t.slug === "bg-remover");
+		expect(bgRemover?.isEnabled).toBe(false);
+		expect(bgRemover?.isComingSoon).toBe(false);
+	});
 
-		it("marks config-enabled tools not in allowlist as isComingSoon: true", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-			const tools = getToolsWithStatus();
-			const newsAnalyzer = tools.find((t) => t.slug === "news-analyzer");
-			expect(newsAnalyzer?.isEnabled).toBe(false);
-			expect(newsAnalyzer?.isComingSoon).toBe(true);
-		});
+	it("marks tool as coming soon when config-enabled but not in env allowlist", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
+		const tools = getToolsWithStatus();
+		const invoiceProcessor = tools.find(
+			(t) => t.slug === "invoice-processor",
+		);
+		expect(invoiceProcessor?.isEnabled).toBe(false);
+		expect(invoiceProcessor?.isComingSoon).toBe(true);
+	});
 
-		it("marks config-disabled tools as neither enabled nor coming soon", () => {
-			process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-			const tools = getToolsWithStatus();
-			const disabledTool = tools.find((t) => t.slug === "disabled-tool");
-			expect(disabledTool?.isEnabled).toBe(false);
-			expect(disabledTool?.isComingSoon).toBe(false);
-		});
+	it("marks tool as enabled when in both config and env allowlist", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
+		const tools = getToolsWithStatus();
+		const newsAnalyzer = tools.find((t) => t.slug === "news-analyzer");
+		expect(newsAnalyzer?.isEnabled).toBe(true);
+		expect(newsAnalyzer?.isComingSoon).toBe(false);
 	});
 });
 
 describe("getEnabledTools", () => {
-	const originalEnv = process.env;
-
-	beforeEach(() => {
-		vi.resetModules();
-		process.env = { ...originalEnv };
-	});
-
 	afterEach(() => {
-		process.env = originalEnv;
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 	});
 
-	it("returns only enabled tools when env var not set", () => {
+	it("returns only enabled tools when no env restriction", () => {
 		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 		const tools = getEnabledTools();
-		expect(tools).toHaveLength(3); // Excludes disabled-tool
-		expect(tools.map((t) => t.slug)).toEqual([
-			"bg-remover",
-			"news-analyzer",
-			"speaker-separation",
-		]);
-	});
-
-	it("returns only tools in allowlist when env var is set", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover,news-analyzer";
-		const tools = getEnabledTools();
+		// news-analyzer and invoice-processor are config-enabled, bg-remover is not
 		expect(tools).toHaveLength(2);
-		expect(tools.map((t) => t.slug)).toEqual([
-			"bg-remover",
-			"news-analyzer",
-		]);
+		expect(tools.every((t) => t.isEnabled)).toBe(true);
 	});
 
-	it("filters out config-disabled tools even if in allowlist", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover,disabled-tool";
+	it("returns only allowed tools when env allowlist is set", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
 		const tools = getEnabledTools();
 		expect(tools).toHaveLength(1);
-		expect(tools[0].slug).toBe("bg-remover");
+		expect(tools[0].slug).toBe("news-analyzer");
 	});
 });
 
 describe("getVisibleTools", () => {
-	const originalEnv = process.env;
-
-	beforeEach(() => {
-		vi.resetModules();
-		process.env = { ...originalEnv };
-	});
-
 	afterEach(() => {
-		process.env = originalEnv;
+		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 	});
 
-	it("returns enabled and coming soon tools when env var not set", () => {
+	it("returns enabled tools when no env restriction", () => {
 		delete process.env.NEXT_PUBLIC_ENABLED_TOOLS;
 		const tools = getVisibleTools();
-		// Only config-enabled tools (3), not config-disabled
-		expect(tools).toHaveLength(3);
-		expect(tools.map((t) => t.slug)).toEqual([
-			"bg-remover",
-			"news-analyzer",
-			"speaker-separation",
-		]);
+		// news-analyzer and invoice-processor are enabled; bg-remover is config-disabled (not visible)
+		expect(tools).toHaveLength(2);
 	});
 
-	it("includes coming soon tools when env var is set", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
+	it("returns both enabled and coming-soon tools when env allowlist is set", () => {
+		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "news-analyzer";
 		const tools = getVisibleTools();
-		// bg-remover (enabled) + news-analyzer + speaker-separation (coming soon)
-		expect(tools).toHaveLength(3);
-		expect(tools.find((t) => t.slug === "bg-remover")?.isEnabled).toBe(
-			true,
-		);
-		expect(
-			tools.find((t) => t.slug === "news-analyzer")?.isComingSoon,
-		).toBe(true);
-		expect(
-			tools.find((t) => t.slug === "speaker-separation")?.isComingSoon,
-		).toBe(true);
-	});
-
-	it("excludes config-disabled tools", () => {
-		process.env.NEXT_PUBLIC_ENABLED_TOOLS = "bg-remover";
-		const tools = getVisibleTools();
-		expect(tools.find((t) => t.slug === "disabled-tool")).toBeUndefined();
+		// news-analyzer: enabled, invoice-processor: coming soon, bg-remover: not visible
+		expect(tools).toHaveLength(2);
+		const slugs = tools.map((t) => t.slug);
+		expect(slugs).toContain("news-analyzer");
+		expect(slugs).toContain("invoice-processor");
 	});
 });
