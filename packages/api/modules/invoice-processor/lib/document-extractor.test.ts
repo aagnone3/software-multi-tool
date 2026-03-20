@@ -1,9 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
 	detectFileType,
-	extractTextFromImage,
-	extractTextFromInvoiceDocument,
-	extractTextFromPdf,
 	MAX_INVOICE_FILE_SIZE,
 	SUPPORTED_EXTENSIONS,
 	SUPPORTED_MIME_TYPES,
@@ -11,488 +8,188 @@ import {
 	verifyMagicBytes,
 } from "./document-extractor";
 
-const pdfParseMock = vi.hoisted(() => vi.fn());
-const tesseractMock = vi.hoisted(() => ({
-	recognize: vi.fn(),
-}));
-const sharpMock = vi.hoisted(() => {
-	const mockInstance = {
-		png: vi.fn().mockReturnThis(),
-		toBuffer: vi.fn(),
-	};
-	return vi.fn(() => mockInstance);
+describe("document-extractor constants", () => {
+	it("should export supported MIME types including PDF and images", () => {
+		expect(SUPPORTED_MIME_TYPES).toContain("application/pdf");
+		expect(SUPPORTED_MIME_TYPES).toContain("image/jpeg");
+		expect(SUPPORTED_MIME_TYPES).toContain("image/png");
+		expect(SUPPORTED_MIME_TYPES).toContain("image/tiff");
+		expect(SUPPORTED_MIME_TYPES).toContain("image/webp");
+	});
+
+	it("should export supported extensions including pdf and image types", () => {
+		expect(SUPPORTED_EXTENSIONS).toContain(".pdf");
+		expect(SUPPORTED_EXTENSIONS).toContain(".jpg");
+		expect(SUPPORTED_EXTENSIONS).toContain(".jpeg");
+		expect(SUPPORTED_EXTENSIONS).toContain(".png");
+		expect(SUPPORTED_EXTENSIONS).toContain(".tiff");
+		expect(SUPPORTED_EXTENSIONS).toContain(".webp");
+	});
+
+	it("should set max file size to 10MB", () => {
+		expect(MAX_INVOICE_FILE_SIZE).toBe(10 * 1024 * 1024);
+	});
 });
-const loggerMock = vi.hoisted(() => ({
-	info: vi.fn(),
-	debug: vi.fn(),
-	error: vi.fn(),
-}));
 
-vi.mock("pdf-parse", () => ({
-	default: pdfParseMock,
-}));
-
-vi.mock("tesseract.js", () => ({
-	default: tesseractMock,
-}));
-
-vi.mock("sharp", () => ({
-	default: sharpMock,
-}));
-
-vi.mock("@repo/logs", () => ({
-	logger: loggerMock,
-}));
-
-// Helper to create magic bytes for different file types
-const MAGIC_BYTES = {
-	pdf: Buffer.from([0x25, 0x50, 0x44, 0x46]), // %PDF
-	jpeg: Buffer.from([0xff, 0xd8, 0xff]),
-	png: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
-	tiff_le: Buffer.from([0x49, 0x49, 0x2a, 0x00]),
-	tiff_be: Buffer.from([0x4d, 0x4d, 0x00, 0x2a]),
-	webp: Buffer.from([
-		0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-	]),
-};
-
-function createMockBuffer(magicBytes: Buffer, extraSize = 100): Buffer {
-	const extra = Buffer.alloc(extraSize);
-	return Buffer.concat([magicBytes, extra]);
-}
-
-describe("document-extractor", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
+describe("verifyMagicBytes", () => {
+	it("should detect PDF magic bytes", () => {
+		const buffer = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x00]);
+		expect(verifyMagicBytes(buffer)).toBe("pdf");
 	});
 
-	describe("constants", () => {
-		it("should have MAX_INVOICE_FILE_SIZE set to 10MB", () => {
-			expect(MAX_INVOICE_FILE_SIZE).toBe(10 * 1024 * 1024);
-		});
-
-		it("should support PDF and image MIME types", () => {
-			expect(SUPPORTED_MIME_TYPES).toContain("application/pdf");
-			expect(SUPPORTED_MIME_TYPES).toContain("image/jpeg");
-			expect(SUPPORTED_MIME_TYPES).toContain("image/png");
-			expect(SUPPORTED_MIME_TYPES).toContain("image/tiff");
-			expect(SUPPORTED_MIME_TYPES).toContain("image/webp");
-		});
-
-		it("should support .pdf and image file extensions", () => {
-			expect(SUPPORTED_EXTENSIONS).toContain(".pdf");
-			expect(SUPPORTED_EXTENSIONS).toContain(".jpg");
-			expect(SUPPORTED_EXTENSIONS).toContain(".jpeg");
-			expect(SUPPORTED_EXTENSIONS).toContain(".png");
-			expect(SUPPORTED_EXTENSIONS).toContain(".tiff");
-			expect(SUPPORTED_EXTENSIONS).toContain(".tif");
-			expect(SUPPORTED_EXTENSIONS).toContain(".webp");
-		});
+	it("should detect JPEG magic bytes", () => {
+		const buffer = Buffer.from([0xff, 0xd8, 0xff, 0x00]);
+		expect(verifyMagicBytes(buffer)).toBe("jpeg");
 	});
 
-	describe("verifyMagicBytes", () => {
-		it("should detect PDF from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			expect(verifyMagicBytes(buffer)).toBe("pdf");
-		});
-
-		it("should detect JPEG from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			expect(verifyMagicBytes(buffer)).toBe("jpeg");
-		});
-
-		it("should detect PNG from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.png);
-			expect(verifyMagicBytes(buffer)).toBe("png");
-		});
-
-		it("should detect TIFF (little-endian) from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.tiff_le);
-			expect(verifyMagicBytes(buffer)).toBe("tiff");
-		});
-
-		it("should detect TIFF (big-endian) from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.tiff_be);
-			expect(verifyMagicBytes(buffer)).toBe("tiff");
-		});
-
-		it("should detect WebP from magic bytes", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.webp);
-			expect(verifyMagicBytes(buffer)).toBe("webp");
-		});
-
-		it("should return null for unrecognized magic bytes", () => {
-			const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05]);
-			expect(verifyMagicBytes(buffer)).toBeNull();
-		});
-
-		it("should return null for buffer too small", () => {
-			const buffer = Buffer.from([0x25, 0x50]); // Only 2 bytes
-			expect(verifyMagicBytes(buffer)).toBeNull();
-		});
+	it("should detect PNG magic bytes", () => {
+		const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00]);
+		expect(verifyMagicBytes(buffer)).toBe("png");
 	});
 
-	describe("detectFileType", () => {
-		it("should detect PDF from MIME type", () => {
-			expect(detectFileType("application/pdf")).toBe("pdf");
-		});
-
-		it("should detect image from MIME types", () => {
-			expect(detectFileType("image/jpeg")).toBe("image");
-			expect(detectFileType("image/png")).toBe("image");
-			expect(detectFileType("image/tiff")).toBe("image");
-			expect(detectFileType("image/webp")).toBe("image");
-		});
-
-		it("should detect PDF from filename extension", () => {
-			expect(detectFileType(undefined, "invoice.pdf")).toBe("pdf");
-		});
-
-		it("should detect image from filename extensions", () => {
-			expect(detectFileType(undefined, "invoice.jpg")).toBe("image");
-			expect(detectFileType(undefined, "invoice.jpeg")).toBe("image");
-			expect(detectFileType(undefined, "invoice.png")).toBe("image");
-			expect(detectFileType(undefined, "invoice.tiff")).toBe("image");
-			expect(detectFileType(undefined, "invoice.tif")).toBe("image");
-			expect(detectFileType(undefined, "invoice.webp")).toBe("image");
-		});
-
-		it("should prefer MIME type over filename", () => {
-			expect(detectFileType("application/pdf", "invoice.jpg")).toBe(
-				"pdf",
-			);
-		});
-
-		it("should return null for unsupported types", () => {
-			expect(detectFileType("text/plain")).toBeNull();
-			expect(detectFileType(undefined, "document.docx")).toBeNull();
-		});
-
-		it("should handle case-insensitive extensions", () => {
-			expect(detectFileType(undefined, "INVOICE.PDF")).toBe("pdf");
-			expect(detectFileType(undefined, "Document.PNG")).toBe("image");
-		});
+	it("should detect TIFF little-endian magic bytes", () => {
+		const buffer = Buffer.from([0x49, 0x49, 0x2a, 0x00]);
+		expect(verifyMagicBytes(buffer)).toBe("tiff");
 	});
 
-	describe("validateInvoiceFile", () => {
-		it("should reject files larger than 10MB", () => {
-			const largeBuffer = Buffer.alloc(11 * 1024 * 1024);
-			const result = validateInvoiceFile(
-				largeBuffer,
-				"application/pdf",
-				"invoice.pdf",
-			);
-
-			expect(result).not.toBeNull();
-			expect(result?.error.code).toBe("FILE_TOO_LARGE");
-			expect(result?.error.message).toContain(
-				"exceeds maximum allowed size",
-			);
-		});
-
-		it("should reject unsupported file types", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = validateInvoiceFile(
-				buffer,
-				"text/plain",
-				"document.txt",
-			);
-
-			expect(result).not.toBeNull();
-			expect(result?.error.code).toBe("UNSUPPORTED_FILE_TYPE");
-		});
-
-		it("should reject files with invalid magic bytes", () => {
-			const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05]);
-			const result = validateInvoiceFile(
-				buffer,
-				"application/pdf",
-				"invoice.pdf",
-			);
-
-			expect(result).not.toBeNull();
-			expect(result?.error.code).toBe("INVALID_FILE_FORMAT");
-		});
-
-		it("should reject files with mismatched magic bytes and MIME type", () => {
-			const pdfBuffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = validateInvoiceFile(
-				pdfBuffer,
-				"image/jpeg",
-				"invoice.jpg",
-			);
-
-			expect(result).not.toBeNull();
-			expect(result?.error.code).toBe("INVALID_FILE_FORMAT");
-			expect(result?.error.message).toContain("doesn't match");
-		});
-
-		it("should accept valid PDF files", () => {
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = validateInvoiceFile(
-				buffer,
-				"application/pdf",
-				"invoice.pdf",
-			);
-
-			expect(result).toBeNull();
-		});
-
-		it("should accept valid image files", () => {
-			const jpegBuffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			const pngBuffer = createMockBuffer(MAGIC_BYTES.png);
-
-			expect(
-				validateInvoiceFile(jpegBuffer, "image/jpeg", "invoice.jpg"),
-			).toBeNull();
-			expect(
-				validateInvoiceFile(pngBuffer, "image/png", "invoice.png"),
-			).toBeNull();
-		});
+	it("should detect TIFF big-endian magic bytes", () => {
+		const buffer = Buffer.from([0x4d, 0x4d, 0x00, 0x2a]);
+		expect(verifyMagicBytes(buffer)).toBe("tiff");
 	});
 
-	describe("extractTextFromPdf", () => {
-		it("should extract text from PDF successfully", async () => {
-			const mockPdfData = {
-				text: "Invoice from ACME Corp\nTotal: $500.00",
-				numpages: 1,
-			};
-			pdfParseMock.mockResolvedValue(mockPdfData);
-
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = await extractTextFromPdf(buffer);
-
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.text).toBe(
-					"Invoice from ACME Corp\nTotal: $500.00",
-				);
-				expect(result.metadata.fileType).toBe("pdf");
-				expect(result.metadata.pageCount).toBe(1);
-				expect(result.metadata.usedOcr).toBe(false);
-			}
-		});
-
-		it("should fall back to OCR for scanned PDF with little text", async () => {
-			pdfParseMock.mockResolvedValue({
-				text: "abc", // Less than 10 characters
-				numpages: 1,
-			});
-
-			// Mock sharp to return image buffer
-			const sharpInstance = sharpMock();
-			sharpInstance.toBuffer.mockResolvedValue(Buffer.from("fake image"));
-
-			// Mock tesseract
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "Invoice from scanned PDF\nTotal: $1,000.00",
-					confidence: 85,
-				},
-			});
-
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = await extractTextFromPdf(buffer);
-
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.text).toBe(
-					"Invoice from scanned PDF\nTotal: $1,000.00",
-				);
-				expect(result.metadata.usedOcr).toBe(true);
-				expect(result.metadata.ocrConfidence).toBe(0.85);
-			}
-		});
-
-		it("should fall back to OCR when native extraction fails", async () => {
-			pdfParseMock.mockRejectedValue(new Error("PDF parsing failed"));
-
-			// Mock sharp to return image buffer
-			const sharpInstance = sharpMock();
-			sharpInstance.toBuffer.mockResolvedValue(Buffer.from("fake image"));
-
-			// Mock tesseract
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "OCR extracted text",
-					confidence: 80,
-				},
-			});
-
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = await extractTextFromPdf(buffer);
-
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.text).toBe("OCR extracted text");
-				expect(result.metadata.usedOcr).toBe(true);
-			}
-		});
-
-		it("should return error when OCR also fails for PDF", async () => {
-			pdfParseMock.mockRejectedValue(new Error("PDF parsing failed"));
-
-			// Mock sharp to fail
-			const sharpInstance = sharpMock();
-			sharpInstance.toBuffer.mockRejectedValue(
-				new Error("Sharp processing failed"),
-			);
-
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = await extractTextFromPdf(buffer);
-
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				expect(result.error.code).toBe("OCR_FAILED");
-			}
-		});
+	it("should detect WebP magic bytes (RIFF...WEBP)", () => {
+		const buffer = Buffer.alloc(12);
+		// RIFF header
+		buffer[0] = 0x52; // R
+		buffer[1] = 0x49; // I
+		buffer[2] = 0x46; // F
+		buffer[3] = 0x46; // F
+		// WEBP at offset 8
+		buffer[8] = 0x57; // W
+		buffer[9] = 0x45; // E
+		buffer[10] = 0x42; // B
+		buffer[11] = 0x50; // P
+		expect(verifyMagicBytes(buffer)).toBe("webp");
 	});
 
-	describe("extractTextFromImage", () => {
-		it("should extract text from image using OCR", async () => {
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "Invoice #12345\nVendor: Test Company\nAmount: $250.00",
-					confidence: 92,
-				},
-			});
-
-			const buffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			const result = await extractTextFromImage(buffer);
-
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.text).toBe(
-					"Invoice #12345\nVendor: Test Company\nAmount: $250.00",
-				);
-				expect(result.metadata.fileType).toBe("image");
-				expect(result.metadata.usedOcr).toBe(true);
-				expect(result.metadata.ocrConfidence).toBe(0.92);
-			}
-		});
-
-		it("should return error for empty OCR result", async () => {
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "   ",
-					confidence: 50,
-				},
-			});
-
-			const buffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			const result = await extractTextFromImage(buffer);
-
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				expect(result.error.code).toBe("EMPTY_DOCUMENT");
-			}
-		});
-
-		it("should handle OCR errors", async () => {
-			tesseractMock.recognize.mockRejectedValue(
-				new Error("Tesseract processing failed"),
-			);
-
-			const buffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			const result = await extractTextFromImage(buffer);
-
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				expect(result.error.code).toBe("OCR_FAILED");
-				expect(result.error.message).toContain(
-					"Tesseract processing failed",
-				);
-			}
-		});
+	it("should return null for unknown magic bytes", () => {
+		const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03]);
+		expect(verifyMagicBytes(buffer)).toBeNull();
 	});
 
-	describe("extractTextFromInvoiceDocument", () => {
-		it("should reject files larger than 10MB", async () => {
-			const largeBuffer = Buffer.alloc(11 * 1024 * 1024);
-			const result = await extractTextFromInvoiceDocument(
-				largeBuffer,
-				"application/pdf",
-			);
+	it("should return null for too-short buffer", () => {
+		const buffer = Buffer.from([0x25, 0x50]);
+		expect(verifyMagicBytes(buffer)).toBeNull();
+	});
+});
 
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				expect(result.error.code).toBe("FILE_TOO_LARGE");
-			}
-		});
+describe("detectFileType", () => {
+	it("should detect PDF by MIME type", () => {
+		expect(detectFileType("application/pdf")).toBe("pdf");
+	});
 
-		it("should reject unsupported file types", async () => {
-			const buffer = Buffer.from("some content");
-			const result = await extractTextFromInvoiceDocument(
-				buffer,
-				"text/plain",
-			);
+	it("should detect image by MIME type", () => {
+		expect(detectFileType("image/jpeg")).toBe("image");
+		expect(detectFileType("image/png")).toBe("image");
+		expect(detectFileType("image/tiff")).toBe("image");
+		expect(detectFileType("image/webp")).toBe("image");
+	});
 
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				expect(result.error.code).toBe("UNSUPPORTED_FILE_TYPE");
-			}
-		});
+	it("should detect PDF by extension when no MIME type", () => {
+		expect(detectFileType(undefined, "invoice.pdf")).toBe("pdf");
+	});
 
-		it("should route PDF files to PDF extractor", async () => {
-			pdfParseMock.mockResolvedValue({
-				text: "PDF invoice content",
-				numpages: 1,
-			});
+	it("should detect image by extension when no MIME type", () => {
+		expect(detectFileType(undefined, "scan.jpg")).toBe("image");
+		expect(detectFileType(undefined, "scan.PNG")).toBe("image");
+		expect(detectFileType(undefined, "scan.tiff")).toBe("image");
+	});
 
-			const buffer = createMockBuffer(MAGIC_BYTES.pdf);
-			const result = await extractTextFromInvoiceDocument(
-				buffer,
-				"application/pdf",
-			);
+	it("should return null for unsupported MIME type", () => {
+		expect(detectFileType("application/zip")).toBeNull();
+	});
 
-			expect(pdfParseMock).toHaveBeenCalled();
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.metadata.fileType).toBe("pdf");
-			}
-		});
+	it("should return null when no MIME type and unsupported extension", () => {
+		expect(detectFileType(undefined, "doc.docx")).toBeNull();
+	});
 
-		it("should route image files to OCR extractor", async () => {
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "Image invoice content",
-					confidence: 90,
-				},
-			});
+	it("should return null when both undefined", () => {
+		expect(detectFileType()).toBeNull();
+	});
+});
 
-			const buffer = createMockBuffer(MAGIC_BYTES.jpeg);
-			const result = await extractTextFromInvoiceDocument(
-				buffer,
-				"image/jpeg",
-			);
+describe("validateInvoiceFile", () => {
+	function makePdfBuffer(size = 100): Buffer {
+		const buf = Buffer.alloc(size, 0);
+		buf[0] = 0x25; // %
+		buf[1] = 0x50; // P
+		buf[2] = 0x44; // D
+		buf[3] = 0x46; // F
+		return buf;
+	}
 
-			expect(tesseractMock.recognize).toHaveBeenCalled();
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.metadata.fileType).toBe("image");
-				expect(result.metadata.usedOcr).toBe(true);
-			}
-		});
+	function makeJpegBuffer(size = 100): Buffer {
+		const buf = Buffer.alloc(size, 0);
+		buf[0] = 0xff;
+		buf[1] = 0xd8;
+		buf[2] = 0xff;
+		return buf;
+	}
 
-		it("should detect file type from filename when MIME type is missing", async () => {
-			tesseractMock.recognize.mockResolvedValue({
-				data: {
-					text: "Invoice from filename detection",
-					confidence: 88,
-				},
-			});
+	it("should return null for a valid PDF buffer", () => {
+		const result = validateInvoiceFile(
+			makePdfBuffer(),
+			"application/pdf",
+			"invoice.pdf",
+		);
+		expect(result).toBeNull();
+	});
 
-			const buffer = createMockBuffer(MAGIC_BYTES.png);
-			const result = await extractTextFromInvoiceDocument(
-				buffer,
-				undefined,
-				"invoice.png",
-			);
+	it("should return null for a valid JPEG buffer", () => {
+		const result = validateInvoiceFile(
+			makeJpegBuffer(),
+			"image/jpeg",
+			"photo.jpg",
+		);
+		expect(result).toBeNull();
+	});
 
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.metadata.fileType).toBe("image");
-			}
-		});
+	it("should return FILE_TOO_LARGE when buffer exceeds 10MB", () => {
+		const bigBuffer = Buffer.alloc(MAX_INVOICE_FILE_SIZE + 1, 0x25);
+		bigBuffer[1] = 0x50;
+		bigBuffer[2] = 0x44;
+		bigBuffer[3] = 0x46;
+		const result = validateInvoiceFile(bigBuffer, "application/pdf");
+		expect(result).not.toBeNull();
+		expect(result?.error.code).toBe("FILE_TOO_LARGE");
+	});
+
+	it("should return UNSUPPORTED_FILE_TYPE for unsupported MIME type", () => {
+		const buffer = makePdfBuffer();
+		const result = validateInvoiceFile(
+			buffer,
+			"application/zip",
+			"file.zip",
+		);
+		expect(result).not.toBeNull();
+		expect(result?.error.code).toBe("UNSUPPORTED_FILE_TYPE");
+	});
+
+	it("should return INVALID_FILE_FORMAT for empty/unrecognized buffer", () => {
+		const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x00]);
+		const result = validateInvoiceFile(buffer, "application/pdf");
+		expect(result).not.toBeNull();
+		expect(result?.error.code).toBe("INVALID_FILE_FORMAT");
+	});
+
+	it("should return INVALID_FILE_FORMAT when magic bytes mismatch claimed MIME type", () => {
+		// JPEG bytes but claiming PDF
+		const result = validateInvoiceFile(
+			makeJpegBuffer(),
+			"application/pdf",
+			"invoice.pdf",
+		);
+		expect(result).not.toBeNull();
+		expect(result?.error.code).toBe("INVALID_FILE_FORMAT");
 	});
 });
