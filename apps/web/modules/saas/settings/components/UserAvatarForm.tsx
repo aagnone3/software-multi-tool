@@ -1,5 +1,6 @@
 "use client";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
+import React from "react";
 import { toast } from "sonner";
 import { UserAvatarUpload } from "./UserAvatarUpload";
 
