@@ -5,6 +5,7 @@ import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { BarChart3Icon, MessageSquareIcon, WrenchIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 interface QuickActionsProps {
 	className?: string;

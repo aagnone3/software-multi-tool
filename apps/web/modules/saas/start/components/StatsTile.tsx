@@ -3,7 +3,7 @@
 import { useLocaleCurrency } from "@shared/hooks/locale-currency";
 import { Badge } from "@ui/components/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 type Props = {
 	title: string;
