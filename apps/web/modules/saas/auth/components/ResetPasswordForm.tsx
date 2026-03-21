@@ -20,6 +20,7 @@ import { PasswordInput } from "@ui/components/password-input";
 import { AlertTriangleIcon, ArrowLeftIcon, MailboxIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
