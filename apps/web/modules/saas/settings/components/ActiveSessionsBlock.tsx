@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Skeleton } from "@ui/components/skeleton";
 import { ComputerIcon, XIcon } from "lucide-react";
+import React from "react";
 import { toast } from "sonner";
 
 export function ActiveSessionsBlock() {
