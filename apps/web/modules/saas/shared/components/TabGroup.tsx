@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 export function TabGroup({
 	items,
