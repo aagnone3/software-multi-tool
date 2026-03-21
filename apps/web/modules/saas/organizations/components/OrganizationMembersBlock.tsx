@@ -1,7 +1,7 @@
 "use client";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
-import { useState } from "react";
+import React, { useState } from "react";
 import { OrganizationInvitationsList } from "./OrganizationInvitationsList";
 import { OrganizationMembersList } from "./OrganizationMembersList";
 
