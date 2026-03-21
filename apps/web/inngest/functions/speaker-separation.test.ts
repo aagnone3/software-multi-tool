@@ -103,7 +103,11 @@ describe("speakerSeparation inngest function", () => {
 
 	it("runs all 5 steps in order", async () => {
 		const step = makeStep();
-		await (speakerSeparation as unknown as Function)({
+		await (
+			speakerSeparation as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -138,7 +142,11 @@ describe("speakerSeparation inngest function", () => {
 
 	it("returns success when job completes", async () => {
 		const step = makeStep();
-		const result = await (speakerSeparation as unknown as Function)({
+		const result = await (
+			speakerSeparation as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -153,7 +161,11 @@ describe("speakerSeparation inngest function", () => {
 
 		const step = makeStep();
 		await expect(
-			(speakerSeparation as unknown as Function)({
+			(
+				speakerSeparation as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -169,7 +181,11 @@ describe("speakerSeparation inngest function", () => {
 
 		const step = makeStep();
 		await expect(
-			(speakerSeparation as unknown as Function)({
+			(
+				speakerSeparation as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -184,7 +200,11 @@ describe("speakerSeparation inngest function", () => {
 		});
 
 		const step = makeStep();
-		const result = await (speakerSeparation as unknown as Function)({
+		const result = await (
+			speakerSeparation as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -204,7 +224,11 @@ describe("speakerSeparation inngest function", () => {
 		});
 
 		const step = makeStep();
-		const result = await (speakerSeparation as unknown as Function)({
+		const result = await (
+			speakerSeparation as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -224,7 +248,11 @@ describe("speakerSeparation inngest function", () => {
 		});
 
 		const step = makeStep();
-		const result = await (speakerSeparation as unknown as Function)({
+		const result = await (
+			speakerSeparation as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});

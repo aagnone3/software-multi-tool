@@ -52,7 +52,11 @@ describe("meetingSummarizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (meetingSummarizer as unknown as Function)({
+		await (
+			meetingSummarizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -63,7 +67,11 @@ describe("meetingSummarizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (meetingSummarizer as unknown as Function)({
+		const result = await (
+			meetingSummarizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -79,7 +87,11 @@ describe("meetingSummarizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (meetingSummarizer as unknown as Function)({
+		const result = await (
+			meetingSummarizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -93,7 +105,11 @@ describe("meetingSummarizer inngest function", () => {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
 		await expect(
-			(meetingSummarizer as unknown as Function)({
+			(
+				meetingSummarizer as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -106,7 +122,11 @@ describe("meetingSummarizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (meetingSummarizer as unknown as Function)({
+		await (
+			meetingSummarizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -118,7 +138,11 @@ describe("meetingSummarizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (meetingSummarizer as unknown as Function)({
+		await (
+			meetingSummarizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});

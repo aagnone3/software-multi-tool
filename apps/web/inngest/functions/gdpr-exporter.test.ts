@@ -52,7 +52,11 @@ describe("gdprExporter inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (gdprExporter as unknown as Function)({
+		await (
+			gdprExporter as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -63,7 +67,11 @@ describe("gdprExporter inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (gdprExporter as unknown as Function)({
+		const result = await (
+			gdprExporter as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -79,7 +87,11 @@ describe("gdprExporter inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (gdprExporter as unknown as Function)({
+		const result = await (
+			gdprExporter as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -93,7 +105,11 @@ describe("gdprExporter inngest function", () => {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
 		await expect(
-			(gdprExporter as unknown as Function)({
+			(
+				gdprExporter as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -106,7 +122,11 @@ describe("gdprExporter inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (gdprExporter as unknown as Function)({
+		await (
+			gdprExporter as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -118,7 +138,11 @@ describe("gdprExporter inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (gdprExporter as unknown as Function)({
+		await (
+			gdprExporter as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});

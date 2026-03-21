@@ -46,13 +46,6 @@ describe("contractAnalyzer inngest function", () => {
 		processContract?: () => unknown;
 		updateJobStatus?: () => unknown;
 	}) => {
-		const callIdx = 0;
-		const steps = [
-			overrides?.validateJob ?? (() => ({ exists: true })),
-			overrides?.processContract ??
-				(() => ({ success: true, output: { result: "ok" } })),
-			overrides?.updateJobStatus ?? (() => undefined),
-		];
 		return {
 			run: vi.fn(async (_name: string, fn: () => unknown) => {
 				if (overrides) {
@@ -77,7 +70,11 @@ describe("contractAnalyzer inngest function", () => {
 
 	it("runs all three steps in order", async () => {
 		const step = makeStep();
-		const result = await (contractAnalyzer as unknown as Function)({
+		const result = await (
+			contractAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -111,7 +108,11 @@ describe("contractAnalyzer inngest function", () => {
 			run: vi.fn(async (_name: string, fn: () => unknown) => fn()),
 		};
 
-		const result = await (contractAnalyzer as unknown as Function)({
+		const result = await (
+			contractAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -131,7 +132,11 @@ describe("contractAnalyzer inngest function", () => {
 			run: vi.fn(async (_name: string, fn: () => unknown) => fn()),
 		};
 
-		const result = await (contractAnalyzer as unknown as Function)({
+		const result = await (
+			contractAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -149,7 +154,11 @@ describe("contractAnalyzer inngest function", () => {
 		};
 
 		await expect(
-			(contractAnalyzer as unknown as Function)({
+			(
+				contractAnalyzer as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -165,7 +174,11 @@ describe("contractAnalyzer inngest function", () => {
 			run: vi.fn(async (_name: string, fn: () => unknown) => fn()),
 		};
 
-		await (contractAnalyzer as unknown as Function)({
+		await (
+			contractAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -181,7 +194,11 @@ describe("contractAnalyzer inngest function", () => {
 			run: vi.fn(async (_name: string, fn: () => unknown) => fn()),
 		};
 
-		await (contractAnalyzer as unknown as Function)({
+		await (
+			contractAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});

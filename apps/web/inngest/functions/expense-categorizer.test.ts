@@ -52,7 +52,11 @@ describe("expenseCategorizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (expenseCategorizer as unknown as Function)({
+		await (
+			expenseCategorizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -63,7 +67,11 @@ describe("expenseCategorizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (expenseCategorizer as unknown as Function)({
+		const result = await (
+			expenseCategorizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -79,7 +87,11 @@ describe("expenseCategorizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		const result = await (expenseCategorizer as unknown as Function)({
+		const result = await (
+			expenseCategorizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -93,7 +105,11 @@ describe("expenseCategorizer inngest function", () => {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
 		await expect(
-			(expenseCategorizer as unknown as Function)({
+			(
+				expenseCategorizer as unknown as (
+					...args: unknown[]
+				) => Promise<Record<string, unknown>>
+			)({
 				event: { data: { toolJobId } },
 				step,
 			}),
@@ -106,7 +122,11 @@ describe("expenseCategorizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (expenseCategorizer as unknown as Function)({
+		await (
+			expenseCategorizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
@@ -118,7 +138,11 @@ describe("expenseCategorizer inngest function", () => {
 		const step = {
 			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
 		};
-		await (expenseCategorizer as unknown as Function)({
+		await (
+			expenseCategorizer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
 			event: { data: { toolJobId } },
 			step,
 		});
