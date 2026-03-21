@@ -3,10 +3,9 @@
 import posthog from "posthog-js";
 import { useEffect } from "react";
 
-const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
-
 export function AnalyticsScript() {
 	useEffect(() => {
+		const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
 		if (!posthogKey) {
 			return;
 		}
@@ -23,6 +22,7 @@ export function AnalyticsScript() {
 
 export function useAnalytics() {
 	const trackEvent = (event: string, data?: Record<string, unknown>) => {
+		const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY as string;
 		if (!posthogKey) {
 			return;
 		}
