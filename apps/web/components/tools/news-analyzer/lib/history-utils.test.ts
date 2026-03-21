@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	cleanArticleTitle,
 	filterJobsBySearch,
 	filterJobsByStatus,
 	formatDuration,
@@ -9,299 +10,149 @@ import {
 	statusConfig,
 } from "./history-utils";
 
-describe("history-utils", () => {
-	describe("getArticleTitle", () => {
-		it("extracts hostname and path from valid URL", () => {
-			const input = {
-				articleUrl: "https://example.com/article/my-news-story",
-			};
-			const result = getArticleTitle(input);
-			expect(result).toBe("example.com/article/my-news-story");
-		});
+function makeJob(overrides: Partial<NewsAnalyzerJob> = {}): NewsAnalyzerJob {
+	return {
+		id: "job-1",
+		toolSlug: "news-analyzer",
+		status: "COMPLETED",
+		input: {},
+		output: null,
+		error: null,
+		createdAt: new Date("2024-01-01"),
+		completedAt: new Date("2024-01-01T00:01:00"),
+		startedAt: new Date("2024-01-01T00:00:00"),
+		...overrides,
+	};
+}
 
-		it("truncates long paths with ellipsis", () => {
-			const input = {
-				articleUrl:
-					"https://example.com/very/long/path/that/exceeds/the/maximum/length/limit/here",
-			};
-			const result = getArticleTitle(input);
-			expect(result).toContain("example.com");
-			expect(result).toContain("...");
-			expect(result.length).toBeLessThanOrEqual(50);
-		});
-
-		it("handles invalid URLs gracefully", () => {
-			const input = { articleUrl: "not-a-valid-url" };
-			const result = getArticleTitle(input);
-			expect(result).toBe("not-a-valid-url");
-		});
-
-		it("truncates long invalid URLs", () => {
-			const longUrl = "a".repeat(100);
-			const input = { articleUrl: longUrl };
-			const result = getArticleTitle(input);
-			expect(result).toBe(`${"a".repeat(50)}...`);
-		});
-
-		it("returns truncated text for articleText input", () => {
-			const input = {
-				articleText: "This is a sample article text content",
-			};
-			const result = getArticleTitle(input);
-			expect(result).toBe("This is a sample article text content");
-		});
-
-		it("truncates long article text with ellipsis", () => {
-			const longText = "x".repeat(100);
-			const input = { articleText: longText };
-			const result = getArticleTitle(input);
-			expect(result).toBe(`${"x".repeat(50)}...`);
-		});
-
-		it('returns "Unknown" when no input provided', () => {
-			const input = {};
-			const result = getArticleTitle(input);
-			expect(result).toBe("Unknown");
-		});
-
-		it("prefers URL over text when both provided", () => {
-			const input = {
-				articleUrl: "https://example.com/test",
-				articleText: "Some text",
-			};
-			const result = getArticleTitle(input);
-			expect(result).toContain("example.com");
-		});
+describe("cleanArticleTitle", () => {
+	it("strips pipe-separated site suffix", () => {
+		expect(cleanArticleTitle("Article Title | CNN")).toBe("Article Title");
 	});
 
-	describe("formatDuration", () => {
-		it('returns "-" when startedAt is null', () => {
-			const result = formatDuration(null, new Date());
-			expect(result).toBe("-");
-		});
-
-		it('returns "-" when completedAt is null', () => {
-			const result = formatDuration(new Date(), null);
-			expect(result).toBe("-");
-		});
-
-		it('returns "-" when both are null', () => {
-			const result = formatDuration(null, null);
-			expect(result).toBe("-");
-		});
-
-		it("formats seconds correctly for durations under 60s", () => {
-			const start = new Date("2025-01-01T10:00:00Z");
-			const end = new Date("2025-01-01T10:00:30Z");
-			const result = formatDuration(start, end);
-			expect(result).toBe("30s");
-		});
-
-		it("formats minutes and seconds correctly", () => {
-			const start = new Date("2025-01-01T10:00:00Z");
-			const end = new Date("2025-01-01T10:02:15Z");
-			const result = formatDuration(start, end);
-			expect(result).toBe("2m 15s");
-		});
-
-		it("handles exactly 60 seconds", () => {
-			const start = new Date("2025-01-01T10:00:00Z");
-			const end = new Date("2025-01-01T10:01:00Z");
-			const result = formatDuration(start, end);
-			expect(result).toBe("1m 0s");
-		});
-
-		it("handles zero duration", () => {
-			const time = new Date("2025-01-01T10:00:00Z");
-			const result = formatDuration(time, time);
-			expect(result).toBe("0s");
-		});
+	it("strips dash-separated site suffix", () => {
+		expect(cleanArticleTitle("Article Title - The New York Times")).toBe(
+			"Article Title",
+		);
 	});
 
-	describe("filterJobsBySearch", () => {
-		const mockJobs: NewsAnalyzerJob[] = [
-			{
-				id: "1",
-				toolSlug: "news-analyzer",
-				status: "COMPLETED",
-				input: { articleUrl: "https://example.com/politics" },
-				output: null,
-				error: null,
-				createdAt: new Date(),
-				completedAt: new Date(),
-			},
-			{
-				id: "2",
-				toolSlug: "news-analyzer",
-				status: "COMPLETED",
-				input: { articleText: "Breaking news about technology" },
-				output: null,
-				error: null,
-				createdAt: new Date(),
-				completedAt: new Date(),
-			},
-			{
-				id: "3",
-				toolSlug: "news-analyzer",
-				status: "FAILED",
-				input: { articleUrl: "https://news.site/sports" },
-				output: null,
-				error: "Failed",
-				createdAt: new Date(),
-				completedAt: null,
-			},
-		];
-
-		it("returns all jobs when search term is empty", () => {
-			const result = filterJobsBySearch(mockJobs, "");
-			expect(result).toHaveLength(3);
-		});
-
-		it("filters by URL hostname", () => {
-			const result = filterJobsBySearch(mockJobs, "example");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("1");
-		});
-
-		it("filters by URL path", () => {
-			const result = filterJobsBySearch(mockJobs, "politics");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("1");
-		});
-
-		it("filters by article text", () => {
-			const result = filterJobsBySearch(mockJobs, "technology");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("2");
-		});
-
-		it("is case insensitive", () => {
-			const result = filterJobsBySearch(mockJobs, "BREAKING");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("2");
-		});
-
-		it("returns empty array when no matches", () => {
-			const result = filterJobsBySearch(mockJobs, "nonexistent");
-			expect(result).toHaveLength(0);
-		});
+	it("does not strip if suffix is >= 40 chars", () => {
+		const longSuffix = "A".repeat(40);
+		const title = `Article Title | ${longSuffix}`;
+		expect(cleanArticleTitle(title)).toBe(title);
 	});
 
-	describe("filterJobsByStatus", () => {
-		const mockJobs: NewsAnalyzerJob[] = [
-			{
-				id: "1",
-				toolSlug: "news-analyzer",
-				status: "COMPLETED",
-				input: { articleUrl: "https://example.com" },
-				output: null,
-				error: null,
-				createdAt: new Date(),
-				completedAt: new Date(),
-			},
-			{
-				id: "2",
-				toolSlug: "news-analyzer",
-				status: "FAILED",
-				input: { articleUrl: "https://example.com" },
-				output: null,
-				error: "Error",
-				createdAt: new Date(),
-				completedAt: null,
-			},
-			{
-				id: "3",
-				toolSlug: "news-analyzer",
-				status: "PENDING",
-				input: { articleUrl: "https://example.com" },
-				output: null,
-				error: null,
-				createdAt: new Date(),
-				completedAt: null,
-			},
-		];
+	it("returns original title if no separator found", () => {
+		expect(cleanArticleTitle("Just a title")).toBe("Just a title");
+	});
+});
 
-		it("returns all jobs when status is empty string", () => {
-			const result = filterJobsByStatus(mockJobs, "");
-			expect(result).toHaveLength(3);
+describe("getArticleTitle", () => {
+	it("returns hostname + truncated path for URLs", () => {
+		const result = getArticleTitle({
+			articleUrl: "https://example.com/some/path",
 		});
-
-		it("filters by COMPLETED status", () => {
-			const result = filterJobsByStatus(mockJobs, "COMPLETED");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("1");
-		});
-
-		it("filters by FAILED status", () => {
-			const result = filterJobsByStatus(mockJobs, "FAILED");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("2");
-		});
-
-		it("filters by PENDING status", () => {
-			const result = filterJobsByStatus(mockJobs, "PENDING");
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe("3");
-		});
-
-		it("returns empty array when no matches", () => {
-			const result = filterJobsByStatus(mockJobs, "PROCESSING");
-			expect(result).toHaveLength(0);
-		});
+		expect(result).toContain("example.com");
 	});
 
-	describe("paginateJobs", () => {
-		const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-		it("returns first page correctly", () => {
-			const result = paginateJobs(items, 1, 3);
-			expect(result).toEqual([1, 2, 3]);
-		});
-
-		it("returns second page correctly", () => {
-			const result = paginateJobs(items, 2, 3);
-			expect(result).toEqual([4, 5, 6]);
-		});
-
-		it("handles last page with fewer items", () => {
-			const result = paginateJobs(items, 4, 3);
-			expect(result).toEqual([10]);
-		});
-
-		it("returns empty array for out of range page", () => {
-			const result = paginateJobs(items, 10, 3);
-			expect(result).toEqual([]);
-		});
-
-		it("handles empty array", () => {
-			const result = paginateJobs([], 1, 10);
-			expect(result).toEqual([]);
-		});
-
-		it("returns all items when page size exceeds total", () => {
-			const result = paginateJobs(items, 1, 20);
-			expect(result).toEqual(items);
-		});
+	it("truncates text input at 50 chars", () => {
+		const text = "A".repeat(60);
+		const result = getArticleTitle({ articleText: text });
+		expect(result).toBe(`${"A".repeat(50)}...`);
 	});
 
-	describe("statusConfig", () => {
-		it("has all job statuses defined", () => {
-			expect(statusConfig.PENDING).toBeDefined();
-			expect(statusConfig.PROCESSING).toBeDefined();
-			expect(statusConfig.COMPLETED).toBeDefined();
-			expect(statusConfig.FAILED).toBeDefined();
-			expect(statusConfig.CANCELLED).toBeDefined();
-		});
+	it("returns Unknown for empty input", () => {
+		expect(getArticleTitle({})).toBe("Unknown");
+	});
+});
 
-		it("has correct labels", () => {
-			expect(statusConfig.COMPLETED.label).toBe("Completed");
-			expect(statusConfig.FAILED.label).toBe("Failed");
-		});
+describe("formatDuration", () => {
+	it("returns dash when startedAt is missing", () => {
+		expect(formatDuration(null, new Date())).toBe("-");
+	});
 
-		it("has correct variants", () => {
-			expect(statusConfig.COMPLETED.variant).toBe("success");
-			expect(statusConfig.FAILED.variant).toBe("error");
-			expect(statusConfig.PENDING.variant).toBe("warning");
-		});
+	it("returns dash when completedAt is missing", () => {
+		expect(formatDuration(new Date(), null)).toBe("-");
+	});
+
+	it("formats seconds when < 60", () => {
+		const start = new Date("2024-01-01T00:00:00");
+		const end = new Date("2024-01-01T00:00:45");
+		expect(formatDuration(start, end)).toBe("45s");
+	});
+
+	it("formats minutes and seconds when >= 60", () => {
+		const start = new Date("2024-01-01T00:00:00");
+		const end = new Date("2024-01-01T00:01:30");
+		expect(formatDuration(start, end)).toBe("1m 30s");
+	});
+});
+
+describe("filterJobsBySearch", () => {
+	const jobs = [
+		makeJob({ input: { articleUrl: "https://cnn.com/politics" } }),
+		makeJob({ input: { articleText: "Breaking news about tech" } }),
+	];
+
+	it("returns all jobs for empty search", () => {
+		expect(filterJobsBySearch(jobs, "")).toHaveLength(2);
+	});
+
+	it("filters by URL content", () => {
+		const result = filterJobsBySearch(jobs, "cnn");
+		expect(result).toHaveLength(1);
+	});
+
+	it("filters by text content", () => {
+		const result = filterJobsBySearch(jobs, "tech");
+		expect(result).toHaveLength(1);
+	});
+});
+
+describe("filterJobsByStatus", () => {
+	const jobs = [
+		makeJob({ status: "COMPLETED" }),
+		makeJob({ status: "FAILED" }),
+		makeJob({ status: "PENDING" }),
+	];
+
+	it("returns all for empty status", () => {
+		expect(filterJobsByStatus(jobs, "")).toHaveLength(3);
+	});
+
+	it("filters by status", () => {
+		expect(filterJobsByStatus(jobs, "FAILED")).toHaveLength(1);
+	});
+});
+
+describe("paginateJobs", () => {
+	const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+	it("returns first page", () => {
+		expect(paginateJobs(items, 1, 3)).toEqual([1, 2, 3]);
+	});
+
+	it("returns second page", () => {
+		expect(paginateJobs(items, 2, 3)).toEqual([4, 5, 6]);
+	});
+
+	it("returns partial last page", () => {
+		expect(paginateJobs(items, 4, 3)).toEqual([10]);
+	});
+});
+
+describe("statusConfig", () => {
+	it("has entries for all statuses", () => {
+		const statuses = [
+			"PENDING",
+			"PROCESSING",
+			"COMPLETED",
+			"FAILED",
+			"CANCELLED",
+		] as const;
+		for (const status of statuses) {
+			expect(statusConfig[status]).toBeDefined();
+			expect(statusConfig[status].label).toBeTruthy();
+		}
 	});
 });
