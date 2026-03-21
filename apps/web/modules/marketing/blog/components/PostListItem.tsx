@@ -1,10 +1,9 @@
-import React from "react";
-
-("use client");
+"use client";
 
 import type { Post } from "@marketing/blog/types";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 export function PostListItem({ post }: { post: Post }) {
 	const { title, excerpt, authorName, image, date, path, authorImage, tags } =

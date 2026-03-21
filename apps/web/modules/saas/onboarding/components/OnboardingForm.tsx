@@ -4,6 +4,7 @@ import { useRouter } from "@shared/hooks/router";
 import { clearCache } from "@shared/lib/cache";
 import { Progress } from "@ui/components/progress";
 import { useSearchParams } from "next/navigation";
+import React from "react";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
 
