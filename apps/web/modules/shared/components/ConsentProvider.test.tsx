@@ -17,11 +17,11 @@ function TestConsumer() {
 		useContext(ConsentContext);
 	return (
 		<div>
-			<span data-testid="consent">{String(userHasConsented)}</span>
-			<button onClick={allowCookies} type="button">
+			<span data-testid="consented">{String(userHasConsented)}</span>
+			<button type="button" onClick={allowCookies}>
 				allow
 			</button>
-			<button onClick={declineCookies} type="button">
+			<button type="button" onClick={declineCookies}>
 				decline
 			</button>
 		</div>
@@ -33,60 +33,51 @@ describe("ConsentProvider", () => {
 		vi.clearAllMocks();
 	});
 
-	it("starts with initialConsent=false by default", () => {
+	it("defaults to not consented", () => {
 		render(
 			<ConsentProvider>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		expect(screen.getByTestId("consent").textContent).toBe("false");
+		expect(screen.getByTestId("consented")).toHaveTextContent("false");
 	});
 
-	it("starts with initialConsent=true when provided", () => {
+	it("initializes with initialConsent=true", () => {
 		render(
 			<ConsentProvider initialConsent={true}>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		expect(screen.getByTestId("consent").textContent).toBe("true");
+		expect(screen.getByTestId("consented")).toHaveTextContent("true");
 	});
 
-	it("allowCookies sets cookie and updates consent state", () => {
+	it("allowCookies sets cookie and updates state", async () => {
 		render(
 			<ConsentProvider>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		act(() => {
+		await act(async () => {
 			screen.getByText("allow").click();
 		});
 		expect(Cookies.set).toHaveBeenCalledWith("consent", "true", {
 			expires: 30,
 		});
-		expect(screen.getByTestId("consent").textContent).toBe("true");
+		expect(screen.getByTestId("consented")).toHaveTextContent("true");
 	});
 
-	it("declineCookies sets cookie and updates consent state", () => {
+	it("declineCookies sets cookie and updates state to false", async () => {
 		render(
 			<ConsentProvider initialConsent={true}>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		act(() => {
+		await act(async () => {
 			screen.getByText("decline").click();
 		});
 		expect(Cookies.set).toHaveBeenCalledWith("consent", "false", {
 			expires: 30,
 		});
-		expect(screen.getByTestId("consent").textContent).toBe("false");
-	});
-
-	it("renders children", () => {
-		render(
-			<ConsentProvider>
-				<span>child content</span>
-			</ConsentProvider>,
-		);
-		expect(screen.getByText("child content")).toBeTruthy();
+		expect(screen.getByTestId("consented")).toHaveTextContent("false");
 	});
 });
