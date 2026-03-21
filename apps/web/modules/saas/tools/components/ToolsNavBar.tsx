@@ -8,6 +8,7 @@ import { Button } from "@ui/components/button";
 import { GridIcon, HomeIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 export function ToolsNavBar() {
 	const pathname = usePathname();
