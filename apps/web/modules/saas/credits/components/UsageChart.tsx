@@ -9,6 +9,7 @@ import {
 } from "@ui/components/card";
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
+import React from "react";
 import {
 	CartesianGrid,
 	Line,
