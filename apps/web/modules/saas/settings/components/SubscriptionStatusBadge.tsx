@@ -2,6 +2,7 @@
 
 import type { BadgeProps } from "@ui/components/badge";
 import { Badge } from "@ui/components/badge";
+import React from "react";
 
 export function SubscriptionStatusBadge({
 	status,
