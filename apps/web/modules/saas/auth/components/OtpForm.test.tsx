@@ -5,6 +5,36 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockReplace = vi.fn();
 const mockGet = vi.fn();
 
+// Mock input-otp to avoid internal setTimeout that fires after test cleanup
+vi.mock("@ui/components/input-otp", () => ({
+	InputOTP: ({
+		children,
+		onChange,
+		maxLength,
+	}: {
+		children: React.ReactNode;
+		onChange?: (v: string) => void;
+		maxLength?: number;
+	}) => (
+		<div data-testid="input-otp">
+			<input
+				aria-label="one-time code"
+				autoComplete="one-time-code"
+				maxLength={maxLength}
+				onChange={(e) => onChange?.(e.target.value)}
+			/>
+			{children}
+		</div>
+	),
+	InputOTPGroup: ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	),
+	InputOTPSlot: ({ index }: { index: number }) => (
+		<div data-slot="input-otp-slot" data-index={index} />
+	),
+	InputOTPSeparator: () => <div />,
+}));
+
 vi.mock("@repo/auth/client", () => ({
 	authClient: {
 		twoFactor: {
