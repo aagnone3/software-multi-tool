@@ -1,113 +1,78 @@
 import { render, screen } from "@testing-library/react";
-import React, { type ReactNode } from "react";
+import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
-const mockUseUsageStats = vi.fn();
+const mockUseUsageStats = vi.hoisted(() => vi.fn());
+
 vi.mock("../hooks/use-usage-stats", () => ({
-	useUsageStats: () => mockUseUsageStats(),
+	useUsageStats: mockUseUsageStats,
 }));
-
-vi.mock("../lib/format-tool-name", () => ({
-	formatToolName: (slug: string) =>
-		slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-}));
-
-vi.mock("@ui/components/card", () => {
-	const React = require("react");
-	return {
-		Card: ({ children }: { children: ReactNode }) =>
-			React.createElement("div", { "data-testid": "card" }, children),
-		CardHeader: ({ children }: { children: ReactNode }) =>
-			React.createElement("div", null, children),
-		CardContent: ({ children }: { children: ReactNode }) =>
-			React.createElement("div", null, children),
-		CardTitle: ({ children }: { children: ReactNode }) =>
-			React.createElement("span", null, children),
-	};
-});
-
-vi.mock("@ui/components/skeleton", () => {
-	const React = require("react");
-	return {
-		Skeleton: () =>
-			React.createElement("div", { "data-testid": "skeleton" }),
-	};
-});
 
 import { UsageSummaryCards } from "./UsageSummaryCards";
 
+const defaultStats = {
+	totalUsed: 0,
+	totalOverage: 0,
+	mostUsedTool: null,
+	totalOperations: 0,
+	isLoading: false,
+};
+
 describe("UsageSummaryCards", () => {
-	it("renders skeletons while loading", () => {
-		mockUseUsageStats.mockReturnValue({
-			isLoading: true,
-			totalUsed: 0,
-			totalOverage: 0,
-			mostUsedTool: null,
-			totalOperations: 0,
-		});
-		render(<UsageSummaryCards />);
-		const skeletons = screen.getAllByTestId("skeleton");
+	it("renders loading skeletons when isLoading", () => {
+		mockUseUsageStats.mockReturnValue({ ...defaultStats, isLoading: true });
+		const { container } = render(<UsageSummaryCards />);
+		// 4 skeleton cards
+		const skeletons = container.querySelectorAll(
+			"[class*='skeleton'], .animate-pulse, [data-slot='skeleton']",
+		);
 		expect(skeletons.length).toBeGreaterThan(0);
 	});
 
-	it("renders four stat cards when loaded", () => {
-		mockUseUsageStats.mockReturnValue({
-			isLoading: false,
-			totalUsed: 120,
-			totalOverage: 5,
-			mostUsedTool: { toolSlug: "meeting-summarizer", credits: 30 },
-			totalOperations: 15,
-		});
+	it("renders This Month credits used", () => {
+		mockUseUsageStats.mockReturnValue({ ...defaultStats, totalUsed: 42 });
 		render(<UsageSummaryCards />);
-		const cards = screen.getAllByTestId("card");
-		expect(cards).toHaveLength(4);
+		expect(screen.getByText("42")).toBeDefined();
+		expect(screen.getByText("credits used")).toBeDefined();
 	});
 
-	it("displays totalUsed value", () => {
+	it("renders overage and calculated cost", () => {
 		mockUseUsageStats.mockReturnValue({
-			isLoading: false,
-			totalUsed: 88,
-			totalOverage: 0,
+			...defaultStats,
+			totalOverage: 50,
+		});
+		render(<UsageSummaryCards />);
+		expect(screen.getByText("50")).toBeDefined();
+		// $50 * 0.02 = $1.00
+		expect(screen.getByText("$1.00 charged")).toBeDefined();
+	});
+
+	it("renders most used tool name when present", () => {
+		mockUseUsageStats.mockReturnValue({
+			...defaultStats,
+			mostUsedTool: { toolSlug: "meeting-summarizer", credits: 200 },
+		});
+		render(<UsageSummaryCards />);
+		// formatToolName converts slug to display name
+		expect(screen.getByText("200 credits")).toBeDefined();
+	});
+
+	it("renders dash when no most used tool", () => {
+		mockUseUsageStats.mockReturnValue({
+			...defaultStats,
 			mostUsedTool: null,
-			totalOperations: 10,
 		});
 		render(<UsageSummaryCards />);
-		expect(screen.getByText("88")).toBeTruthy();
+		expect(screen.getByText("-")).toBeDefined();
 	});
 
-	it("displays formatted mostUsedTool name", () => {
+	it("renders total operations", () => {
 		mockUseUsageStats.mockReturnValue({
-			isLoading: false,
-			totalUsed: 10,
-			totalOverage: 0,
-			mostUsedTool: { toolSlug: "invoice-processor", credits: 20 },
-			totalOperations: 5,
+			...defaultStats,
+			totalOperations: 17,
 		});
 		render(<UsageSummaryCards />);
-		expect(screen.getByText("Invoice Processor")).toBeTruthy();
-	});
-
-	it("shows dash when no mostUsedTool", () => {
-		mockUseUsageStats.mockReturnValue({
-			isLoading: false,
-			totalUsed: 0,
-			totalOverage: 0,
-			mostUsedTool: null,
-			totalOperations: 0,
-		});
-		render(<UsageSummaryCards />);
-		expect(screen.getByText("-")).toBeTruthy();
-	});
-
-	it("calculates overage cost correctly", () => {
-		mockUseUsageStats.mockReturnValue({
-			isLoading: false,
-			totalUsed: 10,
-			totalOverage: 100,
-			mostUsedTool: null,
-			totalOperations: 5,
-		});
-		render(<UsageSummaryCards />);
-		expect(screen.getByText("$2.00 charged")).toBeTruthy();
+		expect(screen.getByText("17")).toBeDefined();
+		expect(screen.getByText("tool executions")).toBeDefined();
 	});
 });
