@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ToolFeedbackProps {
