@@ -228,4 +228,43 @@ describe("mail providers", () => {
 			).rejects.toThrow("Could not send email");
 		});
 	});
+
+	describe("nodemailer provider", () => {
+		it("sends email and passes correct transport config", async () => {
+			const mockSendMail = vi.fn().mockResolvedValueOnce({});
+			const mockCreateTransport = vi.fn().mockReturnValue({
+				sendMail: mockSendMail,
+			});
+			vi.doMock("nodemailer", () => ({
+				default: { createTransport: mockCreateTransport },
+			}));
+
+			vi.stubEnv("MAIL_HOST", "smtp.custom.com");
+			vi.stubEnv("MAIL_PORT", "465");
+			vi.stubEnv("MAIL_USER", "admin");
+			vi.stubEnv("MAIL_PASS", "secret");
+
+			const { send } = await import("./nodemailer");
+			await send({
+				to: "user@example.com",
+				subject: "Test",
+				html: "<p>Hello</p>",
+				text: "Hello",
+			});
+
+			expect(mockCreateTransport).toHaveBeenCalledWith(
+				expect.objectContaining({
+					host: "smtp.custom.com",
+					port: 465,
+					auth: { user: "admin", pass: "secret" },
+				}),
+			);
+			expect(mockSendMail).toHaveBeenCalledWith(
+				expect.objectContaining({
+					to: "user@example.com",
+					subject: "Test",
+				}),
+			);
+		});
+	});
 });
