@@ -28,7 +28,7 @@ import {
 	XIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface RecommendedToolWidgetProps {
 	className?: string;
