@@ -11,16 +11,15 @@ vi.mock("posthog-js", () => ({
 	},
 }));
 
-vi.mock("./index", async () => {
-	const actual = await vi.importActual<typeof import("./index")>("./index");
-	return actual;
-});
-
 import { useAnalytics } from "./index";
 
 describe("useAnalytics", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.unstubAllEnvs();
+		// Stub key to empty by default so tests that expect no-key behavior work
+		// even when .env/.env.local has the key set.
+		vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
 	});
 
 	it("returns a trackEvent function", () => {
@@ -35,12 +34,12 @@ describe("useAnalytics", () => {
 		expect(posthogCaptureMock).toHaveBeenCalledWith("test-event", {
 			foo: "bar",
 		});
-		vi.unstubAllEnvs();
 	});
 
 	it("does not capture event when posthog key is undefined", () => {
 		const { result } = renderHook(() => useAnalytics());
 		expect(() => result.current.trackEvent("test-event")).not.toThrow();
+		expect(posthogCaptureMock).not.toHaveBeenCalled();
 	});
 
 	it("captures event without data when data is omitted", () => {
@@ -51,6 +50,5 @@ describe("useAnalytics", () => {
 			"no-data-event",
 			undefined,
 		);
-		vi.unstubAllEnvs();
 	});
 });

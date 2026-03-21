@@ -1,4 +1,34 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import baseConfig from "../../tooling/test/vitest.workspace";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Stubs for optional analytics packages that are not installed by default.
+const optionalPackageAliases = [
+	{
+		find: "@vercel/analytics/react",
+		replacement: path.join(
+			__dirname,
+			"tests/stubs/vercel-analytics-react.ts",
+		),
+	},
+	{
+		find: "@vercel/analytics",
+		replacement: path.join(__dirname, "tests/stubs/vercel-analytics.ts"),
+	},
+	{
+		find: "mixpanel-browser",
+		replacement: path.join(__dirname, "tests/stubs/mixpanel-browser.ts"),
+	},
+	{
+		find: "@next/third-parties/google",
+		replacement: path.join(
+			__dirname,
+			"tests/stubs/next-third-parties-google.ts",
+		),
+	},
+];
 
 const coverageInclude = ["app/robots.ts"];
 const coverageExclude = ["next.config.ts", "middleware.ts", "tests/**"];
@@ -66,6 +96,29 @@ function withHappyDomEnvironment(config: Record<string, any>) {
 	return config;
 }
 
-export default withHappyDomEnvironment(
-	withCoverageOverrides({ ...baseConfig }),
+function withOptionalPackageAliases(config: Record<string, any>) {
+	const existingAliases = config.resolve?.alias ?? [];
+	config.resolve = {
+		...(config.resolve ?? {}),
+		alias: [...existingAliases, ...optionalPackageAliases],
+	};
+
+	if (Array.isArray(config.projects)) {
+		config.projects = config.projects.map((project) => {
+			const projectAliases = project.resolve?.alias ?? [];
+			return {
+				...project,
+				resolve: {
+					...(project.resolve ?? {}),
+					alias: [...projectAliases, ...optionalPackageAliases],
+				},
+			};
+		});
+	}
+
+	return config;
+}
+
+export default withOptionalPackageAliases(
+	withHappyDomEnvironment(withCoverageOverrides({ ...baseConfig })),
 );
