@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from "react";
+import React from "react";
 
 export function SettingsList({ children }: PropsWithChildren) {
 	return (
