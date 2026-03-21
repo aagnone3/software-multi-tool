@@ -9,6 +9,7 @@ import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { Button } from "@ui/components/button";
 import { Skeleton } from "@ui/components/skeleton";
 import { CheckCircle2Icon, LinkIcon } from "lucide-react";
+import React from "react";
 
 export function ConnectedAccountsBlock() {
 	const { data, isPending } = useUserAccountsQuery();
