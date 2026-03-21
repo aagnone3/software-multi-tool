@@ -13,11 +13,14 @@ const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerDebug = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 
+const mockLoggerWarn = vi.hoisted(() => vi.fn());
+
 vi.mock("@repo/logs", () => ({
 	logger: {
 		info: mockLoggerInfo,
 		debug: mockLoggerDebug,
 		error: mockLoggerError,
+		warn: mockLoggerWarn,
 	},
 }));
 
@@ -25,18 +28,27 @@ vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
 }));
 
+const deleteToolJobMock = vi.hoisted(() => vi.fn());
+const deleteAudioFromStorageMock = vi.hoisted(() => vi.fn());
+
 vi.mock("@repo/database", () => ({
 	createToolJob: createToolJobMock,
 	getToolJobById: getToolJobByIdMock,
 	getToolJobsByUserId: getToolJobsByUserIdMock,
 	getToolJobsBySessionId: getToolJobsBySessionIdMock,
 	cancelToolJob: cancelToolJobMock,
+	deleteToolJob: deleteToolJobMock,
+}));
+
+vi.mock("../speaker-separation/lib/audio-storage", () => ({
+	deleteAudioFromStorage: deleteAudioFromStorageMock,
 }));
 
 describe("Jobs Router", () => {
 	// Use valid CUID format for test IDs
 	const TEST_JOB_ID = "clz1234567890abcdefghij";
 	const TEST_USER_ID = "clu1234567890abcdefghij";
+	const TEST_SESSION_ID = "sess_test_12345";
 
 	const mockJob = {
 		id: TEST_JOB_ID,
@@ -356,7 +368,7 @@ describe("Jobs Router", () => {
 			});
 		});
 
-		it("throws BAD_REQUEST when job is not pending", async () => {
+		it("throws BAD_REQUEST when job is not cancellable", async () => {
 			getSessionMock.mockResolvedValue({
 				user: { id: TEST_USER_ID },
 				session: { id: "session-1" },
@@ -371,6 +383,102 @@ describe("Jobs Router", () => {
 			await expect(client({ jobId: TEST_JOB_ID })).rejects.toMatchObject({
 				code: "BAD_REQUEST",
 			});
+		});
+	});
+
+	describe("jobs.delete", () => {
+		let client: ReturnType<typeof createProcedureClient>;
+
+		beforeEach(() => {
+			client = createProcedureClient(jobsRouter.delete, {
+				context: {
+					headers: new Headers({ "x-session-id": TEST_SESSION_ID }),
+				},
+			});
+			deleteToolJobMock.mockResolvedValue(undefined);
+			deleteAudioFromStorageMock.mockResolvedValue(undefined);
+		});
+
+		it("deletes job for authenticated owner", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				id: TEST_JOB_ID,
+				userId: TEST_USER_ID,
+				sessionId: null,
+				audioFileUrl: null,
+			});
+
+			const result = await client({ jobId: TEST_JOB_ID });
+			expect(result).toEqual({ success: true });
+			expect(deleteToolJobMock).toHaveBeenCalledWith(TEST_JOB_ID);
+		});
+
+		it("deletes job for session owner when not authenticated", async () => {
+			getSessionMock.mockResolvedValue(null);
+			getToolJobByIdMock.mockResolvedValue({
+				id: TEST_JOB_ID,
+				userId: null,
+				sessionId: TEST_SESSION_ID,
+				audioFileUrl: null,
+			});
+
+			const result = await client({ jobId: TEST_JOB_ID });
+			expect(result).toEqual({ success: true });
+		});
+
+		it("throws NOT_FOUND when job does not exist", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue(null);
+
+			await expect(client({ jobId: TEST_JOB_ID })).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+		});
+
+		it("throws FORBIDDEN when user does not own the job", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				id: TEST_JOB_ID,
+				userId: "other-user-id",
+				sessionId: "other-session-id",
+				audioFileUrl: null,
+			});
+
+			await expect(client({ jobId: TEST_JOB_ID })).rejects.toMatchObject({
+				code: "FORBIDDEN",
+			});
+		});
+
+		it("deletes audio from storage when audioFileUrl is present", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				id: TEST_JOB_ID,
+				userId: TEST_USER_ID,
+				sessionId: null,
+				audioFileUrl: "https://storage.example.com/audio/file.mp3",
+			});
+
+			await client({ jobId: TEST_JOB_ID });
+			expect(deleteAudioFromStorageMock).toHaveBeenCalledWith(
+				"https://storage.example.com/audio/file.mp3",
+			);
+		});
+
+		it("still deletes job even if audio storage deletion fails", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				id: TEST_JOB_ID,
+				userId: TEST_USER_ID,
+				sessionId: null,
+				audioFileUrl: "https://storage.example.com/audio/file.mp3",
+			});
+			deleteAudioFromStorageMock.mockRejectedValue(
+				new Error("storage error"),
+			);
+
+			const result = await client({ jobId: TEST_JOB_ID });
+			expect(result).toEqual({ success: true });
+			expect(deleteToolJobMock).toHaveBeenCalledWith(TEST_JOB_ID);
 		});
 	});
 });
