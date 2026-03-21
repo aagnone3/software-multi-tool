@@ -15,7 +15,7 @@ import {
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
 import { ArrowRightIcon } from "lucide-react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
