@@ -10,7 +10,7 @@ import {
 	AlertDialogTitle,
 } from "@ui/components/alert-dialog";
 import { Button } from "@ui/components/button";
-import {
+import React, {
 	createContext,
 	type PropsWithChildren,
 	useContext,
