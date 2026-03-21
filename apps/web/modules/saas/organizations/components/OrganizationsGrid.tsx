@@ -7,6 +7,7 @@ import { useOrganizationListQuery } from "@saas/organizations/lib/api";
 import { Card } from "@ui/components/card";
 import { ChevronRightIcon, PlusCircleIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 export function OrganizationsGrid() {
 	const { setActiveOrganization } = useActiveOrganization();

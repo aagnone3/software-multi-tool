@@ -159,4 +159,73 @@ describe("mail providers", () => {
 			).resolves.not.toThrow();
 		});
 	});
+
+	describe("mailgun provider", () => {
+		it("sends email successfully", async () => {
+			mockFetch.mockResolvedValueOnce({ ok: true });
+			vi.stubEnv("MAILGUN_DOMAIN", "test.mailgun.org");
+			vi.stubEnv("MAILGUN_API_KEY", "test-mailgun-key");
+
+			const { send } = await import("./mailgun");
+			await send({
+				to: "user@example.com",
+				subject: "Test",
+				html: "<p>Hello</p>",
+				text: "Hello",
+			});
+
+			expect(mockFetch).toHaveBeenCalledWith(
+				"https://api.mailgun.net/v3/test.mailgun.org/messages",
+				expect.objectContaining({
+					method: "POST",
+					headers: expect.objectContaining({
+						Authorization: expect.stringContaining("Basic "),
+					}),
+				}),
+			);
+		});
+
+		it("includes authorization header with base64-encoded api key", async () => {
+			mockFetch.mockResolvedValueOnce({ ok: true });
+			vi.stubEnv("MAILGUN_DOMAIN", "test.mailgun.org");
+			vi.stubEnv("MAILGUN_API_KEY", "test-mailgun-key");
+
+			const { send } = await import("./mailgun");
+			await send({
+				to: "user@example.com",
+				subject: "Test",
+				html: "<p>Hello</p>",
+				text: "Hello",
+			});
+
+			const expectedAuth = `Basic ${Buffer.from("api:test-mailgun-key").toString("base64")}`;
+			expect(mockFetch).toHaveBeenCalledWith(
+				expect.any(String),
+				expect.objectContaining({
+					headers: expect.objectContaining({
+						Authorization: expectedAuth,
+					}),
+				}),
+			);
+		});
+
+		it("throws on non-ok response", async () => {
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				text: async () => "error",
+			});
+			vi.stubEnv("MAILGUN_DOMAIN", "test.mailgun.org");
+			vi.stubEnv("MAILGUN_API_KEY", "test-mailgun-key");
+
+			const { send } = await import("./mailgun");
+			await expect(
+				send({
+					to: "user@example.com",
+					subject: "Test",
+					html: "<p>Hello</p>",
+					text: "Hello",
+				}),
+			).rejects.toThrow("Could not send email");
+		});
+	});
 });
