@@ -9,6 +9,7 @@ import {
 	TrendingUpIcon,
 	WrenchIcon,
 } from "lucide-react";
+import React from "react";
 import { useUsageStats } from "../hooks/use-usage-stats";
 import { formatToolName } from "../lib/format-tool-name";
 

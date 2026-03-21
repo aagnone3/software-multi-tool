@@ -6,6 +6,7 @@ import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { AlertTriangleIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 interface LowCreditsWarningProps {
