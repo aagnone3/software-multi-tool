@@ -8,7 +8,7 @@ import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { CropImageDialog } from "../../settings/components/CropImageDialog";
