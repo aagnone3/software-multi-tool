@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
+import React from "react";
 
 export function LoginModeSwitch({
 	activeMode,
