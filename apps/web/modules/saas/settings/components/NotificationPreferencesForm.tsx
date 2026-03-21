@@ -4,6 +4,7 @@ import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Label } from "@ui/components/label";
 import { Switch } from "@ui/components/switch";
+import React from "react";
 import { toast } from "sonner";
 
 interface ChannelPreferences {
