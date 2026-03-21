@@ -159,7 +159,7 @@ describe("LoginForm", () => {
 
 	it("calls signIn.email on form submit with password mode", async () => {
 		mockSignInEmail.mockResolvedValue({ data: {}, error: null });
-		const user = userEvent.setup();
+		const user = userEvent.setup({ delay: null });
 		render(<LoginForm />);
 
 		const passwordInput = document.querySelector(
@@ -184,7 +184,7 @@ describe("LoginForm", () => {
 			data: null,
 			error: { code: "INVALID_CREDENTIALS" },
 		});
-		const user = userEvent.setup();
+		const user = userEvent.setup({ delay: null });
 		render(<LoginForm />);
 
 		const passwordInput = document.querySelector(
@@ -206,7 +206,7 @@ describe("LoginForm", () => {
 			data: { twoFactorRedirect: true },
 			error: null,
 		});
-		const user = userEvent.setup();
+		const user = userEvent.setup({ delay: null });
 		render(<LoginForm />);
 
 		const passwordInput = document.querySelector(
@@ -224,7 +224,7 @@ describe("LoginForm", () => {
 	});
 
 	it("toggles password visibility", async () => {
-		const user = userEvent.setup();
+		const user = userEvent.setup({ delay: null });
 		render(<LoginForm />);
 
 		const passwordInput = document.querySelector(

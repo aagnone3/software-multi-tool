@@ -68,15 +68,16 @@ describe("ResetPasswordForm", () => {
 	});
 
 	it("shows success state after successful submit", async () => {
+		const user = userEvent.setup({ delay: null });
 		mockResetPassword.mockResolvedValueOnce({ error: null });
 		await renderForm();
-		await userEvent.type(
+		await user.type(
 			document.querySelector(
 				'input[type="password"]',
 			) as HTMLInputElement,
 			"newpassword123",
 		);
-		await userEvent.click(
+		await user.click(
 			screen.getByRole("button", { name: /reset password/i }),
 		);
 		await waitFor(() => {
@@ -87,17 +88,18 @@ describe("ResetPasswordForm", () => {
 	});
 
 	it("shows error alert on failed submit", async () => {
+		const user = userEvent.setup({ delay: null });
 		mockResetPassword.mockResolvedValueOnce({
 			error: { code: "INVALID_TOKEN" },
 		});
 		await renderForm();
-		await userEvent.type(
+		await user.type(
 			document.querySelector(
 				'input[type="password"]',
 			) as HTMLInputElement,
 			"newpassword123",
 		);
-		await userEvent.click(
+		await user.click(
 			screen.getByRole("button", { name: /reset password/i }),
 		);
 		await waitFor(() => {

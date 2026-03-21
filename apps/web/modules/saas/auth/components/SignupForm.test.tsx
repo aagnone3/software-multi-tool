@@ -100,21 +100,19 @@ describe("SignupForm", () => {
 	});
 
 	it("calls signUp.email on submit with valid data", async () => {
+		const user = userEvent.setup({ delay: null });
 		mockSignUpEmail.mockResolvedValueOnce({ error: null });
 		render(<SignupForm />);
 
-		await userEvent.type(screen.getByLabelText(/name/i), "Test User");
-		await userEvent.type(
-			screen.getByLabelText(/email/i),
-			"user@example.com",
-		);
-		await userEvent.type(
+		await user.type(screen.getByLabelText(/name/i), "Test User");
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(
 			document.querySelector(
 				'input[type="password"]',
 			) as HTMLInputElement,
 			"password123",
 		);
-		await userEvent.click(
+		await user.click(
 			screen.getByRole("button", { name: /create account/i }),
 		);
 
@@ -130,21 +128,19 @@ describe("SignupForm", () => {
 	});
 
 	it("shows success message after successful signup", async () => {
+		const user = userEvent.setup({ delay: null });
 		mockSignUpEmail.mockResolvedValueOnce({ error: null });
 		render(<SignupForm />);
 
-		await userEvent.type(screen.getByLabelText(/name/i), "Test User");
-		await userEvent.type(
-			screen.getByLabelText(/email/i),
-			"user@example.com",
-		);
-		await userEvent.type(
+		await user.type(screen.getByLabelText(/name/i), "Test User");
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(
 			document.querySelector(
 				'input[type="password"]',
 			) as HTMLInputElement,
 			"password123",
 		);
-		await userEvent.click(
+		await user.click(
 			screen.getByRole("button", { name: /create account/i }),
 		);
 
@@ -156,23 +152,21 @@ describe("SignupForm", () => {
 	});
 
 	it("shows error message when signup fails", async () => {
+		const user = userEvent.setup({ delay: null });
 		mockSignUpEmail.mockResolvedValueOnce({
 			error: { code: "USER_ALREADY_EXISTS" },
 		});
 		render(<SignupForm />);
 
-		await userEvent.type(screen.getByLabelText(/name/i), "Test User");
-		await userEvent.type(
-			screen.getByLabelText(/email/i),
-			"user@example.com",
-		);
-		await userEvent.type(
+		await user.type(screen.getByLabelText(/name/i), "Test User");
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(
 			document.querySelector(
 				'input[type="password"]',
 			) as HTMLInputElement,
 			"password123",
 		);
-		await userEvent.click(
+		await user.click(
 			screen.getByRole("button", { name: /create account/i }),
 		);
 
@@ -182,6 +176,7 @@ describe("SignupForm", () => {
 	});
 
 	it("toggles password visibility", async () => {
+		const user = userEvent.setup({ delay: null });
 		render(<SignupForm />);
 		const passwordInput = document.querySelector(
 			'input[type="password"]',
@@ -189,15 +184,14 @@ describe("SignupForm", () => {
 		expect(passwordInput).toBeTruthy();
 		expect(passwordInput.type).toBe("password");
 
-		// Find the toggle button (eye icon)
 		const toggleBtn = passwordInput
 			.closest("div")
 			?.querySelector("button") as HTMLButtonElement;
 		expect(toggleBtn).toBeTruthy();
-		await userEvent.click(toggleBtn);
+		await user.click(toggleBtn);
 		expect(passwordInput.type).toBe("text");
 
-		await userEvent.click(toggleBtn);
+		await user.click(toggleBtn);
 		expect(passwordInput.type).toBe("password");
 	});
 });
