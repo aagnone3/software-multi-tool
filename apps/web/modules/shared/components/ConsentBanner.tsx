@@ -3,7 +3,7 @@
 import { useCookieConsent } from "@shared/hooks/cookie-consent";
 import { Button } from "@ui/components/button";
 import { CookieIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export function ConsentBanner() {
 	const { userHasConsented, allowCookies, declineCookies } =
