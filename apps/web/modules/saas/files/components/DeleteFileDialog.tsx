@@ -10,6 +10,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@ui/components/alert-dialog";
+import React from "react";
 
 interface DeleteFileDialogProps {
 	file: { id: string; filename: string } | null;

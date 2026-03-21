@@ -4,6 +4,7 @@ import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
 import { Button } from "@ui/components/button";
 import { parseAsString, useQueryState } from "nuqs";
+import React from "react";
 import { oAuthProviders } from "../constants/oauth-providers";
 
 export function SocialSigninButton({
