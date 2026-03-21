@@ -1,4 +1,5 @@
 import { cn } from "@ui/lib";
+import React from "react";
 
 export function FaqSection({ className }: { className?: string }) {
 	const items = [

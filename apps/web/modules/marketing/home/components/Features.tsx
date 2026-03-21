@@ -5,6 +5,7 @@ import {
 	type LucideIcon,
 	ZapIcon,
 } from "lucide-react";
+import React from "react";
 
 interface Feature {
 	id: string;
