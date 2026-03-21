@@ -1,4 +1,6 @@
-"use client";
+import React from "react";
+
+("use client");
 
 import type { Post } from "@marketing/blog/types";
 import Image from "next/image";

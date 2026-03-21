@@ -1,5 +1,6 @@
 import { cn } from "@ui/lib";
 import Image from "next/image";
+import React from "react";
 
 export function Logo({
 	withLabel = true,
