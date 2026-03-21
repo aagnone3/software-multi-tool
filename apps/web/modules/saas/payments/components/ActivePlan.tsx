@@ -4,6 +4,7 @@ import { usePlanData } from "@saas/payments/hooks/plan-data";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { BadgeCheckIcon, CheckIcon } from "lucide-react";
+import React from "react";
 import { CustomerPortalButton } from "../../settings/components/CustomerPortalButton";
 import { SubscriptionStatusBadge } from "../../settings/components/SubscriptionStatusBadge";
 
