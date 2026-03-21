@@ -16,7 +16,9 @@ describe("umami useAnalytics", () => {
 
 	it("does not throw when window.umami is not defined", () => {
 		const { result } = renderHook(() => useAnalytics());
-		expect(() => result.current.trackEvent("test-event", { foo: "bar" })).not.toThrow();
+		expect(() =>
+			result.current.trackEvent("test-event", { foo: "bar" }),
+		).not.toThrow();
 	});
 
 	it("does not throw when called without data", () => {
@@ -31,6 +33,8 @@ describe("umami useAnalytics", () => {
 		const { result } = renderHook(() => useAnalytics());
 		result.current.trackEvent("test-event", { key: "value" });
 
-		expect(trackMock).toHaveBeenCalledWith("test-event", { props: { key: "value" } });
+		expect(trackMock).toHaveBeenCalledWith("test-event", {
+			props: { key: "value" },
+		});
 	});
 });
