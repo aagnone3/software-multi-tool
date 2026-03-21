@@ -30,10 +30,26 @@ vi.mock("../organizations/lib/membership", () => ({
 	verifyOrganizationMembership: verifyOrganizationMembershipMock,
 }));
 
+const streamTextMock = vi.hoisted(() => vi.fn());
+const streamToEventIteratorMock = vi.hoisted(() => vi.fn());
+
 vi.mock("@repo/ai", () => ({
 	convertToModelMessages: vi.fn().mockResolvedValue([]),
-	streamText: vi.fn(),
+	streamText: streamTextMock,
 	textModel: "mock-model",
+}));
+
+vi.mock("@orpc/client", () => ({
+	ORPCError: class ORPCError extends Error {
+		constructor(
+			public readonly code: string,
+			options?: { message?: string },
+		) {
+			super(options?.message ?? code);
+			this.name = "ORPCError";
+		}
+	},
+	streamToEventIterator: streamToEventIteratorMock,
 }));
 
 const TEST_CHAT_ID = "clz1234567890abcdefghij";
@@ -246,5 +262,91 @@ describe("AI Router - deleteChat", () => {
 		});
 		const client = makeClient(aiRouter.chats.delete);
 		await expect(client({ id: TEST_CHAT_ID })).rejects.toThrow();
+	});
+});
+
+describe("AI Router - chats.messages.add", () => {
+	const mockMessages = [
+		{
+			id: "msg-1",
+			role: "user" as const,
+			parts: [{ type: "text" as const, text: "Hello" }],
+			createdAt: new Date(),
+		},
+	];
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		getSessionMock.mockResolvedValue({
+			user: mockUser,
+			session: mockSessionData,
+		});
+		const mockStream = { toUIMessageStream: vi.fn().mockReturnValue({}) };
+		streamTextMock.mockReturnValue(mockStream);
+		streamToEventIteratorMock.mockReturnValue("mock-event-iterator");
+	});
+
+	it("streams response for personal chat owner", async () => {
+		getAiChatByIdMock.mockResolvedValue(mockChat);
+		const client = makeClient(aiRouter.chats.messages.add);
+		const result = await client({
+			chatId: TEST_CHAT_ID,
+			messages: mockMessages,
+		});
+		expect(streamTextMock).toHaveBeenCalled();
+		expect(result).toBe("mock-event-iterator");
+	});
+
+	it("throws NOT_FOUND when chat does not exist", async () => {
+		getAiChatByIdMock.mockResolvedValue(null);
+		const client = makeClient(aiRouter.chats.messages.add);
+		await expect(
+			client({ chatId: TEST_CHAT_ID, messages: mockMessages }),
+		).rejects.toThrow();
+	});
+
+	it("throws FORBIDDEN for non-owner personal chat", async () => {
+		getAiChatByIdMock.mockResolvedValue({
+			...mockChat,
+			userId: "other-user",
+		});
+		const client = makeClient(aiRouter.chats.messages.add);
+		await expect(
+			client({ chatId: TEST_CHAT_ID, messages: mockMessages }),
+		).rejects.toThrow();
+	});
+
+	it("streams for org chat when user is a member", async () => {
+		const orgChat = {
+			...mockChat,
+			organizationId: TEST_ORG_ID,
+			userId: null,
+		};
+		getAiChatByIdMock.mockResolvedValue(orgChat);
+		verifyOrganizationMembershipMock.mockResolvedValue({ role: "MEMBER" });
+		const client = makeClient(aiRouter.chats.messages.add);
+		const result = await client({
+			chatId: TEST_CHAT_ID,
+			messages: mockMessages,
+		});
+		expect(verifyOrganizationMembershipMock).toHaveBeenCalledWith(
+			TEST_ORG_ID,
+			TEST_USER_ID,
+		);
+		expect(result).toBe("mock-event-iterator");
+	});
+
+	it("throws FORBIDDEN for org chat when user is not a member", async () => {
+		const orgChat = {
+			...mockChat,
+			organizationId: TEST_ORG_ID,
+			userId: null,
+		};
+		getAiChatByIdMock.mockResolvedValue(orgChat);
+		verifyOrganizationMembershipMock.mockResolvedValue(null);
+		const client = makeClient(aiRouter.chats.messages.add);
+		await expect(
+			client({ chatId: TEST_CHAT_ID, messages: mockMessages }),
+		).rejects.toThrow();
 	});
 });
