@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import { toast } from "sonner";
 import { cleanArticleTitle } from "../../../../../components/tools/news-analyzer/lib/history-utils";
 import {
