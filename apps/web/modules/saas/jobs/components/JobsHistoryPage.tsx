@@ -19,6 +19,7 @@ import {
 	BriefcaseIcon,
 	CheckCircle2Icon,
 	ClockIcon,
+	DownloadIcon,
 	ExternalLinkIcon,
 	Loader2Icon,
 	RefreshCwIcon,
@@ -26,7 +27,7 @@ import {
 	XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 type JobStatus =
 	| "PENDING"
@@ -250,6 +251,46 @@ export function JobsHistoryPage() {
 
 	const hasFilters = Boolean(search || statusFilter || toolFilter);
 
+	const exportToCsv = useCallback(() => {
+		const headers = [
+			"ID",
+			"Tool",
+			"Status",
+			"Created At",
+			"Completed At",
+			"Duration",
+		];
+		const rows = filteredJobs.map((job) => {
+			const duration = job.completedAt
+				? formatDuration(job.createdAt, job.completedAt)
+				: "";
+			return [
+				job.id,
+				getToolName(job.toolSlug),
+				job.status,
+				new Date(job.createdAt).toISOString(),
+				job.completedAt ? new Date(job.completedAt).toISOString() : "",
+				duration,
+			];
+		});
+		const csvContent = [headers, ...rows]
+			.map((row) =>
+				row
+					.map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+					.join(","),
+			)
+			.join("\n");
+		const blob = new Blob([csvContent], {
+			type: "text/csv;charset=utf-8;",
+		});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = `job-history-${new Date().toISOString().split("T")[0]}.csv`;
+		link.click();
+		URL.revokeObjectURL(url);
+	}, [filteredJobs]);
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -259,10 +300,26 @@ export function JobsHistoryPage() {
 						All your tool runs in one place
 					</p>
 				</div>
-				<Button variant="outline" size="sm" onClick={() => refetch()}>
-					<RefreshCwIcon className="size-3.5 mr-1.5" />
-					Refresh
-				</Button>
+				<div className="flex items-center gap-2">
+					{filteredJobs.length > 0 && (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={exportToCsv}
+						>
+							<DownloadIcon className="size-3.5 mr-1.5" />
+							Export CSV
+						</Button>
+					)}
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => refetch()}
+					>
+						<RefreshCwIcon className="size-3.5 mr-1.5" />
+						Refresh
+					</Button>
+				</div>
 			</div>
 
 			{/* Filters */}
