@@ -1,6 +1,7 @@
 "use client";
 
 import { config } from "@repo/config";
+import { useDebounce } from "@shared/hooks/use-debounce";
 import {
 	useJobPolling,
 	useJobsListPaginated,
@@ -87,7 +88,9 @@ function formatDuration(startStr: string, endStr: string): string {
 	const start = new Date(startStr).getTime();
 	const end = new Date(endStr).getTime();
 	const secs = Math.round((end - start) / 1000);
-	if (secs < 60) return `${secs}s`;
+	if (secs < 60) {
+		return `${secs}s`;
+	}
 	const mins = Math.floor(secs / 60);
 	const rem = secs % 60;
 	return rem > 0 ? `${mins}m ${rem}s` : `${mins}m`;
@@ -144,7 +147,9 @@ function JobOutputDialog({
 	const [copied, setCopied] = useState(false);
 
 	const outputText = useMemo(() => {
-		if (!job?.output) return null;
+		if (!job?.output) {
+			return null;
+		}
 		try {
 			return JSON.stringify(job.output, null, 2);
 		} catch {
@@ -329,6 +334,7 @@ export function JobsHistoryPage() {
 		limit: pageSize,
 	});
 	const [search, setSearch] = useState("");
+	const debouncedSearch = useDebounce(search, 250);
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [toolFilter, setToolFilter] = useState<string>("");
 
@@ -347,18 +353,20 @@ export function JobsHistoryPage() {
 			if (toolFilter && job.toolSlug !== toolFilter) {
 				return false;
 			}
-			if (search) {
+			if (debouncedSearch) {
 				const toolName = getToolName(job.toolSlug).toLowerCase();
 				if (
-					!toolName.includes(search.toLowerCase()) &&
-					!job.id.toLowerCase().includes(search.toLowerCase())
+					!toolName.includes(debouncedSearch.toLowerCase()) &&
+					!job.id
+						.toLowerCase()
+						.includes(debouncedSearch.toLowerCase())
 				) {
 					return false;
 				}
 			}
 			return true;
 		});
-	}, [typedJobs, statusFilter, toolFilter, search]);
+	}, [typedJobs, statusFilter, toolFilter, debouncedSearch]);
 
 	const hasFilters = Boolean(search || statusFilter || toolFilter);
 

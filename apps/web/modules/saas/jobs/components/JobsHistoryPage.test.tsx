@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobsHistoryPage } from "./JobsHistoryPage";
@@ -78,6 +78,7 @@ describe("JobsHistoryPage", () => {
 	});
 
 	it("shows filtered empty state when filters active but no results", () => {
+		vi.useFakeTimers();
 		mockJobsList.mockReturnValue({
 			jobs: [
 				{
@@ -97,6 +98,11 @@ describe("JobsHistoryPage", () => {
 			"Search by tool name...",
 		);
 		fireEvent.change(searchInput, { target: { value: "zzznomatch" } });
+		// Advance timers past the 250ms debounce delay
+		act(() => {
+			vi.advanceTimersByTime(300);
+		});
+		vi.useRealTimers();
 		expect(
 			screen.getByText("No jobs match your filters"),
 		).toBeInTheDocument();
