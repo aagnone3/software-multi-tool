@@ -1,6 +1,7 @@
 "use client";
 
 import { config } from "@repo/config";
+import { JobCompletionNotifier } from "@saas/jobs/components/JobCompletionNotifier";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { cn } from "@ui/lib";
 import type { PropsWithChildren } from "react";
@@ -94,6 +95,7 @@ export function AppWrapper({ children }: PropsWithChildren) {
 				</div>
 			)}
 
+			<JobCompletionNotifier />
 			<NavBar />
 			<div
 				className={cn("md:pr-4 py-4 flex", [
