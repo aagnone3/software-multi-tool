@@ -1,47 +1,93 @@
+"use client";
+
 import {
-	BotIcon,
+	ClipboardListIcon,
 	FileTextIcon,
-	HeadphonesIcon,
+	ImageMinusIcon,
 	type LucideIcon,
-	ZapIcon,
+	MessageSquareTextIcon,
+	NewspaperIcon,
+	ReceiptIcon,
+	SeparatorHorizontalIcon,
+	WalletIcon,
 } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
-interface Feature {
+interface Tool {
 	id: string;
 	title: string;
 	description: string;
 	icon: LucideIcon;
+	href: string;
+	comingSoon?: boolean;
 }
 
-const features: Feature[] = [
+const tools: Tool[] = [
 	{
-		id: "document-summarization",
-		title: "Document Summarization",
+		id: "news-analyzer",
+		title: "News Analyzer",
 		description:
-			"Upload contracts, reports, or articles and get clear, actionable summaries in seconds. Save hours of reading time and focus on what matters.",
+			"Analyze news articles for bias, sentiment, and key themes. Understand what's really being said beneath the headlines.",
+		icon: NewspaperIcon,
+		href: "/app/tools/news-analyzer",
+	},
+	{
+		id: "contract-analyzer",
+		title: "Contract Analyzer",
+		description:
+			"Upload any contract and instantly surface key terms, risk clauses, and obligations. No legal degree required.",
 		icon: FileTextIcon,
+		href: "/app/tools/contract-analyzer",
 	},
 	{
-		id: "audio-processing",
-		title: "Audio Processing",
+		id: "invoice-processor",
+		title: "Invoice Processor",
 		description:
-			"Transform meetings, interviews, and voice notes into searchable text. Extract insights from audio content without manual transcription.",
-		icon: HeadphonesIcon,
+			"Extract vendor, amount, line items, and dates from invoices automatically. Export clean data for your accounting workflow.",
+		icon: ReceiptIcon,
+		href: "/app/tools/invoice-processor",
 	},
 	{
-		id: "productivity-enhancement",
-		title: "Productivity Enhancement",
+		id: "meeting-summarizer",
+		title: "Meeting Summarizer",
 		description:
-			"Automate repetitive tasks, generate professional emails, and streamline your daily workflow. Work smarter, not harder.",
-		icon: ZapIcon,
+			"Paste meeting notes or upload a transcript and get a structured summary with action items and key decisions.",
+		icon: ClipboardListIcon,
+		href: "/app/tools/meeting-summarizer",
 	},
 	{
-		id: "general-automation",
-		title: "General Automation",
+		id: "feedback-analyzer",
+		title: "Customer Feedback Analyzer",
 		description:
-			"Connect your business processes with AI-powered automation. From data entry to customer follow-ups, let AI handle the routine.",
-		icon: BotIcon,
+			"Analyze reviews and survey responses at scale. Surface sentiment trends, top complaints, and praise patterns.",
+		icon: MessageSquareTextIcon,
+		href: "/app/tools/feedback-analyzer",
+	},
+	{
+		id: "expense-categorizer",
+		title: "Expense Categorizer",
+		description:
+			"Upload a CSV or spreadsheet of expenses and get them automatically categorized for tax or accounting purposes.",
+		icon: WalletIcon,
+		href: "/app/tools/expense-categorizer",
+	},
+	{
+		id: "speaker-separation",
+		title: "Speaker Separation",
+		description:
+			"Upload an audio file and identify who said what, with timestamps and a full diarized transcript.",
+		icon: SeparatorHorizontalIcon,
+		href: "/app/tools/speaker-separation",
+	},
+	{
+		id: "bg-remover",
+		title: "Background Remover",
+		description:
+			"Remove image backgrounds instantly with AI. Perfect for product photos, headshots, and marketing assets.",
+		icon: ImageMinusIcon,
+		href: "/app/tools/bg-remover",
+		comingSoon: true,
 	},
 ];
 
@@ -54,29 +100,42 @@ export function Features() {
 			<div className="container max-w-6xl">
 				<div className="mx-auto max-w-3xl text-center">
 					<h2 className="font-bold text-3xl md:text-4xl lg:text-5xl">
-						Powerful tools, simple to use
+						8 AI tools, ready to use today
 					</h2>
 					<p className="mt-4 text-balance text-foreground/70 text-lg">
-						Everything you need to leverage AI in your business — no
-						technical expertise required.
+						No prompts to engineer. No APIs to wire up. Just upload,
+						click, and get results.
 					</p>
 				</div>
 
-				<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:mt-16 lg:gap-8">
-					{features.map((feature) => (
+				<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-8">
+					{tools.map((tool) => (
 						<div
-							key={feature.id}
-							className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-lg lg:p-8"
+							key={tool.id}
+							className="group relative rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-lg"
 						>
+							{tool.comingSoon && (
+								<span className="absolute top-4 right-4 rounded-full bg-muted px-2 py-0.5 text-foreground/50 text-xs">
+									Soon
+								</span>
+							)}
 							<div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
-								<feature.icon className="size-6" />
+								<tool.icon className="size-6" />
 							</div>
-							<h3 className="font-semibold text-xl">
-								{feature.title}
+							<h3 className="font-semibold text-lg">
+								{tool.title}
 							</h3>
-							<p className="mt-2 text-foreground/70 leading-relaxed">
-								{feature.description}
+							<p className="mt-2 text-foreground/70 text-sm leading-relaxed">
+								{tool.description}
 							</p>
+							{!tool.comingSoon && (
+								<Link
+									href={tool.href}
+									className="mt-4 inline-block text-primary text-sm hover:underline"
+								>
+									Try it →
+								</Link>
+							)}
 						</div>
 					))}
 				</div>
