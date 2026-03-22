@@ -11,6 +11,7 @@ import { NotificationsWidget } from "./components/NotificationsWidget";
 import { QuickActions } from "./components/QuickActions";
 import { RecentActivityFeed } from "./components/RecentActivityFeed";
 import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
+import { RecentlyViewedToolsWidget } from "./components/RecentlyViewedToolsWidget";
 import { RecommendedToolWidget } from "./components/RecommendedToolWidget";
 import { TopToolsWidget } from "./components/TopToolsWidget";
 import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
@@ -61,6 +62,9 @@ export default function UserStart() {
 
 				{/* Recommended Tool */}
 				<RecommendedToolWidget />
+
+				{/* Recently Viewed Tools — localStorage-persisted quick-access */}
+				<RecentlyViewedToolsWidget />
 
 				{/* Untried Tools — discovery nudge */}
 				<UntriedToolsWidget />

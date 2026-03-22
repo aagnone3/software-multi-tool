@@ -44,6 +44,11 @@ vi.mock("./components/FavoriteToolsWidget", () => ({
 vi.mock("./components/ActiveJobsWidget", () => ({
 	ActiveJobsWidget: () => <div data-testid="active-jobs-widget" />,
 }));
+vi.mock("./components/RecentlyViewedToolsWidget", () => ({
+	RecentlyViewedToolsWidget: () => (
+		<div data-testid="recently-viewed-tools-widget" />
+	),
+}));
 vi.mock("./components/UntriedToolsWidget", () => ({
 	UntriedToolsWidget: () => <div data-testid="untried-tools-widget" />,
 }));
