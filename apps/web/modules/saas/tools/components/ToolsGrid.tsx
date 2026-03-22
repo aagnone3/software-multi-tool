@@ -1,6 +1,7 @@
 "use client";
 
 import { useRecentJobs } from "@saas/start/hooks/use-recent-jobs";
+import { useFavoriteTools } from "@saas/tools/hooks/use-favorite-tools";
 import { getVisibleTools } from "@saas/tools/lib/tool-flags";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
@@ -18,6 +19,7 @@ import { ToolCard } from "./ToolCard";
 
 type SortOption =
 	| "default"
+	| "favorites"
 	| "recently-used"
 	| "name-asc"
 	| "credits-asc"
@@ -50,6 +52,7 @@ export function ToolsGrid() {
 		() => new Set(recentToolSlugs),
 		[recentToolSlugs],
 	);
+	const { favorites, isFavorite, toggleFavorite } = useFavoriteTools();
 
 	/** Sorted, deduplicated list of available categories */
 	const categories = useMemo(() => {
@@ -70,7 +73,12 @@ export function ToolsGrid() {
 			return matchesSearch && matchesCategory;
 		});
 
-		if (sortBy === "recently-used") {
+		if (sortBy === "favorites") {
+			result = [
+				...result.filter((t) => favorites.has(t.slug)),
+				...result.filter((t) => !favorites.has(t.slug)),
+			];
+		} else if (sortBy === "recently-used") {
 			// Tools the user has used come first (in recency order), then the rest
 			const usedTools = recentToolSlugs
 				.map((slug) => result.find((t) => t.slug === slug))
@@ -95,6 +103,7 @@ export function ToolsGrid() {
 		recentToolSlugs,
 		recentToolSet,
 		activeCategory,
+		favorites,
 	]);
 
 	const showControls = allTools.length > 4;
@@ -126,6 +135,11 @@ export function ToolsGrid() {
 							<SelectItem value="default">
 								Default order
 							</SelectItem>
+							{favorites.size > 0 && (
+								<SelectItem value="favorites">
+									Favorites first
+								</SelectItem>
+							)}
 							{recentToolSlugs.length > 0 && (
 								<SelectItem value="recently-used">
 									Recently used
@@ -177,6 +191,8 @@ export function ToolsGrid() {
 							tool={tool}
 							isComingSoon={tool.isComingSoon}
 							isRecentlyUsed={recentToolSet.has(tool.slug)}
+							isFavorite={isFavorite(tool.slug)}
+							onToggleFavorite={toggleFavorite}
 						/>
 					))}
 				</div>

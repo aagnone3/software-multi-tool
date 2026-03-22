@@ -15,6 +15,7 @@ import {
 } from "@ui/components/tooltip";
 import { cn } from "@ui/lib";
 import {
+	BookmarkIcon,
 	CheckCircle2Icon,
 	ClipboardListIcon,
 	ClockIcon,
@@ -37,6 +38,10 @@ interface ToolCardProps {
 	isComingSoon?: boolean;
 	/** Whether the current user has recently used this tool */
 	isRecentlyUsed?: boolean;
+	/** Whether the current user has favorited this tool */
+	isFavorite?: boolean;
+	/** Callback when the user toggles favorite status */
+	onToggleFavorite?: (slug: string) => void;
 }
 
 function getToolIcon(iconName: string) {
@@ -58,6 +63,8 @@ export function ToolCard({
 	tool,
 	isComingSoon = false,
 	isRecentlyUsed = false,
+	isFavorite = false,
+	onToggleFavorite,
 }: ToolCardProps) {
 	const Icon = getToolIcon(tool.icon);
 
@@ -119,15 +126,55 @@ export function ToolCard({
 	return (
 		<Card className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-md">
 			<CardHeader className="flex-1">
-				<div className="mb-2 flex items-center gap-2">
-					<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-						<Icon className="size-6" />
+				<div className="mb-2 flex items-center justify-between gap-2">
+					<div className="flex items-center gap-2">
+						<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+							<Icon className="size-6" />
+						</div>
+						{isRecentlyUsed && (
+							<span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
+								<CheckCircle2Icon className="size-3" />
+								Used
+							</span>
+						)}
 					</div>
-					{isRecentlyUsed && (
-						<span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
-							<CheckCircle2Icon className="size-3" />
-							Used
-						</span>
+					{onToggleFavorite && (
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										variant="ghost"
+										size="sm"
+										className={cn(
+											"size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity",
+											isFavorite &&
+												"opacity-100 text-amber-500",
+										)}
+										onClick={(e) => {
+											e.preventDefault();
+											onToggleFavorite(tool.slug);
+										}}
+										aria-label={
+											isFavorite
+												? "Remove from favorites"
+												: "Add to favorites"
+										}
+									>
+										<BookmarkIcon
+											className={cn(
+												"size-4",
+												isFavorite && "fill-amber-500",
+											)}
+										/>
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									{isFavorite
+										? "Remove from favorites"
+										: "Save to favorites"}
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 					)}
 				</div>
 				<CardTitle className="text-lg">{tool.name}</CardTitle>
