@@ -4,6 +4,7 @@ import { config } from "@repo/config";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
 import React from "react";
 import { CreditsOverview } from "./components/CreditsOverview";
+import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
 import { QuickActions } from "./components/QuickActions";
@@ -46,9 +47,12 @@ export default function UserStart() {
 			</div>
 
 			{/* Bottom grid */}
-			<div className="grid gap-6 lg:grid-cols-2">
+			<div className="grid gap-6 lg:grid-cols-3">
 				{/* Top Tools Widget */}
 				<TopToolsWidget />
+
+				{/* Favorite Tools */}
+				<FavoriteToolsWidget />
 
 				{/* Recommended Tool */}
 				<RecommendedToolWidget />
