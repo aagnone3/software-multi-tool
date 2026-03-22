@@ -11,6 +11,7 @@ import {
 } from "@ui/components/select";
 import { Textarea } from "@ui/components/textarea";
 import { RotateCcw } from "lucide-react";
+import React from "react";
 import {
 	DIAGRAM_TYPE_LABELS,
 	type DiagramType,
