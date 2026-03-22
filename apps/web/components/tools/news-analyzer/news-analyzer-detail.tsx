@@ -50,7 +50,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import {
 	cleanArticleTitle,
@@ -240,7 +240,11 @@ export function NewsAnalyzerDetail({ jobId }: NewsAnalyzerDetailProps) {
 					{/* Options Dropdown */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="icon">
+							<Button
+								variant="outline"
+								size="icon"
+								aria-label="More options"
+							>
 								<MoreVertical className="size-4" />
 							</Button>
 						</DropdownMenuTrigger>
