@@ -13,7 +13,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NewsAnalyzerForm } from "./news-analyzer-form";
 import type { NewsAnalysisOutput } from "./news-analyzer-results";
 
