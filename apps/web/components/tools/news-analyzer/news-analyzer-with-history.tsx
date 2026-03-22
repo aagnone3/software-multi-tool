@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
+import React from "react";
 import { NewsAnalyzer } from "./news-analyzer";
 import { NewsAnalyzerHistory } from "./news-analyzer-history";
 
