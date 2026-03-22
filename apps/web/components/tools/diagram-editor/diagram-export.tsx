@@ -10,6 +10,7 @@ import {
 } from "@ui/components/dropdown-menu";
 import { ChevronDown, Copy, Download, Image } from "lucide-react";
 import { useTheme } from "next-themes";
+import React from "react";
 import { toast } from "sonner";
 import {
 	copyPngToClipboard,

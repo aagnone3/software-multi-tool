@@ -5,7 +5,7 @@ import { cn } from "@ui/lib";
 import { AlertCircle, Loader2 } from "lucide-react";
 import mermaid from "mermaid";
 import { useTheme } from "next-themes";
-import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useId, useRef, useState } from "react";
 
 interface DiagramPreviewProps {
 	code: string;
