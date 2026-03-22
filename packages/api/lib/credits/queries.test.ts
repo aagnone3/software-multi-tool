@@ -3,7 +3,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Mock Prisma - use hoisted mocks
 const mockFindUnique = vi.hoisted(() => vi.fn());
 const mockFindMany = vi.hoisted(() => vi.fn());
+const mockFindFirst = vi.hoisted(() => vi.fn());
 const mockCount = vi.hoisted(() => vi.fn());
+const mockUpsert = vi.hoisted(() => vi.fn());
+const mockCreate = vi.hoisted(() => vi.fn());
+const mockTransaction = vi.hoisted(() =>
+	vi.fn().mockImplementation(async (fn: (tx: unknown) => unknown) => {
+		const tx = {
+			creditBalance: { upsert: mockUpsert },
+			creditTransaction: { create: mockCreate },
+		};
+		return fn(tx);
+	}),
+);
 
 vi.mock("@repo/database", () => ({
 	db: {
@@ -12,13 +24,20 @@ vi.mock("@repo/database", () => ({
 		},
 		creditTransaction: {
 			findMany: mockFindMany,
+			findFirst: mockFindFirst,
 			count: mockCount,
 		},
+		$transaction: mockTransaction,
 	},
 }));
 
 // Import after mocking
-import { getTransactionHistory, getUsageStats } from "./queries";
+import {
+	executeAtomicPurchaseGrant,
+	findPurchaseTransaction,
+	getTransactionHistory,
+	getUsageStats,
+} from "./queries";
 
 describe("Credit Queries", () => {
 	beforeEach(() => {
@@ -454,5 +473,80 @@ describe("Credit Queries", () => {
 				}),
 			);
 		});
+	});
+});
+
+describe("findPurchaseTransaction", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("returns transaction when found by stripeSessionId", async () => {
+		const mockTransaction = {
+			id: "tx-1",
+			type: "PURCHASE",
+			description: "Credit pack purchase [session: sess_123]",
+		};
+		mockFindFirst.mockResolvedValue(mockTransaction);
+
+		const result = await findPurchaseTransaction("sess_123");
+
+		expect(result).toEqual(mockTransaction);
+		expect(mockFindFirst).toHaveBeenCalledWith({
+			where: {
+				type: "PURCHASE",
+				description: { contains: "sess_123" },
+			},
+		});
+	});
+
+	it("returns null when no transaction found", async () => {
+		mockFindFirst.mockResolvedValue(null);
+		const result = await findPurchaseTransaction("sess_notfound");
+		expect(result).toBeNull();
+	});
+});
+
+describe("executeAtomicPurchaseGrant", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("upserts credit balance and creates transaction record", async () => {
+		const mockBalance = { id: "balance-1", purchasedCredits: 100 };
+		const mockTx = {
+			id: "tx-1",
+			amount: 50,
+			type: "PURCHASE",
+			description:
+				"Credit pack purchase: Starter Pack (pack-starter) - 50 credits [session: sess_abc]",
+		};
+		mockUpsert.mockResolvedValue(mockBalance);
+		mockCreate.mockResolvedValue(mockTx);
+
+		const result = await executeAtomicPurchaseGrant({
+			organizationId: "org-1",
+			credits: 50,
+			packId: "pack-starter",
+			packName: "Starter Pack",
+			stripeSessionId: "sess_abc",
+		});
+
+		expect(mockTransaction).toHaveBeenCalled();
+		expect(mockUpsert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: { organizationId: "org-1" },
+				update: { purchasedCredits: { increment: 50 } },
+			}),
+		);
+		expect(mockCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					amount: 50,
+					type: "PURCHASE",
+				}),
+			}),
+		);
+		expect(result).toEqual(mockTx);
 	});
 });

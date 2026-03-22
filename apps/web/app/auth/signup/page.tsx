@@ -2,6 +2,7 @@ import { config } from "@repo/config";
 import { SignupForm } from "@saas/auth/components/SignupForm";
 import { getInvitation } from "@saas/auth/lib/server";
 import { redirect } from "next/navigation";
+import React from "react";
 import { withQuery } from "ufo";
 
 export const dynamic = "force-dynamic";
