@@ -1,4 +1,5 @@
 import { config } from "@repo/config";
+import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
@@ -85,6 +86,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 		return (
 			<div className="max-w-4xl">
 				<ToolPageHeader tool={tool} />
+				<LowCreditsWarning className="mb-4" showActionButtons={true} />
 				<ToolUsageGuide toolSlug={toolSlug} />
 				<div className="rounded-2xl border border-dashed border-muted-foreground/25 bg-muted/50 p-12 text-center">
 					<p className="text-muted-foreground">
@@ -98,6 +100,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 	return (
 		<div className="max-w-4xl">
 			<ToolPageHeader tool={tool} />
+			<LowCreditsWarning className="mb-4" showActionButtons={true} />
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
 		</div>
