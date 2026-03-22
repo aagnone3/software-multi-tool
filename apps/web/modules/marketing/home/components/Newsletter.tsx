@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@ui/components/alert";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { CheckCircleIcon, KeyIcon } from "lucide-react";
+import React from "react";
 
 import { useForm } from "react-hook-form";
 import * as z from "zod";

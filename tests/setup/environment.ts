@@ -14,7 +14,7 @@ const workspaceRoot = path.resolve(
 const envLocalPath = path.join(workspaceRoot, "apps", "web", ".env.local");
 
 if (existsSync(envLocalPath)) {
-	config({ path: envLocalPath });
+	config({ path: envLocalPath, quiet: true });
 }
 
 process.env.TZ = process.env.TZ ?? "UTC";

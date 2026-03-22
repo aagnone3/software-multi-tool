@@ -1,8 +1,84 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useTools } from "@saas/tools/hooks/use-tools";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommandPalette } from "./CommandPalette";
+
+vi.mock("cmdk", () => {
+	const CommandRoot = ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	);
+
+	const CommandInput = React.forwardRef<
+		HTMLInputElement,
+		React.InputHTMLAttributes<HTMLInputElement> & {
+			onValueChange?: (value: string) => void;
+		}
+	>(({ onValueChange, onChange, ...props }, ref) => (
+		<input
+			ref={ref}
+			onChange={(event) => {
+				onValueChange?.(event.target.value);
+				onChange?.(event);
+			}}
+			{...props}
+		/>
+	));
+	CommandInput.displayName = "CommandInput";
+
+	const CommandList = ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	);
+	const CommandEmpty = ({ children }: { children: React.ReactNode }) => (
+		<div>{children}</div>
+	);
+	const CommandGroup = ({
+		heading,
+		children,
+	}: {
+		heading?: React.ReactNode;
+		children: React.ReactNode;
+	}) => (
+		<div>
+			{heading ? <div>{heading}</div> : null}
+			{children}
+		</div>
+	);
+	const CommandItem = ({
+		children,
+		onSelect,
+		onClick,
+		disabled,
+		...props
+	}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+		onSelect?: () => void;
+		disabled?: boolean;
+	}) => (
+		<button
+			aria-disabled={disabled}
+			disabled={disabled}
+			onClick={(event) => {
+				onClick?.(event);
+				onSelect?.();
+			}}
+			type="button"
+			{...props}
+		>
+			{children}
+		</button>
+	);
+
+	return {
+		Command: Object.assign(CommandRoot, {
+			Input: CommandInput,
+			List: CommandList,
+			Empty: CommandEmpty,
+			Group: CommandGroup,
+			Item: CommandItem,
+		}),
+	};
+});
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -24,41 +100,59 @@ vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	})),
 }));
 
+const testTools = [
+	{
+		slug: "test-tool-1",
+		name: "Test Tool 1",
+		description: "First test tool",
+		icon: "wrench",
+		enabled: true,
+		public: true,
+		creditCost: 1,
+		isEnabled: true,
+		isComingSoon: false,
+	},
+	{
+		slug: "test-tool-2",
+		name: "Test Tool 2",
+		description: "Second test tool",
+		icon: "users",
+		enabled: true,
+		public: true,
+		creditCost: 1,
+		isEnabled: true,
+		isComingSoon: false,
+	},
+	{
+		slug: "test-tool-3",
+		name: "Disabled Tool",
+		description: "This tool is disabled",
+		icon: "newspaper",
+		enabled: false,
+		public: true,
+		creditCost: 1,
+		isEnabled: false,
+		isComingSoon: true,
+	},
+];
+
 // Mock config
 vi.mock("@repo/config", () => ({
 	config: {
-		tools: {
-			registry: [
-				{
-					slug: "test-tool-1",
-					name: "Test Tool 1",
-					description: "First test tool",
-					icon: "wrench",
-					enabled: true,
-					public: true,
-				},
-				{
-					slug: "test-tool-2",
-					name: "Test Tool 2",
-					description: "Second test tool",
-					icon: "users",
-					enabled: true,
-					public: true,
-				},
-				{
-					slug: "test-tool-3",
-					name: "Disabled Tool",
-					description: "This tool is disabled",
-					icon: "newspaper",
-					enabled: false,
-					public: true,
-				},
-			],
-		},
 		organizations: {
 			hideOrganization: false,
 		},
 	},
+}));
+
+vi.mock("@saas/tools/hooks/use-tools", () => ({
+	useTools: vi.fn(() => ({
+		tools: testTools,
+		enabledTools: testTools.filter((tool) => tool.enabled),
+		visibleTools: testTools.filter((tool) => tool.enabled),
+		isToolEnabled: (slug: string) =>
+			testTools.some((tool) => tool.slug === slug && tool.enabled),
+	})),
 }));
 
 // Mock localStorage for happy-dom environment
@@ -91,7 +185,11 @@ describe("CommandPalette", () => {
 	const mockPush = vi.fn();
 	const mockClose = vi.fn();
 
+	const renderCommandPalette = () =>
+		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+
 	beforeEach(() => {
+		vi.clearAllMocks();
 		vi.mocked(useRouter).mockReturnValue({
 			push: mockPush,
 			back: vi.fn(),
@@ -100,8 +198,14 @@ describe("CommandPalette", () => {
 			replace: vi.fn(),
 			prefetch: vi.fn(),
 		} as ReturnType<typeof useRouter>);
+		vi.mocked(useTools).mockReturnValue({
+			tools: testTools,
+			enabledTools: testTools.filter((tool) => tool.enabled),
+			visibleTools: testTools.filter((tool) => tool.enabled),
+			isToolEnabled: (slug: string) =>
+				testTools.some((tool) => tool.slug === slug && tool.enabled),
+		});
 		localStorageMock.clear();
-		vi.clearAllMocks();
 	});
 
 	afterEach(() => {
@@ -116,84 +220,75 @@ describe("CommandPalette", () => {
 	});
 
 	it("renders command palette when open", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 		expect(
 			screen.getByPlaceholderText("Search pages and tools..."),
 		).toBeInTheDocument();
 	});
 
 	it("displays enabled tools only", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 		expect(screen.getByText("Test Tool 1")).toBeInTheDocument();
 		expect(screen.getByText("Test Tool 2")).toBeInTheDocument();
 		expect(screen.queryByText("Disabled Tool")).not.toBeInTheDocument();
 	});
 
-	it("filters tools based on search input", async () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+	it("filters tools based on search input", () => {
+		renderCommandPalette();
 
 		const searchInput = screen.getByPlaceholderText(
 			"Search pages and tools...",
 		);
 		fireEvent.change(searchInput, { target: { value: "Test Tool 1" } });
 
-		await waitFor(() => {
-			expect(screen.getByText("Test Tool 1")).toBeInTheDocument();
-			// Note: cmdk may still render hidden items, so we check visibility via DOM
-		});
+		expect(screen.getByText("Test Tool 1")).toBeInTheDocument();
 	});
 
-	it("navigates to tool when selected", async () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+	it("navigates to tool when selected", () => {
+		renderCommandPalette();
 
 		const tool = screen.getByText("Test Tool 1");
 		fireEvent.click(tool);
 
-		await waitFor(() => {
-			expect(mockPush).toHaveBeenCalledWith("/app/tools/test-tool-1");
-			expect(mockClose).toHaveBeenCalled();
-		});
+		expect(mockPush).toHaveBeenCalledWith("/app/tools/test-tool-1");
+		expect(mockClose).toHaveBeenCalled();
 	});
 
-	it("stores recently used items in localStorage", async () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+	it("stores recently used items in localStorage", () => {
+		renderCommandPalette();
 
 		const tool = screen.getByText("Test Tool 1");
 		fireEvent.click(tool);
 
-		await waitFor(() => {
-			const stored = localStorage.getItem("command-palette:recent-items");
-			expect(stored).toBeTruthy();
-			if (stored) {
-				const recent = JSON.parse(stored);
-				expect(recent).toEqual(
-					expect.arrayContaining([
-						expect.objectContaining({
-							id: "test-tool-1",
-							type: "tool",
-						}),
-					]),
-				);
-			}
-		});
+		const stored = localStorage.getItem("command-palette:recent-items");
+		expect(stored).toBeTruthy();
+		if (stored) {
+			const recent = JSON.parse(stored);
+			expect(recent).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						id: "test-tool-1",
+						type: "tool",
+					}),
+				]),
+			);
+		}
 	});
 
-	it("displays recently used items section", async () => {
+	it("displays recently used items section", () => {
 		// Pre-populate recent items
 		localStorage.setItem(
 			"command-palette:recent-items",
 			JSON.stringify([{ id: "test-tool-2", type: "tool" }]),
 		);
 
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
-		await waitFor(() => {
-			expect(screen.getByText("Recently Used")).toBeInTheDocument();
-		});
+		expect(screen.getByText("Recently Used")).toBeInTheDocument();
 	});
 
 	it("closes when clicking backdrop", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
 		const backdrop = screen
 			.getByPlaceholderText("Search pages and tools...")
@@ -206,7 +301,7 @@ describe("CommandPalette", () => {
 	});
 
 	it("closes on Escape key", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
 		fireEvent.keyDown(document, { key: "Escape" });
 
@@ -250,7 +345,7 @@ describe("CommandPalette", () => {
 	});
 
 	it("displays navigation pages", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
 		expect(screen.getByText("Home")).toBeInTheDocument();
 		expect(screen.getByText("Chat")).toBeInTheDocument();
@@ -258,20 +353,18 @@ describe("CommandPalette", () => {
 		expect(screen.getByText("Usage")).toBeInTheDocument();
 	});
 
-	it("navigates to page when selected", async () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+	it("navigates to page when selected", () => {
+		renderCommandPalette();
 
 		const page = screen.getByText("Chat");
 		fireEvent.click(page);
 
-		await waitFor(() => {
-			expect(mockPush).toHaveBeenCalledWith("/app/chatbot");
-			expect(mockClose).toHaveBeenCalled();
-		});
+		expect(mockPush).toHaveBeenCalledWith("/app/chatbot");
+		expect(mockClose).toHaveBeenCalled();
 	});
 
 	it("shows keyboard navigation hints", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
 		expect(screen.getByText(/to navigate/i)).toBeInTheDocument();
 		expect(screen.getByText(/to select/i)).toBeInTheDocument();
@@ -279,7 +372,7 @@ describe("CommandPalette", () => {
 	});
 
 	it("displays tool descriptions", () => {
-		render(<CommandPalette isOpen={true} onClose={mockClose} />);
+		renderCommandPalette();
 
 		expect(screen.getByText("First test tool")).toBeInTheDocument();
 		expect(screen.getByText("Second test tool")).toBeInTheDocument();

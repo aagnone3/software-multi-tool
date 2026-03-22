@@ -1,6 +1,7 @@
 import { config } from "@repo/config";
 import { Logo } from "@shared/components/Logo";
 import Link from "next/link";
+import React from "react";
 
 export function Footer() {
 	return (

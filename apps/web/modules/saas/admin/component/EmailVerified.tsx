@@ -6,6 +6,7 @@ import {
 } from "@ui/components/tooltip";
 import { cn } from "@ui/lib";
 import { CheckIcon, ClockIcon } from "lucide-react";
+import React from "react";
 
 export function EmailVerified({
 	verified,

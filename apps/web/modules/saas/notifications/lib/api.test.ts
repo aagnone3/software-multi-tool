@@ -83,9 +83,12 @@ describe("Notifications API hooks", () => {
 				wrapper: createWrapper(),
 			});
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(mockedNotifications.list).toHaveBeenCalledWith({
 				limit: 20,
@@ -116,9 +119,12 @@ describe("Notifications API hooks", () => {
 				},
 			);
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(mockedNotifications.list).toHaveBeenCalledWith({
 				limit: 10,
@@ -155,9 +161,12 @@ describe("Notifications API hooks", () => {
 				},
 			);
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(result.current.data).toEqual({ unreadCount: 5 });
 		});
@@ -200,9 +209,12 @@ describe("Notifications API hooks", () => {
 
 			result.current.mutate("notif-1");
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(mockedNotifications.markAsRead).toHaveBeenCalledWith({
 				id: "notif-1",
@@ -234,9 +246,12 @@ describe("Notifications API hooks", () => {
 
 			result.current.mutate();
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(mockedNotifications.markAllAsRead).toHaveBeenCalled();
 			expect(invalidateSpy).toHaveBeenCalledWith({
@@ -263,9 +278,12 @@ describe("Notifications API hooks", () => {
 
 			result.current.mutate("notif-1");
 
-			await waitFor(() => {
-				expect(result.current.isSuccess).toBe(true);
-			});
+			await waitFor(
+				() => {
+					expect(result.current.isSuccess).toBe(true);
+				},
+				{ interval: 10 },
+			);
 
 			expect(mockedNotifications.delete).toHaveBeenCalledWith({
 				id: "notif-1",

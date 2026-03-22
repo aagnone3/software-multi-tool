@@ -1,7 +1,7 @@
 "use client";
 
 import Cookies from "js-cookie";
-import { createContext, useState } from "react";
+import React, { createContext, useState } from "react";
 
 export const ConsentContext = createContext<{
 	userHasConsented: boolean;

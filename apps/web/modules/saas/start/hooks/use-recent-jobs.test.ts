@@ -10,7 +10,7 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			list: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["jobs", "list"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () => Promise.resolve({ jobs: [] }),
 				})),
 			},
 		},

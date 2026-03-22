@@ -20,6 +20,7 @@ import {
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
 import { LogOutIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
+import React from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
 

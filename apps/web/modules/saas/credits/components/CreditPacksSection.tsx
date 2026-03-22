@@ -3,6 +3,7 @@
 import { getCreditPacks } from "@repo/config";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { cn } from "@ui/lib";
+import React from "react";
 import { toast } from "sonner";
 import {
 	type PackId,

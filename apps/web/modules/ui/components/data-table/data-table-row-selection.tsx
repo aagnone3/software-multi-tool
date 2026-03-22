@@ -3,7 +3,7 @@
 import type { Row, Table } from "@tanstack/react-table";
 import { cn } from "@ui/lib";
 import { CheckIcon, MinusIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface CheckboxProps {
 	checked: boolean | "indeterminate";

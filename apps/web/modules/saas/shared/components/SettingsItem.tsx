@@ -1,6 +1,7 @@
 import { Card } from "@ui/components/card";
 import { cn } from "@ui/lib";
 import type { PropsWithChildren, ReactNode } from "react";
+import React from "react";
 
 export function SettingsItem({
 	children,

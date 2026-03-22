@@ -12,7 +12,7 @@ import {
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
 import { BarChart3Icon, TrendingUpIcon } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
 	Area,
 	AreaChart,

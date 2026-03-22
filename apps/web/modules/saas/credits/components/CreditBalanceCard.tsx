@@ -13,6 +13,7 @@ import { Progress } from "@ui/components/progress";
 import { cn } from "@ui/lib";
 import { ChevronRightIcon, CoinsIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 /**

@@ -1,5 +1,6 @@
 import type { ContentStructureItem } from "@shared/lib/content";
 import Link from "next/link";
+import React from "react";
 
 function ContentMenuItem({
 	label,

@@ -1,6 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Readable } from "node:stream";
+import { logger } from "@repo/logs";
 import {
 	afterAll,
 	afterEach,
@@ -20,6 +21,7 @@ const TEST_SIGNING_SECRET = "test-secret";
 
 describe("LocalStorageProvider", () => {
 	let provider: LocalStorageProvider;
+	let loggerErrorSpy: ReturnType<typeof vi.spyOn>;
 
 	beforeAll(async () => {
 		// Ensure test directory exists
@@ -27,6 +29,9 @@ describe("LocalStorageProvider", () => {
 	});
 
 	beforeEach(() => {
+		loggerErrorSpy = vi
+			.spyOn(logger, "error")
+			.mockImplementation(() => logger);
 		provider = new LocalStorageProvider({
 			baseDir: TEST_BASE_DIR,
 			baseUrl: TEST_BASE_URL,
@@ -35,6 +40,7 @@ describe("LocalStorageProvider", () => {
 	});
 
 	afterEach(async () => {
+		loggerErrorSpy.mockRestore();
 		// Clean up test files after each test
 		try {
 			await rm(TEST_BASE_DIR, { recursive: true, force: true });

@@ -1,28 +1,46 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createStorageProvider } from "../../index";
+import { SupabaseStorageProvider } from "./index";
 
-const loggerError = vi.fn();
+const {
+	loggerError,
+	uploadMock,
+	createSignedUploadUrlMock,
+	createSignedUrlMock,
+	removeMock,
+	listMock,
+	fromMock,
+	createClientMock,
+} = vi.hoisted(() => {
+	const uploadMock = vi.fn();
+	const createSignedUploadUrlMock = vi.fn();
+	const createSignedUrlMock = vi.fn();
+	const removeMock = vi.fn();
+	const listMock = vi.fn();
+	const fromMock = vi.fn(() => ({
+		upload: uploadMock,
+		createSignedUploadUrl: createSignedUploadUrlMock,
+		createSignedUrl: createSignedUrlMock,
+		remove: removeMock,
+		list: listMock,
+	}));
+	const createClientMock = vi.fn(() => ({
+		storage: {
+			from: fromMock,
+		},
+	}));
 
-// Mock Supabase storage methods
-const uploadMock = vi.fn();
-const createSignedUploadUrlMock = vi.fn();
-const createSignedUrlMock = vi.fn();
-const removeMock = vi.fn();
-const listMock = vi.fn();
-
-// Mock storage.from() to return bucket-scoped methods
-const fromMock = vi.fn(() => ({
-	upload: uploadMock,
-	createSignedUploadUrl: createSignedUploadUrlMock,
-	createSignedUrl: createSignedUrlMock,
-	remove: removeMock,
-	list: listMock,
-}));
-
-const createClientMock = vi.fn(() => ({
-	storage: {
-		from: fromMock,
-	},
-}));
+	return {
+		loggerError: vi.fn(),
+		uploadMock,
+		createSignedUploadUrlMock,
+		createSignedUrlMock,
+		removeMock,
+		listMock,
+		fromMock,
+		createClientMock,
+	};
+});
 
 vi.mock("@supabase/supabase-js", () => ({
 	createClient: createClientMock,
@@ -36,7 +54,6 @@ describe("supabase provider", () => {
 	const originalEnv = process.env;
 
 	beforeEach(() => {
-		vi.resetModules();
 		vi.clearAllMocks();
 		process.env = {
 			...originalEnv,
@@ -79,8 +96,6 @@ describe("supabase provider", () => {
 
 	describe("SupabaseStorageProvider class", () => {
 		it("creates provider with configuration", async () => {
-			const { SupabaseStorageProvider } = await import("./index");
-
 			const provider = new SupabaseStorageProvider({
 				supabaseUrl: "https://custom.supabase.co",
 				supabaseServiceRoleKey: "custom-key",
@@ -558,8 +573,6 @@ describe("createStorageProvider with supabase", () => {
 	});
 
 	it("creates a Supabase provider from config", async () => {
-		const { createStorageProvider } = await import("../../index");
-
 		const provider = createStorageProvider({
 			type: "supabase",
 			supabaseUrl: "https://example.supabase.co",

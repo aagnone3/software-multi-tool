@@ -6,6 +6,7 @@ import { creditsRouter } from "./router";
 const getSessionMock = vi.hoisted(() => vi.fn());
 const getPurchasesByOrganizationIdMock = vi.hoisted(() => vi.fn());
 const getCreditPurchasesByOrganizationIdMock = vi.hoisted(() => vi.fn());
+const getOrganizationByIdMock = vi.hoisted(() => vi.fn());
 
 // Credit service mocks
 const getCreditStatusMock = vi.hoisted(() => vi.fn());
@@ -15,6 +16,15 @@ const getOrCreateCreditBalanceMock = vi.hoisted(() => vi.fn());
 const getTransactionHistoryMock = vi.hoisted(() => vi.fn());
 const getUsageStatsMock = vi.hoisted(() => vi.fn());
 
+// Purchase checkout mocks
+const getCreditPackByIdMock = vi.hoisted(() => vi.fn());
+const getCustomerIdFromEntityMock = vi.hoisted(() => vi.fn());
+const createCheckoutLinkMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@repo/logs", () => ({
+	logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
+}));
+
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
 }));
@@ -22,12 +32,31 @@ vi.mock("@repo/auth", () => ({
 vi.mock("@repo/database", () => ({
 	getPurchasesByOrganizationId: getPurchasesByOrganizationIdMock,
 	getCreditPurchasesByOrganizationId: getCreditPurchasesByOrganizationIdMock,
+	getOrganizationById: getOrganizationByIdMock,
+}));
+
+vi.mock("@repo/config", () => ({
+	getCreditPackById: getCreditPackByIdMock,
+	config: {
+		credits: {
+			included: { free: 100, pro: 500, starter: 100 },
+		},
+		payments: {
+			plans: {
+				pro: { id: "pro", name: "Pro" },
+				free: { id: "free", name: "Free" },
+				starter: { id: "starter", name: "Starter" },
+			},
+		},
+	},
 }));
 
 vi.mock("@repo/payments", () => ({
 	createPurchasesHelper: vi.fn(() => ({
 		activePlan: { id: "pro", status: "active" },
 	})),
+	getCustomerIdFromEntity: getCustomerIdFromEntityMock,
+	createCheckoutLink: createCheckoutLinkMock,
 }));
 
 vi.mock("../../lib/credits", () => ({
@@ -354,6 +383,99 @@ describe("Credits Router", () => {
 			await expect(client({})).rejects.toMatchObject({
 				code: "UNAUTHORIZED",
 			});
+		});
+	});
+
+	describe("credits.purchase", () => {
+		const mockCreditPack = {
+			id: "boost",
+			name: "Boost Pack",
+			credits: 100,
+			amount: 999,
+			currency: "usd",
+			priceId: "price_123",
+		};
+
+		const createClient = () =>
+			createProcedureClient(creditsRouter.purchase, {
+				context: {
+					headers: new Headers(),
+				},
+			});
+
+		beforeEach(() => {
+			getCreditPackByIdMock.mockReturnValue(mockCreditPack);
+			getOrganizationByIdMock.mockResolvedValue({
+				id: "org-123",
+				name: "Test Org",
+			});
+			getCustomerIdFromEntityMock.mockResolvedValue("cus_123");
+			createCheckoutLinkMock.mockResolvedValue(
+				"https://checkout.stripe.com/session_123",
+			);
+		});
+
+		it("creates a checkout session for valid pack", async () => {
+			const client = createClient();
+			const result = await client({ packId: "boost" });
+
+			expect(result).toEqual({
+				checkoutUrl: "https://checkout.stripe.com/session_123",
+				pack: {
+					id: "boost",
+					name: "Boost Pack",
+					credits: 100,
+					amount: 999,
+					currency: "usd",
+				},
+			});
+		});
+
+		it("throws BAD_REQUEST when no active organization", async () => {
+			getSessionMock.mockResolvedValue({
+				...mockSession,
+				session: { id: "session-1", activeOrganizationId: null },
+			});
+
+			const client = createClient();
+
+			await expect(client({ packId: "boost" })).rejects.toMatchObject({
+				code: "BAD_REQUEST",
+			});
+		});
+
+		it("throws NOT_FOUND when organization not found", async () => {
+			getOrganizationByIdMock.mockResolvedValue(null);
+
+			const client = createClient();
+
+			await expect(client({ packId: "boost" })).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+		});
+
+		it("throws INTERNAL_SERVER_ERROR when checkout link is null", async () => {
+			createCheckoutLinkMock.mockResolvedValue(null);
+
+			const client = createClient();
+
+			await expect(client({ packId: "boost" })).rejects.toMatchObject({
+				code: "INTERNAL_SERVER_ERROR",
+			});
+		});
+
+		it("passes redirectUrl when provided", async () => {
+			const client = createClient();
+			await client({
+				packId: "boost",
+				redirectUrl: "https://app.example.com/success",
+			});
+
+			expect(createCheckoutLinkMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					redirectUrl: "https://app.example.com/success",
+				}),
+			);
 		});
 	});
 });

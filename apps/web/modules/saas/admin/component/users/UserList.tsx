@@ -27,7 +27,7 @@ import {
 	TrashIcon,
 } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
 import { EmailVerified } from "../EmailVerified";

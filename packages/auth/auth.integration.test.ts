@@ -1,3 +1,4 @@
+import { hasWorkingContainerRuntime } from "@repo/database/tests/container-runtime.mjs";
 import type { PostgresTestHarness } from "@repo/database/tests/postgres-test-harness";
 import { createPostgresTestHarness } from "@repo/database/tests/postgres-test-harness";
 import {
@@ -19,8 +20,11 @@ import {
 
 const HOOK_TIMEOUT = 120_000;
 const TEST_TIMEOUT = 20_000;
+const describeWithContainerRuntime = hasWorkingContainerRuntime()
+	? describe.sequential
+	: describe.skip;
 
-describe.sequential("Better Auth integration tests", () => {
+describeWithContainerRuntime("Better Auth integration tests", () => {
 	let harness: PostgresTestHarness | undefined;
 
 	beforeAll(async () => {

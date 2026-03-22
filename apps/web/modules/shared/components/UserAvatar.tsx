@@ -1,6 +1,6 @@
 import { config } from "@repo/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@ui/components/avatar";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 export const UserAvatar = ({
 	name,

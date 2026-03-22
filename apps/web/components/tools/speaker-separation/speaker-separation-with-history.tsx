@@ -3,6 +3,7 @@
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
+import React from "react";
 import { SpeakerSeparationHistory } from "./speaker-separation-history";
 
 export function SpeakerSeparationWithHistory() {

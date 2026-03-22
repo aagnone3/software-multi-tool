@@ -7,6 +7,7 @@ import { useConfirmationAlert } from "@saas/shared/components/ConfirmationAlertP
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { useRouter } from "@shared/hooks/router";
 import { Button } from "@ui/components/button";
+import React from "react";
 import { toast } from "sonner";
 
 export function DeleteOrganizationForm() {

@@ -15,7 +15,7 @@ import type { AgentSessionConfig, SessionContext } from "./types";
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-describe("Agent Session Integration", () => {
+describe.concurrent("Agent Session Integration", () => {
 	const requireApiKey = () => {
 		if (!process.env.ANTHROPIC_API_KEY) {
 			throw new Error(
@@ -84,12 +84,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 			expect(savedState).not.toBeNull();
 			expect(savedState?.messages.length).toBe(messages.length);
 
-			console.log("Multi-turn conversation test passed:");
-			console.log(`- Session ID: ${session.getSessionId()}`);
-			console.log(`- Messages: ${messages.length}`);
-			console.log(
-				`- Tokens used: ${result1.usage.inputTokens} input, ${result1.usage.outputTokens} output`,
-			);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 
@@ -115,10 +110,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 			expect(result.extractedData).toHaveProperty("status");
 			expect(session.isComplete()).toBe(true);
 
-			console.log("Completion detection test passed:");
-			console.log(
-				`- Extracted data: ${JSON.stringify(result.extractedData)}`,
-			);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 
@@ -158,11 +150,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 			// The assistant should ask a follow-up question
 			expect(result.isComplete).toBe(false);
 
-			console.log("FeedbackCollector test passed:");
-			console.log(`- Initial message: ${initialMessages[0].content}`);
-			console.log(
-				`- Response preview: ${result.response.slice(0, 100)}...`,
-			);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 
@@ -217,9 +205,7 @@ Otherwise, just respond with a brief acknowledgment.`,
 				usage1.outputTokens,
 			);
 
-			console.log("Session persistence test passed:");
-			console.log(`- Initial usage: ${JSON.stringify(usage1)}`);
-			console.log(`- Final usage: ${JSON.stringify(finalUsage)}`);
+			// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 		},
 	);
 
@@ -250,13 +236,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 			result1.usage.outputTokens + result2.usage.outputTokens,
 		);
 
-		console.log("Token usage tracking test passed:");
-		console.log(
-			`- Turn 1: ${result1.usage.inputTokens}/${result1.usage.outputTokens}`,
-		);
-		console.log(
-			`- Turn 2: ${result2.usage.inputTokens}/${result2.usage.outputTokens}`,
-		);
-		console.log(`- Total: ${usage2.inputTokens}/${usage2.outputTokens}`);
+		// Keep assertions as the integration proof; avoid noisy stdout in passing runs.
 	});
 });

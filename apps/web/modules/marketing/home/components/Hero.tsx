@@ -1,6 +1,7 @@
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 export function Hero() {
 	return (

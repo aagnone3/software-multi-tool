@@ -44,6 +44,8 @@ describe("getBranchCredentials", () => {
 	let mockFetch: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
 		// Mock global fetch
 		mockFetch = vi.fn();
 		global.fetch = mockFetch;

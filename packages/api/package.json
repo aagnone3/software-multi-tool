@@ -47,7 +47,8 @@
 	"name": "@repo/api",
 	"scripts": {
 		"type-check": "tsc --noEmit",
-		"test": "vitest --config ./vitest.config.ts --run",
+		"test": "node ./tests/run-vitest.mjs",
+		"test:integration": "vitest run --config ./vitest.config.ts \"**/*.integration.test.ts\"",
 		"test:ci": "VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 vitest --config ./vitest.config.ts --run"
 	},
 	"version": "0.0.0"

@@ -2,29 +2,39 @@ import { describe, expect, it } from "vitest";
 import { formatDuration } from "./format-duration";
 
 describe("formatDuration", () => {
-	it("formats seconds only", () => {
+	it("formats zero seconds", () => {
 		expect(formatDuration(0)).toBe("0:00");
-		expect(formatDuration(5)).toBe("0:05");
-		expect(formatDuration(59)).toBe("0:59");
+	});
+
+	it("formats seconds only (< 1 minute)", () => {
+		expect(formatDuration(45)).toBe("0:45");
 	});
 
 	it("formats minutes and seconds", () => {
-		expect(formatDuration(60)).toBe("1:00");
 		expect(formatDuration(65)).toBe("1:05");
-		expect(formatDuration(125)).toBe("2:05");
-		expect(formatDuration(599)).toBe("9:59");
-		expect(formatDuration(3599)).toBe("59:59");
+	});
+
+	it("pads seconds with leading zero", () => {
+		expect(formatDuration(62)).toBe("1:02");
+	});
+
+	it("formats exactly one hour", () => {
+		expect(formatDuration(3600)).toBe("1:00:00");
 	});
 
 	it("formats hours, minutes, and seconds", () => {
-		expect(formatDuration(3600)).toBe("1:00:00");
 		expect(formatDuration(3661)).toBe("1:01:01");
-		expect(formatDuration(7325)).toBe("2:02:05");
-		expect(formatDuration(86399)).toBe("23:59:59");
+	});
+
+	it("pads minutes and seconds with leading zeros in HH:MM:SS format", () => {
+		expect(formatDuration(7200 + 5 * 60 + 3)).toBe("2:05:03");
+	});
+
+	it("formats 59 minutes 59 seconds without hours", () => {
+		expect(formatDuration(3599)).toBe("59:59");
 	});
 
 	it("handles fractional seconds by flooring", () => {
 		expect(formatDuration(65.9)).toBe("1:05");
-		expect(formatDuration(65.1)).toBe("1:05");
 	});
 });

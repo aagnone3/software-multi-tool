@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 	const { user } = useSession();

@@ -20,6 +20,7 @@ import {
 } from "@ui/components/dropdown-menu";
 import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { OrganizationLogo } from "./OrganizationLogo";
 
 export function OrganzationSelect({ className }: { className?: string }) {

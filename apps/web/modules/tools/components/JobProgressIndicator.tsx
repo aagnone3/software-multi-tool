@@ -17,6 +17,7 @@ import {
 	Loader2Icon,
 	XCircleIcon,
 } from "lucide-react";
+import React from "react";
 import { useCancelJob } from "../hooks/use-job-polling";
 import { useJobUpdates } from "../hooks/use-job-updates";
 

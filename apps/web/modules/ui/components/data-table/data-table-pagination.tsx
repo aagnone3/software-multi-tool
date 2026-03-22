@@ -15,6 +15,7 @@ import {
 	ChevronsLeftIcon,
 	ChevronsRightIcon,
 } from "lucide-react";
+import React from "react";
 
 export interface DataTablePaginationProps<TData> {
 	table: Table<TData>;

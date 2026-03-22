@@ -4,6 +4,7 @@ import { CreditsOverview } from "@saas/start/components/CreditsOverview";
 import { GettingStartedChecklist } from "@saas/start/components/GettingStartedChecklist";
 import { RecentActivityFeed } from "@saas/start/components/RecentActivityFeed";
 import { RecentlyUsedTools } from "@saas/start/components/RecentlyUsedTools";
+import React from "react";
 
 export default function OrganizationStart() {
 	return (

@@ -7,6 +7,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import React from "react";
 
 export function OrganizationRoleSelect({
 	value,

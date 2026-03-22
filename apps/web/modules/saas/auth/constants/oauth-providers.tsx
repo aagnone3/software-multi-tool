@@ -1,4 +1,5 @@
 import type { JSXElementConstructor } from "react";
+import React from "react";
 
 type IconProps = {
 	className?: string;

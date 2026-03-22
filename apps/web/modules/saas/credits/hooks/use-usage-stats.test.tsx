@@ -10,7 +10,13 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			usageStats: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "usageStats"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							totalUsed: 0,
+							totalOverage: 0,
+							byTool: [],
+							byPeriod: [],
+						}),
 				})),
 			},
 		},

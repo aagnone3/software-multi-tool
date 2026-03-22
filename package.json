@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"setup": "./tooling/scripts/src/setup-local.sh",
+		"local-eval:smoke": "pnpm --filter @repo/scripts local-eval:smoke",
 		"build": "dotenv -c -- turbo build",
 		"dev": "dotenv -c -- turbo dev --concurrency 15",
 		"web:env:list": "dotenv -c -e apps/web/.env.local -e apps/web/.env -- pnpm --filter @repo/scripts env:list --app apps/web",
@@ -18,13 +19,13 @@
 		"format": "biome format . --write",
 		"metrics:collect": "TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=0 pnpm test && pnpm --filter @repo/scripts exec tsx src/testing-metrics.ts",
 		"metrics:weekly": "pnpm --filter @repo/scripts exec tsx src/weekly-test-summary.ts",
-		"test": "dotenv -c -- turbo run test",
-		"test:ci": "dotenv -c -- env TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
+		"test": "dotenv -c -- env DOTENV_CONFIG_QUIET=true turbo run test",
+		"test:ci": "dotenv -c -- env DOTENV_CONFIG_QUIET=true TURBO_FORCE=1 VITEST_COVERAGE=1 VITEST_ENFORCE_THRESHOLDS=1 turbo run test",
 		"e2e": "pnpm --filter @repo/e2e test",
 		"e2e:ui": "pnpm --filter @repo/e2e test:ui",
 		"e2e:smoke": "pnpm --filter @repo/e2e test:smoke",
 		"db:migrate:deploy": "pnpm --filter @repo/scripts exec tsx src/prisma/migrate-deploy.ts",
-		"db:seed": "PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql",
+		"db:seed": "pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs",
 		"worktree:create": "./tooling/scripts/src/worktree-setup.sh create",
 		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
 		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",
@@ -37,7 +38,7 @@
 		"mt": "pnpm --filter @repo/cli mt"
 	},
 	"engines": {
-		"node": "22.22.1"
+		"node": ">=22.22.0"
 	},
 	"packageManager": "pnpm@10.27.0",
 	"optionalDependencies": {
@@ -62,7 +63,8 @@
 		"postcss": "8.5.8",
 		"turbo": "2.7.6",
 		"typescript": "5.9.3",
-		"vitest": "4.0.18"
+		"vitest": "4.0.18",
+		"zod": "4.3.6"
 	},
 	"pnpm": {
 		"overrides": {

@@ -1,6 +1,7 @@
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, CheckCircleIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 const benefits = [
 	"No credit card required",

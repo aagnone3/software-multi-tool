@@ -38,19 +38,41 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			balance: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "balance"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							included: 0,
+							used: 0,
+							remaining: 0,
+							overage: 0,
+							purchasedCredits: 0,
+							totalAvailable: 0,
+							periodStart: "2025-01-01T00:00:00.000Z",
+							periodEnd: "2025-02-01T00:00:00.000Z",
+							plan: { id: "free", name: "Free" },
+							purchases: [],
+						}),
 				})),
 			},
 			usageStats: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "usageStats"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							totalUsed: 0,
+							totalOverage: 0,
+							byTool: [],
+							byPeriod: [],
+						}),
 				})),
 			},
 			history: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["credits", "history"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () =>
+						Promise.resolve({
+							transactions: [],
+							pagination: undefined,
+						}),
 				})),
 			},
 		},
@@ -58,7 +80,7 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			list: {
 				queryOptions: vi.fn(() => ({
 					queryKey: ["jobs", "list"],
-					queryFn: () => Promise.resolve(undefined),
+					queryFn: () => Promise.resolve({ jobs: [] }),
 				})),
 			},
 		},

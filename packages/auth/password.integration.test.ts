@@ -1,3 +1,4 @@
+import { hasWorkingContainerRuntime } from "@repo/database/tests/container-runtime.mjs";
 import type { PostgresTestHarness } from "@repo/database/tests/postgres-test-harness";
 import { createPostgresTestHarness } from "@repo/database/tests/postgres-test-harness";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
@@ -13,8 +14,11 @@ import {
 
 const HOOK_TIMEOUT = 120_000;
 const TEST_TIMEOUT = 20_000;
+const describeWithContainerRuntime = hasWorkingContainerRuntime()
+	? describe.sequential
+	: describe.skip;
 
-describe.sequential("Password hashing integration tests", () => {
+describeWithContainerRuntime("Password hashing integration tests", () => {
 	let harness: PostgresTestHarness | undefined;
 
 	beforeAll(async () => {
@@ -47,8 +51,9 @@ describe.sequential("Password hashing integration tests", () => {
 				// Hash the password using Better Auth's crypto
 				const hashedPassword = await hashPassword(password);
 
-				console.log("Hashed password:", hashedPassword);
-				console.log("Hash length:", hashedPassword.length);
+				expect(hashedPassword).toBeTruthy();
+				expect(hashedPassword.length).toBeGreaterThan(0);
+				expect(hashedPassword).not.toBe(password);
 
 				// Verify the password matches
 				const isValid = await verifyPassword({
@@ -121,6 +126,7 @@ describe.sequential("Password hashing integration tests", () => {
 
 				expect(account).not.toBeNull();
 				expect(account?.password).toBe(hashedPassword);
+				expect(account?.password).not.toBe(password);
 
 				// Verify the password can be validated
 				const isValid = await verifyPassword({
@@ -129,12 +135,6 @@ describe.sequential("Password hashing integration tests", () => {
 				});
 
 				expect(isValid).toBe(true);
-
-				// Output the hash for use in seed.sql
-				console.log("\n=== Use this hash in seed.sql ===");
-				console.log(`Password: ${password}`);
-				console.log(`Hash: ${hashedPassword}`);
-				console.log("================================\n");
 			},
 			TEST_TIMEOUT,
 		);

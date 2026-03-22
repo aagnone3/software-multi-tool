@@ -16,6 +16,7 @@ import {
 	ChevronsUpDownIcon,
 	EyeOffIcon,
 } from "lucide-react";
+import React from "react";
 
 export interface DataTableColumnHeaderProps<TData, TValue> {
 	column: Column<TData, TValue>;

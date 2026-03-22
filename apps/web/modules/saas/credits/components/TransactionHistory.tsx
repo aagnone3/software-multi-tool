@@ -20,7 +20,7 @@ import {
 } from "@ui/components/table";
 import { cn } from "@ui/lib";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import type { Transaction } from "../hooks/use-credits-history";
 import { useCreditsHistory } from "../hooks/use-credits-history";
 import { formatToolName } from "../lib/format-tool-name";

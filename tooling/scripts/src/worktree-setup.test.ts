@@ -1,5 +1,5 @@
 import { exec } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 const execAsync = promisify(exec);
 
 const SCRIPT_PATH = resolve(__dirname, "worktree-setup.sh");
+const SCRIPT_SOURCE = readFileSync(SCRIPT_PATH, "utf8");
 // Get the repo root (3 levels up from tooling/scripts/src/)
 const REPO_ROOT = resolve(__dirname, "../../..");
 
@@ -20,6 +21,37 @@ describe("worktree-setup.sh", () => {
 			// Use bash -n to check syntax without executing
 			const { stderr } = await execAsync(`bash -n "${SCRIPT_PATH}"`);
 			expect(stderr).toBe("");
+		});
+
+		it("should use the repo-owned preview user validator instead of host psql", () => {
+			expect(SCRIPT_SOURCE).toContain("check-local-preview-user.mjs");
+			expect(SCRIPT_SOURCE).toContain("check_preview_user exists");
+			expect(SCRIPT_SOURCE).not.toContain("psql -h 127.0.0.1");
+		});
+
+		it("should route Supabase commands through the repo-owned CLI runner", () => {
+			expect(SCRIPT_SOURCE).toContain(
+				'SUPABASE_CLI_RUNNER="$SCRIPT_DIR/supabase/run-supabase-cli.sh"',
+			);
+			expect(SCRIPT_SOURCE).toContain("run_supabase_cli()");
+			expect(SCRIPT_SOURCE).toContain(
+				"if run_supabase_cli status &>/dev/null; then",
+			);
+			expect(SCRIPT_SOURCE).toContain(
+				"if run_supabase_cli db reset --no-confirm 2>&1; then",
+			);
+		});
+
+		it("should describe the global Supabase CLI as optional in usage and recovery messaging", () => {
+			expect(SCRIPT_SOURCE).toContain(
+				"Uses the repo-owned Supabase CLI runner (global install optional)",
+			);
+			expect(SCRIPT_SOURCE).toContain(
+				"A global supabase install is optional",
+			);
+			expect(SCRIPT_SOURCE).toContain(
+				"This prefers a global supabase binary when available and falls back to pnpm dlx when it is not.",
+			);
 		});
 	});
 

@@ -30,7 +30,11 @@ NC='\033[0m' # No Color
 # Configuration
 WORKTREE_BASE_DIR=".worktrees"
 PORT_ALLOCATOR="$SCRIPT_DIR/worktree-port.sh"
+SUPABASE_CLI_RUNNER="$SCRIPT_DIR/supabase/run-supabase-cli.sh"
 REQUIRED_NODE_MAJOR="22"
+SUPABASE_DB_PORT="54322"
+TEST_USER_ID="preview_user_001"
+EXPECTED_PASSWORD_PREFIX="46eb4f9cb6d62a4d8e23"
 
 # Print colored output
 log_info() {
@@ -51,6 +55,19 @@ log_error() {
 
 log_step() {
   echo -e "\n${BOLD}=== $1 ===${NC}"
+}
+
+run_supabase_cli() {
+  "$SUPABASE_CLI_RUNNER" "$@"
+}
+
+check_preview_user() {
+  local mode="$1"
+
+  SUPABASE_DB_PORT="$SUPABASE_DB_PORT" \
+    PREVIEW_USER_ID="$TEST_USER_ID" \
+    PREVIEW_USER_PASSWORD_PREFIX="$EXPECTED_PASSWORD_PREFIX" \
+    pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs "$mode" >/dev/null 2>&1
 }
 
 # Check and switch to correct Node version
@@ -160,8 +177,19 @@ ${BOLD}What this script automates:${NC}
   3. Allocates unique ports for web app (3501-3999)
   4. Installs/links dependencies (pnpm install)
   5. Generates Prisma client
-  6. Runs baseline verification tests
-  7. Reports success/failure status
+  6. Uses the repo-owned Supabase CLI runner (global install optional)
+  7. Runs baseline verification tests
+  8. Reports success/failure status
+
+${BOLD}Hard prerequisites:${NC}
+  - Node.js v22
+  - git
+  - pnpm
+  - Docker Desktop / Docker Engine running
+
+${BOLD}Optional tools:${NC}
+  - Supabase CLI installed globally for faster startup
+    If it is missing, the script falls back to a pinned repo-owned pnpm dlx invocation.
 
 ${BOLD}Fail-fast behavior:${NC}
   The script stops on the first error and reports what went wrong.
@@ -471,19 +499,24 @@ setup_worktree_environment() {
   # Step 6: Verify Supabase Local is running and database is seeded
   # Note: We enforce Supabase Local in Step 2, so we know we're using port 54322
   log_step "Step 6: Checking Supabase Local status"
+  log_info "Supabase commands use the repo-owned CLI runner. A global supabase install is optional."
 
   # Ensure Supabase local is running
-  if supabase status &>/dev/null; then
+  if run_supabase_cli status &>/dev/null; then
     log_success "Supabase local is running"
   else
-    log_warning "Supabase local is not running"
-    log_info "Starting Supabase local..."
-    if supabase start; then
+    log_warning "Supabase local is not running yet"
+    log_info "Starting Supabase local via the repo-owned CLI runner..."
+    log_info "This prefers a global supabase binary when available and falls back to pnpm dlx when it is not."
+    log_info "Docker must be running for either path to work."
+    if run_supabase_cli start; then
       log_success "Supabase local started"
     else
       log_error "Failed to start Supabase local"
-      log_info "Run: supabase start"
-      log_info "Then: supabase db reset"
+      log_info "A global Supabase CLI install is optional; the fallback still needs pnpm plus a working Docker daemon."
+      log_info "Retry after confirming: pnpm --version && docker info"
+      log_info "Then: pnpm supabase:start"
+      log_info "If the local stack needs a clean rebuild: pnpm supabase:reset"
       exit 1
     fi
   fi
@@ -491,33 +524,26 @@ setup_worktree_environment() {
   # Verify test user exists with correct password hash
   log_info "Checking for test user in Supabase Local..."
 
-  if PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT 1 FROM \"user\" WHERE id = 'preview_user_001'" 2>/dev/null | grep -q "1"; then
-    # User exists, verify password hash is correct
-    local password_hash
-    password_hash=$(PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -tAc "SELECT password FROM account WHERE \"userId\" = 'preview_user_001'" 2>/dev/null | tr -d ' ')
-
-    # Expected hash from seed.sql (first 20 chars)
-    local expected_prefix="46eb4f9cb6d62a4d8e23"
-
-    if echo "$password_hash" | grep -q "^$expected_prefix"; then
+  if check_preview_user exists; then
+    if check_preview_user password; then
       log_success "Database seeded correctly (preview_user_001 exists with valid password)"
     else
       log_warning "Test user exists but password hash is incorrect"
       log_info "Resetting database with correct seed..."
-      if supabase db reset --no-confirm 2>&1; then
+      if run_supabase_cli db reset --no-confirm 2>&1; then
         log_success "Database reset and seeded successfully"
       else
         log_warning "Database reset had issues (non-blocking)"
-        log_info "Run manually: supabase db reset"
+        log_info "Run manually: pnpm supabase:reset"
       fi
     fi
   else
     log_info "Test user not found, resetting database with seed..."
-    if supabase db reset --no-confirm 2>&1; then
+    if run_supabase_cli db reset --no-confirm 2>&1; then
       log_success "Database reset and seeded successfully"
     else
       log_warning "Database reset had issues (non-blocking)"
-      log_info "Run manually: supabase db reset"
+      log_info "Run manually: pnpm supabase:reset"
     fi
   fi
 

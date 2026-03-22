@@ -20,6 +20,7 @@ import {
 import { Input } from "@ui/components/input";
 import { Textarea } from "@ui/components/textarea";
 import { MailCheckIcon, MailIcon } from "lucide-react";
+import React from "react";
 import { useForm } from "react-hook-form";
 
 export function ContactForm() {

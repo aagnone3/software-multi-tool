@@ -1,38 +1,56 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createStorageProvider } from "../../index";
+import { S3StorageProvider } from "./index";
 
-const putCommandSpy = vi.fn();
-const getCommandSpy = vi.fn();
-const deleteCommandSpy = vi.fn();
-const headCommandSpy = vi.fn();
-const sendSpy = vi.fn();
-const getSignedUrlMock = vi.fn();
-const loggerError = vi.fn();
-
-class PutObjectCommandMock {
-	constructor(input: unknown) {
-		putCommandSpy(input);
-	}
-}
-
-class GetObjectCommandMock {
-	constructor(input: unknown) {
-		getCommandSpy(input);
-	}
-}
-
-class DeleteObjectCommandMock {
-	constructor(input: unknown) {
-		deleteCommandSpy(input);
-	}
-}
-
-class HeadObjectCommandMock {
-	constructor(input: unknown) {
-		headCommandSpy(input);
-	}
-}
-
-const s3ClientSpy = vi.fn();
+const {
+	putCommandSpy,
+	getCommandSpy,
+	deleteCommandSpy,
+	headCommandSpy,
+	sendSpy,
+	getSignedUrlMock,
+	loggerError,
+	s3ClientSpy,
+	PutObjectCommandMock,
+	GetObjectCommandMock,
+	DeleteObjectCommandMock,
+	HeadObjectCommandMock,
+} = vi.hoisted(() => {
+	const putCommandSpy = vi.fn();
+	const getCommandSpy = vi.fn();
+	const deleteCommandSpy = vi.fn();
+	const headCommandSpy = vi.fn();
+	return {
+		putCommandSpy,
+		getCommandSpy,
+		deleteCommandSpy,
+		headCommandSpy,
+		sendSpy: vi.fn(),
+		getSignedUrlMock: vi.fn(),
+		loggerError: vi.fn(),
+		s3ClientSpy: vi.fn(),
+		PutObjectCommandMock: class {
+			constructor(input: unknown) {
+				putCommandSpy(input);
+			}
+		},
+		GetObjectCommandMock: class {
+			constructor(input: unknown) {
+				getCommandSpy(input);
+			}
+		},
+		DeleteObjectCommandMock: class {
+			constructor(input: unknown) {
+				deleteCommandSpy(input);
+			}
+		},
+		HeadObjectCommandMock: class {
+			constructor(input: unknown) {
+				headCommandSpy(input);
+			}
+		},
+	};
+});
 
 vi.mock("@aws-sdk/client-s3", () => ({
 	S3Client: class {
@@ -59,7 +77,6 @@ describe("s3 provider", () => {
 	const originalEnv = process.env;
 
 	beforeEach(() => {
-		vi.resetModules();
 		vi.clearAllMocks();
 		process.env = {
 			...originalEnv,
@@ -244,8 +261,6 @@ describe("s3 provider", () => {
 
 	describe("S3StorageProvider class", () => {
 		it("creates provider with configuration", async () => {
-			const { S3StorageProvider } = await import("./index");
-
 			const provider = new S3StorageProvider({
 				endpoint: "https://custom.s3.endpoint",
 				region: "eu-west-1",
@@ -568,8 +583,6 @@ describe("createStorageProvider", () => {
 	});
 
 	it("creates an S3 provider from config", async () => {
-		const { createStorageProvider } = await import("../../index");
-
 		const provider = createStorageProvider({
 			type: "s3",
 			endpoint: "https://s3.example.com",

@@ -23,3 +23,7 @@ export function registerAllProcessors() {
 
 	initialized = true;
 }
+
+export function resetRegisteredProcessorsForTests() {
+	initialized = false;
+}

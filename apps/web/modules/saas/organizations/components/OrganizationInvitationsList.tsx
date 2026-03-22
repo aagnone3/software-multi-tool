@@ -26,7 +26,7 @@ import {
 	MoreVerticalIcon,
 	XIcon,
 } from "lucide-react";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { toast } from "sonner";
 import { OrganizationRoleSelect } from "./OrganizationRoleSelect";
 

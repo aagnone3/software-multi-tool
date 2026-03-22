@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
+import React from "react";
 import { CreditsOverview } from "./components/CreditsOverview";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { RecentActivityFeed } from "./components/RecentActivityFeed";

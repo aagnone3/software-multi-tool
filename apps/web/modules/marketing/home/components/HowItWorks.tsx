@@ -4,6 +4,7 @@ import {
 	MessageSquareIcon,
 	UserPlusIcon,
 } from "lucide-react";
+import React from "react";
 
 interface Step {
 	number: number;

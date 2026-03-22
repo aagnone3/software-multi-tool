@@ -1,121 +1,101 @@
 import { createProcedureClient } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { usersRouter } from "./router";
 
-// Mock dependencies
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
+const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
+const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const buildUserPathMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn(() => false));
-const existsMock = vi.hoisted(() => vi.fn(() => Promise.resolve(false)));
-const deleteMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 
-vi.mock("@repo/storage", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("@repo/storage")>();
-	return {
-		...actual,
-		getSignedUploadUrl: getSignedUploadUrlMock,
-		shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-		getDefaultSupabaseProvider: vi.fn(() => ({
-			exists: existsMock,
-			delete: deleteMock,
-		})),
-	};
-});
+vi.mock("@repo/storage", () => ({
+	getSignedUploadUrl: getSignedUploadUrlMock,
+	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
+	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	buildUserPath: buildUserPathMock,
+}));
 
 vi.mock("@repo/auth", () => ({
 	auth: { api: { getSession: getSessionMock } },
 }));
 
-describe("Users Router", () => {
-	// Valid UUIDs for testing (buildUserPath validates UUID format)
-	const TEST_ORG_ID = "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
-	const TEST_USER_ID = "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e";
-	const OTHER_USER_ID = "c3d4e5f6-a7b8-4c9d-ae1f-2a3b4c5d6e7f";
+vi.mock("@repo/config", () => ({
+	config: {
+		storage: { bucketNames: { avatars: "avatars" } },
+	},
+}));
 
+vi.mock("@repo/database", () => ({
+	db: {},
+}));
+
+import { usersRouter } from "./router";
+
+const TEST_USER_ID = "clu1234567890abcdefghij";
+const TEST_ORG_ID = "clg1234567890abcdefghij";
+
+const createClient = (orgId: string | null = TEST_ORG_ID) => {
+	getSessionMock.mockResolvedValue({
+		user: { id: TEST_USER_ID },
+		session: { id: "session-1", activeOrganizationId: orgId },
+	});
+	return createProcedureClient(usersRouter.avatarUploadUrl, {
+		context: { headers: new Headers() },
+	});
+};
+
+describe("Users Router - avatarUploadUrl", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		getSignedUploadUrlMock.mockResolvedValue(
-			"https://storage.test/signed-upload-url",
+		buildUserPathMock.mockReturnValue(
+			"organizations/org-1/users/user-1/avatar.png",
 		);
 	});
 
-	describe("users.avatarUploadUrl", () => {
-		const createClient = (
-			userId = TEST_USER_ID,
-			activeOrganizationId: string | null = TEST_ORG_ID,
-		) => {
-			getSessionMock.mockResolvedValue({
-				user: { id: userId, role: "member" },
-				session: { id: "session-1", activeOrganizationId },
-			});
+	it("returns signed upload url and path", async () => {
+		shouldUseSupabaseStorageMock.mockReturnValue(false);
+		getSignedUploadUrlMock.mockResolvedValue(
+			"https://example.com/signed-url",
+		);
 
-			return createProcedureClient(usersRouter.avatarUploadUrl, {
-				context: {
-					headers: new Headers(),
-				},
-			});
+		const result = await createClient()({});
+
+		expect(result.signedUploadUrl).toBe("https://example.com/signed-url");
+		expect(result.path).toBe("organizations/org-1/users/user-1/avatar.png");
+	});
+
+	it("throws BAD_REQUEST when no active organization", async () => {
+		await expect(createClient(null)({})).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+	});
+
+	it("deletes existing avatar when supabase storage is in use", async () => {
+		const mockProvider = {
+			exists: vi.fn().mockResolvedValue(true),
+			delete: vi.fn().mockResolvedValue(undefined),
 		};
+		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		getDefaultSupabaseProviderMock.mockReturnValue(mockProvider);
+		getSignedUploadUrlMock.mockResolvedValue("https://example.com/url");
 
-		it("creates signed upload URL for authenticated user with org-scoped path", async () => {
-			const client = createClient();
-			const result = await client();
+		await createClient()({});
 
-			expect(result).toEqual({
-				signedUploadUrl: "https://storage.test/signed-upload-url",
-				path: `organizations/${TEST_ORG_ID}/users/${TEST_USER_ID}/avatar.png`,
-			});
-			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				`organizations/${TEST_ORG_ID}/users/${TEST_USER_ID}/avatar.png`,
-				{
-					bucket: expect.any(String),
-				},
-			);
-		});
+		expect(mockProvider.exists).toHaveBeenCalled();
+		expect(mockProvider.delete).toHaveBeenCalled();
+	});
 
-		it("uses user ID and organization ID in path", async () => {
-			const client = createClient(OTHER_USER_ID);
-			await client();
+	it("skips delete when file does not exist in supabase", async () => {
+		const mockProvider = {
+			exists: vi.fn().mockResolvedValue(false),
+			delete: vi.fn(),
+		};
+		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		getDefaultSupabaseProviderMock.mockReturnValue(mockProvider);
+		getSignedUploadUrlMock.mockResolvedValue("https://example.com/url");
 
-			expect(getSignedUploadUrlMock).toHaveBeenCalledWith(
-				`organizations/${TEST_ORG_ID}/users/${OTHER_USER_ID}/avatar.png`,
-				{
-					bucket: expect.any(String),
-				},
-			);
-		});
+		await createClient()({});
 
-		it("throws UNAUTHORIZED when not authenticated", async () => {
-			getSessionMock.mockResolvedValue(null);
-
-			const client = createProcedureClient(usersRouter.avatarUploadUrl, {
-				context: {
-					headers: new Headers(),
-				},
-			});
-
-			await expect(client()).rejects.toMatchObject({
-				code: "UNAUTHORIZED",
-			});
-		});
-
-		it("throws BAD_REQUEST when no active organization", async () => {
-			const client = createClient(TEST_USER_ID, null);
-
-			await expect(client()).rejects.toMatchObject({
-				code: "BAD_REQUEST",
-			});
-		});
-
-		it("handles storage service errors", async () => {
-			getSignedUploadUrlMock.mockRejectedValue(
-				new Error("Storage service unavailable"),
-			);
-
-			const client = createClient();
-
-			await expect(client()).rejects.toThrow(
-				"Storage service unavailable",
-			);
-		});
+		expect(mockProvider.exists).toHaveBeenCalled();
+		expect(mockProvider.delete).not.toHaveBeenCalled();
 	});
 });

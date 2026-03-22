@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@ui/lib";
+import * as React from "react";
 import { useEffect, useState } from "react";
 
 interface GaugeThreshold {
