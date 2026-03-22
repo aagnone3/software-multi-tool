@@ -7,6 +7,7 @@ import { organizationListQueryKey } from "@saas/organizations/lib/api";
 import { CommandPaletteProvider } from "@saas/shared/components/CommandPaletteProvider";
 import { CommandPaletteShortcut } from "@saas/shared/components/CommandPaletteShortcut";
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
+import { KeyboardNavigationShortcuts } from "@saas/shared/components/KeyboardNavigationShortcuts";
 import { KeyboardShortcutsHelp } from "@saas/shared/components/KeyboardShortcutsHelp";
 import { Document } from "@shared/components/Document";
 import { PreviewStatusBanner } from "@shared/components/PreviewStatusBanner";
@@ -53,6 +54,7 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 						<ConfirmationAlertProvider>
 							<CommandPaletteProvider>
 								<CommandPaletteShortcut />
+								<KeyboardNavigationShortcuts />
 								<KeyboardShortcutsHelp />
 								<PreviewStatusBanner />
 								{children}
