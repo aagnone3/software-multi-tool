@@ -2,37 +2,82 @@
 
 import { getVisibleTools } from "@saas/tools/lib/tool-flags";
 import { Input } from "@ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@ui/components/select";
 import { SearchIcon, WrenchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { ToolCard } from "./ToolCard";
 
+type SortOption = "default" | "name-asc" | "credits-asc" | "credits-desc";
+
 export function ToolsGrid() {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [sortBy, setSortBy] = useState<SortOption>("default");
 	const allTools = useMemo(() => getVisibleTools(), []);
 
 	const filteredTools = useMemo(() => {
 		const q = searchQuery.trim().toLowerCase();
-		if (!q) return allTools;
-		return allTools.filter(
-			(tool) =>
-				tool.name.toLowerCase().includes(q) ||
-				tool.description.toLowerCase().includes(q),
-		);
-	}, [allTools, searchQuery]);
+		let result = q
+			? allTools.filter(
+					(tool) =>
+						tool.name.toLowerCase().includes(q) ||
+						tool.description.toLowerCase().includes(q),
+				)
+			: [...allTools];
+
+		if (sortBy === "name-asc") {
+			result = result.sort((a, b) => a.name.localeCompare(b.name));
+		} else if (sortBy === "credits-asc") {
+			result = result.sort((a, b) => a.creditCost - b.creditCost);
+		} else if (sortBy === "credits-desc") {
+			result = result.sort((a, b) => b.creditCost - a.creditCost);
+		}
+
+		return result;
+	}, [allTools, searchQuery, sortBy]);
+
+	const showControls = allTools.length > 4;
 
 	return (
 		<div className="space-y-6">
-			{allTools.length > 4 && (
-				<div className="relative max-w-sm">
-					<SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-					<Input
-						type="search"
-						placeholder="Search tools…"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="pl-9"
-						aria-label="Search tools"
-					/>
+			{showControls && (
+				<div className="flex flex-wrap items-center gap-3">
+					<div className="relative max-w-sm flex-1">
+						<SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+						<Input
+							type="search"
+							placeholder="Search tools…"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="pl-9"
+							aria-label="Search tools"
+						/>
+					</div>
+					<Select
+						value={sortBy}
+						onValueChange={(v) => setSortBy(v as SortOption)}
+					>
+						<SelectTrigger className="w-44" aria-label="Sort tools">
+							<SelectValue placeholder="Sort by…" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="default">
+								Default order
+							</SelectItem>
+							<SelectItem value="name-asc">Name (A–Z)</SelectItem>
+							<SelectItem value="credits-asc">
+								Credits (low → high)
+							</SelectItem>
+							<SelectItem value="credits-desc">
+								Credits (high → low)
+							</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 			)}
 

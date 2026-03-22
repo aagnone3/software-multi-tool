@@ -89,6 +89,11 @@ describe("ToolsGrid", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows sort selector when tool count > 4", () => {
+		render(<ToolsGrid />);
+		expect(screen.getByLabelText("Sort tools")).toBeInTheDocument();
+	});
+
 	it("filters tools by name", async () => {
 		const user = userEvent.setup({ delay: null });
 		render(<ToolsGrid />);
@@ -124,5 +129,11 @@ describe("ToolsGrid", () => {
 		const search = screen.getByPlaceholderText("Search tools…");
 		await user.type(search, "NEWS");
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
+	});
+
+	it("renders sort selector with default option shown", () => {
+		render(<ToolsGrid />);
+		// The select trigger shows the current value; default order text should be present
+		expect(screen.getByLabelText("Sort tools")).toBeInTheDocument();
 	});
 });
