@@ -1,10 +1,20 @@
 "use client";
 
 import { config } from "@repo/config";
-import { useJobsListPaginated } from "@tools/hooks/use-job-polling";
+import {
+	useJobPolling,
+	useJobsListPaginated,
+} from "@tools/hooks/use-job-polling";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@ui/components/dialog";
 import { Input } from "@ui/components/input";
 import {
 	Select,
@@ -19,6 +29,7 @@ import {
 	BriefcaseIcon,
 	CheckCircle2Icon,
 	ClockIcon,
+	CopyIcon,
 	DownloadIcon,
 	ExternalLinkIcon,
 	Loader2Icon,
@@ -117,6 +128,80 @@ interface Job {
 	status: JobStatus;
 	createdAt: string;
 	completedAt?: string | null;
+	output?: unknown;
+}
+
+function JobOutputDialog({
+	jobId,
+	open,
+	onClose,
+}: {
+	jobId: string;
+	open: boolean;
+	onClose: () => void;
+}) {
+	const { job, isLoading } = useJobPolling(open ? jobId : undefined);
+	const [copied, setCopied] = useState(false);
+
+	const outputText = useMemo(() => {
+		if (!job?.output) return null;
+		try {
+			return JSON.stringify(job.output, null, 2);
+		} catch {
+			return String(job.output);
+		}
+	}, [job?.output]);
+
+	const handleCopy = useCallback(() => {
+		if (outputText) {
+			navigator.clipboard.writeText(outputText).then(() => {
+				setCopied(true);
+				setTimeout(() => setCopied(false), 2000);
+			});
+		}
+	}, [outputText]);
+
+	const toolName = job ? getToolName(job.toolSlug as string) : "Job";
+
+	return (
+		<Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+			<DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+				<DialogHeader>
+					<DialogTitle>{toolName} Output</DialogTitle>
+					<DialogDescription>
+						Result from job {jobId.slice(0, 8)}…
+					</DialogDescription>
+				</DialogHeader>
+				{isLoading ? (
+					<div className="space-y-2 p-4">
+						<Skeleton className="h-4 w-full" />
+						<Skeleton className="h-4 w-3/4" />
+						<Skeleton className="h-4 w-1/2" />
+					</div>
+				) : !outputText ? (
+					<div className="p-8 text-center text-muted-foreground text-sm">
+						No output available for this job.
+					</div>
+				) : (
+					<div className="flex flex-col gap-2 min-h-0 flex-1">
+						<div className="flex justify-end">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleCopy}
+							>
+								<CopyIcon className="size-3 mr-1" />
+								{copied ? "Copied!" : "Copy"}
+							</Button>
+						</div>
+						<pre className="overflow-auto rounded-md bg-muted p-4 text-xs font-mono flex-1 max-h-[50vh]">
+							{outputText}
+						</pre>
+					</div>
+				)}
+			</DialogContent>
+		</Dialog>
+	);
 }
 
 function JobRow({ job }: { job: Job }) {
@@ -124,60 +209,81 @@ function JobRow({ job }: { job: Job }) {
 	const toolName = getToolName(job.toolSlug);
 	const detailUrl = getJobDetailUrl(job.toolSlug, job.id);
 	const canView = job.status === "COMPLETED" || job.status === "FAILED";
+	const [outputOpen, setOutputOpen] = useState(false);
 
 	return (
-		<div className="flex items-center gap-4 py-3 border-b last:border-b-0 hover:bg-muted/30 px-4 rounded-lg transition-colors">
-			<div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-				<WrenchIcon className="size-4" />
-			</div>
-
-			<div className="min-w-0 flex-1">
-				<div className="flex items-center gap-2 flex-wrap">
-					<span className="text-sm font-medium">{toolName}</span>
-					<StatusBadge status={job.status} />
+		<>
+			<div className="flex items-center gap-4 py-3 border-b last:border-b-0 hover:bg-muted/30 px-4 rounded-lg transition-colors">
+				<div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+					<WrenchIcon className="size-4" />
 				</div>
-				<div className="text-xs text-muted-foreground mt-0.5">
-					{date} at {time}
-					{job.completedAt && (
-						<span className="ml-2 text-xs">
-							· Completed {formatDateTime(job.completedAt).time}
-							{" · "}
-							{formatDuration(job.createdAt, job.completedAt)}
-						</span>
+
+				<div className="min-w-0 flex-1">
+					<div className="flex items-center gap-2 flex-wrap">
+						<span className="text-sm font-medium">{toolName}</span>
+						<StatusBadge status={job.status} />
+					</div>
+					<div className="text-xs text-muted-foreground mt-0.5">
+						{date} at {time}
+						{job.completedAt && (
+							<span className="ml-2 text-xs">
+								· Completed{" "}
+								{formatDateTime(job.completedAt).time}
+								{" · "}
+								{formatDuration(job.createdAt, job.completedAt)}
+							</span>
+						)}
+					</div>
+				</div>
+
+				<div className="shrink-0 flex items-center gap-1">
+					{canView && detailUrl ? (
+						<>
+							<Button variant="ghost" size="sm" asChild>
+								<Link href={detailUrl}>
+									<ExternalLinkIcon className="size-3 mr-1" />
+									View
+								</Link>
+							</Button>
+							<Button variant="ghost" size="sm" asChild>
+								<Link href={`/app/tools/${job.toolSlug}`}>
+									Run Again
+								</Link>
+							</Button>
+						</>
+					) : canView ? (
+						<>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setOutputOpen(true)}
+							>
+								<ExternalLinkIcon className="size-3 mr-1" />
+								View Output
+							</Button>
+							<Button variant="ghost" size="sm" asChild>
+								<Link href={`/app/tools/${job.toolSlug}`}>
+									Run Again
+								</Link>
+							</Button>
+						</>
+					) : (
+						<Button variant="ghost" size="sm" asChild>
+							<Link href={`/app/tools/${job.toolSlug}`}>
+								Open Tool
+							</Link>
+						</Button>
 					)}
 				</div>
 			</div>
-
-			<div className="shrink-0 flex items-center gap-1">
-				{canView && detailUrl ? (
-					<>
-						<Button variant="ghost" size="sm" asChild>
-							<Link href={detailUrl}>
-								<ExternalLinkIcon className="size-3 mr-1" />
-								View
-							</Link>
-						</Button>
-						<Button variant="ghost" size="sm" asChild>
-							<Link href={`/app/tools/${job.toolSlug}`}>
-								Run Again
-							</Link>
-						</Button>
-					</>
-				) : canView ? (
-					<Button variant="ghost" size="sm" asChild>
-						<Link href={`/app/tools/${job.toolSlug}`}>
-							Run Again
-						</Link>
-					</Button>
-				) : (
-					<Button variant="ghost" size="sm" asChild>
-						<Link href={`/app/tools/${job.toolSlug}`}>
-							Open Tool
-						</Link>
-					</Button>
-				)}
-			</div>
-		</div>
+			{outputOpen && (
+				<JobOutputDialog
+					jobId={job.id}
+					open={outputOpen}
+					onClose={() => setOutputOpen(false)}
+				/>
+			)}
+		</>
 	);
 }
 
