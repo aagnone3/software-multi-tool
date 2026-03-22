@@ -1,5 +1,6 @@
 "use client";
 
+import { useRecentJobs } from "@saas/start/hooks/use-recent-jobs";
 import { getVisibleTools } from "@saas/tools/lib/tool-flags";
 import { Input } from "@ui/components/input";
 import {
@@ -13,12 +14,22 @@ import { SearchIcon, WrenchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { ToolCard } from "./ToolCard";
 
-type SortOption = "default" | "name-asc" | "credits-asc" | "credits-desc";
+type SortOption =
+	| "default"
+	| "recently-used"
+	| "name-asc"
+	| "credits-asc"
+	| "credits-desc";
 
 export function ToolsGrid() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<SortOption>("default");
 	const allTools = useMemo(() => getVisibleTools(), []);
+	const { recentToolSlugs } = useRecentJobs(20);
+	const recentToolSet = useMemo(
+		() => new Set(recentToolSlugs),
+		[recentToolSlugs],
+	);
 
 	const filteredTools = useMemo(() => {
 		const q = searchQuery.trim().toLowerCase();
@@ -30,7 +41,16 @@ export function ToolsGrid() {
 				)
 			: [...allTools];
 
-		if (sortBy === "name-asc") {
+		if (sortBy === "recently-used") {
+			// Tools the user has used come first (in recency order), then the rest
+			const usedTools = recentToolSlugs
+				.map((slug) => result.find((t) => t.slug === slug))
+				.filter(Boolean) as typeof result;
+			const unusedTools = result.filter(
+				(t) => !recentToolSet.has(t.slug),
+			);
+			result = [...usedTools, ...unusedTools];
+		} else if (sortBy === "name-asc") {
 			result = result.sort((a, b) => a.name.localeCompare(b.name));
 		} else if (sortBy === "credits-asc") {
 			result = result.sort((a, b) => a.creditCost - b.creditCost);
@@ -39,7 +59,7 @@ export function ToolsGrid() {
 		}
 
 		return result;
-	}, [allTools, searchQuery, sortBy]);
+	}, [allTools, searchQuery, sortBy, recentToolSlugs, recentToolSet]);
 
 	const showControls = allTools.length > 4;
 
@@ -69,6 +89,11 @@ export function ToolsGrid() {
 							<SelectItem value="default">
 								Default order
 							</SelectItem>
+							{recentToolSlugs.length > 0 && (
+								<SelectItem value="recently-used">
+									Recently used
+								</SelectItem>
+							)}
 							<SelectItem value="name-asc">Name (A–Z)</SelectItem>
 							<SelectItem value="credits-asc">
 								Credits (low → high)
@@ -88,6 +113,7 @@ export function ToolsGrid() {
 							key={tool.slug}
 							tool={tool}
 							isComingSoon={tool.isComingSoon}
+							isRecentlyUsed={recentToolSet.has(tool.slug)}
 						/>
 					))}
 				</div>

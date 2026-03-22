@@ -15,6 +15,7 @@ import {
 } from "@ui/components/tooltip";
 import { cn } from "@ui/lib";
 import {
+	CheckCircle2Icon,
 	ClipboardListIcon,
 	ClockIcon,
 	CoinsIcon,
@@ -34,6 +35,8 @@ interface ToolCardProps {
 	tool: ToolConfig;
 	/** Whether this tool is coming soon (disabled but visible) */
 	isComingSoon?: boolean;
+	/** Whether the current user has recently used this tool */
+	isRecentlyUsed?: boolean;
 }
 
 function getToolIcon(iconName: string) {
@@ -51,7 +54,11 @@ function getToolIcon(iconName: string) {
 	return icons[iconName] || WrenchIcon;
 }
 
-export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
+export function ToolCard({
+	tool,
+	isComingSoon = false,
+	isRecentlyUsed = false,
+}: ToolCardProps) {
 	const Icon = getToolIcon(tool.icon);
 
 	if (isComingSoon) {
@@ -112,8 +119,16 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 	return (
 		<Card className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-md">
 			<CardHeader className="flex-1">
-				<div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-					<Icon className="size-6" />
+				<div className="mb-2 flex items-center gap-2">
+					<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+						<Icon className="size-6" />
+					</div>
+					{isRecentlyUsed && (
+						<span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
+							<CheckCircle2Icon className="size-3" />
+							Used
+						</span>
+					)}
 				</div>
 				<CardTitle className="text-lg">{tool.name}</CardTitle>
 				<CardDescription>{tool.description}</CardDescription>

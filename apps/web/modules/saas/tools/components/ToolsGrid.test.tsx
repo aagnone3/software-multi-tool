@@ -4,6 +4,10 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolsGrid } from "./ToolsGrid";
 
+vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
+	useRecentJobs: () => ({ recentToolSlugs: [] }),
+}));
+
 vi.mock("@saas/tools/lib/tool-flags", () => ({
 	getVisibleTools: () => [
 		{
