@@ -14,14 +14,29 @@ vi.mock("./components/GettingStartedChecklist", () => ({
 		<div data-testid="getting-started-checklist" />
 	),
 }));
+vi.mock("./components/QuickActions", () => ({
+	QuickActions: () => <div data-testid="quick-actions" />,
+}));
 vi.mock("./components/CreditsOverview", () => ({
 	CreditsOverview: () => <div data-testid="credits-overview" />,
 }));
 vi.mock("./components/RecentlyUsedTools", () => ({
 	RecentlyUsedTools: () => <div data-testid="recently-used-tools" />,
 }));
+vi.mock("./components/NotificationsWidget", () => ({
+	NotificationsWidget: () => <div data-testid="notifications-widget" />,
+}));
+vi.mock("./components/UsageTrendChart", () => ({
+	UsageTrendChart: () => <div data-testid="usage-trend-chart" />,
+}));
 vi.mock("./components/RecentActivityFeed", () => ({
 	RecentActivityFeed: () => <div data-testid="recent-activity-feed" />,
+}));
+vi.mock("./components/TopToolsWidget", () => ({
+	TopToolsWidget: () => <div data-testid="top-tools-widget" />,
+}));
+vi.mock("./components/RecommendedToolWidget", () => ({
+	RecommendedToolWidget: () => <div data-testid="recommended-tool-widget" />,
 }));
 
 describe("UserStart", () => {
@@ -31,9 +46,16 @@ describe("UserStart", () => {
 		expect(
 			screen.getByTestId("getting-started-checklist"),
 		).toBeInTheDocument();
+		expect(screen.getByTestId("quick-actions")).toBeInTheDocument();
 		expect(screen.getByTestId("credits-overview")).toBeInTheDocument();
 		expect(screen.getByTestId("recently-used-tools")).toBeInTheDocument();
+		expect(screen.getByTestId("notifications-widget")).toBeInTheDocument();
+		expect(screen.getByTestId("usage-trend-chart")).toBeInTheDocument();
 		expect(screen.getByTestId("recent-activity-feed")).toBeInTheDocument();
+		expect(screen.getByTestId("top-tools-widget")).toBeInTheDocument();
+		expect(
+			screen.getByTestId("recommended-tool-widget"),
+		).toBeInTheDocument();
 	});
 
 	it("hides organizations grid when organizations disabled", async () => {
