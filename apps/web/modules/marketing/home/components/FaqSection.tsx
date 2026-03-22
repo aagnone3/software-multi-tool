@@ -4,20 +4,28 @@ import React from "react";
 export function FaqSection({ className }: { className?: string }) {
 	const items = [
 		{
-			question: "What is the refund policy?",
-			answer: "Instead of offering refunds, we provide free usage tiers. Try before you buy!",
+			question: "Do you offer a free trial?",
+			answer: "Yes — every new account gets free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
+		},
+		{
+			question: "How does credit-based pricing work?",
+			answer: "Each AI tool consumes a small number of credits per run. Credits never expire, so you only pay for what you use. Purchase additional credit packs any time from your account dashboard.",
+		},
+		{
+			question: "What file types are supported?",
+			answer: "Most tools accept PDF, DOCX, TXT, CSV, XLSX, MP3, MP4, and WAV files. File size limits and supported MIME types are shown on each tool's page before you upload.",
+		},
+		{
+			question: "Can I use the tools for my whole team?",
+			answer: "Yes. Upgrade to a team plan to invite members to a shared organization, pool credits, and manage access from one billing account.",
 		},
 		{
 			question: "How do I cancel my subscription?",
-			answer: "You can cancel your subscription by visiting the billing page.",
+			answer: "Cancel any time from the Billing section in your account settings. Your credits and active plan remain available through the end of the billing period.",
 		},
 		{
-			question: "Can I change my plan?",
-			answer: "Yes, you can change your plan at any time by visiting the billing page.",
-		},
-		{
-			question: "Do you offer a free trial?",
-			answer: "Yes, we offer a diverse and comprehensive free trial.",
+			question: "Is my data kept private?",
+			answer: "Files you upload are processed to generate your results and are not used to train AI models. Documents are deleted from our servers after processing completes.",
 		},
 	];
 

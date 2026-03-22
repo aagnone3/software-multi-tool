@@ -14,14 +14,22 @@ describe("FaqSection", () => {
 	it("renders all FAQ items", () => {
 		render(<FaqSection />);
 		expect(
-			screen.getByText("What is the refund policy?"),
+			screen.getByText("Do you offer a free trial?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("How does credit-based pricing work?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("What file types are supported?"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Can I use the tools for my whole team?"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("How do I cancel my subscription?"),
 		).toBeInTheDocument();
-		expect(screen.getByText("Can I change my plan?")).toBeInTheDocument();
 		expect(
-			screen.getByText("Do you offer a free trial?"),
+			screen.getByText("Is my data kept private?"),
 		).toBeInTheDocument();
 	});
 
