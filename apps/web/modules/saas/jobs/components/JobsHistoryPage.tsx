@@ -71,6 +71,16 @@ function getJobDetailUrl(toolSlug: string, jobId: string): string | null {
 	return detailRouteTools[toolSlug] ?? null;
 }
 
+function formatDuration(startStr: string, endStr: string): string {
+	const start = new Date(startStr).getTime();
+	const end = new Date(endStr).getTime();
+	const secs = Math.round((end - start) / 1000);
+	if (secs < 60) return `${secs}s`;
+	const mins = Math.floor(secs / 60);
+	const rem = secs % 60;
+	return rem > 0 ? `${mins}m ${rem}s` : `${mins}m`;
+}
+
 function formatDateTime(dateString: string): { date: string; time: string } {
 	const date = new Date(dateString);
 	return {
@@ -130,17 +140,32 @@ function JobRow({ job }: { job: Job }) {
 					{job.completedAt && (
 						<span className="ml-2 text-xs">
 							· Completed {formatDateTime(job.completedAt).time}
+							{" · "}
+							{formatDuration(job.createdAt, job.completedAt)}
 						</span>
 					)}
 				</div>
 			</div>
 
-			<div className="shrink-0">
+			<div className="shrink-0 flex items-center gap-1">
 				{canView && detailUrl ? (
+					<>
+						<Button variant="ghost" size="sm" asChild>
+							<Link href={detailUrl}>
+								<ExternalLinkIcon className="size-3 mr-1" />
+								View
+							</Link>
+						</Button>
+						<Button variant="ghost" size="sm" asChild>
+							<Link href={`/app/tools/${job.toolSlug}`}>
+								Run Again
+							</Link>
+						</Button>
+					</>
+				) : canView ? (
 					<Button variant="ghost" size="sm" asChild>
-						<Link href={detailUrl}>
-							<ExternalLinkIcon className="size-3 mr-1" />
-							View
+						<Link href={`/app/tools/${job.toolSlug}`}>
+							Run Again
 						</Link>
 					</Button>
 				) : (

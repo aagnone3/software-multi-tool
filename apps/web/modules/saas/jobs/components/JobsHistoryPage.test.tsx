@@ -144,7 +144,7 @@ describe("JobsHistoryPage", () => {
 		expect(screen.getByText("1 job")).toBeInTheDocument();
 	});
 
-	it("shows View link for completed job with detail route", () => {
+	it("shows View and Run Again links for completed job with detail route", () => {
 		mockJobsList.mockReturnValue({
 			jobs: [
 				{
@@ -163,9 +163,14 @@ describe("JobsHistoryPage", () => {
 			"href",
 			"/app/tools/news-analyzer/job-abc",
 		);
+		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
+		expect(runAgainLink).toHaveAttribute(
+			"href",
+			"/app/tools/news-analyzer",
+		);
 	});
 
-	it("shows Open Tool link for job without dedicated detail page", () => {
+	it("shows Run Again link for completed job without dedicated detail page", () => {
 		mockJobsList.mockReturnValue({
 			jobs: [
 				// A tool without a detail route (e.g. invoice-processor)
@@ -180,11 +185,52 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 		});
 		render(<JobsHistoryPage />);
+		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
+		expect(runAgainLink).toHaveAttribute(
+			"href",
+			"/app/tools/invoice-processor",
+		);
+	});
+
+	it("shows Open Tool link for pending/processing jobs", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-pending",
+					toolSlug: "invoice-processor",
+					status: "PENDING",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+		});
+		render(<JobsHistoryPage />);
 		const openLink = screen.getByRole("link", { name: "Open Tool" });
 		expect(openLink).toHaveAttribute(
 			"href",
 			"/app/tools/invoice-processor",
 		);
+	});
+
+	it("shows duration for completed jobs with completedAt", () => {
+		const createdAt = new Date("2026-03-22T10:00:00Z").toISOString();
+		const completedAt = new Date("2026-03-22T10:00:45Z").toISOString();
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-timed",
+					toolSlug: "invoice-processor",
+					status: "COMPLETED",
+					createdAt,
+					completedAt,
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+		});
+		render(<JobsHistoryPage />);
+		expect(screen.getByText(/45s/)).toBeTruthy();
 	});
 
 	it("calls refetch when Refresh button is clicked", () => {
