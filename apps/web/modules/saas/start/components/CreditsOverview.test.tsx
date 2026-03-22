@@ -74,15 +74,16 @@ describe("CreditsOverview", () => {
 		expect(screen.getByText("Loading...")).toBeDefined();
 	});
 
-	it("returns null when no balance and not loading", () => {
+	it("shows empty state when no balance and not loading", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			balance: null,
 			isLoading: false,
 			percentageUsed: 0,
 			isLowCredits: false,
 		} as any);
-		const { container } = render(<CreditsOverview />);
-		expect(container.firstChild).toBeNull();
+		render(<CreditsOverview />);
+		expect(screen.getByText("No credits yet")).toBeDefined();
+		expect(screen.getByText("View plans")).toBeDefined();
 	});
 
 	it("shows low balance badge when credits are low", () => {

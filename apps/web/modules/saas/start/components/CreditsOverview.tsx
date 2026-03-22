@@ -65,7 +65,37 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 	}
 
 	if (!balance) {
-		return null;
+		return (
+			<Card className={className}>
+				<CardHeader className="pb-3">
+					<CardTitle className="flex items-center gap-2">
+						<CoinsIcon className="size-5" />
+						Credits
+					</CardTitle>
+					<CardDescription>Your credit balance</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="flex flex-col items-center justify-center py-6 text-center">
+						<CoinsIcon className="size-10 text-muted-foreground/40 mb-3" />
+						<p className="text-sm font-medium">No credits yet</p>
+						<p className="text-xs text-muted-foreground mt-1">
+							Choose a plan to get started with credits
+						</p>
+						<Button
+							variant="outline"
+							size="sm"
+							className="mt-3"
+							asChild
+						>
+							<Link href={billingPath}>
+								View plans
+								<ChevronRightIcon className="size-4 ml-1" />
+							</Link>
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+		);
 	}
 
 	const daysRemaining = Math.ceil(
