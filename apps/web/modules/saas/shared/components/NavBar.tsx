@@ -9,6 +9,7 @@ import { Logo } from "@shared/components/Logo";
 import { cn } from "@ui/lib";
 import {
 	BotMessageSquareIcon,
+	BriefcaseIcon,
 	ChevronRightIcon,
 	CoinsIcon,
 	FolderOpenIcon,
@@ -45,6 +46,12 @@ export function NavBar() {
 			href: "/app/tools",
 			icon: WrenchIcon,
 			isActive: pathname.startsWith("/app/tools"),
+		},
+		{
+			label: "Jobs",
+			href: "/app/jobs",
+			icon: BriefcaseIcon,
+			isActive: pathname.startsWith("/app/jobs"),
 		},
 		{
 			label: "Files",
