@@ -13,6 +13,7 @@ import { RecentActivityFeed } from "./components/RecentActivityFeed";
 import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
 import { RecommendedToolWidget } from "./components/RecommendedToolWidget";
 import { TopToolsWidget } from "./components/TopToolsWidget";
+import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
 import { UsageTrendChart } from "./components/UsageTrendChart";
 
 export default function UserStart() {
@@ -60,6 +61,9 @@ export default function UserStart() {
 
 				{/* Recommended Tool */}
 				<RecommendedToolWidget />
+
+				{/* Untried Tools — discovery nudge */}
+				<UntriedToolsWidget />
 			</div>
 		</div>
 	);
