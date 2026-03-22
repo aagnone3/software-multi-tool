@@ -1,5 +1,6 @@
 import { config } from "@repo/config";
 import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
+import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
@@ -103,6 +104,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<LowCreditsWarning className="mb-4" showActionButtons={true} />
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
+			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
 }
