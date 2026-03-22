@@ -1,4 +1,5 @@
 import { config } from "@repo/config";
+import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
 import { ContractAnalyzerTool } from "@tools/components/ContractAnalyzerTool";
 import { ExpenseCategorizerTool } from "@tools/components/ExpenseCategorizerTool";
@@ -82,17 +83,11 @@ export default async function ToolPage({ params }: ToolPageProps) {
 	if (!ToolComponent) {
 		return (
 			<div className="max-w-4xl">
-				<div className="rounded-2xl border bg-card p-8">
-					<h1 className="text-2xl font-bold">{tool.name}</h1>
-					<p className="mt-2 text-muted-foreground">
-						{tool.description}
+				<ToolPageHeader tool={tool} />
+				<div className="rounded-2xl border border-dashed border-muted-foreground/25 bg-muted/50 p-12 text-center">
+					<p className="text-muted-foreground">
+						This tool is under development. Check back soon!
 					</p>
-
-					<div className="mt-8 rounded-lg border border-dashed border-muted-foreground/25 bg-muted/50 p-12 text-center">
-						<p className="text-muted-foreground">
-							This tool is under development. Check back soon!
-						</p>
-					</div>
 				</div>
 			</div>
 		);
@@ -100,6 +95,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
 	return (
 		<div className="max-w-4xl">
+			<ToolPageHeader tool={tool} />
 			<ToolComponent />
 		</div>
 	);
