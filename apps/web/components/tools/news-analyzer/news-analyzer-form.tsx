@@ -6,7 +6,7 @@ import { Label } from "@ui/components/label";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import { FileText, Link2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export interface NewsAnalyzerFormProps {
 	onSubmit: (data: { articleUrl?: string; articleText?: string }) => void;
