@@ -1,7 +1,7 @@
 "use client";
 
 import { config } from "@repo/config";
-import { useJobsList } from "@tools/hooks/use-job-polling";
+import { useJobsListPaginated } from "@tools/hooks/use-job-polling";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
@@ -215,8 +215,13 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 	);
 }
 
+const PAGE_SIZE = 20;
+
 export function JobsHistoryPage() {
-	const { jobs, isLoading, refetch } = useJobsList();
+	const [pageSize, setPageSize] = useState(PAGE_SIZE);
+	const { jobs, isLoading, refetch, hasMore } = useJobsListPaginated({
+		limit: pageSize,
+	});
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [toolFilter, setToolFilter] = useState<string>("");
@@ -418,6 +423,19 @@ export function JobsHistoryPage() {
 							{filteredJobs.map((job) => (
 								<JobRow key={job.id} job={job} />
 							))}
+							{!hasFilters && hasMore && (
+								<div className="flex justify-center pt-4">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() =>
+											setPageSize((p) => p + PAGE_SIZE)
+										}
+									>
+										Load more
+									</Button>
+								</div>
+							)}
 						</div>
 					)}
 				</CardContent>

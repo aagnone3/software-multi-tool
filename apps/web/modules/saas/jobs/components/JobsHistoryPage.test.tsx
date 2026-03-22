@@ -31,6 +31,7 @@ const mockJobsList = vi.fn();
 
 vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobsList: () => mockJobsList(),
+	useJobsListPaginated: () => mockJobsList(),
 }));
 
 // Mock next/link
@@ -51,6 +52,7 @@ describe("JobsHistoryPage", () => {
 			jobs: [],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 	});
 
@@ -59,6 +61,7 @@ describe("JobsHistoryPage", () => {
 			jobs: [],
 			isLoading: true,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		expect(screen.getByText("Loading...")).toBeInTheDocument();
@@ -86,6 +89,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		// Search for something that doesn't match
@@ -119,6 +123,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
@@ -139,6 +144,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		expect(screen.getByText("1 job")).toBeInTheDocument();
@@ -156,6 +162,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		const viewLink = screen.getByRole("link", { name: /View/ });
@@ -183,6 +190,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
@@ -204,6 +212,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		const openLink = screen.getByRole("link", { name: "Open Tool" });
@@ -228,6 +237,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		expect(screen.getByText(/45s/)).toBeTruthy();
@@ -252,6 +262,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		const searchInput = screen.getByPlaceholderText(
@@ -275,6 +286,7 @@ describe("JobsHistoryPage", () => {
 			],
 			isLoading: false,
 			refetch: mockRefetch,
+			hasMore: false,
 		});
 		render(<JobsHistoryPage />);
 		const searchInput = screen.getByPlaceholderText(
@@ -306,6 +318,7 @@ describe("JobsHistoryPage", () => {
 				],
 				isLoading: false,
 				refetch: mockRefetch,
+				hasMore: false,
 			});
 			render(<JobsHistoryPage />);
 			expect(
@@ -318,6 +331,7 @@ describe("JobsHistoryPage", () => {
 				jobs: [],
 				isLoading: false,
 				refetch: mockRefetch,
+				hasMore: false,
 			});
 			render(<JobsHistoryPage />);
 			expect(
@@ -342,6 +356,7 @@ describe("JobsHistoryPage", () => {
 				],
 				isLoading: false,
 				refetch: mockRefetch,
+				hasMore: false,
 			});
 			render(<JobsHistoryPage />);
 			const exportBtn = screen.getByRole("button", {
