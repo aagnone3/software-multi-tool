@@ -1,7 +1,30 @@
-import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TwoFactorBlock } from "./TwoFactorBlock";
+
+const {
+	twoFactorEnableMock,
+	twoFactorDisableMock,
+	twoFactorVerifyTotpMock,
+	mockReloadSession,
+} = vi.hoisted(() => ({
+	twoFactorEnableMock: vi.fn(),
+	twoFactorDisableMock: vi.fn(),
+	twoFactorVerifyTotpMock: vi.fn(),
+	mockReloadSession: vi.fn(),
+}));
+
+vi.mock("@repo/auth/client", () => ({
+	authClient: {
+		twoFactor: {
+			enable: twoFactorEnableMock,
+			disable: twoFactorDisableMock,
+			verifyTotp: twoFactorVerifyTotpMock,
+		},
+	},
+}));
 
 const mockUser = {
 	id: "user-1",
@@ -10,199 +33,147 @@ const mockUser = {
 	twoFactorEnabled: false,
 };
 
-vi.mock("@tanstack/react-query", () => ({
-	useMutation: vi.fn(() => ({
-		mutate: vi.fn(),
-		isPending: false,
-	})),
-	useQuery: vi.fn(() => ({ data: undefined, isPending: false })),
-	useQueryClient: vi.fn(() => ({ invalidateQueries: vi.fn() })),
-}));
-
-vi.mock("@repo/auth/client", () => ({
-	authClient: {
-		twoFactor: {
-			enable: vi.fn(),
-			disable: vi.fn(),
-			verifyTotp: vi.fn(),
-		},
-	},
-}));
-
 vi.mock("@saas/auth/hooks/use-session", () => ({
-	useSession: vi.fn(),
+	useSession: () => ({
+		user: mockUser,
+		reloadSession: mockReloadSession,
+	}),
 }));
 
 vi.mock("@saas/auth/lib/api", () => ({
-	useUserAccountsQuery: vi.fn(),
+	useUserAccountsQuery: () => ({
+		data: [{ providerId: "credential" }],
+	}),
 }));
 
-vi.mock("@saas/shared/components/SettingsItem", () => ({
-	SettingsItem: ({
-		title,
-		description,
-		children,
-	}: {
-		title: string;
-		description: string;
-		children: React.ReactNode;
-	}) => (
-		<div>
-			<h3>{title}</h3>
-			<p>{description}</p>
-			{children}
-		</div>
-	),
+vi.mock("sonner", () => ({
+	toast: {
+		success: vi.fn(),
+		error: vi.fn(),
+	},
 }));
 
 vi.mock("react-qr-code", () => ({
 	default: ({ value }: { value: string }) => (
-		<div data-testid="qr-code">{value}</div>
+		<div data-testid="qr-code" data-value={value}>
+			QR Code
+		</div>
 	),
 }));
 
-vi.mock("sonner", () => ({
-	toast: { success: vi.fn(), error: vi.fn() },
-}));
+import { toast } from "sonner";
+import { TwoFactorBlock } from "./TwoFactorBlock";
 
-vi.mock("@ui/components/button", () => ({
-	Button: ({
-		children,
-		onClick,
-	}: {
-		children: React.ReactNode;
-		onClick?: () => void;
-	}) => (
-		<button type="button" onClick={onClick}>
+const mockToast = toast as unknown as {
+	success: ReturnType<typeof vi.fn>;
+	error: ReturnType<typeof vi.fn>;
+};
+
+function makeWrapper() {
+	const queryClient = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	return ({ children }: { children: React.ReactNode }) => (
+		<QueryClientProvider client={queryClient}>
 			{children}
-		</button>
-	),
-}));
-
-vi.mock("@ui/components/dialog", () => ({
-	Dialog: ({
-		children,
-		open,
-	}: {
-		children: React.ReactNode;
-		open: boolean;
-	}) => (open ? <div data-testid="dialog">{children}</div> : null),
-	DialogContent: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-	DialogHeader: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-	DialogTitle: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-}));
-
-vi.mock("@ui/components/form", () => ({
-	FormItem: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-}));
-
-vi.mock("@ui/components/input", () => ({
-	Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-		<input {...props} />
-	),
-}));
-
-vi.mock("@ui/components/label", () => ({
-	Label: ({
-		children,
-		htmlFor,
-	}: {
-		children: React.ReactNode;
-		htmlFor?: string;
-	}) => <label htmlFor={htmlFor}>{children}</label>,
-}));
-
-vi.mock("@ui/components/password-input", () => ({
-	PasswordInput: ({
-		value,
-		onChange,
-	}: {
-		value: string;
-		onChange: (v: string) => void;
-	}) => (
-		<input
-			type="password"
-			value={value}
-			onChange={(e) => onChange(e.target.value)}
-		/>
-	),
-}));
-
-vi.mock("@ui/components/card", () => ({
-	Card: ({ children }: { children: React.ReactNode }) => (
-		<div>{children}</div>
-	),
-}));
-
-import { useSession } from "@saas/auth/hooks/use-session";
-import { useUserAccountsQuery } from "@saas/auth/lib/api";
+		</QueryClientProvider>
+	);
+}
 
 describe("TwoFactorBlock", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockUser.twoFactorEnabled = false;
 	});
 
-	it("renders nothing when no credential account", () => {
-		vi.mocked(useSession).mockReturnValue({
-			user: mockUser,
-			reloadSession: vi.fn(),
-			session: null,
-		} as any);
-		vi.mocked(useUserAccountsQuery).mockReturnValue({
-			data: [{ providerId: "google" }],
-		} as any);
-
-		const { container } = render(<TwoFactorBlock />);
-		expect(container.firstChild).toBeNull();
+	it("renders enable two-factor button when 2FA is not enabled", () => {
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		expect(
+			screen.getByText("Enable two-factor authentication"),
+		).toBeTruthy();
 	});
 
-	it("renders enable button when 2FA is disabled", () => {
-		vi.mocked(useSession).mockReturnValue({
-			user: { ...mockUser, twoFactorEnabled: false },
-			reloadSession: vi.fn(),
-			session: null,
-		} as any);
-		vi.mocked(useUserAccountsQuery).mockReturnValue({
-			data: [{ providerId: "credential" }],
-		} as any);
-
-		render(<TwoFactorBlock />);
-		expect(screen.getByText(/Enable two-factor/)).toBeTruthy();
+	it("renders disable button when 2FA is already enabled", () => {
+		mockUser.twoFactorEnabled = true;
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		expect(
+			screen.getByText("Disable two-factor authentication"),
+		).toBeTruthy();
 	});
 
-	it("renders disable button when 2FA is enabled", () => {
-		vi.mocked(useSession).mockReturnValue({
-			user: { ...mockUser, twoFactorEnabled: true },
-			reloadSession: vi.fn(),
-			session: null,
-		} as any);
-		vi.mocked(useUserAccountsQuery).mockReturnValue({
-			data: [{ providerId: "credential" }],
-		} as any);
-
-		render(<TwoFactorBlock />);
-		expect(screen.getByText(/Disable two-factor/)).toBeTruthy();
+	it("shows shield icon and message when 2FA is enabled", () => {
+		mockUser.twoFactorEnabled = true;
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		expect(
+			screen.getByText(
+				"You have two-factor authentication enabled for your account.",
+			),
+		).toBeTruthy();
 	});
 
-	it("shows status badge when 2FA is enabled", () => {
-		vi.mocked(useSession).mockReturnValue({
-			user: { ...mockUser, twoFactorEnabled: true },
-			reloadSession: vi.fn(),
-			session: null,
-		} as any);
-		vi.mocked(useUserAccountsQuery).mockReturnValue({
-			data: [{ providerId: "credential" }],
-		} as any);
+	it("opens password dialog when enable button is clicked", async () => {
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		await userEvent.click(
+			screen.getByText("Enable two-factor authentication"),
+		);
+		expect(screen.getByText("Verify with password")).toBeTruthy();
+	});
 
-		render(<TwoFactorBlock />);
-		expect(screen.getByText(/enabled for your account/)).toBeTruthy();
+	it("calls twoFactor.enable and shows QR code on success", async () => {
+		const totpURI =
+			"otpauth://totp/App:test@example.com?secret=JBSWY3DPEHPK3PXP&issuer=App";
+		twoFactorEnableMock.mockResolvedValue({
+			data: { totpURI },
+			error: null,
+		});
+
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		await userEvent.click(
+			screen.getByText("Enable two-factor authentication"),
+		);
+
+		await userEvent.click(screen.getByText("Continue"));
+
+		await waitFor(() => {
+			expect(twoFactorEnableMock).toHaveBeenCalled();
+			expect(screen.getByTestId("qr-code")).toBeTruthy();
+		});
+	});
+
+	it("shows error toast on enable failure", async () => {
+		twoFactorEnableMock.mockResolvedValue({
+			data: null,
+			error: new Error("wrong password"),
+		});
+
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		await userEvent.click(
+			screen.getByText("Enable two-factor authentication"),
+		);
+		await userEvent.click(screen.getByText("Continue"));
+
+		await waitFor(() => {
+			expect(mockToast.error).toHaveBeenCalledWith(
+				"Could not verify your account with the provided password. Please try again.",
+			);
+		});
+	});
+
+	it("calls twoFactor.disable on confirm and shows success toast", async () => {
+		mockUser.twoFactorEnabled = true;
+		twoFactorDisableMock.mockResolvedValue({ error: null });
+
+		render(<TwoFactorBlock />, { wrapper: makeWrapper() });
+		await userEvent.click(
+			screen.getByText("Disable two-factor authentication"),
+		);
+		await userEvent.click(screen.getByText("Continue"));
+
+		await waitFor(() => {
+			expect(twoFactorDisableMock).toHaveBeenCalled();
+			expect(mockToast.success).toHaveBeenCalledWith(
+				"Two-factor authentication has been disabled successfully.",
+			);
+		});
 	});
 });
