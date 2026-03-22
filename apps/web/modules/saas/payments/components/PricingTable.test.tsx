@@ -161,4 +161,17 @@ describe("PricingTable", () => {
 		expect(screen.getByText("For small teams")).toBeDefined();
 		expect(screen.getByText("For professionals")).toBeDefined();
 	});
+
+	it("shows included credits badge for plans with credits", () => {
+		render(<PricingTable />);
+		expect(screen.getByText("10 credits/month included")).toBeDefined();
+		expect(screen.getByText("100 credits/month included")).toBeDefined();
+		expect(screen.getByText("500 credits/month included")).toBeDefined();
+	});
+
+	it("does not show credits badge for enterprise plan with 0 credits", () => {
+		// Enterprise has credits.included = 0, so the badge shouldn't render
+		render(<PricingTable />);
+		expect(screen.queryByText("0 credits/month included")).toBeNull();
+	});
 });
