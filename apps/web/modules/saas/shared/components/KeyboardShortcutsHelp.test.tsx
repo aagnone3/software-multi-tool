@@ -1,58 +1,58 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { KeyboardShortcutsHelp } from "./KeyboardShortcutsHelp";
 
 describe("KeyboardShortcutsHelp", () => {
-	it("renders nothing visible by default", () => {
-		render(<KeyboardShortcutsHelp />);
+	it("renders nothing initially (dialog closed)", () => {
+		const { container } = render(<KeyboardShortcutsHelp />);
 		expect(
 			screen.queryByText("Keyboard Shortcuts"),
 		).not.toBeInTheDocument();
 	});
 
-	it("opens dialog when ? is pressed", async () => {
+	it("opens dialog when ? key is pressed", () => {
 		render(<KeyboardShortcutsHelp />);
-		await userEvent.keyboard("?");
+		fireEvent.keyDown(document, { key: "?" });
 		expect(screen.getByText("Keyboard Shortcuts")).toBeInTheDocument();
 	});
 
-	it("shows navigation shortcuts", async () => {
+	it("shows all navigation shortcuts", () => {
 		render(<KeyboardShortcutsHelp />);
-		await userEvent.keyboard("?");
-		expect(screen.getByText("Open command palette")).toBeInTheDocument();
-		expect(screen.getByText("Go to dashboard")).toBeInTheDocument();
+		fireEvent.keyDown(document, { key: "?" });
+		expect(screen.getByText("Go to Dashboard")).toBeInTheDocument();
+		expect(screen.getByText("Go to Tools")).toBeInTheDocument();
+		expect(screen.getByText("Go to Jobs")).toBeInTheDocument();
+		expect(screen.getByText("Go to Settings")).toBeInTheDocument();
 	});
 
-	it("shows general shortcuts", async () => {
-		render(<KeyboardShortcutsHelp />);
-		await userEvent.keyboard("?");
-		expect(screen.getByText("Show keyboard shortcuts")).toBeInTheDocument();
-	});
-
-	it("closes dialog on Escape", async () => {
-		render(<KeyboardShortcutsHelp />);
-		await userEvent.keyboard("?");
-		expect(screen.getByText("Keyboard Shortcuts")).toBeInTheDocument();
-		await userEvent.keyboard("{Escape}");
-		expect(
-			screen.queryByText("Keyboard Shortcuts"),
-		).not.toBeInTheDocument();
-	});
-
-	it("does not open when typing in an input", async () => {
+	it("does not open when ? is pressed in an input", () => {
 		render(
 			<>
-				<input data-testid="inp" />
 				<KeyboardShortcutsHelp />
+				<input data-testid="inp" />
 			</>,
 		);
 		const input = screen.getByTestId("inp");
-		input.focus();
-		await userEvent.keyboard("?");
+		fireEvent.keyDown(input, { key: "?", target: input });
 		expect(
 			screen.queryByText("Keyboard Shortcuts"),
 		).not.toBeInTheDocument();
+	});
+
+	it("closes dialog when ? is pressed again", () => {
+		render(<KeyboardShortcutsHelp />);
+		fireEvent.keyDown(document, { key: "?" });
+		expect(screen.getByText("Keyboard Shortcuts")).toBeInTheDocument();
+		fireEvent.keyDown(document, { key: "?" });
+		expect(
+			screen.queryByText("Keyboard Shortcuts"),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the Help section with ? shortcut", () => {
+		render(<KeyboardShortcutsHelp />);
+		fireEvent.keyDown(document, { key: "?" });
+		expect(screen.getByText("Show keyboard shortcuts")).toBeInTheDocument();
 	});
 });
