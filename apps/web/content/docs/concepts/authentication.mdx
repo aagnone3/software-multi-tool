@@ -1,0 +1,84 @@
+---
+title: Authentication
+description: How authentication works in Software Multitool, powered by better-auth.
+---
+
+Software Multitool uses [better-auth](https://better-auth.com) for authentication. All auth flows — sign-up, sign-in, session management, OAuth, passkeys, and two-factor — are handled by better-auth with a Prisma adapter backed by your Postgres database.
+
+## Supported auth methods
+
+All methods can be toggled on or off in `config/index.ts` under `auth`:
+
+| Method | Config key | Default |
+|---|---|---|
+| Email + password | `enablePasswordLogin` | `true` |
+| Magic link | `enableMagicLink` | `true` |
+| Social OAuth | `enableSocialLogin` | `true` |
+| Passkeys (WebAuthn) | `enablePasskeys` | `true` |
+| Two-factor auth | `enableTwoFactor` | `true` |
+
+## Social providers
+
+To enable social sign-in, set the corresponding environment variables:
+
+| Provider | Variables |
+|---|---|
+| GitHub | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
+| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+
+Additional providers supported by better-auth can be wired in `packages/auth/auth.ts`.
+
+## Organizations and multi-tenancy
+
+By default, the app requires users to belong to an organization:
+
+```ts
+// config/index.ts
+organizations: {
+  requireOrganization: true,
+  enableUsersToCreateOrganizations: false,  // Only admins can create orgs
+}
+```
+
+After sign-up, users are redirected to the onboarding flow and then to their organization dashboard.
+
+## Session behavior
+
+Sessions are handled via secure cookies. The default session lifetime is 30 days, configurable via:
+
+```ts
+auth: {
+  sessionCookieMaxAge: 60 * 60 * 24 * 30,  // 30 days
+  redirectAfterSignIn: "/app",
+  redirectAfterLogout: "/",
+}
+```
+
+## Invitation-only mode
+
+To restrict sign-up to invited users only, enable the invitation-only plugin in `packages/auth/plugins/invitation-only/`:
+
+```ts
+// packages/auth/auth.ts
+plugins: [
+  invitationOnlyPlugin(),
+]
+```
+
+When enabled, only users with a valid invitation token can create an account.
+
+## Admin accounts
+
+Users with `role: "admin"` in the database have access to the admin panel at `/admin`. Admin roles are set via the better-auth admin plugin — see the better-auth docs for how to promote users.
+
+## Customizing auth pages
+
+Auth UI components live in `apps/web/modules/saas/auth/components/`:
+
+- `LoginForm.tsx` — email/password and magic link sign-in
+- `SignupForm.tsx` — account creation form
+- `OtpForm.tsx` — two-factor code entry
+- `ForgotPasswordForm.tsx` / `ResetPasswordForm.tsx` — password reset flow
+- `SocialSigninButton.tsx` — OAuth provider buttons
+
+All forms use React Hook Form + Zod validation and connect to better-auth's client SDK via `@repo/auth/client`.

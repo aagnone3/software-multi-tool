@@ -1,0 +1,83 @@
+---
+title: AI Tools
+description: How AI tools work in Software Multitool — from job creation to async processing.
+---
+
+Software Multitool ships with a fully wired AI tool system. Each tool follows the same pattern: a user submits a request, the system creates a **job**, processes it asynchronously via Inngest, and streams status updates back to the client.
+
+## Included tools
+
+| Tool | Slug | Status | Requires auth |
+|---|---|---|---|
+| News Analyzer | `news-analyzer` | Enabled | No (10/day anonymous) |
+| Invoice Processor | `invoice-processor` | Enabled | No (5/day anonymous) |
+| Speaker Separation | `speaker-separation` | Enabled | Yes |
+| Background Remover | `bg-remover` | Disabled (example) | No |
+| Contract Analyzer | `contract-analyzer` | Disabled (example) | No |
+| Customer Feedback Analyzer | `feedback-analyzer` | Disabled (example) | No |
+| Expense Categorizer | `expense-categorizer` | Disabled (example) | No |
+| Meeting Summarizer | `meeting-summarizer` | Disabled (example) | No |
+
+Disabled tools serve as implementation examples — you can enable them by setting `enabled: true` in `config/index.ts` and supplying the required API credentials.
+
+## How a tool request flows
+
+1. **Client** calls `POST /jobs` with a `toolSlug` and tool-specific input
+2. **Credit middleware** checks and deducts the required credits
+3. **Rate limit middleware** enforces per-tool, per-user rate limits
+4. **Job is created** in Postgres with status `PENDING`
+5. **Inngest trigger** fires an async function for the tool
+6. **Processor** runs the AI task (LLM call, OCR, audio transcription, etc.)
+7. **Job status** updates to `COMPLETED` or `FAILED`
+8. **Client** polls or streams job status via `/jobs/:id`
+
+## Tool configuration
+
+Each tool is registered in `config/index.ts` under `tools.registry`:
+
+```ts
+{
+  slug: "news-analyzer",
+  name: "News Analyzer",
+  description: "Analyze news articles for bias and sentiment",
+  icon: "newspaper",
+  public: true,          // Allow anonymous access
+  enabled: true,
+  creditCost: 1,
+  rateLimits: {
+    anonymous: { requests: 10, window: "1d" },
+    authenticated: { requests: 100, window: "1h" },
+  },
+}
+```
+
+## Enabling/disabling tools at runtime
+
+Use the `NEXT_PUBLIC_ENABLED_TOOLS` environment variable to allowlist tools without changing code:
+
+```bash
+# Only expose these two tools (comma-separated slugs)
+NEXT_PUBLIC_ENABLED_TOOLS=news-analyzer,invoice-processor
+```
+
+If this variable is not set, all tools with `enabled: true` in config are shown.
+
+## Adding a new tool
+
+1. **Register the tool** in `config/index.ts` with a unique slug, credit cost, and rate limits.
+2. **Create the processor** at `packages/api/modules/<tool-slug>/lib/processor.ts`. The processor receives the job input and returns a structured result.
+3. **Create the Inngest function** at `apps/web/inngest/functions/<tool-slug>.ts`. This wires the Inngest trigger to your processor.
+4. **Create the UI component** at `apps/web/components/tools/<tool-slug>/`. Typically includes:
+   - An input form
+   - A results display component
+   - `history-utils.ts` for rendering past results
+5. **Register the Inngest function** in `apps/web/inngest/client.ts`.
+6. **Set `enabled: true`** and add any required API keys to your environment.
+
+## Feedback collection
+
+Each tool can optionally collect structured user feedback via an agent-based conversation. The feedback system is wired to the `execute-turn` procedure and can be configured per-tool in the tool's processor.
+
+## Job history
+
+Users can see their past tool jobs per-tool in the tool's history tab. The `history-utils.ts` file in each tool component handles formatting the raw job output into a readable result card.

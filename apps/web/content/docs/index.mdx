@@ -1,42 +1,40 @@
 ---
 title: Documentation
-description: This is a short description of this docs page that is also used as a meta description for SEO.
+description: Everything you need to know about building with Software Multitool — a production-ready Next.js SaaS starter.
 ---
 
-Welcome to the documentation of Software Multitool. Here you will find all the information you need to work with our software.
+Software Multitool is a Next.js 15 monorepo starter designed to help teams ship production SaaS products without spending weeks on project setup. It includes authentication, multi-tenancy, a credits-based monetization system, AI-powered tools, and a full marketing site — all wired together and ready to customize.
 
+## What's included
 
-## 1.1 Getting started - Overview
+- **Authentication** — Email/password, magic links, passkeys, social OAuth, and two-factor auth via [better-auth](https://better-auth.com)
+- **Multi-tenancy** — Organization management, member invitations, role-based access (owner, member), and per-organization billing
+- **Credits system** — Built-in credit balance, usage tracking, purchase flows, and per-tool credit costs
+- **AI tools** — News Analyzer, Invoice Processor, Speaker Separation, and more — each with rate limiting, credit deduction, and async job processing via Inngest
+- **Payments** — Stripe, Creem, Polar, and DodoPay adapters with checkout links and customer portal
+- **Email** — Resend, Postmark, Plunk, Mailgun, and Nodemailer adapters with a shared React email template system
+- **File storage** — S3, Supabase Storage, and local adapters with signed upload/download URLs and tag support
+- **Admin panel** — User and organization management, audit logs, and system stats
+- **Marketing site** — Landing page, blog, docs, and legal pages — all built into the same Next.js app
+- **Notifications** — In-app notification feed with billing, security, and team notification triggers
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+## Tech stack
 
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 15 + React 19 (App Router) |
+| Styling | Tailwind CSS + Shadcn UI + Radix Primitives |
+| Backend | Hono + oRPC (typed end-to-end) |
+| Database | PostgreSQL via Prisma (SQLite and MySQL Drizzle schemas also included) |
+| Auth | better-auth |
+| Job queue | Inngest |
+| AI | Vercel AI SDK |
+| Monorepo | Turborepo + pnpm workspaces |
+| Linting | Biome |
 
-### Another sub-section
+## Quick navigation
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-
-## Code example
-
-This is an example of code highlighting:
-
-```python {1}
-def hello_world():
-    print("Hello World!")
-```
-
-## Images
-
-This is an example of an image:
-
-![Login](/images/docs/login.png)
-
-## Lists
-
-This is an example of a list:
-
-- Item 1
-- Item 2
-- Item 3
+- [Getting Started](/docs/getting-started/overview) — First-run setup, local evaluation, and environment variables
+- **Concepts** *(coming soon)* — How credits, tools, and organizations work
+- **Deployment** *(coming soon)* — Vercel, environment configuration, and database migrations
+- **Customization** *(coming soon)* — Adding tools, theming, and configuring providers

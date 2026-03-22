@@ -1,0 +1,96 @@
+---
+title: Credits System
+description: How the credits-based monetization system works in Software Multitool.
+---
+
+Software Multitool uses a **credits** system to meter AI tool usage and connect it to paid plans and one-time purchases. This is the recommended monetization model for AI-powered tools where compute cost per request varies significantly.
+
+## How it works
+
+1. Users get a **credit balance** — either granted by their subscription plan or purchased as a one-time top-up.
+2. Each tool has a **credit cost** configured in `config/index.ts`. For example:
+   - News Analyzer: 1 credit per article
+   - Speaker Separation: 2 credits per minute of audio
+   - Invoice Processor: 3 credits per document
+3. When a user runs a tool, the system deducts the appropriate credits from their balance.
+4. If the user has insufficient credits, the request is rejected with a `402 PAYMENT_REQUIRED` response.
+
+## Credit sources
+
+Credits can come from three sources:
+
+| Source | How | Example |
+|---|---|---|
+| **Subscription grant** | Automatically added on billing period start | 500 credits/month on a Pro plan |
+| **One-time purchase** | Purchased through the credits store | Buy 200 credits for $19 |
+| **Admin grant** | Manually added by an admin | Compensating a user for a failed job |
+
+## Configuring tool credit costs
+
+In `config/index.ts`, each tool entry includes a `creditCost` field and optional `creditUnit`:
+
+```ts
+{
+  slug: "invoice-processor",
+  name: "Invoice Processor",
+  creditCost: 3,   // 3 credits per document
+  // creditUnit defaults to "request" if not set
+}
+
+{
+  slug: "speaker-separation",
+  creditCost: 2,
+  creditUnit: "minute",   // 2 credits per minute of audio
+}
+```
+
+## Configuring credit packs
+
+Credit packs (one-time purchases) are defined in `config/index.ts` under `payments.creditPacks`:
+
+```ts
+creditPacks: [
+  {
+    id: "boost",
+    credits: 100,
+    productId: "your-stripe-product-id",
+    name: "Boost Pack",
+    price: 999,   // in cents
+  },
+]
+```
+
+Each pack needs a corresponding product in your payment provider (Stripe, Creem, etc.).
+
+## Subscription credit grants
+
+Subscription plans can grant credits at the start of each billing period. Configure this in the plan definition in `config/index.ts`:
+
+```ts
+plans: {
+  pro: {
+    name: "Pro",
+    monthlyCredits: 500,
+    prices: [...],
+  }
+}
+```
+
+The `monthlyCredits` value is granted when a subscription is created or renewed.
+
+## Credit middleware
+
+The API enforces credit requirements via `packages/api/lib/credit-middleware.ts`. This middleware runs before every tool endpoint and:
+1. Checks if the user has enough credits for the requested operation
+2. Deducts the credits atomically with the job creation
+3. Refunds credits if the job fails or is cancelled
+
+You typically do not need to modify this middleware unless you want to add custom credit logic.
+
+## Viewing credit usage
+
+Users can see their credit balance and transaction history at:
+- `/app/billing/usage` — usage trends and breakdown by tool
+- `/app/settings/billing` — current balance, active plan, and purchase history
+
+Admins can view org-level usage in the admin panel at `/admin`.
