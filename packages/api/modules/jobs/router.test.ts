@@ -481,4 +481,77 @@ describe("Jobs Router", () => {
 			expect(deleteToolJobMock).toHaveBeenCalledWith(TEST_JOB_ID);
 		});
 	});
+
+	describe("jobs.stream", () => {
+		// Helper to call stream handler directly (createProcedureClient doesn't support generators)
+		async function collectStreamEvents(
+			headers: Headers,
+			jobId: string,
+			signal?: AbortSignal,
+		) {
+			const { streamJob } = await import("./procedures/stream-job");
+			const handler =
+				(streamJob as any)["~orpc"]?.handler ??
+				(streamJob as any).handler;
+			if (!handler) {
+				throw new Error("Cannot find stream handler");
+			}
+			const gen = handler({
+				input: { jobId },
+				context: { headers },
+				signal,
+			});
+			const events: unknown[] = [];
+			for await (const event of gen) {
+				events.push(event);
+			}
+			return events;
+		}
+
+		it("throws NOT_FOUND when job does not exist", async () => {
+			getToolJobByIdMock.mockResolvedValue(null);
+			await expect(
+				collectStreamEvents(new Headers(), TEST_JOB_ID),
+			).rejects.toMatchObject({ code: "NOT_FOUND" });
+		});
+
+		it("throws FORBIDDEN when user does not own the job", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				...mockJob,
+				userId: "different-user",
+				sessionId: null,
+			});
+			await expect(
+				collectStreamEvents(new Headers(), TEST_JOB_ID),
+			).rejects.toMatchObject({ code: "FORBIDDEN" });
+		});
+
+		it("streams update and closes on terminal status for session owner", async () => {
+			const sessionJob = {
+				...mockJob,
+				userId: null,
+				sessionId: TEST_SESSION_ID,
+				status: "COMPLETED",
+			};
+			getToolJobByIdMock.mockResolvedValue(sessionJob);
+			const headers = new Headers({ "x-session-id": TEST_SESSION_ID });
+			const events = await collectStreamEvents(headers, TEST_JOB_ID);
+			expect(events.length).toBeGreaterThanOrEqual(1);
+			expect((events[0] as { type: string }).type).toBe("update");
+		});
+
+		it("streams update for authenticated user owning the job", async () => {
+			getSessionMock.mockResolvedValue({ user: { id: TEST_USER_ID } });
+			getToolJobByIdMock.mockResolvedValue({
+				...mockJob,
+				status: "COMPLETED",
+			});
+			const events = await collectStreamEvents(
+				new Headers(),
+				TEST_JOB_ID,
+			);
+			expect(events[0]).toMatchObject({ type: "update" });
+		});
+	});
 });
