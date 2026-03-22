@@ -1,5 +1,6 @@
 import { cn } from "@ui/lib";
 import Link from "next/link";
+import React from "react";
 
 export function Footer() {
 	return (
