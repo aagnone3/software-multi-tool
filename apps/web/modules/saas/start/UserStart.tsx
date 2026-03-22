@@ -3,6 +3,7 @@
 import { config } from "@repo/config";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
 import React from "react";
+import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
 import { CreditsOverview } from "./components/CreditsOverview";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
@@ -24,6 +25,9 @@ export default function UserStart() {
 
 			{/* Quick Actions row */}
 			<QuickActions />
+
+			{/* Active jobs — only shown when there are in-flight/recently completed jobs */}
+			<ActiveJobsWidget />
 
 			{/* Main dashboard grid */}
 			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">

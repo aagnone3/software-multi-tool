@@ -41,6 +41,9 @@ vi.mock("./components/RecommendedToolWidget", () => ({
 vi.mock("./components/FavoriteToolsWidget", () => ({
 	FavoriteToolsWidget: () => <div data-testid="favorite-tools-widget" />,
 }));
+vi.mock("./components/ActiveJobsWidget", () => ({
+	ActiveJobsWidget: () => <div data-testid="active-jobs-widget" />,
+}));
 
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
