@@ -287,4 +287,69 @@ describe("JobsHistoryPage", () => {
 			screen.queryByRole("button", { name: "Clear filters" }),
 		).not.toBeInTheDocument();
 	});
+
+	describe("Export CSV", () => {
+		beforeEach(() => {
+			URL.createObjectURL = vi.fn().mockReturnValue("blob:url");
+			URL.revokeObjectURL = vi.fn();
+		});
+
+		it("shows Export CSV button when there are filtered jobs", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [
+					{
+						id: "job-csv",
+						toolSlug: "news-analyzer",
+						status: "COMPLETED",
+						createdAt: new Date().toISOString(),
+					},
+				],
+				isLoading: false,
+				refetch: mockRefetch,
+			});
+			render(<JobsHistoryPage />);
+			expect(
+				screen.getByRole("button", { name: /Export CSV/ }),
+			).toBeInTheDocument();
+		});
+
+		it("does not show Export CSV button when no jobs", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [],
+				isLoading: false,
+				refetch: mockRefetch,
+			});
+			render(<JobsHistoryPage />);
+			expect(
+				screen.queryByRole("button", { name: /Export CSV/ }),
+			).not.toBeInTheDocument();
+		});
+
+		it("triggers CSV download (createObjectURL called) on click", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [
+					{
+						id: "job-csv",
+						toolSlug: "news-analyzer",
+						status: "COMPLETED",
+						createdAt: new Date(
+							"2026-03-22T10:00:00Z",
+						).toISOString(),
+						completedAt: new Date(
+							"2026-03-22T10:01:30Z",
+						).toISOString(),
+					},
+				],
+				isLoading: false,
+				refetch: mockRefetch,
+			});
+			render(<JobsHistoryPage />);
+			const exportBtn = screen.getByRole("button", {
+				name: /Export CSV/,
+			});
+			fireEvent.click(exportBtn);
+			expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+			expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:url");
+		});
+	});
 });
