@@ -1,0 +1,117 @@
+---
+title: Deploy to Vercel
+description: Deploy Software Multitool to Vercel with a Supabase database.
+---
+
+Software Multitool is designed to deploy to Vercel with a Supabase PostgreSQL database. This guide covers the full production deployment.
+
+## Prerequisites
+
+- A [Vercel](https://vercel.com) account
+- A [Supabase](https://supabase.com) project (free tier works)
+- At minimum one email provider (Resend is the easiest)
+
+## Step 1: Create a Supabase project
+
+1. Go to [supabase.com](https://supabase.com) and create a new project.
+2. After the project initializes, go to **Settings → API** and copy:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Go to **Settings → Database** and copy the **connection string (URI)** → `POSTGRES_PRISMA_URL`
+
+## Step 2: Deploy to Vercel
+
+1. Fork or clone the repository and push to your GitHub account.
+2. Go to [vercel.com/new](https://vercel.com/new) and import your repository.
+3. Vercel will detect the Turborepo monorepo automatically.
+4. Set the **Root Directory** to `apps/web`.
+5. Add the environment variables listed below before deploying.
+
+## Step 3: Set environment variables
+
+Add these to Vercel under **Settings → Environment Variables**:
+
+### Required
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+POSTGRES_PRISMA_URL=postgresql://...?pgbouncer=true&connection_limit=1
+POSTGRES_URL_NON_POOLING=postgresql://...
+BETTER_AUTH_SECRET=your-random-secret-min-32-chars
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+```
+
+Generate `BETTER_AUTH_SECRET` with:
+```bash
+openssl rand -base64 32
+```
+
+### Email (pick one provider)
+
+```
+# Resend
+RESEND_API_KEY=re_...
+
+# OR Postmark
+POSTMARK_API_KEY=...
+```
+
+### Payments (optional but recommended)
+
+```
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+### AI tools (optional — needed for specific tools)
+
+```
+OPENAI_API_KEY=sk-...
+ASSEMBLYAI_API_KEY=...
+REPLICATE_API_TOKEN=...
+```
+
+## Step 4: Run database migrations
+
+After your first deploy, run the Prisma migrations against your Supabase database:
+
+```bash
+# From your local machine with the production DATABASE_URL set
+pnpm db:migrate
+```
+
+Or configure Vercel to run migrations automatically on deploy via the `Deploy Database Migrations` workflow in `.github/workflows/`.
+
+## Step 5: Set up Inngest (for async jobs)
+
+1. Create an account at [inngest.com](https://inngest.com).
+2. Add your Inngest event key and signing key to Vercel:
+   ```
+   INNGEST_EVENT_KEY=...
+   INNGEST_SIGNING_KEY=...
+   ```
+3. Sync your functions in the Inngest dashboard after deploying.
+
+## Step 6: Configure payment webhooks
+
+If you're using payments, configure your provider's webhook to point at:
+```
+https://yourdomain.com/api/webhooks/payments
+```
+
+For Stripe, use:
+```
+https://yourdomain.com/api/webhooks/stripe
+```
+
+## Environment variable reference
+
+See [Getting Started → Environment Variables](/docs/getting-started/overview#environment-variables) for a full list of supported variables.
+
+## Custom domain
+
+Point your custom domain to Vercel via your DNS provider. Vercel handles SSL automatically.
+
+Update `NEXT_PUBLIC_SITE_URL` in your environment variables to match your production domain.
