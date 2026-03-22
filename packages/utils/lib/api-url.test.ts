@@ -50,6 +50,35 @@ describe("getApiBaseUrl (server-side)", () => {
 	it("returns /api path from base URL", () => {
 		const url = getApiBaseUrl();
 		expect(url).toContain("/api");
+		expect(url).not.toContain("/api/rpc");
+	});
+
+	it("returns full absolute URL on server-side", () => {
+		const url = getApiBaseUrl();
+		expect(url).toBe("https://example.com/api");
+	});
+});
+
+describe("getApiBaseUrl (client-side)", () => {
+	beforeEach(() => {
+		Object.defineProperty(globalThis, "window", {
+			value: { location: { origin: "https://client.example.com" } },
+			writable: true,
+			configurable: true,
+		});
+	});
+
+	afterEach(() => {
+		Object.defineProperty(globalThis, "window", {
+			value: undefined,
+			writable: true,
+			configurable: true,
+		});
+	});
+
+	it("returns /api path using window.location.origin", () => {
+		const url = getApiBaseUrl();
+		expect(url).toBe("https://client.example.com/api");
 	});
 });
 
@@ -69,5 +98,33 @@ describe("getOrpcUrl (server-side)", () => {
 	it("returns /api/rpc path from base URL", () => {
 		const url = getOrpcUrl();
 		expect(url).toContain("/api/rpc");
+	});
+
+	it("returns full absolute URL on server-side", () => {
+		const url = getOrpcUrl();
+		expect(url).toBe("https://example.com/api/rpc");
+	});
+});
+
+describe("getOrpcUrl (client-side)", () => {
+	beforeEach(() => {
+		Object.defineProperty(globalThis, "window", {
+			value: { location: { origin: "https://client.example.com" } },
+			writable: true,
+			configurable: true,
+		});
+	});
+
+	afterEach(() => {
+		Object.defineProperty(globalThis, "window", {
+			value: undefined,
+			writable: true,
+			configurable: true,
+		});
+	});
+
+	it("returns /api/rpc path using window.location.origin", () => {
+		const url = getOrpcUrl();
+		expect(url).toBe("https://client.example.com/api/rpc");
 	});
 });
