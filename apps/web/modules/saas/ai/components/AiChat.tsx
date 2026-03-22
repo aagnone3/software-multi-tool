@@ -19,7 +19,13 @@ import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import { EllipsisIcon, PlusIcon, SendIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { toast } from "sonner";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("en", {
@@ -288,6 +294,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 						type="submit"
 						size="icon"
 						variant="secondary"
+						aria-label="Send"
 						className="absolute right-3 bottom-3"
 						disabled={!hasChat}
 					>

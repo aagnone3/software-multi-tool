@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import {
 	filterJobsBySearch,

@@ -30,20 +30,6 @@ export function shouldUseProxy(_isClientSide: boolean): boolean {
 }
 
 /**
- * Gets the current origin for client-side requests.
- * Uses window.location.origin to ensure same-origin requests.
- *
- * This is critical for Vercel deployments where NEXT_PUBLIC_VERCEL_URL
- * may differ from the actual URL the user is accessing.
- */
-function getClientOrigin(): string {
-	if (typeof window !== "undefined") {
-		return window.location.origin;
-	}
-	return getBaseUrl();
-}
-
-/**
  * Gets the API base URL for making requests.
  *
  * All requests use the same-origin /api route since the API is served
@@ -52,11 +38,9 @@ function getClientOrigin(): string {
  * @returns The base URL for API requests (without trailing slash)
  */
 export function getApiBaseUrl(): string {
-	const isClientSide = typeof window !== "undefined";
-
 	// Client-side: use window.location.origin for same-origin requests
-	if (isClientSide) {
-		return `${getClientOrigin()}/api`;
+	if (typeof window !== "undefined") {
+		return `${window.location.origin}/api`;
 	}
 
 	// Server-side: use base URL
@@ -69,11 +53,9 @@ export function getApiBaseUrl(): string {
  * @returns The full URL for oRPC requests (always absolute)
  */
 export function getOrpcUrl(): string {
-	const isClientSide = typeof window !== "undefined";
-
 	// Client-side: use window.location.origin for same-origin requests
-	if (isClientSide) {
-		return `${getClientOrigin()}/api/rpc`;
+	if (typeof window !== "undefined") {
+		return `${window.location.origin}/api/rpc`;
 	}
 
 	// Server-side: use base URL

@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { GitBranch } from "lucide-react";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { DiagramEditorInput } from "./diagram-editor-input";
 import { DiagramExport } from "./diagram-export";
