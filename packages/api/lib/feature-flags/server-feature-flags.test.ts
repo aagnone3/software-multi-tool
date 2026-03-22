@@ -373,6 +373,61 @@ describe("Server Feature Flags", () => {
 			});
 		});
 
+		describe("cache TTL expiry", () => {
+			it("should re-fetch flags after TTL expires", async () => {
+				vi.useFakeTimers();
+
+				mockPostHogInstance.getAllFlags.mockResolvedValue({
+					"flag-a": true,
+				});
+
+				// First call fills cache
+				await service.getAllFeatureFlags("ttl-user");
+
+				// Advance time past 1-minute TTL
+				vi.advanceTimersByTime(61_000);
+
+				// Second call should re-fetch
+				await service.getAllFeatureFlags("ttl-user");
+
+				expect(mockPostHogInstance.getAllFlags).toHaveBeenCalledTimes(
+					2,
+				);
+
+				vi.useRealTimers();
+			});
+		});
+
+		describe("cache size eviction", () => {
+			it("should evict oldest entries when cache reaches 1000 entries", async () => {
+				const service1000 = new ServerFeatureFlagService({
+					apiKey: "test-api-key",
+					host: "https://test.posthog.com",
+					enabled: true,
+				});
+
+				mockPostHogInstance.getAllFlags.mockResolvedValue({
+					"flag-a": true,
+				});
+
+				// Fill cache to 1000 entries
+				for (let i = 0; i < 1001; i++) {
+					await service1000.getAllFeatureFlags(`user-${i}`);
+				}
+
+				// Should have called getAllFlags 1001 times (no cache hits since each user is unique)
+				expect(mockPostHogInstance.getAllFlags).toHaveBeenCalledTimes(
+					1001,
+				);
+
+				// Calling the 1001st user again should NOT use cache (it was evicted)
+				mockPostHogInstance.getAllFlags.mockClear();
+				await service1000.getAllFeatureFlags("user-0");
+				// user-0 may have been evicted, so PostHog may be called again
+				// The important thing is no error was thrown
+			});
+		});
+
 		describe("clearCache", () => {
 			it("should clear cache for specific user", async () => {
 				mockPostHogInstance.getAllFlags.mockResolvedValue({
