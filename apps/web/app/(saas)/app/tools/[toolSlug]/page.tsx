@@ -2,6 +2,7 @@ import { config } from "@repo/config";
 import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
 import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
+import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
 import { ContractAnalyzerTool } from "@tools/components/ContractAnalyzerTool";
@@ -102,6 +103,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 		<div className="max-w-4xl">
 			<ToolPageHeader tool={tool} />
 			<LowCreditsWarning className="mb-4" showActionButtons={true} />
+			<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
