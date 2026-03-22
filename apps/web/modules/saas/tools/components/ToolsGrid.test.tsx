@@ -123,7 +123,7 @@ describe("ToolsGrid", () => {
 		await user.type(search, "zzz-not-a-tool");
 		expect(screen.getByText("No tools found")).toBeInTheDocument();
 		expect(
-			screen.getByText("Try a different search term."),
+			screen.getByText("Try a different search term or category."),
 		).toBeInTheDocument();
 	});
 
@@ -139,5 +139,38 @@ describe("ToolsGrid", () => {
 		render(<ToolsGrid />);
 		// The select trigger shows the current value; default order text should be present
 		expect(screen.getByLabelText("Sort tools")).toBeInTheDocument();
+	});
+
+	it("renders category filter buttons", () => {
+		render(<ToolsGrid />);
+		// All category pills should be rendered (group has aria-label)
+		expect(
+			screen.getByRole("group", { name: "Filter by category" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
+	});
+
+	it("filters tools by category", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		// Click "Finance" category which maps to invoice-processor
+		const financeBtn = screen.getByRole("button", { name: "Finance" });
+		await user.click(financeBtn);
+		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
+		expect(screen.queryByText("News Analyzer")).not.toBeInTheDocument();
+	});
+
+	it("shows 'Show all tools' button in empty category state", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		// Search for something that won't match any tool in the category
+		const search = screen.getByPlaceholderText("Search tools…");
+		await user.type(search, "zzz-not-a-tool");
+		// click a category
+		const financeBtn = screen.getByRole("button", { name: "Finance" });
+		await user.click(financeBtn);
+		expect(
+			screen.getByRole("button", { name: "Show all tools" }),
+		).toBeInTheDocument();
 	});
 });

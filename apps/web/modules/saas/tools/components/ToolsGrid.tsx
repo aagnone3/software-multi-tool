@@ -2,6 +2,7 @@
 
 import { useRecentJobs } from "@saas/start/hooks/use-recent-jobs";
 import { getVisibleTools } from "@saas/tools/lib/tool-flags";
+import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import {
 	Select,
@@ -10,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import { cn } from "@ui/lib";
 import { SearchIcon, WrenchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { ToolCard } from "./ToolCard";
@@ -21,9 +23,27 @@ type SortOption =
 	| "credits-asc"
 	| "credits-desc";
 
+/** Maps a tool slug to its category label. Extend as new tools are added. */
+const TOOL_CATEGORIES: Record<string, string> = {
+	"bg-remover": "Image & Media",
+	"speaker-separation": "Audio",
+	"news-analyzer": "Analytics",
+	"invoice-processor": "Finance",
+	"contract-analyzer": "Document",
+	"feedback-analyzer": "Analytics",
+	"expense-categorizer": "Finance",
+	"meeting-summarizer": "Productivity",
+	"diagram-editor": "Productivity",
+};
+
+function getCategory(slug: string): string {
+	return TOOL_CATEGORIES[slug] ?? "Other";
+}
+
 export function ToolsGrid() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<SortOption>("default");
+	const [activeCategory, setActiveCategory] = useState<string>("All");
 	const allTools = useMemo(() => getVisibleTools(), []);
 	const { recentToolSlugs } = useRecentJobs(20);
 	const recentToolSet = useMemo(
@@ -31,15 +51,24 @@ export function ToolsGrid() {
 		[recentToolSlugs],
 	);
 
+	/** Sorted, deduplicated list of available categories */
+	const categories = useMemo(() => {
+		const cats = new Set(allTools.map((t) => getCategory(t.slug)));
+		return ["All", ...Array.from(cats).sort()];
+	}, [allTools]);
+
 	const filteredTools = useMemo(() => {
 		const q = searchQuery.trim().toLowerCase();
-		let result = q
-			? allTools.filter(
-					(tool) =>
-						tool.name.toLowerCase().includes(q) ||
-						tool.description.toLowerCase().includes(q),
-				)
-			: [...allTools];
+		let result = allTools.filter((tool) => {
+			const matchesSearch =
+				!q ||
+				tool.name.toLowerCase().includes(q) ||
+				tool.description.toLowerCase().includes(q);
+			const matchesCategory =
+				activeCategory === "All" ||
+				getCategory(tool.slug) === activeCategory;
+			return matchesSearch && matchesCategory;
+		});
 
 		if (sortBy === "recently-used") {
 			// Tools the user has used come first (in recency order), then the rest
@@ -59,9 +88,17 @@ export function ToolsGrid() {
 		}
 
 		return result;
-	}, [allTools, searchQuery, sortBy, recentToolSlugs, recentToolSet]);
+	}, [
+		allTools,
+		searchQuery,
+		sortBy,
+		recentToolSlugs,
+		recentToolSet,
+		activeCategory,
+	]);
 
 	const showControls = allTools.length > 4;
+	const showCategories = categories.length > 2;
 
 	return (
 		<div className="space-y-6">
@@ -106,6 +143,32 @@ export function ToolsGrid() {
 				</div>
 			)}
 
+			{showCategories && (
+				<fieldset
+					className="flex flex-wrap gap-2 border-none p-0 m-0"
+					aria-label="Filter by category"
+				>
+					<legend className="sr-only">Filter by category</legend>
+					{categories.map((cat) => (
+						<Button
+							key={cat}
+							variant={
+								activeCategory === cat ? "primary" : "outline"
+							}
+							size="sm"
+							onClick={() => setActiveCategory(cat)}
+							className={cn(
+								"rounded-full",
+								activeCategory === cat && "shadow-sm",
+							)}
+							aria-pressed={activeCategory === cat}
+						>
+							{cat}
+						</Button>
+					))}
+				</fieldset>
+			)}
+
 			{filteredTools.length > 0 ? (
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{filteredTools.map((tool) => (
@@ -126,8 +189,20 @@ export function ToolsGrid() {
 						No tools found
 					</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
-						Try a different search term.
+						{searchQuery
+							? "Try a different search term or category."
+							: "No tools available in this category."}
 					</p>
+					{activeCategory !== "All" && (
+						<Button
+							variant="outline"
+							size="sm"
+							className="mt-4"
+							onClick={() => setActiveCategory("All")}
+						>
+							Show all tools
+						</Button>
+					)}
 				</div>
 			)}
 		</div>
