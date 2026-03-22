@@ -58,6 +58,21 @@ describe("ToolCard", () => {
 		expect(screen.getByText("Test Tool")).toBeInTheDocument();
 	});
 
+	it("shows credit cost when creditCost > 0", () => {
+		render(<ToolCard tool={baseTool} />);
+		expect(screen.getByText(/1 credit per use/i)).toBeInTheDocument();
+	});
+
+	it("shows plural credits when creditCost > 1", () => {
+		render(<ToolCard tool={{ ...baseTool, creditCost: 3 }} />);
+		expect(screen.getByText(/3 credits per use/i)).toBeInTheDocument();
+	});
+
+	it("hides credit display when creditCost is 0", () => {
+		render(<ToolCard tool={{ ...baseTool, creditCost: 0 }} />);
+		expect(screen.queryByText(/credit/i)).not.toBeInTheDocument();
+	});
+
 	it("renders known icons for each supported icon name", () => {
 		const icons = [
 			"image-minus",

@@ -17,6 +17,7 @@ import { cn } from "@ui/lib";
 import {
 	ClipboardListIcon,
 	ClockIcon,
+	CoinsIcon,
 	FileTextIcon,
 	ImageMinusIcon,
 	MessageSquareTextIcon,
@@ -77,6 +78,16 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 					<CardDescription>{tool.description}</CardDescription>
 				</CardHeader>
 				<CardContent className="pt-0">
+					{tool.creditCost > 0 && (
+						<div className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+							<CoinsIcon className="size-3.5" />
+							<span>
+								{tool.creditCost}{" "}
+								{tool.creditCost === 1 ? "credit" : "credits"}{" "}
+								per use
+							</span>
+						</div>
+					)}
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -108,6 +119,16 @@ export function ToolCard({ tool, isComingSoon = false }: ToolCardProps) {
 				<CardDescription>{tool.description}</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-0">
+				{tool.creditCost > 0 && (
+					<div className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+						<CoinsIcon className="size-3.5 text-primary/70" />
+						<span>
+							{tool.creditCost}{" "}
+							{tool.creditCost === 1 ? "credit" : "credits"} per
+							use
+						</span>
+					</div>
+				)}
 				<Link href={`/app/tools/${tool.slug}`}>
 					<Button className="w-full" variant="outline">
 						Open Tool
