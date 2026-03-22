@@ -1,76 +1,49 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { useRecentJobs } from "../hooks/use-recent-jobs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TopToolsWidget } from "./TopToolsWidget";
 
-vi.mock("@saas/tools/hooks/use-tools", () => ({
-	useTools: vi.fn(() => ({
-		enabledTools: [
-			{
-				slug: "news-analyzer",
-				name: "News Analyzer",
-				enabled: true,
-				isComingSoon: false,
-				creditCost: 1,
-				public: false,
-				icon: "newspaper",
-				description: "Analyze news",
-			},
-			{
-				slug: "invoice-processor",
-				name: "Invoice Processor",
-				enabled: true,
-				isComingSoon: false,
-				creditCost: 2,
-				public: false,
-				icon: "file",
-				description: "Process invoices",
-			},
-		],
-	})),
-}));
+const mockUseRecentJobs = vi.fn();
+const mockUseTools = vi.fn();
 
 vi.mock("../hooks/use-recent-jobs", () => ({
-	useRecentJobs: vi.fn(() => ({
-		jobs: [],
-		isLoading: false,
-		isError: false,
-		recentToolSlugs: [],
-		recentToolsMap: new Map(),
-		error: null,
-		refetch: vi.fn(),
-	})),
+	useRecentJobs: () => mockUseRecentJobs(),
 }));
 
-const mockUseRecentJobs = vi.mocked(useRecentJobs);
+vi.mock("@saas/tools/hooks/use-tools", () => ({
+	useTools: () => mockUseTools(),
+}));
+
+vi.mock("next/link", () => ({
+	default: ({
+		children,
+		href,
+	}: {
+		children: React.ReactNode;
+		href: string;
+	}) => <a href={href}>{children}</a>,
+}));
+
+const enabledTools = [
+	{ slug: "news-analyzer", name: "News Analyzer" },
+	{ slug: "invoice-processor", name: "Invoice Processor" },
+	{ slug: "meeting-summarizer", name: "Meeting Summarizer" },
+];
 
 describe("TopToolsWidget", () => {
-	it("renders loading skeleton", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [],
-			isLoading: true,
-			isError: false,
-			recentToolSlugs: [],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
+	beforeEach(() => {
+		mockUseTools.mockReturnValue({ enabledTools });
+	});
+
+	it("renders loading skeleton when loading", () => {
+		mockUseRecentJobs.mockReturnValue({ jobs: [], isLoading: true });
 		render(<TopToolsWidget />);
 		expect(screen.getByText("Top Tools")).toBeInTheDocument();
 		expect(screen.getByText("Loading...")).toBeInTheDocument();
 	});
 
 	it("renders empty state when no jobs", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [],
-			isLoading: false,
-			isError: false,
-			recentToolSlugs: [],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
+		mockUseRecentJobs.mockReturnValue({ jobs: [], isLoading: false });
 		render(<TopToolsWidget />);
 		expect(screen.getByText("No usage yet")).toBeInTheDocument();
 		expect(
@@ -78,120 +51,48 @@ describe("TopToolsWidget", () => {
 		).toHaveAttribute("href", "/app/tools");
 	});
 
-	it("renders top tools with run counts", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [
-				{
-					id: "1",
-					toolSlug: "news-analyzer",
-					status: "COMPLETED",
-					createdAt: "2026-01-01",
-					completedAt: null,
-				},
-				{
-					id: "2",
-					toolSlug: "news-analyzer",
-					status: "COMPLETED",
-					createdAt: "2026-01-02",
-					completedAt: null,
-				},
-				{
-					id: "3",
-					toolSlug: "invoice-processor",
-					status: "COMPLETED",
-					createdAt: "2026-01-03",
-					completedAt: null,
-				},
-			],
-			isLoading: false,
-			isError: false,
-			recentToolSlugs: ["news-analyzer", "invoice-processor"],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
+	it("renders top tools with counts and percentages", () => {
+		const jobs = [
+			{ toolSlug: "news-analyzer" },
+			{ toolSlug: "news-analyzer" },
+			{ toolSlug: "invoice-processor" },
+		];
+		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
 		render(<TopToolsWidget />);
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
-		expect(screen.getByText("2 runs")).toBeInTheDocument();
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
+		expect(screen.getByText("2 runs")).toBeInTheDocument();
 		expect(screen.getByText("1 run")).toBeInTheDocument();
 	});
 
-	it("links tools to their tool pages", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [
-				{
-					id: "1",
-					toolSlug: "news-analyzer",
-					status: "COMPLETED",
-					createdAt: "2026-01-01",
-					completedAt: null,
-				},
-			],
-			isLoading: false,
-			isError: false,
-			recentToolSlugs: ["news-analyzer"],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
-		render(<TopToolsWidget />);
+	it("respects maxTools limit", () => {
+		const jobs = [
+			{ toolSlug: "news-analyzer" },
+			{ toolSlug: "invoice-processor" },
+			{ toolSlug: "meeting-summarizer" },
+		];
+		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
+		render(<TopToolsWidget maxTools={2} />);
+		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
+		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
 		expect(
-			screen.getByRole("link", { name: /News Analyzer/i }),
-		).toHaveAttribute("href", "/app/tools/news-analyzer");
+			screen.queryByText("Meeting Summarizer"),
+		).not.toBeInTheDocument();
 	});
 
-	it("shows view all jobs link", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [
-				{
-					id: "1",
-					toolSlug: "news-analyzer",
-					status: "COMPLETED",
-					createdAt: "2026-01-01",
-					completedAt: null,
-				},
-			],
-			isLoading: false,
-			isError: false,
-			recentToolSlugs: ["news-analyzer"],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
+	it("falls back to slug as name for unknown tools", () => {
+		const jobs = [{ toolSlug: "unknown-tool" }];
+		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
+		render(<TopToolsWidget />);
+		expect(screen.getByText("unknown-tool")).toBeInTheDocument();
+	});
+
+	it("renders View all jobs link", () => {
+		const jobs = [{ toolSlug: "news-analyzer" }];
+		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
 		render(<TopToolsWidget />);
 		expect(
 			screen.getByRole("link", { name: /View all jobs/i }),
 		).toHaveAttribute("href", "/app/jobs");
-	});
-
-	it("respects maxTools limit", () => {
-		mockUseRecentJobs.mockReturnValue({
-			jobs: [
-				{
-					id: "1",
-					toolSlug: "news-analyzer",
-					status: "COMPLETED",
-					createdAt: "2026-01-01",
-					completedAt: null,
-				},
-				{
-					id: "2",
-					toolSlug: "invoice-processor",
-					status: "COMPLETED",
-					createdAt: "2026-01-02",
-					completedAt: null,
-				},
-			],
-			isLoading: false,
-			isError: false,
-			recentToolSlugs: ["news-analyzer", "invoice-processor"],
-			recentToolsMap: new Map(),
-			error: null,
-			refetch: vi.fn(),
-		});
-		render(<TopToolsWidget maxTools={1} />);
-		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
-		expect(screen.queryByText("Invoice Processor")).not.toBeInTheDocument();
 	});
 });
