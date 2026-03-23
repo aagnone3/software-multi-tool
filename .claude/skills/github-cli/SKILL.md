@@ -42,18 +42,6 @@ This system may have multiple GitHub accounts configured. Only `aagnone3` has ac
 | Verify repo access | `gh repo view aagnone3/software-multi-tool` |
 | Standard pre-flight | `gh auth status && gh <command>` |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Creating or managing pull requests
-- Working with GitHub issues
-- Using the GitHub API
-- Switching between GitHub accounts
-- Troubleshooting GitHub CLI authentication
-
-**Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api, merge PR, close PR, gh pr create, gh pr merge, gh issue, repo, repository, gh auth, authentication, aagnone3
-
 ## Common Workflows
 
 ### Creating Pull Requests
@@ -224,6 +212,18 @@ If the GitHub CLI persistently fails, provide the user with the manual URL:
 - **View repo:** `https://github.com/aagnone3/software-multi-tool`
 - **View PRs:** `https://github.com/aagnone3/software-multi-tool/pulls`
 - **View issues:** `https://github.com/aagnone3/software-multi-tool/issues`
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Creating or managing pull requests
+- Working with GitHub issues
+- Using the GitHub API
+- Switching between GitHub accounts
+- Troubleshooting GitHub CLI authentication
+
+**Activation keywords**: GitHub, pull request, PR, issue, gh cli, github api, merge PR, close PR, gh pr create, gh pr merge, gh issue, repo, repository, gh auth, authentication, aagnone3
 
 ## Related Skills
 

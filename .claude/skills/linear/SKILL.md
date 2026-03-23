@@ -52,19 +52,6 @@ All Linear operations use this base command:
 pnpm --filter @repo/scripts linear <resource> <action> [options]
 ```
 
-## When to Use This Skill
-
-Use this skill when:
-
-- Querying or updating Linear issues, projects, milestones, or dependencies via CLI
-- Looking up issue details or state (e.g., "what's in PRA-21?")
-- Closing completed issues after PR merge
-- Managing project dependencies and milestones
-
-**For full development workflow** (implement → PR → merge), use the **linear-workflow** skill instead.
-
-**Activation keywords**: Linear, PRA-, issue, project, milestone, dependency, close issue
-
 ## Available Operations
 
 ### Projects
@@ -223,6 +210,19 @@ pnpm --filter @repo/scripts linear views list-issues --view <id|slug>
 ## Additional Resources
 
 See [examples.md](examples.md) for detailed CLI usage examples and common command patterns.
+
+## When to Use This Skill
+
+Use this skill when:
+
+- Querying or updating Linear issues, projects, milestones, or dependencies via CLI
+- Looking up issue details or state (e.g., "what's in PRA-21?")
+- Closing completed issues after PR merge
+- Managing project dependencies and milestones
+
+**For full development workflow** (implement → PR → merge), use the **linear-workflow** skill instead.
+
+**Activation keywords**: Linear, PRA-, issue, project, milestone, dependency, close issue
 
 ## Related Skills
 

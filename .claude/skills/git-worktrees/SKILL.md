@@ -26,17 +26,6 @@ Enables parallel development with isolated git worktrees for concurrent features
 | Prune stale refs | `git worktree prune` |
 | **⚠ New migrations** | `pnpm supabase:reset` (all worktrees share one DB) |
 
-## When to Use This Skill
-
-Use git worktrees when you need to:
-
-- **Parallel development**: Work on multiple features simultaneously (PRA-123 and PRA-456)
-- **PR review**: Check out and test pull requests locally while preserving your current work
-- **Hotfix workflow**: Create urgent fixes from main while continuing feature development
-- **Isolated testing**: Run integration tests in parallel across different branches
-
-**Activation keywords**: worktree, worktrees, git worktree, parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work
-
 ## Why Worktrees Are Mandatory
 
 This repository is designed for **parallel development** with multiple Claude Code instances working simultaneously.
@@ -171,6 +160,17 @@ For comprehensive details, see these supporting files:
 | **[troubleshooting.md](./troubleshooting.md)** | Common issues and solutions |
 | **[examples.md](./examples.md)** | Complete workflow examples |
 | **[diagrams.md](./diagrams.md)** | Visual architecture diagrams |
+
+## When to Use This Skill
+
+Use git worktrees when you need to:
+
+- **Parallel development**: Work on multiple features simultaneously (PRA-123 and PRA-456)
+- **PR review**: Check out and test pull requests locally while preserving your current work
+- **Hotfix workflow**: Create urgent fixes from main while continuing feature development
+- **Isolated testing**: Run integration tests in parallel across different branches
+
+**Activation keywords**: worktree, worktrees, git worktree, parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work
 
 ## Related Skills
 

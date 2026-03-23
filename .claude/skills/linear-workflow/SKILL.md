@@ -22,18 +22,6 @@ Guided workflow for implementing Linear issues with feature branches and pull re
 | **In Progress** | Currently being worked on           |
 | **Done**        | After PR is merged                  |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- User asks to work on a Linear issue (e.g., "work on PRA-19", "start PRA-35")
-- User wants to pick up groomed issues from Linear backlog
-- User needs to create a pull request for completed work
-- User wants to merge a PR and close the associated issue
-- User mentions Linear issue keys or asks about workflow steps
-
-**Activation keywords**: work on PRA-, start issue, Linear ticket, create PR, close issue, implement, implementing, development workflow
-
 ## Core Workflow
 
 ### 1. Issue Selection
@@ -166,6 +154,18 @@ Claude: [Fetches issue, moves to In Progress]
 ## Additional Resources
 
 See [examples.md](examples.md) for detailed workflow examples and edge cases.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- User asks to work on a Linear issue (e.g., "work on PRA-19", "start PRA-35")
+- User wants to pick up groomed issues from Linear backlog
+- User needs to create a pull request for completed work
+- User wants to merge a PR and close the associated issue
+- User mentions Linear issue keys or asks about workflow steps
+
+**Activation keywords**: work on PRA-, start issue, Linear ticket, create PR, close issue, implement, implementing, development workflow
 
 ## Related Skills
 

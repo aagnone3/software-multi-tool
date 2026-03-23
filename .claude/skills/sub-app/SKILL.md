@@ -27,20 +27,6 @@ Use this when building complete tools from scratch, not just registering them in
 | Tool Routes                  | `apps/web/app/(saas)/app/tools/[toolSlug]/`     |
 | Middleware (public access)   | `apps/web/middleware.ts`                        |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Creating a new tool/sub-app from scratch
-- Implementing tool-specific database models
-- Setting up API endpoints for a tool
-- Understanding the async job queue pattern
-- Adding database query helpers for a tool
-- Building tool-specific UI components
-- Questions like "How do I create a new tool?" or "What's the pattern for tool database models?"
-
-**Activation keywords**: new tool, sub-app, tool development, build a tool, create tool, async job, job queue, ToolJob, tool backend, tool implementation, Inngest, background job, worker, processor
-
 **Note**: For just registering an existing tool in the config, use the `tools` skill instead. This skill is for complete implementations.
 
 ## Architecture Overview
@@ -376,6 +362,20 @@ pnpm --filter @repo/api test
 # Run with coverage
 pnpm test:ci
 ```
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Creating a new tool/sub-app from scratch
+- Implementing tool-specific database models
+- Setting up API endpoints for a tool
+- Understanding the async job queue pattern
+- Adding database query helpers for a tool
+- Building tool-specific UI components
+- Questions like "How do I create a new tool?" or "What's the pattern for tool database models?"
+
+**Activation keywords**: new tool, sub-app, tool development, build a tool, create tool, async job, job queue, ToolJob, tool backend, tool implementation, Inngest, background job, worker, processor
 
 ## Related Skills
 

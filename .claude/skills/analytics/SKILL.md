@@ -194,22 +194,6 @@ The `@analytics` alias is configured in `apps/web/tsconfig.json`:
 }
 ```
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Implementing event tracking in components
-- Setting up PostHog for a new project
-- Switching between analytics providers
-- Adding user identification to analytics
-- Debugging analytics events
-- Understanding the analytics architecture
-- Creating a custom analytics provider
-- Configuring PostHog options (EU hosting, person profiles)
-- Adding analytics to new tools (see `tool-analytics.md`)
-
-**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, user identification, analytics provider, usage tracking, tool analytics, server analytics
-
 ## Common Event Patterns
 
 ```typescript
@@ -250,6 +234,22 @@ For comprehensive documentation on tracking tool usage for anonymous and authent
 - **Conversion tracking**: Track signup and purchase events from tools
 
 See [tool-analytics.md](tool-analytics.md) for detailed implementation guide and examples.
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Implementing event tracking in components
+- Setting up PostHog for a new project
+- Switching between analytics providers
+- Adding user identification to analytics
+- Debugging analytics events
+- Understanding the analytics architecture
+- Creating a custom analytics provider
+- Configuring PostHog options (EU hosting, person profiles)
+- Adding analytics to new tools (see `tool-analytics.md`)
+
+**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, user identification, analytics provider, usage tracking, tool analytics, server analytics
 
 ## Related Skills
 

@@ -39,18 +39,6 @@ allowed-tools:
 | Pulse | Scale + opacity | 4-6s | Attention, breathing |
 | Fade | Opacity transitions | 3-5s | Subtle presence |
 
-## When to Use This Skill
-
-Use this skill when:
-
-- Designing landing page backgrounds
-- Creating animated hero sections
-- Implementing decorative visual patterns
-- Adding depth and visual interest to marketing pages
-- Enhancing page aesthetics without compromising performance
-
-**Activation keywords**: landing page, background, animated background, hero section, gradient orbs, floating shapes, visual design, marketing page
-
 ## Architecture Overview
 
 ```text
@@ -326,6 +314,18 @@ const prefersReducedMotion =
 ## Additional Resources
 
 See [examples.md](examples.md) for complete landing page examples with annotated source code.
+
+## When to Use This Skill
+
+Use this skill when:
+
+- Designing landing page backgrounds
+- Creating animated hero sections
+- Implementing decorative visual patterns
+- Adding depth and visual interest to marketing pages
+- Enhancing page aesthetics without compromising performance
+
+**Activation keywords**: landing page, background, animated background, hero section, gradient orbs, floating shapes, visual design, marketing page
 
 ## Related Skills
 
