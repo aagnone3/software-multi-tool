@@ -26,18 +26,6 @@ Multi-tenant file storage patterns and path conventions for the `@repo/storage` 
 | Image proxy route | `apps/web/app/image-proxy/[...path]/route.ts` |
 | Bucket config | `config/index.ts` (storage.bucketNames) |
 
-## When to Use This Skill
-
-Use this skill when:
-
-- Implementing file upload features (avatars, logos, documents)
-- Adding new upload types to the application
-- Working with storage providers (Supabase, S3, local)
-- Migrating existing files to new path conventions
-- Debugging file access issues
-
-**Activation keywords**: file upload, storage, avatar, logo, s3, supabase, bucket, signed url, multi-tenant paths
-
 ## Core Concept: Multi-Tenant Path Isolation
 
 All file uploads must follow multi-tenant path conventions to ensure proper isolation between organizations.
@@ -310,6 +298,18 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 | `packages/storage/provider/s3/` | S3-compatible storage implementation |
 | `config/index.ts` | Bucket name configuration |
 | `apps/web/app/image-proxy/[...path]/route.ts` | Image serving proxy |
+
+## When to Use This Skill
+
+Use this skill when:
+
+- Implementing file upload features (avatars, logos, documents)
+- Adding new upload types to the application
+- Working with storage providers (Supabase, S3, local)
+- Migrating existing files to new path conventions
+- Debugging file access issues
+
+**Activation keywords**: file upload, storage, avatar, logo, s3, supabase, bucket, signed url, multi-tenant paths
 
 ## Related Skills
 
