@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ToolsGrid } from "./ToolsGrid";
 
 vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
-	useRecentJobs: () => ({ recentToolSlugs: [] }),
+	useRecentJobs: () => ({ recentToolSlugs: [], recentToolsMap: new Map() }),
 }));
 
 vi.mock("@saas/tools/lib/tool-flags", () => ({

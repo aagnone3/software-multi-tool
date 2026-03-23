@@ -47,7 +47,7 @@ export function ToolsGrid() {
 	const [sortBy, setSortBy] = useState<SortOption>("default");
 	const [activeCategory, setActiveCategory] = useState<string>("All");
 	const allTools = useMemo(() => getVisibleTools(), []);
-	const { recentToolSlugs } = useRecentJobs(20);
+	const { recentToolSlugs, recentToolsMap } = useRecentJobs(20);
 	const recentToolSet = useMemo(
 		() => new Set(recentToolSlugs),
 		[recentToolSlugs],
@@ -191,6 +191,11 @@ export function ToolsGrid() {
 							tool={tool}
 							isComingSoon={tool.isComingSoon}
 							isRecentlyUsed={recentToolSet.has(tool.slug)}
+							lastUsedAt={
+								recentToolsMap.get(tool.slug)?.completedAt ??
+								recentToolsMap.get(tool.slug)?.createdAt ??
+								null
+							}
 							isFavorite={isFavorite(tool.slug)}
 							onToggleFavorite={toggleFavorite}
 						/>

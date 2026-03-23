@@ -38,10 +38,30 @@ interface ToolCardProps {
 	isComingSoon?: boolean;
 	/** Whether the current user has recently used this tool */
 	isRecentlyUsed?: boolean;
+	/** ISO date string for when the user last used this tool */
+	lastUsedAt?: string | null;
 	/** Whether the current user has favorited this tool */
 	isFavorite?: boolean;
 	/** Callback when the user toggles favorite status */
 	onToggleFavorite?: (slug: string) => void;
+}
+
+function formatLastUsed(dateStr: string): string {
+	const date = new Date(dateStr);
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffMins = Math.floor(diffMs / 60000);
+	const diffHours = Math.floor(diffMins / 60);
+	const diffDays = Math.floor(diffHours / 24);
+
+	if (diffMins < 1) return "just now";
+	if (diffMins < 60) return `${diffMins}m ago`;
+	if (diffHours < 24) return `${diffHours}h ago`;
+	if (diffDays < 7) return `${diffDays}d ago`;
+	return date.toLocaleDateString(undefined, {
+		month: "short",
+		day: "numeric",
+	});
 }
 
 function getToolIcon(iconName: string) {
@@ -63,6 +83,7 @@ export function ToolCard({
 	tool,
 	isComingSoon = false,
 	isRecentlyUsed = false,
+	lastUsedAt = null,
 	isFavorite = false,
 	onToggleFavorite,
 }: ToolCardProps) {
@@ -134,7 +155,9 @@ export function ToolCard({
 						{isRecentlyUsed && (
 							<span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
 								<CheckCircle2Icon className="size-3" />
-								Used
+								{lastUsedAt
+									? formatLastUsed(lastUsedAt)
+									: "Used"}
 							</span>
 						)}
 					</div>

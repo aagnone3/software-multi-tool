@@ -73,6 +73,17 @@ describe("ToolCard", () => {
 		expect(screen.queryByText(/credit/i)).not.toBeInTheDocument();
 	});
 
+	it("shows 'Used' badge when isRecentlyUsed=true without lastUsedAt", () => {
+		render(<ToolCard tool={baseTool} isRecentlyUsed />);
+		expect(screen.getByText("Used")).toBeInTheDocument();
+	});
+
+	it("shows relative time instead of 'Used' when lastUsedAt is provided", () => {
+		const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString(); // 5 minutes ago
+		render(<ToolCard tool={baseTool} isRecentlyUsed lastUsedAt={recent} />);
+		expect(screen.getByText("5m ago")).toBeInTheDocument();
+	});
+
 	it("renders known icons for each supported icon name", () => {
 		const icons = [
 			"image-minus",
