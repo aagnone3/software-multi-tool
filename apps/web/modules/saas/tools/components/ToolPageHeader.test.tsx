@@ -4,6 +4,10 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolPageHeader } from "./ToolPageHeader";
 
+vi.mock("./ToolFeedbackButton", () => ({
+	ToolFeedbackButton: () => null,
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,

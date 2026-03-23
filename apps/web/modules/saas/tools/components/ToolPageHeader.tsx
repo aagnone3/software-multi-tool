@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
+import { ToolFeedbackButton } from "./ToolFeedbackButton";
 
 interface ToolPageHeaderProps {
 	tool: ToolConfig;
@@ -82,6 +83,7 @@ export function ToolPageHeader({ tool }: ToolPageHeaderProps) {
 							{tool.creditCost === 1 ? "credit" : "credits"} / use
 						</span>
 					)}
+					<ToolFeedbackButton toolSlug={tool.slug} />
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
