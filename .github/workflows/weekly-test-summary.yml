@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter @repo/database exec prisma generate
+
       - name: Collect metrics
         run: pnpm metrics:collect
         env:
