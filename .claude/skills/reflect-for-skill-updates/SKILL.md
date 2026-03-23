@@ -25,19 +25,6 @@ allowed-tools:
 | Missing workflow step | Update skill's workflow steps |
 | Configuration drift | Add consistency checks to setup scripts |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- A bug or issue was caused by **missing or incomplete documentation**
-- You had to **debug something that a skill should have prevented**
-- Configuration was **inconsistent** between components (e.g., different database URLs)
-- A workflow step was **missing** from documented procedures
-- You discovered a **gotcha** that others will likely hit too
-- The user explicitly asks: "Any skills need updating?"
-
-**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, lessons learned, post-mortem
-
 ## Reflection Process
 
 ### Step 1: Identify the Root Cause
@@ -187,6 +174,19 @@ Use this template to structure your reflection:
 | `cicd` | New GitHub Actions workflows, new CI checks |
 | `sub-app` | New tool patterns, job queue changes |
 | `ai` | Model ID changes, new SDK exports, new processors |
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- A bug or issue was caused by **missing or incomplete documentation**
+- You had to **debug something that a skill should have prevented**
+- Configuration was **inconsistent** between components (e.g., different database URLs)
+- A workflow step was **missing** from documented procedures
+- You discovered a **gotcha** that others will likely hit too
+- The user explicitly asks: "Any skills need updating?"
+
+**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, post-mortem
 
 ## Related Skills
 
