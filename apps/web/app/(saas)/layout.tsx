@@ -9,6 +9,7 @@ import { CommandPaletteShortcut } from "@saas/shared/components/CommandPaletteSh
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
 import { KeyboardNavigationShortcuts } from "@saas/shared/components/KeyboardNavigationShortcuts";
 import { KeyboardShortcutsHelp } from "@saas/shared/components/KeyboardShortcutsHelp";
+import { MilestoneNotifier } from "@saas/start/components/MilestoneNotifier";
 import { Document } from "@shared/components/Document";
 import { PreviewStatusBanner } from "@shared/components/PreviewStatusBanner";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -54,6 +55,7 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 						<ConfirmationAlertProvider>
 							<CommandPaletteProvider>
 								<CommandPaletteShortcut />
+								<MilestoneNotifier />
 								<KeyboardNavigationShortcuts />
 								<KeyboardShortcutsHelp />
 								<PreviewStatusBanner />

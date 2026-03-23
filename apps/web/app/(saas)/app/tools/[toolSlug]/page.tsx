@@ -5,6 +5,7 @@ import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
 import { ToolRatingWidget } from "@saas/tools/components/ToolRatingWidget";
 import { ToolRecentRuns } from "@saas/tools/components/ToolRecentRuns";
+import { ToolSampleOutput } from "@saas/tools/components/ToolSampleOutput";
 import { ToolTipsBanner } from "@saas/tools/components/ToolTipsBanner";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
 import { ToolViewTracker } from "@saas/tools/components/ToolViewTracker";
@@ -113,6 +114,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
 			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
+			<ToolSampleOutput toolSlug={toolSlug} className="mt-6" />
 			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
