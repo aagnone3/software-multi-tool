@@ -1,93 +1,79 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ToolFeedbackButton } from "./ToolFeedbackButton";
 
-const { mockMutate, mockToastSuccess, mockToastError, mockFeedbackCreate } =
-	vi.hoisted(() => ({
-		mockMutate: vi.fn(),
-		mockToastSuccess: vi.fn(),
-		mockToastError: vi.fn(),
-		mockFeedbackCreate: vi.fn().mockResolvedValue({}),
-	}));
-
-vi.mock("@tanstack/react-query", () => ({
-	useMutation: vi.fn(() => ({
-		mutate: mockMutate,
-		isPending: false,
-	})),
-}));
-
-vi.mock("sonner", () => ({
-	toast: {
-		success: mockToastSuccess,
-		error: mockToastError,
-	},
-}));
-
+const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }));
 vi.mock("@shared/lib/orpc-client", () => ({
 	orpcClient: {
 		feedback: {
-			create: mockFeedbackCreate,
+			create: mockCreate,
 		},
 	},
 }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 describe("ToolFeedbackButton", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
+	it("renders Feedback button", () => {
+		render(<ToolFeedbackButton toolSlug="invoice-processor" />);
+		expect(screen.getByRole("button", { name: /feedback/i })).toBeTruthy();
 	});
 
-	it("renders feedback icon button", () => {
-		render(<ToolFeedbackButton toolSlug="test-tool" />);
-		expect(
-			screen.getByRole("button", { name: "Give feedback on this tool" }),
-		).toBeDefined();
+	it("opens dialog on click", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<ToolFeedbackButton toolSlug="invoice-processor" />);
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		expect(screen.getByText("Share your feedback")).toBeTruthy();
+		expect(screen.getByText("Helpful")).toBeTruthy();
+		expect(screen.getByText("Not helpful")).toBeTruthy();
 	});
 
-	it("opens dialog when clicked", async () => {
-		render(<ToolFeedbackButton toolSlug="test-tool" />);
-		const button = screen.getByRole("button", {
-			name: "Give feedback on this tool",
+	it("submit is disabled until rating is chosen", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<ToolFeedbackButton toolSlug="invoice-processor" />);
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		const submitBtn = screen.getByRole("button", {
+			name: /submit feedback/i,
 		});
-		fireEvent.click(button);
-		await waitFor(() => {
-			expect(screen.getByText("Rate this tool")).toBeDefined();
-		});
+		expect((submitBtn as HTMLButtonElement).disabled).toBe(true);
 	});
 
-	it("shows rating buttons in dialog", async () => {
-		render(<ToolFeedbackButton toolSlug="test-tool" />);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Give feedback on this tool" }),
+	it("submits feedback with POSITIVE rating", async () => {
+		const user = userEvent.setup({ delay: null });
+		mockCreate.mockResolvedValueOnce({ feedback: { id: "f1" } });
+		render(
+			<ToolFeedbackButton toolSlug="invoice-processor" jobId="job-1" />,
 		);
-		await waitFor(() => {
-			expect(screen.getByText("Yes, great!")).toBeDefined();
-			expect(screen.getByText("Needs work")).toBeDefined();
-		});
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		await user.click(screen.getByText("Helpful"));
+		await user.click(
+			screen.getByRole("button", { name: /submit feedback/i }),
+		);
+		await waitFor(() =>
+			expect(mockCreate).toHaveBeenCalledWith({
+				toolSlug: "invoice-processor",
+				rating: "POSITIVE",
+				jobId: "job-1",
+				chatTranscript: undefined,
+			}),
+		);
 	});
 
-	it("shows comment textarea", async () => {
-		render(<ToolFeedbackButton toolSlug="test-tool" />);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Give feedback on this tool" }),
+	it("shows error toast on failure", async () => {
+		const user = userEvent.setup({ delay: null });
+		const { toast } = await import("sonner");
+		mockCreate.mockRejectedValueOnce(new Error("fail"));
+		render(<ToolFeedbackButton toolSlug="invoice-processor" />);
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		await user.click(screen.getByText("Not helpful"));
+		await user.click(
+			screen.getByRole("button", { name: /submit feedback/i }),
 		);
-		await waitFor(() => {
-			expect(screen.getByRole("textbox")).toBeDefined();
-		});
-	});
-
-	it("submit button is disabled without a rating", async () => {
-		render(<ToolFeedbackButton toolSlug="test-tool" />);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Give feedback on this tool" }),
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith(
+				"Failed to submit feedback. Please try again.",
+			),
 		);
-		await waitFor(() => {
-			const submitBtn = screen.getByText("Submit feedback");
-			expect(submitBtn.closest("button")).toHaveProperty(
-				"disabled",
-				true,
-			);
-		});
 	});
 });
