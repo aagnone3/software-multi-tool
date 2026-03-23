@@ -133,8 +133,10 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 					const status = job.status as JobStatus;
 					const detailBase = DETAIL_ROUTES[toolSlug];
 					const detailUrl =
-						detailBase && status === "COMPLETED"
-							? `${detailBase}/${job.id}`
+						status === "COMPLETED"
+							? detailBase
+								? `${detailBase}/${job.id}`
+								: `/app/jobs/${job.id}`
 							: null;
 
 					return (

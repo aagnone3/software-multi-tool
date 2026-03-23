@@ -113,7 +113,7 @@ describe("ToolRecentRuns", () => {
 		);
 	});
 
-	it("does not show View link for non-detail-route tools", () => {
+	it("shows View link to /app/jobs/[id] for non-detail-route tools", () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [makeJob({ toolSlug: "contract-analyzer" })],
 			isLoading: false,
@@ -122,7 +122,8 @@ describe("ToolRecentRuns", () => {
 		});
 		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
 		const viewLinks = screen.queryAllByRole("link", { name: /^view$/i });
-		expect(viewLinks.length).toBe(0);
+		expect(viewLinks.length).toBeGreaterThan(0);
+		expect(viewLinks[0].getAttribute("href")).toContain("/app/jobs/");
 	});
 
 	it("passes toolSlug and limit=3 to useJobsList", () => {

@@ -258,6 +258,8 @@ export function JobsHistoryPage() {
 	const debouncedSearch = useDebounce(search, 250);
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [toolFilter, setToolFilter] = useState<string>("");
+	const [dateFrom, setDateFrom] = useState<string>("");
+	const [dateTo, setDateTo] = useState<string>("");
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const queryClient = useQueryClient();
 
@@ -299,12 +301,20 @@ export function JobsHistoryPage() {
 	}, [typedJobs]);
 
 	const filteredJobs = useMemo(() => {
+		const fromTs = dateFrom ? new Date(dateFrom).getTime() : null;
+		const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
 		return typedJobs.filter((job) => {
 			if (statusFilter && job.status !== statusFilter) {
 				return false;
 			}
 			if (toolFilter && job.toolSlug !== toolFilter) {
 				return false;
+			}
+			if (fromTs !== null) {
+				if (new Date(job.createdAt).getTime() < fromTs) return false;
+			}
+			if (toTs !== null) {
+				if (new Date(job.createdAt).getTime() > toTs) return false;
 			}
 			if (debouncedSearch) {
 				const toolName = getToolName(job.toolSlug).toLowerCase();
@@ -319,9 +329,18 @@ export function JobsHistoryPage() {
 			}
 			return true;
 		});
-	}, [typedJobs, statusFilter, toolFilter, debouncedSearch]);
+	}, [
+		typedJobs,
+		statusFilter,
+		toolFilter,
+		dateFrom,
+		dateTo,
+		debouncedSearch,
+	]);
 
-	const hasFilters = Boolean(search || statusFilter || toolFilter);
+	const hasFilters = Boolean(
+		search || statusFilter || toolFilter || dateFrom || dateTo,
+	);
 
 	const exportToCsv = useCallback(() => {
 		const headers = [
@@ -441,6 +460,22 @@ export function JobsHistoryPage() {
 					</Select>
 				)}
 
+				{/* Date range */}
+				<Input
+					type="date"
+					value={dateFrom}
+					onChange={(e) => setDateFrom(e.target.value)}
+					className="w-[145px] text-sm"
+					aria-label="From date"
+				/>
+				<Input
+					type="date"
+					value={dateTo}
+					onChange={(e) => setDateTo(e.target.value)}
+					className="w-[145px] text-sm"
+					aria-label="To date"
+				/>
+
 				{hasFilters && (
 					<Button
 						variant="ghost"
@@ -449,6 +484,8 @@ export function JobsHistoryPage() {
 							setSearch("");
 							setStatusFilter("");
 							setToolFilter("");
+							setDateFrom("");
+							setDateTo("");
 						}}
 					>
 						Clear filters
