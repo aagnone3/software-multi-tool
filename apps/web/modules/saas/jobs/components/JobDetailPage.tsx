@@ -17,7 +17,6 @@ import {
 	ArrowLeftIcon,
 	CheckCircle2Icon,
 	ClockIcon,
-	CopyIcon,
 	Loader2Icon,
 	Share2Icon,
 	WrenchIcon,
@@ -26,6 +25,7 @@ import {
 import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
 type JobStatus =
 	| "PENDING"
@@ -102,46 +102,6 @@ function StatusBadge({ status }: { status: JobStatus }) {
 			/>
 			{statusConfig.label}
 		</Badge>
-	);
-}
-
-function OutputViewer({ output }: { output: unknown }) {
-	const [copied, setCopied] = useState(false);
-
-	const outputText = (() => {
-		try {
-			return JSON.stringify(output, null, 2);
-		} catch {
-			return String(output);
-		}
-	})();
-
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(outputText);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		} catch {
-			toast.error("Failed to copy to clipboard");
-		}
-	};
-
-	return (
-		<div className="relative">
-			<Button
-				variant="ghost"
-				size="sm"
-				className="absolute top-2 right-2 z-10"
-				onClick={handleCopy}
-				aria-label="Copy output"
-			>
-				<CopyIcon className="size-3 mr-1" />
-				{copied ? "Copied!" : "Copy"}
-			</Button>
-			<pre className="bg-muted rounded-lg p-4 pt-10 text-xs overflow-auto max-h-96 text-foreground font-mono">
-				{outputText}
-			</pre>
-		</div>
 	);
 }
 
@@ -289,11 +249,15 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 					<CardHeader className="pb-3">
 						<CardTitle className="text-base">Output</CardTitle>
 						<CardDescription>
-							Raw JSON output from the job
+							Job result — use tabs to switch between formatted
+							and raw JSON views
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<OutputViewer output={job.output} />
+						<SmartOutputRenderer
+							output={job.output}
+							toolSlug={job.toolSlug}
+						/>
 					</CardContent>
 				</Card>
 			)}

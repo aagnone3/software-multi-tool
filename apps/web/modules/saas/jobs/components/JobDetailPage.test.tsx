@@ -163,15 +163,19 @@ describe("JobDetailPage", () => {
 		expect(screen.getByText("unknown-tool")).toBeInTheDocument();
 	});
 
-	it("shows Copy button in output viewer", async () => {
+	it("shows SmartOutputRenderer tabs in output viewer", async () => {
 		mockUseJobPolling.mockReturnValue({
 			job: baseJob,
 			isLoading: false,
 			invalidateJob: vi.fn(),
 		});
 		render(<JobDetailPage jobId="job-abc123" />);
+		// SmartOutputRenderer shows Formatted/Raw JSON tabs for object output
 		expect(
-			screen.getByRole("button", { name: "Copy output" }),
+			screen.getByRole("tab", { name: /formatted/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("tab", { name: /raw json/i }),
 		).toBeInTheDocument();
 	});
 
