@@ -18,6 +18,7 @@ import { StreakWidget } from "./components/StreakWidget";
 import { TopToolsWidget } from "./components/TopToolsWidget";
 import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
 import { UsageTrendChart } from "./components/UsageTrendChart";
+import { WeeklyActivityHeatmap } from "./components/WeeklyActivityHeatmap";
 
 export default function UserStart() {
 	return (
@@ -53,6 +54,9 @@ export default function UserStart() {
 				{/* Recent Activity Feed */}
 				<RecentActivityFeed className="lg:col-span-2 xl:col-span-1" />
 			</div>
+
+			{/* Activity heatmap — full-width */}
+			<WeeklyActivityHeatmap />
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
