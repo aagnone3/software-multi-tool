@@ -1,74 +1,116 @@
 "use client";
 
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
-	useTools: vi.fn(),
+	useTools: () => ({
+		enabledTools: [
+			{
+				slug: "document-analyzer",
+				name: "Document Analyzer",
+				creditCost: 5,
+				public: true,
+				comingSoon: false,
+			},
+		],
+	}),
 }));
+
 vi.mock("next/link", () => ({
-	default: ({ href, children, ...props }: React.ComponentProps<"a">) => (
-		<a href={href as string} {...props}>
+	default: ({
+		href,
+		children,
+		...props
+	}: {
+		href: string;
+		children: React.ReactNode;
+		[key: string]: unknown;
+	}) => (
+		<a href={href} {...props}>
 			{children}
 		</a>
 	),
 }));
 
-import { useTools } from "@saas/tools/hooks/use-tools";
+const mockLocalStorage: Record<string, string> = {};
+vi.stubGlobal("localStorage", {
+	getItem: (key: string) => mockLocalStorage[key] ?? null,
+	setItem: (key: string, value: string) => {
+		mockLocalStorage[key] = value;
+	},
+	removeItem: (key: string) => {
+		delete mockLocalStorage[key];
+	},
+	clear: () => {
+		for (const key of Object.keys(mockLocalStorage))
+			delete mockLocalStorage[key];
+	},
+});
+
 import { WelcomeModal } from "./WelcomeModal";
 
-const mockUseTools = vi.mocked(useTools);
-
-const enabledTools = [
-	{ slug: "news-analyzer", name: "News Analyzer", enabled: true },
-];
-
-beforeEach(() => {
-	vi.useFakeTimers({ shouldAdvanceTime: false });
-	localStorage.clear();
-	mockUseTools.mockReturnValue({
-		enabledTools,
-		tools: enabledTools,
-		visibleTools: enabledTools,
-		isLoading: false,
-		isToolEnabled: () => true,
-	} as unknown as ReturnType<typeof useTools>);
-});
-
-afterEach(() => {
-	vi.useRealTimers();
-});
-
 describe("WelcomeModal", () => {
-	it("does not show before delay", () => {
-		render(<WelcomeModal />);
-		expect(screen.queryByText("Welcome to your AI workspace")).toBeNull();
+	beforeEach(() => {
+		for (const key of Object.keys(mockLocalStorage))
+			delete mockLocalStorage[key];
+		vi.useFakeTimers();
 	});
 
-	it("shows after delay when not dismissed", () => {
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	const openModal = () => {
 		render(<WelcomeModal />);
 		act(() => {
 			vi.advanceTimersByTime(1000);
 		});
-		expect(screen.getByText("Welcome to your AI workspace")).toBeTruthy();
+	};
+
+	it("renders welcome modal after delay when not dismissed", () => {
+		openModal();
+		expect(
+			screen.getByText("Welcome to your AI workspace"),
+		).toBeInTheDocument();
 	});
 
-	it("does not show when already dismissed", () => {
-		localStorage.setItem("welcome-modal-dismissed", "true");
-		render(<WelcomeModal />);
-		act(() => {
-			vi.advanceTimersByTime(1000);
-		});
-		expect(screen.queryByText("Welcome to your AI workspace")).toBeNull();
+	it("does not render when previously dismissed", () => {
+		mockLocalStorage["welcome-modal-dismissed"] = "true";
+		openModal();
+		expect(
+			screen.queryByText("Welcome to your AI workspace"),
+		).not.toBeInTheDocument();
 	});
 
-	it("shows step dots for all 4 steps", () => {
-		render(<WelcomeModal />);
-		act(() => {
-			vi.advanceTimersByTime(1000);
-		});
-		const stepDots = screen.getAllByRole("button", { name: /go to step/i });
-		expect(stepDots.length).toBe(4);
+	it("navigates to next step on Next button click", () => {
+		openModal();
+		fireEvent.click(screen.getByRole("button", { name: /next/i }));
+		expect(screen.getByText("Explore the Tools")).toBeInTheDocument();
+	});
+
+	it("navigates back on Back button click", () => {
+		openModal();
+		fireEvent.click(screen.getByRole("button", { name: /next/i }));
+		fireEvent.click(screen.getByRole("button", { name: /back/i }));
+		expect(
+			screen.getByText("Welcome to your AI workspace"),
+		).toBeInTheDocument();
+	});
+
+	it("shows Try a tool button on last step", () => {
+		openModal();
+		const nextBtn = screen.getByRole("button", { name: /next/i });
+		fireEvent.click(nextBtn);
+		fireEvent.click(nextBtn);
+		fireEvent.click(nextBtn);
+		expect(screen.getByText(/try a tool/i)).toBeInTheDocument();
+	});
+
+	it("dismisses modal when skip tour is clicked", () => {
+		openModal();
+		fireEvent.click(screen.getByRole("button", { name: /skip tour/i }));
+		expect(mockLocalStorage["welcome-modal-dismissed"]).toBe("true");
 	});
 });
