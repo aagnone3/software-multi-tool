@@ -17,6 +17,7 @@ import { FeedbackAnalyzerTool } from "@tools/components/FeedbackAnalyzerTool";
 import { InvoiceProcessorTool } from "@tools/components/InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
+import { ToolNotes } from "@tools/components/ToolNotes";
 import { notFound, redirect } from "next/navigation";
 import { DiagramEditor } from "../../../../../components/tools/diagram-editor";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
@@ -122,6 +123,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
 			<ToolSampleOutput toolSlug={toolSlug} className="mt-6" />
 			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
+			<ToolNotes toolSlug={toolSlug} className="mt-6" />
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
