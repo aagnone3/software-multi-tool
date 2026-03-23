@@ -174,4 +174,16 @@ describe("JobDetailPage", () => {
 			screen.getByRole("button", { name: "Copy output" }),
 		).toBeInTheDocument();
 	});
+
+	it("shows Share button in the header", () => {
+		mockUseJobPolling.mockReturnValue({
+			job: baseJob,
+			isLoading: false,
+			invalidateJob: vi.fn(),
+		});
+		render(<JobDetailPage jobId="job-abc123" />);
+		expect(
+			screen.getByRole("button", { name: "Share job link" }),
+		).toBeInTheDocument();
+	});
 });

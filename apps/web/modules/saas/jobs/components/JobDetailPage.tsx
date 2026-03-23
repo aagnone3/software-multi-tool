@@ -19,6 +19,7 @@ import {
 	ClockIcon,
 	CopyIcon,
 	Loader2Icon,
+	Share2Icon,
 	WrenchIcon,
 	XCircleIcon,
 } from "lucide-react";
@@ -146,6 +147,19 @@ function OutputViewer({ output }: { output: unknown }) {
 
 export function JobDetailPage({ jobId }: { jobId: string }) {
 	const { job, isLoading } = useJobPolling(jobId);
+	const [shared, setShared] = useState(false);
+
+	const handleShare = async () => {
+		try {
+			const url = window.location.href;
+			await navigator.clipboard.writeText(url);
+			setShared(true);
+			toast.success("Job link copied to clipboard");
+			setTimeout(() => setShared(false), 2000);
+		} catch {
+			toast.error("Failed to copy link");
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -198,12 +212,21 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 				<div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
 					<WrenchIcon className="size-4" />
 				</div>
-				<div>
+				<div className="flex-1">
 					<h1 className="text-xl font-semibold">{toolName}</h1>
 					<p className="text-sm text-muted-foreground">
 						Job ID: {job.id}
 					</p>
 				</div>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={handleShare}
+					aria-label="Share job link"
+				>
+					<Share2Icon className="size-4 mr-1" />
+					{shared ? "Copied!" : "Share"}
+				</Button>
 			</div>
 
 			{/* Status Card */}
