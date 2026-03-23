@@ -13,9 +13,68 @@ import {
 	SelectValue,
 } from "@ui/components/select";
 import { cn } from "@ui/lib";
-import { SearchIcon, WrenchIcon } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { ClockIcon, SearchIcon, WrenchIcon, XIcon } from "lucide-react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { ToolCard } from "./ToolCard";
+
+const RECENT_SEARCHES_KEY = "tools-grid-recent-searches";
+const MAX_RECENT_SEARCHES = 5;
+
+function useRecentSearches() {
+	const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+		try {
+			const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+			return stored ? (JSON.parse(stored) as string[]) : [];
+		} catch {
+			return [];
+		}
+	});
+
+	const addSearch = useCallback((query: string) => {
+		const q = query.trim();
+		if (!q) {
+			return;
+		}
+		setRecentSearches((prev) => {
+			const deduplicated = [q, ...prev.filter((s) => s !== q)].slice(
+				0,
+				MAX_RECENT_SEARCHES,
+			);
+			try {
+				localStorage.setItem(
+					RECENT_SEARCHES_KEY,
+					JSON.stringify(deduplicated),
+				);
+			} catch {
+				// ignore
+			}
+			return deduplicated;
+		});
+	}, []);
+
+	const removeSearch = useCallback((query: string) => {
+		setRecentSearches((prev) => {
+			const updated = prev.filter((s) => s !== query);
+			try {
+				localStorage.setItem(
+					RECENT_SEARCHES_KEY,
+					JSON.stringify(updated),
+				);
+			} catch {
+				// ignore
+			}
+			return updated;
+		});
+	}, []);
+
+	return { recentSearches, addSearch, removeSearch };
+}
 
 type SortOption =
 	| "default"
@@ -46,6 +105,9 @@ export function ToolsGrid() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<SortOption>("default");
 	const [activeCategory, setActiveCategory] = useState<string>("All");
+	const [showRecentSearches, setShowRecentSearches] = useState(false);
+	const searchRef = useRef<HTMLDivElement>(null);
+	const { recentSearches, addSearch, removeSearch } = useRecentSearches();
 	const allTools = useMemo(() => getVisibleTools(), []);
 	const { recentToolSlugs, recentToolsMap } = useRecentJobs(20);
 	const recentToolSet = useMemo(
@@ -106,6 +168,42 @@ export function ToolsGrid() {
 		favorites,
 	]);
 
+	// Close recent searches dropdown on outside click
+	useEffect(() => {
+		function handleClick(e: MouseEvent) {
+			if (
+				searchRef.current &&
+				!searchRef.current.contains(e.target as Node)
+			) {
+				setShowRecentSearches(false);
+			}
+		}
+		document.addEventListener("mousedown", handleClick);
+		return () => document.removeEventListener("mousedown", handleClick);
+	}, []);
+
+	const handleSearchChange = useCallback(
+		(value: string) => {
+			setSearchQuery(value);
+			if (!value.trim()) {
+				setShowRecentSearches(recentSearches.length > 0);
+			}
+		},
+		[recentSearches.length],
+	);
+
+	const handleSearchBlur = useCallback(() => {
+		// Save non-empty queries when user leaves the field
+		if (searchQuery.trim()) {
+			addSearch(searchQuery);
+		}
+	}, [searchQuery, addSearch]);
+
+	const applyRecentSearch = useCallback((query: string) => {
+		setSearchQuery(query);
+		setShowRecentSearches(false);
+	}, []);
+
 	const showControls = allTools.length > 4;
 	const showCategories = categories.length > 2;
 
@@ -113,16 +211,74 @@ export function ToolsGrid() {
 		<div className="space-y-6">
 			{showControls && (
 				<div className="flex flex-wrap items-center gap-3">
-					<div className="relative max-w-sm flex-1">
+					<div ref={searchRef} className="relative max-w-sm flex-1">
 						<SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
 						<Input
 							type="search"
 							placeholder="Search tools…"
 							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
+							onChange={(e) => handleSearchChange(e.target.value)}
+							onFocus={() =>
+								setShowRecentSearches(
+									recentSearches.length > 0 &&
+										!searchQuery.trim(),
+								)
+							}
+							onBlur={handleSearchBlur}
 							className="pl-9"
 							aria-label="Search tools"
+							aria-autocomplete="list"
+							aria-expanded={showRecentSearches}
 						/>
+						{showRecentSearches && (
+							<div
+								className="absolute left-0 top-full z-50 mt-1 w-full rounded-md border bg-popover shadow-md"
+								role="listbox"
+								aria-label="Recent searches"
+							>
+								<p className="px-3 py-1.5 text-xs text-muted-foreground font-medium">
+									Recent searches
+								</p>
+								{recentSearches.map((s) => (
+									<div
+										key={s}
+										className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent cursor-pointer"
+										role="option"
+										aria-selected={false}
+										tabIndex={0}
+										onMouseDown={(e) => {
+											e.preventDefault();
+											applyRecentSearch(s);
+										}}
+										onKeyDown={(e) => {
+											if (
+												e.key === "Enter" ||
+												e.key === " "
+											) {
+												applyRecentSearch(s);
+											}
+										}}
+									>
+										<ClockIcon className="size-3.5 text-muted-foreground shrink-0" />
+										<span className="flex-1 truncate">
+											{s}
+										</span>
+										<button
+											type="button"
+											aria-label={`Remove "${s}" from recent searches`}
+											className="text-muted-foreground hover:text-foreground"
+											onMouseDown={(e) => {
+												e.stopPropagation();
+												e.preventDefault();
+												removeSearch(s);
+											}}
+										>
+											<XIcon className="size-3.5" />
+										</button>
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 					<Select
 						value={sortBy}

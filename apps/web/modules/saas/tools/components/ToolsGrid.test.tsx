@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolsGrid } from "./ToolsGrid";
 
 vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
@@ -79,6 +79,9 @@ vi.mock("next/link", () => ({
 }));
 
 describe("ToolsGrid", () => {
+	beforeEach(() => {
+		localStorage.clear();
+	});
 	it("renders all visible tools", () => {
 		render(<ToolsGrid />);
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
@@ -172,5 +175,52 @@ describe("ToolsGrid", () => {
 		expect(
 			screen.getByRole("button", { name: "Show all tools" }),
 		).toBeInTheDocument();
+	});
+
+	it("shows recent searches dropdown when input is focused with prior searches", async () => {
+		// Pre-seed localStorage with a recent search
+		localStorage.setItem(
+			"tools-grid-recent-searches",
+			JSON.stringify(["invoice"]),
+		);
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		const search = screen.getByPlaceholderText("Search tools…");
+		await user.click(search);
+		expect(screen.getByText("Recent searches")).toBeInTheDocument();
+		expect(screen.getByText("invoice")).toBeInTheDocument();
+	});
+
+	it("applies a recent search when clicked", async () => {
+		localStorage.setItem(
+			"tools-grid-recent-searches",
+			JSON.stringify(["invoice"]),
+		);
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		const search = screen.getByPlaceholderText("Search tools…");
+		await user.click(search);
+		const recentEntry = screen.getByText("invoice");
+		await user.click(recentEntry);
+		// Search should now show only Invoice Processor
+		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
+		expect(screen.queryByText("News Analyzer")).not.toBeInTheDocument();
+	});
+
+	it("removes a recent search when X button is clicked", async () => {
+		localStorage.setItem(
+			"tools-grid-recent-searches",
+			JSON.stringify(["invoice"]),
+		);
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		const search = screen.getByPlaceholderText("Search tools…");
+		await user.click(search);
+		expect(screen.getByText("invoice")).toBeInTheDocument();
+		const removeBtn = screen.getByRole("button", {
+			name: 'Remove "invoice" from recent searches',
+		});
+		await user.click(removeBtn);
+		expect(screen.queryByText("invoice")).not.toBeInTheDocument();
 	});
 });
