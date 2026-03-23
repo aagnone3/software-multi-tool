@@ -4,6 +4,7 @@ import { config } from "@repo/config";
 import { CreditBurnRateWidget } from "@saas/credits/components/CreditBurnRateWidget";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
 import React from "react";
+import { JobSearchWidget } from "../jobs/components/JobSearchWidget";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
 import { CreditsByToolChart } from "./components/CreditsByToolChart";
 import { CreditsOverview } from "./components/CreditsOverview";
@@ -96,6 +97,9 @@ export default function UserStart() {
 
 				{/* Pinned Job Outputs */}
 				<PinnedJobsWidget />
+
+				{/* Job Search */}
+				<JobSearchWidget />
 			</div>
 		</div>
 	);

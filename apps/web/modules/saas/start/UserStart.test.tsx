@@ -73,6 +73,14 @@ vi.mock("./components/StreakWidget", () => ({
 	StreakWidget: () => <div data-testid="streak-widget" />,
 }));
 
+vi.mock("./components/PinnedJobsWidget", () => ({
+	PinnedJobsWidget: () => <div data-testid="pinned-jobs-widget" />,
+}));
+
+vi.mock("../jobs/components/JobSearchWidget", () => ({
+	JobSearchWidget: () => <div data-testid="job-search-widget" />,
+}));
+
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
 		render(<UserStart />);
