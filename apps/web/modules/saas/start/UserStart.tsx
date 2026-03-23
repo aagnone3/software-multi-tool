@@ -14,6 +14,7 @@ import { RecentActivityFeed } from "./components/RecentActivityFeed";
 import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
 import { RecentlyViewedToolsWidget } from "./components/RecentlyViewedToolsWidget";
 import { RecommendedToolWidget } from "./components/RecommendedToolWidget";
+import { StreakWidget } from "./components/StreakWidget";
 import { TopToolsWidget } from "./components/TopToolsWidget";
 import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
 import { UsageTrendChart } from "./components/UsageTrendChart";
@@ -55,6 +56,9 @@ export default function UserStart() {
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
+				{/* Activity Streak */}
+				<StreakWidget />
+
 				{/* Daily Goal Widget */}
 				<DailyGoalWidget />
 
