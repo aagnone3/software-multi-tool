@@ -116,6 +116,18 @@ describe("JobDetailPage", () => {
 		expect(screen.getByText(/summary/)).toBeInTheDocument();
 	});
 
+	it("renders Download button when output exists", () => {
+		mockUseJobPolling.mockReturnValue({
+			job: baseJob,
+			isLoading: false,
+			invalidateJob: vi.fn(),
+		});
+		render(<JobDetailPage jobId="job-abc123" />);
+		expect(
+			screen.getByRole("button", { name: "Download output as JSON" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders Run Again action for completed job", () => {
 		mockUseJobPolling.mockReturnValue({
 			job: baseJob,

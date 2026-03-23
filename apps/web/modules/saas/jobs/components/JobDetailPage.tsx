@@ -17,6 +17,7 @@ import {
 	ArrowLeftIcon,
 	CheckCircle2Icon,
 	ClockIcon,
+	DownloadIcon,
 	Loader2Icon,
 	Share2Icon,
 	WrenchIcon,
@@ -108,6 +109,20 @@ function StatusBadge({ status }: { status: JobStatus }) {
 export function JobDetailPage({ jobId }: { jobId: string }) {
 	const { job, isLoading } = useJobPolling(jobId);
 	const [shared, setShared] = useState(false);
+
+	const handleDownload = () => {
+		if (!job?.output) return;
+		const blob = new Blob([JSON.stringify(job.output, null, 2)], {
+			type: "application/json",
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `job-${jobId}-output.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		toast.success("Output downloaded");
+	};
 
 	const handleShare = async () => {
 		try {
@@ -247,11 +262,26 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 			{job.output && (
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-base">Output</CardTitle>
-						<CardDescription>
-							Job result — use tabs to switch between formatted
-							and raw JSON views
-						</CardDescription>
+						<div className="flex items-center justify-between">
+							<div>
+								<CardTitle className="text-base">
+									Output
+								</CardTitle>
+								<CardDescription className="mt-1">
+									Job result — use tabs to switch between
+									formatted and raw JSON views
+								</CardDescription>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleDownload}
+								aria-label="Download output as JSON"
+							>
+								<DownloadIcon className="size-4 mr-1" />
+								Download
+							</Button>
+						</div>
 					</CardHeader>
 					<CardContent>
 						<SmartOutputRenderer
