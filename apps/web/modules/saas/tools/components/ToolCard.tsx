@@ -25,6 +25,7 @@ import {
 	MessageSquareTextIcon,
 	NewspaperIcon,
 	ReceiptIcon,
+	StarIcon,
 	UsersIcon,
 	WalletIcon,
 	WrenchIcon,
@@ -44,6 +45,8 @@ interface ToolCardProps {
 	isFavorite?: boolean;
 	/** Callback when the user toggles favorite status */
 	onToggleFavorite?: (slug: string) => void;
+	/** User's rating for this tool (1-5), if any */
+	userRating?: number | null;
 }
 
 function formatLastUsed(dateStr: string): string {
@@ -54,10 +57,18 @@ function formatLastUsed(dateStr: string): string {
 	const diffHours = Math.floor(diffMins / 60);
 	const diffDays = Math.floor(diffHours / 24);
 
-	if (diffMins < 1) return "just now";
-	if (diffMins < 60) return `${diffMins}m ago`;
-	if (diffHours < 24) return `${diffHours}h ago`;
-	if (diffDays < 7) return `${diffDays}d ago`;
+	if (diffMins < 1) {
+		return "just now";
+	}
+	if (diffMins < 60) {
+		return `${diffMins}m ago`;
+	}
+	if (diffHours < 24) {
+		return `${diffHours}h ago`;
+	}
+	if (diffDays < 7) {
+		return `${diffDays}d ago`;
+	}
 	return date.toLocaleDateString(undefined, {
 		month: "short",
 		day: "numeric",
@@ -86,6 +97,7 @@ export function ToolCard({
 	lastUsedAt = null,
 	isFavorite = false,
 	onToggleFavorite,
+	userRating = null,
 }: ToolCardProps) {
 	const Icon = getToolIcon(tool.icon);
 
@@ -211,6 +223,28 @@ export function ToolCard({
 							{tool.creditCost}{" "}
 							{tool.creditCost === 1 ? "credit" : "credits"} per
 							use
+						</span>
+					</div>
+				)}
+				{userRating && (
+					<div
+						className="mb-3 flex items-center gap-1"
+						role="img"
+						aria-label={`Your rating: ${userRating} stars`}
+					>
+						{[1, 2, 3, 4, 5].map((star) => (
+							<StarIcon
+								key={star}
+								className={cn(
+									"size-3.5",
+									star <= userRating
+										? "fill-amber-400 text-amber-400"
+										: "fill-transparent text-muted-foreground/30",
+								)}
+							/>
+						))}
+						<span className="ml-1 text-xs text-muted-foreground">
+							{userRating}/5
 						</span>
 					</div>
 				)}

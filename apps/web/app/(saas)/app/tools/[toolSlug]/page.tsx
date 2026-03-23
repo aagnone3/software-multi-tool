@@ -3,6 +3,7 @@ import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
 import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
+import { ToolRatingWidget } from "@saas/tools/components/ToolRatingWidget";
 import { ToolRecentRuns } from "@saas/tools/components/ToolRecentRuns";
 import { ToolTipsBanner } from "@saas/tools/components/ToolTipsBanner";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
@@ -112,6 +113,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
 			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
+			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
