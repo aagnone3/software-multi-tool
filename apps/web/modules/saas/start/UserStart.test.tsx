@@ -77,6 +77,9 @@ vi.mock("./components/PinnedJobsWidget", () => ({
 	PinnedJobsWidget: () => <div data-testid="pinned-jobs-widget" />,
 }));
 
+vi.mock("./components/ToolBenchmarkWidget", () => ({
+	ToolBenchmarkWidget: () => <div data-testid="tool-benchmark-widget" />,
+}));
 vi.mock("../jobs/components/JobSearchWidget", () => ({
 	JobSearchWidget: () => <div data-testid="job-search-widget" />,
 }));

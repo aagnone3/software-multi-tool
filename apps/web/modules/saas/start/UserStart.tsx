@@ -19,6 +19,7 @@ import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
 import { RecentlyViewedToolsWidget } from "./components/RecentlyViewedToolsWidget";
 import { RecommendedToolWidget } from "./components/RecommendedToolWidget";
 import { StreakWidget } from "./components/StreakWidget";
+import { ToolBenchmarkWidget } from "./components/ToolBenchmarkWidget";
 import { TopToolsWidget } from "./components/TopToolsWidget";
 import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
 import { UsageTrendChart } from "./components/UsageTrendChart";
@@ -100,6 +101,9 @@ export default function UserStart() {
 
 				{/* Job Search */}
 				<JobSearchWidget />
+
+				{/* Tool Benchmark — per-tool success rate and avg duration */}
+				<ToolBenchmarkWidget />
 			</div>
 		</div>
 	);
