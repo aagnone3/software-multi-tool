@@ -1,7 +1,15 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobsHistoryPage } from "./JobsHistoryPage";
+
+function renderWithQuery(ui: React.ReactElement) {
+	const qc = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+}
 
 // Mock config
 vi.mock("@repo/config", () => ({
@@ -35,6 +43,22 @@ vi.mock("@tools/hooks/use-job-polling", () => ({
 }));
 
 // Mock next/link
+vi.mock("@shared/lib/orpc-client", () => ({
+	orpcClient: {
+		jobs: {
+			delete: vi.fn().mockResolvedValue(undefined),
+		},
+	},
+}));
+
+vi.mock("@shared/lib/orpc-query-utils", () => ({
+	orpc: {
+		jobs: {
+			list: { key: () => ["jobs", "list"] },
+		},
+	},
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
@@ -63,12 +87,12 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		expect(screen.getByText("Loading...")).toBeInTheDocument();
 	});
 
 	it("shows empty state with Browse Tools CTA when no jobs", () => {
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		expect(screen.getByText("No jobs yet")).toBeInTheDocument();
 		expect(
 			screen.getByText(/Your tool runs will appear here/),
@@ -92,7 +116,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		// Search for something that doesn't match
 		const searchInput = screen.getByPlaceholderText(
 			"Search by tool name...",
@@ -131,7 +155,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
 		expect(screen.getByText("Speaker Separation")).toBeInTheDocument();
 		expect(screen.getByText("Completed")).toBeInTheDocument();
@@ -152,7 +176,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		expect(screen.getByText("1 job")).toBeInTheDocument();
 	});
 
@@ -170,7 +194,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const viewLink = screen.getByRole("link", { name: /View/ });
 		expect(viewLink).toHaveAttribute(
 			"href",
@@ -198,7 +222,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
 		expect(runAgainLink).toHaveAttribute(
 			"href",
@@ -220,7 +244,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const openLink = screen.getByRole("link", { name: "Open Tool" });
 		expect(openLink).toHaveAttribute(
 			"href",
@@ -245,12 +269,12 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		expect(screen.getByText(/45s/)).toBeTruthy();
 	});
 
 	it("calls refetch when Refresh button is clicked", () => {
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const refreshBtn = screen.getByRole("button", { name: /Refresh/ });
 		fireEvent.click(refreshBtn);
 		expect(mockRefetch).toHaveBeenCalledOnce();
@@ -270,7 +294,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const searchInput = screen.getByPlaceholderText(
 			"Search by tool name...",
 		);
@@ -294,7 +318,7 @@ describe("JobsHistoryPage", () => {
 			refetch: mockRefetch,
 			hasMore: false,
 		});
-		render(<JobsHistoryPage />);
+		renderWithQuery(<JobsHistoryPage />);
 		const searchInput = screen.getByPlaceholderText(
 			"Search by tool name...",
 		);
@@ -326,7 +350,7 @@ describe("JobsHistoryPage", () => {
 				refetch: mockRefetch,
 				hasMore: false,
 			});
-			render(<JobsHistoryPage />);
+			renderWithQuery(<JobsHistoryPage />);
 			expect(
 				screen.getByRole("button", { name: /Export CSV/ }),
 			).toBeInTheDocument();
@@ -339,7 +363,7 @@ describe("JobsHistoryPage", () => {
 				refetch: mockRefetch,
 				hasMore: false,
 			});
-			render(<JobsHistoryPage />);
+			renderWithQuery(<JobsHistoryPage />);
 			expect(
 				screen.queryByRole("button", { name: /Export CSV/ }),
 			).not.toBeInTheDocument();
@@ -364,7 +388,7 @@ describe("JobsHistoryPage", () => {
 				refetch: mockRefetch,
 				hasMore: false,
 			});
-			render(<JobsHistoryPage />);
+			renderWithQuery(<JobsHistoryPage />);
 			const exportBtn = screen.getByRole("button", {
 				name: /Export CSV/,
 			});

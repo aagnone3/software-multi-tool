@@ -2,6 +2,9 @@
 
 import { config } from "@repo/config";
 import { useDebounce } from "@shared/hooks/use-debounce";
+import { orpcClient } from "@shared/lib/orpc-client";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	useJobPolling,
 	useJobsListPaginated,
@@ -35,11 +38,13 @@ import {
 	ExternalLinkIcon,
 	Loader2Icon,
 	RefreshCwIcon,
+	Trash2Icon,
 	WrenchIcon,
 	XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 type JobStatus =
 	| "PENDING"
@@ -209,7 +214,15 @@ function JobOutputDialog({
 	);
 }
 
-function JobRow({ job }: { job: Job }) {
+function JobRow({
+	job,
+	selected,
+	onToggle,
+}: {
+	job: Job;
+	selected: boolean;
+	onToggle: (id: string) => void;
+}) {
 	const { date, time } = formatDateTime(job.createdAt);
 	const toolName = getToolName(job.toolSlug);
 	const detailUrl = getJobDetailUrl(job.toolSlug, job.id);
@@ -219,6 +232,13 @@ function JobRow({ job }: { job: Job }) {
 	return (
 		<>
 			<div className="flex items-center gap-4 py-3 border-b last:border-b-0 hover:bg-muted/30 px-4 rounded-lg transition-colors">
+				<input
+					type="checkbox"
+					checked={selected}
+					onChange={() => onToggle(job.id)}
+					aria-label={`Select job ${job.id}`}
+					className="size-4 shrink-0 cursor-pointer rounded border-border accent-primary"
+				/>
 				<div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
 					<WrenchIcon className="size-4" />
 				</div>
@@ -337,6 +357,38 @@ export function JobsHistoryPage() {
 	const debouncedSearch = useDebounce(search, 250);
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [toolFilter, setToolFilter] = useState<string>("");
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const queryClient = useQueryClient();
+
+	const toggleSelect = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	}, []);
+
+	const { mutate: bulkDelete, isPending: isBulkDeleting } = useMutation({
+		mutationFn: async (ids: string[]) => {
+			await Promise.all(
+				ids.map((jobId) => orpcClient.jobs.delete({ jobId })),
+			);
+		},
+		onSuccess: () => {
+			toast.success(
+				`Deleted ${selectedIds.size} job${selectedIds.size !== 1 ? "s" : ""}`,
+			);
+			setSelectedIds(new Set());
+			queryClient.invalidateQueries({ queryKey: orpc.jobs.list.key() });
+		},
+		onError: () => {
+			toast.error("Failed to delete some jobs");
+		},
+	});
 
 	const typedJobs = jobs as unknown as Job[];
 
@@ -506,12 +558,56 @@ export function JobsHistoryPage() {
 			{/* Jobs list */}
 			<Card>
 				<CardHeader className="pb-2">
-					<CardTitle className="text-base font-medium flex items-center gap-2">
-						<BriefcaseIcon className="size-4" />
-						{isLoading
-							? "Loading..."
-							: `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""}`}
-					</CardTitle>
+					<div className="flex items-center justify-between">
+						<CardTitle className="text-base font-medium flex items-center gap-2">
+							{!isLoading && filteredJobs.length > 0 && (
+								<input
+									type="checkbox"
+									checked={
+										selectedIds.size ===
+											filteredJobs.length &&
+										filteredJobs.length > 0
+									}
+									onChange={(e) => {
+										if (e.target.checked) {
+											setSelectedIds(
+												new Set(
+													filteredJobs.map(
+														(j) => j.id,
+													),
+												),
+											);
+										} else {
+											setSelectedIds(new Set());
+										}
+									}}
+									aria-label="Select all jobs"
+									className="size-4 cursor-pointer rounded border-border accent-primary"
+								/>
+							)}
+							<BriefcaseIcon className="size-4" />
+							{isLoading
+								? "Loading..."
+								: `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""}`}
+						</CardTitle>
+						{selectedIds.size > 0 && (
+							<Button
+								variant="error"
+								size="sm"
+								disabled={isBulkDeleting}
+								onClick={() =>
+									bulkDelete(Array.from(selectedIds))
+								}
+							>
+								{isBulkDeleting ? (
+									<Loader2Icon className="size-3.5 mr-1.5 animate-spin" />
+								) : (
+									<Trash2Icon className="size-3.5 mr-1.5" />
+								)}
+								Delete {selectedIds.size} selected
+							</Button>
+						)}
+					</div>
 				</CardHeader>
 				<CardContent>
 					{isLoading ? (
@@ -535,7 +631,12 @@ export function JobsHistoryPage() {
 					) : (
 						<div>
 							{filteredJobs.map((job) => (
-								<JobRow key={job.id} job={job} />
+								<JobRow
+									key={job.id}
+									job={job}
+									selected={selectedIds.has(job.id)}
+									onToggle={toggleSelect}
+								/>
 							))}
 							{!hasFilters && hasMore && (
 								<div className="flex justify-center pt-4">
