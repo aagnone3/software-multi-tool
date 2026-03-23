@@ -36,17 +36,6 @@ allowed-tools:
 | destructive | text-destructive      | Errors, deletions, warnings        |
 | highlight   | text-highlight        | Attention, badges, notifications   |
 
-## When to Use This Skill
-
-Use this skill when:
-
-- Adding icons to UI components
-- Choosing appropriate icon sizes for different contexts
-- Applying semantic colors to icons
-- Creating consistent icon usage across the application
-
-**Activation keywords**: icon, icons, iconography, lucide, icon size, icon color
-
 ## Architecture Overview
 
 ```text
@@ -263,6 +252,17 @@ The icon color system integrates with the brand color palette defined in `toolin
 | success     | --success (#16A34A)         |
 | destructive | --destructive (#DC2626)     |
 | highlight   | --highlight (#F59E0B)       |
+
+## When to Use This Skill
+
+Use this skill when:
+
+- Adding icons to UI components
+- Choosing appropriate icon sizes for different contexts
+- Applying semantic colors to icons
+- Creating consistent icon usage across the application
+
+**Activation keywords**: icon, icons, iconography, lucide, icon size, icon color
 
 ## Related Skills
 
