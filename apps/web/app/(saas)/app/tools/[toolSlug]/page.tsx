@@ -4,6 +4,7 @@ import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
 import { ToolRecentRuns } from "@saas/tools/components/ToolRecentRuns";
+import { ToolTipsBanner } from "@saas/tools/components/ToolTipsBanner";
 import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
 import { ToolViewTracker } from "@saas/tools/components/ToolViewTracker";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
@@ -106,6 +107,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<ToolViewTracker toolSlug={toolSlug} />
 			<ToolPageHeader tool={tool} />
 			<LowCreditsWarning className="mb-4" showActionButtons={true} />
+			<ToolTipsBanner toolSlug={toolSlug} className="mb-4" />
 			<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
