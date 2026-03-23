@@ -5,6 +5,7 @@ import { RecommendedToolWidget } from "./RecommendedToolWidget";
 
 const useToolsMock = vi.hoisted(() => vi.fn());
 const useActiveOrganizationMock = vi.hoisted(() => vi.fn());
+const useJobsListMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
 	useTools: useToolsMock,
@@ -12,6 +13,10 @@ vi.mock("@saas/tools/hooks/use-tools", () => ({
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: useActiveOrganizationMock,
+}));
+
+vi.mock("@tools/hooks/use-job-polling", () => ({
+	useJobsList: useJobsListMock,
 }));
 
 vi.mock("next/link", () => ({
@@ -50,14 +55,12 @@ describe("RecommendedToolWidget", () => {
 		vi.clearAllMocks();
 		localStorage.clear();
 		useActiveOrganizationMock.mockReturnValue({ activeOrganization: null });
+		useJobsListMock.mockReturnValue({ jobs: [] });
 	});
 
 	it("renders loading state before client hydration", () => {
 		useToolsMock.mockReturnValue({ enabledTools: mockTools });
-		// Note: component renders loading state until useEffect fires (isClient=false)
 		const { container } = render(<RecommendedToolWidget />);
-		// After first render (SSR-like), loading state with skeletons should be present initially
-		// but useEffect fires synchronously in test, so we check final state
 		expect(container).toBeTruthy();
 	});
 
@@ -99,7 +102,6 @@ describe("RecommendedToolWidget", () => {
 	it("rotates to next tool when refresh button is clicked", () => {
 		useToolsMock.mockReturnValue({ enabledTools: mockTools });
 		render(<RecommendedToolWidget />);
-		// First tool should be visible
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
 
 		const refreshBtn = screen.getByRole("button", {
@@ -129,5 +131,40 @@ describe("RecommendedToolWidget", () => {
 		fireEvent.click(refreshBtn); // -> index 1
 		fireEvent.click(refreshBtn); // -> index 0
 		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
+	});
+
+	it("shows untried badge and description for tools with no job history", () => {
+		useToolsMock.mockReturnValue({ enabledTools: mockTools });
+		// No jobs for any tool
+		useJobsListMock.mockReturnValue({ jobs: [] });
+		render(<RecommendedToolWidget />);
+		expect(
+			screen.getByText("You haven't tried this yet"),
+		).toBeInTheDocument();
+		expect(screen.getByLabelText("New to you")).toBeInTheDocument();
+	});
+
+	it("shows generic description for tools already tried", () => {
+		useToolsMock.mockReturnValue({ enabledTools: mockTools });
+		// Both tools have been used
+		useJobsListMock.mockReturnValue({
+			jobs: [
+				{ toolSlug: "invoice-processor", status: "COMPLETED" },
+				{ toolSlug: "news-analyzer", status: "COMPLETED" },
+			],
+		});
+		render(<RecommendedToolWidget />);
+		expect(screen.getByText("Try something new")).toBeInTheDocument();
+	});
+
+	it("prioritizes untried tools first", () => {
+		useToolsMock.mockReturnValue({ enabledTools: mockTools });
+		// invoice-processor has been used, news-analyzer hasn't
+		useJobsListMock.mockReturnValue({
+			jobs: [{ toolSlug: "invoice-processor", status: "COMPLETED" }],
+		});
+		render(<RecommendedToolWidget />);
+		// news-analyzer (untried) should appear first
+		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
 	});
 });
