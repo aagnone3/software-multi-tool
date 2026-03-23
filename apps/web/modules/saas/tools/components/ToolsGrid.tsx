@@ -22,6 +22,7 @@ import React, {
 	useState,
 } from "react";
 import { ToolCard } from "./ToolCard";
+import { ToolPreviewDrawer } from "./ToolPreviewDrawer";
 
 const RECENT_SEARCHES_KEY = "tools-grid-recent-searches";
 const MAX_RECENT_SEARCHES = 5;
@@ -106,6 +107,7 @@ export function ToolsGrid() {
 	const [sortBy, setSortBy] = useState<SortOption>("default");
 	const [activeCategory, setActiveCategory] = useState<string>("All");
 	const [showRecentSearches, setShowRecentSearches] = useState(false);
+	const [previewSlug, setPreviewSlug] = useState<string | null>(null);
 	const searchRef = useRef<HTMLDivElement>(null);
 	const { recentSearches, addSearch, removeSearch } = useRecentSearches();
 	const allTools = useMemo(() => getVisibleTools(), []);
@@ -354,6 +356,7 @@ export function ToolsGrid() {
 							}
 							isFavorite={isFavorite(tool.slug)}
 							onToggleFavorite={toggleFavorite}
+							onPreview={setPreviewSlug}
 						/>
 					))}
 				</div>
@@ -382,6 +385,10 @@ export function ToolsGrid() {
 					)}
 				</div>
 			)}
+			<ToolPreviewDrawer
+				toolSlug={previewSlug}
+				onClose={() => setPreviewSlug(null)}
+			/>
 		</div>
 	);
 }

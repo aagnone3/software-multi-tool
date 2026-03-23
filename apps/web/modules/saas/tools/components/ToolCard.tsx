@@ -47,6 +47,8 @@ interface ToolCardProps {
 	onToggleFavorite?: (slug: string) => void;
 	/** User's rating for this tool (1-5), if any */
 	userRating?: number | null;
+	/** Callback when the user clicks the Preview button */
+	onPreview?: (slug: string) => void;
 }
 
 function formatLastUsed(dateStr: string): string {
@@ -98,6 +100,7 @@ export function ToolCard({
 	isFavorite = false,
 	onToggleFavorite,
 	userRating = null,
+	onPreview,
 }: ToolCardProps) {
 	const Icon = getToolIcon(tool.icon);
 
@@ -248,11 +251,27 @@ export function ToolCard({
 						</span>
 					</div>
 				)}
-				<Link href={`/app/tools/${tool.slug}`}>
-					<Button className="w-full" variant="outline">
-						Open Tool
-					</Button>
-				</Link>
+				<div className="flex gap-2">
+					{onPreview && (
+						<Button
+							variant="ghost"
+							size="sm"
+							className="flex-none opacity-0 group-hover:opacity-100 transition-opacity"
+							onClick={(e) => {
+								e.preventDefault();
+								onPreview(tool.slug);
+							}}
+							aria-label={`Preview ${tool.name}`}
+						>
+							Preview
+						</Button>
+					)}
+					<Link href={`/app/tools/${tool.slug}`} className="flex-1">
+						<Button className="w-full" variant="outline">
+							Open Tool
+						</Button>
+					</Link>
+				</div>
 			</CardContent>
 		</Card>
 	);
