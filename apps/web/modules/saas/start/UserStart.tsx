@@ -20,10 +20,14 @@ import { TopToolsWidget } from "./components/TopToolsWidget";
 import { UntriedToolsWidget } from "./components/UntriedToolsWidget";
 import { UsageTrendChart } from "./components/UsageTrendChart";
 import { WeeklyActivityHeatmap } from "./components/WeeklyActivityHeatmap";
+import { WelcomeModal } from "./components/WelcomeModal";
 
 export default function UserStart() {
 	return (
 		<div className="space-y-6">
+			{/* Welcome modal — shown only on first visit */}
+			<WelcomeModal />
+
 			{config.organizations.enable && <OrganizationsGrid />}
 
 			{/* Getting Started - dismissible onboarding checklist */}

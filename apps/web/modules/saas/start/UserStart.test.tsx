@@ -62,6 +62,10 @@ vi.mock("./components/WeeklyActivityHeatmap", () => ({
 	WeeklyActivityHeatmap: () => <div>WeeklyActivityHeatmap</div>,
 }));
 
+vi.mock("./components/WelcomeModal", () => ({
+	WelcomeModal: () => null,
+}));
+
 vi.mock("./components/StreakWidget", () => ({
 	StreakWidget: () => <div data-testid="streak-widget" />,
 }));
