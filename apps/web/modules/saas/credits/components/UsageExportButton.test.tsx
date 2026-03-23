@@ -41,8 +41,10 @@ describe("UsageExportButton", () => {
 
 		createObjectURL = vi.fn().mockReturnValue("blob:test");
 		revokeObjectURL = vi.fn();
-		URL.createObjectURL = createObjectURL as unknown as typeof URL.createObjectURL;
-		URL.revokeObjectURL = revokeObjectURL as unknown as typeof URL.revokeObjectURL;
+		URL.createObjectURL =
+			createObjectURL as unknown as typeof URL.createObjectURL;
+		URL.revokeObjectURL =
+			revokeObjectURL as unknown as typeof URL.revokeObjectURL;
 
 		clickSpy = vi.fn();
 		const originalCreateElement = document.createElement.bind(document);
