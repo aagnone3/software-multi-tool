@@ -22,19 +22,6 @@ Developer CLI (`mt`) for the software-multi-tool monorepo. Provides commands for
 | `pnpm mt features --json` | Output feature flags as JSON |
 | `pnpm mt --help` | Show available commands |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Running CLI commands for development workflows
-- Adding new CLI commands to the tooling
-- Debugging CLI issues or extending functionality
-- Understanding the CLI architecture
-- Working with PostHog feature flags via CLI
-- Creating scripting workflows with JSON output
-
-**Activation keywords**: CLI, mt command, pnpm mt, developer tooling, command line, feature flags inspection, JSON output, scripting
-
 ## Architecture
 
 The CLI lives in `tooling/cli/` and uses:
@@ -346,6 +333,19 @@ pnpm install
 # Check for type errors
 pnpm exec tsc --noEmit -p tooling/cli/tsconfig.json
 ```
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Running CLI commands for development workflows
+- Adding new CLI commands to the tooling
+- Debugging CLI issues or extending functionality
+- Understanding the CLI architecture
+- Working with PostHog feature flags via CLI
+- Creating scripting workflows with JSON output
+
+**Activation keywords**: CLI, mt command, pnpm mt, developer tooling, command line, feature flags inspection, JSON output, scripting
 
 ## Related Skills
 
