@@ -1,28 +1,25 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Cookies from "js-cookie";
 import React, { useContext } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConsentContext, ConsentProvider } from "./ConsentProvider";
 
 vi.mock("js-cookie", () => ({
-	default: {
-		set: vi.fn(),
-		get: vi.fn(),
-	},
+	default: { set: vi.fn(), get: vi.fn() },
 }));
-
-import Cookies from "js-cookie";
 
 function TestConsumer() {
 	const { userHasConsented, allowCookies, declineCookies } =
 		useContext(ConsentContext);
 	return (
 		<div>
-			<span data-testid="consented">{String(userHasConsented)}</span>
+			<span data-testid="consent">{String(userHasConsented)}</span>
 			<button type="button" onClick={allowCookies}>
-				allow
+				Allow
 			</button>
 			<button type="button" onClick={declineCookies}>
-				decline
+				Decline
 			</button>
 		</div>
 	);
@@ -33,51 +30,58 @@ describe("ConsentProvider", () => {
 		vi.clearAllMocks();
 	});
 
-	it("defaults to not consented", () => {
+	it("renders children", () => {
+		render(
+			<ConsentProvider>
+				<span>child</span>
+			</ConsentProvider>,
+		);
+		expect(screen.getByText("child")).toBeTruthy();
+	});
+
+	it("initialConsent=false → userHasConsented is false by default", () => {
 		render(
 			<ConsentProvider>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		expect(screen.getByTestId("consented")).toHaveTextContent("false");
+		expect(screen.getByTestId("consent").textContent).toBe("false");
 	});
 
-	it("initializes with initialConsent=true", () => {
+	it("initialConsent=true → userHasConsented starts true", () => {
 		render(
 			<ConsentProvider initialConsent={true}>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		expect(screen.getByTestId("consented")).toHaveTextContent("true");
+		expect(screen.getByTestId("consent").textContent).toBe("true");
 	});
 
 	it("allowCookies sets cookie and updates state", async () => {
+		const user = userEvent.setup({ delay: null });
 		render(
 			<ConsentProvider>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		await act(async () => {
-			screen.getByText("allow").click();
-		});
+		await user.click(screen.getByText("Allow"));
 		expect(Cookies.set).toHaveBeenCalledWith("consent", "true", {
 			expires: 30,
 		});
-		expect(screen.getByTestId("consented")).toHaveTextContent("true");
+		expect(screen.getByTestId("consent").textContent).toBe("true");
 	});
 
-	it("declineCookies sets cookie and updates state to false", async () => {
+	it("declineCookies sets cookie and keeps state false", async () => {
+		const user = userEvent.setup({ delay: null });
 		render(
 			<ConsentProvider initialConsent={true}>
 				<TestConsumer />
 			</ConsentProvider>,
 		);
-		await act(async () => {
-			screen.getByText("decline").click();
-		});
+		await user.click(screen.getByText("Decline"));
 		expect(Cookies.set).toHaveBeenCalledWith("consent", "false", {
 			expires: 30,
 		});
-		expect(screen.getByTestId("consented")).toHaveTextContent("false");
+		expect(screen.getByTestId("consent").textContent).toBe("false");
 	});
 });
