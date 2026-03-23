@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { JobNotesPanel } from "./JobNotesPanel";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
 type JobStatus =
@@ -341,6 +342,9 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 					</CardContent>
 				</Card>
 			)}
+
+			{/* Notes Panel */}
+			<JobNotesPanel jobId={jobId} />
 
 			{/* Actions */}
 			<div className="flex gap-2">
