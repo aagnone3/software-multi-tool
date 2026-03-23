@@ -20,6 +20,7 @@ import {
 import { Skeleton } from "@ui/components/skeleton";
 import {
 	AlertCircleIcon,
+	ArrowRightLeftIcon,
 	BriefcaseIcon,
 	CheckCircle2Icon,
 	ClockIcon,
@@ -402,6 +403,12 @@ export function JobsHistoryPage() {
 							Export CSV
 						</Button>
 					)}
+					<Button variant="outline" size="sm" asChild>
+						<Link href="/app/jobs/compare">
+							<ArrowRightLeftIcon className="size-3.5 mr-1.5" />
+							Compare
+						</Link>
+					</Button>
 					<Button
 						variant="outline"
 						size="sm"
