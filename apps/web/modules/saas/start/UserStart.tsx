@@ -1,6 +1,7 @@
 "use client";
 
 import { config } from "@repo/config";
+import { CreditBurnRateWidget } from "@saas/credits/components/CreditBurnRateWidget";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
 import React from "react";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
@@ -43,6 +44,9 @@ export default function UserStart() {
 			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
 				{/* Credits Overview */}
 				<CreditsOverview className="lg:col-span-1" />
+
+				{/* Credit Burn Rate — only shown when there's active usage */}
+				<CreditBurnRateWidget className="lg:col-span-1" />
 
 				{/* Recently Used Tools */}
 				<RecentlyUsedTools className="lg:col-span-1" />

@@ -55,6 +55,9 @@ vi.mock("./components/UntriedToolsWidget", () => ({
 vi.mock("./components/DailyGoalWidget", () => ({
 	DailyGoalWidget: () => <div data-testid="daily-goal-widget" />,
 }));
+vi.mock("@saas/credits/components/CreditBurnRateWidget", () => ({
+	CreditBurnRateWidget: () => <div data-testid="credit-burn-rate-widget" />,
+}));
 vi.mock("./components/CreditsByToolChart", () => ({
 	CreditsByToolChart: () => <div>CreditsByToolChart</div>,
 }));
