@@ -29,6 +29,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { JobNotesPanel } from "./JobNotesPanel";
+import { JobTagsPanel } from "./JobTagsPanel";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
 type JobStatus =
@@ -115,7 +116,9 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 	const { pinJob, unpinJob, isPinned } = usePinnedJobs();
 
 	const handleDownload = () => {
-		if (!job?.output) return;
+		if (!job?.output) {
+			return;
+		}
 		const blob = new Blob([JSON.stringify(job.output, null, 2)], {
 			type: "application/json",
 		});
@@ -342,6 +345,9 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 					</CardContent>
 				</Card>
 			)}
+
+			{/* Tags Panel */}
+			<JobTagsPanel jobId={jobId} className="border rounded-lg p-4" />
 
 			{/* Notes Panel */}
 			<JobNotesPanel jobId={jobId} />
