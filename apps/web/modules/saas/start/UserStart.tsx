@@ -4,6 +4,7 @@ import { config } from "@repo/config";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
 import React from "react";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
+import { CreditsByToolChart } from "./components/CreditsByToolChart";
 import { CreditsOverview } from "./components/CreditsOverview";
 import { DailyGoalWidget } from "./components/DailyGoalWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
@@ -57,6 +58,9 @@ export default function UserStart() {
 
 			{/* Activity heatmap — full-width */}
 			<WeeklyActivityHeatmap />
+
+			{/* Credits breakdown by tool */}
+			<CreditsByToolChart />
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
