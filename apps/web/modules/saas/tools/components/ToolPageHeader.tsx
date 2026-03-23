@@ -83,6 +83,11 @@ export function ToolPageHeader({ tool }: ToolPageHeaderProps) {
 							{tool.creditCost === 1 ? "credit" : "credits"} / use
 						</span>
 					)}
+					<Button variant="outline" size="sm" asChild>
+						<Link href={`/app/tools/${tool.slug}/history`}>
+							History
+						</Link>
+					</Button>
 					<ToolFeedbackButton toolSlug={tool.slug} />
 					<TooltipProvider>
 						<Tooltip>
