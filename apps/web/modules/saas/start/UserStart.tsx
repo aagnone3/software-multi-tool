@@ -11,6 +11,7 @@ import { DailyGoalWidget } from "./components/DailyGoalWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
+import { PinnedJobsWidget } from "./components/PinnedJobsWidget";
 import { QuickActions } from "./components/QuickActions";
 import { RecentActivityFeed } from "./components/RecentActivityFeed";
 import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
@@ -92,6 +93,9 @@ export default function UserStart() {
 
 				{/* Untried Tools — discovery nudge */}
 				<UntriedToolsWidget />
+
+				{/* Pinned Job Outputs */}
+				<PinnedJobsWidget />
 			</div>
 		</div>
 	);

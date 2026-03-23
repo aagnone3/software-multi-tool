@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { useJobPolling } from "@tools/hooks/use-job-polling";
+import { usePinnedJobs } from "@tools/hooks/use-pinned-jobs";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -19,6 +20,7 @@ import {
 	ClockIcon,
 	DownloadIcon,
 	Loader2Icon,
+	PinIcon,
 	Share2Icon,
 	WrenchIcon,
 	XCircleIcon,
@@ -109,6 +111,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
 export function JobDetailPage({ jobId }: { jobId: string }) {
 	const { job, isLoading } = useJobPolling(jobId);
 	const [shared, setShared] = useState(false);
+	const { pinJob, unpinJob, isPinned } = usePinnedJobs();
 
 	const handleDownload = () => {
 		if (!job?.output) return;
@@ -193,15 +196,40 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 						Job ID: {job.id}
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleShare}
-					aria-label="Share job link"
-				>
-					<Share2Icon className="size-4 mr-1" />
-					{shared ? "Copied!" : "Share"}
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => {
+							if (isPinned(job.id)) {
+								unpinJob(job.id);
+								toast.info("Unpinned from dashboard");
+							} else {
+								pinJob({
+									id: job.id,
+									toolSlug: job.toolSlug ?? "",
+									toolName: getToolName(job.toolSlug ?? ""),
+								});
+								toast.success("Pinned to dashboard");
+							}
+						}}
+						aria-label={
+							isPinned(job.id) ? "Unpin" : "Pin to dashboard"
+						}
+					>
+						<PinIcon className="size-4 mr-1" />
+						{isPinned(job.id) ? "Pinned" : "Pin"}
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleShare}
+						aria-label="Share job link"
+					>
+						<Share2Icon className="size-4 mr-1" />
+						{shared ? "Copied!" : "Share"}
+					</Button>
+				</div>
 			</div>
 
 			{/* Status Card */}
