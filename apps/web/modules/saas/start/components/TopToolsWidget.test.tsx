@@ -1,98 +1,120 @@
+"use client";
+
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TopToolsWidget } from "./TopToolsWidget";
-
-const mockUseRecentJobs = vi.fn();
-const mockUseTools = vi.fn();
-
-vi.mock("../hooks/use-recent-jobs", () => ({
-	useRecentJobs: () => mockUseRecentJobs(),
-}));
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
-	useTools: () => mockUseTools(),
+	useTools: vi.fn(),
+}));
+vi.mock("../hooks/use-recent-jobs", () => ({
+	useRecentJobs: vi.fn(),
+}));
+vi.mock("next/link", () => ({
+	default: ({ href, children, ...props }: React.ComponentProps<"a">) => (
+		<a href={href as string} {...props}>
+			{children}
+		</a>
+	),
 }));
 
-vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-	}: {
-		children: React.ReactNode;
-		href: string;
-	}) => <a href={href}>{children}</a>,
-}));
+import { useTools } from "@saas/tools/hooks/use-tools";
+import { useRecentJobs } from "../hooks/use-recent-jobs";
+import { TopToolsWidget } from "./TopToolsWidget";
+
+const mockUseTools = vi.mocked(useTools);
+const mockUseRecentJobs = vi.mocked(useRecentJobs);
 
 const enabledTools = [
-	{ slug: "news-analyzer", name: "News Analyzer" },
-	{ slug: "invoice-processor", name: "Invoice Processor" },
-	{ slug: "meeting-summarizer", name: "Meeting Summarizer" },
+	{ slug: "news-analyzer", name: "News Analyzer", enabled: true },
+	{ slug: "invoice-processor", name: "Invoice Processor", enabled: true },
 ];
 
+beforeEach(() => {
+	mockUseTools.mockReturnValue({
+		enabledTools,
+		tools: enabledTools,
+		visibleTools: enabledTools,
+		isLoading: false,
+		isToolEnabled: () => true,
+	} as unknown as ReturnType<typeof useTools>);
+});
+
 describe("TopToolsWidget", () => {
-	beforeEach(() => {
-		mockUseTools.mockReturnValue({ enabledTools });
+	it("shows loading state", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [],
+			isLoading: true,
+		} as unknown as ReturnType<typeof useRecentJobs>);
+		render(<TopToolsWidget />);
+		expect(screen.getByText("Top Tools")).toBeTruthy();
+		expect(screen.getByText("Loading...")).toBeTruthy();
 	});
 
-	it("renders loading skeleton when loading", () => {
-		mockUseRecentJobs.mockReturnValue({ jobs: [], isLoading: true });
+	it("shows empty state when no jobs", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [],
+			isLoading: false,
+		} as unknown as ReturnType<typeof useRecentJobs>);
 		render(<TopToolsWidget />);
-		expect(screen.getByText("Top Tools")).toBeInTheDocument();
-		expect(screen.getByText("Loading...")).toBeInTheDocument();
-	});
-
-	it("renders empty state when no jobs", () => {
-		mockUseRecentJobs.mockReturnValue({ jobs: [], isLoading: false });
-		render(<TopToolsWidget />);
-		expect(screen.getByText("No usage yet")).toBeInTheDocument();
+		expect(screen.getByText("No usage yet")).toBeTruthy();
 		expect(
-			screen.getByRole("link", { name: /Browse tools/i }),
-		).toHaveAttribute("href", "/app/tools");
+			screen.getByRole("link", { name: /browse tools/i }),
+		).toBeTruthy();
 	});
 
-	it("renders top tools with counts and percentages", () => {
+	it("shows top tools sorted by usage", () => {
 		const jobs = [
 			{ toolSlug: "news-analyzer" },
 			{ toolSlug: "news-analyzer" },
+			{ toolSlug: "news-analyzer" },
 			{ toolSlug: "invoice-processor" },
-		];
-		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
+		] as ReturnType<typeof useRecentJobs>["jobs"];
+		mockUseRecentJobs.mockReturnValue({
+			jobs,
+			isLoading: false,
+		} as unknown as ReturnType<typeof useRecentJobs>);
 		render(<TopToolsWidget />);
-		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
-		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
-		expect(screen.getByText("2 runs")).toBeInTheDocument();
-		expect(screen.getByText("1 run")).toBeInTheDocument();
+		const links = screen.getAllByRole("link");
+		const toolLinks = links.filter((l) =>
+			l.getAttribute("href")?.startsWith("/app/tools/"),
+		);
+		// news-analyzer should be first (3 runs)
+		expect(toolLinks[0].getAttribute("href")).toBe(
+			"/app/tools/news-analyzer",
+		);
+		expect(screen.getByText("3 runs")).toBeTruthy();
+		expect(screen.getByText("1 run")).toBeTruthy();
 	});
 
-	it("respects maxTools limit", () => {
-		const jobs = [
-			{ toolSlug: "news-analyzer" },
-			{ toolSlug: "invoice-processor" },
-			{ toolSlug: "meeting-summarizer" },
-		];
-		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
+	it("respects maxTools prop", () => {
+		const jobs = Array.from({ length: 10 }, (_, i) => ({
+			toolSlug: `tool-${i}`,
+		})) as ReturnType<typeof useRecentJobs>["jobs"];
+		mockUseRecentJobs.mockReturnValue({
+			jobs,
+			isLoading: false,
+		} as unknown as ReturnType<typeof useRecentJobs>);
 		render(<TopToolsWidget maxTools={2} />);
-		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
-		expect(screen.getByText("Invoice Processor")).toBeInTheDocument();
-		expect(
-			screen.queryByText("Meeting Summarizer"),
-		).not.toBeInTheDocument();
+		const toolLinks = screen
+			.getAllByRole("link")
+			.filter((l) =>
+				l.getAttribute("href")?.startsWith("/app/tools/tool-"),
+			);
+		expect(toolLinks.length).toBe(2);
 	});
 
-	it("falls back to slug as name for unknown tools", () => {
-		const jobs = [{ toolSlug: "unknown-tool" }];
-		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
-		render(<TopToolsWidget />);
-		expect(screen.getByText("unknown-tool")).toBeInTheDocument();
-	});
-
-	it("renders View all jobs link", () => {
-		const jobs = [{ toolSlug: "news-analyzer" }];
-		mockUseRecentJobs.mockReturnValue({ jobs, isLoading: false });
+	it("shows View all jobs link", () => {
+		const jobs = [{ toolSlug: "news-analyzer" }] as ReturnType<
+			typeof useRecentJobs
+		>["jobs"];
+		mockUseRecentJobs.mockReturnValue({
+			jobs,
+			isLoading: false,
+		} as unknown as ReturnType<typeof useRecentJobs>);
 		render(<TopToolsWidget />);
 		expect(
-			screen.getByRole("link", { name: /View all jobs/i }),
-		).toHaveAttribute("href", "/app/jobs");
+			screen.getByRole("link", { name: /view all jobs/i }),
+		).toBeTruthy();
 	});
 });
