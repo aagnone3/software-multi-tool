@@ -23,20 +23,6 @@ allowed-tools:
 | Webhook endpoint | `POST /api/webhooks/payments` |
 | Environment file | `apps/web/.env.local` |
 
-## When to Use This Skill
-
-Invoke this skill when:
-
-- Testing Stripe webhooks locally with the Stripe CLI
-- Debugging webhook delivery or processing issues
-- Validating webhook integration with your application
-- Fixing "account mismatch" errors between CLI and API keys
-- Testing subscription renewals with Stripe Test Clock
-- Simulating time advancement for subscription testing
-- Troubleshooting "No such price" or payment source errors
-
-**Activation keywords**: stripe webhooks, webhook testing, stripe listen, test clock, stripe account mismatch, subscription renewal testing, payment webhook, invoice webhook, subscription webhook, stripe CLI, STRIPE_WEBHOOK_SECRET, whsec_, stripe trigger, checkout.session.completed, customer.subscription
-
 ## Quick Start
 
 ### Prerequisites
@@ -270,6 +256,20 @@ When switching between Stripe accounts (e.g., personal → company):
    ```
 
 ---
+
+## When to Use This Skill
+
+Invoke this skill when:
+
+- Testing Stripe webhooks locally with the Stripe CLI
+- Debugging webhook delivery or processing issues
+- Validating webhook integration with your application
+- Fixing "account mismatch" errors between CLI and API keys
+- Testing subscription renewals with Stripe Test Clock
+- Simulating time advancement for subscription testing
+- Troubleshooting "No such price" or payment source errors
+
+**Activation keywords**: stripe webhooks, webhook testing, stripe listen, test clock, stripe account mismatch, subscription renewal testing, payment webhook, invoice webhook, subscription webhook, stripe CLI, STRIPE_WEBHOOK_SECRET, whsec_, stripe trigger, checkout.session.completed, customer.subscription
 
 ## Related Skills
 
