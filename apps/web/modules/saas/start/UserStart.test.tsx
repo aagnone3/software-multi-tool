@@ -52,6 +52,9 @@ vi.mock("./components/RecentlyViewedToolsWidget", () => ({
 vi.mock("./components/UntriedToolsWidget", () => ({
 	UntriedToolsWidget: () => <div data-testid="untried-tools-widget" />,
 }));
+vi.mock("./components/DailyGoalWidget", () => ({
+	DailyGoalWidget: () => <div data-testid="daily-goal-widget" />,
+}));
 
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {

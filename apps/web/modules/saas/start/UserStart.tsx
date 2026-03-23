@@ -5,6 +5,7 @@ import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsG
 import React from "react";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
 import { CreditsOverview } from "./components/CreditsOverview";
+import { DailyGoalWidget } from "./components/DailyGoalWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
@@ -54,6 +55,9 @@ export default function UserStart() {
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
+				{/* Daily Goal Widget */}
+				<DailyGoalWidget />
+
 				{/* Top Tools Widget */}
 				<TopToolsWidget />
 
