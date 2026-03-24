@@ -289,6 +289,22 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 	const features = TOOL_FEATURES[toolSlug] ?? [];
 	const useCases = TOOL_USE_CASES[toolSlug] ?? [];
 
+	const faqJsonLd =
+		useCases.length > 0
+			? {
+					"@context": "https://schema.org",
+					"@type": "FAQPage",
+					mainEntity: useCases.map((uc) => ({
+						"@type": "Question",
+						name: `How does ${tool.name} help ${uc.title}?`,
+						acceptedAnswer: {
+							"@type": "Answer",
+							text: uc.description,
+						},
+					})),
+				}
+			: null;
+
 	const breadcrumbJsonLd = {
 		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
@@ -339,6 +355,15 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
+			{faqJsonLd && (
+				<script
+					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(faqJsonLd),
+					}}
+				/>
+			)}
 			<main>
 				{/* Hero */}
 				<section className="container pt-32 pb-16 text-center md:pt-40 lg:pb-24">
