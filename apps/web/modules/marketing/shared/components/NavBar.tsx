@@ -62,7 +62,7 @@ export function NavBar() {
 		},
 		{
 			label: "FAQ",
-			href: "/#faq",
+			href: "/faq",
 		},
 		{
 			label: "Changelog",
