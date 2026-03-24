@@ -19,7 +19,10 @@ const staticMarketingPages = [
 	"/faq",
 	"/use-cases",
 	"/for",
+	"/vs",
 ];
+
+const competitorSlugs = ["otter-ai", "fireflies-ai", "docparser", "chatgpt"];
 
 const industryPages = [
 	"accountants",
@@ -46,6 +49,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				lastModified: new Date(),
 			})),
 		),
+		...competitorSlugs.map((slug) => ({
+			url: new URL(`/vs/${slug}`, baseUrl).href,
+			lastModified: new Date(),
+			changeFrequency: "monthly" as const,
+			priority: 0.7,
+		})),
 		...industryPages.map((slug) => ({
 			url: new URL(`/for/${slug}`, baseUrl).href,
 			lastModified: new Date(),
