@@ -9,6 +9,9 @@ vi.mock("@tools/hooks/use-job-tags", () => ({
 		tags: ["bug", "review"],
 		addTag: vi.fn(),
 		removeTag: vi.fn(),
+		getAllTags: vi.fn().mockReturnValue([]),
+		hasTag: vi.fn().mockReturnValue(false),
+		getTagsForJob: vi.fn().mockReturnValue([]),
 	})),
 }));
 
@@ -50,6 +53,9 @@ describe("JobTagsPanel", () => {
 			tags: [],
 			addTag: vi.fn(),
 			removeTag: vi.fn(),
+			getAllTags: vi.fn().mockReturnValue([]),
+			hasTag: vi.fn().mockReturnValue(false),
+			getTagsForJob: vi.fn().mockReturnValue([]),
 		});
 		render(<JobTagsPanel jobId="job-1" />);
 		expect(screen.getByText("No tags yet")).toBeInTheDocument();
@@ -62,6 +68,9 @@ describe("JobTagsPanel", () => {
 			tags: [],
 			addTag,
 			removeTag: vi.fn(),
+			getAllTags: vi.fn().mockReturnValue([]),
+			hasTag: vi.fn().mockReturnValue(false),
+			getTagsForJob: vi.fn().mockReturnValue([]),
 		});
 		render(<JobTagsPanel jobId="job-1" />);
 		const user = userEvent.setup({ delay: null });

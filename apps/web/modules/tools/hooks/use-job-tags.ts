@@ -64,5 +64,27 @@ export function useJobTags(jobId: string) {
 		[jobId],
 	);
 
-	return { tags, addTag, removeTag };
+	const getAllTags = useCallback((): string[] => {
+		const all = new Set<string>();
+		for (const tagList of Object.values(allTags)) {
+			for (const tag of tagList) {
+				all.add(tag);
+			}
+		}
+		return Array.from(all).sort();
+	}, [allTags]);
+
+	const hasTag = useCallback(
+		(tag: string): boolean => {
+			return (allTags[jobId] ?? []).includes(tag);
+		},
+		[allTags, jobId],
+	);
+
+	const getTagsForJob = useCallback(
+		(id: string): string[] => allTags[id] ?? [],
+		[allTags],
+	);
+
+	return { tags, addTag, removeTag, getAllTags, hasTag, getTagsForJob };
 }

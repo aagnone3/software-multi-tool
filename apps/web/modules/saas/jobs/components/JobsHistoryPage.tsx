@@ -6,6 +6,7 @@ import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useJobsListPaginated } from "@tools/hooks/use-job-polling";
+import { useJobTags } from "@tools/hooks/use-job-tags";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
@@ -261,7 +262,9 @@ export function JobsHistoryPage() {
 	const [toolFilter, setToolFilter] = useState<string>("");
 	const [dateFrom, setDateFrom] = useState<string>("");
 	const [dateTo, setDateTo] = useState<string>("");
+	const [tagFilter, setTagFilter] = useState<string>("");
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const { getAllTags, getTagsForJob } = useJobTags("");
 	const queryClient = useQueryClient();
 
 	const toggleSelect = useCallback((id: string) => {
@@ -328,6 +331,10 @@ export function JobsHistoryPage() {
 					return false;
 				}
 			}
+			if (tagFilter) {
+				const jobTags = getTagsForJob(job.id);
+				if (!jobTags.includes(tagFilter)) return false;
+			}
 			return true;
 		});
 	}, [
@@ -337,10 +344,14 @@ export function JobsHistoryPage() {
 		dateFrom,
 		dateTo,
 		debouncedSearch,
+		tagFilter,
+		getTagsForJob,
 	]);
 
+	const availableTags = useMemo(() => getAllTags(), [getAllTags]);
+
 	const hasFilters = Boolean(
-		search || statusFilter || toolFilter || dateFrom || dateTo,
+		search || statusFilter || toolFilter || dateFrom || dateTo || tagFilter,
 	);
 
 	const exportToCsv = useCallback(() => {
@@ -483,6 +494,27 @@ export function JobsHistoryPage() {
 					aria-label="To date"
 				/>
 
+				{availableTags.length > 0 && (
+					<Select
+						value={tagFilter}
+						onValueChange={(v) =>
+							setTagFilter(v === "all" ? "" : v)
+						}
+					>
+						<SelectTrigger className="w-[140px]">
+							<SelectValue placeholder="All Tags" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Tags</SelectItem>
+							{availableTags.map((tag) => (
+								<SelectItem key={tag} value={tag}>
+									{tag}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+
 				{hasFilters && (
 					<Button
 						variant="ghost"
@@ -493,6 +525,7 @@ export function JobsHistoryPage() {
 							setToolFilter("");
 							setDateFrom("");
 							setDateTo("");
+							setTagFilter("");
 						}}
 					>
 						Clear filters
