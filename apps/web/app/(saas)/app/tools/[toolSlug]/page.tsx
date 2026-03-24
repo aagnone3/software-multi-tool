@@ -51,6 +51,15 @@ export async function generateMetadata({ params }: ToolPageProps) {
 	return {
 		title: tool.name,
 		description: tool.description,
+		openGraph: {
+			title: `${tool.name} | ${config.appName}`,
+			description: tool.description,
+		},
+		twitter: {
+			card: "summary",
+			title: `${tool.name} | ${config.appName}`,
+			description: tool.description,
+		},
 	};
 }
 

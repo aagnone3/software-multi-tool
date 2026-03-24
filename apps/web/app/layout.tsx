@@ -12,12 +12,65 @@ const sansFont = Montserrat({
 	variable: "--font-sans",
 });
 
+const description =
+	config.appDescription ??
+	"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, and more.";
+
+const siteUrl =
+	process.env.NEXT_PUBLIC_SITE_URL ?? "https://softwaremultitool.com";
+
 export const metadata: Metadata = {
 	title: {
 		absolute: config.appName,
 		default: config.appName,
 		template: `%s | ${config.appName}`,
 	},
+	description,
+	keywords: [
+		"AI tools",
+		"small business",
+		"meeting summarizer",
+		"invoice processor",
+		"contract analyzer",
+		"speaker separation",
+		"document processing",
+		"AI productivity",
+	],
+	authors: [{ name: config.appName }],
+	creator: config.appName,
+	openGraph: {
+		type: "website",
+		url: siteUrl,
+		siteName: config.appName,
+		title: config.appName,
+		description,
+		images: [
+			{
+				url: `${siteUrl}/og-image.png`,
+				width: 1200,
+				height: 630,
+				alt: config.appName,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: config.appName,
+		description,
+		images: [`${siteUrl}/og-image.png`],
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			"max-video-preview": -1,
+			"max-image-preview": "large",
+			"max-snippet": -1,
+		},
+	},
+	metadataBase: new URL(siteUrl),
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

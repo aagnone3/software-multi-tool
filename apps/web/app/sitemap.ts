@@ -13,6 +13,10 @@ const locales = [DEFAULT_LOCALE];
 
 const staticMarketingPages = [""];
 
+const enabledToolSlugs = config.tools.registry
+	.filter((t) => t.enabled)
+	.map((t) => t.slug);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const posts = config.ui.blog.enabled ? await getAllPosts() : [];
 
@@ -23,6 +27,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				lastModified: new Date(),
 			})),
 		),
+		...enabledToolSlugs.map((slug) => ({
+			url: new URL(`/app/tools/${slug}`, baseUrl).href,
+			lastModified: new Date(),
+			changeFrequency: "weekly" as const,
+			priority: 0.8,
+		})),
 		...posts.map((post) => ({
 			url: new URL(`/${post.locale}/blog/${post.path}`, baseUrl).href,
 			lastModified: new Date(),
