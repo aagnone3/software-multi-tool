@@ -28,7 +28,7 @@ export function Footer() {
 						Features
 					</a>
 
-					<a href="/#pricing" className="block">
+					<a href="/pricing" className="block">
 						Pricing
 					</a>
 				</div>

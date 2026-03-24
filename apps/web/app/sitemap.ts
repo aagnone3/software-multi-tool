@@ -11,7 +11,7 @@ const baseUrl = getBaseUrl();
 const DEFAULT_LOCALE = "en";
 const locales = [DEFAULT_LOCALE];
 
-const staticMarketingPages = ["", "/changelog", "/tools"];
+const staticMarketingPages = ["", "/changelog", "/tools", "/pricing"];
 
 const enabledToolSlugs = config.tools.registry
 	.filter((t) => t.enabled)

@@ -58,7 +58,7 @@ export function NavBar() {
 		},
 		{
 			label: "Pricing",
-			href: "/#pricing",
+			href: "/pricing",
 		},
 		{
 			label: "FAQ",
