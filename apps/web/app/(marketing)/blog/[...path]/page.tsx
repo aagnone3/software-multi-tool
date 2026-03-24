@@ -1,3 +1,4 @@
+import { BlogNewsletterCta } from "@marketing/blog/components/BlogNewsletterCta";
 import { PostContent } from "@marketing/blog/components/PostContent";
 import { RelatedPosts } from "@marketing/blog/components/RelatedPosts";
 import { RelatedToolCta } from "@marketing/blog/components/RelatedToolCta";
@@ -178,6 +179,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 					<PostContent content={body} />
 					<div className="mx-auto max-w-2xl">
 						<RelatedToolCta tags={tags ?? []} />
+						<BlogNewsletterCta />
 						<SocialShareButtons title={title} path={slug} />
 					</div>
 				</div>
