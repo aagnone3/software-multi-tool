@@ -18,6 +18,47 @@ const staticMarketingPages = [
 	"/pricing",
 	"/faq",
 	"/use-cases",
+	"/case-studies",
+	"/roi-calculator",
+	"/for",
+	"/vs",
+	"/integrations",
+	"/security",
+	"/partners",
+];
+
+const competitorSlugs = [
+	"otter-ai",
+	"fireflies-ai",
+	"docparser",
+	"chatgpt",
+	"zapier",
+	"notion-ai",
+	"adobe-acrobat-ai",
+	"microsoft-copilot",
+	"google-gemini",
+	"descript",
+	"tldv",
+	"fathom",
+	"claude-ai",
+	"loom",
+];
+
+const industryPages = [
+	"accountants",
+	"lawyers",
+	"freelancers",
+	"small-businesses",
+	"podcast-producers",
+	"consultants",
+	"hr-teams",
+	"real-estate",
+	"nonprofits",
+	"financial-advisors",
+	"insurance-professionals",
+	"marketing-agencies",
+	"medical-practices",
+	"ecommerce",
 ];
 
 const enabledToolSlugs = config.tools.registry
@@ -34,6 +75,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				lastModified: new Date(),
 			})),
 		),
+		...competitorSlugs.map((slug) => ({
+			url: new URL(`/vs/${slug}`, baseUrl).href,
+			lastModified: new Date(),
+			changeFrequency: "monthly" as const,
+			priority: 0.7,
+		})),
+		...industryPages.map((slug) => ({
+			url: new URL(`/for/${slug}`, baseUrl).href,
+			lastModified: new Date(),
+			changeFrequency: "monthly" as const,
+			priority: 0.7,
+		})),
 		...enabledToolSlugs.map((slug) => ({
 			url: new URL(`/tools/${slug}`, baseUrl).href,
 			lastModified: new Date(),

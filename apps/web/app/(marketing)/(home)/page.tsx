@@ -5,6 +5,7 @@ import { Hero } from "@marketing/home/components/Hero";
 import { HowItWorks } from "@marketing/home/components/HowItWorks";
 import { PricingSection } from "@marketing/home/components/PricingSection";
 import { SocialProofBar } from "@marketing/home/components/SocialProofBar";
+import { StatsBar } from "@marketing/home/components/StatsBar";
 import { Testimonials } from "@marketing/home/components/Testimonials";
 import { config } from "@repo/config";
 import type { Metadata } from "next";
@@ -187,6 +188,7 @@ export default async function Home() {
 			/>
 			<Hero />
 			<SocialProofBar />
+			<StatsBar />
 			<Features />
 			<HowItWorks />
 			<Testimonials />

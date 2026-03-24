@@ -61,8 +61,20 @@ export function NavBar() {
 			href: "/pricing",
 		},
 		{
+			label: "By Industry",
+			href: "/for",
+		},
+		{
 			label: "Use Cases",
 			href: "/use-cases",
+		},
+		{
+			label: "Case Studies",
+			href: "/case-studies",
+		},
+		{
+			label: "ROI Calculator",
+			href: "/roi-calculator",
 		},
 		{
 			label: "FAQ",
@@ -91,6 +103,18 @@ export function NavBar() {
 		{
 			label: "Docs",
 			href: "/docs",
+		},
+		{
+			label: "Integrations",
+			href: "/integrations",
+		},
+		{
+			label: "Security",
+			href: "/security",
+		},
+		{
+			label: "Partners",
+			href: "/partners",
 		},
 	];
 
