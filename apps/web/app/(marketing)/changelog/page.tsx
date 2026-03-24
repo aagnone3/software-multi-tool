@@ -1,0 +1,232 @@
+import { config } from "@repo/config";
+import { getBaseUrl } from "@repo/utils";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Changelog",
+	description: `Stay up to date with the latest improvements and new features added to ${config.appName}.`,
+	openGraph: {
+		title: `Changelog | ${config.appName}`,
+		description: `Stay up to date with the latest improvements and new features added to ${config.appName}.`,
+		url: `${getBaseUrl()}/changelog`,
+	},
+};
+
+const releases = [
+	{
+		version: "1.4.0",
+		date: "March 2026",
+		highlights: "AI-powered dashboard & UX overhaul",
+		changes: [
+			{
+				type: "feature" as const,
+				text: "Added personalized dashboard with activity heatmap, streak widget, daily goals, and credit forecasting",
+			},
+			{
+				type: "feature" as const,
+				text: "Added job comparison, pinned jobs, job notes, and job tagging to the jobs history page",
+			},
+			{
+				type: "feature" as const,
+				text: "Added ToolPreviewDrawer, ToolTipsBanner, ToolUsageGuide, ToolSampleOutput, and ToolBenchmarkWidget",
+			},
+			{
+				type: "feature" as const,
+				text: "Added keyboard navigation shortcuts (g+h/t/j/s) and keyboard shortcuts help dialog (?)",
+			},
+			{
+				type: "feature" as const,
+				text: "Added searchable, filterable, and sortable ToolsGrid with favorites and tool collections",
+			},
+			{
+				type: "feature" as const,
+				text: "Added milestone notifications, job completion toasts, and credit alert settings",
+			},
+			{
+				type: "improvement" as const,
+				text: "Redesigned job detail page with output viewer, run-again action, and auto-polling",
+			},
+			{
+				type: "improvement" as const,
+				text: "Bulk select and delete jobs from the jobs history page",
+			},
+		],
+	},
+	{
+		version: "1.3.0",
+		date: "March 2026",
+		highlights: "SEO & marketing pages",
+		changes: [
+			{
+				type: "feature" as const,
+				text: "Added public marketing landing pages for each AI tool with hero, features, use-cases, and JSON-LD structured data",
+			},
+			{
+				type: "feature" as const,
+				text: "Added dynamic OG image generation endpoint for social sharing",
+			},
+			{
+				type: "feature" as const,
+				text: "Added BreadcrumbList, FAQPage, and Article JSON-LD structured data throughout the site",
+			},
+			{
+				type: "improvement" as const,
+				text: "Updated robots.txt and sitemap.xml to include all public tool pages",
+			},
+			{
+				type: "improvement" as const,
+				text: "Added social proof bar and three new blog posts on AI tool use cases",
+			},
+		],
+	},
+	{
+		version: "1.2.0",
+		date: "February 2026",
+		highlights: "Test coverage & reliability",
+		changes: [
+			{
+				type: "improvement" as const,
+				text: "Added 1,900+ automated tests across web, API, database, storage, and mail packages",
+			},
+			{
+				type: "improvement" as const,
+				text: "Dockerless test runner ergonomics — all tests skip or skip-integrate gracefully when Docker is unavailable",
+			},
+			{
+				type: "improvement" as const,
+				text: "Removed host psql dependency from local-eval, setup, and seed flows",
+			},
+			{
+				type: "improvement" as const,
+				text: "Significant speedups in test suites via parallelization and shared fixtures",
+			},
+		],
+	},
+	{
+		version: "1.1.0",
+		date: "January 2026",
+		highlights: "Local development & onboarding",
+		changes: [
+			{
+				type: "feature" as const,
+				text: "Added pnpm local-eval:smoke command for single-command local evaluation",
+			},
+			{
+				type: "improvement" as const,
+				text: "Tightened README and CONTRIBUTING docs — local evaluation path now reflects real prerequisites",
+			},
+			{
+				type: "improvement" as const,
+				text: "Repo-owned Supabase CLI fallback so global install is optional",
+			},
+			{
+				type: "improvement" as const,
+				text: "Added pnpm worktree:create / resume / list / remove for parallel feature development",
+			},
+		],
+	},
+	{
+		version: "1.0.0",
+		date: "December 2025",
+		highlights: "Initial launch",
+		changes: [
+			{
+				type: "feature" as const,
+				text: "Meeting Summarizer — AI-powered meeting notes and action item extraction",
+			},
+			{
+				type: "feature" as const,
+				text: "Invoice Processor — extract line items, totals, and vendor details from invoice PDFs",
+			},
+			{
+				type: "feature" as const,
+				text: "Contract Analyzer — identify key clauses, obligations, and risk factors in contracts",
+			},
+			{
+				type: "feature" as const,
+				text: "Speaker Separation — diarize audio into per-speaker segments",
+			},
+			{
+				type: "feature" as const,
+				text: "News Analyzer — curate and analyze news articles on any topic",
+			},
+			{
+				type: "feature" as const,
+				text: "Expense Categorizer — auto-categorize expense CSVs for bookkeeping",
+			},
+			{
+				type: "feature" as const,
+				text: "Feedback Analyzer — analyze customer feedback for themes and sentiment",
+			},
+			{
+				type: "feature" as const,
+				text: "Credit-based pricing with free tier, Pro plan, and Enterprise plan",
+			},
+		],
+	},
+];
+
+const typeBadge: Record<"feature" | "improvement" | "fix", string> = {
+	feature:
+		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+	improvement:
+		"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+	fix: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+};
+
+const typeLabel: Record<"feature" | "improvement" | "fix", string> = {
+	feature: "New",
+	improvement: "Improved",
+	fix: "Fixed",
+};
+
+export default function ChangelogPage() {
+	return (
+		<div className="container mx-auto max-w-3xl px-4 py-16">
+			<div className="mb-12">
+				<h1 className="mb-4 font-bold text-4xl">Changelog</h1>
+				<p className="text-lg text-muted-foreground">
+					All notable changes to {config.appName} are documented here.
+				</p>
+			</div>
+
+			<div className="space-y-16">
+				{releases.map((release) => (
+					<div key={release.version} className="relative">
+						<div className="mb-6 flex flex-wrap items-baseline gap-3">
+							<span className="rounded-full bg-primary px-3 py-1 font-mono font-semibold text-primary-foreground text-sm">
+								v{release.version}
+							</span>
+							<span className="text-muted-foreground text-sm">
+								{release.date}
+							</span>
+							<span className="font-medium text-foreground">
+								{release.highlights}
+							</span>
+						</div>
+
+						<ul className="space-y-3">
+							{release.changes.map((change) => (
+								<li
+									key={change.text}
+									className="flex items-start gap-3 text-sm"
+								>
+									<span
+										className={`mt-0.5 inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-medium text-xs ${typeBadge[change.type]}`}
+									>
+										{typeLabel[change.type]}
+									</span>
+									<span className="text-foreground/80">
+										{change.text}
+									</span>
+								</li>
+							))}
+						</ul>
+
+						<div className="mt-8 border-b" />
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}

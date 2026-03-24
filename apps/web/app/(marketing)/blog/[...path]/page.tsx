@@ -1,4 +1,8 @@
+import { BlogNewsletterCta } from "@marketing/blog/components/BlogNewsletterCta";
 import { PostContent } from "@marketing/blog/components/PostContent";
+import { RelatedPosts } from "@marketing/blog/components/RelatedPosts";
+import { RelatedToolCta } from "@marketing/blog/components/RelatedToolCta";
+import { SocialShareButtons } from "@marketing/blog/components/SocialShareButtons";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -23,19 +27,34 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
+	const siteUrl = getBaseUrl();
+	const ogImage = post?.image
+		? post.image.startsWith("http")
+			? post.image
+			: new URL(post.image, siteUrl).toString()
+		: `${siteUrl}/api/og?title=${encodeURIComponent(post?.title ?? config.appName)}&description=${encodeURIComponent(post?.excerpt ?? "")}`;
+
 	return {
 		title: post?.title,
 		description: post?.excerpt,
+		alternates: {
+			canonical: `${siteUrl}/blog/${getActivePathFromUrlParam(path)}`,
+		},
 		openGraph: {
+			type: "article",
 			title: post?.title,
 			description: post?.excerpt,
-			images: post?.image
-				? [
-						post.image.startsWith("http")
-							? post.image
-							: new URL(post.image, getBaseUrl()).toString(),
-					]
-				: [],
+			url: `${siteUrl}/blog/${getActivePathFromUrlParam(path)}`,
+			images: [{ url: ogImage, width: 1200, height: 630 }],
+			publishedTime: post?.date,
+			authors: post?.authorName ? [post.authorName] : [],
+			tags: post?.tags ?? [],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: post?.title,
+			description: post?.excerpt,
+			images: [ogImage],
 		},
 	};
 }
@@ -158,7 +177,13 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 
 				<div className="pb-8">
 					<PostContent content={body} />
+					<div className="mx-auto max-w-2xl">
+						<RelatedToolCta tags={tags ?? []} />
+						<BlogNewsletterCta />
+						<SocialShareButtons title={title} path={slug} />
+					</div>
 				</div>
+				<RelatedPosts currentSlug={slug} tags={tags ?? []} limit={3} />
 			</div>
 		</>
 	);

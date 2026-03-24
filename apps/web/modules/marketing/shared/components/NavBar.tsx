@@ -58,11 +58,19 @@ export function NavBar() {
 		},
 		{
 			label: "Pricing",
-			href: "/#pricing",
+			href: "/pricing",
+		},
+		{
+			label: "Use Cases",
+			href: "/use-cases",
 		},
 		{
 			label: "FAQ",
-			href: "/#faq",
+			href: "/faq",
+		},
+		{
+			label: "Changelog",
+			href: "/changelog",
 		},
 		...(config.ui.blog.enabled
 			? [
