@@ -805,6 +805,50 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Help Your Team Do More",
 	},
+	construction: {
+		slug: "construction",
+		title: "AI Tools for Construction Companies",
+		headline: "Cut Admin Overhead on Every Job Site.",
+		description:
+			"Construction companies generate mountains of paperwork — invoices, meeting notes, contracts, and expense reports. AI tools automate the administrative work so your team can focus on building.",
+		persona: "Project Managers, Office Managers, and GC Owners",
+		challenge:
+			"Construction businesses process dozens of supplier invoices, subcontractor feedback, job site meeting notes, and expense reports every week. AI tools turn hours of manual admin work into minutes.",
+		tools: [
+			{
+				slug: "invoice-processor",
+				name: "Invoice Processor",
+				how: "Extract vendor details, line items, amounts, and PO references from any supplier invoice — PDF, image, or scanned document — in seconds.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Turn job site meeting recordings and pre-construction calls into structured summaries with decisions, action items, and open issues.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Surface risky clauses, payment terms, liquidated damages provisions, and unusual indemnification language in subcontract agreements before you sign.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize field expenses by project code automatically from receipts submitted by supervisors and PMs.",
+			},
+		],
+		benefits: [
+			"Process supplier invoices in seconds instead of minutes",
+			"Never lose job site decisions or action items again",
+			"Spot contract red flags before signing with subcontractors",
+			"Cut field expense report processing time by 80%",
+		],
+		testimonial: {
+			quote: "We were spending 8 hours a week keying invoice data. Now it's 90 minutes. That alone paid for the tool in the first week.",
+			name: "Mike Delgado",
+			role: "Office Manager, Delgado General Contracting",
+		},
+		cta: "Cut Your Admin Overhead",
+	},
 };
 
 export function generateStaticParams() {

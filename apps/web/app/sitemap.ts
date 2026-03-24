@@ -83,6 +83,7 @@ const industryPages = [
 	"startups",
 	"logistics-teams",
 	"nonprofit-organizations",
+	"construction",
 ];
 
 const enabledToolSlugs = config.tools.registry
