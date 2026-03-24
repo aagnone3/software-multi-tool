@@ -1,4 +1,6 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
+import { RelatedPosts } from "@marketing/blog/components/RelatedPosts";
+import { RelatedToolCta } from "@marketing/blog/components/RelatedToolCta";
 import { SocialShareButtons } from "@marketing/blog/components/SocialShareButtons";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
 import { config } from "@repo/config";
@@ -175,9 +177,11 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 				<div className="pb-8">
 					<PostContent content={body} />
 					<div className="mx-auto max-w-2xl">
+						<RelatedToolCta tags={tags ?? []} />
 						<SocialShareButtons title={title} path={slug} />
 					</div>
 				</div>
+				<RelatedPosts currentSlug={slug} tags={tags ?? []} limit={3} />
 			</div>
 		</>
 	);
