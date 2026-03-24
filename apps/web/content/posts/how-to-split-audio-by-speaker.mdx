@@ -1,0 +1,123 @@
+---
+title: "How to Split Audio by Speaker (Diarization Without Code)"
+description: "Speaker diarization — splitting audio by who's talking — used to require a developer. Now you can do it in a browser with no code. Here's how."
+date: "2026-03-24"
+author: "gilfoyle"
+authorName: "Gilfoyle"
+authorImage: "/images/blog/author.jpg"
+locale: "en"
+excerpt: "If you've ever needed to split a recorded conversation by speaker, you've probably hit a wall. Here's how to do it without writing a single line of code."
+tags: ["speaker-separation", "audio", "transcription"]
+published: true
+---
+
+You have an audio recording. Two people talking. Maybe three. You need to know who said what.
+
+Welcome to speaker diarization — the technical term for splitting audio by speaker. It used to be a developer problem. You'd need to integrate an API, write code, handle edge cases. For a non-technical business user, it was basically inaccessible.
+
+That's changed. Here's how to split audio by speaker in 2025 — no code required.
+
+## What Is Speaker Diarization?
+
+Speaker diarization is the process of segmenting an audio file by speaker identity. The output is typically something like:
+
+```
+[00:01:23] Speaker 1: We need to finalize the contract by Friday.
+[00:01:28] Speaker 2: I'll have legal review it by Thursday.
+[00:01:35] Speaker 1: Perfect. Let's confirm on the call next week.
+```
+
+It's extremely useful for:
+- Meeting transcripts where you need to know who said what
+- Interview recordings for journalism or research
+- Podcast transcripts with multiple hosts
+- Legal depositions and recorded conversations
+- Call center quality analysis
+
+## The Old Way (Painful)
+
+Before no-code tools existed, you had two options:
+
+1. **Manual labeling** — listen to the audio and type who said what as you go. A 60-minute recording might take 3-4 hours to manually attribute.
+
+2. **Use an API** — services like AssemblyAI, Deepgram, and AWS Transcribe all support diarization, but they require you to write code to call the API and process the output.
+
+Neither is practical for most business users.
+
+## The New Way: No-Code Speaker Separation
+
+Software like software-multi-tool's speaker separation tool lets you:
+
+1. Upload an audio or video file
+2. Select the expected number of speakers (or let it detect automatically)
+3. Get back a labeled transcript in minutes
+
+That's it. No API keys. No code. No waiting for a developer.
+
+### How It Works Under the Hood
+
+Modern speaker separation uses neural diarization models that analyze voice characteristics — pitch, cadence, frequency patterns — to distinguish between speakers even when they're not explicitly identified by name.
+
+The accuracy depends on:
+- **Audio quality** — clear audio diarizes better than phone-quality recordings
+- **Speaker overlap** — people talking over each other is harder to segment
+- **Number of speakers** — 2-3 speakers diarize better than 8+
+
+For most business recordings (meetings, interviews, calls), accuracy is high enough to be useful immediately.
+
+## Step-by-Step: Split Audio by Speaker
+
+### Step 1: Get Your Audio File
+
+Supported formats include MP3, MP4, WAV, M4A, and most common audio/video formats. If your recording is a video file (Zoom, Teams recording), you can upload the video directly — the audio is extracted automatically.
+
+### Step 2: Upload to the Speaker Separation Tool
+
+Go to [software-multi-tool's speaker separation tool](/tools/speaker-separation) and upload your file. If you know how many speakers are in the recording, you can specify that — it slightly improves accuracy.
+
+### Step 3: Review the Output
+
+The tool returns a transcript segmented by speaker. Each segment is labeled:
+- Speaker 1, Speaker 2, etc. (or by name if you identify them)
+- Timestamp for each segment
+- Confidence indicator
+
+### Step 4: Export or Use the Transcript
+
+Copy the labeled transcript, export it as text, or use it as input for your meeting summarizer to get structured notes with proper speaker attribution.
+
+## Use Cases Where Speaker Separation Saves Real Time
+
+**Podcast production**
+Transcript your podcast with speaker labels, then hand it to an editor or use it for show notes. Saves 2-3 hours per episode compared to manual transcription.
+
+**Client call reviews**
+Review sales or support calls with clear attribution. Know exactly what the rep said vs. what the customer said.
+
+**Interview-based research**
+Qualitative researchers can tag quotes by respondent instantly instead of manually labeling hours of recordings.
+
+**Meeting documentation**
+When you need not just what was decided but who proposed what, speaker labels make meeting notes far more useful.
+
+**Legal and compliance**
+Deposition recordings and compliance calls often need speaker attribution for evidentiary purposes.
+
+## Alternatives to Consider
+
+If you need speaker diarization at scale (hundreds of recordings per day), a direct API integration via AssemblyAI or Deepgram might be more cost-effective. But for 1-20 recordings per week, a no-code tool is faster and cheaper when you factor in development time.
+
+Other no-code options:
+- **Descript** — great but subscription-heavy; $24/month
+- **tl;dv** — live meeting bot only, no file upload
+- **Otter.ai** — transcription with some speaker ID, limited free tier
+
+For file-upload-based diarization, software-multi-tool is the most direct path.
+
+## Try It Free
+
+Upload a recording and see labeled speaker output in minutes.
+
+[Try Speaker Separation →](/tools/speaker-separation)
+
+No credit card. No code. Just upload your file.
