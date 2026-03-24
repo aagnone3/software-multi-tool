@@ -20,6 +20,14 @@ const staticMarketingPages = [
 	"/use-cases",
 ];
 
+const industryPages = [
+	"accountants",
+	"lawyers",
+	"freelancers",
+	"small-businesses",
+	"podcast-producers",
+];
+
 const enabledToolSlugs = config.tools.registry
 	.filter((t) => t.enabled)
 	.map((t) => t.slug);
@@ -34,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				lastModified: new Date(),
 			})),
 		),
+		...industryPages.map((slug) => ({
+			url: new URL(`/for/${slug}`, baseUrl).href,
+			lastModified: new Date(),
+			changeFrequency: "monthly" as const,
+			priority: 0.7,
+		})),
 		...enabledToolSlugs.map((slug) => ({
 			url: new URL(`/tools/${slug}`, baseUrl).href,
 			lastModified: new Date(),
