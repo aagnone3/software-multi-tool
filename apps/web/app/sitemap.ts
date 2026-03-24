@@ -57,6 +57,10 @@ const competitorSlugs = [
 	"azure-ai-document",
 	"eightfold-ai",
 	"kofax",
+	"docsumo",
+	"sensible",
+	"hyperscience",
+	"instabase",
 ];
 
 const industryPages = [
