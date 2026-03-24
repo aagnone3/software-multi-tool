@@ -24,19 +24,34 @@ export async function generateMetadata(props: { params: Promise<Params> }) {
 	const slug = getActivePathFromUrlParam(path);
 	const post = await getPostBySlug(slug, { locale });
 
+	const siteUrl = getBaseUrl();
+	const ogImage = post?.image
+		? post.image.startsWith("http")
+			? post.image
+			: new URL(post.image, siteUrl).toString()
+		: `${siteUrl}/api/og?title=${encodeURIComponent(post?.title ?? config.appName)}&description=${encodeURIComponent(post?.excerpt ?? "")}`;
+
 	return {
 		title: post?.title,
 		description: post?.excerpt,
+		alternates: {
+			canonical: `${siteUrl}/blog/${getActivePathFromUrlParam(path)}`,
+		},
 		openGraph: {
+			type: "article",
 			title: post?.title,
 			description: post?.excerpt,
-			images: post?.image
-				? [
-						post.image.startsWith("http")
-							? post.image
-							: new URL(post.image, getBaseUrl()).toString(),
-					]
-				: [],
+			url: `${siteUrl}/blog/${getActivePathFromUrlParam(path)}`,
+			images: [{ url: ogImage, width: 1200, height: 630 }],
+			publishedTime: post?.date,
+			authors: post?.authorName ? [post.authorName] : [],
+			tags: post?.tags ?? [],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: post?.title,
+			description: post?.excerpt,
+			images: [ogImage],
 		},
 	};
 }
