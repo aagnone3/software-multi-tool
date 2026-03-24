@@ -9,7 +9,7 @@ const siteUrl = getBaseUrl();
 
 export const metadata: Metadata = {
 	title: `${config.appName} vs Alternatives — AI Tool Comparisons`,
-	description: `Compare ${config.appName} with Otter.ai, Fireflies, Docparser, and ChatGPT. See how we stack up on features, pricing, and ease of use.`,
+	description: `Compare ${config.appName} with Otter.ai, Fireflies, Docparser, ChatGPT, Zapier, Notion AI, and Adobe Acrobat AI. See how we stack up on features, pricing, and ease of use.`,
 	alternates: { canonical: `${siteUrl}/vs` },
 	openGraph: {
 		type: "website",
@@ -43,6 +43,24 @@ const comparisons = [
 		name: "ChatGPT",
 		tagline: "General-purpose AI assistant",
 		diff: "Purpose-built workflows, consistent output",
+	},
+	{
+		slug: "zapier",
+		name: "Zapier",
+		tagline: "No-code workflow automation",
+		diff: "AI-native document intelligence, not routing",
+	},
+	{
+		slug: "notion-ai",
+		name: "Notion AI",
+		tagline: "AI writing inside a team workspace",
+		diff: "Specialized processing beyond writing assistance",
+	},
+	{
+		slug: "adobe-acrobat-ai",
+		name: "Adobe Acrobat AI",
+		tagline: "PDF Q&A inside the Adobe suite",
+		diff: "No Adobe subscription — works on audio, CSV, and PDFs",
 	},
 ];
 

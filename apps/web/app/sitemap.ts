@@ -22,7 +22,15 @@ const staticMarketingPages = [
 	"/vs",
 ];
 
-const competitorSlugs = ["otter-ai", "fireflies-ai", "docparser", "chatgpt"];
+const competitorSlugs = [
+	"otter-ai",
+	"fireflies-ai",
+	"docparser",
+	"chatgpt",
+	"zapier",
+	"notion-ai",
+	"adobe-acrobat-ai",
+];
 
 const industryPages = [
 	"accountants",
