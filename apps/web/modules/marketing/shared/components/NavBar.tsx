@@ -69,6 +69,10 @@ export function NavBar() {
 			href: "/use-cases",
 		},
 		{
+			label: "Case Studies",
+			href: "/case-studies",
+		},
+		{
 			label: "ROI Calculator",
 			href: "/roi-calculator",
 		},

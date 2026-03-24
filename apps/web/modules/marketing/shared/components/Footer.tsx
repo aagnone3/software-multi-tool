@@ -55,6 +55,9 @@ export function Footer() {
 					<Link href="/use-cases" className="block">
 						Use Cases
 					</Link>
+					<Link href="/case-studies" className="block">
+						Case Studies
+					</Link>
 					<Link href="/integrations" className="block">
 						Integrations
 					</Link>

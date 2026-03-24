@@ -18,6 +18,7 @@ const staticMarketingPages = [
 	"/pricing",
 	"/faq",
 	"/use-cases",
+	"/case-studies",
 	"/roi-calculator",
 	"/for",
 	"/vs",
