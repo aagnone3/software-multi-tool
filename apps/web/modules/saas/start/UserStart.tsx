@@ -6,6 +6,7 @@ import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsG
 import React from "react";
 import { JobSearchWidget } from "../jobs/components/JobSearchWidget";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
+import { CreditForecastWidget } from "./components/CreditForecastWidget";
 import { CreditsByToolChart } from "./components/CreditsByToolChart";
 import { CreditsOverview } from "./components/CreditsOverview";
 import { DailyGoalWidget } from "./components/DailyGoalWidget";
@@ -103,6 +104,9 @@ export default function UserStart() {
 				<JobSearchWidget />
 
 				{/* Tool Benchmark — per-tool success rate and avg duration */}
+
+				{/* Credit Forecast — projects future credit usage */}
+				<CreditForecastWidget />
 				<ToolBenchmarkWidget />
 			</div>
 		</div>

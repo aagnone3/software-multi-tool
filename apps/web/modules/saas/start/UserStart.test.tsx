@@ -80,6 +80,10 @@ vi.mock("./components/PinnedJobsWidget", () => ({
 vi.mock("./components/ToolBenchmarkWidget", () => ({
 	ToolBenchmarkWidget: () => <div data-testid="tool-benchmark-widget" />,
 }));
+
+vi.mock("./components/CreditForecastWidget", () => ({
+	CreditForecastWidget: () => <div data-testid="credit-forecast-widget" />,
+}));
 vi.mock("../jobs/components/JobSearchWidget", () => ({
 	JobSearchWidget: () => <div data-testid="job-search-widget" />,
 }));
