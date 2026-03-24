@@ -1,8 +1,10 @@
 import { createPurchasesHelper } from "@repo/payments/lib/helper";
 import { getSession } from "@saas/auth/lib/server";
+import { CreditAlertSettings } from "@saas/credits/components/CreditAlertSettings";
 import { CreditBalanceSection } from "@saas/credits/components/CreditBalanceSection";
 import { ActivePlan } from "@saas/payments/components/ActivePlan";
 import { ChangePlan } from "@saas/payments/components/ChangePlan";
+import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { SettingsList } from "@saas/shared/components/SettingsList";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -46,6 +48,12 @@ export default async function BillingSettingsPage() {
 				userId={session?.user.id}
 				activePlanId={activePlan?.id}
 			/>
+			<SettingsItem
+				title="Credit alerts"
+				description="Configure when to show low-credit warnings."
+			>
+				<CreditAlertSettings />
+			</SettingsItem>
 		</SettingsList>
 	);
 }

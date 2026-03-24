@@ -1,4 +1,17 @@
 import { config } from "@repo/config";
+import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
+import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
+import { ToolCollectionsPanel } from "@saas/tools/components/ToolCollectionsPanel";
+import { ToolInputTemplates } from "@saas/tools/components/ToolInputTemplates";
+import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
+import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
+import { ToolRatingWidget } from "@saas/tools/components/ToolRatingWidget";
+import { ToolRecentRuns } from "@saas/tools/components/ToolRecentRuns";
+import { ToolSampleOutput } from "@saas/tools/components/ToolSampleOutput";
+import { ToolScheduler } from "@saas/tools/components/ToolScheduler";
+import { ToolTipsBanner } from "@saas/tools/components/ToolTipsBanner";
+import { ToolUsageGuide } from "@saas/tools/components/ToolUsageGuide";
+import { ToolViewTracker } from "@saas/tools/components/ToolViewTracker";
 import { isToolEnabled } from "@saas/tools/lib/tool-flags";
 import { ContractAnalyzerTool } from "@tools/components/ContractAnalyzerTool";
 import { ExpenseCategorizerTool } from "@tools/components/ExpenseCategorizerTool";
@@ -6,6 +19,7 @@ import { FeedbackAnalyzerTool } from "@tools/components/FeedbackAnalyzerTool";
 import { InvoiceProcessorTool } from "@tools/components/InvoiceProcessorTool";
 import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
+import { ToolNotes } from "@tools/components/ToolNotes";
 import { notFound, redirect } from "next/navigation";
 import { DiagramEditor } from "../../../../../components/tools/diagram-editor";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
@@ -82,17 +96,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
 	if (!ToolComponent) {
 		return (
 			<div className="max-w-4xl">
-				<div className="rounded-2xl border bg-card p-8">
-					<h1 className="text-2xl font-bold">{tool.name}</h1>
-					<p className="mt-2 text-muted-foreground">
-						{tool.description}
+				<ToolPageHeader tool={tool} />
+				<LowCreditsWarning className="mb-4" showActionButtons={true} />
+				<ToolUsageGuide toolSlug={toolSlug} />
+				<div className="rounded-2xl border border-dashed border-muted-foreground/25 bg-muted/50 p-12 text-center">
+					<p className="text-muted-foreground">
+						This tool is under development. Check back soon!
 					</p>
-
-					<div className="mt-8 rounded-lg border border-dashed border-muted-foreground/25 bg-muted/50 p-12 text-center">
-						<p className="text-muted-foreground">
-							This tool is under development. Check back soon!
-						</p>
-					</div>
 				</div>
 			</div>
 		);
@@ -100,7 +110,28 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
 	return (
 		<div className="max-w-4xl">
+			<ToolViewTracker toolSlug={toolSlug} />
+			<ToolPageHeader tool={tool} />
+			<ToolScheduler
+				toolSlug={toolSlug}
+				toolName={tool.name}
+				className="mb-4"
+			/>
+			<LowCreditsWarning className="mb-4" showActionButtons={true} />
+			<ToolTipsBanner toolSlug={toolSlug} className="mb-4" />
+			<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
+			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
+			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
+			<ToolSampleOutput toolSlug={toolSlug} className="mt-6" />
+			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
+			<ToolNotes toolSlug={toolSlug} className="mt-6" />
+			<ToolCollectionsPanel
+				currentToolSlug={toolSlug}
+				className="mt-6 rounded-lg border p-4"
+			/>
+			<ToolInputTemplates toolSlug={toolSlug} className="mt-6" />
+			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
 }

@@ -89,10 +89,10 @@ export function useCancelJob() {
 	});
 }
 
-export function useJobsList(toolSlug?: string) {
+export function useJobsList(toolSlug?: string, limit?: number) {
 	const { data, isLoading, error, refetch } = useQuery({
 		...orpc.jobs.list.queryOptions({
-			input: { toolSlug },
+			input: { toolSlug, limit },
 		}),
 	});
 
@@ -101,5 +101,29 @@ export function useJobsList(toolSlug?: string) {
 		isLoading,
 		error,
 		refetch,
+	};
+}
+
+export function useJobsListPaginated({
+	toolSlug,
+	limit = 20,
+	offset = 0,
+}: {
+	toolSlug?: string;
+	limit?: number;
+	offset?: number;
+}) {
+	const { data, isLoading, error, refetch } = useQuery({
+		...orpc.jobs.list.queryOptions({
+			input: { toolSlug, limit, offset },
+		}),
+	});
+
+	return {
+		jobs: data?.jobs ?? [],
+		isLoading,
+		error,
+		refetch,
+		hasMore: (data?.jobs?.length ?? 0) === limit,
 	};
 }

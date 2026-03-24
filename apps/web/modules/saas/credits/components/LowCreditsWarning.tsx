@@ -6,8 +6,33 @@ import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { AlertTriangleIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
+
+const ALERT_SETTINGS_KEY = "credit-alert-settings";
+
+function getAlertSettings(): {
+	enabled: boolean;
+	threshold: number | null;
+} {
+	try {
+		const stored = localStorage.getItem(ALERT_SETTINGS_KEY);
+		if (stored) {
+			const parsed = JSON.parse(stored);
+			return {
+				enabled: parsed.enabled !== false,
+				threshold:
+					typeof parsed.threshold === "number" && parsed.threshold > 0
+						? parsed.threshold
+						: null,
+			};
+		}
+	} catch {
+		// ignore
+	}
+	// No saved settings — respect only proportional threshold
+	return { enabled: true, threshold: null };
+}
 
 interface LowCreditsWarningProps {
 	className?: string;
@@ -22,15 +47,33 @@ export function LowCreditsWarning({
 }: LowCreditsWarningProps) {
 	const { balance, isLoading } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const [alertSettings, setAlertSettings] = useState<{
+		enabled: boolean;
+		threshold: number | null;
+	}>({ enabled: true, threshold: null });
+
+	useEffect(() => {
+		setAlertSettings(getAlertSettings());
+	}, []);
 
 	if (isLoading || !balance) {
 		return null;
 	}
 
-	// Check if below threshold (default 20%)
-	const isLow =
+	// Respect user-configured alert settings
+	if (!alertSettings.enabled) {
+		return null;
+	}
+
+	// Check absolute threshold from user settings OR the proportional threshold prop
+	const totalCredits = balance.remaining + (balance.purchasedCredits ?? 0);
+	const isLowAbsolute =
+		alertSettings.threshold !== null &&
+		totalCredits < alertSettings.threshold;
+	const isLowProportional =
 		balance.included > 0 &&
 		balance.remaining / balance.included < threshold;
+	const isLow = isLowAbsolute || isLowProportional;
 
 	if (!isLow) {
 		return null;

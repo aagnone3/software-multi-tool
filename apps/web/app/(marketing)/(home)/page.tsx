@@ -4,6 +4,7 @@ import { FinalCta } from "@marketing/home/components/FinalCta";
 import { Hero } from "@marketing/home/components/Hero";
 import { HowItWorks } from "@marketing/home/components/HowItWorks";
 import { PricingSection } from "@marketing/home/components/PricingSection";
+import { Testimonials } from "@marketing/home/components/Testimonials";
 
 export default async function Home() {
 	return (
@@ -11,6 +12,7 @@ export default async function Home() {
 			<Hero />
 			<Features />
 			<HowItWorks />
+			<Testimonials />
 			<PricingSection />
 			<FaqSection />
 			<FinalCta />

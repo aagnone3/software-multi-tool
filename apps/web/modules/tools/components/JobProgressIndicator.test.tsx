@@ -9,6 +9,7 @@ import {
 
 const useJobUpdatesMock = vi.hoisted(() => vi.fn());
 const useCancelJobMock = vi.hoisted(() => vi.fn());
+const useActiveOrganizationMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../hooks/use-job-updates", () => ({
 	useJobUpdates: useJobUpdatesMock,
@@ -18,10 +19,25 @@ vi.mock("../hooks/use-job-polling", () => ({
 	useCancelJob: useCancelJobMock,
 }));
 
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: useActiveOrganizationMock,
+}));
+
+vi.mock("next/link", () => ({
+	default: ({
+		children,
+		href,
+	}: {
+		children: React.ReactNode;
+		href: string;
+	}) => <a href={href}>{children}</a>,
+}));
+
 const cancelMutateMock = vi.fn();
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	useActiveOrganizationMock.mockReturnValue({ activeOrganization: null });
 	useCancelJobMock.mockReturnValue({
 		mutate: cancelMutateMock,
 		isPending: false,
@@ -63,6 +79,41 @@ describe("JobProgressIndicator", () => {
 		render(<JobProgressIndicator jobId="job-1" />);
 		expect(screen.getByText("Failed")).toBeInTheDocument();
 		expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+	});
+
+	it("renders insufficient credits CTA when job fails with credits error", () => {
+		useJobUpdatesMock.mockReturnValue({
+			job: {
+				status: "FAILED",
+				error: "You have run out of credits. Please upgrade your plan or purchase more credits.",
+			},
+			error: null,
+		});
+		render(<JobProgressIndicator jobId="job-1" />);
+		expect(screen.getByText("Insufficient Credits")).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Buy Credits" }),
+		).toHaveAttribute("href", "/app/settings/billing");
+		expect(
+			screen.getByRole("link", { name: "Upgrade Plan" }),
+		).toBeInTheDocument();
+	});
+
+	it("uses org-scoped billing path for insufficient credits CTA", () => {
+		useActiveOrganizationMock.mockReturnValue({
+			activeOrganization: { slug: "my-org" },
+		});
+		useJobUpdatesMock.mockReturnValue({
+			job: {
+				status: "FAILED",
+				error: "Insufficient credits: required 10, available 0",
+			},
+			error: null,
+		});
+		render(<JobProgressIndicator jobId="job-1" />);
+		expect(
+			screen.getByRole("link", { name: "Buy Credits" }),
+		).toHaveAttribute("href", "/app/my-org/settings/billing");
 	});
 
 	it("renders cancelled state", () => {

@@ -14,14 +14,81 @@ vi.mock("./components/GettingStartedChecklist", () => ({
 		<div data-testid="getting-started-checklist" />
 	),
 }));
+vi.mock("./components/QuickActions", () => ({
+	QuickActions: () => <div data-testid="quick-actions" />,
+}));
 vi.mock("./components/CreditsOverview", () => ({
 	CreditsOverview: () => <div data-testid="credits-overview" />,
 }));
 vi.mock("./components/RecentlyUsedTools", () => ({
 	RecentlyUsedTools: () => <div data-testid="recently-used-tools" />,
 }));
+vi.mock("./components/NotificationsWidget", () => ({
+	NotificationsWidget: () => <div data-testid="notifications-widget" />,
+}));
+vi.mock("./components/UsageTrendChart", () => ({
+	UsageTrendChart: () => <div data-testid="usage-trend-chart" />,
+}));
 vi.mock("./components/RecentActivityFeed", () => ({
 	RecentActivityFeed: () => <div data-testid="recent-activity-feed" />,
+}));
+vi.mock("./components/TopToolsWidget", () => ({
+	TopToolsWidget: () => <div data-testid="top-tools-widget" />,
+}));
+vi.mock("./components/RecommendedToolWidget", () => ({
+	RecommendedToolWidget: () => <div data-testid="recommended-tool-widget" />,
+}));
+vi.mock("./components/FavoriteToolsWidget", () => ({
+	FavoriteToolsWidget: () => <div data-testid="favorite-tools-widget" />,
+}));
+vi.mock("./components/ActiveJobsWidget", () => ({
+	ActiveJobsWidget: () => <div data-testid="active-jobs-widget" />,
+}));
+vi.mock("./components/RecentlyViewedToolsWidget", () => ({
+	RecentlyViewedToolsWidget: () => (
+		<div data-testid="recently-viewed-tools-widget" />
+	),
+}));
+vi.mock("./components/UntriedToolsWidget", () => ({
+	UntriedToolsWidget: () => <div data-testid="untried-tools-widget" />,
+}));
+vi.mock("./components/DailyGoalWidget", () => ({
+	DailyGoalWidget: () => <div data-testid="daily-goal-widget" />,
+}));
+vi.mock("@saas/credits/components/CreditBurnRateWidget", () => ({
+	CreditBurnRateWidget: () => <div data-testid="credit-burn-rate-widget" />,
+}));
+vi.mock("./components/CreditsByToolChart", () => ({
+	CreditsByToolChart: () => <div>CreditsByToolChart</div>,
+}));
+vi.mock("./components/WeeklyActivityHeatmap", () => ({
+	WeeklyActivityHeatmap: () => <div>WeeklyActivityHeatmap</div>,
+}));
+
+vi.mock("./components/WelcomeModal", () => ({
+	WelcomeModal: () => null,
+}));
+
+vi.mock("./components/StreakWidget", () => ({
+	StreakWidget: () => <div data-testid="streak-widget" />,
+}));
+
+vi.mock("./components/PinnedJobsWidget", () => ({
+	PinnedJobsWidget: () => <div data-testid="pinned-jobs-widget" />,
+}));
+
+vi.mock("./components/ToolBenchmarkWidget", () => ({
+	ToolBenchmarkWidget: () => <div data-testid="tool-benchmark-widget" />,
+}));
+
+vi.mock("./components/CreditForecastWidget", () => ({
+	CreditForecastWidget: () => <div data-testid="credit-forecast-widget" />,
+}));
+vi.mock("../jobs/components/JobSearchWidget", () => ({
+	JobSearchWidget: () => <div data-testid="job-search-widget" />,
+}));
+vi.mock("./components/FailedJobsRetryWidget", () => ({
+	FailedJobsRetryWidget: () => <div data-testid="failed-jobs-retry-widget" />,
 }));
 
 describe("UserStart", () => {
@@ -31,9 +98,16 @@ describe("UserStart", () => {
 		expect(
 			screen.getByTestId("getting-started-checklist"),
 		).toBeInTheDocument();
+		expect(screen.getByTestId("quick-actions")).toBeInTheDocument();
 		expect(screen.getByTestId("credits-overview")).toBeInTheDocument();
 		expect(screen.getByTestId("recently-used-tools")).toBeInTheDocument();
+		expect(screen.getByTestId("notifications-widget")).toBeInTheDocument();
+		expect(screen.getByTestId("usage-trend-chart")).toBeInTheDocument();
 		expect(screen.getByTestId("recent-activity-feed")).toBeInTheDocument();
+		expect(screen.getByTestId("top-tools-widget")).toBeInTheDocument();
+		expect(
+			screen.getByTestId("recommended-tool-widget"),
+		).toBeInTheDocument();
 	});
 
 	it("hides organizations grid when organizations disabled", async () => {

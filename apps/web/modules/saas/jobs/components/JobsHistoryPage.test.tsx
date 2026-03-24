@@ -1,0 +1,400 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { JobsHistoryPage } from "./JobsHistoryPage";
+
+function renderWithQuery(ui: React.ReactElement) {
+	const qc = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+}
+
+// Mock config
+vi.mock("@repo/config", () => ({
+	config: {
+		tools: {
+			registry: [
+				{
+					slug: "news-analyzer",
+					name: "News Analyzer",
+					public: true,
+					creditCost: 5,
+				},
+				{
+					slug: "speaker-separation",
+					name: "Speaker Separation",
+					public: true,
+					creditCost: 10,
+				},
+			],
+		},
+	},
+}));
+
+// Mock use-job-polling
+const mockRefetch = vi.fn();
+const mockJobsList = vi.fn();
+
+vi.mock("@tools/hooks/use-job-polling", () => ({
+	useJobsList: () => mockJobsList(),
+	useJobsListPaginated: () => mockJobsList(),
+}));
+
+// Mock next/link
+vi.mock("@shared/lib/orpc-client", () => ({
+	orpcClient: {
+		jobs: {
+			delete: vi.fn().mockResolvedValue(undefined),
+		},
+	},
+}));
+
+vi.mock("@shared/lib/orpc-query-utils", () => ({
+	orpc: {
+		jobs: {
+			list: { key: () => ["jobs", "list"] },
+		},
+	},
+}));
+
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	}) => <a href={href}>{children}</a>,
+}));
+
+describe("JobsHistoryPage", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockJobsList.mockReturnValue({
+			jobs: [],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+	});
+
+	it("shows loading skeleton while loading", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [],
+			isLoading: true,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		expect(screen.getByText("Loading...")).toBeInTheDocument();
+	});
+
+	it("shows empty state with Browse Tools CTA when no jobs", () => {
+		renderWithQuery(<JobsHistoryPage />);
+		expect(screen.getByText("No jobs yet")).toBeInTheDocument();
+		expect(
+			screen.getByText(/Your tool runs will appear here/),
+		).toBeInTheDocument();
+		const link = screen.getByRole("link", { name: "Browse Tools" });
+		expect(link).toHaveAttribute("href", "/app/tools");
+	});
+
+	it("shows filtered empty state when filters active but no results", () => {
+		vi.useFakeTimers();
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		// Search for something that doesn't match
+		const searchInput = screen.getByPlaceholderText(
+			"Search by tool name...",
+		);
+		fireEvent.change(searchInput, { target: { value: "zzznomatch" } });
+		// Advance timers past the 250ms debounce delay
+		act(() => {
+			vi.advanceTimersByTime(300);
+		});
+		vi.useRealTimers();
+		expect(
+			screen.getByText("No jobs match your filters"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Try adjusting your search or filter criteria."),
+		).toBeInTheDocument();
+	});
+
+	it("renders job rows when jobs exist", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+				{
+					id: "job-2",
+					toolSlug: "speaker-separation",
+					status: "PENDING",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
+		expect(screen.getByText("Speaker Separation")).toBeInTheDocument();
+		expect(screen.getByText("Completed")).toBeInTheDocument();
+		expect(screen.getByText("Pending")).toBeInTheDocument();
+	});
+
+	it("shows job count in header", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		expect(screen.getByText("1 job")).toBeInTheDocument();
+	});
+
+	it("shows View and Run Again links for completed job with detail route", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-abc",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		const viewLink = screen.getByRole("link", { name: /View/ });
+		expect(viewLink).toHaveAttribute(
+			"href",
+			"/app/tools/news-analyzer/job-abc",
+		);
+		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
+		expect(runAgainLink).toHaveAttribute(
+			"href",
+			"/app/tools/news-analyzer",
+		);
+	});
+
+	it("shows Run Again link for completed job without dedicated detail page", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				// A tool without a detail route (e.g. invoice-processor)
+				{
+					id: "job-xyz",
+					toolSlug: "invoice-processor",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		const runAgainLink = screen.getByRole("link", { name: "Run Again" });
+		expect(runAgainLink).toHaveAttribute(
+			"href",
+			"/app/tools/invoice-processor",
+		);
+	});
+
+	it("shows Open Tool link for pending/processing jobs", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-pending",
+					toolSlug: "invoice-processor",
+					status: "PENDING",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		const openLink = screen.getByRole("link", { name: "Open Tool" });
+		expect(openLink).toHaveAttribute(
+			"href",
+			"/app/tools/invoice-processor",
+		);
+	});
+
+	it("shows duration for completed jobs with completedAt", () => {
+		const createdAt = new Date("2026-03-22T10:00:00Z").toISOString();
+		const completedAt = new Date("2026-03-22T10:00:45Z").toISOString();
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-timed",
+					toolSlug: "invoice-processor",
+					status: "COMPLETED",
+					createdAt,
+					completedAt,
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		expect(screen.getByText(/45s/)).toBeTruthy();
+	});
+
+	it("calls refetch when Refresh button is clicked", () => {
+		renderWithQuery(<JobsHistoryPage />);
+		const refreshBtn = screen.getByRole("button", { name: /Refresh/ });
+		fireEvent.click(refreshBtn);
+		expect(mockRefetch).toHaveBeenCalledOnce();
+	});
+
+	it("shows Clear filters button when filters are active", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		const searchInput = screen.getByPlaceholderText(
+			"Search by tool name...",
+		);
+		fireEvent.change(searchInput, { target: { value: "test" } });
+		expect(
+			screen.getByRole("button", { name: "Clear filters" }),
+		).toBeInTheDocument();
+	});
+
+	it("clears filters when Clear filters is clicked", () => {
+		mockJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+				},
+			],
+			isLoading: false,
+			refetch: mockRefetch,
+			hasMore: false,
+		});
+		renderWithQuery(<JobsHistoryPage />);
+		const searchInput = screen.getByPlaceholderText(
+			"Search by tool name...",
+		);
+		fireEvent.change(searchInput, { target: { value: "test" } });
+		const clearBtn = screen.getByRole("button", { name: "Clear filters" });
+		fireEvent.click(clearBtn);
+		expect(
+			screen.queryByRole("button", { name: "Clear filters" }),
+		).not.toBeInTheDocument();
+	});
+
+	describe("Export CSV", () => {
+		beforeEach(() => {
+			URL.createObjectURL = vi.fn().mockReturnValue("blob:url");
+			URL.revokeObjectURL = vi.fn();
+		});
+
+		it("shows Export CSV button when there are filtered jobs", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [
+					{
+						id: "job-csv",
+						toolSlug: "news-analyzer",
+						status: "COMPLETED",
+						createdAt: new Date().toISOString(),
+					},
+				],
+				isLoading: false,
+				refetch: mockRefetch,
+				hasMore: false,
+			});
+			renderWithQuery(<JobsHistoryPage />);
+			expect(
+				screen.getByRole("button", { name: /Export CSV/ }),
+			).toBeInTheDocument();
+		});
+
+		it("does not show Export CSV button when no jobs", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [],
+				isLoading: false,
+				refetch: mockRefetch,
+				hasMore: false,
+			});
+			renderWithQuery(<JobsHistoryPage />);
+			expect(
+				screen.queryByRole("button", { name: /Export CSV/ }),
+			).not.toBeInTheDocument();
+		});
+
+		it("triggers CSV download (createObjectURL called) on click", () => {
+			mockJobsList.mockReturnValue({
+				jobs: [
+					{
+						id: "job-csv",
+						toolSlug: "news-analyzer",
+						status: "COMPLETED",
+						createdAt: new Date(
+							"2026-03-22T10:00:00Z",
+						).toISOString(),
+						completedAt: new Date(
+							"2026-03-22T10:01:30Z",
+						).toISOString(),
+					},
+				],
+				isLoading: false,
+				refetch: mockRefetch,
+				hasMore: false,
+			});
+			renderWithQuery(<JobsHistoryPage />);
+			const exportBtn = screen.getByRole("button", {
+				name: /Export CSV/,
+			});
+			fireEvent.click(exportBtn);
+			expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+			expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:url");
+		});
+	});
+});

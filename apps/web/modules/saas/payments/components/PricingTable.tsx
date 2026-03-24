@@ -14,6 +14,7 @@ import {
 	ArrowRightIcon,
 	BadgePercentIcon,
 	CheckIcon,
+	CoinsIcon,
 	PhoneIcon,
 	StarIcon,
 } from "lucide-react";
@@ -123,8 +124,13 @@ export function PricingTable({
 				{filteredPlans
 					.filter(([planId]) => planId !== activePlanId)
 					.map(([planId, plan]) => {
-						const { isFree, isEnterprise, prices, recommended } =
-							plan;
+						const {
+							isFree,
+							isEnterprise,
+							prices,
+							recommended,
+							credits,
+						} = plan;
 						const { title, description, features } =
 							planData[planId as keyof typeof planData];
 
@@ -184,6 +190,17 @@ export function PricingTable({
 												{description}
 											</div>
 										)}
+
+										{credits?.included !== undefined &&
+											credits.included > 0 && (
+												<div className="mt-3 flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
+													<CoinsIcon className="size-4" />
+													<span>
+														{credits.included}{" "}
+														credits/month included
+													</span>
+												</div>
+											)}
 
 										{!!features?.length && (
 											<ul className="mt-4 grid list-none gap-2 text-sm">

@@ -58,6 +58,32 @@ describe("ToolCard", () => {
 		expect(screen.getByText("Test Tool")).toBeInTheDocument();
 	});
 
+	it("shows credit cost when creditCost > 0", () => {
+		render(<ToolCard tool={baseTool} />);
+		expect(screen.getByText(/1 credit per use/i)).toBeInTheDocument();
+	});
+
+	it("shows plural credits when creditCost > 1", () => {
+		render(<ToolCard tool={{ ...baseTool, creditCost: 3 }} />);
+		expect(screen.getByText(/3 credits per use/i)).toBeInTheDocument();
+	});
+
+	it("hides credit display when creditCost is 0", () => {
+		render(<ToolCard tool={{ ...baseTool, creditCost: 0 }} />);
+		expect(screen.queryByText(/credit/i)).not.toBeInTheDocument();
+	});
+
+	it("shows 'Used' badge when isRecentlyUsed=true without lastUsedAt", () => {
+		render(<ToolCard tool={baseTool} isRecentlyUsed />);
+		expect(screen.getByText("Used")).toBeInTheDocument();
+	});
+
+	it("shows relative time instead of 'Used' when lastUsedAt is provided", () => {
+		const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString(); // 5 minutes ago
+		render(<ToolCard tool={baseTool} isRecentlyUsed lastUsedAt={recent} />);
+		expect(screen.getByText("5m ago")).toBeInTheDocument();
+	});
+
 	it("renders known icons for each supported icon name", () => {
 		const icons = [
 			"image-minus",

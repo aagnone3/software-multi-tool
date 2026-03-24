@@ -2,6 +2,7 @@
 
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useTools } from "@saas/tools/hooks/use-tools";
+import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -22,13 +23,14 @@ import {
 	NewspaperIcon,
 	ReceiptIcon,
 	RefreshCwIcon,
+	SparklesIcon,
 	UsersIcon,
 	WalletIcon,
 	WrenchIcon,
 	XIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 interface RecommendedToolWidgetProps {
 	className?: string;
@@ -56,6 +58,7 @@ export function RecommendedToolWidget({
 }: RecommendedToolWidgetProps) {
 	const { enabledTools } = useTools();
 	const { activeOrganization } = useActiveOrganization();
+	const { jobs } = useJobsList(undefined, 100);
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 	const [isClient, setIsClient] = useState(false);
 
@@ -63,14 +66,36 @@ export function RecommendedToolWidget({
 		? `/app/${activeOrganization.slug}`
 		: "/app";
 
+	// Build a prioritized list: untried tools first, then least-used tools
+	const prioritizedTools = useMemo(() => {
+		if (!jobs || enabledTools.length === 0) {
+			return enabledTools;
+		}
+
+		// Count usage per tool slug
+		const usageCount: Record<string, number> = {};
+		for (const job of jobs) {
+			usageCount[job.toolSlug] = (usageCount[job.toolSlug] ?? 0) + 1;
+		}
+
+		// Split into untried (no jobs) and tried (has jobs), sort tried by least used
+		const untried = enabledTools.filter((t) => !usageCount[t.slug]);
+		const tried = enabledTools
+			.filter((t) => usageCount[t.slug])
+			.sort(
+				(a, b) => (usageCount[a.slug] ?? 0) - (usageCount[b.slug] ?? 0),
+			);
+
+		return [...untried, ...tried];
+	}, [enabledTools, jobs]);
+
 	// Initialize from localStorage on mount
 	useEffect(() => {
 		setIsClient(true);
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored !== null) {
 			const storedIndex = Number.parseInt(stored, 10);
-			// Ensure stored index is valid
-			if (storedIndex >= 0 && storedIndex < enabledTools.length) {
+			if (storedIndex >= 0 && storedIndex < prioritizedTools.length) {
 				setCurrentIndex(storedIndex);
 			} else {
 				setCurrentIndex(0);
@@ -78,20 +103,20 @@ export function RecommendedToolWidget({
 		} else {
 			setCurrentIndex(0);
 		}
-	}, [enabledTools.length]);
+	}, [prioritizedTools.length]);
 
 	const rotateToNext = useCallback(() => {
-		if (enabledTools.length === 0) {
+		if (prioritizedTools.length === 0) {
 			return;
 		}
 
 		const nextIndex =
 			currentIndex === null
 				? 0
-				: (currentIndex + 1) % enabledTools.length;
+				: (currentIndex + 1) % prioritizedTools.length;
 		setCurrentIndex(nextIndex);
 		localStorage.setItem(STORAGE_KEY, String(nextIndex));
-	}, [currentIndex, enabledTools.length]);
+	}, [currentIndex, prioritizedTools.length]);
 
 	// Loading state (before client-side hydration)
 	if (!isClient || currentIndex === null) {
@@ -114,7 +139,7 @@ export function RecommendedToolWidget({
 	}
 
 	// No tools available
-	if (enabledTools.length === 0) {
+	if (prioritizedTools.length === 0) {
 		return (
 			<Card className={className}>
 				<CardHeader>
@@ -136,8 +161,12 @@ export function RecommendedToolWidget({
 		);
 	}
 
-	const currentTool = enabledTools[currentIndex];
+	const currentTool = prioritizedTools[currentIndex];
 	const Icon = getToolIcon(currentTool.icon);
+
+	// Check if this tool is untried (for personalization badge)
+	const isUntried =
+		jobs && !jobs.some((j) => j.toolSlug === currentTool.slug);
 
 	return (
 		<Card className={className}>
@@ -148,7 +177,11 @@ export function RecommendedToolWidget({
 							<LightbulbIcon className="size-5" />
 							Recommended
 						</CardTitle>
-						<CardDescription>Try something new</CardDescription>
+						<CardDescription>
+							{isUntried
+								? "You haven't tried this yet"
+								: "Try something new"}
+						</CardDescription>
 					</div>
 					<div className="flex gap-1">
 						<Button
@@ -174,8 +207,21 @@ export function RecommendedToolWidget({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex items-start gap-3">
-					<div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+					<div className="relative flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
 						<Icon className="size-6" />
+						{isUntried && (
+							<span
+								className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-amber-500"
+								title="New to you"
+								role="img"
+								aria-label="New to you"
+							>
+								<SparklesIcon
+									className="size-2.5 text-white"
+									aria-hidden="true"
+								/>
+							</span>
+						)}
 					</div>
 					<div className="min-w-0 flex-1">
 						<p className="font-semibold truncate">

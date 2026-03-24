@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -14,9 +15,11 @@ import {
 	AlertCircleIcon,
 	CheckCircle2Icon,
 	CircleIcon,
+	CoinsIcon,
 	Loader2Icon,
 	XCircleIcon,
 } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 import { useCancelJob } from "../hooks/use-job-polling";
 import { useJobUpdates } from "../hooks/use-job-updates";
@@ -78,6 +81,13 @@ interface JobProgressIndicatorProps {
 	className?: string;
 }
 
+const INSUFFICIENT_CREDITS_PATTERN =
+	/insufficient credits|run out of credits|not enough credits/i;
+
+function isInsufficientCreditsError(errorMsg: string | null | undefined) {
+	return errorMsg ? INSUFFICIENT_CREDITS_PATTERN.test(errorMsg) : false;
+}
+
 export function JobProgressIndicator({
 	jobId,
 	title = "Processing",
@@ -89,6 +99,11 @@ export function JobProgressIndicator({
 }: JobProgressIndicatorProps) {
 	const { job, error } = useJobUpdates(jobId);
 	const cancelMutation = useCancelJob();
+	const { activeOrganization } = useActiveOrganization();
+
+	const billingPath = activeOrganization
+		? `/app/${activeOrganization.slug}/settings/billing`
+		: "/app/settings/billing";
 
 	const status = (job?.status ?? "PENDING") as JobStatus;
 	const config = STATUS_CONFIG[status];
@@ -174,13 +189,50 @@ export function JobProgressIndicator({
 						</p>
 					)}
 
-					{job?.error && (
-						<div className="rounded-md bg-destructive/10 p-3">
-							<p className="text-destructive text-sm">
-								{job.error}
-							</p>
-						</div>
-					)}
+					{job?.error &&
+						(isInsufficientCreditsError(job.error) ? (
+							<div className="rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+								<div className="flex items-start gap-3">
+									<CoinsIcon className="size-5 text-amber-600 shrink-0 mt-0.5" />
+									<div className="flex-1 space-y-2">
+										<p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+											Insufficient Credits
+										</p>
+										<p className="text-sm text-amber-800 dark:text-amber-300">
+											You've run out of credits for this
+											billing period. Buy more credits or
+											upgrade your plan to continue.
+										</p>
+										<div className="flex flex-wrap gap-2 pt-1">
+											<Button
+												size="sm"
+												variant="primary"
+												asChild
+											>
+												<Link href={billingPath}>
+													Buy Credits
+												</Link>
+											</Button>
+											<Button
+												size="sm"
+												variant="outline"
+												asChild
+											>
+												<Link href={billingPath}>
+													Upgrade Plan
+												</Link>
+											</Button>
+										</div>
+									</div>
+								</div>
+							</div>
+						) : (
+							<div className="rounded-md bg-destructive/10 p-3">
+								<p className="text-destructive text-sm">
+									{job.error}
+								</p>
+							</div>
+						))}
 
 					{showCancel && status === "PENDING" && (
 						<div className="flex justify-end">
