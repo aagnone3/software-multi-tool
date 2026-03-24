@@ -53,6 +53,10 @@ export function NavBar() {
 		href: string;
 	}[] = [
 		{
+			label: "Tools",
+			href: "/tools",
+		},
+		{
 			label: "Pricing",
 			href: "/#pricing",
 		},
