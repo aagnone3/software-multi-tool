@@ -38,7 +38,11 @@ vi.mock("@marketing/blog/utils/lib/posts", () => ({
 }));
 
 vi.mock("@repo/config", () => ({
-	config: { appName: "Test App" },
+	config: {
+		appName: "Test App",
+		appDescription: "Test description",
+		ui: { blog: { enabled: true } },
+	},
 }));
 
 vi.mock("@repo/utils", () => ({
