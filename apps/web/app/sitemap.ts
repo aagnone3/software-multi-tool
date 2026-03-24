@@ -53,6 +53,10 @@ const competitorSlugs = [
 	"hyper-ai",
 	"grain",
 	"abbyy",
+	"aws-textract",
+	"azure-ai-document",
+	"eightfold-ai",
+	"kofax",
 ];
 
 const industryPages = [
