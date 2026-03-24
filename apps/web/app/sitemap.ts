@@ -49,6 +49,9 @@ const industryPages = [
 	"consultants",
 	"hr-teams",
 	"real-estate",
+	"marketing-agencies",
+	"medical-practices",
+	"ecommerce",
 ];
 
 const enabledToolSlugs = config.tools.registry
