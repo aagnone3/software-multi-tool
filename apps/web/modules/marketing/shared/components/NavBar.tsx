@@ -100,6 +100,14 @@ export function NavBar() {
 			label: "Docs",
 			href: "/docs",
 		},
+		{
+			label: "Integrations",
+			href: "/integrations",
+		},
+		{
+			label: "Security",
+			href: "/security",
+		},
 	];
 
 	const isMenuItemActive = (href: string) => pathname.startsWith(href);
