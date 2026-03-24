@@ -31,6 +31,12 @@ export function Footer() {
 					<a href="/pricing" className="block">
 						Pricing
 					</a>
+					<Link href="/roi-calculator" className="block">
+						ROI Calculator
+					</Link>
+					<Link href="/use-cases" className="block">
+						Use Cases
+					</Link>
 				</div>
 
 				<div className="flex flex-col gap-2">
