@@ -112,6 +112,10 @@ export function NavBar() {
 			label: "Security",
 			href: "/security",
 		},
+		{
+			label: "Partners",
+			href: "/partners",
+		},
 	];
 
 	const isMenuItemActive = (href: string) => pathname.startsWith(href);

@@ -24,6 +24,7 @@ const staticMarketingPages = [
 	"/vs",
 	"/integrations",
 	"/security",
+	"/partners",
 ];
 
 const competitorSlugs = [
