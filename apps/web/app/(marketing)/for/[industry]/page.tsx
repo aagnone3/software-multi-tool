@@ -727,6 +727,84 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Build Faster with AI",
 	},
+	"logistics-teams": {
+		slug: "logistics-teams",
+		title: "AI Tools for Logistics and Supply Chain Teams",
+		headline: "Process Vendor Invoices and Contracts 10x Faster.",
+		description:
+			"Logistics teams manage hundreds of vendor invoices, carrier contracts, and expense reports every month. AI tools automate the document work so your ops team can focus on moving freight, not paper.",
+		persona: "Logistics Operations Teams",
+		challenge:
+			"Logistics and supply chain teams process enormous volumes of documentation — carrier invoices, freight contracts, customs docs, expense reports — most of it still manually. That creates bottlenecks, errors, and hours of admin work every week.",
+		tools: [
+			{
+				slug: "invoice-processor",
+				name: "Invoice Processor",
+				how: "Upload carrier invoices, fuel bills, and vendor charges — AI extracts all line items, amounts, and payment terms automatically, ready for your accounting system.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Surface rate schedules, fuel surcharges, liability caps, and payment terms from carrier agreements in minutes instead of reading 40-page contracts line by line.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Process driver and field team expense reports by categorizing fuel, tolls, lodging, and maintenance charges automatically from CSV or XLSX exports.",
+			},
+		],
+		benefits: [
+			"Cut invoice processing time by 80% across carrier and vendor invoices",
+			"Review carrier agreements and spot unfavorable terms in minutes",
+			"Process expense reports automatically — no more manual categorization",
+			"Free ops staff from paperwork so they can focus on shipments and vendor relationships",
+		],
+		testimonial: {
+			quote: "We were spending 3 days per month just on invoice entry. Now it takes a few hours. The AI handles the vendor invoices so our team focuses on the actual logistics.",
+			name: "Marcus Chen",
+			role: "VP Operations, FastFreight Co.",
+		},
+		cta: "Streamline Your Logistics Ops",
+	},
+	"nonprofit-organizations": {
+		slug: "nonprofit-organizations",
+		title: "AI Tools for Nonprofits",
+		headline: "Do More with Your Small Team.",
+		description:
+			"Nonprofits run lean. AI tools help your staff automate grant document review, meeting summaries, expense tracking, and vendor invoice processing — so you can spend more time on your mission.",
+		persona: "Nonprofit Program & Finance Staff",
+		challenge:
+			"Nonprofit teams juggle grant reporting, board communications, vendor management, and program delivery with minimal administrative support. AI tools can handle the document-heavy tasks so your people can focus on impact.",
+		tools: [
+			{
+				slug: "document-summarizer",
+				name: "Document Summarizer",
+				how: "Summarize grant agreements, MOU documents, and program reports quickly — surface key obligations, deadlines, and reporting requirements without reading every page.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Transcribe and summarize board meetings, committee calls, and donor check-ins automatically — so every meeting produces a clear written record with action items.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize program expenses by grant or cost center automatically, making audit prep and grant reporting significantly faster for your finance team.",
+			},
+		],
+		benefits: [
+			"Cut grant document review time from hours to minutes",
+			"Never lose meeting notes or action items from board calls",
+			"Simplify grant expense reporting with automatic categorization",
+			"Let program staff focus on mission delivery, not paperwork",
+		],
+		testimonial: {
+			quote: "Our executive director used to spend a full day reviewing grant agreements. Now she reviews the AI summary in 20 minutes and digs in where it matters.",
+			name: "Rachel Torres",
+			role: "Operations Director, Community Forward",
+		},
+		cta: "Help Your Team Do More",
+	},
 };
 
 export function generateStaticParams() {
