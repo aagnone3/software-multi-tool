@@ -87,6 +87,9 @@ vi.mock("./components/CreditForecastWidget", () => ({
 vi.mock("../jobs/components/JobSearchWidget", () => ({
 	JobSearchWidget: () => <div data-testid="job-search-widget" />,
 }));
+vi.mock("./components/FailedJobsRetryWidget", () => ({
+	FailedJobsRetryWidget: () => <div data-testid="failed-jobs-retry-widget" />,
+}));
 
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {

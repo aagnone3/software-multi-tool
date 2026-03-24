@@ -10,6 +10,7 @@ import { CreditForecastWidget } from "./components/CreditForecastWidget";
 import { CreditsByToolChart } from "./components/CreditsByToolChart";
 import { CreditsOverview } from "./components/CreditsOverview";
 import { DailyGoalWidget } from "./components/DailyGoalWidget";
+import { FailedJobsRetryWidget } from "./components/FailedJobsRetryWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
@@ -43,6 +44,9 @@ export default function UserStart() {
 
 			{/* Active jobs — only shown when there are in-flight/recently completed jobs */}
 			<ActiveJobsWidget />
+
+			{/* Failed jobs retry — only shown when there are recent failures */}
+			<FailedJobsRetryWidget />
 
 			{/* Main dashboard grid */}
 			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
