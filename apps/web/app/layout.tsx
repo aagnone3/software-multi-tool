@@ -71,6 +71,11 @@ export const metadata: Metadata = {
 		},
 	},
 	metadataBase: new URL(siteUrl),
+	alternates: {
+		types: {
+			"application/rss+xml": `${siteUrl}/feed.xml`,
+		},
+	},
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
