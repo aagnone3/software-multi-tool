@@ -18,6 +18,7 @@ const staticMarketingPages = [
 	"/pricing",
 	"/faq",
 	"/use-cases",
+	"/for",
 ];
 
 const industryPages = [
@@ -26,6 +27,9 @@ const industryPages = [
 	"freelancers",
 	"small-businesses",
 	"podcast-producers",
+	"consultants",
+	"hr-teams",
+	"real-estate",
 ];
 
 const enabledToolSlugs = config.tools.registry

@@ -230,6 +230,127 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Speed Up Your Podcast Workflow",
 	},
+	consultants: {
+		slug: "consultants",
+		title: "AI Tools for Consultants",
+		headline: "Deliver Client Insights Faster. Win More Engagements.",
+		description:
+			"Consultants use AI to analyze client documents, summarize meetings, and produce polished deliverables in a fraction of the time.",
+		persona:
+			"Management Consultants, Strategy Advisors & Business Analysts",
+		challenge:
+			"Consultants spend too much time on document analysis, meeting notes, and client reports — time that should go toward strategic thinking and client relationships.",
+		tools: [
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review client agreements, vendor contracts, and SOWs instantly to surface risk, obligations, and key terms without reading line by line.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Turn discovery calls and workshop recordings into structured summaries with action items, decisions, and key insights.",
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze client survey responses and stakeholder feedback to identify recurring themes, sentiment, and priority issues.",
+			},
+		],
+		benefits: [
+			"Deliver client meeting summaries within minutes of every call",
+			"Reduce contract review time from hours to minutes",
+			"Extract key themes from stakeholder interviews automatically",
+			"Win more pitches with faster, better-prepared deliverables",
+			"Scale your practice without hiring more analysts",
+		],
+		testimonial: {
+			quote: "I use the contract analyzer before every client kickoff. It catches scope issues I might have missed and saves me from awkward billing conversations later.",
+			name: "Marcus Reid",
+			role: "Independent Strategy Consultant",
+		},
+		cta: "Sharpen Your Consulting Practice",
+	},
+	"hr-teams": {
+		slug: "hr-teams",
+		title: "AI Tools for HR Teams",
+		headline: "Automate Paperwork. Focus on People.",
+		description:
+			"HR teams use AI to analyze employee feedback, review employment contracts, summarize interview recordings, and process policy documents faster.",
+		persona: "HR Managers, People Ops & Talent Teams",
+		challenge:
+			"HR teams are buried in documents — offer letters, policy reviews, interview notes, exit surveys, and engagement data — leaving little time for the human side of the work.",
+		tools: [
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze employee engagement surveys, exit interview responses, and team pulse checks to identify patterns and actionable insights.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Summarize interview recordings, performance review discussions, and all-hands meetings with structured notes and key takeaways.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review employment agreements, contractor SOWs, and vendor contracts for non-standard terms, obligations, and missing clauses.",
+			},
+		],
+		benefits: [
+			"Surface employee sentiment trends from survey data in seconds",
+			"Reduce time spent writing interview notes by 70%",
+			"Catch problematic contract clauses before they become HR issues",
+			"Scale onboarding documentation review across multiple hires",
+			"Spend more time on people, less time on paperwork",
+		],
+		testimonial: {
+			quote: "We run every exit interview through the feedback analyzer. It's helped us spot recurring themes we were missing manually, and we've made real process improvements as a result.",
+			name: "Priya Nair",
+			role: "Head of People Operations, Meridian Tech",
+		},
+		cta: "Modernize Your HR Workflows",
+	},
+	"real-estate": {
+		slug: "real-estate",
+		title: "AI Tools for Real Estate Professionals",
+		headline: "Review Contracts Faster. Close More Deals.",
+		description:
+			"Real estate agents and brokers use AI to review purchase agreements, summarize inspection reports, and analyze market news in minutes.",
+		persona: "Real Estate Agents, Brokers & Property Managers",
+		challenge:
+			"Real estate transactions involve mountains of paperwork — purchase agreements, lease contracts, disclosure documents, and inspection reports — all requiring careful review under time pressure.",
+		tools: [
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review purchase agreements, lease terms, and disclosure documents to surface contingencies, deadlines, and non-standard clauses instantly.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Summarize client calls, showing notes, and property walkthroughs so nothing important falls through the cracks.",
+			},
+			{
+				slug: "news-analyzer",
+				name: "News Analyzer",
+				how: "Stay ahead of market shifts by analyzing real estate news, rate announcements, and local market coverage with AI-extracted insights.",
+			},
+		],
+		benefits: [
+			"Review purchase agreements in minutes instead of hours",
+			"Never miss a contingency deadline or key contract term",
+			"Brief clients accurately using AI-generated document summaries",
+			"Stay ahead of market trends with automated news analysis",
+			"Handle more transactions simultaneously without missing details",
+		],
+		testimonial: {
+			quote: "I run every offer contract through the analyzer before presenting to my clients. It catches things I'd normally have to call my attorney about, and it's saved me real money.",
+			name: "Teresa Fontaine",
+			role: "Licensed Real Estate Agent, Summit Realty Group",
+		},
+		cta: "Close Deals Faster with AI",
+	},
 };
 
 export function generateStaticParams() {

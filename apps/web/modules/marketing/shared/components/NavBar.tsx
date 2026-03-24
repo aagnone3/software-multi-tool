@@ -61,6 +61,10 @@ export function NavBar() {
 			href: "/pricing",
 		},
 		{
+			label: "By Industry",
+			href: "/for",
+		},
+		{
 			label: "Use Cases",
 			href: "/use-cases",
 		},
