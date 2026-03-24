@@ -61,6 +61,10 @@ export function NavBar() {
 			href: "/pricing",
 		},
 		{
+			label: "Use Cases",
+			href: "/use-cases",
+		},
+		{
 			label: "FAQ",
 			href: "/faq",
 		},
