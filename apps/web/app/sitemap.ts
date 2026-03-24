@@ -48,6 +48,11 @@ const competitorSlugs = [
 	"rossum",
 	"bardeen",
 	"make",
+	"assemblyai",
+	"deepgram",
+	"hyper-ai",
+	"grain",
+	"abbyy",
 ];
 
 const industryPages = [
@@ -65,6 +70,9 @@ const industryPages = [
 	"marketing-agencies",
 	"medical-practices",
 	"ecommerce",
+	"law-firms",
+	"ecommerce-businesses",
+	"startups",
 ];
 
 const enabledToolSlugs = config.tools.registry
