@@ -30,6 +30,9 @@ const competitorSlugs = [
 	"zapier",
 	"notion-ai",
 	"adobe-acrobat-ai",
+	"microsoft-copilot",
+	"google-gemini",
+	"descript",
 ];
 
 const industryPages = [

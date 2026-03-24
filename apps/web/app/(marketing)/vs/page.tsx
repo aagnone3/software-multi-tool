@@ -9,7 +9,7 @@ const siteUrl = getBaseUrl();
 
 export const metadata: Metadata = {
 	title: `${config.appName} vs Alternatives — AI Tool Comparisons`,
-	description: `Compare ${config.appName} with Otter.ai, Fireflies, Docparser, ChatGPT, Zapier, Notion AI, and Adobe Acrobat AI. See how we stack up on features, pricing, and ease of use.`,
+	description: `Compare ${config.appName} with Otter.ai, Fireflies, Docparser, ChatGPT, Zapier, Notion AI, Adobe Acrobat AI, Microsoft Copilot, Google Gemini, and Descript. See how we stack up on features, pricing, and ease of use.`,
 	alternates: { canonical: `${siteUrl}/vs` },
 	openGraph: {
 		type: "website",
@@ -61,6 +61,24 @@ const comparisons = [
 		name: "Adobe Acrobat AI",
 		tagline: "PDF Q&A inside the Adobe suite",
 		diff: "No Adobe subscription — works on audio, CSV, and PDFs",
+	},
+	{
+		slug: "microsoft-copilot",
+		name: "Microsoft Copilot",
+		tagline: "AI assistant embedded in Microsoft 365",
+		diff: "No $22+/user Microsoft 365 seat required",
+	},
+	{
+		slug: "google-gemini",
+		name: "Google Gemini",
+		tagline: "Google's general-purpose multimodal AI",
+		diff: "Purpose-built workflows with consistent structured output",
+	},
+	{
+		slug: "descript",
+		name: "Descript",
+		tagline: "Audio/video editor with transcription",
+		diff: "Meeting summaries + 7 more AI tools, no video editor needed",
 	},
 ];
 
