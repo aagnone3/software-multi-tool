@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: ToolPageProps) {
 			description: tool.description,
 		},
 		twitter: {
-			card: "summary",
+			card: "summary_large_image",
 			title: `${tool.name} | ${config.appName}`,
 			description: tool.description,
 		},
