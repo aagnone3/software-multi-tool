@@ -311,6 +311,129 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Modernize Your HR Workflows",
 	},
+	"marketing-agencies": {
+		slug: "marketing-agencies",
+		title: "AI Tools for Marketing Agencies",
+		headline:
+			"Ship Client Deliverables Faster. Scale Without Adding Headcount.",
+		description:
+			"Marketing agencies use AI to analyze customer feedback, summarize campaign calls, process news for content research, and review vendor contracts in a fraction of the time.",
+		persona: "Marketing Agencies, Creative Teams & Digital Consultants",
+		challenge:
+			"Agency teams lose hours every week to manual tasks: summarizing client briefs, extracting insights from feedback surveys, reviewing influencer or vendor contracts, and researching content topics.",
+		tools: [
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze client satisfaction surveys, social sentiment, and campaign response data to surface key themes and actionable insights automatically.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Turn client kickoffs, campaign debriefs, and strategy calls into structured meeting notes with action items in under a minute.",
+			},
+			{
+				slug: "news-analyzer",
+				name: "News Analyzer",
+				how: "Research content topics by analyzing competitor press, industry news, and trending stories — so your content team always has relevant angles.",
+			},
+		],
+		benefits: [
+			"Produce client recap reports in minutes instead of hours",
+			"Extract themes from campaign feedback and NPS surveys automatically",
+			"Research content topics and news angles faster than any intern",
+			"Review influencer and vendor contracts without reading every line",
+			"Handle more clients without expanding your team",
+		],
+		testimonial: {
+			quote: "We use the feedback analyzer after every campaign. It pulls out the signal from hundreds of responses in seconds — what used to take a junior analyst a full day now takes us five minutes.",
+			name: "Dani Park",
+			role: "Account Director, Elevation Digital",
+		},
+		cta: "Scale Your Agency With AI",
+	},
+	"medical-practices": {
+		slug: "medical-practices",
+		title: "AI Tools for Medical Practices & Healthcare Teams",
+		headline: "Cut Admin Time. Spend More Time with Patients.",
+		description:
+			"Medical offices use AI to summarize care team discussions, analyze patient feedback, review vendor contracts, and process administrative documents faster.",
+		persona:
+			"Practice Managers, Medical Admins & Healthcare Operations Teams",
+		challenge:
+			"Healthcare administration is overwhelmed with documentation — staff meeting notes, patient satisfaction surveys, vendor agreements, and compliance reviews — all pulling focus away from patient care.",
+		tools: [
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Summarize care coordination meetings, staff huddles, and administrative calls with accurate structured notes and action items.",
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze patient satisfaction surveys and staff feedback to identify recurring issues, sentiment trends, and areas for improvement.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review vendor agreements, EHR contracts, and insurance arrangements for payment terms, obligations, and non-standard clauses.",
+			},
+		],
+		benefits: [
+			"Reduce time spent writing meeting notes by 70%",
+			"Surface patient satisfaction trends from survey data in seconds",
+			"Catch problematic contract terms in vendor agreements before signing",
+			"Free up admin staff from document review tasks",
+			"Improve care coordination with faster, cleaner meeting records",
+		],
+		testimonial: {
+			quote: "Our practice manager uses the meeting summarizer for every care coordination call. Notes that took 45 minutes to write now take 3. It's been a real operational win.",
+			name: "Dr. Angela Webb",
+			role: "Family Practice Physician & Practice Owner",
+		},
+		cta: "Reduce Admin Burden for Your Practice",
+	},
+	ecommerce: {
+		slug: "ecommerce",
+		title: "AI Tools for E-Commerce Businesses",
+		headline:
+			"Analyze Customer Feedback at Scale. Improve What Moves Revenue.",
+		description:
+			"E-commerce teams use AI to process product reviews, analyze customer support tickets, summarize supplier negotiations, and categorize expense data across their operations.",
+		persona: "E-Commerce Operators, DTC Brand Teams & Online Retailers",
+		challenge:
+			"E-commerce businesses collect enormous volumes of customer feedback — reviews, support tickets, surveys — but rarely have the bandwidth to analyze it systematically before making product or operational decisions.",
+		tools: [
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze hundreds of product reviews, support tickets, or post-purchase surveys to surface recurring themes, sentiment trends, and priority issues.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Upload shipping, COGS, and operational expense exports to get categorized cost summaries and anomaly flags without manual review.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review supplier agreements, 3PL contracts, and platform terms to surface payment terms, obligations, and exit clauses fast.",
+			},
+		],
+		benefits: [
+			"Process hundreds of product reviews in minutes to guide product decisions",
+			"Surface recurring customer complaints before they become returns or chargebacks",
+			"Categorize operational expenses automatically for better margin visibility",
+			"Review supplier and 3PL contracts without calling your lawyer for every term",
+			"Move faster on product improvements backed by real customer data",
+		],
+		testimonial: {
+			quote: "We run our product reviews through the feedback analyzer every quarter. It consistently surfaces issues our support team flags anecdotally but never had data to back up — now we do.",
+			name: "Chloe Kim",
+			role: "Head of Customer Experience, Petal & Root Co.",
+		},
+		cta: "Turn Customer Data Into Growth",
+	},
 	"real-estate": {
 		slug: "real-estate",
 		title: "AI Tools for Real Estate Professionals",

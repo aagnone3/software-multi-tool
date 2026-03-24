@@ -73,6 +73,27 @@ const INDUSTRY_CARDS = [
 			"Automate document workflows, analyze feedback, and reduce manual data entry.",
 	},
 	{
+		slug: "marketing-agencies",
+		icon: "📣",
+		title: "Marketing Agencies",
+		description:
+			"Analyze campaign feedback, summarize client calls, and research content topics at scale.",
+	},
+	{
+		slug: "medical-practices",
+		icon: "🏥",
+		title: "Medical Practices",
+		description:
+			"Summarize care coordination meetings, analyze patient feedback, and review vendor contracts.",
+	},
+	{
+		slug: "ecommerce",
+		icon: "🛒",
+		title: "E-Commerce Businesses",
+		description:
+			"Process product reviews, categorize expenses, and review supplier agreements faster.",
+	},
+	{
 		slug: "podcast-producers",
 		icon: "🎙️",
 		title: "Podcast Producers",
