@@ -1,4 +1,5 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
+import { SocialShareButtons } from "@marketing/blog/components/SocialShareButtons";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -158,6 +159,9 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 
 				<div className="pb-8">
 					<PostContent content={body} />
+					<div className="mx-auto max-w-2xl">
+						<SocialShareButtons title={title} path={slug} />
+					</div>
 				</div>
 			</div>
 		</>
