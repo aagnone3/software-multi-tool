@@ -45,9 +45,48 @@ export const metadata: Metadata = {
 	},
 };
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: config.appName,
+	description:
+		config.appDescription ??
+		"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, separate speakers, and more — all in one platform.",
+	url: siteUrl,
+	potentialAction: {
+		"@type": "SearchAction",
+		target: {
+			"@type": "EntryPoint",
+			urlTemplate: `${siteUrl}/app/tools?q={search_term_string}`,
+		},
+		"query-input": "required name=search_term_string",
+	},
+};
+
+const orgJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	name: config.appName,
+	url: siteUrl,
+	logo: `${siteUrl}/logo.png`,
+	description:
+		config.appDescription ?? "AI-powered business tools for small teams.",
+	sameAs: [],
+};
+
 export default async function Home() {
 	return (
 		<>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+			/>
 			<Hero />
 			<Features />
 			<HowItWorks />
