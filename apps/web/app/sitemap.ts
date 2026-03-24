@@ -38,6 +38,10 @@ const competitorSlugs = [
 	"microsoft-copilot",
 	"google-gemini",
 	"descript",
+	"tldv",
+	"fathom",
+	"claude-ai",
+	"loom",
 ];
 
 const industryPages = [
