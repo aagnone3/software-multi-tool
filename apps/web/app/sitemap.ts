@@ -21,6 +21,7 @@ const staticMarketingPages = [
 	"/roi-calculator",
 	"/for",
 	"/vs",
+	"/integrations",
 ];
 
 const competitorSlugs = [

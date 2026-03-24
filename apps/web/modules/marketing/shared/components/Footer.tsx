@@ -37,6 +37,9 @@ export function Footer() {
 					<Link href="/use-cases" className="block">
 						Use Cases
 					</Link>
+					<Link href="/integrations" className="block">
+						Integrations
+					</Link>
 				</div>
 
 				<div className="flex flex-col gap-2">
