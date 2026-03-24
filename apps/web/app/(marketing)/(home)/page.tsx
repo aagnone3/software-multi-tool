@@ -75,6 +75,89 @@ const orgJsonLd = {
 	sameAs: [],
 };
 
+const softwareAppJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "SoftwareApplication",
+	name: config.appName,
+	url: siteUrl,
+	applicationCategory: "BusinessApplication",
+	operatingSystem: "Web",
+	offers: {
+		"@type": "Offer",
+		price: "0",
+		priceCurrency: "USD",
+		description:
+			"Free credits included on signup. No credit card required.",
+	},
+	description:
+		config.appDescription ??
+		"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, separate speakers, and more.",
+	featureList: [
+		"Meeting summarizer",
+		"Contract analyzer",
+		"Invoice processor",
+		"Customer feedback analyzer",
+		"Expense categorizer",
+		"Speaker separation",
+		"News analyzer",
+	],
+};
+
+const faqJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	mainEntity: [
+		{
+			"@type": "Question",
+			name: "Do you offer a free trial?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Yes — every new account gets free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "How does credit-based pricing work?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Each AI tool consumes a small number of credits per run. Credits never expire, so you only pay for what you use. Purchase additional credit packs any time from your account dashboard.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "What file types are supported?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Most tools accept PDF, DOCX, TXT, CSV, XLSX, MP3, MP4, and WAV files. File size limits and supported MIME types are shown on each tool's page before you upload.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "Can I use the tools for my whole team?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Yes. Upgrade to a team plan to invite members to a shared organization, pool credits, and manage access from one billing account.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "How do I cancel my subscription?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Cancel any time from the Billing section in your account settings. Your credits and active plan remain available through the end of the billing period.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "Is my data kept private?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Files you upload are processed to generate your results and are not used to train AI models. Documents are deleted from our servers after processing completes.",
+			},
+		},
+	],
+};
+
 export default async function Home() {
 	return (
 		<>
@@ -87,6 +170,18 @@ export default async function Home() {
 				type="application/ld+json"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(softwareAppJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
 			/>
 			<Hero />
 			<SocialProofBar />
