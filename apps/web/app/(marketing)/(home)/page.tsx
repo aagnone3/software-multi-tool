@@ -4,6 +4,7 @@ import { FinalCta } from "@marketing/home/components/FinalCta";
 import { Hero } from "@marketing/home/components/Hero";
 import { HowItWorks } from "@marketing/home/components/HowItWorks";
 import { PricingSection } from "@marketing/home/components/PricingSection";
+import { SocialProofBar } from "@marketing/home/components/SocialProofBar";
 import { Testimonials } from "@marketing/home/components/Testimonials";
 import { config } from "@repo/config";
 import type { Metadata } from "next";
@@ -88,6 +89,7 @@ export default async function Home() {
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
 			/>
 			<Hero />
+			<SocialProofBar />
 			<Features />
 			<HowItWorks />
 			<Testimonials />
