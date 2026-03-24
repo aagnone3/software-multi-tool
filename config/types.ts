@@ -74,6 +74,8 @@ export interface ToolConfig {
 
 export type Config = {
 	appName: string;
+	appDescription?: string;
+	appTagline?: string;
 	tools: {
 		/** Registry of all available tools/sub-apps */
 		registry: ToolConfig[];

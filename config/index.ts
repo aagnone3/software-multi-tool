@@ -2,6 +2,9 @@ import type { Config, CreditPack, PlanCredits } from "./types";
 
 export const config = {
 	appName: "Software Multitool",
+	appDescription:
+		"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, separate speakers, and more — all in one platform.",
+	appTagline: "AI tools for small businesses",
 	// Tools/Sub-apps registry
 	tools: {
 		registry: [

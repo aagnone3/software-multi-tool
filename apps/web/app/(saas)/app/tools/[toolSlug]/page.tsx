@@ -51,6 +51,15 @@ export async function generateMetadata({ params }: ToolPageProps) {
 	return {
 		title: tool.name,
 		description: tool.description,
+		openGraph: {
+			title: `${tool.name} | ${config.appName}`,
+			description: tool.description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `${tool.name} | ${config.appName}`,
+			description: tool.description,
+		},
 	};
 }
 
@@ -70,6 +79,27 @@ const DEDICATED_ROUTE_TOOLS = new Set(["news-analyzer", "speaker-separation"]);
 
 export default async function ToolPage({ params }: ToolPageProps) {
 	const { toolSlug } = await params;
+
+	const siteUrl =
+		process.env.NEXT_PUBLIC_SITE_URL ?? "https://softwaremultitool.com";
+	const toolMeta = config.tools.registry.find((t) => t.slug === toolSlug);
+	const toolJsonLd = toolMeta
+		? {
+				"@context": "https://schema.org",
+				"@type": "SoftwareApplication",
+				name: toolMeta.name,
+				description: toolMeta.description,
+				applicationCategory: "BusinessApplication",
+				operatingSystem: "Web",
+				url: `${siteUrl}/app/tools/${toolSlug}`,
+				offers: {
+					"@type": "Offer",
+					price: toolMeta.creditCost,
+					priceCurrency: "CREDITS",
+					description: `${toolMeta.creditCost} credits per use`,
+				},
+			}
+		: null;
 
 	// Tools with dedicated routes should use their specific routes
 	if (DEDICATED_ROUTE_TOOLS.has(toolSlug)) {
@@ -110,6 +140,15 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
 	return (
 		<div className="max-w-4xl">
+			{toolJsonLd && (
+				<script
+					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(toolJsonLd),
+					}}
+				/>
+			)}
 			<ToolViewTracker toolSlug={toolSlug} />
 			<ToolPageHeader tool={tool} />
 			<ToolScheduler
