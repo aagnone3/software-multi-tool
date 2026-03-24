@@ -610,6 +610,123 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Close Deals Faster with AI",
 	},
+	"law-firms": {
+		slug: "law-firms",
+		title: "AI Tools for Law Firms",
+		headline: "Review Contracts Faster. Bill More Hours on Strategy.",
+		description:
+			"Legal professionals use AI to review contracts, extract key clauses, analyze documents, and summarize meetings — all without expensive e-discovery tools.",
+		persona: "Attorneys & Legal Teams",
+		challenge:
+			"Lawyers spend 30% of their time on document review and administrative tasks. AI tools can handle the extraction and summarization so attorneys can focus on strategy and client work.",
+		tools: [
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Extract obligations, payment terms, termination clauses, and risk flags from any contract in seconds — not hours.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Transcribe and summarize client intake calls, depositions, and team meetings with full speaker attribution.",
+			},
+			{
+				slug: "document-analyzer",
+				name: "Document Analyzer",
+				how: "Extract key facts, dates, parties, and provisions from any legal document without reading the entire file.",
+			},
+		],
+		benefits: [
+			"Cut contract review time from hours to minutes",
+			"Never miss a clause or deadline in complex agreements",
+			"Produce instant meeting summaries for client files",
+			"Scale your review capacity without hiring more staff",
+		],
+		testimonial: {
+			quote: "We review 3x more contracts per week with the same team. The AI catches exactly what we need and flags the risky clauses first.",
+			name: "James Whitfield",
+			role: "Managing Partner, Whitfield & Associates",
+		},
+		cta: "Start Reviewing Contracts with AI",
+	},
+	"ecommerce-businesses": {
+		slug: "ecommerce-businesses",
+		title: "AI Tools for Ecommerce Businesses",
+		headline: "Process More Orders. Analyze More Feedback. Grow Faster.",
+		description:
+			"Ecommerce teams use AI to process supplier invoices, categorize expenses, analyze customer feedback, and monitor competitor news automatically.",
+		persona: "Ecommerce Teams & Online Retailers",
+		challenge:
+			"Growing ecommerce businesses are drowning in supplier invoices, expense reconciliation, and customer feedback data — all manual processes that don't scale.",
+		tools: [
+			{
+				slug: "invoice-processor",
+				name: "Invoice Processor",
+				how: "Upload supplier invoices and get structured data — vendor, amount, line items, dates — extracted automatically for your accounting system.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize advertising spend, COGS, shipping costs, and returns automatically from your bank or credit card exports.",
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze thousands of customer reviews at once to identify product issues, sentiment trends, and top feature requests.",
+			},
+		],
+		benefits: [
+			"Process supplier invoices 10x faster with AI extraction",
+			"Identify customer sentiment trends before they become problems",
+			"Reconcile expenses across ad platforms, shipping, and returns automatically",
+			"Scale ops without scaling your back-office headcount",
+		],
+		testimonial: {
+			quote: "Invoice processing used to take our team an entire day each week. Now it takes 20 minutes. That time goes straight back into marketing and growth.",
+			name: "Priya Nair",
+			role: "Operations Lead, Brightleaf Home Goods",
+		},
+		cta: "Automate Your Back Office with AI",
+	},
+	startups: {
+		slug: "startups",
+		title: "AI Tools for Startups",
+		headline: "Move Fast. Automate the Boring Stuff.",
+		description:
+			"Early-stage startups use AI to process vendor invoices, review contracts, analyze user feedback, and monitor competitor news — all without hiring an ops team.",
+		persona: "Startup Founders & Early Teams",
+		challenge:
+			"Startups have no time to waste on manual admin tasks. Every hour spent on document processing or expense reconciliation is an hour not spent building the product.",
+		tools: [
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review SaaS agreements, vendor contracts, and partnership terms quickly — without a lawyer on call for every document.",
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze customer interviews, NPS responses, and support tickets to identify patterns and prioritize your roadmap.",
+			},
+			{
+				slug: "news-analyzer",
+				name: "News Analyzer",
+				how: "Monitor industry news and competitor announcements to stay ahead without spending hours on research each week.",
+			},
+		],
+		benefits: [
+			"Stay on top of market changes without a dedicated research team",
+			"Review contracts confidently without legal overhead for every agreement",
+			"Understand user feedback patterns to prioritize product decisions",
+			"Process invoices and expenses in minutes — not accounting hours",
+		],
+		testimonial: {
+			quote: "We're a 4-person team running like a 12-person team. The AI handles the document work so we can focus on customers and code.",
+			name: "Anika Bose",
+			role: "Co-Founder & CEO, FlowStack",
+		},
+		cta: "Build Faster with AI",
+	},
 };
 
 export function generateStaticParams() {
