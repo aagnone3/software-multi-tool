@@ -87,6 +87,9 @@ export function Footer() {
 					<Link href="/security" className="block">
 						Security
 					</Link>
+					<Link href="/partners" className="block">
+						Partners
+					</Link>
 					<Link href="/changelog" className="block">
 						Changelog
 					</Link>
