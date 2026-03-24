@@ -42,6 +42,12 @@ const competitorSlugs = [
 	"fathom",
 	"claude-ai",
 	"loom",
+	"rev",
+	"sonix",
+	"nanonets",
+	"rossum",
+	"bardeen",
+	"make",
 ];
 
 const industryPages = [
