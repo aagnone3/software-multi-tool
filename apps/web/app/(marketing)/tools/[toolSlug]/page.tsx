@@ -289,6 +289,26 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 	const features = TOOL_FEATURES[toolSlug] ?? [];
 	const useCases = TOOL_USE_CASES[toolSlug] ?? [];
 
+	const breadcrumbJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Tools",
+				item: `${siteUrl}/tools`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
+				name: tool.name,
+				item: `${siteUrl}/tools/${toolSlug}`,
+			},
+		],
+	};
+
 	const jsonLd = {
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
@@ -307,6 +327,13 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 
 	return (
 		<>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(breadcrumbJsonLd),
+				}}
+			/>
 			<script
 				type="application/ld+json"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
