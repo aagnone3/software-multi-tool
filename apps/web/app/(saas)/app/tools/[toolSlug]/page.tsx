@@ -2,6 +2,7 @@ import { config } from "@repo/config";
 import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
 import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolCollectionsPanel } from "@saas/tools/components/ToolCollectionsPanel";
+import { ToolInputTemplates } from "@saas/tools/components/ToolInputTemplates";
 import { ToolPageHeader } from "@saas/tools/components/ToolPageHeader";
 import { ToolPersonalStats } from "@saas/tools/components/ToolPersonalStats";
 import { ToolRatingWidget } from "@saas/tools/components/ToolRatingWidget";
@@ -129,6 +130,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 				currentToolSlug={toolSlug}
 				className="mt-6 rounded-lg border p-4"
 			/>
+			<ToolInputTemplates toolSlug={toolSlug} className="mt-6" />
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
