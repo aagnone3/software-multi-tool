@@ -434,6 +434,142 @@ const INDUSTRIES: Record<string, IndustryPage> = {
 		},
 		cta: "Turn Customer Data Into Growth",
 	},
+	nonprofits: {
+		slug: "nonprofits",
+		title: "AI Tools for Nonprofits",
+		headline:
+			"Do More With Less. AI That Helps Mission-Driven Teams Work Faster.",
+		description:
+			"Nonprofits use AI to analyze donor feedback, summarize board meeting minutes, review grant agreements, and process expense reports — without adding headcount.",
+		persona: "Nonprofit Directors, Program Managers & Development Teams",
+		challenge:
+			"Nonprofit teams wear too many hats. Staff who should be focused on programs and mission are buried in administrative paperwork — meeting notes, grant contracts, expense reports, and donor surveys that pile up faster than they can process.",
+		tools: [
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze program participant surveys, donor feedback, and volunteer responses to surface themes and insights that inform strategy.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Generate structured board meeting minutes, committee summaries, and stakeholder call recaps in seconds.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review grant agreements, vendor contracts, and partnership MOUs to surface obligations, deliverables, and key dates without legal review.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize program expenses and operational costs automatically to simplify grant reporting and budget tracking.",
+			},
+		],
+		benefits: [
+			"Turn hours of administrative work into minutes so staff can focus on mission",
+			"Analyze donor and program feedback at scale to improve outcomes",
+			"Review grant contracts and MOUs without expensive legal consultations",
+			"Generate board-ready meeting summaries automatically",
+			"Categorize grant expenses quickly for accurate and compliant reporting",
+		],
+		testimonial: {
+			quote: "Our small team was drowning in meeting notes and grant paperwork. Using AI tools has given us back real hours every week that we put back into programs.",
+			name: "Marcus Delgado",
+			role: "Executive Director, Eastside Youth Alliance",
+		},
+		cta: "Free Up Your Team for What Matters",
+	},
+	"financial-advisors": {
+		slug: "financial-advisors",
+		title: "AI Tools for Financial Advisors",
+		headline: "Spend Less Time on Paperwork. More Time with Clients.",
+		description:
+			"Financial advisors use AI to summarize client meetings, review agreements, analyze market news, and process expense data — so they can focus on growing their practice.",
+		persona: "Independent RIAs, Wealth Managers & Financial Planning Teams",
+		challenge:
+			"Financial advisors spend a significant portion of their week on non-billable administrative tasks: writing meeting summaries, reviewing client agreements, staying current on market news, and managing practice expenses. That's time not spent advising clients.",
+		tools: [
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Summarize client review meetings and discovery calls with structured action items, account updates, and follow-up tasks.",
+			},
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review advisory agreements, investment management contracts, and service agreements to identify key terms and obligations.",
+			},
+			{
+				slug: "news-analyzer",
+				name: "News Analyzer",
+				how: "Analyze financial news, Fed announcements, and market commentary to extract key insights for client briefings.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize practice expenses for compliance reporting, tax preparation, and overhead analysis.",
+			},
+		],
+		benefits: [
+			"Generate detailed client meeting summaries in seconds instead of 30 minutes",
+			"Review advisory agreements and client contracts without outside counsel",
+			"Stay ahead of market movements with AI-extracted news insights",
+			"Reduce non-billable administrative hours by automating document processing",
+			"Scale your practice without adding admin staff",
+		],
+		testimonial: {
+			quote: "I summarize every client meeting and run through any new agreements before signing. It's changed how efficiently I run my practice — I have time for two more clients a week.",
+			name: "Sandra Okonkwo",
+			role: "Independent RIA & CFP",
+		},
+		cta: "Grow Your Practice Without the Admin Grind",
+	},
+	"insurance-professionals": {
+		slug: "insurance-professionals",
+		title: "AI Tools for Insurance Professionals",
+		headline: "Review Policies Faster. Process Claims More Efficiently.",
+		description:
+			"Insurance agents, adjusters, and brokers use AI to review policy documents, analyze claims, summarize client calls, and process expense reports — at a fraction of the time.",
+		persona: "Insurance Agents, Adjusters & Brokerage Teams",
+		challenge:
+			"Insurance professionals handle high volumes of complex documents — policies, endorsements, claims reports, coverage summaries, and client communications — all requiring accurate review under time pressure. Manual document processing creates bottlenecks and increases error risk.",
+		tools: [
+			{
+				slug: "contract-analyzer",
+				name: "Contract Analyzer",
+				how: "Review policy documents, endorsements, and coverage schedules to extract key terms, exclusions, limits, and conditions quickly.",
+			},
+			{
+				slug: "meeting-summarizer",
+				name: "Meeting Summarizer",
+				how: "Summarize client consultations, claims calls, and underwriting discussions with structured notes and action items.",
+			},
+			{
+				slug: "feedback-analyzer",
+				name: "Feedback Analyzer",
+				how: "Analyze policyholder feedback and claims experience data to identify service gaps and renewal risk.",
+			},
+			{
+				slug: "expense-categorizer",
+				name: "Expense Categorizer",
+				how: "Categorize agency expenses, commission records, and claims-related costs automatically for reporting and compliance.",
+			},
+		],
+		benefits: [
+			"Review policy documents and endorsements in minutes instead of hours",
+			"Surface exclusions, conditions, and coverage gaps in complex policies",
+			"Document client calls and claims discussions without manual note-taking",
+			"Analyze policyholder feedback to improve retention and service quality",
+			"Reduce document review backlogs without adding headcount",
+		],
+		testimonial: {
+			quote: "I run commercial policy documents through the contract analyzer before every renewal. It surfaces renewal flags and exclusions I'd otherwise spend an hour finding manually.",
+			name: "Patrick Nguyen",
+			role: "Commercial Lines Broker, Hartwell Insurance Group",
+		},
+		cta: "Process Documents Faster, Serve More Clients",
+	},
 	"real-estate": {
 		slug: "real-estate",
 		title: "AI Tools for Real Estate Professionals",
