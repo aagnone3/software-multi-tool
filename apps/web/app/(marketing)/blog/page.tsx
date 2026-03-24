@@ -7,8 +7,24 @@ import { notFound } from "next/navigation";
 const DEFAULT_LOCALE = "en";
 
 export async function generateMetadata() {
+	const siteUrl =
+		process.env.NEXT_PUBLIC_SITE_URL ?? "https://softwaremultitool.com";
 	return {
-		title: "My awesome blog",
+		title: `Blog | ${config.appName}`,
+		description:
+			"Tips, tutorials, and insights on using AI tools to grow your small business. Learn how to automate invoices, meetings, contracts, and more.",
+		openGraph: {
+			title: `Blog | ${config.appName}`,
+			description:
+				"Tips, tutorials, and insights on using AI tools to grow your small business.",
+			url: `${siteUrl}/blog`,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `Blog | ${config.appName}`,
+			description:
+				"Tips, tutorials, and insights on using AI tools to grow your small business.",
+		},
 	};
 }
 
@@ -25,9 +41,12 @@ export default async function BlogListPage() {
 	return (
 		<div className="container max-w-6xl pt-32 pb-16">
 			<div className="mb-12 pt-8 text-center">
-				<h1 className="mb-2 font-bold text-5xl">My awesome blog</h1>
+				<h1 className="mb-2 font-bold text-5xl">
+					{config.appName} Blog
+				</h1>
 				<p className="text-lg opacity-50">
-					Read the latest news from our company
+					Tips, tutorials, and insights on AI tools for small
+					businesses
 				</p>
 			</div>
 
