@@ -64,6 +64,10 @@ export function NavBar() {
 			label: "FAQ",
 			href: "/#faq",
 		},
+		{
+			label: "Changelog",
+			href: "/changelog",
+		},
 		...(config.ui.blog.enabled
 			? [
 					{

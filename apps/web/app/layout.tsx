@@ -76,6 +76,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren) {
 	return (
 		<html lang="en" suppressHydrationWarning className={sansFont.className}>
+			<head>
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link
+					rel="preconnect"
+					href="https://fonts.gstatic.com"
+					crossOrigin="anonymous"
+				/>
+			</head>
 			<body
 				className={cn(
 					"min-h-screen bg-background text-foreground antialiased",
