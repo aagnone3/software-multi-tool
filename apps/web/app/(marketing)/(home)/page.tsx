@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 			"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, separate speakers, and more — all in one platform.",
 		images: [
 			{
-				url: `${siteUrl}/og-image.png`,
+				url: `${siteUrl}/api/og?title=${encodeURIComponent(`${config.appName} — AI Tools for Small Businesses`)}`,
 				width: 1200,
 				height: 630,
 				alt: `${config.appName} — AI Tools for Small Businesses`,
@@ -42,7 +42,9 @@ export const metadata: Metadata = {
 		description:
 			config.appDescription ??
 			"AI-powered business tools for small teams. Summarize meetings, process invoices, analyze contracts, and more.",
-		images: [`${siteUrl}/og-image.png`],
+		images: [
+			`${siteUrl}/api/og?title=${encodeURIComponent(`${config.appName} — AI Tools for Small Businesses`)}`,
+		],
 	},
 };
 

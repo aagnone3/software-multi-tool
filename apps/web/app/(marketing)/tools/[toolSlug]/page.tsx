@@ -257,7 +257,7 @@ export async function generateMetadata({
 			description,
 			images: [
 				{
-					url: `${siteUrl}/og-image.png`,
+					url: `${siteUrl}/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`,
 					width: 1200,
 					height: 630,
 					alt: title,
@@ -268,7 +268,9 @@ export async function generateMetadata({
 			card: "summary_large_image",
 			title,
 			description,
-			images: [`${siteUrl}/og-image.png`],
+			images: [
+				`${siteUrl}/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`,
+			],
 		},
 	};
 }

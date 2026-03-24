@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 		description,
 		images: [
 			{
-				url: `${siteUrl}/og-image.png`,
+				url: `${siteUrl}/api/og`,
 				width: 1200,
 				height: 630,
 				alt: config.appName,
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: config.appName,
 		description,
-		images: [`${siteUrl}/og-image.png`],
+		images: [`${siteUrl}/api/og`],
 	},
 	robots: {
 		index: true,
