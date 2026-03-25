@@ -61,37 +61,13 @@ export function NavBar() {
 			href: "/pricing",
 		},
 		{
-			label: "By Industry",
-			href: "/for",
+			label: "Blog",
+			href: "/blog",
 		},
 		{
-			label: "Use Cases",
-			href: "/use-cases",
+			label: "Docs",
+			href: "/docs",
 		},
-		{
-			label: "Case Studies",
-			href: "/case-studies",
-		},
-		{
-			label: "ROI Calculator",
-			href: "/roi-calculator",
-		},
-		{
-			label: "FAQ",
-			href: "/faq",
-		},
-		{
-			label: "Changelog",
-			href: "/changelog",
-		},
-		...(config.ui.blog.enabled
-			? [
-					{
-						label: "Blog",
-						href: "/blog",
-					},
-				]
-			: []),
 		...(config.contactForm.enabled
 			? [
 					{
@@ -100,22 +76,6 @@ export function NavBar() {
 					},
 				]
 			: []),
-		{
-			label: "Docs",
-			href: "/docs",
-		},
-		{
-			label: "Integrations",
-			href: "/integrations",
-		},
-		{
-			label: "Security",
-			href: "/security",
-		},
-		{
-			label: "Partners",
-			href: "/partners",
-		},
 	];
 
 	const isMenuItemActive = (href: string) => pathname.startsWith(href);
