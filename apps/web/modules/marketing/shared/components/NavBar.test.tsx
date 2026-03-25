@@ -65,13 +65,13 @@ describe("NavBar", () => {
 		expect(dashLinks.length).toBeGreaterThan(0);
 	});
 
-	it("renders Pricing and FAQ menu items", () => {
+	it("renders Pricing and Blog menu items", () => {
 		render(<NavBar />);
 		expect(
 			screen.getAllByRole("link", { name: "Pricing" }).length,
 		).toBeGreaterThan(0);
 		expect(
-			screen.getAllByRole("link", { name: "FAQ" }).length,
+			screen.getAllByRole("link", { name: "Blog" }).length,
 		).toBeGreaterThan(0);
 	});
 
