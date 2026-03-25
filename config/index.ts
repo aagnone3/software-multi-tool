@@ -211,7 +211,7 @@ export const config = {
 		// blog functionality
 		blog: {
 			// whether the blog should be enabled (set to false to hide blog links and return 404 for blog routes)
-			enabled: false,
+			enabled: true,
 		},
 	},
 	// Storage
