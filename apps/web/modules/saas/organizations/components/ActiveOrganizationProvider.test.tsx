@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ActiveOrganizationProvider } from "./ActiveOrganizationProvider";
@@ -7,7 +7,6 @@ const mockPush = vi.hoisted(() => vi.fn());
 const mockUseParams = vi.hoisted(() => vi.fn());
 const mockGetSession = vi.hoisted(() => vi.fn());
 const mockUseActiveOrganizationQuery = vi.hoisted(() => vi.fn());
-const mockUseOrganizationListQuery = vi.hoisted(() => vi.fn());
 const mockSetQueryData = vi.hoisted(() => vi.fn());
 const mockRefetchQueries = vi.hoisted(() => vi.fn());
 const mockPrefetchQuery = vi.hoisted(() => vi.fn());
@@ -29,7 +28,6 @@ vi.mock("@saas/auth/hooks/use-session", () => ({
 vi.mock("@saas/organizations/lib/api", () => ({
 	activeOrganizationQueryKey: (slug: string) => ["active-organization", slug],
 	useActiveOrganizationQuery: mockUseActiveOrganizationQuery,
-	useOrganizationListQuery: mockUseOrganizationListQuery,
 }));
 
 vi.mock("@saas/auth/lib/api", () => ({
@@ -77,7 +75,6 @@ describe("ActiveOrganizationProvider", () => {
 			data: undefined,
 			isFetched: false,
 		});
-		mockUseOrganizationListQuery.mockReturnValue({ data: [] });
 	});
 
 	it("renders children", () => {
@@ -124,52 +121,5 @@ describe("ActiveOrganizationProvider", () => {
 		);
 
 		expect(screen.getByText("org child")).toBeDefined();
-	});
-
-	it("applies legacy fallback when session has no active org but user has orgs", async () => {
-		mockUseParams.mockReturnValue({});
-		mockGetSession.mockReturnValue({
-			session: { activeOrganizationId: null },
-			user: { id: "user-1" },
-		});
-		mockUseOrganizationListQuery.mockReturnValue({
-			data: [{ id: "org-1", slug: "first-org", name: "First Org" }],
-		});
-		mockSetActive.mockResolvedValue({
-			data: { id: "org-1", slug: "first-org" },
-		});
-
-		render(
-			<ActiveOrganizationProvider>
-				<div>child</div>
-			</ActiveOrganizationProvider>,
-		);
-
-		await waitFor(() => {
-			expect(mockSetActive).toHaveBeenCalledWith({
-				organizationSlug: "first-org",
-			});
-		});
-	});
-
-	it("skips legacy fallback when session already has active org", async () => {
-		mockUseParams.mockReturnValue({});
-		mockGetSession.mockReturnValue({
-			session: { activeOrganizationId: "org-1" },
-			user: { id: "user-1" },
-		});
-		mockUseOrganizationListQuery.mockReturnValue({
-			data: [{ id: "org-1", slug: "first-org" }],
-		});
-
-		render(
-			<ActiveOrganizationProvider>
-				<div>child</div>
-			</ActiveOrganizationProvider>,
-		);
-
-		await waitFor(() => {
-			expect(mockSetActive).not.toHaveBeenCalled();
-		});
 	});
 });
