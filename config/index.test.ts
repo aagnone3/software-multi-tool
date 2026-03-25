@@ -330,8 +330,8 @@ describe("blog configuration", () => {
 		expect(typeof config.ui.blog.enabled).toBe("boolean");
 	});
 
-	it("blog is disabled by default", () => {
-		expect(config.ui.blog.enabled).toBe(false);
+	it("blog is enabled by default", () => {
+		expect(config.ui.blog.enabled).toBe(true);
 	});
 
 	it("blog config is part of the ui section", () => {
