@@ -1,0 +1,109 @@
+---
+title: "How to Automate Reconciliation Aging Analysis with AI"
+description: "Learn how finance teams can automate reconciliation aging analysis with AI to surface stale exceptions sooner, route ownership clearly, and reduce close-cycle risk."
+authorName: "Anthony Agnone"
+authorImage: "/blog/authors/anthony-agnone.png"
+date: "2029-02-28"
+published: true
+category: "Finance Automation"
+tags:
+  [
+    "reconciliation aging",
+    "account reconciliation",
+    "month-end close",
+    "finance automation",
+    "ai workflows",
+  ]
+image: "/og?title=How%20to%20Automate%20Reconciliation%20Aging%20Analysis%20with%20AI"
+---
+
+Reconciliation teams usually know which accounts are risky. The challenge is proving it fast enough to act before close pressure spikes.
+
+AI can run a consistent aging analysis across every reconciliation, flagging stale items and weak owner commentary before they become late-cycle escalations.
+
+## Why reconciliation aging analysis breaks down
+
+Aging reviews often fail for predictable reasons:
+
+1. **Exception notes are inconsistent.** Different preparers describe the same issue in completely different ways.
+2. **Ownership is unclear.** Open items get rolled forward with no explicit next action or due date.
+3. **Risk is buried in volume.** Teams review a long queue manually and miss the oldest/highest-impact items.
+
+When this happens, controllers discover concentration risk too late.
+
+## What AI should do in an aging workflow
+
+The objective is better prioritization and cleaner reviewer context — not replacing accounting decisions.
+
+### 1) Normalize exception metadata
+
+AI can standardize open-item records into consistent fields:
+
+- age bucket (0–30, 31–60, 61–90, 90+)
+- account + entity owner
+- issue category (timing, classification, support gap, dispute)
+- expected resolution date
+
+That alone makes trend analysis significantly easier.
+
+### 2) Score stale-item risk
+
+Use risk factors such as:
+
+- item age and repeated carry-forward count
+- dollar magnitude relative to account materiality
+- proximity to filing/close deadlines
+- missing or low-quality remediation notes
+
+The result should be a ranked queue, not a flat list.
+
+### 3) Draft escalation summaries
+
+For high-risk aged items, AI can generate a concise escalation draft:
+
+- what is unresolved
+- why it is high risk now
+- what evidence is missing
+- who needs to act next and by when
+
+Reviewers edit and approve the summary, but the first draft is already structured.
+
+## Practical implementation pattern
+
+A rollout that works in production:
+
+1. Pull open reconciliation exceptions from your close platform.
+2. Enrich with amount, owner, prior-period history, and due dates.
+3. Run AI normalization + risk scoring daily during close.
+4. Route top-tier exceptions to controller review queues.
+5. Log reviewer disposition and feed outcomes back into scoring.
+
+Keep humans as final approvers for all escalations and signoffs.
+
+## Controls that keep audit confidence high
+
+Use explicit guardrails:
+
+- mandatory human approval for material exceptions
+- immutable audit trail for AI output and reviewer edits
+- threshold policies by account class/entity
+- forced escalation for 90+ day unresolved items
+
+This preserves accountability while speeding triage.
+
+## Metrics to track in the first 2 close cycles
+
+Measure operational impact directly:
+
+- count of 61+ day and 90+ day open exceptions
+- average days unresolved by account category
+- % of aged items with complete owner/action/due-date metadata
+- late-cycle escalations per close
+
+If these improve, the system is doing its job.
+
+## Where this fits in close automation
+
+Reconciliation aging analysis works best alongside flux analysis, certification workflows, and close risk scoring.
+
+AI handles first-pass structuring and prioritization. Finance leadership still owns judgment, materiality calls, and final signoff.
