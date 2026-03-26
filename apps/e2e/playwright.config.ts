@@ -97,7 +97,9 @@ export default defineConfig({
 					url: "http://localhost:3500",
 					reuseExistingServer: !process.env.CI,
 					stdout: "pipe",
-					timeout: 180 * 1000,
+					// CI builds now include a larger pre-rendered marketing/blog surface.
+					// Give webServer startup enough headroom to finish `next build`.
+					timeout: 300 * 1000,
 					cwd: path.resolve(__dirname, "../.."),
 					env: {
 						PORT: "3500",
