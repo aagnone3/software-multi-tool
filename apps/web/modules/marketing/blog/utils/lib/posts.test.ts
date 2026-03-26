@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/utils", () => ({
-	getBaseUrl: () => "https://example.com",
-}));
-
 const mockPosts = [
 	{
 		path: "hello-world",
@@ -38,11 +34,11 @@ describe("getAllPosts", () => {
 		expect(posts).toHaveLength(4);
 	});
 
-	it("injects OG image URL for posts without an explicit image", async () => {
+	it("injects relative OG image URL for posts without an explicit image", async () => {
 		const { getAllPosts } = await import("./posts");
 		const posts = await getAllPosts();
 		const post = posts.find((p) => p.path === "another-post");
-		expect(post?.image).toMatch(/^https:\/\/example\.com\/api\/og\?/);
+		expect(post?.image).toMatch(/^\/api\/og\?/);
 		expect(post?.image).toContain("title=Another+Post");
 	});
 
@@ -59,7 +55,7 @@ describe("getPostBySlug", () => {
 		const { getPostBySlug } = await import("./posts");
 		const post = await getPostBySlug("another-post");
 		expect(post?.path).toBe("another-post");
-		expect(post?.image).toMatch(/\/api\/og\?/);
+		expect(post?.image).toMatch(/^\/api\/og\?/);
 	});
 
 	it("returns null when slug does not match", async () => {

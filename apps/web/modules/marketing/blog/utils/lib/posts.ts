@@ -1,22 +1,23 @@
 import type { Post } from "@marketing/blog/types";
-import { getBaseUrl } from "@repo/utils";
 import { allPosts } from "content-collections";
 
 /**
  * Returns a post's image URL, falling back to a dynamically generated OG image
  * via /api/og when the post has no explicit image set.
- * This ensures every blog post has a proper branded cover image.
+ *
+ * Uses a relative URL (/api/og?...) so it works in all environments
+ * (production, preview, local) without env vars or next.config remotePatterns.
+ * Next.js <Image> handles same-origin relative paths natively.
  */
 function withDefaultImage(post: Post): Post {
 	if (post.image) {
 		return post;
 	}
-	const baseUrl = getBaseUrl();
 	const params = new URLSearchParams({
 		title: post.title,
 		description: post.excerpt ?? "",
 	});
-	return { ...post, image: `${baseUrl}/api/og?${params.toString()}` };
+	return { ...post, image: `/api/og?${params.toString()}` };
 }
 
 export async function getAllPosts(): Promise<Post[]> {
