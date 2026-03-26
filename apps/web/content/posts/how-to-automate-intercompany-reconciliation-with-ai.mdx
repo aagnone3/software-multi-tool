@@ -1,0 +1,112 @@
+---
+title: "How to Automate Intercompany Reconciliation with AI"
+description: "Learn how finance teams can use AI to automate intercompany reconciliation, reduce close-cycle delays, and improve audit readiness across entities."
+authorName: "Anthony Agnone"
+authorImage: "/images/authors/anthony-agnone.jpg"
+authorRole: "Founder"
+date: "2028-01-26"
+category: "Finance Automation"
+tags: ["intercompany reconciliation", "ai accounting", "finance automation", "month-end close"]
+published: true
+---
+
+Intercompany reconciliation is one of those finance processes everyone agrees is painful, but it still eats hours every close cycle.
+
+Entity A books a transaction one way. Entity B books it another way (or later, or not at all). Then someone has to manually trace entries across ERP exports, email threads, and spreadsheets to figure out what happened.
+
+AI can help by doing the repetitive matching, variance triage, and exception summarization work — while keeping humans in control of approvals and adjustments.
+
+## Why intercompany reconciliation gets stuck
+
+Most delays come from a few repeated patterns:
+
+- Mismatched reference fields (invoice IDs, PO numbers, cost center labels)
+- Timing differences between entities
+- Amount mismatches due to FX rates, fees, or partial postings
+- Missing supporting documents
+- Manual follow-up loops that happen in inboxes instead of systems
+
+The process breaks down when analysts spend more time *finding* discrepancies than *resolving* them.
+
+## What AI should automate (and what it should not)
+
+A practical AI-assisted workflow usually looks like this:
+
+1. **Ingest** transaction exports from each entity.
+2. **Normalize** descriptions, counterparties, currencies, and references.
+3. **Match** likely pairs using deterministic rules plus similarity scoring.
+4. **Flag exceptions** with reason codes (timing, amount variance, missing doc, potential duplicate).
+5. **Draft summaries** for controllers and entity owners.
+
+Keep these steps human-reviewed:
+
+- Posting final journal adjustments
+- Materiality judgments
+- Policy interpretation and sign-off
+
+AI accelerates analysis. It should not silently post financial changes.
+
+## A simple implementation blueprint
+
+If you are starting from a spreadsheet-heavy process, do this in phases:
+
+### Phase 1: Standardize exports
+
+Define one required export schema per entity:
+
+- transaction date
+- document number
+- counterparty entity
+- amount and currency
+- memo/description
+- source system link
+
+Even before AI, this alone removes a lot of friction.
+
+### Phase 2: Add automated matching and exception buckets
+
+Run a daily or close-window matching job that outputs:
+
+- matched pairs with confidence score
+- unmatched items
+- likely timing differences
+- high-risk mismatches above threshold
+
+### Phase 3: Add AI-generated review summaries
+
+Have AI produce short, structured summaries like:
+
+- "Top 10 unresolved mismatches by value"
+- "Items likely to clear next cycle"
+- "Exceptions missing documentation"
+
+This gives controllers decision-ready context instead of raw tables.
+
+## Metrics that prove it is working
+
+Track these every close:
+
+- Time to reconcile intercompany balances
+- Number of open exceptions at close cutoff
+- Percentage auto-matched without manual intervention
+- Rework due to late-discovered mismatches
+- Audit adjustments linked to intercompany errors
+
+If those are improving, your automation is creating real finance value.
+
+## Common rollout mistakes to avoid
+
+- Automating before agreeing on entity-level data standards
+- Letting AI outputs bypass review controls
+- No exception ownership model (who resolves what)
+- Measuring only speed and not error reduction
+
+Speed without control is just faster risk accumulation.
+
+## Final takeaway
+
+Intercompany reconciliation does not need to be a perpetual close bottleneck.
+
+Use AI for what it does best — matching, pattern detection, and exception summarization — and keep humans on policy, approvals, and material decisions.
+
+That combination is how teams shorten close cycles *and* improve confidence in the numbers.
