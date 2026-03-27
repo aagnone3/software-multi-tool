@@ -1,3 +1,4 @@
+import { MidPostCTA } from "@marketing/blog/components/MidPostCTA";
 import { slugifyHeadline } from "@shared/lib/content";
 import type { MDXComponents } from "mdx/types";
 import type { ImageProps } from "next/image";
@@ -100,4 +101,5 @@ export const mdxComponents = {
 		</ol>
 	),
 	li: ({ children, ...rest }) => <li {...rest}>{children}</li>,
+	MidPostCTA: () => <MidPostCTA />,
 } satisfies MDXComponents;

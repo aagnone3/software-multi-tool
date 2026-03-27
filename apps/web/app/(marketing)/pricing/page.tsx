@@ -113,11 +113,11 @@ export default function PricingPage() {
 				{/* Hero */}
 				<section className="container pt-32 pb-8 text-center md:pt-40">
 					<h1 className="mx-auto max-w-3xl font-bold text-4xl leading-tight md:text-5xl">
-						Ship production SaaS in days, not months
+						AI tools for your business — simple, transparent pricing
 					</h1>
 					<p className="mx-auto mt-4 max-w-2xl text-foreground/70 text-lg">
-						Auth, billing, AI tools, multi-tenancy — already built.
-						You focus on your product.
+						Start free. Run your first tool in under a minute.
+						Upgrade only when you need more.
 					</p>
 				</section>
 
@@ -152,18 +152,18 @@ export default function PricingPage() {
 						{[
 							{
 								icon: SparklesIcon,
-								label: "10+ AI tools built in",
-								desc: "Content, SEO, images, and more — ready to use out of the box.",
+								label: "10+ AI tools included",
+								desc: "Invoices, contracts, meetings, expenses, and more — all in one platform.",
 							},
 							{
 								icon: RocketIcon,
-								label: "Deploy in minutes",
-								desc: "One-click setup with auth, payments, and database included.",
+								label: "Run your first tool in minutes",
+								desc: "No setup, no integrations. Sign up and start right away.",
 							},
 							{
 								icon: BlocksIcon,
-								label: "300+ SEO pages included",
-								desc: "Programmatic landing pages that drive organic traffic from day one.",
+								label: "Credits never expire",
+								desc: "Unused monthly credits roll over as long as your subscription is active.",
 							},
 						].map(({ icon: Icon, label, desc }) => (
 							<div

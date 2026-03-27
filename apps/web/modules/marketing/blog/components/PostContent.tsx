@@ -10,6 +10,7 @@ export function PostContent({ content }: { content: string }) {
 				code={content}
 				components={{
 					a: mdxComponents.a,
+					MidPostCTA: mdxComponents.MidPostCTA,
 				}}
 			/>
 		</div>
