@@ -1,0 +1,121 @@
+---
+title: "How to Automate Close Adjustment Approval Routing with AI"
+slug: "how-to-automate-close-adjustment-approval-routing-with-ai"
+description: "Learn how finance teams can use AI to route close adjustments to the right approvers, reduce bottlenecks, and keep approval evidence audit-ready."
+excerpt: "A practical framework for AI-assisted close-adjustment routing with risk scoring, SLA-based queues, and stronger sign-off control."
+date: "2030-04-03"
+authorName: "Anthony Agnone"
+authorImage: "/blog/authors/anthony.jpg"
+category: "Finance"
+tags: ["month-end close", "journal adjustments", "approval workflows", "finance automation", "ai for accounting"]
+published: true
+coverImage: "/blog/og?title=How%20to%20Automate%20Close%20Adjustment%20Approval%20Routing%20with%20AI"
+---
+
+Close adjustments don’t usually fail because of accounting logic.
+
+They fail because approvals get stuck in the wrong queue, too late in the cycle, with weak context.
+
+AI can route each adjustment to the right reviewer, at the right priority, with the right evidence attached.
+
+## Why adjustment routing breaks during close
+
+Most teams still route approvals with static rules like “send all adjustments above X to Controller.”
+
+That breaks when close pressure rises:
+
+1. High-risk entries wait behind low-risk entries
+2. Reviewer capacity gets overloaded unevenly
+3. Escalations happen too late to protect deadlines
+4. Approval evidence is scattered across systems
+
+AI helps by combining risk context and routing policy in one repeatable decision layer.
+
+## Build an AI-assisted adjustment approval flow
+
+### 1) Define approval policy by risk tier
+
+Segment adjustments using practical dimensions:
+
+- Amount and materiality threshold
+- Account sensitivity
+- Entry timing (early vs final-close window)
+- Supporting documentation completeness
+
+Then map each tier to required approver levels and evidence standards.
+
+### 2) Classify each adjustment before queueing
+
+When an adjustment is created, AI should assign:
+
+- Risk tier (low, medium, high)
+- Required approver role
+- SLA deadline by close checkpoint
+- Missing-document flags
+
+This prevents “first-come, first-served” routing from dominating high-stakes days.
+
+### 3) Route to the right owner with explicit fallback
+
+Each routed item should include:
+
+- Primary approver
+- Backup approver path if SLA is missed
+- Escalation trigger timing
+- Current close phase context
+
+Fallback rules matter most when leaders are in overlapping review meetings.
+
+### 4) Attach approval-ready context automatically
+
+Package context directly in the approval task:
+
+- Proposed entry and account impact
+- Why the adjustment is needed
+- Source support references
+- Prior similar adjustments this quarter
+
+Approvers should not have to assemble evidence manually while the clock is running.
+
+### 5) Capture decision evidence by default
+
+For every decision, store:
+
+- Approver identity and timestamp
+- Decision (approve/reject/request changes)
+- Rationale text
+- Linked documentation snapshot
+
+This turns late-close approvals into defensible audit artifacts.
+
+## Example routed adjustment
+
+- **Adjustment:** Revenue deferral correction
+- **Amount:** $142,000
+- **Risk tier:** High
+- **Route:** Senior Accountant → Controller fallback at 90 minutes
+- **SLA:** Final decision before close checkpoint T-3 hours
+
+## Common rollout mistakes
+
+- Routing based only on amount, ignoring account risk
+- No backup approver path for SLA misses
+- Requiring manual evidence gathering at review time
+- Measuring queue volume instead of cycle-time and quality
+
+The objective is faster, safer approvals—not just more tickets moved.
+
+## KPIs to track each month-end cycle
+
+- Median approval cycle time by risk tier
+- Percent of high-risk adjustments approved within SLA
+- Escalation rate due to missed primary approver deadlines
+- Percent of approvals with complete evidence package
+
+These measures show whether routing is improving control quality and close speed.
+
+## Final takeaway
+
+AI should orchestrate adjustment approval flow, not replace accounting judgment.
+
+Use it to route, prioritize, and document decisions so your finance team can close faster with stronger control confidence.
