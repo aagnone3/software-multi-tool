@@ -1,10 +1,15 @@
 import { PricingSection } from "@marketing/home/components/PricingSection";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
+import { Button } from "@ui/components/button";
 import {
+	ArrowRightIcon,
+	BlocksIcon,
 	CheckCircleIcon,
 	HelpCircleIcon,
+	RocketIcon,
 	ShieldCheckIcon,
+	SparklesIcon,
 	ZapIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -108,11 +113,11 @@ export default function PricingPage() {
 				{/* Hero */}
 				<section className="container pt-32 pb-8 text-center md:pt-40">
 					<h1 className="mx-auto max-w-3xl font-bold text-4xl leading-tight md:text-5xl">
-						Simple, transparent pricing
+						Ship production SaaS in days, not months
 					</h1>
 					<p className="mx-auto mt-4 max-w-2xl text-foreground/70 text-lg">
-						Start free. Upgrade when you need more. No hidden fees,
-						no long-term contracts.
+						Auth, billing, AI tools, multi-tenancy — already built.
+						You focus on your product.
 					</p>
 				</section>
 
@@ -141,8 +146,59 @@ export default function PricingPage() {
 					</div>
 				</section>
 
+				{/* Value-anchor strip */}
+				<section className="container pb-12">
+					<div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-3">
+						{[
+							{
+								icon: SparklesIcon,
+								label: "10+ AI tools built in",
+								desc: "Content, SEO, images, and more — ready to use out of the box.",
+							},
+							{
+								icon: RocketIcon,
+								label: "Deploy in minutes",
+								desc: "One-click setup with auth, payments, and database included.",
+							},
+							{
+								icon: BlocksIcon,
+								label: "300+ SEO pages included",
+								desc: "Programmatic landing pages that drive organic traffic from day one.",
+							},
+						].map(({ icon: Icon, label, desc }) => (
+							<div
+								key={label}
+								className="rounded-lg border bg-background p-5 text-center"
+							>
+								<Icon className="mx-auto mb-2 size-5 text-primary" />
+								<p className="font-semibold text-sm">{label}</p>
+								<p className="mt-1 text-foreground/60 text-xs">
+									{desc}
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
+
 				{/* Pricing table */}
 				<PricingSection />
+
+				{/* Social proof / founding member */}
+				<section className="container py-12">
+					<div className="mx-auto max-w-2xl rounded-xl border border-primary/20 bg-primary/5 p-8 text-center">
+						<h2 className="font-bold text-xl">Join early access</h2>
+						<p className="mx-auto mt-2 max-w-lg text-foreground/70 text-sm">
+							Get founding member pricing — locked in for life
+							when you subscribe today.
+						</p>
+						<Button asChild size="sm" className="mt-5">
+							<Link href="/auth/signup">
+								Get started free
+								<ArrowRightIcon className="ml-1.5 size-3.5" />
+							</Link>
+						</Button>
+					</div>
+				</section>
 
 				{/* Credit costs per tool */}
 				<section className="border-t py-16">
