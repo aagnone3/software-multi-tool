@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import React from "react";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
+import { OnboardingStep2 } from "./OnboardingStep2";
 
 export function OnboardingForm() {
 	const router = useRouter();
@@ -18,13 +19,19 @@ export function OnboardingForm() {
 		? Number.parseInt(stepSearchParam, 10)
 		: 1;
 
-	// biome-ignore lint/correctness/noUnusedVariables: Will be used with more steps
 	const setStep = (step: number) => {
 		router.replace(
-			withQuery(window.location.search ?? "", {
-				step,
-			}),
+			withQuery(
+				window.location.pathname + (window.location.search ?? ""),
+				{
+					step,
+				},
+			),
 		);
+	};
+
+	const onStep1Completed = () => {
+		setStep(2);
 	};
 
 	const onCompleted = async () => {
@@ -38,7 +45,10 @@ export function OnboardingForm() {
 
 	const steps = [
 		{
-			component: <OnboardingStep1 onCompleted={() => onCompleted()} />,
+			component: <OnboardingStep1 onCompleted={onStep1Completed} />,
+		},
+		{
+			component: <OnboardingStep2 onCompleted={onCompleted} />,
 		},
 	];
 

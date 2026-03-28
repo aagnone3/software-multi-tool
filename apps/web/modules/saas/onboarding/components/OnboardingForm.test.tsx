@@ -36,6 +36,18 @@ vi.mock("./OnboardingStep1", () => ({
 		<div>
 			<span>OnboardingStep1</span>
 			<button type="button" onClick={onCompleted}>
+				Next
+			</button>
+		</div>
+	),
+}));
+
+// Mock OnboardingStep2 to simplify testing
+vi.mock("./OnboardingStep2", () => ({
+	OnboardingStep2: ({ onCompleted }: { onCompleted: () => void }) => (
+		<div>
+			<span>OnboardingStep2</span>
+			<button type="button" onClick={onCompleted}>
 				Complete
 			</button>
 		</div>
@@ -58,7 +70,25 @@ describe("OnboardingForm", () => {
 		expect(screen.getByText("OnboardingStep1")).toBeDefined();
 	});
 
-	it("calls updateUser and redirects to /app on completion", async () => {
+	it("advances to step 2 when step 1 is completed", async () => {
+		render(<OnboardingForm />);
+		expect(screen.getByText("OnboardingStep1")).toBeDefined();
+		fireEvent.click(screen.getByText("Next"));
+
+		await waitFor(() => {
+			expect(mockReplace).toHaveBeenCalledWith(
+				expect.stringContaining("step=2"),
+			);
+		});
+	});
+
+	it("calls updateUser and redirects to /app on step 2 completion", async () => {
+		// Start on step 2
+		mockSearchParams.get.mockImplementation((key: string) => {
+			if (key === "step") return "2";
+			return null;
+		});
+
 		mockUpdateUser.mockResolvedValue({});
 		mockClearCache.mockResolvedValue(undefined);
 
@@ -75,10 +105,10 @@ describe("OnboardingForm", () => {
 	});
 
 	it("redirects to redirectTo param if set", async () => {
+		// Start on step 2 with redirectTo
 		mockSearchParams.get.mockImplementation((key: string) => {
-			if (key === "redirectTo") {
-				return "/custom-redirect";
-			}
+			if (key === "step") return "2";
+			if (key === "redirectTo") return "/custom-redirect";
 			return null;
 		});
 
