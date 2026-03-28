@@ -1,7 +1,18 @@
 import { Button } from "@ui/components/button";
-import { ArrowRightIcon, SparklesIcon } from "lucide-react";
+import {
+	ArrowRightIcon,
+	CheckIcon,
+	ClockIcon,
+	SparklesIcon,
+} from "lucide-react";
 import Link from "next/link";
 import React from "react";
+
+const highlights = [
+	"Summarizes a 1-hour meeting in under 30 seconds",
+	"Extracts invoice data from any PDF in seconds",
+	"Analyzes a contract for risk clauses instantly",
+];
 
 export function Hero() {
 	return (
@@ -13,32 +24,41 @@ export function Hero() {
 				</div>
 
 				<h1 className="mx-auto max-w-4xl text-balance font-bold text-4xl leading-tight md:text-5xl lg:text-6xl">
-					Your one-stop shop for{" "}
-					<span className="text-primary">AI-powered</span> business
-					tools
+					Stop wasting hours on tasks{" "}
+					<span className="text-primary">AI can do in seconds</span>
 				</h1>
 
 				<p className="mx-auto mt-6 max-w-2xl text-balance text-foreground/70 text-lg md:text-xl">
-					Access powerful AI capabilities without technical
-					complexity. Summarize documents, process audio, automate
-					tasks, and boost productivity — all in one intuitive
-					platform.
+					Eight powerful AI tools in one platform — built for small
+					business owners who need results fast, without a technical
+					team.
 				</p>
+
+				{/* Social proof ticks */}
+				<ul className="mx-auto mt-8 flex max-w-xl flex-col items-start gap-2 text-left text-sm text-foreground/70 sm:gap-3">
+					{highlights.map((h) => (
+						<li key={h} className="flex items-start gap-2">
+							<CheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+							<span>{h}</span>
+						</li>
+					))}
+				</ul>
 
 				<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 					<Button size="lg" variant="primary" asChild>
 						<Link href="/auth/signup">
-							Get Started Free
+							Try Free — No Card Required
 							<ArrowRightIcon className="ml-2 size-4" />
 						</Link>
 					</Button>
 					<Button variant="outline" size="lg" asChild>
-						<Link href="#how-it-works">See How It Works</Link>
+						<Link href="/tools">See All Tools</Link>
 					</Button>
 				</div>
 
-				<p className="mt-6 text-foreground/50 text-sm">
-					No credit card required · Start in under 2 minutes
+				<p className="mt-5 flex items-center justify-center gap-1.5 text-foreground/50 text-sm">
+					<ClockIcon className="size-3.5" />
+					Set up in under 2 minutes · Free credits included
 				</p>
 			</div>
 		</section>

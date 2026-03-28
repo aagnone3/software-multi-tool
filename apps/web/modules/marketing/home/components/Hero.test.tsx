@@ -6,25 +6,34 @@ import { Hero } from "./Hero";
 describe("Hero", () => {
 	it("renders the headline", () => {
 		render(<Hero />);
-		expect(screen.getAllByText(/AI-powered/i).length).toBeGreaterThan(0);
+		expect(
+			screen.getByText(/stop wasting hours on tasks/i),
+		).toBeInTheDocument();
 	});
 
-	it("renders Get Started Free link", () => {
+	it("renders Try Free CTA link to signup", () => {
 		render(<Hero />);
-		const link = screen.getByRole("link", { name: /get started free/i });
+		const link = screen.getByRole("link", { name: /try free/i });
 		expect(link).toHaveAttribute("href", "/auth/signup");
 	});
 
-	it("renders See How It Works link", () => {
+	it("renders See All Tools link", () => {
 		render(<Hero />);
-		const link = screen.getByRole("link", { name: /see how it works/i });
-		expect(link).toHaveAttribute("href", "#how-it-works");
+		const link = screen.getByRole("link", { name: /see all tools/i });
+		expect(link).toHaveAttribute("href", "/tools");
 	});
 
-	it("renders no credit card required text", () => {
+	it("renders setup time text", () => {
 		render(<Hero />);
 		expect(
-			screen.getByText(/no credit card required/i),
+			screen.getByText(/set up in under 2 minutes/i),
+		).toBeInTheDocument();
+	});
+
+	it("renders highlight list items", () => {
+		render(<Hero />);
+		expect(
+			screen.getByText(/summarizes a 1-hour meeting/i),
 		).toBeInTheDocument();
 	});
 });
