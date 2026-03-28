@@ -14,30 +14,36 @@ export function usePlanData() {
 	> = {
 		free: {
 			title: "Free",
-			description: "Start for free",
+			description: "Try all the tools — no credit card required",
 			features: [
 				"10 credits/month",
-				"Basic tools access",
+				"All tools included",
+				"No credit card required",
 				"Community support",
 			],
 		},
 		starter: {
 			title: "Starter",
-			description: "Great for individuals",
+			description:
+				"For freelancers and professionals who run AI workflows weekly",
 			features: [
 				"100 credits/month",
-				"All tools access",
+				"All tools included",
+				"Rollover unused credits",
 				"Email support",
 				"7-day free trial",
 			],
 		},
 		pro: {
 			title: "Pro",
-			description: "Best for teams",
+			description:
+				"For teams that rely on AI tools as part of their daily workflow",
 			features: [
 				"500 credits/month",
-				"All tools access",
+				"All tools included",
+				"Rollover unused credits",
 				"Priority support",
+				"Team seats included",
 				"7-day free trial",
 			],
 		},
