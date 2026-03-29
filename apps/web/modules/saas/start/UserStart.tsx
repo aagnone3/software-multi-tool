@@ -16,6 +16,7 @@ import { FailedJobsRetryWidget } from "./components/FailedJobsRetryWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
 import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
+import { OnboardingRewardChecklist } from "./components/OnboardingRewardChecklist";
 import { PinnedJobsWidget } from "./components/PinnedJobsWidget";
 import { QuickActions } from "./components/QuickActions";
 import { RecentActivityFeed } from "./components/RecentActivityFeed";
@@ -39,6 +40,7 @@ export default function UserStart() {
 			{config.organizations.enable && <OrganizationsGrid />}
 
 			{/* Getting Started - dismissible onboarding checklist */}
+			<OnboardingRewardChecklist />
 			<GettingStartedChecklist />
 
 			{/* Quick Actions row */}
