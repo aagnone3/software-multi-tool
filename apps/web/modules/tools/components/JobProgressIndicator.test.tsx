@@ -18,6 +18,7 @@ vi.mock("../hooks/use-job-updates", () => ({
 
 vi.mock("../hooks/use-job-polling", () => ({
 	useCancelJob: useCancelJobMock,
+	useJobsList: () => ({ jobs: [] }),
 }));
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
