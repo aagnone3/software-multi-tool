@@ -6,6 +6,7 @@ import { HowItWorks } from "@marketing/home/components/HowItWorks";
 import { PricingSection } from "@marketing/home/components/PricingSection";
 import { SocialProofBar } from "@marketing/home/components/SocialProofBar";
 import { StatsBar } from "@marketing/home/components/StatsBar";
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { Testimonials } from "@marketing/home/components/Testimonials";
 import { config } from "@repo/config";
 import type { Metadata } from "next";
@@ -186,6 +187,7 @@ export default async function Home() {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
 			/>
+			<StickyCta />
 			<Hero />
 			<SocialProofBar />
 			<StatsBar />
