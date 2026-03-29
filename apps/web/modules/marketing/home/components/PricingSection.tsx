@@ -1,5 +1,6 @@
 "use client";
 import { PricingTable } from "@saas/payments/components/PricingTable";
+import { PricingTrustBar } from "./PricingTrustBar";
 
 export function PricingSection() {
 	return (
@@ -19,6 +20,7 @@ export function PricingSection() {
 				</div>
 
 				<PricingTable />
+				<PricingTrustBar />
 			</div>
 		</section>
 	);
