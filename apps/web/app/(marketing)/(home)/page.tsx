@@ -1,3 +1,4 @@
+import { BeforeAfter } from "@marketing/home/components/BeforeAfter";
 import { FaqSection } from "@marketing/home/components/FaqSection";
 import { Features } from "@marketing/home/components/Features";
 import { FinalCta } from "@marketing/home/components/FinalCta";
@@ -193,6 +194,7 @@ export default async function Home() {
 			<SocialProofBar />
 			<StatsBar />
 			<WhoIsItFor />
+			<BeforeAfter />
 			<Features />
 			<HowItWorks />
 			<Testimonials />
