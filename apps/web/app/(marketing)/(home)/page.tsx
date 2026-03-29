@@ -1,4 +1,5 @@
 import { BeforeAfter } from "@marketing/home/components/BeforeAfter";
+import { ExitIntentModal } from "@marketing/home/components/ExitIntentModal";
 import { FaqSection } from "@marketing/home/components/FaqSection";
 import { Features } from "@marketing/home/components/Features";
 import { FinalCta } from "@marketing/home/components/FinalCta";
@@ -189,6 +190,7 @@ export default async function Home() {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
 			/>
+			<ExitIntentModal />
 			<StickyCta />
 			<Hero />
 			<SocialProofBar />
