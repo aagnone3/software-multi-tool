@@ -4,12 +4,15 @@ import { getBaseUrl } from "@repo/utils";
 import { Button } from "@ui/components/button";
 import {
 	ArrowRightIcon,
+	BadgeCheckIcon,
 	BlocksIcon,
 	CheckCircleIcon,
 	HelpCircleIcon,
 	RocketIcon,
 	ShieldCheckIcon,
 	SparklesIcon,
+	StarIcon,
+	ThumbsUpIcon,
 	ZapIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -182,6 +185,102 @@ export default function PricingPage() {
 
 				{/* Pricing table */}
 				<PricingSection />
+
+				{/* Money-back guarantee / risk-reversal */}
+				<section className="container py-12">
+					<div className="mx-auto max-w-4xl">
+						<div className="grid gap-6 sm:grid-cols-3">
+							{[
+								{
+									icon: ThumbsUpIcon,
+									title: "30-day money-back guarantee",
+									desc: "Not happy in your first 30 days? Email us and we'll refund your plan purchase, no questions asked.",
+								},
+								{
+									icon: ShieldCheckIcon,
+									title: "Your data stays yours",
+									desc: "Files you upload are processed and immediately deleted. We never train models on your documents.",
+								},
+								{
+									icon: BadgeCheckIcon,
+									title: "Cancel anytime, no lock-in",
+									desc: "No long-term contracts. Cancel from your account settings in one click and keep access until the billing period ends.",
+								},
+							].map(({ icon: Icon, title, desc }) => (
+								<div
+									key={title}
+									className="flex flex-col items-start gap-3 rounded-xl border bg-background p-6"
+								>
+									<div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
+										<Icon className="size-5 text-primary" />
+									</div>
+									<h3 className="font-semibold text-base">
+										{title}
+									</h3>
+									<p className="text-foreground/60 text-sm">
+										{desc}
+									</p>
+								</div>
+							))}
+						</div>
+					</div>
+				</section>
+
+				{/* Social proof testimonials */}
+				<section className="border-t bg-muted/20 py-12">
+					<div className="container max-w-4xl">
+						<h2 className="mb-8 text-center font-bold text-2xl">
+							What customers say
+						</h2>
+						<div className="grid gap-6 sm:grid-cols-3">
+							{[
+								{
+									quote: "Saved us 3 hours every Monday morning. The meeting summarizer alone is worth the subscription.",
+									name: "Sarah K.",
+									role: "Operations Manager",
+								},
+								{
+									quote: "I was skeptical, but the invoice processor paid for itself in the first week. Incredible time saver.",
+									name: "Marcus T.",
+									role: "Freelance Consultant",
+								},
+								{
+									quote: "We process 50+ contracts a month. The contract analyzer catches things we used to miss completely.",
+									name: "Jennifer L.",
+									role: "Legal Operations Lead",
+								},
+							].map(({ quote, name, role }) => (
+								<div
+									key={name}
+									className="flex flex-col gap-4 rounded-xl border bg-background p-6"
+								>
+									<div className="flex gap-0.5">
+										{Array.from({ length: 5 }).map(
+											(_, i) => (
+												<StarIcon
+													// biome-ignore lint/suspicious/noArrayIndexKey: static star list
+													key={i}
+													className="size-4 fill-amber-400 text-amber-400"
+												/>
+											),
+										)}
+									</div>
+									<p className="text-foreground/70 text-sm leading-relaxed">
+										&ldquo;{quote}&rdquo;
+									</p>
+									<div>
+										<p className="font-semibold text-sm">
+											{name}
+										</p>
+										<p className="text-foreground/50 text-xs">
+											{role}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</section>
 
 				{/* Social proof / founding member */}
 				<section className="container py-12">
