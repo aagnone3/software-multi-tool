@@ -1,4 +1,5 @@
 import { PageHeader } from "@saas/shared/components/PageHeader";
+import { NewUserWelcomeBanner } from "@saas/tools/components/NewUserWelcomeBanner";
 import { ToolsGrid } from "@saas/tools/components/ToolsGrid";
 import { Button } from "@ui/components/button";
 import { BarChart3Icon, GitCompareArrowsIcon } from "lucide-react";
@@ -27,6 +28,7 @@ export default function ToolsPage() {
 					</div>
 				}
 			/>
+			<NewUserWelcomeBanner className="mb-6" />
 			<ToolsGrid />
 		</div>
 	);
