@@ -96,6 +96,34 @@ export function PricingTable({
 	const formatTrialDays = (days: number) =>
 		`${days} ${days === 1 ? "day" : "days"} free trial`;
 
+	/** Calculate annual savings % for a given plan (returns null if no both intervals exist) */
+	const getAnnualSavingsPct = (planId: string): number | null => {
+		const plan = plans[planId as keyof typeof plans];
+		const prices = plan?.prices;
+		if (!prices) return null;
+		const monthly = prices.find(
+			(p) =>
+				p.type === "recurring" && p.interval === "month" && !p.hidden,
+		);
+		const yearly = prices.find(
+			(p) => p.type === "recurring" && p.interval === "year" && !p.hidden,
+		);
+		if (!monthly || !yearly || monthly.amount === 0) return null;
+		const annualizedMonthly = monthly.amount * 12;
+		const savings = Math.round(
+			((annualizedMonthly - yearly.amount) / annualizedMonthly) * 100,
+		);
+		return savings > 0 ? savings : null;
+	};
+
+	const maxAnnualSavingsPct = Object.keys(plans).reduce<number>(
+		(max, planId) => {
+			const pct = getAnnualSavingsPct(planId);
+			return pct !== null && pct > max ? pct : max;
+		},
+		0,
+	);
+
 	return (
 		<div className={cn("@container", className)}>
 			{hasSubscriptions && (
@@ -109,7 +137,14 @@ export function PricingTable({
 					>
 						<TabsList className="border-foreground/10">
 							<TabsTrigger value="month">Monthly</TabsTrigger>
-							<TabsTrigger value="year">Yearly</TabsTrigger>
+							<TabsTrigger value="year" className="relative">
+								Yearly
+								{maxAnnualSavingsPct > 0 && (
+									<span className="ml-1.5 rounded-full bg-green-100 px-1.5 py-0.5 font-semibold text-green-700 text-xs dark:bg-green-900/30 dark:text-green-400">
+										Save {maxAnnualSavingsPct}%
+									</span>
+								)}
+							</TabsTrigger>
 						</TabsList>
 					</Tabs>
 				</div>
@@ -258,6 +293,44 @@ export function PricingTable({
 												)}
 											</strong>
 										)}
+										{interval === "year" &&
+											!isFree &&
+											!isEnterprise &&
+											(() => {
+												const savingsPct =
+													getAnnualSavingsPct(planId);
+												if (!savingsPct) return null;
+												const monthlyPrice = plans[
+													planId as keyof typeof plans
+												]?.prices?.find(
+													(p) =>
+														p.type ===
+															"recurring" &&
+														p.interval ===
+															"month" &&
+														!p.hidden,
+												);
+												if (!monthlyPrice) return null;
+												const savedAmount =
+													monthlyPrice.amount * 12 -
+													(price?.amount ?? 0);
+												return (
+													<p className="mt-1 text-green-600 text-xs dark:text-green-400">
+														You save{" "}
+														{new Intl.NumberFormat(
+															"en",
+															{
+																style: "currency",
+																currency:
+																	monthlyPrice.currency,
+																maximumFractionDigits: 0,
+															},
+														).format(savedAmount)}
+														/year ({savingsPct}%
+														off)
+													</p>
+												);
+											})()}
 
 										{isEnterprise ? (
 											<Button
