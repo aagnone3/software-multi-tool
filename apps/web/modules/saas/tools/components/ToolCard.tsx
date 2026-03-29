@@ -220,14 +220,34 @@ export function ToolCard({
 			</CardHeader>
 			<CardContent className="pt-0">
 				{tool.creditCost > 0 && (
-					<div className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-						<CoinsIcon className="size-3.5 text-primary/70" />
-						<span>
-							{tool.creditCost}{" "}
-							{tool.creditCost === 1 ? "credit" : "credits"} per
-							use
-						</span>
-					</div>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div className="mb-3 flex cursor-default items-center gap-1.5 text-xs text-muted-foreground">
+									<CoinsIcon className="size-3.5 text-primary/70" />
+									<span>
+										{tool.creditCost}{" "}
+										{tool.creditCost === 1
+											? "credit"
+											: "credits"}{" "}
+										per {tool.creditUnit ?? "use"}
+									</span>
+								</div>
+							</TooltipTrigger>
+							<TooltipContent
+								side="top"
+								className="max-w-[200px] text-center"
+							>
+								<p className="font-medium">
+									≈ ${(tool.creditCost * 0.04).toFixed(2)}{" "}
+									value
+								</p>
+								<p className="text-xs text-muted-foreground">
+									Based on Pro plan ($19.99/mo, 500 credits)
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				)}
 				{userRating && (
 					<div

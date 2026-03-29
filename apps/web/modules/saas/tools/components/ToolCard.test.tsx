@@ -68,6 +68,12 @@ describe("ToolCard", () => {
 		expect(screen.getByText(/3 credits per use/i)).toBeInTheDocument();
 	});
 
+	it("shows credit cost info in tooltip trigger for creditCost > 0", () => {
+		render(<ToolCard tool={{ ...baseTool, creditCost: 5 }} />);
+		// The trigger element with credit info is rendered in the DOM
+		expect(screen.getByText(/5 credits per/i)).toBeInTheDocument();
+	});
+
 	it("hides credit display when creditCost is 0", () => {
 		render(<ToolCard tool={{ ...baseTool, creditCost: 0 }} />);
 		expect(screen.queryByText(/credit/i)).not.toBeInTheDocument();
