@@ -10,6 +10,7 @@ import {
 const useJobUpdatesMock = vi.hoisted(() => vi.fn());
 const useCancelJobMock = vi.hoisted(() => vi.fn());
 const useActiveOrganizationMock = vi.hoisted(() => vi.fn());
+const useCreditsBalanceMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../hooks/use-job-updates", () => ({
 	useJobUpdates: useJobUpdatesMock,
@@ -21,6 +22,10 @@ vi.mock("../hooks/use-job-polling", () => ({
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: useActiveOrganizationMock,
+}));
+
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: useCreditsBalanceMock,
 }));
 
 vi.mock("next/link", () => ({
@@ -38,6 +43,12 @@ const cancelMutateMock = vi.fn();
 beforeEach(() => {
 	vi.clearAllMocks();
 	useActiveOrganizationMock.mockReturnValue({ activeOrganization: null });
+	useCreditsBalanceMock.mockReturnValue({
+		balance: null,
+		isLoading: false,
+		isFreePlan: false,
+		isLowCredits: false,
+	});
 	useCancelJobMock.mockReturnValue({
 		mutate: cancelMutateMock,
 		isPending: false,
