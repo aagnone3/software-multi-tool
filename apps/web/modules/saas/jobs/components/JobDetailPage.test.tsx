@@ -8,6 +8,10 @@ vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobPolling: vi.fn(),
 }));
 
+vi.mock("@saas/payments/hooks/purchases", () => ({
+	usePurchases: vi.fn().mockReturnValue({ activePlan: { id: "starter" } }),
+}));
+
 vi.mock("@repo/config", () => ({
 	config: {
 		tools: {

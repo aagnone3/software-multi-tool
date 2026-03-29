@@ -29,6 +29,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { JobNotesPanel } from "./JobNotesPanel";
+import { JobResultsUpgradeNudge } from "./JobResultsUpgradeNudge";
 import { JobTagsPanel } from "./JobTagsPanel";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
@@ -345,6 +346,9 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 					</CardContent>
 				</Card>
 			)}
+
+			{/* Upgrade nudge — shown after completed jobs for free plan users */}
+			{status === "COMPLETED" && <JobResultsUpgradeNudge />}
 
 			{/* Tags Panel */}
 			<JobTagsPanel jobId={jobId} className="border rounded-lg p-4" />
