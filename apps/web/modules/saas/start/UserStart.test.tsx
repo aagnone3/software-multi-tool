@@ -98,6 +98,12 @@ vi.mock("@saas/referrals/components/ReferralWidget", () => ({
 	ReferralWidget: () => <div data-testid="referral-widget" />,
 }));
 
+vi.mock("./components/OnboardingRewardChecklist", () => ({
+	OnboardingRewardChecklist: () => (
+		<div data-testid="onboarding-reward-checklist" />
+	),
+}));
+
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
 		render(<UserStart />);
