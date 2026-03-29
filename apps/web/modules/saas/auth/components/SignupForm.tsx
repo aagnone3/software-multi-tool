@@ -127,10 +127,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
-				Create your account
+				Start saving hours every week
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				Enter your details to create an account
+				Free credits included — no card required. Cancel anytime.
 			</p>
 
 			{form.formState.isSubmitSuccessful && !invitationOnlyMode ? (
@@ -237,7 +237,8 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 							)}
 
 							<Button loading={form.formState.isSubmitting}>
-								Create account
+								Create free account
+								<ArrowRightIcon className="ml-2 size-4" />
 							</Button>
 						</form>
 					</Form>
