@@ -5,8 +5,8 @@ import React from "react";
 
 const benefits = [
 	"No credit card required",
-	"Free credits to get started",
-	"Cancel anytime",
+	"Free credits included on signup",
+	"First result in under 2 minutes",
 ];
 
 export function FinalCta() {
@@ -20,13 +20,13 @@ export function FinalCta() {
 
 					<div className="relative">
 						<h2 className="mx-auto max-w-2xl text-balance font-bold text-3xl md:text-4xl lg:text-5xl">
-							Ready to transform your productivity with AI?
+							Try it free. First results in under 2 minutes.
 						</h2>
 
 						<p className="mx-auto mt-4 max-w-xl text-balance text-primary-foreground/80 text-lg">
-							Join the league of small business owners who are
-							already saving time and boosting productivity with
-							our AI tools.
+							Upload a contract, invoice, or meeting transcript
+							and see what AI can do for your business — no setup,
+							no credit card, no waiting.
 						</p>
 
 						<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -37,9 +37,17 @@ export function FinalCta() {
 								asChild
 							>
 								<Link href="/auth/signup">
-									Get Started Free
+									Start Free — No Card Needed
 									<ArrowRightIcon className="ml-2 size-4" />
 								</Link>
+							</Button>
+							<Button
+								size="lg"
+								variant="ghost"
+								className="text-white/90 hover:bg-white/10 hover:text-white"
+								asChild
+							>
+								<Link href="/tools">Browse All Tools</Link>
 							</Button>
 						</div>
 

@@ -1,7 +1,7 @@
 import {
 	CreditCardIcon,
 	LayoutDashboardIcon,
-	MessageSquareIcon,
+	UploadCloudIcon,
 	UserPlusIcon,
 } from "lucide-react";
 import React from "react";
@@ -18,28 +18,28 @@ const steps: Step[] = [
 		number: 1,
 		title: "Sign up for free",
 		description:
-			"Create your account in seconds. No credit card required, no complicated setup — just enter your email and get started.",
+			"Create your account in seconds. No credit card required — just your email and you're in. Free credits are waiting.",
 		icon: UserPlusIcon,
 	},
 	{
 		number: 2,
-		title: "Explore the tools",
+		title: "Pick a tool",
 		description:
-			"Browse our dashboard of AI-powered tools designed for small businesses. Each tool is ready to use with clear instructions.",
+			"Choose from 8 AI-powered tools built for small businesses — meeting summarizer, invoice processor, contract analyzer, and more.",
 		icon: LayoutDashboardIcon,
 	},
 	{
 		number: 3,
-		title: "Chat with AI",
+		title: "Upload your file",
 		description:
-			"Not sure which tool fits your needs? Our AI assistant helps you find the right solution for your specific problem.",
-		icon: MessageSquareIcon,
+			"Drop in your PDF, audio, spreadsheet, or text. The AI processes it automatically — no prompts, no configuration needed.",
+		icon: UploadCloudIcon,
 	},
 	{
 		number: 4,
-		title: "Scale as you grow",
+		title: "Get results instantly",
 		description:
-			"Start with free credits and add more as your usage grows. Only pay for what you need, when you need it.",
+			"Download your structured output in seconds. Pay only for what you use — credits never expire, no monthly commitments.",
 		icon: CreditCardIcon,
 	},
 ];

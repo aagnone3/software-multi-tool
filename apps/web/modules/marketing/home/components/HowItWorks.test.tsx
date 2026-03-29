@@ -12,9 +12,9 @@ describe("HowItWorks", () => {
 	it("renders all 4 steps", () => {
 		render(<HowItWorks />);
 		expect(screen.getByText("Sign up for free")).toBeInTheDocument();
-		expect(screen.getByText("Explore the tools")).toBeInTheDocument();
-		expect(screen.getByText("Chat with AI")).toBeInTheDocument();
-		expect(screen.getByText("Scale as you grow")).toBeInTheDocument();
+		expect(screen.getByText("Pick a tool")).toBeInTheDocument();
+		expect(screen.getByText("Upload your file")).toBeInTheDocument();
+		expect(screen.getByText("Get results instantly")).toBeInTheDocument();
 	});
 
 	it("renders step numbers 1–4", () => {

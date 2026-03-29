@@ -7,22 +7,32 @@ describe("FinalCta", () => {
 	it("renders the heading", () => {
 		render(<FinalCta />);
 		expect(
-			screen.getByText("Ready to transform your productivity with AI?"),
+			screen.getByText("Try it free. First results in under 2 minutes."),
 		).toBeInTheDocument();
 	});
 
-	it("renders Get Started Free link pointing to signup", () => {
+	it("renders Start Free link pointing to signup", () => {
 		render(<FinalCta />);
-		const link = screen.getByRole("link", { name: /get started free/i });
+		const link = screen.getByRole("link", {
+			name: /start free — no card needed/i,
+		});
 		expect(link).toHaveAttribute("href", "/auth/signup");
+	});
+
+	it("renders Browse All Tools link", () => {
+		render(<FinalCta />);
+		const link = screen.getByRole("link", { name: /browse all tools/i });
+		expect(link).toHaveAttribute("href", "/tools");
 	});
 
 	it("renders all benefit items", () => {
 		render(<FinalCta />);
 		expect(screen.getByText("No credit card required")).toBeInTheDocument();
 		expect(
-			screen.getByText("Free credits to get started"),
+			screen.getByText("Free credits included on signup"),
 		).toBeInTheDocument();
-		expect(screen.getByText("Cancel anytime")).toBeInTheDocument();
+		expect(
+			screen.getByText("First result in under 2 minutes"),
+		).toBeInTheDocument();
 	});
 });
