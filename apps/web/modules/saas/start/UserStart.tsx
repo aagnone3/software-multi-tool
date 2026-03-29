@@ -10,6 +10,7 @@ import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
 import { CreditForecastWidget } from "./components/CreditForecastWidget";
 import { CreditsByToolChart } from "./components/CreditsByToolChart";
 import { CreditsOverview } from "./components/CreditsOverview";
+import { CreditUpgradeWidget } from "./components/CreditUpgradeWidget";
 import { DailyGoalWidget } from "./components/DailyGoalWidget";
 import { FailedJobsRetryWidget } from "./components/FailedJobsRetryWidget";
 import { FavoriteToolsWidget } from "./components/FavoriteToolsWidget";
@@ -51,6 +52,9 @@ export default function UserStart() {
 
 			{/* Main dashboard grid */}
 			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+				{/* Credit Upgrade — shown for free/low-credit users */}
+				<CreditUpgradeWidget className="lg:col-span-1" />
+
 				{/* Credits Overview */}
 				<CreditsOverview className="lg:col-span-1" />
 

@@ -9,6 +9,9 @@ vi.mock("@repo/config", () => ({
 vi.mock("@saas/organizations/components/OrganizationsGrid", () => ({
 	OrganizationsGrid: () => <div data-testid="organizations-grid" />,
 }));
+vi.mock("./components/CreditUpgradeWidget", () => ({
+	CreditUpgradeWidget: () => <div data-testid="credit-upgrade-widget" />,
+}));
 vi.mock("./components/GettingStartedChecklist", () => ({
 	GettingStartedChecklist: () => (
 		<div data-testid="getting-started-checklist" />
