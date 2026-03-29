@@ -10,6 +10,7 @@ import { CommandPaletteShortcut } from "@saas/shared/components/CommandPaletteSh
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
 import { KeyboardNavigationShortcuts } from "@saas/shared/components/KeyboardNavigationShortcuts";
 import { KeyboardShortcutsHelp } from "@saas/shared/components/KeyboardShortcutsHelp";
+import { LowCreditsUrgencyModal } from "@saas/start/components/LowCreditsUrgencyModal";
 import { MilestoneNotifier } from "@saas/start/components/MilestoneNotifier";
 import { Document } from "@shared/components/Document";
 import { PreviewStatusBanner } from "@shared/components/PreviewStatusBanner";
@@ -58,6 +59,9 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 								<CommandPaletteShortcut />
 								<MilestoneNotifier />
 								<ZeroCreditsModal />
+								<LowCreditsUrgencyModal
+									userId={session.user.id}
+								/>
 								<KeyboardNavigationShortcuts />
 								<KeyboardShortcutsHelp />
 								<PreviewStatusBanner />
