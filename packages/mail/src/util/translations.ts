@@ -43,6 +43,9 @@ export const defaultTranslations = {
 			join: "Join the organization",
 			subject: "You have been invited to join an organization",
 		},
+		welcomeEmail: {
+			subject: "Your 10 free credits are ready — here's where to start",
+		},
 	},
 } as const;
 
