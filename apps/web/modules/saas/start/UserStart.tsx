@@ -3,6 +3,7 @@
 import { config } from "@repo/config";
 import { CreditBurnRateWidget } from "@saas/credits/components/CreditBurnRateWidget";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
+import { ReferralWidget } from "@saas/referrals/components/ReferralWidget";
 import React from "react";
 import { JobSearchWidget } from "../jobs/components/JobSearchWidget";
 import { ActiveJobsWidget } from "./components/ActiveJobsWidget";
@@ -112,6 +113,9 @@ export default function UserStart() {
 				{/* Credit Forecast — projects future credit usage */}
 				<CreditForecastWidget />
 				<ToolBenchmarkWidget />
+
+				{/* Referral — earn free credits by inviting friends */}
+				<ReferralWidget />
 			</div>
 		</div>
 	);

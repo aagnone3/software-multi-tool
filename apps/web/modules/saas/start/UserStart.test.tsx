@@ -91,6 +91,10 @@ vi.mock("./components/FailedJobsRetryWidget", () => ({
 	FailedJobsRetryWidget: () => <div data-testid="failed-jobs-retry-widget" />,
 }));
 
+vi.mock("@saas/referrals/components/ReferralWidget", () => ({
+	ReferralWidget: () => <div data-testid="referral-widget" />,
+}));
+
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
 		render(<UserStart />);
