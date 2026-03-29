@@ -8,6 +8,7 @@ import { SocialProofBar } from "@marketing/home/components/SocialProofBar";
 import { StatsBar } from "@marketing/home/components/StatsBar";
 import { StickyCta } from "@marketing/home/components/StickyCta";
 import { Testimonials } from "@marketing/home/components/Testimonials";
+import { WhoIsItFor } from "@marketing/home/components/WhoIsItFor";
 import { config } from "@repo/config";
 import type { Metadata } from "next";
 
@@ -191,6 +192,7 @@ export default async function Home() {
 			<Hero />
 			<SocialProofBar />
 			<StatsBar />
+			<WhoIsItFor />
 			<Features />
 			<HowItWorks />
 			<Testimonials />
