@@ -18,6 +18,7 @@ import { GettingStartedChecklist } from "./components/GettingStartedChecklist";
 import { NotificationsWidget } from "./components/NotificationsWidget";
 import { OnboardingRewardChecklist } from "./components/OnboardingRewardChecklist";
 import { PinnedJobsWidget } from "./components/PinnedJobsWidget";
+import { ProTrialOfferCard } from "./components/ProTrialOfferCard";
 import { QuickActions } from "./components/QuickActions";
 import { RecentActivityFeed } from "./components/RecentActivityFeed";
 import { RecentlyUsedTools } from "./components/RecentlyUsedTools";
@@ -38,6 +39,9 @@ export default function UserStart() {
 			<WelcomeModal />
 
 			{config.organizations.enable && <OrganizationsGrid />}
+
+			{/* Pro trial offer — shown once to free users, dismissible */}
+			<ProTrialOfferCard />
 
 			{/* Getting Started - dismissible onboarding checklist */}
 			<OnboardingRewardChecklist />

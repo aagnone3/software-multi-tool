@@ -104,6 +104,10 @@ vi.mock("./components/OnboardingRewardChecklist", () => ({
 	),
 }));
 
+vi.mock("./components/ProTrialOfferCard", () => ({
+	ProTrialOfferCard: () => <div data-testid="pro-trial-offer-card" />,
+}));
+
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
 		render(<UserStart />);
