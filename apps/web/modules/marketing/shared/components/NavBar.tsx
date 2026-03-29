@@ -168,6 +168,17 @@ export function NavBar() {
 									>
 										{user ? "Dashboard" : "Login"}
 									</Link>
+
+									{!user && (
+										<Link
+											key="signup"
+											href="/auth/signup"
+											className="block px-3 py-2 text-base font-semibold text-primary"
+											prefetch
+										>
+											Start free →
+										</Link>
+									)}
 								</div>
 							</SheetContent>
 						</Sheet>
@@ -183,16 +194,28 @@ export function NavBar() {
 									<Link href="/app">Dashboard</Link>
 								</Button>
 							) : (
-								<Button
-									key="login"
-									className="hidden lg:flex"
-									asChild
-									variant="secondary"
-								>
-									<Link href="/auth/login" prefetch>
-										Login
-									</Link>
-								</Button>
+								<>
+									<Button
+										key="login"
+										className="hidden lg:flex"
+										asChild
+										variant="ghost"
+									>
+										<Link href="/auth/login" prefetch>
+											Login
+										</Link>
+									</Button>
+									<Button
+										key="signup"
+										className="hidden lg:flex"
+										asChild
+										variant="primary"
+									>
+										<Link href="/auth/signup" prefetch>
+											Start free
+										</Link>
+									</Button>
+								</>
 							))}
 					</div>
 				</div>
