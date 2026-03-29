@@ -173,6 +173,40 @@ describe("CreditBalanceCard", () => {
 		expect(screen.getByText("Credit Pack")).toBeDefined();
 	});
 
+	it("shows upgrade nudge when on free plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { ...baseBalance, plan: { id: "free", name: "Free" } },
+			isLoading: false,
+			totalCredits: 1000,
+			percentageUsed: 25,
+			isLowCredits: false,
+			isFreePlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		render(<CreditBalanceCard />);
+		expect(screen.getByText("Upgrade for 10× more credits")).toBeDefined();
+		const upgradeLink = screen.getByRole("link", {
+			name: /Upgrade to Starter/i,
+		});
+		expect(upgradeLink.getAttribute("href")).toBe("/app/settings/billing");
+	});
+
+	it("shows low-credits nudge when isLowCredits and not free plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { ...baseBalance, totalAvailable: 50 },
+			isLoading: false,
+			totalCredits: 1000,
+			percentageUsed: 95,
+			isLowCredits: true,
+			isFreePlan: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		render(<CreditBalanceCard />);
+		expect(
+			screen.getByText("Running low — top up or upgrade"),
+		).toBeDefined();
+	});
+
 	it("uses org usage history path when activeOrganization exists", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			balance: baseBalance,

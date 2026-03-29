@@ -11,7 +11,12 @@ import {
 } from "@ui/components/card";
 import { Progress } from "@ui/components/progress";
 import { cn } from "@ui/lib";
-import { ChevronRightIcon, CoinsIcon } from "lucide-react";
+import {
+	ArrowUpCircleIcon,
+	ChevronRightIcon,
+	CoinsIcon,
+	ZapIcon,
+} from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
@@ -30,13 +35,23 @@ interface CreditBalanceCardProps {
 }
 
 export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
-	const { balance, isLoading, totalCredits, percentageUsed, isLowCredits } =
-		useCreditsBalance();
+	const {
+		balance,
+		isLoading,
+		totalCredits,
+		percentageUsed,
+		isLowCredits,
+		isFreePlan,
+	} = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 
 	const usageHistoryPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/usage`
 		: "/app/settings/usage";
+
+	const billingPath = activeOrganization
+		? `/app/${activeOrganization.slug}/settings/billing`
+		: "/app/settings/billing";
 
 	if (isLoading) {
 		return (
@@ -195,6 +210,69 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 							: "Billing period ending soon"}
 					</p>
 				</div>
+
+				{/* Upgrade nudge: shown when on free plan or when credits are low */}
+				{(isFreePlan || isLowCredits) && (
+					<div
+						className={cn(
+							"rounded-lg border p-4",
+							isFreePlan
+								? "border-primary/20 bg-primary/5"
+								: "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950",
+						)}
+					>
+						<div className="flex items-start gap-3">
+							{isFreePlan ? (
+								<ArrowUpCircleIcon className="mt-0.5 size-5 shrink-0 text-primary" />
+							) : (
+								<ZapIcon className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+							)}
+							<div className="flex-1 min-w-0">
+								<p
+									className={cn(
+										"text-sm font-semibold",
+										isFreePlan
+											? "text-primary"
+											: "text-amber-800 dark:text-amber-200",
+									)}
+								>
+									{isFreePlan
+										? "Upgrade for 10× more credits"
+										: "Running low — top up or upgrade"}
+								</p>
+								<p
+									className={cn(
+										"mt-0.5 text-xs",
+										isFreePlan
+											? "text-primary/70"
+											: "text-amber-700 dark:text-amber-300",
+									)}
+								>
+									{isFreePlan
+										? "Starter plan: 100 credits/month for $4.99. Unused credits roll over."
+										: "Keep your workflows running without interruption."}
+								</p>
+								<Button
+									asChild
+									size="sm"
+									className={cn(
+										"mt-3 w-full",
+										!isFreePlan &&
+											"bg-amber-600 hover:bg-amber-700 text-white border-0",
+									)}
+									variant={isFreePlan ? "primary" : "outline"}
+								>
+									<Link href={billingPath}>
+										{isFreePlan
+											? "Upgrade to Starter"
+											: "Add credits / upgrade"}
+										<ChevronRightIcon className="ml-1.5 size-3.5" />
+									</Link>
+								</Button>
+							</div>
+						</div>
+					</div>
+				)}
 
 				<Button variant="outline" className="w-full" asChild>
 					<Link href={usageHistoryPath}>
