@@ -2,6 +2,7 @@ import { config } from "@repo/config";
 import { SessionProvider } from "@saas/auth/components/SessionProvider";
 import { sessionQueryKey } from "@saas/auth/lib/api";
 import { getOrganizationList, getSession } from "@saas/auth/lib/server";
+import { ZeroCreditsModal } from "@saas/credits/components/ZeroCreditsModal";
 import { ActiveOrganizationProvider } from "@saas/organizations/components/ActiveOrganizationProvider";
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
 import { CommandPaletteProvider } from "@saas/shared/components/CommandPaletteProvider";
@@ -56,6 +57,7 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 							<CommandPaletteProvider>
 								<CommandPaletteShortcut />
 								<MilestoneNotifier />
+								<ZeroCreditsModal />
 								<KeyboardNavigationShortcuts />
 								<KeyboardShortcutsHelp />
 								<PreviewStatusBanner />
