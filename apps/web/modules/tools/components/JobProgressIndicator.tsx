@@ -23,6 +23,7 @@ import Link from "next/link";
 import React from "react";
 import { useCancelJob } from "../hooks/use-job-polling";
 import { useJobUpdates } from "../hooks/use-job-updates";
+import { PostJobShareNudge } from "./PostJobShareNudge";
 import { PostJobUpgradeNudge } from "./PostJobUpgradeNudge";
 
 type JobStatus =
@@ -74,6 +75,7 @@ const STATUS_CONFIG: Record<JobStatus, StatusConfig> = {
 
 interface JobProgressIndicatorProps {
 	jobId: string;
+	toolSlug?: string;
 	title?: string;
 	description?: string;
 	onComplete?: (output: Record<string, unknown>) => void;
@@ -91,6 +93,7 @@ function isInsufficientCreditsError(errorMsg: string | null | undefined) {
 
 export function JobProgressIndicator({
 	jobId,
+	toolSlug,
 	title = "Processing",
 	description,
 	onComplete,
@@ -236,6 +239,9 @@ export function JobProgressIndicator({
 						))}
 
 					{status === "COMPLETED" && <PostJobUpgradeNudge />}
+					{status === "COMPLETED" && (
+						<PostJobShareNudge toolSlug={toolSlug} />
+					)}
 
 					{showCancel && status === "PENDING" && (
 						<div className="flex justify-end">
