@@ -23,6 +23,7 @@ import Link from "next/link";
 import React from "react";
 import { useCancelJob } from "../hooks/use-job-polling";
 import { useJobUpdates } from "../hooks/use-job-updates";
+import { PostJobUpgradeNudge } from "./PostJobUpgradeNudge";
 
 type JobStatus =
 	| "PENDING"
@@ -233,6 +234,8 @@ export function JobProgressIndicator({
 								</p>
 							</div>
 						))}
+
+					{status === "COMPLETED" && <PostJobUpgradeNudge />}
 
 					{showCancel && status === "PENDING" && (
 						<div className="flex justify-end">
