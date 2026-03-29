@@ -1,4 +1,5 @@
-import { StarIcon } from "lucide-react";
+import { ArrowRightIcon, StarIcon } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 interface Testimonial {
@@ -11,6 +12,17 @@ interface Testimonial {
 	avatar: string;
 }
 
+interface Testimonial {
+	id: string;
+	name: string;
+	role: string;
+	company: string;
+	content: string;
+	rating: number;
+	avatar: string;
+	highlight: string;
+}
+
 const testimonials: Testimonial[] = [
 	{
 		id: "1",
@@ -21,6 +33,7 @@ const testimonials: Testimonial[] = [
 			"The meeting summarizer has transformed how we handle client calls. What used to take 2 hours of manual notes now takes 5 minutes. Our team is more productive and nothing falls through the cracks.",
 		rating: 5,
 		avatar: "SC",
+		highlight: "Saved 2+ hours per meeting",
 	},
 	{
 		id: "2",
@@ -31,6 +44,7 @@ const testimonials: Testimonial[] = [
 			"Invoice processing used to be my biggest time sink every month. Now I just upload the PDFs and the AI extracts everything accurately. I've reclaimed nearly 10 hours per month.",
 		rating: 5,
 		avatar: "MR",
+		highlight: "10 hours saved per month",
 	},
 	{
 		id: "3",
@@ -41,6 +55,7 @@ const testimonials: Testimonial[] = [
 			"The feedback analyzer lets us process hundreds of support tickets and reviews in minutes. We spotted a recurring pain point we'd missed for months — and fixed it. Response rates jumped 23%.",
 		rating: 5,
 		avatar: "PN",
+		highlight: "23% improvement in response rates",
 	},
 	{
 		id: "4",
@@ -51,6 +66,7 @@ const testimonials: Testimonial[] = [
 			"Speaker separation is incredibly accurate. I run raw interview recordings through it and get clean, labeled transcripts in minutes. My editing workflow has never been smoother.",
 		rating: 5,
 		avatar: "JW",
+		highlight: "Clean transcripts in minutes",
 	},
 	{
 		id: "5",
@@ -61,6 +77,7 @@ const testimonials: Testimonial[] = [
 			"I'm not a tech person, but this platform is genuinely easy to use. The expense categorizer saves me a weekend every quarter and I actually understand my spending now.",
 		rating: 5,
 		avatar: "AT",
+		highlight: "A full weekend saved every quarter",
 	},
 	{
 		id: "6",
@@ -71,6 +88,7 @@ const testimonials: Testimonial[] = [
 			"Contract analysis used to require senior attorney time just for initial review. Now I run contracts through the AI first to flag key clauses. It's become an essential part of our intake process.",
 		rating: 5,
 		avatar: "DK",
+		highlight: "Senior review time eliminated",
 	},
 ];
 
@@ -94,7 +112,12 @@ function StarRating({ rating }: { rating: number }) {
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 	return (
 		<div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-			<StarRating rating={testimonial.rating} />
+			<div className="flex items-start justify-between gap-2">
+				<StarRating rating={testimonial.rating} />
+				<span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+					{testimonial.highlight}
+				</span>
+			</div>
 			<blockquote className="mt-4 flex-1 text-foreground/80 text-sm leading-relaxed">
 				"{testimonial.content}"
 			</blockquote>
@@ -139,13 +162,23 @@ export function Testimonials() {
 					))}
 				</div>
 
-				<div className="mt-12 text-center">
+				<div className="mt-12 flex flex-col items-center gap-4 text-center">
 					<p className="text-foreground/50 text-sm">
 						Trusted by{" "}
 						<span className="font-semibold text-foreground/80">
 							500+
 						</span>{" "}
 						small businesses and freelancers
+					</p>
+					<Link
+						href="/auth/sign-up"
+						className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm transition-opacity hover:opacity-90"
+					>
+						Join them — it's free
+						<ArrowRightIcon className="size-4" />
+					</Link>
+					<p className="text-foreground/40 text-xs">
+						No credit card required · 100 free credits to start
 					</p>
 				</div>
 			</div>
