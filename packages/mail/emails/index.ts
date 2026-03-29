@@ -5,6 +5,7 @@ import { NewsletterSignup } from "../emails/NewsletterSignup";
 import { NewUser } from "../emails/NewUser";
 import { NotificationEmail } from "../emails/NotificationEmail";
 import { OrganizationInvitation } from "../emails/OrganizationInvitation";
+import { WelcomeEmail } from "../emails/WelcomeEmail";
 
 export const mailTemplates = {
 	magicLink: MagicLink,
@@ -14,4 +15,5 @@ export const mailTemplates = {
 	notificationEmail: NotificationEmail,
 	organizationInvitation: OrganizationInvitation,
 	emailVerification: EmailVerification,
+	welcomeEmail: WelcomeEmail,
 } as const;

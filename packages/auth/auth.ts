@@ -92,6 +92,28 @@ export const auth = betterAuth({
 				},
 			},
 		},
+		user: {
+			create: {
+				after: async (user) => {
+					// Send welcome email to new users (non-blocking — don't throw on failure)
+					try {
+						await sendEmail({
+							to: user.email,
+							templateId: "welcomeEmail",
+							context: {
+								name: user.name ?? "there",
+								appUrl,
+							},
+						});
+					} catch (err) {
+						logger.error("Failed to send welcome email", {
+							err,
+							userId: user.id,
+						});
+					}
+				},
+			},
+		},
 	},
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
