@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { CreditRunwayBanner } from "@saas/credits/components/CreditRunwayBanner";
+import { FreeCreditsProgressBanner } from "@saas/credits/components/FreeCreditsProgressBanner";
 import { JobCompletionNotifier } from "@saas/jobs/components/JobCompletionNotifier";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { cn } from "@ui/lib";
@@ -97,6 +98,7 @@ export function AppWrapper({ children }: PropsWithChildren) {
 			)}
 
 			<JobCompletionNotifier />
+			<FreeCreditsProgressBanner />
 			<CreditRunwayBanner />
 			<NavBar />
 			<div
