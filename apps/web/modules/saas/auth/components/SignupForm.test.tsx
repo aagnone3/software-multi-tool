@@ -76,10 +76,12 @@ describe("SignupForm", () => {
 	it("renders the signup form", () => {
 		render(<SignupForm />);
 		expect(
-			screen.getByRole("heading", { name: /create your account/i }),
+			screen.getByRole("heading", {
+				name: /start saving hours every week/i,
+			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: /create account/i }),
+			screen.getByRole("button", { name: /create free account/i }),
 		).toBeInTheDocument();
 	});
 
@@ -113,7 +115,7 @@ describe("SignupForm", () => {
 			"password123",
 		);
 		await user.click(
-			screen.getByRole("button", { name: /create account/i }),
+			screen.getByRole("button", { name: /create free account/i }),
 		);
 
 		await waitFor(() => {
@@ -141,7 +143,7 @@ describe("SignupForm", () => {
 			"password123",
 		);
 		await user.click(
-			screen.getByRole("button", { name: /create account/i }),
+			screen.getByRole("button", { name: /create free account/i }),
 		);
 
 		await waitFor(() => {
@@ -167,7 +169,7 @@ describe("SignupForm", () => {
 			"password123",
 		);
 		await user.click(
-			screen.getByRole("button", { name: /create account/i }),
+			screen.getByRole("button", { name: /create free account/i }),
 		);
 
 		await waitFor(() => {
