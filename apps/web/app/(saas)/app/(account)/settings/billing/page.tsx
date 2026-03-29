@@ -3,6 +3,7 @@ import { getSession } from "@saas/auth/lib/server";
 import { CreditAlertSettings } from "@saas/credits/components/CreditAlertSettings";
 import { CreditBalanceSection } from "@saas/credits/components/CreditBalanceSection";
 import { ActivePlan } from "@saas/payments/components/ActivePlan";
+import { BillingTrustSection } from "@saas/payments/components/BillingTrustSection";
 import { ChangePlan } from "@saas/payments/components/ChangePlan";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { SettingsList } from "@saas/shared/components/SettingsList";
@@ -54,6 +55,7 @@ export default async function BillingSettingsPage() {
 			>
 				<CreditAlertSettings />
 			</SettingsItem>
+			<BillingTrustSection className="mt-2" />
 		</SettingsList>
 	);
 }
