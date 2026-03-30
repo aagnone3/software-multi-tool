@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -51,6 +52,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+import { ToolOutputExporter } from "./ToolOutputExporter";
 import {
 	type TranscriptFileData,
 	TranscriptFileUpload,
@@ -691,6 +693,21 @@ export function MeetingSummarizerTool() {
 										? "Copied!"
 										: "Copy Markdown"}
 								</Button>
+								<UpgradeGate
+									featureName="Output Export"
+									description="Download your meeting summary as JSON or TXT."
+								>
+									<ToolOutputExporter
+										data={result}
+										label={
+											result.summary.title ||
+											"meeting-summary"
+										}
+										plainText={
+											result.exportFormats?.markdown
+										}
+									/>
+								</UpgradeGate>
 							</div>
 						</div>
 						<CardContent className="p-6">
