@@ -88,7 +88,9 @@ const TAG_TO_TOOL: Record<string, RelatedTool> = {
 function getToolFromTags(tags: string[]): RelatedTool | null {
 	for (const tag of tags) {
 		const tool = TAG_TO_TOOL[tag.toLowerCase()];
-		if (tool) return tool;
+		if (tool) {
+			return tool;
+		}
 	}
 	return null;
 }
@@ -99,7 +101,9 @@ type Props = {
 
 export function RelatedToolCta({ tags = [] }: Props) {
 	const tool = getToolFromTags(tags);
-	if (!tool) return null;
+	if (!tool) {
+		return null;
+	}
 
 	return (
 		<div className="my-10 rounded-xl border border-primary/20 bg-primary/5 p-6">
