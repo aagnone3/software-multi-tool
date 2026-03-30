@@ -12,3 +12,4 @@ export {
 } from "./JobProgressIndicator";
 export { MeetingSummarizerTool } from "./MeetingSummarizerTool";
 export { SpeakerSeparationTool } from "./SpeakerSeparationTool";
+export { ToolOutputExporter } from "./ToolOutputExporter";
