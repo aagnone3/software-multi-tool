@@ -27,8 +27,9 @@ import {
 /**
  * Get or create a credit balance for an organization.
  *
- * If no balance exists, creates one with default values (no credits).
- * Use grantSubscriptionCredits to allocate credits after creation.
+ * If no balance exists, creates one with the free plan's included credits
+ * (currently 10). This ensures new users get their promised free credits
+ * immediately on first access without requiring a separate grant step.
  */
 export async function getOrCreateCreditBalance(
 	organizationId: string,
@@ -39,15 +40,18 @@ export async function getOrCreateCreditBalance(
 		return existing;
 	}
 
-	// Create with minimal default values
-	// Credits should be granted via grantSubscriptionCredits
+	// New organizations get the free plan's included credits on first creation.
+	// This guarantees the "10 free credits, no card required" promise is kept.
+	const freePlanCredits = getPlanCredits("free");
+	const initialCredits = freePlanCredits?.included ?? 0;
+
 	const now = new Date();
 	const periodEnd = new Date(now);
 	periodEnd.setMonth(periodEnd.getMonth() + 1);
 
 	return executeAtomicGrant({
 		organizationId,
-		included: 0,
+		included: initialCredits,
 		periodStart: now,
 		periodEnd,
 	});

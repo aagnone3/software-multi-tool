@@ -65,12 +65,14 @@ describe("getOrCreateCreditBalance", () => {
 		expect(mockExecuteAtomicGrant).not.toHaveBeenCalled();
 	});
 
-	it("creates new balance when none exists", async () => {
+	it("creates new balance with free plan credits when none exists", async () => {
 		mockFindCreditBalanceByOrgId.mockResolvedValue(null);
+		mockGetPlanCredits.mockReturnValue({ included: 10 });
 		mockExecuteAtomicGrant.mockResolvedValue(mockBalance);
 		const result = await getOrCreateCreditBalance("org-1");
+		expect(mockGetPlanCredits).toHaveBeenCalledWith("free");
 		expect(mockExecuteAtomicGrant).toHaveBeenCalledWith(
-			expect.objectContaining({ organizationId: "org-1", included: 0 }),
+			expect.objectContaining({ organizationId: "org-1", included: 10 }),
 		);
 		expect(result).toBe(mockBalance);
 	});

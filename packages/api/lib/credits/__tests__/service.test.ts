@@ -29,11 +29,11 @@ vi.mock("../queries", () => ({
 }));
 
 // Mock the config module
-vi.mock("config", () => ({
+vi.mock("@repo/config", () => ({
 	getPlanCredits: vi.fn(),
 }));
 
-import { getPlanCredits } from "config";
+import { getPlanCredits } from "@repo/config";
 import * as queries from "../queries";
 
 const mockFindCreditBalanceByOrgId =
@@ -81,7 +81,34 @@ describe("Credit Service", () => {
 			expect(mockExecuteAtomicGrant).not.toHaveBeenCalled();
 		});
 
-		it("should create new balance if not found", async () => {
+		it("should create new balance with free plan credits if not found", async () => {
+			const newBalance = {
+				id: "balance-1",
+				organizationId: "org-1",
+				included: 10,
+				used: 0,
+				overage: 0,
+				purchasedCredits: 0,
+				periodStart: expect.any(Date),
+				periodEnd: expect.any(Date),
+			};
+			mockFindCreditBalanceByOrgId.mockResolvedValue(null);
+			mockGetPlanCredits.mockReturnValue({ included: 10 });
+			mockExecuteAtomicGrant.mockResolvedValue(newBalance);
+
+			const result = await getOrCreateCreditBalance("org-1");
+
+			expect(result).toEqual(newBalance);
+			expect(mockGetPlanCredits).toHaveBeenCalledWith("free");
+			expect(mockExecuteAtomicGrant).toHaveBeenCalledWith({
+				organizationId: "org-1",
+				included: 10,
+				periodStart: expect.any(Date),
+				periodEnd: expect.any(Date),
+			});
+		});
+
+		it("should create new balance with 0 credits if free plan config is missing", async () => {
 			const newBalance = {
 				id: "balance-1",
 				organizationId: "org-1",
@@ -93,6 +120,7 @@ describe("Credit Service", () => {
 				periodEnd: expect.any(Date),
 			};
 			mockFindCreditBalanceByOrgId.mockResolvedValue(null);
+			mockGetPlanCredits.mockReturnValue(undefined);
 			mockExecuteAtomicGrant.mockResolvedValue(newBalance);
 
 			const result = await getOrCreateCreditBalance("org-1");
