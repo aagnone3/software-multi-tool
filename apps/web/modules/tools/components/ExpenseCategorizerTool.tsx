@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -1290,15 +1291,20 @@ export function ExpenseCategorizerTool() {
 										</p>
 									</div>
 								</div>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleExportCSV}
-									className="rounded-lg"
+								<UpgradeGate
+									featureName="CSV Export"
+									description="Download your categorized expenses as a CSV file."
 								>
-									<DownloadIcon className="mr-2 size-4" />
-									Export CSV
-								</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleExportCSV}
+										className="rounded-lg"
+									>
+										<DownloadIcon className="mr-2 size-4" />
+										Export CSV
+									</Button>
+								</UpgradeGate>
 							</div>
 						</div>
 						<CardContent className="p-6">
