@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -51,6 +52,7 @@ import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { type DocumentFileData, DocumentUpload } from "./DocumentUpload";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+import { ToolOutputExporter } from "./ToolOutputExporter";
 
 const fileDataSchema = z.object({
 	content: z.string().min(1),
@@ -793,7 +795,7 @@ export function ContractAnalyzerTool() {
 					)}
 
 					{/* Action Button */}
-					<div className="flex justify-center pt-2">
+					<div className="flex flex-wrap items-center justify-center gap-3 pt-2">
 						<Button
 							onClick={handleNewContract}
 							variant="outline"
@@ -802,6 +804,15 @@ export function ContractAnalyzerTool() {
 							<RefreshCwIcon className="mr-2 size-4" />
 							Analyze Another Contract
 						</Button>
+						<UpgradeGate
+							featureName="Output Export"
+							description="Download your contract analysis as JSON or TXT."
+						>
+							<ToolOutputExporter
+								data={result}
+								label="contract-analysis"
+							/>
+						</UpgradeGate>
 					</div>
 				</div>
 			)}
