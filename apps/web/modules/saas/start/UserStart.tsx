@@ -3,6 +3,7 @@
 import { config } from "@repo/config";
 import { CreditBurnRateWidget } from "@saas/credits/components/CreditBurnRateWidget";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { ReferralWidget } from "@saas/referrals/components/ReferralWidget";
 import React from "react";
 import { JobSearchWidget } from "../jobs/components/JobSearchWidget";
@@ -83,8 +84,13 @@ export default function UserStart() {
 				<RecentActivityFeed className="lg:col-span-2 xl:col-span-1" />
 			</div>
 
-			{/* Activity heatmap — full-width */}
-			<WeeklyActivityHeatmap />
+			{/* Activity heatmap — full-width; gated for pro users */}
+			<UpgradeGate
+				featureName="Activity Heatmap"
+				description="See your daily usage patterns over time. Available on Pro and above."
+			>
+				<WeeklyActivityHeatmap />
+			</UpgradeGate>
 
 			{/* Credits breakdown by tool */}
 			<CreditsByToolChart />
@@ -120,9 +126,21 @@ export default function UserStart() {
 
 				{/* Tool Benchmark — per-tool success rate and avg duration */}
 
-				{/* Credit Forecast — projects future credit usage */}
-				<CreditForecastWidget />
-				<ToolBenchmarkWidget />
+				{/* Credit Forecast — projects future credit usage; gated for pro */}
+				<UpgradeGate
+					featureName="Credit Forecast"
+					description="Project your future credit usage based on recent activity. Pro feature."
+				>
+					<CreditForecastWidget />
+				</UpgradeGate>
+
+				{/* Tool Benchmark — per-tool success rate; gated for pro */}
+				<UpgradeGate
+					featureName="Tool Benchmark"
+					description="Compare success rates and processing times across all your tools. Pro feature."
+				>
+					<ToolBenchmarkWidget />
+				</UpgradeGate>
 
 				{/* Referral — earn free credits by inviting friends */}
 				<ReferralWidget />

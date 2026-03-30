@@ -108,6 +108,12 @@ vi.mock("./components/ProTrialOfferCard", () => ({
 	ProTrialOfferCard: () => <div data-testid="pro-trial-offer-card" />,
 }));
 
+vi.mock("@saas/payments/components/UpgradeGate", () => ({
+	UpgradeGate: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+}));
+
 describe("UserStart", () => {
 	it("renders all dashboard sections", () => {
 		render(<UserStart />);
