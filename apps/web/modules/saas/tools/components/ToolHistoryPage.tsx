@@ -1,5 +1,7 @@
 "use client";
 
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { EmptyStateUpgradeNudge } from "@saas/shared/components/EmptyStateUpgradeNudge";
 import { useDebounce } from "@shared/hooks/use-debounce";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -75,6 +77,7 @@ interface ToolHistoryPageProps {
 }
 
 export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
+	const { activeOrganization } = useActiveOrganization();
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState<JobStatus | "ALL">("ALL");
 	const [fromDate, setFromDate] = useState("");
@@ -305,10 +308,17 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 							))}
 						</div>
 					) : filtered.length === 0 ? (
-						<div className="py-12 text-center text-muted-foreground">
+						<div className="flex flex-col items-center py-12 text-center text-muted-foreground">
 							{hasFilters
 								? "No jobs match your filters."
 								: "No runs yet for this tool."}
+							{!hasFilters && (
+								<EmptyStateUpgradeNudge
+									organizationId={activeOrganization?.id}
+									context="tool"
+									className="max-w-lg mt-4"
+								/>
+							)}
 						</div>
 					) : (
 						<div className="overflow-x-auto">

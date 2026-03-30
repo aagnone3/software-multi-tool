@@ -1,6 +1,8 @@
 "use client";
 
 import { config } from "@repo/config";
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { EmptyStateUpgradeNudge } from "@saas/shared/components/EmptyStateUpgradeNudge";
 import { useDebounce } from "@shared/hooks/use-debounce";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -215,7 +217,13 @@ function JobRow({
 	);
 }
 
-function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+function EmptyState({
+	hasFilters,
+	organizationId,
+}: {
+	hasFilters: boolean;
+	organizationId?: string;
+}) {
 	if (hasFilters) {
 		return (
 			<div className="flex flex-col items-center py-12 text-center">
@@ -245,6 +253,11 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 			<Button className="mt-4" asChild>
 				<Link href="/app/tools">Browse Tools</Link>
 			</Button>
+			<EmptyStateUpgradeNudge
+				organizationId={organizationId}
+				context="jobs"
+				className="max-w-lg mt-2"
+			/>
 		</div>
 	);
 }
@@ -252,6 +265,7 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
 const PAGE_SIZE = 20;
 
 export function JobsHistoryPage() {
+	const { activeOrganization } = useActiveOrganization();
 	const [pageSize, setPageSize] = useState(PAGE_SIZE);
 	const { jobs, isLoading, refetch, hasMore } = useJobsListPaginated({
 		limit: pageSize,
@@ -605,7 +619,10 @@ export function JobsHistoryPage() {
 							))}
 						</div>
 					) : filteredJobs.length === 0 ? (
-						<EmptyState hasFilters={hasFilters} />
+						<EmptyState
+							hasFilters={hasFilters}
+							organizationId={activeOrganization?.id}
+						/>
 					) : (
 						<div>
 							{filteredJobs.map((job) => (
