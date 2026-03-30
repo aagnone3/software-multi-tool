@@ -45,6 +45,9 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: { jobs: { list: { key: () => ["jobs", "list"] } } },
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("@saas/payments/hooks/purchases", () => ({
+	usePurchases: vi.fn(() => ({ activePlan: { id: "free", name: "Free" } })),
+}));
 vi.mock("next/link", () => ({
 	default: ({
 		children,

@@ -30,7 +30,18 @@ vi.mock("@repo/config", () => ({
 				},
 			],
 		},
+		payments: {
+			plans: {},
+		},
 	},
+}));
+
+vi.mock("@saas/payments/hooks/purchases", () => ({
+	usePurchases: vi.fn(() => ({ activePlan: { id: "free", name: "Free" } })),
+}));
+
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
 }));
 
 // Mock use-job-polling
