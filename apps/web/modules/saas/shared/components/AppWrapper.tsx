@@ -4,6 +4,7 @@ import { config } from "@repo/config";
 import { CreditRunwayBanner } from "@saas/credits/components/CreditRunwayBanner";
 import { FreeCreditsProgressBanner } from "@saas/credits/components/FreeCreditsProgressBanner";
 import { JobCompletionNotifier } from "@saas/jobs/components/JobCompletionNotifier";
+import { ExitIntentUpgradeModal } from "@saas/shared/components/ExitIntentUpgradeModal";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { cn } from "@ui/lib";
 import type { PropsWithChildren } from "react";
@@ -97,6 +98,7 @@ export function AppWrapper({ children }: PropsWithChildren) {
 				</div>
 			)}
 
+			<ExitIntentUpgradeModal />
 			<JobCompletionNotifier />
 			<FreeCreditsProgressBanner />
 			<CreditRunwayBanner />
