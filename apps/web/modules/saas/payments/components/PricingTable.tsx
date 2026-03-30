@@ -69,7 +69,7 @@ export function PricingTable({
 						price.type === "one-time" ? "one-time" : "subscription",
 					productId: price.productId,
 					organizationId,
-					redirectUrl: window.location.href,
+					redirectUrl: `${window.location.origin}/app/welcome`,
 				});
 
 			window.location.href = checkoutLink;
@@ -100,7 +100,9 @@ export function PricingTable({
 	const getAnnualSavingsPct = (planId: string): number | null => {
 		const plan = plans[planId as keyof typeof plans];
 		const prices = plan?.prices;
-		if (!prices) return null;
+		if (!prices) {
+			return null;
+		}
 		const monthly = prices.find(
 			(p) =>
 				p.type === "recurring" && p.interval === "month" && !p.hidden,
@@ -108,7 +110,9 @@ export function PricingTable({
 		const yearly = prices.find(
 			(p) => p.type === "recurring" && p.interval === "year" && !p.hidden,
 		);
-		if (!monthly || !yearly || monthly.amount === 0) return null;
+		if (!monthly || !yearly || monthly.amount === 0) {
+			return null;
+		}
 		const annualizedMonthly = monthly.amount * 12;
 		const savings = Math.round(
 			((annualizedMonthly - yearly.amount) / annualizedMonthly) * 100,
@@ -299,7 +303,9 @@ export function PricingTable({
 											(() => {
 												const savingsPct =
 													getAnnualSavingsPct(planId);
-												if (!savingsPct) return null;
+												if (!savingsPct) {
+													return null;
+												}
 												const monthlyPrice = plans[
 													planId as keyof typeof plans
 												]?.prices?.find(
@@ -310,7 +316,9 @@ export function PricingTable({
 															"month" &&
 														!p.hidden,
 												);
-												if (!monthlyPrice) return null;
+												if (!monthlyPrice) {
+													return null;
+												}
 												const savedAmount =
 													monthlyPrice.amount * 12 -
 													(price?.amount ?? 0);

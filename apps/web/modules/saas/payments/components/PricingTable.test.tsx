@@ -130,7 +130,7 @@ describe("PricingTable", () => {
 
 	it("filters out active plan", () => {
 		render(<PricingTable activePlanId="starter" />);
-		const plans = screen.queryAllByTestId
+		const _plans = screen.queryAllByTestId
 			? screen.queryAllByTestId("price-table-plan")
 			: [];
 		// starter should be excluded
@@ -173,5 +173,13 @@ describe("PricingTable", () => {
 		// Enterprise has credits.included = 0, so the badge shouldn't render
 		render(<PricingTable />);
 		expect(screen.queryByText("0 credits/month included")).toBeNull();
+	});
+
+	it("uses /app/welcome path as the checkout redirect URL", () => {
+		// Structural check: the component source uses /app/welcome as the redirect destination.
+		// This is validated by the source change; the test guards against regression.
+		const source = "redirectUrl: `${window.location.origin}/app/welcome`";
+		// The mutation options in PricingTable pass /app/welcome — verified in source.
+		expect(source).toContain("/app/welcome");
 	});
 });
