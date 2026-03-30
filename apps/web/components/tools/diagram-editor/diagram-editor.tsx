@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { GitBranch } from "lucide-react";
 import React, { useRef, useState } from "react";
@@ -43,10 +44,15 @@ export function DiagramEditor() {
 							</p>
 						</div>
 					</div>
-					<DiagramExport
-						containerRef={previewRef}
-						disabled={!hasValidCode}
-					/>
+					<UpgradeGate
+						featureName="Diagram Export"
+						description="Export your diagrams as PNG or SVG files."
+					>
+						<DiagramExport
+							containerRef={previewRef}
+							disabled={!hasValidCode}
+						/>
+					</UpgradeGate>
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-6 lg:grid-cols-2">
