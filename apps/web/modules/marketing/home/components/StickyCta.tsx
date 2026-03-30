@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, XIcon } from "lucide-react";
 import Link from "next/link";
@@ -8,6 +9,7 @@ import React, { useEffect, useState } from "react";
 export function StickyCta() {
 	const [visible, setVisible] = useState(false);
 	const [dismissed, setDismissed] = useState(false);
+	const { isFreePlan, isLoading, balance } = useCreditsBalance();
 
 	useEffect(() => {
 		// Show after user scrolls past ~400px (past the hero fold)
@@ -26,7 +28,13 @@ export function StickyCta() {
 		setVisible(false);
 	};
 
-	if (!visible || dismissed) {
+	// Hide for authenticated Pro (paid) users only.
+	// - Anonymous visitors: balance=undefined, isFreePlan=false → show CTA
+	// - Free plan users: balance exists, isFreePlan=true → show CTA
+	// - Pro users: balance exists, isFreePlan=false, !isLoading → hide CTA
+	const isPaidUser = !isLoading && balance !== undefined && !isFreePlan;
+
+	if (!visible || dismissed || isPaidUser) {
 		return null;
 	}
 
