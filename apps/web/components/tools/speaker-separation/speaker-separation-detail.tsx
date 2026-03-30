@@ -4,6 +4,7 @@ import type {
 	SpeakerSegment,
 	SpeakerSeparationOutput,
 } from "@repo/api/modules/speaker-separation/types";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { ToolFeedback } from "@shared/components/ToolFeedback";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -542,24 +543,31 @@ function ExportActions({
 				)}
 				<span className="hidden sm:inline">Copy</span>
 			</Button>
-			<Button
-				variant="outline"
-				size="sm"
-				onClick={handleDownloadText}
-				className="gap-2"
+			<UpgradeGate
+				featureName="Transcript Download"
+				description="Download your transcript and speaker data as TXT or JSON files."
 			>
-				<FileTextIcon className="size-4" />
-				<span className="hidden sm:inline">TXT</span>
-			</Button>
-			<Button
-				variant="outline"
-				size="sm"
-				onClick={handleDownloadJSON}
-				className="gap-2"
-			>
-				<DownloadIcon className="size-4" />
-				<span className="hidden sm:inline">JSON</span>
-			</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleDownloadText}
+						className="gap-2"
+					>
+						<FileTextIcon className="size-4" />
+						<span className="hidden sm:inline">TXT</span>
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleDownloadJSON}
+						className="gap-2"
+					>
+						<DownloadIcon className="size-4" />
+						<span className="hidden sm:inline">JSON</span>
+					</Button>
+				</div>
+			</UpgradeGate>
 		</div>
 	);
 }

@@ -60,6 +60,16 @@ vi.mock("sonner", () => ({
 	toast: { success: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: vi.fn(() => ({ isFreePlan: false, isLoading: false })),
+}));
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
+}));
+vi.mock("next-themes", () => ({
+	useTheme: vi.fn(() => ({ resolvedTheme: "light" })),
+}));
+
 vi.mock("@shared/components/ToolFeedback", () => ({
 	ToolFeedback: () => <div>ToolFeedback</div>,
 }));

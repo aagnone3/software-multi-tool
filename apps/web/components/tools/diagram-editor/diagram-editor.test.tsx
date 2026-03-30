@@ -4,6 +4,25 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: vi.fn(() => ({ isFreePlan: false, isLoading: false })),
+}));
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
+}));
+vi.mock("next-themes", () => ({
+	useTheme: vi.fn(() => ({ resolvedTheme: "light" })),
+}));
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	}) => <a href={href}>{children}</a>,
+}));
+
 vi.mock("./diagram-editor-input", () => ({
 	DiagramEditorInput: ({
 		value,
