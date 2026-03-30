@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { X } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +11,13 @@ const DISMISS_DAYS = 7;
 export function ExitIntentModal() {
 	const [visible, setVisible] = useState(false);
 	const triggered = useRef(false);
+	const { isFreePlan, isLoading, balance } = useCreditsBalance();
+
+	// Hide for authenticated Pro (paid) users only.
+	// - Anonymous visitors: balance=undefined, isFreePlan=false → show modal
+	// - Free plan users: balance exists, isFreePlan=true → show modal
+	// - Pro users: balance exists, isFreePlan=false, !isLoading → hide modal
+	const isPaidUser = !isLoading && balance !== undefined && !isFreePlan;
 
 	const dismiss = useCallback(() => {
 		setVisible(false);
@@ -18,6 +26,8 @@ export function ExitIntentModal() {
 	}, []);
 
 	useEffect(() => {
+		if (isPaidUser) return;
+
 		const suppressed = localStorage.getItem(STORAGE_KEY);
 		if (suppressed && Date.now() < Number(suppressed)) return;
 
@@ -32,8 +42,9 @@ export function ExitIntentModal() {
 		document.addEventListener("mouseleave", handleMouseLeave);
 		return () =>
 			document.removeEventListener("mouseleave", handleMouseLeave);
-	}, []);
+	}, [isPaidUser]);
 
+	if (isPaidUser) return null;
 	if (!visible) return null;
 
 	return (
