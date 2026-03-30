@@ -1,0 +1,135 @@
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
+import { UpgradeGate } from "./UpgradeGate";
+
+// ---- module mocks ----
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: vi.fn(),
+}));
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
+}));
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	}) => <a href={href}>{children}</a>,
+}));
+
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
+
+const mockUseCreditsBalance = useCreditsBalance as ReturnType<typeof vi.fn>;
+
+describe("UpgradeGate", () => {
+	it("renders children directly when user is on a paid plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate featureName="Bulk Export">
+				<button type="button">Export All</button>
+			</UpgradeGate>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Export All" }),
+		).toBeVisible();
+		expect(screen.queryByText(/Upgrade to unlock/)).not.toBeInTheDocument();
+	});
+
+	it("shows blurred overlay with upgrade prompt when user is on free plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: true,
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate featureName="Bulk Export">
+				<button type="button">Export All</button>
+			</UpgradeGate>,
+		);
+
+		expect(
+			screen.getByText("Upgrade to unlock Bulk Export"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Upgrade to Pro/ }),
+		).toHaveAttribute("href", "/app/settings/billing");
+		expect(
+			screen.getByRole("link", { name: "View plans" }),
+		).toHaveAttribute("href", "/pricing");
+	});
+
+	it("shows description text when provided", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: true,
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate
+				featureName="Bulk Export"
+				description="Export all your jobs at once"
+			>
+				<div>content</div>
+			</UpgradeGate>,
+		);
+
+		expect(
+			screen.getByText("Export all your jobs at once"),
+		).toBeInTheDocument();
+	});
+
+	it("renders children when hasAccess=true regardless of plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: true,
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate featureName="Bulk Export" hasAccess={true}>
+				<button type="button">Export All</button>
+			</UpgradeGate>,
+		);
+
+		expect(screen.queryByText(/Upgrade to unlock/)).not.toBeInTheDocument();
+	});
+
+	it("shows lock when hasAccess=false regardless of plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate featureName="Advanced Analytics" hasAccess={false}>
+				<div>chart</div>
+			</UpgradeGate>,
+		);
+
+		expect(
+			screen.getByText("Upgrade to unlock Advanced Analytics"),
+		).toBeInTheDocument();
+	});
+
+	it("does not show overlay while loading", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isLoading: true,
+		});
+
+		render(
+			<UpgradeGate featureName="Bulk Export">
+				<button type="button">Export All</button>
+			</UpgradeGate>,
+		);
+
+		expect(screen.queryByText(/Upgrade to unlock/)).not.toBeInTheDocument();
+	});
+});
