@@ -22,6 +22,7 @@ import { MeetingSummarizerTool } from "@tools/components/MeetingSummarizerTool";
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
 import { ToolNotes } from "@tools/components/ToolNotes";
 import { notFound, redirect } from "next/navigation";
+import React from "react";
 import { DiagramEditor } from "../../../../../components/tools/diagram-editor";
 import { NewsAnalyzer } from "../../../../../components/tools/news-analyzer";
 
@@ -171,12 +172,30 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
 			<ToolSampleOutput toolSlug={toolSlug} className="mt-6" />
 			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
-			<ToolNotes toolSlug={toolSlug} className="mt-6" />
-			<ToolCollectionsPanel
-				currentToolSlug={toolSlug}
-				className="mt-6 rounded-lg border p-4"
-			/>
-			<ToolInputTemplates toolSlug={toolSlug} className="mt-6" />
+			<UpgradeGate
+				featureName="Tool Notes"
+				description="Save personal notes for each tool — tips, reminders, and common inputs. Available on Pro and above."
+				className="mt-6"
+			>
+				<ToolNotes toolSlug={toolSlug} className="mt-6" />
+			</UpgradeGate>
+			<UpgradeGate
+				featureName="Tool Collections"
+				description="Organise your favourite tools into named collections for quick access. Available on Pro and above."
+				className="mt-6"
+			>
+				<ToolCollectionsPanel
+					currentToolSlug={toolSlug}
+					className="mt-6 rounded-lg border p-4"
+				/>
+			</UpgradeGate>
+			<UpgradeGate
+				featureName="Input Templates"
+				description="Save and reuse common input templates across tool runs. Available on Pro and above."
+				className="mt-6"
+			>
+				<ToolInputTemplates toolSlug={toolSlug} className="mt-6" />
+			</UpgradeGate>
 			<RelatedToolsWidget currentToolSlug={toolSlug} className="mt-6" />
 		</div>
 	);
