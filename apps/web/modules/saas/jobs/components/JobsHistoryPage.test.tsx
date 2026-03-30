@@ -40,6 +40,30 @@ vi.mock("@saas/payments/hooks/purchases", () => ({
 	usePurchases: vi.fn(() => ({ activePlan: { id: "free", name: "Free" } })),
 }));
 
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: vi.fn(() => ({ isFreePlan: false, isLoading: false })),
+}));
+
+vi.mock("@saas/payments/components/UpgradeGate", () => ({
+	UpgradeGate: ({
+		children,
+		featureName,
+		description,
+	}: {
+		children: React.ReactNode;
+		featureName?: string;
+		description?: string;
+	}) => (
+		<div
+			data-testid="upgrade-gate"
+			data-feature={featureName}
+			data-desc={description}
+		>
+			{children}
+		</div>
+	),
+}));
+
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
 }));

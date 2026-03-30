@@ -1,6 +1,7 @@
 "use client";
 
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { EmptyStateUpgradeNudge } from "@saas/shared/components/EmptyStateUpgradeNudge";
 import { useDebounce } from "@shared/hooks/use-debounce";
 import { orpcClient } from "@shared/lib/orpc-client";
@@ -63,11 +64,15 @@ function formatDuration(
 	createdAt: Date | string,
 	completedAt?: Date | string | null,
 ): string {
-	if (!completedAt) return "—";
+	if (!completedAt) {
+		return "—";
+	}
 	const ms = new Date(completedAt).getTime() - new Date(createdAt).getTime();
 	const s = Math.floor(ms / 1000);
 	const m = Math.floor(s / 60);
-	if (m > 0) return `${m}m ${s % 60}s`;
+	if (m > 0) {
+		return `${m}m ${s % 60}s`;
+	}
 	return `${s}s`;
 }
 
@@ -88,22 +93,28 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 	const { jobs, isLoading } = useJobsListPaginated({ toolSlug, limit: 100 });
 
 	const filtered = useMemo(() => {
-		if (!jobs) return [];
+		if (!jobs) {
+			return [];
+		}
 		return jobs.filter((job) => {
-			if (statusFilter !== "ALL" && job.status !== statusFilter)
+			if (statusFilter !== "ALL" && job.status !== statusFilter) {
 				return false;
-			if (fromDate && new Date(job.createdAt) < new Date(fromDate))
+			}
+			if (fromDate && new Date(job.createdAt) < new Date(fromDate)) {
 				return false;
+			}
 			if (
 				toDate &&
 				new Date(job.createdAt) > new Date(`${toDate}T23:59:59`)
-			)
+			) {
 				return false;
+			}
 			if (
 				debouncedSearch &&
 				!job.id.toLowerCase().includes(debouncedSearch.toLowerCase())
-			)
+			) {
 				return false;
+			}
 			return true;
 		});
 	}, [jobs, statusFilter, fromDate, toDate, debouncedSearch]);
@@ -119,7 +130,9 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 	}, []);
 
 	const exportCsv = useCallback(() => {
-		if (!filtered.length) return;
+		if (!filtered.length) {
+			return;
+		}
 		const rows = [
 			["ID", "Status", "Created At", "Completed At", "Duration"],
 			...filtered.map((job) => [
@@ -152,7 +165,9 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 	});
 
 	const stats = useMemo(() => {
-		if (!jobs) return null;
+		if (!jobs) {
+			return null;
+		}
 		const total = jobs.length;
 		const completed = jobs.filter((j) => j.status === "COMPLETED").length;
 		const failed = jobs.filter((j) => j.status === "FAILED").length;
@@ -180,10 +195,19 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 						</Link>
 					</Button>
 					{filtered.length > 0 && (
-						<Button variant="outline" size="sm" onClick={exportCsv}>
-							<DownloadIcon className="mr-1 h-4 w-4" />
-							Export CSV
-						</Button>
+						<UpgradeGate
+							featureName="Tool History Export"
+							description="Export your tool run history to CSV."
+						>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={exportCsv}
+							>
+								<DownloadIcon className="mr-1 h-4 w-4" />
+								Export CSV
+							</Button>
+						</UpgradeGate>
 					)}
 				</div>
 			</div>
