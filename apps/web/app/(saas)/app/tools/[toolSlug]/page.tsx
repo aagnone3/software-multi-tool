@@ -1,5 +1,6 @@
 import { config } from "@repo/config";
 import { LowCreditsWarning } from "@saas/credits/components/LowCreditsWarning";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { RelatedToolsWidget } from "@saas/tools/components/RelatedToolsWidget";
 import { ToolCollectionsPanel } from "@saas/tools/components/ToolCollectionsPanel";
 import { ToolInputTemplates } from "@saas/tools/components/ToolInputTemplates";
@@ -151,11 +152,17 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			)}
 			<ToolViewTracker toolSlug={toolSlug} />
 			<ToolPageHeader tool={tool} />
-			<ToolScheduler
-				toolSlug={toolSlug}
-				toolName={tool.name}
+			<UpgradeGate
+				featureName="Tool Scheduler"
+				description="Schedule tool runs for later. Available on Pro and above."
 				className="mb-4"
-			/>
+			>
+				<ToolScheduler
+					toolSlug={toolSlug}
+					toolName={tool.name}
+					className="mb-4"
+				/>
+			</UpgradeGate>
 			<LowCreditsWarning className="mb-4" showActionButtons={true} />
 			<ToolTipsBanner toolSlug={toolSlug} className="mb-4" />
 			<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
