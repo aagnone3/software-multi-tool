@@ -5,6 +5,7 @@ import { RelatedPosts } from "@marketing/blog/components/RelatedPosts";
 import { RelatedToolCta } from "@marketing/blog/components/RelatedToolCta";
 import { SocialShareButtons } from "@marketing/blog/components/SocialShareButtons";
 import { getPostBySlug } from "@marketing/blog/utils/lib/posts";
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
@@ -187,6 +188,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 				</div>
 				<RelatedPosts currentSlug={slug} tags={tags ?? []} limit={3} />
 			</div>
+			<StickyCta />
 		</>
 	);
 }
