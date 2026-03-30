@@ -2,9 +2,16 @@ import { Footer } from "@saas/shared/components/Footer";
 import { ColorModeToggle } from "@shared/components/ColorModeToggle";
 import { Logo } from "@shared/components/Logo";
 import { cn } from "@ui/lib";
-import { CheckIcon, ClockIcon, ShieldCheckIcon, ZapIcon } from "lucide-react";
+import {
+	CheckIcon,
+	ClockIcon,
+	ShieldCheckIcon,
+	StarIcon,
+	ZapIcon,
+} from "lucide-react";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
+import React from "react";
 
 const benefits = [
 	{
@@ -30,6 +37,13 @@ const benefits = [
 			"Files are deleted after processing. We never train on your data.",
 	},
 ];
+
+const testimonial = {
+	quote: "I used to spend half my Friday summarizing meeting notes. Now it's done before I leave the call.",
+	author: "Sarah M.",
+	role: "Operations Lead, Series B startup",
+	rating: 5,
+};
 
 export function AuthWrapper({
 	children,
@@ -77,6 +91,38 @@ export function AuthWrapper({
 									</li>
 								))}
 							</ul>
+
+							{/* Testimonial */}
+							<blockquote
+								data-testid="auth-testimonial"
+								className="rounded-2xl border border-border bg-muted/50 p-4"
+							>
+								<div
+									role="img"
+									aria-label={`${testimonial.rating} out of 5 stars`}
+									className="mb-2 flex gap-0.5"
+								>
+									{Array.from({
+										length: testimonial.rating,
+									}).map((_, i) => (
+										<StarIcon
+											key={i}
+											className="size-3.5 fill-yellow-400 text-yellow-400"
+										/>
+									))}
+								</div>
+								<p className="mb-3 text-foreground/80 text-sm leading-relaxed">
+									&ldquo;{testimonial.quote}&rdquo;
+								</p>
+								<footer className="flex flex-col">
+									<span className="font-semibold text-sm">
+										{testimonial.author}
+									</span>
+									<span className="text-foreground/50 text-xs">
+										{testimonial.role}
+									</span>
+								</footer>
+							</blockquote>
 						</aside>
 
 						{/* Form card */}
