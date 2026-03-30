@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -49,6 +50,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
+import { ToolOutputExporter } from "./ToolOutputExporter";
 
 const formSchema = z.object({
 	feedback: z.string().min(1, "Feedback text is required"),
@@ -789,7 +791,7 @@ export function FeedbackAnalyzerTool() {
 					</Card>
 
 					{/* Action Button */}
-					<div className="flex justify-center pt-2">
+					<div className="flex flex-wrap items-center justify-center gap-3 pt-2">
 						<Button
 							onClick={handleNewAnalysis}
 							variant="outline"
@@ -798,6 +800,15 @@ export function FeedbackAnalyzerTool() {
 							<RefreshCwIcon className="mr-2 size-4" />
 							Analyze More Feedback
 						</Button>
+						<UpgradeGate
+							featureName="Output Export"
+							description="Download your feedback analysis as JSON or TXT."
+						>
+							<ToolOutputExporter
+								data={result}
+								label="feedback-analysis"
+							/>
+						</UpgradeGate>
 					</div>
 				</div>
 			)}
