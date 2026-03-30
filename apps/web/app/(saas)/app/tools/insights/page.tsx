@@ -1,3 +1,6 @@
+"use client";
+
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { PageHeader } from "@saas/shared/components/PageHeader";
 import { ToolInsightsDashboard } from "@saas/tools/components/ToolInsightsDashboard";
 import { Button } from "@ui/components/button";
@@ -19,7 +22,12 @@ export default function ToolInsightsPage() {
 					</Button>
 				}
 			/>
-			<ToolInsightsDashboard />
+			<UpgradeGate
+				featureName="Tool Insights"
+				description="Detailed per-tool stats, success rates, and credit consumption breakdowns are available on Pro and above."
+			>
+				<ToolInsightsDashboard />
+			</UpgradeGate>
 		</div>
 	);
 }
