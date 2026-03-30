@@ -48,6 +48,14 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@saas/payments/hooks/purchases", () => ({
 	usePurchases: vi.fn(() => ({ activePlan: { id: "free", name: "Free" } })),
 }));
+vi.mock("@saas/payments/components/UpgradeGate", () => ({
+	UpgradeGate: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+}));
+vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
+	useActiveOrganization: vi.fn(() => ({ activeOrganization: null })),
+}));
 vi.mock("next/link", () => ({
 	default: ({
 		children,

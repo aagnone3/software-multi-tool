@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { EmptyStateUpgradeNudge } from "@saas/shared/components/EmptyStateUpgradeNudge";
 import { useDebounce } from "@shared/hooks/use-debounce";
 import { orpcClient } from "@shared/lib/orpc-client";
@@ -320,7 +321,7 @@ export function JobsHistoryPage() {
 
 	const filteredJobs = useMemo(() => {
 		const fromTs = dateFrom ? new Date(dateFrom).getTime() : null;
-		const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
+		const toTs = dateTo ? new Date(`${dateTo}T23:59:59`).getTime() : null;
 		return typedJobs.filter((job) => {
 			if (statusFilter && job.status !== statusFilter) {
 				return false;
@@ -329,10 +330,14 @@ export function JobsHistoryPage() {
 				return false;
 			}
 			if (fromTs !== null) {
-				if (new Date(job.createdAt).getTime() < fromTs) return false;
+				if (new Date(job.createdAt).getTime() < fromTs) {
+					return false;
+				}
 			}
 			if (toTs !== null) {
-				if (new Date(job.createdAt).getTime() > toTs) return false;
+				if (new Date(job.createdAt).getTime() > toTs) {
+					return false;
+				}
 			}
 			if (debouncedSearch) {
 				const toolName = getToolName(job.toolSlug).toLowerCase();
@@ -347,7 +352,9 @@ export function JobsHistoryPage() {
 			}
 			if (tagFilter) {
 				const jobTags = getTagsForJob(job.id);
-				if (!jobTags.includes(tagFilter)) return false;
+				if (!jobTags.includes(tagFilter)) {
+					return false;
+				}
 			}
 			return true;
 		});
@@ -419,14 +426,19 @@ export function JobsHistoryPage() {
 				</div>
 				<div className="flex items-center gap-2">
 					{filteredJobs.length > 0 && (
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={exportToCsv}
+						<UpgradeGate
+							featureName="Job History Export"
+							description="Export your job history to CSV for offline analysis."
 						>
-							<DownloadIcon className="size-3.5 mr-1.5" />
-							Export CSV
-						</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={exportToCsv}
+							>
+								<DownloadIcon className="size-3.5 mr-1.5" />
+								Export CSV
+							</Button>
+						</UpgradeGate>
 					)}
 					<Button variant="outline" size="sm" asChild>
 						<Link href="/app/jobs/compare">
