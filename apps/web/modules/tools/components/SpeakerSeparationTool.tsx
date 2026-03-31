@@ -6,6 +6,7 @@ import type {
 	SpeakerSeparationOutput,
 } from "@repo/api/modules/speaker-separation/types";
 import { formatDuration } from "@repo/utils";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Button } from "@ui/components/button";
 import { Card, CardContent } from "@ui/components/card";
 import {
@@ -436,14 +437,29 @@ function ExportOptions({
 					</>
 				)}
 			</Button>
-			<Button variant="outline" size="sm" onClick={handleDownloadText}>
-				<FileTextIcon className="mr-2 size-4" />
-				Download TXT
-			</Button>
-			<Button variant="outline" size="sm" onClick={handleDownloadJSON}>
-				<DownloadIcon className="mr-2 size-4" />
-				Download JSON
-			</Button>
+			<UpgradeGate
+				featureName="Transcript Download"
+				description="Download your transcript and speaker data as TXT or JSON files."
+			>
+				<div className="flex flex-wrap gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleDownloadText}
+					>
+						<FileTextIcon className="mr-2 size-4" />
+						Download TXT
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleDownloadJSON}
+					>
+						<DownloadIcon className="mr-2 size-4" />
+						Download JSON
+					</Button>
+				</div>
+			</UpgradeGate>
 		</div>
 	);
 }
