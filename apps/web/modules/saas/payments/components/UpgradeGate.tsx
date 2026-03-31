@@ -42,7 +42,8 @@ export function UpgradeGate({
 	className,
 	hasAccess: hasAccessProp,
 }: UpgradeGateProps) {
-	const { isFreePlan, isLoading, balance } = useCreditsBalance();
+	const { isFreePlan, isStarterPlan, isLoading, balance } =
+		useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 	const { track } = useProductAnalytics();
 
@@ -50,7 +51,7 @@ export function UpgradeGate({
 		? `/app/${activeOrganization.slug}/settings/billing`
 		: "/app/settings/billing";
 
-	// Respect explicit override; fall back to plan check
+	// Respect explicit override; fall back to plan check (free users locked, Starter users pass by default)
 	const isLocked =
 		hasAccessProp !== undefined ? !hasAccessProp : !isLoading && isFreePlan;
 
@@ -86,11 +87,18 @@ export function UpgradeGate({
 					<LockIcon className="size-5 text-primary" />
 				</div>
 				<p className="font-semibold text-sm">
-					Upgrade to unlock {featureName}
+					{isStarterPlan
+						? `Upgrade to Pro to unlock ${featureName}`
+						: `Upgrade to unlock ${featureName}`}
 				</p>
 				{description && (
 					<p className="mt-1 text-muted-foreground text-xs max-w-xs">
 						{description}
+					</p>
+				)}
+				{isStarterPlan && (
+					<p className="mt-1 text-muted-foreground text-xs max-w-xs">
+						This feature is exclusive to the Pro plan.
 					</p>
 				)}
 				<div className="mt-4 flex gap-2">
@@ -101,7 +109,15 @@ export function UpgradeGate({
 						</Link>
 					</Button>
 					<Button asChild variant="outline" size="sm">
-						<Link href="/pricing">View plans</Link>
+						<Link
+							href={
+								isStarterPlan
+									? "/pricing#pricing-plan-pro"
+									: "/pricing"
+							}
+						>
+							{isStarterPlan ? "Compare plans" : "View plans"}
+						</Link>
 					</Button>
 				</div>
 			</div>

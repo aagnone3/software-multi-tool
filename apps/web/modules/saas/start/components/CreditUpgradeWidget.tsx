@@ -23,21 +23,37 @@ interface CreditUpgradeWidgetProps {
 const UPGRADE_THRESHOLD = 0.4; // Show when ≤40% credits remaining
 
 export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
-	const { balance, isLoading, isFreePlan, percentageUsed, totalCredits } =
-		useCreditsBalance();
+	const {
+		balance,
+		isLoading,
+		isFreePlan,
+		isStarterPlan,
+		percentageUsed,
+		totalCredits,
+	} = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 
-	if (isLoading || !balance) return null;
+	if (isLoading || !balance) {
+		return null;
+	}
 
 	const percentageRemaining = 100 - percentageUsed;
 	const remainingFraction =
 		totalCredits > 0 ? balance.totalAvailable / totalCredits : 1;
 
-	// Only show for free plan users or users with ≤40% credits remaining
-	if (!isFreePlan && remainingFraction > UPGRADE_THRESHOLD) return null;
+	// Only show for free/starter plan users or users with ≤40% credits remaining
+	if (
+		!isFreePlan &&
+		!isStarterPlan &&
+		remainingFraction > UPGRADE_THRESHOLD
+	) {
+		return null;
+	}
 
 	// Don't show if already on overage (CreditBalanceCard handles that)
-	if (balance.overage > 0) return null;
+	if (balance.overage > 0) {
+		return null;
+	}
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -52,11 +68,20 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 			? "bg-amber-500"
 			: "bg-blue-500";
 
-	const features = [
+	const freeFeatures = [
 		{ icon: ZapIcon, text: "500 credits/month included" },
 		{ icon: StarIcon, text: "Priority processing" },
 		{ icon: SparklesIcon, text: "Unlimited tool access" },
 	];
+
+	const starterFeatures = [
+		{ icon: ZapIcon, text: "More credits with rollover" },
+		{ icon: StarIcon, text: "Scheduled runs & bulk actions" },
+		{ icon: SparklesIcon, text: "Advanced templates" },
+	];
+
+	const features = isStarterPlan ? starterFeatures : freeFeatures;
+	const showFeatures = isFreePlan || isStarterPlan;
 
 	return (
 		<Card className={className}>
@@ -67,7 +92,7 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 						<CardTitle className="text-base">
 							{isUrgent
 								? "Running out of credits"
-								: isFreePlan
+								: isFreePlan || isStarterPlan
 									? "Upgrade your plan"
 									: "Low on credits"}
 						</CardTitle>
@@ -81,7 +106,9 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 				<CardDescription>
 					{isFreePlan
 						? "Unlock more with a Pro or Business plan"
-						: `${balance.totalAvailable} of ${totalCredits} credits remaining this period`}
+						: isStarterPlan
+							? "Upgrade to Pro for more credits and exclusive features"
+							: `${balance.totalAvailable} of ${totalCredits} credits remaining this period`}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -101,7 +128,7 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 					/>
 				</div>
 
-				{isFreePlan && (
+				{showFeatures && (
 					<ul className="space-y-1.5">
 						{features.map(({ icon: Icon, text }) => (
 							<li
@@ -119,12 +146,14 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 					<Button asChild size="sm" className="flex-1">
 						<Link href={billingPath}>
 							<ZapIcon className="size-3.5 mr-1.5" />
-							{isFreePlan ? "Upgrade to Pro" : "Get More Credits"}
+							{isFreePlan || isStarterPlan
+								? "Upgrade to Pro"
+								: "Get More Credits"}
 						</Link>
 					</Button>
-					{isFreePlan && (
+					{(isFreePlan || isStarterPlan) && (
 						<Button asChild size="sm" variant="outline">
-							<Link href="/pricing">
+							<Link href="/pricing#pricing-plan-pro">
 								Compare plans
 								<ArrowRightIcon className="size-3.5 ml-1.5" />
 							</Link>
