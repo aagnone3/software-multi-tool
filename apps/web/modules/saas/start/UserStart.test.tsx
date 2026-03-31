@@ -207,6 +207,20 @@ describe("UserStart", () => {
 		expect(screen.getByTestId("untried-tools-widget")).toBeInTheDocument();
 	});
 
+	it("wraps PinnedJobsWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-pinned-outputs");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("pinned-jobs-widget")).toBeInTheDocument();
+	});
+
+	it("wraps JobSearchWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-job-search");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("job-search-widget")).toBeInTheDocument();
+	});
+
 	it("hides organizations grid when organizations disabled", async () => {
 		const { config } = await import("@repo/config");
 		(config.organizations as any).enable = false;

@@ -165,11 +165,21 @@ export default function UserStart() {
 					<UntriedToolsWidget />
 				</UpgradeGate>
 
-				{/* Pinned Job Outputs */}
-				<PinnedJobsWidget />
+				{/* Pinned Job Outputs — gated for pro users */}
+				<UpgradeGate
+					featureName="Pinned Outputs"
+					description="Pin and revisit your most important job outputs. Available on Pro and above."
+				>
+					<PinnedJobsWidget />
+				</UpgradeGate>
 
-				{/* Job Search */}
-				<JobSearchWidget />
+				{/* Job Search — gated for pro users */}
+				<UpgradeGate
+					featureName="Job Search"
+					description="Search through your job history by tool, status, or job ID. Available on Pro and above."
+				>
+					<JobSearchWidget />
+				</UpgradeGate>
 
 				{/* Tool Benchmark — per-tool success rate and avg duration */}
 
