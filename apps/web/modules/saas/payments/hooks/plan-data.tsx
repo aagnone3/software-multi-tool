@@ -53,6 +53,11 @@ export function usePlanData() {
 				"Custom input templates",
 				"Bulk actions on job history",
 				"Usage data export",
+				"Usage trend & credit analytics dashboard",
+				"Recent activity feed & top tools insights",
+				"Streak tracker & daily goal widget",
+				"Favorite tools & recently viewed shortcuts",
+				"Pinned jobs & advanced job search",
 			],
 		},
 	};
