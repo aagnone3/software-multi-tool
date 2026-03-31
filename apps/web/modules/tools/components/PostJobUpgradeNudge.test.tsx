@@ -17,6 +17,7 @@ type CreditsBalanceMock = {
 	balance: { totalAvailable: number } | undefined;
 	isLoading: boolean;
 	isFreePlan: boolean;
+	isStarterPlan: boolean;
 	isLowCredits: boolean;
 };
 
@@ -58,6 +59,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 2 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -69,6 +71,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: undefined,
 			isLoading: true,
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -81,6 +84,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 100 },
 			isLoading: false,
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -93,6 +97,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 8 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -108,6 +113,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 2 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -120,6 +126,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 7 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -134,6 +141,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 5 },
 			isLoading: false,
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLowCredits: true,
 		});
 		render(<PostJobUpgradeNudge />);
@@ -149,6 +157,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 8 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		mockUseActiveOrganization.mockReturnValue({
@@ -165,6 +174,7 @@ describe("PostJobUpgradeNudge", () => {
 			balance: { totalAvailable: 8 },
 			isLoading: false,
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLowCredits: false,
 		});
 		mockUseActiveOrganization.mockReturnValue({
@@ -174,5 +184,64 @@ describe("PostJobUpgradeNudge", () => {
 		await advancePast600ms();
 		const upgradeLink = screen.getAllByRole("link")[0] as HTMLAnchorElement;
 		expect(upgradeLink.href).toContain("/app/settings/billing");
+	});
+
+	it("shows Starter upgrade prompt for starter-plan users after delay", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { totalAvailable: 50 },
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLowCredits: false,
+		});
+		render(<PostJobUpgradeNudge />);
+		await advancePast600ms();
+		expect(
+			screen.getByRole("complementary", {
+				name: /starter upgrade prompt/i,
+			}),
+		).toBeTruthy();
+		expect(screen.getByText(/you're on the starter plan/i)).toBeTruthy();
+	});
+
+	it("shows Starter→Pro value copy with Pro features", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { totalAvailable: 50 },
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLowCredits: false,
+		});
+		render(<PostJobUpgradeNudge />);
+		await advancePast600ms();
+		expect(screen.getByText(/scheduled runs, bulk actions/i)).toBeTruthy();
+	});
+
+	it("shows Compare plans CTA for Starter users", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { totalAvailable: 50 },
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLowCredits: false,
+		});
+		render(<PostJobUpgradeNudge />);
+		await advancePast600ms();
+		expect(
+			screen.getByRole("link", { name: /compare plans/i }),
+		).toBeTruthy();
+	});
+
+	it("hides nudge for Starter users with sufficient credits and not low", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: { totalAvailable: 200 },
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: false,
+			isLowCredits: false,
+		});
+		render(<PostJobUpgradeNudge />);
+		await advancePast600ms();
+		expect(screen.queryByRole("complementary")).toBeNull();
 	});
 });
