@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
 import React from "react";
@@ -24,7 +25,12 @@ export function NewsAnalyzerWithHistory() {
 			</TabsContent>
 
 			<TabsContent value="history">
-				<NewsAnalyzerHistory />
+				<UpgradeGate
+					featureName="Analysis History"
+					description="View and revisit all your past news analyses in one place."
+				>
+					<NewsAnalyzerHistory />
+				</UpgradeGate>
 			</TabsContent>
 		</Tabs>
 	);
