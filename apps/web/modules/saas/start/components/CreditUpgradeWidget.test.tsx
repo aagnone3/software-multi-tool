@@ -32,7 +32,12 @@ function makeBalance(overrides = {}) {
 	};
 }
 
-function setup(balanceOverrides = {}, isFreePlan = true, isLoading = false) {
+function setup(
+	balanceOverrides = {},
+	isFreePlan = true,
+	isLoading = false,
+	isStarterPlan = false,
+) {
 	const balance = isLoading ? undefined : makeBalance(balanceOverrides);
 	const totalCredits = balance
 		? balance.included + balance.purchasedCredits
@@ -53,7 +58,7 @@ function setup(balanceOverrides = {}, isFreePlan = true, isLoading = false) {
 		percentageUsed,
 		isLowCredits: false,
 		isFreePlan,
-		isStarterPlan: false,
+		isStarterPlan,
 		hasActiveOrganization: true,
 		refetch: vi.fn(),
 	} as ReturnType<typeof useCreditsBalance>);
@@ -167,5 +172,66 @@ describe("CreditUpgradeWidget", () => {
 		);
 		const { container } = render(<CreditUpgradeWidget />);
 		expect(container.firstChild).toBeNull();
+	});
+
+	it("renders for Starter plan users even with plenty of credits (prompt to upgrade to Pro)", () => {
+		setup(
+			{
+				included: 200,
+				used: 50,
+				totalAvailable: 150,
+				plan: { id: "starter", name: "Starter" },
+			},
+			false,
+			false,
+			true,
+		);
+		render(<CreditUpgradeWidget />);
+		expect(screen.getByText("Upgrade your plan")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Upgrade to Pro for more credits and exclusive features",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("shows Pro-exclusive features for Starter plan users", () => {
+		setup(
+			{
+				included: 200,
+				used: 50,
+				totalAvailable: 150,
+				plan: { id: "starter", name: "Starter" },
+			},
+			false,
+			false,
+			true,
+		);
+		render(<CreditUpgradeWidget />);
+		expect(
+			screen.getByText("Scheduled runs & bulk actions"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Advanced templates")).toBeInTheDocument();
+	});
+
+	it("shows Upgrade to Pro and Compare plans buttons for Starter users", () => {
+		setup(
+			{
+				included: 200,
+				used: 50,
+				totalAvailable: 150,
+				plan: { id: "starter", name: "Starter" },
+			},
+			false,
+			false,
+			true,
+		);
+		render(<CreditUpgradeWidget />);
+		expect(
+			screen.getByRole("link", { name: /upgrade to pro/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /compare plans/i }),
+		).toHaveAttribute("href", "/pricing#pricing-plan-pro");
 	});
 });

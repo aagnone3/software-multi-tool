@@ -31,6 +31,7 @@ describe("UpgradeGate", () => {
 	it("renders children directly when user is on a paid plan", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLoading: false,
 		});
 
@@ -49,6 +50,7 @@ describe("UpgradeGate", () => {
 	it("shows blurred overlay with upgrade prompt when user is on free plan", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 		});
 
@@ -72,6 +74,7 @@ describe("UpgradeGate", () => {
 	it("shows description text when provided", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 		});
 
@@ -92,6 +95,7 @@ describe("UpgradeGate", () => {
 	it("renders children when hasAccess=true regardless of plan", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 		});
 
@@ -107,6 +111,8 @@ describe("UpgradeGate", () => {
 	it("shows lock when hasAccess=false regardless of plan", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
+
 			isLoading: false,
 		});
 
@@ -121,9 +127,35 @@ describe("UpgradeGate", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows Starter-specific copy when Starter user is locked via hasAccess=false", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: true,
+
+			isLoading: false,
+		});
+
+		render(
+			<UpgradeGate featureName="Advanced Analytics" hasAccess={false}>
+				<div>chart</div>
+			</UpgradeGate>,
+		);
+
+		expect(
+			screen.getByText("Upgrade to Pro to unlock Advanced Analytics"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("This feature is exclusive to the Pro plan."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Compare plans" }),
+		).toHaveAttribute("href", "/pricing#pricing-plan-pro");
+	});
+
 	it("does not show overlay while loading", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLoading: true,
 		});
 
