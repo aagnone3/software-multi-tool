@@ -86,8 +86,14 @@ export default function UserStart() {
 					<UsageTrendChart className="lg:col-span-2 xl:col-span-2" />
 				</UpgradeGate>
 
-				{/* Recent Activity Feed */}
-				<RecentActivityFeed className="lg:col-span-2 xl:col-span-1" />
+				{/* Recent Activity Feed — gated for pro users */}
+				<UpgradeGate
+					featureName="Recent Activity"
+					description="See a live feed of your recent credit transactions and tool activity. Pro feature."
+					className="lg:col-span-2 xl:col-span-1"
+				>
+					<RecentActivityFeed className="lg:col-span-2 xl:col-span-1" />
+				</UpgradeGate>
 			</div>
 
 			{/* Activity heatmap — full-width; gated for pro users */}
@@ -114,8 +120,13 @@ export default function UserStart() {
 				{/* Daily Goal Widget */}
 				<DailyGoalWidget />
 
-				{/* Top Tools Widget */}
-				<TopToolsWidget />
+				{/* Top Tools Widget — gated for pro users */}
+				<UpgradeGate
+					featureName="Top Tools"
+					description="See which tools you use the most, ranked by run count. Pro feature."
+				>
+					<TopToolsWidget />
+				</UpgradeGate>
 
 				{/* Favorite Tools */}
 				<FavoriteToolsWidget />
