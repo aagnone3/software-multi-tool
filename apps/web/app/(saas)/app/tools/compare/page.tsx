@@ -1,4 +1,6 @@
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { ToolCompareView } from "@saas/tools/components/ToolCompareView";
+import React from "react";
 
 export default function ToolComparePage() {
 	return (
@@ -10,7 +12,12 @@ export default function ToolComparePage() {
 					for your needs.
 				</p>
 			</div>
-			<ToolCompareView />
+			<UpgradeGate
+				featureName="Tool Compare"
+				description="Side-by-side tool comparison is available on Pro and above."
+			>
+				<ToolCompareView />
+			</UpgradeGate>
 		</div>
 	);
 }

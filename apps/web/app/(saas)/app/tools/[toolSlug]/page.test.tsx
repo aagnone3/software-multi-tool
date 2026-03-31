@@ -71,13 +71,15 @@ vi.mock("@saas/tools/components/ToolPageHeader", () => ({
 	ToolPageHeader: () => null,
 }));
 vi.mock("@saas/tools/components/ToolPersonalStats", () => ({
-	ToolPersonalStats: () => null,
+	ToolPersonalStats: () => (
+		<div data-testid="tool-personal-stats">PersonalStats</div>
+	),
 }));
 vi.mock("@saas/tools/components/ToolRatingWidget", () => ({
 	ToolRatingWidget: () => null,
 }));
 vi.mock("@saas/tools/components/ToolRecentRuns", () => ({
-	ToolRecentRuns: () => null,
+	ToolRecentRuns: () => <div data-testid="tool-recent-runs">RecentRuns</div>,
 }));
 vi.mock("@saas/tools/components/ToolSampleOutput", () => ({
 	ToolSampleOutput: () => null,
@@ -138,6 +140,24 @@ describe("ToolPage gate coverage", () => {
 		// biome-ignore lint/suspicious/noExplicitAny: cast needed for async server component in test renderer
 		render(Page as any);
 	}
+
+	it("wraps ToolPersonalStats in UpgradeGate", async () => {
+		await renderToolPage();
+		const gates = screen.getAllByTestId("upgrade-gate");
+		const statsGate = gates.find(
+			(g) => g.dataset.feature === "Personal Stats",
+		);
+		expect(statsGate).toBeDefined();
+		expect(screen.getByTestId("tool-personal-stats")).toBeInTheDocument();
+	});
+
+	it("wraps ToolRecentRuns in UpgradeGate", async () => {
+		await renderToolPage();
+		const gates = screen.getAllByTestId("upgrade-gate");
+		const runsGate = gates.find((g) => g.dataset.feature === "Recent Runs");
+		expect(runsGate).toBeDefined();
+		expect(screen.getByTestId("tool-recent-runs")).toBeInTheDocument();
+	});
 
 	it("wraps ToolNotes in UpgradeGate", async () => {
 		await renderToolPage();
