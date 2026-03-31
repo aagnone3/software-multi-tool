@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import {
@@ -34,6 +35,7 @@ import {
 	BuildingIcon,
 	CalendarIcon,
 	CheckCircle2Icon,
+	DownloadIcon,
 	FileIcon,
 	FileSpreadsheetIcon,
 	FileTextIcon,
@@ -336,6 +338,21 @@ export function InvoiceProcessorTool() {
 		setFileError(null);
 		setUploadProgress(null);
 		form.reset();
+	};
+
+	const handleExportJSON = () => {
+		if (!result) {
+			return;
+		}
+		const json = JSON.stringify(result, null, 2);
+		const blob = new Blob([json], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		const invoiceNum = result.invoice.number ?? "invoice";
+		a.download = `invoice-${invoiceNum}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
 	};
 
 	const removeFile = () => {
@@ -929,8 +946,21 @@ export function InvoiceProcessorTool() {
 						</CardContent>
 					</Card>
 
-					{/* Action Button */}
-					<div className="flex justify-center pt-2">
+					{/* Action Buttons */}
+					<div className="flex flex-wrap justify-center gap-3 pt-2">
+						<UpgradeGate
+							featureName="JSON Export"
+							description="Download the extracted invoice data as a structured JSON file."
+						>
+							<Button
+								onClick={handleExportJSON}
+								variant="outline"
+								className="h-11 rounded-xl px-6"
+							>
+								<DownloadIcon className="mr-2 size-4" />
+								Export JSON
+							</Button>
+						</UpgradeGate>
 						<Button
 							onClick={handleNewInvoice}
 							variant="outline"
