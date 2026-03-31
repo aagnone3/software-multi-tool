@@ -39,6 +39,26 @@ describe("usePlanData", () => {
 		expect(planData.pro.features.length).toBeGreaterThan(0);
 	});
 
+	it("pro plan surfaces Pro-only gated features", () => {
+		const { result } = renderHook(() => usePlanData());
+		const { planData } = result.current;
+
+		const proFeatures = planData.pro.features as string[];
+		// Spot-check a representative set of Pro-gated capabilities
+		expect(
+			proFeatures.some((f) => f.toLowerCase().includes("export")),
+		).toBe(true);
+		expect(
+			proFeatures.some((f) => f.toLowerCase().includes("scheduler")),
+		).toBe(true);
+		expect(
+			proFeatures.some((f) => f.toLowerCase().includes("job comparison")),
+		).toBe(true);
+		expect(
+			proFeatures.some((f) => f.toLowerCase().includes("template")),
+		).toBe(true);
+	});
+
 	it("all plans have description", () => {
 		const { result } = renderHook(() => usePlanData());
 		const { planData } = result.current;
