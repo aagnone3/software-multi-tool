@@ -18,7 +18,7 @@ interface PostJobUpgradeNudgeProps {
  * Displayed at the prime conversion moment: right after a user experiences value.
  */
 export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
-	const { balance, isLoading, isFreePlan, isLowCredits } =
+	const { balance, isLoading, isFreePlan, isStarterPlan, isLowCredits } =
 		useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 	const [show, setShow] = useState(false);
@@ -34,8 +34,12 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 		return () => clearTimeout(timer);
 	}, []);
 
-	// Only show for free plan users or those low on credits
-	if (isLoading || (!isFreePlan && !isLowCredits) || !show) {
+	// Only show for free/starter plan users or those low on credits
+	if (
+		isLoading ||
+		(!isFreePlan && !isStarterPlan && !isLowCredits) ||
+		!show
+	) {
 		return null;
 	}
 
@@ -77,6 +81,52 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 									className="gap-1.5"
 								>
 									View plans
+									<ArrowRightIcon className="size-3.5" />
+								</Button>
+							</Link>
+						</div>
+					</div>
+				</div>
+			</aside>
+		);
+	}
+
+	if (isStarterPlan && !isLowCredits) {
+		return (
+			<aside
+				className={cn(
+					"mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4",
+					className,
+				)}
+				aria-label="Starter upgrade prompt"
+			>
+				<div className="flex items-start gap-3">
+					<div className="flex size-8 flex-none items-center justify-center rounded-lg bg-primary/10 text-primary">
+						<SparklesIcon className="size-4" />
+					</div>
+					<div className="min-w-0 flex-1">
+						<p className="font-semibold text-sm">
+							You're on the Starter plan
+						</p>
+						<p className="mt-0.5 text-muted-foreground text-sm">
+							Upgrade to Pro for scheduled runs, bulk actions, and
+							templates — everything you need to scale your
+							workflow.
+						</p>
+						<div className="mt-3 flex flex-wrap gap-2">
+							<Link href={billingPath}>
+								<Button size="sm" className="gap-1.5">
+									<ZapIcon className="size-3.5" />
+									Upgrade to Pro
+								</Button>
+							</Link>
+							<Link href="/pricing#pricing-plan-pro">
+								<Button
+									variant="outline"
+									size="sm"
+									className="gap-1.5"
+								>
+									Compare plans
 									<ArrowRightIcon className="size-3.5" />
 								</Button>
 							</Link>
