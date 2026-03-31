@@ -12,19 +12,27 @@ import { ArrowRightIcon, CheckIcon, SparklesIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-const STORAGE_KEY = "exit-intent-upgrade-shown";
+const STORAGE_KEY_FREE = "exit-intent-upgrade-shown";
+const STORAGE_KEY_STARTER = "exit-intent-starter-to-pro-shown";
 const COOLDOWN_DAYS = 3;
 
-const UPGRADE_BENEFITS = [
+const FREE_PLAN_BENEFITS = [
 	"Unlimited tool access — no credit limits",
 	"Priority job processing (10× faster)",
 	"Advanced export formats",
 	"API access for automation",
 ];
 
-function hasBeenShownRecently(): boolean {
+const STARTER_TO_PRO_BENEFITS = [
+	"500 credits/month (vs. 100 on Starter) + rollover",
+	"Scheduler runs & bulk actions",
+	"Reusable templates for repeat workflows",
+	"Priority queue — get results faster",
+];
+
+function hasBeenShownRecently(key: string): boolean {
 	if (typeof window === "undefined") return true;
-	const raw = localStorage.getItem(STORAGE_KEY);
+	const raw = localStorage.getItem(key);
 	if (!raw) return false;
 	const ts = Number.parseInt(raw, 10);
 	if (Number.isNaN(ts)) return false;
@@ -32,44 +40,51 @@ function hasBeenShownRecently(): boolean {
 	return daysSince < COOLDOWN_DAYS;
 }
 
-function markShown(): void {
+function markShown(key: string): void {
 	if (typeof window === "undefined") return;
-	localStorage.setItem(STORAGE_KEY, String(Date.now()));
+	localStorage.setItem(key, String(Date.now()));
 }
 
 export function ExitIntentUpgradeModal() {
-	const { isFreePlan, isLoading } = useCreditsBalance();
+	const { isFreePlan, isStarterPlan, isLoading } = useCreditsBalance();
 	const [open, setOpen] = useState(false);
 	const triggeredRef = useRef(false);
+
+	const isEligible = isFreePlan || isStarterPlan;
+	const storageKey = isStarterPlan ? STORAGE_KEY_STARTER : STORAGE_KEY_FREE;
 
 	const handleMouseLeave = useCallback(
 		(e: MouseEvent) => {
 			// Only trigger when cursor moves toward the top of the viewport (exiting via address bar / tab)
 			if (e.clientY > 50) return;
 			if (triggeredRef.current) return;
-			if (!isFreePlan || isLoading) return;
-			if (hasBeenShownRecently()) return;
+			if (!isEligible || isLoading) return;
+			if (hasBeenShownRecently(storageKey)) return;
 
 			triggeredRef.current = true;
-			markShown();
+			markShown(storageKey);
 			setOpen(true);
 		},
-		[isFreePlan, isLoading],
+		[isEligible, isLoading, storageKey],
 	);
 
 	useEffect(() => {
-		if (isLoading || !isFreePlan) return;
+		if (isLoading || !isEligible) return;
 		document.addEventListener("mouseleave", handleMouseLeave);
 		return () => {
 			document.removeEventListener("mouseleave", handleMouseLeave);
 		};
-	}, [isFreePlan, isLoading, handleMouseLeave]);
+	}, [isEligible, isLoading, handleMouseLeave]);
 
 	const handleClose = useCallback(() => {
 		setOpen(false);
 	}, []);
 
-	if (isLoading || !isFreePlan) return null;
+	if (isLoading || !isEligible) return null;
+
+	const benefits = isStarterPlan
+		? STARTER_TO_PRO_BENEFITS
+		: FREE_PLAN_BENEFITS;
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -94,18 +109,21 @@ export function ExitIntentUpgradeModal() {
 					</div>
 
 					<DialogTitle className="text-2xl font-bold leading-tight mb-1">
-						Unlock the full power
+						{isStarterPlan
+							? "Ready to go further?"
+							: "Unlock the full power"}
 					</DialogTitle>
 					<DialogDescription className="text-primary-foreground/80 text-sm">
-						You&apos;re on the free plan. Upgrade once, run anything
-						— no credit anxiety.
+						{isStarterPlan
+							? "You're on Starter. Upgrade to Pro and unlock 5× more credits, scheduling, and bulk actions."
+							: "You're on the free plan. Upgrade once, run anything — no credit anxiety."}
 					</DialogDescription>
 				</div>
 
 				{/* Benefits */}
 				<div className="p-6 space-y-4">
 					<ul className="space-y-2">
-						{UPGRADE_BENEFITS.map((benefit) => (
+						{benefits.map((benefit) => (
 							<li
 								key={benefit}
 								className="flex items-start gap-2 text-sm"
@@ -117,11 +135,23 @@ export function ExitIntentUpgradeModal() {
 					</ul>
 
 					<div className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
-						Plans start at{" "}
-						<span className="font-semibold text-foreground">
-							$9/month
-						</span>{" "}
-						— cancel anytime
+						{isStarterPlan ? (
+							<>
+								Pro is{" "}
+								<span className="font-semibold text-foreground">
+									$29/month
+								</span>{" "}
+								— cancel anytime
+							</>
+						) : (
+							<>
+								Plans start at{" "}
+								<span className="font-semibold text-foreground">
+									$9/month
+								</span>{" "}
+								— cancel anytime
+							</>
+						)}
 					</div>
 
 					<div className="flex flex-col gap-2">
@@ -131,7 +161,9 @@ export function ExitIntentUpgradeModal() {
 							onClick={handleClose}
 						>
 							<Link href="/app/settings/billing">
-								Upgrade now
+								{isStarterPlan
+									? "Upgrade to Pro"
+									: "Upgrade now"}
 								<ArrowRightIcon className="ml-2 h-4 w-4" />
 							</Link>
 						</Button>
@@ -140,7 +172,9 @@ export function ExitIntentUpgradeModal() {
 							className="w-full text-muted-foreground"
 							onClick={handleClose}
 						>
-							No thanks, I&apos;ll stay on free
+							{isStarterPlan
+								? "No thanks, Starter is fine"
+								: "No thanks, I'll stay on free"}
 						</Button>
 					</div>
 				</div>
