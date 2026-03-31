@@ -156,6 +156,20 @@ describe("UserStart", () => {
 		expect(gate).toBeInTheDocument();
 	});
 
+	it("wraps RecentActivityFeed in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-recent-activity");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("recent-activity-feed")).toBeInTheDocument();
+	});
+
+	it("wraps TopToolsWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-top-tools");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("top-tools-widget")).toBeInTheDocument();
+	});
+
 	it("hides organizations grid when organizations disabled", async () => {
 		const { config } = await import("@repo/config");
 		(config.organizations as any).enable = false;
