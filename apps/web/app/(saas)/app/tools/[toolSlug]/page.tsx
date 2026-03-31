@@ -166,10 +166,22 @@ export default async function ToolPage({ params }: ToolPageProps) {
 			</UpgradeGate>
 			<LowCreditsWarning className="mb-4" showActionButtons={true} />
 			<ToolTipsBanner toolSlug={toolSlug} className="mb-4" />
-			<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
+			<UpgradeGate
+				featureName="Personal Stats"
+				description="See your per-tool usage stats, success rates, and last-used time. Available on Pro and above."
+				className="mb-4"
+			>
+				<ToolPersonalStats toolSlug={toolSlug} className="mb-4" />
+			</UpgradeGate>
 			<ToolUsageGuide toolSlug={toolSlug} />
 			<ToolComponent />
-			<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
+			<UpgradeGate
+				featureName="Recent Runs"
+				description="Browse your recent job history for this tool. Available on Pro and above."
+				className="mt-6"
+			>
+				<ToolRecentRuns toolSlug={toolSlug} className="mt-6" />
+			</UpgradeGate>
 			<ToolSampleOutput toolSlug={toolSlug} className="mt-6" />
 			<ToolRatingWidget toolSlug={toolSlug} className="mt-6" />
 			<UpgradeGate
