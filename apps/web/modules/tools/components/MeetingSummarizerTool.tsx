@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { JobProgressIndicator } from "./JobProgressIndicator";
@@ -307,6 +308,7 @@ export function MeetingSummarizerTool() {
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
+			toast.error("Failed to submit job. Please try again.");
 		}
 	};
 

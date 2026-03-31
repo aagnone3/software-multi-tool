@@ -36,6 +36,7 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useCreateJob } from "../hooks/use-job-polling";
 import { type AudioFileData, AudioFileUpload } from "./AudioFileUpload";
@@ -498,9 +499,10 @@ export function SpeakerSeparationTool() {
 			setAudioFile(values.audioFile);
 		} catch (error) {
 			console.error("Failed to create job:", error);
-			setJobError(
-				error instanceof Error ? error.message : "Failed to create job",
-			);
+			const message =
+				error instanceof Error ? error.message : "Failed to create job";
+			setJobError(message);
+			toast.error(message);
 		}
 	};
 
