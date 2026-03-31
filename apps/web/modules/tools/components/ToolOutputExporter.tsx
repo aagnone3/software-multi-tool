@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { Button } from "@ui/components/button";
 import {
 	DropdownMenu,
@@ -16,7 +17,9 @@ import {
 	DownloadIcon,
 	FileJsonIcon,
 	FileTextIcon,
+	LockIcon,
 } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -56,6 +59,10 @@ export function ToolOutputExporter({
 	className,
 }: ToolOutputExporterProps) {
 	const [copied, setCopied] = useState(false);
+	const { isFreePlan, isLoading } = useCreditsBalance();
+
+	// Downloads are a Pro feature; copy-to-clipboard stays free
+	const downloadsLocked = !isLoading && isFreePlan;
 
 	const handleCopyJson = async () => {
 		try {
@@ -69,6 +76,7 @@ export function ToolOutputExporter({
 	};
 
 	const handleDownloadJson = () => {
+		if (downloadsLocked) return;
 		try {
 			downloadBlob(
 				JSON.stringify(data, null, 2),
@@ -82,6 +90,7 @@ export function ToolOutputExporter({
 	};
 
 	const handleDownloadTxt = () => {
+		if (downloadsLocked) return;
 		const content = plainText ?? JSON.stringify(data, null, 2);
 		try {
 			downloadBlob(content, toFilename(label, "txt"), "text/plain");
@@ -103,7 +112,7 @@ export function ToolOutputExporter({
 					Export
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-48">
+			<DropdownMenuContent align="end" className="w-56">
 				<DropdownMenuLabel>Export results</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={handleCopyJson}>
@@ -114,14 +123,34 @@ export function ToolOutputExporter({
 					)}
 					Copy as JSON
 				</DropdownMenuItem>
-				<DropdownMenuItem onClick={handleDownloadJson}>
-					<FileJsonIcon className="mr-2 size-4" />
-					Download JSON
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={handleDownloadTxt}>
-					<FileTextIcon className="mr-2 size-4" />
-					Download TXT
-				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				{downloadsLocked ? (
+					<>
+						<DropdownMenuLabel className="flex items-center gap-1.5 text-muted-foreground text-xs font-normal">
+							<LockIcon className="size-3" />
+							Downloads require Pro
+						</DropdownMenuLabel>
+						<DropdownMenuItem asChild>
+							<Link
+								href="/pricing"
+								className="flex items-center gap-2 text-primary"
+							>
+								Upgrade to unlock downloads
+							</Link>
+						</DropdownMenuItem>
+					</>
+				) : (
+					<>
+						<DropdownMenuItem onClick={handleDownloadJson}>
+							<FileJsonIcon className="mr-2 size-4" />
+							Download JSON
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={handleDownloadTxt}>
+							<FileTextIcon className="mr-2 size-4" />
+							Download TXT
+						</DropdownMenuItem>
+					</>
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
