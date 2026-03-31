@@ -18,9 +18,11 @@ interface EmptyStateUpgradeNudgeProps {
 	className?: string;
 }
 
-const COPY: Record<
+type CopyEntry = { headline: string; body: string; cta: string };
+
+const FREE_COPY: Record<
 	NonNullable<EmptyStateUpgradeNudgeProps["context"]>,
-	{ headline: string; body: string; cta: string }
+	CopyEntry
 > = {
 	jobs: {
 		headline: "Start running tools — get more with Pro",
@@ -39,9 +41,31 @@ const COPY: Record<
 	},
 };
 
+const STARTER_COPY: Record<
+	NonNullable<EmptyStateUpgradeNudgeProps["context"]>,
+	CopyEntry
+> = {
+	jobs: {
+		headline: "Unlock Pro for more power",
+		body: "You're on Starter (100 credits/month). Upgrade to Pro for 500 credits, scheduler runs, bulk actions, and advanced templates.",
+		cta: "Upgrade to Pro",
+	},
+	tool: {
+		headline: "Need more runs? Go Pro",
+		body: "Pro gives you 500 credits/month, scheduled runs, and bulk processing — 5× more than Starter.",
+		cta: "Upgrade to Pro",
+	},
+	credits: {
+		headline: "You've used all your Starter credits",
+		body: "Upgrade to Pro to get 500 credits/month, rollover unused credits, and priority processing — starting at $29/mo.",
+		cta: "Upgrade to Pro",
+	},
+};
+
 /**
  * Subtle upgrade nudge rendered inside empty states (no jobs yet, no tool runs, out of credits).
- * Only visible to free-plan users — zero render cost for paid users.
+ * Visible to free users (Free→Starter/Pro) and starter users (Starter→Pro).
+ * Zero render cost for Pro users.
  */
 export function EmptyStateUpgradeNudge({
 	organizationId,
@@ -50,7 +74,10 @@ export function EmptyStateUpgradeNudge({
 }: EmptyStateUpgradeNudgeProps) {
 	const { activePlan } = usePurchases(organizationId);
 
-	if (!activePlan || activePlan.id !== "free") {
+	const isFree = activePlan?.id === "free";
+	const isStarter = activePlan?.id === "starter";
+
+	if (!isFree && !isStarter) {
 		return null;
 	}
 
@@ -58,7 +85,7 @@ export function EmptyStateUpgradeNudge({
 		? `/app/orgs/${organizationId}/settings/billing`
 		: "/app/settings/billing";
 
-	const copy = COPY[context];
+	const copy = isStarter ? STARTER_COPY[context] : FREE_COPY[context];
 
 	return (
 		<div
@@ -84,12 +111,22 @@ export function EmptyStateUpgradeNudge({
 					<Button asChild size="sm" variant="outline">
 						<Link href={billingHref}>{copy.cta}</Link>
 					</Button>
-					<Button asChild size="sm">
-						<Link href={`${billingHref}#pricing`}>
-							Start free trial
-							<ArrowRightIcon className="ml-1.5 size-3.5" />
-						</Link>
-					</Button>
+					{isFree && (
+						<Button asChild size="sm">
+							<Link href={`${billingHref}#pricing`}>
+								Start free trial
+								<ArrowRightIcon className="ml-1.5 size-3.5" />
+							</Link>
+						</Button>
+					)}
+					{isStarter && (
+						<Button asChild size="sm">
+							<Link href={`${billingHref}#pricing-plan-pro`}>
+								Compare plans
+								<ArrowRightIcon className="ml-1.5 size-3.5" />
+							</Link>
+						</Button>
+					)}
 				</div>
 			</div>
 		</div>

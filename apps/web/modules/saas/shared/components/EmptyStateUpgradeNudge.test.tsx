@@ -12,7 +12,7 @@ import { usePurchases } from "@saas/payments/hooks/purchases";
 const mockUsePurchases = vi.mocked(usePurchases);
 
 describe("EmptyStateUpgradeNudge", () => {
-	it("renders nothing for paid users", () => {
+	it("renders nothing for pro users", () => {
 		mockUsePurchases.mockReturnValue({
 			activePlan: { id: "pro", name: "Pro" },
 		} as unknown as ReturnType<typeof usePurchases>);
@@ -27,6 +27,8 @@ describe("EmptyStateUpgradeNudge", () => {
 		const { container } = render(<EmptyStateUpgradeNudge />);
 		expect(container.firstChild).toBeNull();
 	});
+
+	// ── Free plan ──────────────────────────────────────────────────────────────
 
 	it("renders upgrade nudge for free users — default context (jobs)", () => {
 		mockUsePurchases.mockReturnValue({
@@ -84,11 +86,56 @@ describe("EmptyStateUpgradeNudge", () => {
 		expect(links).toContain("/app/settings/billing");
 	});
 
-	it("renders starter plan users as paid (no nudge)", () => {
+	// ── Starter plan ───────────────────────────────────────────────────────────
+
+	it("renders Starter→Pro nudge for starter users — default context (jobs)", () => {
 		mockUsePurchases.mockReturnValue({
 			activePlan: { id: "starter", name: "Starter" },
 		} as unknown as ReturnType<typeof usePurchases>);
-		const { container } = render(<EmptyStateUpgradeNudge />);
-		expect(container.firstChild).toBeNull();
+		render(<EmptyStateUpgradeNudge />);
+		expect(
+			screen.getByText("Unlock Pro for more power"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Upgrade to Pro")).toBeInTheDocument();
+		expect(screen.getByText("Compare plans")).toBeInTheDocument();
+	});
+
+	it("renders Starter→Pro tool context copy", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		render(<EmptyStateUpgradeNudge context="tool" />);
+		expect(screen.getByText("Need more runs? Go Pro")).toBeInTheDocument();
+		expect(screen.getByText("Upgrade to Pro")).toBeInTheDocument();
+	});
+
+	it("renders Starter→Pro credits context copy", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		render(<EmptyStateUpgradeNudge context="credits" />);
+		expect(
+			screen.getByText("You've used all your Starter credits"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Upgrade to Pro")).toBeInTheDocument();
+	});
+
+	it("Starter nudge links to pro pricing anchor", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		render(<EmptyStateUpgradeNudge />);
+		const links = screen
+			.getAllByRole("link")
+			.map((l) => l.getAttribute("href"));
+		expect(links.some((h) => h?.includes("#pricing-plan-pro"))).toBe(true);
+	});
+
+	it("does NOT show 'Start free trial' button for starter users", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		render(<EmptyStateUpgradeNudge />);
+		expect(screen.queryByText("Start free trial")).toBeNull();
 	});
 });
