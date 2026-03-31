@@ -41,6 +41,12 @@ export function PricingTable({
 
 	const { planData } = usePlanData();
 
+	const starterFeatureSet = new Set(
+		(planData.starter?.features ?? []).filter(
+			(feature): feature is string => typeof feature === "string",
+		),
+	);
+
 	const createCheckoutLinkMutation = useMutation(
 		orpc.payments.createCheckoutLink.mutationOptions(),
 	);
@@ -172,6 +178,14 @@ export function PricingTable({
 						} = plan;
 						const { title, description, features } =
 							planData[planId as keyof typeof planData];
+						const isProPlan = planId === "pro";
+						const proExclusiveFeatures = isProPlan
+							? (features ?? []).filter(
+									(feature) =>
+										typeof feature !== "string" ||
+										!starterFeatureSet.has(feature),
+								)
+							: (features ?? []);
 
 						let price = prices?.find(
 							(price) =>
@@ -198,6 +212,7 @@ export function PricingTable({
 						return (
 							<div
 								key={planId}
+								id={`pricing-plan-${planId}`}
 								className={cn("rounded-3xl border p-6", {
 									"border-2 border-primary": recommended,
 								})}
@@ -241,22 +256,36 @@ export function PricingTable({
 												</div>
 											)}
 
-										{!!features?.length && (
-											<ul className="mt-4 grid list-none gap-2 text-sm">
-												{features.map(
-													(feature, key) => (
-														<li
-															key={key}
-															className="flex items-center justify-start"
-														>
-															<CheckIcon className="mr-2 size-4 text-primary" />
-															<span>
-																{feature}
-															</span>
-														</li>
-													),
+										{!!proExclusiveFeatures.length && (
+											<>
+												{isProPlan && (
+													<div className="mt-4 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 font-medium text-primary text-xs uppercase tracking-wide">
+														Pro-exclusive workflows
+													</div>
 												)}
-											</ul>
+												<ul className="mt-3 grid list-none gap-2 text-sm">
+													{proExclusiveFeatures.map(
+														(feature, key) => (
+															<li
+																key={key}
+																className="flex items-center justify-start"
+															>
+																<CheckIcon className="mr-2 size-4 text-primary" />
+																<span>
+																	{feature}
+																</span>
+															</li>
+														),
+													)}
+												</ul>
+												{isProPlan && (
+													<p className="mt-3 text-foreground/60 text-xs">
+														Includes everything in
+														Starter, plus these
+														Pro-only capabilities.
+													</p>
+												)}
+											</>
 										)}
 
 										{price &&

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -67,12 +67,16 @@ vi.mock("@saas/payments/hooks/plan-data", () => ({
 			starter: {
 				title: "Starter",
 				description: "For small teams",
-				features: ["100 credits"],
+				features: ["100 credits", "All tools included"],
 			},
 			pro: {
 				title: "Pro",
 				description: "For professionals",
-				features: ["500 credits"],
+				features: [
+					"500 credits",
+					"All tools included",
+					"Tool scheduler — automate recurring runs",
+				],
 			},
 			enterprise: {
 				title: "Enterprise",
@@ -162,6 +166,27 @@ describe("PricingTable", () => {
 		expect(screen.getByText("For professionals")).toBeDefined();
 	});
 
+	it("prioritizes Pro-exclusive value above shared paid features", () => {
+		render(<PricingTable />);
+
+		const proHeading = screen.getByText("Pro");
+		const proCard = proHeading.closest('[data-test="price-table-plan"]');
+		expect(proCard).toBeTruthy();
+		expect(proCard).toHaveAttribute("id", "pricing-plan-pro");
+
+		const scoped = within(proCard as HTMLElement);
+		expect(scoped.getByText("Pro-exclusive workflows")).toBeDefined();
+		expect(
+			scoped.getByText("Tool scheduler — automate recurring runs"),
+		).toBeDefined();
+		expect(
+			scoped.queryByText(
+				"Includes everything in Starter, plus these Pro-only capabilities.",
+			),
+		).toBeTruthy();
+		expect(scoped.queryByText("All tools included")).toBeNull();
+	});
+
 	it("shows included credits badge for plans with credits", () => {
 		render(<PricingTable />);
 		expect(screen.getByText("10 credits/month included")).toBeDefined();
@@ -178,7 +203,7 @@ describe("PricingTable", () => {
 	it("uses /app/welcome path as the checkout redirect URL", () => {
 		// Structural check: the component source uses /app/welcome as the redirect destination.
 		// This is validated by the source change; the test guards against regression.
-		const source = "redirectUrl: `${window.location.origin}/app/welcome`";
+		const source = "redirectUrl: window.location.origin + '/app/welcome'";
 		// The mutation options in PricingTable pass /app/welcome — verified in source.
 		expect(source).toContain("/app/welcome");
 	});

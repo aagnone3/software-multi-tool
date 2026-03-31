@@ -31,7 +31,7 @@ type ProductEvent =
 	  }
 	| {
 			name: "upgrade_cta_clicked";
-			props: { source: string; plan_id: string };
+			props: { source: string; plan_id: string; target_plan?: string };
 	  }
 	| {
 			name: "credits_exhausted";
