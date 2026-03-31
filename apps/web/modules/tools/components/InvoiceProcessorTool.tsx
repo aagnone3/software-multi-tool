@@ -55,6 +55,7 @@ import {
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { orpc } from "../../shared/lib/orpc-query-utils";
 import { useCreateJob } from "../hooks/use-job-polling";
@@ -312,11 +313,12 @@ export function InvoiceProcessorTool() {
 			setJobId(response.job.id);
 		} catch (error) {
 			console.error("Failed to create job:", error);
-			setFileError(
+			const message =
 				error instanceof Error
 					? error.message
-					: "Failed to process invoice",
-			);
+					: "Failed to process invoice";
+			setFileError(message);
+			toast.error(message);
 		} finally {
 			setIsProcessingFile(false);
 			setUploadProgress(null);
