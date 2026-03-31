@@ -6,6 +6,10 @@ import { ZeroCreditsModal } from "./ZeroCreditsModal";
 const mockUseCreditsBalance = vi.fn();
 const mockUseActiveOrganization = vi.fn();
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 vi.mock("../hooks/use-credits-balance", () => ({
 	useCreditsBalance: () => mockUseCreditsBalance(),
 }));
@@ -47,7 +51,11 @@ describe("ZeroCreditsModal", () => {
 
 	it("shows when totalAvailable is 0", () => {
 		mockUseCreditsBalance.mockReturnValue({
-			balance: { totalAvailable: 0 },
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "free" },
+				purchasedCredits: 0,
+			},
 			isLoading: false,
 		});
 
@@ -59,7 +67,11 @@ describe("ZeroCreditsModal", () => {
 
 	it("shows upgrade to pro and buy credits buttons", () => {
 		mockUseCreditsBalance.mockReturnValue({
-			balance: { totalAvailable: 0 },
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "free" },
+				purchasedCredits: 0,
+			},
 			isLoading: false,
 		});
 
@@ -74,7 +86,11 @@ describe("ZeroCreditsModal", () => {
 
 	it("uses org-scoped billing path when org is active", () => {
 		mockUseCreditsBalance.mockReturnValue({
-			balance: { totalAvailable: 0 },
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "free" },
+				purchasedCredits: 0,
+			},
 			isLoading: false,
 		});
 		mockUseActiveOrganization.mockReturnValue({
@@ -93,7 +109,11 @@ describe("ZeroCreditsModal", () => {
 
 	it("dismisses when 'Maybe later' is clicked", () => {
 		mockUseCreditsBalance.mockReturnValue({
-			balance: { totalAvailable: 0 },
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "free" },
+				purchasedCredits: 0,
+			},
 			isLoading: false,
 		});
 

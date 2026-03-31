@@ -4,6 +4,7 @@
 		"plugins": [{ "name": "next" }],
 		"paths": {
 			"@analytics": ["./modules/analytics"],
+			"@analytics/*": ["./modules/analytics/*"],
 			"@marketing/*": ["./modules/marketing/*"],
 			"@realtime": ["./modules/realtime"],
 			"@saas/*": ["./modules/saas/*"],

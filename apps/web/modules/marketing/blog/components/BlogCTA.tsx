@@ -1,9 +1,21 @@
+"use client";
+
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 export function BlogCTA() {
+	const { track } = useProductAnalytics();
+
+	const handleCtaClick = () => {
+		track({
+			name: "upgrade_cta_clicked",
+			props: { source: "blog_cta", plan_id: "anonymous" },
+		});
+	};
+
 	return (
 		<div className="my-10 rounded-xl border border-primary/20 bg-primary/5 p-8 text-center">
 			<SparklesIcon className="mx-auto mb-3 size-6 text-primary" />
@@ -14,7 +26,7 @@ export function BlogCTA() {
 			</p>
 			<div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
 				<Button asChild size="sm">
-					<Link href="/auth/signup">
+					<Link href="/auth/signup" onClick={handleCtaClick}>
 						Get started free
 						<ArrowRightIcon className="ml-1.5 size-3.5" />
 					</Link>

@@ -1,12 +1,13 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { LockIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface UpgradeGateProps {
 	/** Content to render when the user has access */
@@ -41,8 +42,9 @@ export function UpgradeGate({
 	className,
 	hasAccess: hasAccessProp,
 }: UpgradeGateProps) {
-	const { isFreePlan, isLoading } = useCreditsBalance();
+	const { isFreePlan, isLoading, balance } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -51,6 +53,18 @@ export function UpgradeGate({
 	// Respect explicit override; fall back to plan check
 	const isLocked =
 		hasAccessProp !== undefined ? !hasAccessProp : !isLoading && isFreePlan;
+
+	useEffect(() => {
+		if (isLocked) {
+			track({
+				name: "upgrade_gate_viewed",
+				props: {
+					feature_name: featureName,
+					plan_id: balance?.plan.id ?? "free",
+				},
+			});
+		}
+	}, [isLocked, featureName, balance?.plan.id, track]);
 
 	if (!isLocked) {
 		return <>{children}</>;

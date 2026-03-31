@@ -3,6 +3,10 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StickyCta } from "./StickyCta";
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
