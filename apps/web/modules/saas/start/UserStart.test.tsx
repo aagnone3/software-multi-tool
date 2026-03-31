@@ -109,8 +109,18 @@ vi.mock("./components/ProTrialOfferCard", () => ({
 }));
 
 vi.mock("@saas/payments/components/UpgradeGate", () => ({
-	UpgradeGate: ({ children }: { children: React.ReactNode }) => (
-		<>{children}</>
+	UpgradeGate: ({
+		children,
+		featureName,
+	}: {
+		children: React.ReactNode;
+		featureName: string;
+	}) => (
+		<div
+			data-testid={`upgrade-gate-${featureName.toLowerCase().replace(/\s+/g, "-")}`}
+		>
+			{children}
+		</div>
 	),
 }));
 
@@ -131,6 +141,19 @@ describe("UserStart", () => {
 		expect(
 			screen.getByTestId("recommended-tool-widget"),
 		).toBeInTheDocument();
+	});
+
+	it("wraps UsageTrendChart in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-usage-trend");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("usage-trend-chart")).toBeInTheDocument();
+	});
+
+	it("wraps CreditsByToolChart in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-credits-by-tool");
+		expect(gate).toBeInTheDocument();
 	});
 
 	it("hides organizations grid when organizations disabled", async () => {
