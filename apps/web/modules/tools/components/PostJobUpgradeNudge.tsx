@@ -61,7 +61,7 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 						<p className="mt-0.5 text-muted-foreground text-sm">
 							{remaining <= 3
 								? `Only ${remaining} credit${remaining === 1 ? "" : "s"} left. Upgrade to keep going.`
-								: "Upgrade to Pro for unlimited monthly runs and priority processing."}
+								: "Upgrade to Pro for 500 credits/month, rollover, and priority processing."}
 						</p>
 						<div className="mt-3 flex flex-wrap gap-2">
 							<Link href={billingPath}>
