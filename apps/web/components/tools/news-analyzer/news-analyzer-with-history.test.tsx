@@ -12,6 +12,12 @@ vi.mock("./news-analyzer-history", () => ({
 	NewsAnalyzerHistory: () => <div>NewsAnalyzerHistory</div>,
 }));
 
+vi.mock("@saas/payments/components/UpgradeGate", () => ({
+	UpgradeGate: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+}));
+
 vi.mock("nuqs", () => ({
 	parseAsString: {
 		withDefault: (val: string) => ({ defaultValue: val }),

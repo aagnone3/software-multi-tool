@@ -12,6 +12,12 @@ vi.mock("./speaker-separation-history", () => ({
 	SpeakerSeparationHistory: () => <div>SpeakerSeparationHistory</div>,
 }));
 
+vi.mock("@saas/payments/components/UpgradeGate", () => ({
+	UpgradeGate: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
+}));
+
 vi.mock("nuqs", () => ({
 	parseAsString: {
 		withDefault: (val: string) => ({ defaultValue: val }),

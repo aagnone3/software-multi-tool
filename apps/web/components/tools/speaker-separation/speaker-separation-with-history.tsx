@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { SpeakerSeparationTool } from "@tools/components/SpeakerSeparationTool";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
@@ -24,7 +25,12 @@ export function SpeakerSeparationWithHistory() {
 			</TabsContent>
 
 			<TabsContent value="history">
-				<SpeakerSeparationHistory />
+				<UpgradeGate
+					featureName="Transcription History"
+					description="View and revisit all your past speaker separation transcriptions."
+				>
+					<SpeakerSeparationHistory />
+				</UpgradeGate>
 			</TabsContent>
 		</Tabs>
 	);
