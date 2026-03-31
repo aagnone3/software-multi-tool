@@ -114,11 +114,21 @@ export default function UserStart() {
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
-				{/* Activity Streak */}
-				<StreakWidget />
+				{/* Activity Streak — gated for pro users */}
+				<UpgradeGate
+					featureName="Activity Streak"
+					description="Track your daily usage streak and stay consistent. Available on Pro and above."
+				>
+					<StreakWidget />
+				</UpgradeGate>
 
-				{/* Daily Goal Widget */}
-				<DailyGoalWidget />
+				{/* Daily Goal Widget — gated for pro users */}
+				<UpgradeGate
+					featureName="Daily Goal"
+					description="Set and track a daily credit usage goal. Available on Pro and above."
+				>
+					<DailyGoalWidget />
+				</UpgradeGate>
 
 				{/* Top Tools Widget — gated for pro users */}
 				<UpgradeGate
@@ -128,8 +138,13 @@ export default function UserStart() {
 					<TopToolsWidget />
 				</UpgradeGate>
 
-				{/* Favorite Tools */}
-				<FavoriteToolsWidget />
+				{/* Favorite Tools — gated for pro users */}
+				<UpgradeGate
+					featureName="Favorite Tools"
+					description="Pin your most-used tools for quick access. Available on Pro and above."
+				>
+					<FavoriteToolsWidget />
+				</UpgradeGate>
 
 				{/* Recommended Tool */}
 				<RecommendedToolWidget />

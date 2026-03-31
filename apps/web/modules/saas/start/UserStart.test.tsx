@@ -170,6 +170,27 @@ describe("UserStart", () => {
 		expect(screen.getByTestId("top-tools-widget")).toBeInTheDocument();
 	});
 
+	it("wraps StreakWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-activity-streak");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("streak-widget")).toBeInTheDocument();
+	});
+
+	it("wraps DailyGoalWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-daily-goal");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("daily-goal-widget")).toBeInTheDocument();
+	});
+
+	it("wraps FavoriteToolsWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-favorite-tools");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("favorite-tools-widget")).toBeInTheDocument();
+	});
+
 	it("hides organizations grid when organizations disabled", async () => {
 		const { config } = await import("@repo/config");
 		(config.organizations as any).enable = false;
