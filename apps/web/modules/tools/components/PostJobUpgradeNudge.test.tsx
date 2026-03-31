@@ -124,7 +124,9 @@ describe("PostJobUpgradeNudge", () => {
 		});
 		render(<PostJobUpgradeNudge />);
 		await advancePast600ms();
-		expect(screen.getByText(/upgrade to pro for unlimited/i)).toBeTruthy();
+		expect(
+			screen.getByText(/upgrade to pro for 500 credits/i),
+		).toBeTruthy();
 	});
 
 	it("shows low-credits prompt for paid users with low credits", async () => {
