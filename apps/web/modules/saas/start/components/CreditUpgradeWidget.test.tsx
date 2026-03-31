@@ -53,6 +53,7 @@ function setup(balanceOverrides = {}, isFreePlan = true, isLoading = false) {
 		percentageUsed,
 		isLowCredits: false,
 		isFreePlan,
+		isStarterPlan: false,
 		hasActiveOrganization: true,
 		refetch: vi.fn(),
 	} as ReturnType<typeof useCreditsBalance>);
