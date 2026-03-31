@@ -77,8 +77,14 @@ export default function UserStart() {
 
 			{/* Secondary grid */}
 			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-				{/* Usage Trend Chart */}
-				<UsageTrendChart className="lg:col-span-2 xl:col-span-2" />
+				{/* Usage Trend Chart — gated for pro users */}
+				<UpgradeGate
+					featureName="Usage Trend"
+					description="View your tool usage trends over time. Available on Pro and above."
+					className="lg:col-span-2 xl:col-span-2"
+				>
+					<UsageTrendChart className="lg:col-span-2 xl:col-span-2" />
+				</UpgradeGate>
 
 				{/* Recent Activity Feed */}
 				<RecentActivityFeed className="lg:col-span-2 xl:col-span-1" />
@@ -92,8 +98,13 @@ export default function UserStart() {
 				<WeeklyActivityHeatmap />
 			</UpgradeGate>
 
-			{/* Credits breakdown by tool */}
-			<CreditsByToolChart />
+			{/* Credits breakdown by tool — gated for pro users */}
+			<UpgradeGate
+				featureName="Credits by Tool"
+				description="See a breakdown of your credit usage by tool. Available on Pro and above."
+			>
+				<CreditsByToolChart />
+			</UpgradeGate>
 
 			{/* Bottom grid */}
 			<div className="grid gap-6 lg:grid-cols-3">
