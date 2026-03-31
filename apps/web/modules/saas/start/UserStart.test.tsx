@@ -191,6 +191,22 @@ describe("UserStart", () => {
 		expect(screen.getByTestId("favorite-tools-widget")).toBeInTheDocument();
 	});
 
+	it("wraps RecentlyViewedToolsWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-recently-viewed-tools");
+		expect(gate).toBeInTheDocument();
+		expect(
+			screen.getByTestId("recently-viewed-tools-widget"),
+		).toBeInTheDocument();
+	});
+
+	it("wraps UntriedToolsWidget in UpgradeGate", () => {
+		render(<UserStart />);
+		const gate = screen.getByTestId("upgrade-gate-untried-tools");
+		expect(gate).toBeInTheDocument();
+		expect(screen.getByTestId("untried-tools-widget")).toBeInTheDocument();
+	});
+
 	it("hides organizations grid when organizations disabled", async () => {
 		const { config } = await import("@repo/config");
 		(config.organizations as any).enable = false;

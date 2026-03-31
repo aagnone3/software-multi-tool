@@ -149,11 +149,21 @@ export default function UserStart() {
 				{/* Recommended Tool */}
 				<RecommendedToolWidget />
 
-				{/* Recently Viewed Tools — localStorage-persisted quick-access */}
-				<RecentlyViewedToolsWidget />
+				{/* Recently Viewed Tools — gated for pro users */}
+				<UpgradeGate
+					featureName="Recently Viewed Tools"
+					description="See your recently visited tools for quick access. Available on Pro and above."
+				>
+					<RecentlyViewedToolsWidget />
+				</UpgradeGate>
 
-				{/* Untried Tools — discovery nudge */}
-				<UntriedToolsWidget />
+				{/* Untried Tools — gated for pro users */}
+				<UpgradeGate
+					featureName="Untried Tools"
+					description="Discover tools you haven't tried yet. Available on Pro and above."
+				>
+					<UntriedToolsWidget />
+				</UpgradeGate>
 
 				{/* Pinned Job Outputs */}
 				<PinnedJobsWidget />
