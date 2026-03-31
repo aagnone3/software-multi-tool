@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
@@ -16,6 +17,17 @@ export function UpgradePromptBanner({
 	className,
 }: UpgradePromptBannerProps) {
 	const { activePlan } = usePurchases(organizationId);
+	const { track } = useProductAnalytics();
+
+	const handleCtaClick = () => {
+		track({
+			name: "upgrade_cta_clicked",
+			props: {
+				source: "upgrade_banner",
+				plan_id: activePlan?.id ?? "free",
+			},
+		});
+	};
 
 	// Only show for free plan users
 	if (!activePlan || activePlan.id !== "free") {
@@ -44,7 +56,10 @@ export function UpgradePromptBanner({
 					</div>
 				</div>
 				<Button asChild size="sm" className="shrink-0">
-					<Link href={`${billingBase}#pricing`}>
+					<Link
+						href={`${billingBase}#pricing`}
+						onClick={handleCtaClick}
+					>
 						Upgrade now
 						<ArrowRightIcon className="ml-1.5 size-3.5" />
 					</Link>

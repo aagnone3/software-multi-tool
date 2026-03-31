@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -11,13 +12,14 @@ import {
 } from "@ui/components/dialog";
 import { CoinsIcon, RocketIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useActiveOrganization } from "../../organizations/hooks/use-active-organization";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 export function ZeroCreditsModal() {
 	const { balance, isLoading } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [dismissed, setDismissed] = React.useState(false);
 
 	const billingPath = activeOrganization
@@ -30,11 +32,25 @@ export function ZeroCreditsModal() {
 		balance !== undefined &&
 		balance.totalAvailable === 0;
 
+	useEffect(() => {
+		if (isOpen && balance) {
+			track({
+				name: "credits_exhausted",
+				props: {
+					plan_id: balance.plan.id,
+					credits_purchased: balance.purchasedCredits,
+				},
+			});
+		}
+	}, [isOpen, balance, track]);
+
 	return (
 		<Dialog
 			open={isOpen}
 			onOpenChange={(open) => {
-				if (!open) setDismissed(true);
+				if (!open) {
+					setDismissed(true);
+				}
 			}}
 		>
 			<DialogContent className="sm:max-w-md">

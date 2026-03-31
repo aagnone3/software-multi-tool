@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, XIcon } from "lucide-react";
@@ -10,6 +11,17 @@ export function StickyCta() {
 	const [visible, setVisible] = useState(false);
 	const [dismissed, setDismissed] = useState(false);
 	const { isFreePlan, isLoading, balance } = useCreditsBalance();
+	const { track } = useProductAnalytics();
+
+	const handleCtaClick = () => {
+		track({
+			name: "upgrade_cta_clicked",
+			props: {
+				source: "sticky_cta",
+				plan_id: balance?.plan.id ?? "anonymous",
+			},
+		});
+	};
 
 	useEffect(() => {
 		// Show after user scrolls past ~400px (past the hero fold)
@@ -45,7 +57,7 @@ export function StickyCta() {
 					Start free — 10 credits, no card needed
 				</p>
 				<Button size="sm" variant="primary" asChild>
-					<Link href="/auth/signup">
+					<Link href="/auth/signup" onClick={handleCtaClick}>
 						Get started
 						<ArrowRightIcon className="ml-1.5 size-3.5" />
 					</Link>

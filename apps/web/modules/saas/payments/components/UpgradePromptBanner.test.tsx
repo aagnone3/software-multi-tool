@@ -3,6 +3,10 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { UpgradePromptBanner } from "./UpgradePromptBanner";
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 vi.mock("@saas/payments/hooks/purchases", () => ({
 	usePurchases: vi.fn(),
 }));

@@ -1,8 +1,10 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const POLLING_INTERVALS = {
 	PROCESSING: 2000, // Poll every 2 seconds while processing
@@ -23,6 +25,10 @@ function getPollingInterval(status: JobStatus | undefined): number | false {
 
 export function useJobPolling(jobId: string | undefined) {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
+	const { balance } = useCreditsBalance();
+	const planId = balance?.plan.id ?? "free";
+	const prevStatusRef = useRef<string | undefined>(undefined);
 
 	const { data, isLoading, error, refetch } = useQuery({
 		...orpc.jobs.get.queryOptions({
@@ -38,6 +44,53 @@ export function useJobPolling(jobId: string | undefined) {
 		refetchIntervalInBackground: false,
 	});
 
+	const job = data?.job;
+
+	// Track status transitions
+	useEffect(() => {
+		if (!job) {
+			return;
+		}
+		const status = job.status as string;
+		if (status === prevStatusRef.current) {
+			return;
+		}
+
+		const toolSlug = (job as { toolSlug?: string }).toolSlug ?? "unknown";
+
+		if (status === "COMPLETED") {
+			const createdAt = (job as { createdAt?: string | Date }).createdAt;
+			const completedAt = (job as { completedAt?: string | Date })
+				.completedAt;
+			const durationMs =
+				createdAt && completedAt
+					? new Date(completedAt).getTime() -
+						new Date(createdAt).getTime()
+					: 0;
+			track({
+				name: "tool_run_completed",
+				props: {
+					tool_slug: toolSlug,
+					plan_id: planId,
+					duration_ms: durationMs,
+					success: true,
+				},
+			});
+		} else if (status === "FAILED") {
+			const errorMsg = (job as { error?: string | null }).error;
+			track({
+				name: "tool_run_failed",
+				props: {
+					tool_slug: toolSlug,
+					plan_id: planId,
+					error_code: errorMsg ?? undefined,
+				},
+			});
+		}
+
+		prevStatusRef.current = status;
+	}, [job, track, planId]);
+
 	const invalidateJob = useCallback(() => {
 		if (jobId) {
 			queryClient.invalidateQueries({
@@ -48,7 +101,7 @@ export function useJobPolling(jobId: string | undefined) {
 	}, [jobId, queryClient]);
 
 	return {
-		job: data?.job,
+		job,
 		isLoading,
 		error,
 		refetch,
@@ -58,13 +111,24 @@ export function useJobPolling(jobId: string | undefined) {
 
 export function useCreateJob() {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
+	const { balance } = useCreditsBalance();
+	const planId = balance?.plan.id ?? "free";
 
 	return useMutation({
 		...orpc.jobs.create.mutationOptions(),
-		onSuccess: () => {
+		onSuccess: (data) => {
 			// Invalidate jobs list when a new job is created
 			queryClient.invalidateQueries({
 				queryKey: orpc.jobs.list.queryOptions({ input: {} }).queryKey,
+			});
+
+			const toolSlug =
+				(data as { job?: { toolSlug?: string } })?.job?.toolSlug ??
+				"unknown";
+			track({
+				name: "tool_run_started",
+				props: { tool_slug: toolSlug, plan_id: planId },
 			});
 		},
 	});

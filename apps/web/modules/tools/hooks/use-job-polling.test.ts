@@ -7,6 +7,19 @@ const mockUseMutation = vi.hoisted(() => vi.fn());
 const mockUseQueryClient = vi.hoisted(() => vi.fn());
 const mockInvalidateQueries = vi.hoisted(() => vi.fn());
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: () => ({
+		balance: { plan: { id: "free" } },
+		isLoading: false,
+		isFreePlan: true,
+		hasActiveOrganization: false,
+	}),
+}));
+
 vi.mock("@tanstack/react-query", () => ({
 	useQuery: mockUseQuery,
 	useMutation: mockUseMutation,

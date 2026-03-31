@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { UpgradeGate } from "./UpgradeGate";
 
 // ---- module mocks ----
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
 vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
 	useCreditsBalance: vi.fn(),
 }));

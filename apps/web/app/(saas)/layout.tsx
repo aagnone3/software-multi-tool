@@ -1,3 +1,4 @@
+import { PostHogIdentitySync } from "@analytics/components/PostHogIdentitySync";
 import { config } from "@repo/config";
 import { SessionProvider } from "@saas/auth/components/SessionProvider";
 import { sessionQueryKey } from "@saas/auth/lib/api";
@@ -56,6 +57,7 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 			<HydrationBoundary state={dehydrate(queryClient)}>
 				<SessionProvider>
 					<ActiveOrganizationProvider>
+						<PostHogIdentitySync />
 						<ConfirmationAlertProvider>
 							<CommandPaletteProvider>
 								<CommandPaletteShortcut />
