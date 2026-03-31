@@ -144,3 +144,105 @@ describe("FreeCreditsProgressBanner", () => {
 		);
 	});
 });
+
+const mockStarterBalance = {
+	included: 100,
+	used: 55,
+	remaining: 45,
+	overage: 0,
+	purchasedCredits: 0,
+	totalAvailable: 45,
+	periodStart: "2026-01-01",
+	periodEnd: "2026-02-01",
+	plan: { id: "starter", name: "Starter" },
+	purchases: [],
+};
+
+describe("FreeCreditsProgressBanner — Starter plan", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		localStorage.clear();
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+	});
+
+	it("renders nothing for Starter user below 50% usage", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: { ...mockStarterBalance, used: 40, remaining: 60 },
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		const { container } = render(<FreeCreditsProgressBanner />);
+		expect(container.firstChild).toBeNull();
+	});
+
+	it("shows Starter banner when ≥50% credits used", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: mockStarterBalance,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<FreeCreditsProgressBanner />);
+		expect(
+			screen.getByTestId("starter-credits-banner"),
+		).toBeInTheDocument();
+	});
+
+	it("shows Pro upgrade CTA in Starter banner", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: mockStarterBalance,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<FreeCreditsProgressBanner />);
+		const link = screen.getByRole("link", { name: /upgrade to pro/i });
+		expect(link).toHaveAttribute("href", "/app/settings/billing");
+	});
+
+	it("shows high urgency message when Starter user at >80% usage", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: { ...mockStarterBalance, used: 85, remaining: 15 },
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<FreeCreditsProgressBanner />);
+		expect(
+			screen.getByText(/Only 15 Starter credits left/i),
+		).toBeInTheDocument();
+	});
+
+	it("shows out-of-credits message when Starter user exhausted", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: { ...mockStarterBalance, used: 100, remaining: 0 },
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<FreeCreditsProgressBanner />);
+		expect(
+			screen.getByText(/You've used all your Starter credits/i),
+		).toBeInTheDocument();
+	});
+
+	it("can be dismissed (24h snooze) in Starter banner", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isLoading: false,
+			balance: mockStarterBalance,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<FreeCreditsProgressBanner />);
+		const dismissBtn = screen.getByRole("button", { name: /dismiss/i });
+		await userEvent.click(dismissBtn);
+		expect(
+			screen.queryByTestId("starter-credits-banner"),
+		).not.toBeInTheDocument();
+		const stored = Number(
+			localStorage.getItem("starter-credits-banner-dismissed-until"),
+		);
+		expect(stored).toBeGreaterThan(Date.now());
+	});
+});

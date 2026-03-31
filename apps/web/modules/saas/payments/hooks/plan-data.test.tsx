@@ -39,6 +39,28 @@ describe("usePlanData", () => {
 		expect(planData.pro.features.length).toBeGreaterThan(0);
 	});
 
+	it("starter plan surfaces paid features available to non-free users", () => {
+		const { result } = renderHook(() => usePlanData());
+		const { planData } = result.current;
+
+		const starterFeatures = planData.starter.features as string[];
+		// Starter gets all non-exclusive Pro features (UpgradeGate only blocks free plan)
+		expect(
+			starterFeatures.some((f) => f.toLowerCase().includes("export")),
+		).toBe(true);
+		expect(
+			starterFeatures.some((f) =>
+				f.toLowerCase().includes("job comparison"),
+			),
+		).toBe(true);
+		expect(
+			starterFeatures.some((f) => f.toLowerCase().includes("analytics")),
+		).toBe(true);
+		expect(
+			starterFeatures.some((f) => f.toLowerCase().includes("pinned")),
+		).toBe(true);
+	});
+
 	it("pro plan surfaces Pro-only gated features", () => {
 		const { result } = renderHook(() => usePlanData());
 		const { planData } = result.current;

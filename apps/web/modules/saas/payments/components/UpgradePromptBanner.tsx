@@ -19,24 +19,44 @@ export function UpgradePromptBanner({
 	const { activePlan } = usePurchases(organizationId);
 	const { track } = useProductAnalytics();
 
-	const handleCtaClick = () => {
+	const handleUpgradeCtaClick = () => {
 		track({
 			name: "upgrade_cta_clicked",
 			props: {
-				source: "upgrade_banner",
+				source:
+					activePlan?.id === "starter"
+						? "starter_to_pro_upgrade_banner"
+						: "upgrade_banner",
 				plan_id: activePlan?.id ?? "free",
+				target_plan: activePlan?.id === "starter" ? "pro" : "starter",
 			},
 		});
 	};
 
-	// Only show for free plan users
-	if (!activePlan || activePlan.id !== "free") {
+	const handleComparePlansClick = () => {
+		track({
+			name: "upgrade_cta_clicked",
+			props: {
+				source: "starter_to_pro_compare_plans_banner",
+				plan_id: activePlan?.id ?? "free",
+				target_plan: "pro",
+			},
+		});
+	};
+
+	// Show upgrade prompts only for free/starter users
+	if (
+		!activePlan ||
+		(activePlan.id !== "free" && activePlan.id !== "starter")
+	) {
 		return null;
 	}
 
 	const billingBase = organizationId
 		? `/app/orgs/${organizationId}/settings/billing`
 		: "/app/settings/billing";
+
+	const isStarter = activePlan.id === "starter";
 
 	return (
 		<div
@@ -47,23 +67,38 @@ export function UpgradePromptBanner({
 					<SparklesIcon className="mt-0.5 size-5 shrink-0 text-primary" />
 					<div>
 						<p className="font-semibold text-sm">
-							You're on the Free plan
+							{isStarter
+								? "You're on the Starter plan"
+								: "You're on the Free plan"}
 						</p>
 						<p className="mt-0.5 text-muted-foreground text-sm">
-							Upgrade to Starter or Pro to unlock more credits,
-							rollover unused credits, and priority support.
+							{isStarter
+								? "Upgrade to Pro to unlock automation features like scheduler runs, bulk actions, and custom templates."
+								: "Upgrade to Starter or Pro to unlock more credits, rollover unused credits, and priority support."}
 						</p>
 					</div>
 				</div>
-				<Button asChild size="sm" className="shrink-0">
-					<Link
-						href={`${billingBase}#pricing`}
-						onClick={handleCtaClick}
-					>
-						Upgrade now
-						<ArrowRightIcon className="ml-1.5 size-3.5" />
-					</Link>
-				</Button>
+				<div className="flex shrink-0 gap-2">
+					{isStarter && (
+						<Button asChild size="sm" variant="secondary">
+							<Link
+								href={`${billingBase}#pricing-plan-pro`}
+								onClick={handleComparePlansClick}
+							>
+								Compare plans
+							</Link>
+						</Button>
+					)}
+					<Button asChild size="sm">
+						<Link
+							href={`${billingBase}#pricing`}
+							onClick={handleUpgradeCtaClick}
+						>
+							{isStarter ? "Unlock Pro" : "Upgrade now"}
+							<ArrowRightIcon className="ml-1.5 size-3.5" />
+						</Link>
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

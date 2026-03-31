@@ -66,6 +66,9 @@ export function useCreditsBalance() {
 	// Check if user is on free plan
 	const isFreePlan = balance ? balance.plan.id === "free" : false;
 
+	// Check if user is on starter plan
+	const isStarterPlan = balance ? balance.plan.id === "starter" : false;
+
 	// Classify the error for UI handling
 	const errorCode: ApiErrorCode | undefined = query.error
 		? classifyError(query.error)
@@ -87,6 +90,7 @@ export function useCreditsBalance() {
 		percentageUsed,
 		isLowCredits,
 		isFreePlan,
+		isStarterPlan,
 		hasActiveOrganization,
 		refetch: query.refetch,
 	};
