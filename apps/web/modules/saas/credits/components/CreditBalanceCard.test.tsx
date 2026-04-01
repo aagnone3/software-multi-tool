@@ -207,6 +207,36 @@ describe("CreditBalanceCard", () => {
 		).toBeDefined();
 	});
 
+	it("shows Starter→Pro nudge when on starter plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...baseBalance,
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			totalCredits: 100,
+			percentageUsed: 25,
+			isLowCredits: false,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		render(<CreditBalanceCard />);
+		expect(
+			screen.getByText("Unlock Pro — more credits & power"),
+		).toBeDefined();
+		const upgradeLink = screen.getByRole("link", {
+			name: /Upgrade to Pro/i,
+		});
+		expect(upgradeLink.getAttribute("href")).toBe("/app/settings/billing");
+		const compareLink = screen.getByRole("link", {
+			name: /Compare plans/i,
+		});
+		expect(compareLink.getAttribute("href")).toBe(
+			"/pricing#pricing-plan-pro",
+		);
+	});
+
 	it("uses org usage history path when activeOrganization exists", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			balance: baseBalance,
