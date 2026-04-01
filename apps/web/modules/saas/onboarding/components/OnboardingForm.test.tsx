@@ -1,11 +1,17 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockReplace, mockUpdateUser, mockClearCache } = vi.hoisted(() => ({
-	mockReplace: vi.fn(),
-	mockUpdateUser: vi.fn(),
-	mockClearCache: vi.fn(),
+const { mockReplace, mockUpdateUser, mockClearCache, mockToastError } =
+	vi.hoisted(() => ({
+		mockReplace: vi.fn(),
+		mockUpdateUser: vi.fn(),
+		mockClearCache: vi.fn(),
+		mockToastError: vi.fn(),
+	}));
+
+vi.mock("sonner", () => ({
+	toast: { error: mockToastError },
 }));
 
 vi.mock("@shared/hooks/router", () => ({
@@ -61,7 +67,12 @@ describe("OnboardingForm", () => {
 		mockReplace.mockClear();
 		mockUpdateUser.mockClear();
 		mockClearCache.mockClear();
+		mockToastError.mockClear();
 		mockSearchParams.get.mockReturnValue(null);
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	it("renders the onboarding form", () => {
@@ -121,5 +132,24 @@ describe("OnboardingForm", () => {
 		await waitFor(() => {
 			expect(mockReplace).toHaveBeenCalledWith("/custom-redirect");
 		});
+	});
+
+	it("shows error toast when updateUser fails during onboarding completion", async () => {
+		mockSearchParams.get.mockImplementation((key: string) => {
+			if (key === "step") return "2";
+			return null;
+		});
+
+		mockUpdateUser.mockRejectedValue(new Error("Network error"));
+
+		render(<OnboardingForm />);
+		fireEvent.click(screen.getByText("Complete"));
+
+		await waitFor(() => {
+			expect(mockToastError).toHaveBeenCalledWith(
+				"Failed to complete onboarding. Please try again.",
+			);
+		});
+		expect(mockReplace).not.toHaveBeenCalled();
 	});
 });

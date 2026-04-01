@@ -18,6 +18,7 @@ import { ArrowRightIcon } from "lucide-react";
 import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -92,7 +93,9 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 									return;
 								}}
 								onError={() => {
-									return;
+									toast.error(
+										"Could not update avatar. Please try again.",
+									);
 								}}
 							/>
 						</FormControl>
