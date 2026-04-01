@@ -40,9 +40,41 @@ describe("JobResultsUpgradeNudge", () => {
 		).toBeInTheDocument();
 	});
 
-	it("does not render for paid plan users", () => {
+	it("renders Starter→Pro nudge for starter plan users", () => {
 		mockUsePurchases.mockReturnValue({
 			activePlan: { id: "starter" },
+		} as ReturnType<typeof usePurchases>);
+
+		render(<JobResultsUpgradeNudge />);
+
+		expect(screen.getByText("Ready for more?")).toBeInTheDocument();
+		expect(
+			screen.getByText(/scheduled runs, bulk actions, and templates/i),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /upgrade to pro/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /compare plans/i }),
+		).toBeInTheDocument();
+	});
+
+	it("Starter compare plans link deep-links to pricing-plan-pro", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		} as ReturnType<typeof usePurchases>);
+
+		render(<JobResultsUpgradeNudge />);
+
+		const compareLink = screen.getByRole("link", {
+			name: /compare plans/i,
+		});
+		expect(compareLink).toHaveAttribute("href", "#pricing-plan-pro");
+	});
+
+	it("does not render for pro plan users", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "pro" },
 		} as ReturnType<typeof usePurchases>);
 
 		const { container } = render(<JobResultsUpgradeNudge />);
@@ -58,7 +90,7 @@ describe("JobResultsUpgradeNudge", () => {
 		expect(container.firstChild).toBeNull();
 	});
 
-	it("links to personal billing page by default", () => {
+	it("links to personal billing page by default (free plan)", () => {
 		mockUsePurchases.mockReturnValue({
 			activePlan: { id: "free" },
 		} as ReturnType<typeof usePurchases>);
@@ -69,7 +101,7 @@ describe("JobResultsUpgradeNudge", () => {
 		expect(link).toHaveAttribute("href", "/app/settings/billing#pricing");
 	});
 
-	it("links to org billing page when organizationId is provided", () => {
+	it("links to org billing page when organizationId is provided (free plan)", () => {
 		mockUsePurchases.mockReturnValue({
 			activePlan: { id: "free" },
 		} as ReturnType<typeof usePurchases>);
@@ -78,6 +110,22 @@ describe("JobResultsUpgradeNudge", () => {
 
 		const link = screen.getByRole("link", { name: /upgrade/i });
 		expect(link).toHaveAttribute(
+			"href",
+			"/app/orgs/org-123/settings/billing#pricing",
+		);
+	});
+
+	it("links to org billing page when organizationId is provided (starter plan)", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		} as ReturnType<typeof usePurchases>);
+
+		render(<JobResultsUpgradeNudge organizationId="org-123" />);
+
+		const upgradeLink = screen.getByRole("link", {
+			name: /upgrade to pro/i,
+		});
+		expect(upgradeLink).toHaveAttribute(
 			"href",
 			"/app/orgs/org-123/settings/billing#pricing",
 		);
@@ -102,7 +150,6 @@ describe("JobResultsUpgradeNudge", () => {
 			<JobResultsUpgradeNudge className="my-custom-class" />,
 		);
 
-		// The outermost rendered div should carry the custom class
 		const outerDiv = container.firstChild as HTMLElement;
 		expect(outerDiv.className).toContain("my-custom-class");
 	});
@@ -117,14 +164,5 @@ describe("JobResultsUpgradeNudge", () => {
 		expect(
 			screen.getByText(/free plan runs are limited/i),
 		).toBeInTheDocument();
-	});
-
-	it("does not render for pro plan users", () => {
-		mockUsePurchases.mockReturnValue({
-			activePlan: { id: "pro" },
-		} as ReturnType<typeof usePurchases>);
-
-		const { container } = render(<JobResultsUpgradeNudge />);
-		expect(container.firstChild).toBeNull();
 	});
 });
