@@ -1,9 +1,15 @@
 "use client";
 
+import { config } from "@repo/config";
 import { usePlanData } from "@saas/payments/hooks/plan-data";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
-import { BadgeCheckIcon, CheckIcon, ZapIcon } from "lucide-react";
+import {
+	BadgeCheckIcon,
+	CalendarCheckIcon,
+	CheckIcon,
+	ZapIcon,
+} from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { CustomerPortalButton } from "../../settings/components/CustomerPortalButton";
@@ -16,6 +22,40 @@ const PRO_EXCLUSIVE_FEATURES = [
 	"Custom input templates",
 	"Usage data export",
 ];
+
+/** Compute annual savings % for a plan that has both monthly and yearly prices. */
+function getAnnualSavingsPct(planId: string): number | null {
+	const plan =
+		config.payments.plans[planId as keyof typeof config.payments.plans];
+	const prices = "prices" in plan ? (plan.prices as unknown[]) : [];
+	if (!Array.isArray(prices)) return null;
+
+	type PriceEntry = {
+		type?: string;
+		interval?: string;
+		intervalCount?: number;
+		amount: number;
+		currency: string;
+		hidden?: boolean;
+	};
+
+	const monthly = (prices as PriceEntry[]).find(
+		(p) =>
+			p.type === "recurring" &&
+			p.interval === "month" &&
+			(p.intervalCount ?? 1) === 1 &&
+			!p.hidden,
+	);
+	const yearly = (prices as PriceEntry[]).find(
+		(p) => p.type === "recurring" && p.interval === "year" && !p.hidden,
+	);
+	if (!monthly || !yearly || monthly.amount === 0) return null;
+	const annualizedMonthly = monthly.amount * 12;
+	const savings = Math.round(
+		((annualizedMonthly - yearly.amount) / annualizedMonthly) * 100,
+	);
+	return savings > 0 ? savings : null;
+}
 
 export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	const { planData } = usePlanData();
@@ -33,6 +73,17 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 
 	const price = "price" in activePlan ? activePlan.price : null;
 	const isStarterPlan = activePlan.id === "starter";
+	const isMonthlySubscription =
+		!isStarterPlan &&
+		price !== null &&
+		price !== undefined &&
+		"interval" in price &&
+		price.interval === "month";
+
+	const annualSavingsPct = isMonthlySubscription
+		? getAnnualSavingsPct(activePlan.id)
+		: null;
+	const showAnnualUpsell = isMonthlySubscription && annualSavingsPct !== null;
 
 	const formatMonth = (count: number) =>
 		count === 1 ? "month" : `${count} months`;
@@ -101,6 +152,35 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 				)}
 			</div>
 
+			{/* Annual billing upsell — shown to monthly subscribers who could save */}
+			{showAnnualUpsell && (
+				<div
+					className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800/40 dark:bg-green-950/20"
+					data-test="annual-billing-upsell"
+				>
+					<div className="mb-2 flex items-center gap-2">
+						<CalendarCheckIcon className="size-4 text-green-600 dark:text-green-400" />
+						<p className="font-semibold text-green-800 text-sm dark:text-green-300">
+							Save {annualSavingsPct}% with annual billing
+						</p>
+					</div>
+					<p className="mb-3 text-green-700 text-sm dark:text-green-400">
+						Switch to annual and stop paying month-to-month. You get
+						the same Pro features at a lower effective rate — locked
+						in for the year.
+					</p>
+					<Link
+						href="/app/billing"
+						className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+						data-test="annual-billing-upsell-cta"
+					>
+						<CalendarCheckIcon className="size-3.5" />
+						Switch to annual — save {annualSavingsPct}%
+					</Link>
+				</div>
+			)}
+
+			{/* Starter→Pro upgrade nudge */}
 			{isStarterPlan && (
 				<div
 					className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4"
