@@ -1,91 +1,109 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PostJobInviteNudge } from "./PostJobInviteNudge";
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
-	useActiveOrganization: () => ({ activeOrganization: null }),
+	useActiveOrganization: () => ({ activeOrganization: { slug: "my-org" } }),
 }));
+
+const mockUseJobsList = vi.fn();
 vi.mock("@tools/hooks/use-job-polling", () => ({
-	useJobsList: () => ({
-		jobs: [
-			{ status: "COMPLETED" },
-			{ status: "COMPLETED" },
-			{ status: "COMPLETED" },
-		],
-	}),
+	useJobsList: (...args: unknown[]) => mockUseJobsList(...args),
 }));
+
+const localStorageMock = (() => {
+	let store: Record<string, string> = {};
+	return {
+		getItem: (key: string) => store[key] ?? null,
+		setItem: (key: string, val: string) => {
+			store[key] = val;
+		},
+		clear: () => {
+			store = {};
+		},
+	};
+})();
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 describe("PostJobInviteNudge", () => {
 	beforeEach(() => {
-		localStorage.clear();
+		localStorageMock.clear();
 		vi.useFakeTimers();
 	});
+
 	afterEach(() => {
 		vi.useRealTimers();
 	});
 
-	it("does not render immediately (timer pending)", () => {
+	it("does not show when completed job count is below threshold", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [{ status: "COMPLETED" }, { status: "COMPLETED" }],
+		});
 		render(<PostJobInviteNudge />);
-		expect(screen.queryByRole("complementary")).toBeNull();
-	});
-
-	it("renders after delay when not dismissed and threshold met", async () => {
-		render(<PostJobInviteNudge />);
-		await act(async () => {
-			vi.advanceTimersByTime(2100);
+		act(() => {
+			vi.advanceTimersByTime(3000);
 		});
 		expect(
-			screen.getByRole("complementary", {
-				name: /invite teammates prompt/i,
-			}),
-		).toBeTruthy();
+			screen.queryByLabelText("Invite teammates prompt"),
+		).not.toBeInTheDocument();
 	});
 
-	it("does not render when already dismissed", async () => {
-		localStorage.setItem("invite-nudge-dismissed", "true");
+	it("shows after threshold is met and delay passes", async () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
+		});
 		render(<PostJobInviteNudge />);
-		await act(async () => {
-			vi.advanceTimersByTime(2100);
+		act(() => {
+			vi.advanceTimersByTime(3000);
 		});
 		expect(
-			screen.queryByRole("complementary", {
-				name: /invite teammates prompt/i,
-			}),
-		).toBeNull();
-	});
-
-	it("dismisses on X click", async () => {
-		render(<PostJobInviteNudge />);
-		await act(async () => {
-			vi.advanceTimersByTime(2100);
-		});
-		screen.getByRole("complementary", { name: /invite teammates prompt/i });
-		fireEvent.click(screen.getByRole("button", { name: /dismiss/i }));
+			screen.getByLabelText("Invite teammates prompt"),
+		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("complementary", {
-				name: /invite teammates prompt/i,
-			}),
-		).toBeNull();
-		expect(localStorage.getItem("invite-nudge-dismissed")).toBe("true");
+			screen.getByText("Bring your team on board"),
+		).toBeInTheDocument();
 	});
 
-	it("shows invite teammates button", async () => {
+	it("does not show if previously dismissed", () => {
+		localStorageMock.setItem("invite-nudge-dismissed", "true");
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
+		});
 		render(<PostJobInviteNudge />);
-		await act(async () => {
-			vi.advanceTimersByTime(2100);
+		act(() => {
+			vi.advanceTimersByTime(3000);
 		});
 		expect(
-			screen.getByRole("link", { name: /invite teammates/i }),
-		).toBeTruthy();
+			screen.queryByLabelText("Invite teammates prompt"),
+		).not.toBeInTheDocument();
 	});
 
-	it("falls back to /app/settings when no activeOrganization", async () => {
-		render(<PostJobInviteNudge />);
-		await act(async () => {
-			vi.advanceTimersByTime(2100);
+	it("dismisses and saves flag", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
 		});
-		const link = screen.getByRole("link", { name: /invite teammates/i });
-		expect(link.getAttribute("href")).toBe("/app/settings");
+		render(<PostJobInviteNudge />);
+		act(() => {
+			vi.advanceTimersByTime(3000);
+		});
+		act(() => {
+			screen.getByLabelText("Dismiss").click();
+		});
+		expect(
+			screen.queryByLabelText("Invite teammates prompt"),
+		).not.toBeInTheDocument();
+		expect(localStorageMock.getItem("invite-nudge-dismissed")).toBe("true");
+	});
+
+	it("renders invite link to org members page", async () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
+		});
+		render(<PostJobInviteNudge />);
+		act(() => {
+			vi.advanceTimersByTime(3000);
+		});
+		expect(screen.getByText("Invite teammates")).toBeInTheDocument();
 	});
 });

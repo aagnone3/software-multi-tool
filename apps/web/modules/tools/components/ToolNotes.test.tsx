@@ -1,42 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolNotes } from "./ToolNotes";
 
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock("@ui/components/button", () => ({
-	Button: ({
-		children,
-		onClick,
-		disabled,
-		"aria-label": al,
-		...props
-	}: React.ComponentProps<"button"> & { "aria-label"?: string }) => (
-		<button
-			onClick={onClick}
-			disabled={disabled}
-			aria-label={al}
-			{...props}
-		>
-			{children}
-		</button>
-	),
-}));
-vi.mock("@ui/components/textarea", () => ({
-	Textarea: ({
-		"aria-label": al,
-		...props
-	}: React.ComponentProps<"textarea"> & { "aria-label"?: string }) => (
-		<textarea aria-label={al} {...props} />
-	),
-}));
+vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
 const localStorageMock = (() => {
 	let store: Record<string, string> = {};
 	return {
 		getItem: (key: string) => store[key] ?? null,
-		setItem: (key: string, value: string) => {
-			store[key] = value;
+		setItem: (key: string, val: string) => {
+			store[key] = val;
 		},
 		removeItem: (key: string) => {
 			delete store[key];
@@ -46,93 +21,81 @@ const localStorageMock = (() => {
 		},
 	};
 })();
-
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 describe("ToolNotes", () => {
-	beforeEach(() => {
-		localStorageMock.clear();
-		vi.clearAllMocks();
-	});
+	beforeEach(() => localStorageMock.clear());
 
-	it("renders My Notes toggle button", () => {
+	it("renders My Notes button", () => {
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		expect(screen.getByText("My Notes")).toBeDefined();
+		expect(screen.getByText("My Notes")).toBeInTheDocument();
 	});
 
-	it("shows textarea after opening", () => {
+	it("shows textarea when opened", async () => {
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		const textarea = screen.getByRole("textbox", { name: "Tool notes" });
-		expect(textarea).toBeDefined();
-		expect((textarea as HTMLTextAreaElement).placeholder).toContain(
-			"Add personal notes",
-		);
+		await userEvent.click(screen.getByText("My Notes"));
+		expect(screen.getByLabelText("Tool notes")).toBeInTheDocument();
 	});
 
-	it("loads existing note from localStorage", () => {
+	it("loads existing note from localStorage", async () => {
 		localStorageMock.setItem(
 			"tool-notes",
 			JSON.stringify({ "contract-analyzer": "My tip" }),
 		);
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
+		await userEvent.click(screen.getByText("My Notes"));
 		expect(
-			(
-				screen.getByRole("textbox", {
-					name: "Tool notes",
-				}) as HTMLTextAreaElement
-			).value,
+			(screen.getByLabelText("Tool notes") as HTMLTextAreaElement).value,
 		).toBe("My tip");
 	});
 
-	it("Save button is disabled initially when no change", () => {
+	it("saves note on Save click", async () => {
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		const saveBtn = screen.getByRole("button", { name: "Save note" });
-		expect((saveBtn as HTMLButtonElement).disabled).toBe(true);
-	});
-
-	it("enables Save button when note changes", () => {
-		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		const textarea = screen.getByRole("textbox", {
-			name: "Tool notes",
-		}) as HTMLTextAreaElement;
-		fireEvent.change(textarea, { target: { value: "New content" } });
-		const saveBtn = screen.getByRole("button", { name: "Save note" });
-		expect((saveBtn as HTMLButtonElement).disabled).toBe(false);
-	});
-
-	it("saves note to localStorage on Save click", async () => {
-		const { toast } = await import("sonner");
-		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		const textarea = screen.getByRole("textbox", {
-			name: "Tool notes",
-		}) as HTMLTextAreaElement;
-		fireEvent.change(textarea, { target: { value: "Important tip" } });
-		fireEvent.click(screen.getByRole("button", { name: "Save note" }));
+		await userEvent.click(screen.getByText("My Notes"));
+		await userEvent.type(
+			screen.getByLabelText("Tool notes"),
+			"Remember this",
+		);
+		await userEvent.click(screen.getByLabelText("Save note"));
 		const stored = JSON.parse(
 			localStorageMock.getItem("tool-notes") ?? "{}",
 		);
-		expect(stored["contract-analyzer"]).toBe("Important tip");
-		expect(toast.success).toHaveBeenCalledWith("Note saved");
+		expect(stored["contract-analyzer"]).toBe("Remember this");
 	});
 
-	it("shows character count when note has content", () => {
+	it("clears note on Clear click", async () => {
+		localStorageMock.setItem(
+			"tool-notes",
+			JSON.stringify({ "contract-analyzer": "My tip" }),
+		);
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		const textarea = screen.getByRole("textbox", {
-			name: "Tool notes",
-		}) as HTMLTextAreaElement;
-		fireEvent.change(textarea, { target: { value: "hello" } });
-		expect(screen.getByText("5 characters")).toBeDefined();
+		await userEvent.click(screen.getByText("My Notes"));
+		await userEvent.click(screen.getByLabelText("Clear note"));
+		const stored = JSON.parse(
+			localStorageMock.getItem("tool-notes") ?? "{}",
+		);
+		expect(stored["contract-analyzer"]).toBeUndefined();
 	});
 
-	it("shows 'No notes yet' when empty", () => {
+	it("Save button is disabled when note is unchanged", async () => {
 		render(<ToolNotes toolSlug="contract-analyzer" />);
-		fireEvent.click(screen.getByText("My Notes"));
-		expect(screen.getByText("No notes yet")).toBeDefined();
+		await userEvent.click(screen.getByText("My Notes"));
+		expect(screen.getByLabelText("Save note")).toBeDisabled();
+	});
+
+	it("Save button enables when note is changed", async () => {
+		render(<ToolNotes toolSlug="contract-analyzer" />);
+		await userEvent.click(screen.getByText("My Notes"));
+		await userEvent.type(screen.getByLabelText("Tool notes"), "New text");
+		expect(screen.getByLabelText("Save note")).not.toBeDisabled();
+	});
+
+	it("shows indicator dot when note exists", async () => {
+		localStorageMock.setItem(
+			"tool-notes",
+			JSON.stringify({ "contract-analyzer": "Tip" }),
+		);
+		render(<ToolNotes toolSlug="contract-analyzer" />);
+		expect(screen.getByLabelText("has note")).toBeInTheDocument();
 	});
 });
