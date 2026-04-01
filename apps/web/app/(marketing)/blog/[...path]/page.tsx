@@ -183,7 +183,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 						<RelatedToolCta tags={tags ?? []} />
 						<BlogNewsletterCta />
 						<BlogCTA />
-						<SocialShareButtons title={title} path={slug} />
+						<SocialShareButtons title={title} />
 					</div>
 				</div>
 				<RelatedPosts currentSlug={slug} tags={tags ?? []} limit={3} />

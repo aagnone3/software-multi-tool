@@ -1,6 +1,7 @@
 "use client";
 
 import { MDXContent } from "@content-collections/mdx/react";
+import React from "react";
 import { mdxComponents } from "../utils/mdx-components";
 
 export function PostContent({ content }: { content: string }) {
