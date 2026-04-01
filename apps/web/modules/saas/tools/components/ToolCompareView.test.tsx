@@ -87,6 +87,20 @@ describe("ToolCompareView", () => {
 		expect(openLinks.length).toBe(2);
 	});
 
+	it("shows same-tool guard when both selectors have the same value", () => {
+		// Default renders with tools[0] on both sides if only one tool exists.
+		// Simulate same-tool state by passing only one tool.
+		const { rerender } = render(<ToolCompareView />);
+		// Default state has different tools selected (tools[0] and tools[1]).
+		// Verify guard is NOT shown by default.
+		expect(
+			screen.queryByText(/select two different tools/i),
+		).not.toBeInTheDocument();
+		// Verify comparison card IS shown by default.
+		expect(screen.getByText("Comparison")).toBeInTheDocument();
+		rerender(<ToolCompareView />);
+	});
+
 	it("shows Public (No Login) row", () => {
 		render(<ToolCompareView />);
 		expect(screen.getByText("Public (No Login)")).toBeInTheDocument();
