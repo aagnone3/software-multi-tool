@@ -1,4 +1,5 @@
 import { ForgotPasswordForm } from "@saas/auth/components/ForgotPasswordForm";
+import React from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
