@@ -149,7 +149,7 @@ interface ActiveJobsWidgetProps {
 }
 
 export function ActiveJobsWidget({ className }: ActiveJobsWidgetProps) {
-	const { jobs, isLoading } = useRecentJobs(20);
+	const { jobs, isLoading, isError } = useRecentJobs(20);
 	const [, setTick] = useState(0);
 
 	// Re-render every 30s so "recently completed" threshold stays accurate
@@ -161,6 +161,25 @@ export function ActiveJobsWidget({ className }: ActiveJobsWidgetProps) {
 	const activeJobs = jobs.filter(
 		(j) => ACTIVE_STATUSES.has(j.status) || isRecentlyCompleted(j),
 	);
+
+	if (isError) {
+		return (
+			<Card className={cn("border-destructive/20", className)}>
+				<CardHeader className="pb-2">
+					<CardTitle className="flex items-center gap-2 text-base">
+						<ZapIcon className="size-4" />
+						Active Jobs
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+						<AlertCircleIcon className="size-4 text-destructive/60 shrink-0" />
+						Failed to load jobs
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	if (isLoading) {
 		return (

@@ -106,3 +106,15 @@ describe("RecentChatsWidget", () => {
 		expect(screen.getByText("Hello there how are you")).toBeDefined();
 	});
 });
+
+describe("RecentChatsWidget error state", () => {
+	it("shows error state when query fails", () => {
+		mockUseQuery.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		});
+		render(<RecentChatsWidget />);
+		expect(screen.getByText("Failed to load chats")).toBeDefined();
+	});
+});

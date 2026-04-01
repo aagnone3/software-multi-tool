@@ -12,6 +12,7 @@ import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
 import {
 	ActivityIcon,
+	AlertCircleIcon,
 	ChevronRightIcon,
 	ClockIcon,
 	CoinsIcon,
@@ -119,7 +120,30 @@ export function RecentActivityFeed({
 	className,
 	maxItems = 5,
 }: RecentActivityFeedProps) {
-	const { transactions, isLoading } = useCreditsHistory({ limit: maxItems });
+	const { transactions, isLoading, isError } = useCreditsHistory({
+		limit: maxItems,
+	});
+
+	if (isError) {
+		return (
+			<Card className={className}>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<ActivityIcon className="size-5" />
+						Recent Activity
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex flex-col items-center justify-center py-6 text-center">
+						<AlertCircleIcon className="size-8 text-destructive/60 mb-2" />
+						<p className="text-sm text-muted-foreground">
+							Failed to load activity
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	if (isLoading) {
 		return (

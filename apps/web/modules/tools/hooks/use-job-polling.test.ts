@@ -1,11 +1,22 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useJobPolling, useJobsList } from "./use-job-polling";
+import {
+	useCancelJob,
+	useCreateJob,
+	useJobPolling,
+	useJobsList,
+} from "./use-job-polling";
 
 const mockUseQuery = vi.hoisted(() => vi.fn());
 const mockUseMutation = vi.hoisted(() => vi.fn());
 const mockUseQueryClient = vi.hoisted(() => vi.fn());
 const mockInvalidateQueries = vi.hoisted(() => vi.fn());
+
+const mockToastError = vi.hoisted(() => vi.fn());
+
+vi.mock("sonner", () => ({
+	toast: { error: mockToastError, success: vi.fn(), info: vi.fn() },
+}));
 
 vi.mock("@analytics/hooks/use-product-analytics", () => ({
 	useProductAnalytics: () => ({ track: vi.fn() }),
@@ -175,6 +186,54 @@ describe("useJobPolling", () => {
 		it("returns false for FAILED", () => {
 			expect(getRefetchInterval("FAILED")).toBe(false);
 		});
+	});
+});
+
+describe("useCreateJob", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockUseQueryClient.mockReturnValue({
+			invalidateQueries: mockInvalidateQueries,
+		});
+	});
+
+	it("calls toast.error on mutation error", () => {
+		let capturedOnError: (() => void) | undefined;
+		mockUseMutation.mockImplementation((opts: { onError?: () => void }) => {
+			capturedOnError = opts.onError;
+			return { mutate: vi.fn(), isPending: false };
+		});
+
+		renderHook(() => useCreateJob());
+		capturedOnError?.();
+
+		expect(mockToastError).toHaveBeenCalledWith(
+			"Failed to start job. Please try again.",
+		);
+	});
+});
+
+describe("useCancelJob", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockUseQueryClient.mockReturnValue({
+			invalidateQueries: mockInvalidateQueries,
+		});
+	});
+
+	it("calls toast.error on mutation error", () => {
+		let capturedOnError: (() => void) | undefined;
+		mockUseMutation.mockImplementation((opts: { onError?: () => void }) => {
+			capturedOnError = opts.onError;
+			return { mutate: vi.fn(), isPending: false };
+		});
+
+		renderHook(() => useCancelJob());
+		capturedOnError?.();
+
+		expect(mockToastError).toHaveBeenCalledWith(
+			"Failed to cancel job. Please try again.",
+		);
 	});
 });
 

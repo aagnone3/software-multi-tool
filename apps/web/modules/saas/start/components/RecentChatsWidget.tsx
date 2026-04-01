@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
 import {
+	AlertCircleIcon,
 	ChevronRightIcon,
 	MessageSquareIcon,
 	MessagesSquareIcon,
@@ -61,7 +62,7 @@ export function RecentChatsWidget({
 		? `/app/${activeOrganization.slug}`
 		: "/app";
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError } = useQuery(
 		orpc.ai.chats.list.queryOptions({
 			input: {
 				organizationId: activeOrganization?.id,
@@ -70,6 +71,27 @@ export function RecentChatsWidget({
 	);
 
 	const chats = data?.chats ?? [];
+
+	if (isError) {
+		return (
+			<Card className={className}>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<MessagesSquareIcon className="size-5" />
+						Recent Chats
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex flex-col items-center justify-center py-6 text-center">
+						<AlertCircleIcon className="size-8 text-destructive/60 mb-2" />
+						<p className="text-sm text-muted-foreground">
+							Failed to load chats
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	// Sort by most recent first and limit
 	const recentChats = chats

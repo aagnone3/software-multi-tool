@@ -123,3 +123,15 @@ describe("RecentActivityFeed", () => {
 		expect(screen.getByText("Used TOOL-1")).toBeInTheDocument();
 	});
 });
+
+describe("RecentActivityFeed error state", () => {
+	it("shows error state when query fails", () => {
+		mockUseCreditsHistory.mockReturnValue({
+			transactions: [],
+			isLoading: false,
+			isError: true,
+		});
+		render(<RecentActivityFeed />);
+		expect(screen.getByText("Failed to load activity")).toBeDefined();
+	});
+});
