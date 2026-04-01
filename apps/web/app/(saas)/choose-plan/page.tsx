@@ -6,6 +6,7 @@ import { getPurchases } from "@saas/payments/lib/server";
 import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
 import { attemptAsync } from "es-toolkit";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
