@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
@@ -24,6 +25,7 @@ const JOB_COUNT_THRESHOLD = 3;
 export function PostJobInviteNudge({ className }: PostJobInviteNudgeProps) {
 	const { activeOrganization } = useActiveOrganization();
 	const { jobs } = useJobsList(undefined, 20);
+	const { track } = useProductAnalytics();
 	const [show, setShow] = useState(false);
 
 	const completedJobCount = (jobs ?? []).filter(
@@ -39,9 +41,18 @@ export function PostJobInviteNudge({ className }: PostJobInviteNudgeProps) {
 		const dismissed = localStorage.getItem(STORAGE_KEY);
 		if (dismissed === "true") return;
 		// Show with a slight delay so it doesn't compete with other nudges
-		const timer = setTimeout(() => setShow(true), 2000);
+		const timer = setTimeout(() => {
+			setShow(true);
+			track({
+				name: "invite_nudge_shown",
+				props: {
+					completed_job_count: completedJobCount,
+					source: "post_job",
+				},
+			});
+		}, 2000);
 		return () => clearTimeout(timer);
-	}, [completedJobCount]);
+	}, [completedJobCount, track]);
 
 	const handleDismiss = () => {
 		localStorage.setItem(STORAGE_KEY, "true");
@@ -80,7 +91,18 @@ export function PostJobInviteNudge({ className }: PostJobInviteNudgeProps) {
 						whole team could do. Invite colleagues to collaborate.
 					</p>
 					<div className="mt-3 flex flex-wrap gap-2">
-						<Link href={invitePath}>
+						<Link
+							href={invitePath}
+							onClick={() =>
+								track({
+									name: "invite_cta_clicked",
+									props: {
+										completed_job_count: completedJobCount,
+										source: "post_job",
+									},
+								})
+							}
+						>
 							<Button size="sm" className="gap-1.5">
 								<UsersIcon className="size-3.5" />
 								Invite teammates

@@ -3,6 +3,11 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PostJobInviteNudge } from "./PostJobInviteNudge";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => ({ activeOrganization: { slug: "my-org" } }),
 }));
@@ -30,6 +35,7 @@ describe("PostJobInviteNudge", () => {
 	beforeEach(() => {
 		localStorageMock.clear();
 		vi.useFakeTimers();
+		mockTrack.mockClear();
 	});
 
 	afterEach(() => {
@@ -105,5 +111,36 @@ describe("PostJobInviteNudge", () => {
 			vi.advanceTimersByTime(3000);
 		});
 		expect(screen.getByText("Invite teammates")).toBeInTheDocument();
+	});
+
+	it("tracks invite_nudge_shown when nudge appears", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
+		});
+		render(<PostJobInviteNudge />);
+		act(() => {
+			vi.advanceTimersByTime(3000);
+		});
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "invite_nudge_shown",
+			props: { completed_job_count: 5, source: "post_job" },
+		});
+	});
+
+	it("tracks invite_cta_clicked when invite button is clicked", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: Array.from({ length: 5 }, () => ({ status: "COMPLETED" })),
+		});
+		render(<PostJobInviteNudge />);
+		act(() => {
+			vi.advanceTimersByTime(3000);
+		});
+		act(() => {
+			screen.getByText("Invite teammates").click();
+		});
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "invite_cta_clicked",
+			props: { completed_job_count: 5, source: "post_job" },
+		});
 	});
 });

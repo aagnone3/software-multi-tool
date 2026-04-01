@@ -3,7 +3,13 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ReferralWidget } from "./ReferralWidget";
 
+const mockTrack = vi.fn();
+
 // Mocks
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: () => ({ user: { id: "user-123", name: "Alice" } }),
 }));
@@ -79,5 +85,29 @@ describe("ReferralWidget", () => {
 	it("accepts a className prop", () => {
 		const { container } = render(<ReferralWidget className="test-class" />);
 		expect(container.querySelector(".test-class")).toBeInTheDocument();
+	});
+
+	it("tracks referral_widget_viewed when user is present", async () => {
+		render(<ReferralWidget />);
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "referral_widget_viewed",
+				props: { source: "dashboard" },
+			});
+		});
+	});
+
+	it("tracks referral_link_copied on successful copy", async () => {
+		render(<ReferralWidget />);
+		const copyBtn = screen.getByRole("button", {
+			name: /copy referral link/i,
+		});
+		fireEvent.click(copyBtn);
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "referral_link_copied",
+				props: { source: "dashboard" },
+			});
+		});
 	});
 });
