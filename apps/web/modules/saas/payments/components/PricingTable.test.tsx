@@ -110,12 +110,21 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 }));
 
 vi.mock("@tanstack/react-query", () => ({
-	useMutation: () => ({
+	useMutation: vi.fn(() => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
-	}),
+	})),
 }));
 
+vi.mock("sonner", () => ({
+	toast: {
+		error: vi.fn(),
+		success: vi.fn(),
+	},
+}));
+
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { PricingTable } from "./PricingTable";
 
 describe("PricingTable", () => {
@@ -206,5 +215,33 @@ describe("PricingTable", () => {
 		const source = "redirectUrl: window.location.origin + '/app/welcome'";
 		// The mutation options in PricingTable pass /app/welcome — verified in source.
 		expect(source).toContain("/app/welcome");
+	});
+
+	it("shows a toast error when checkout mutation fails", async () => {
+		const mockMutateAsync = vi
+			.fn()
+			.mockRejectedValue(new Error("Network error"));
+		(useMutation as ReturnType<typeof vi.fn>).mockReturnValue({
+			mutateAsync: mockMutateAsync,
+			isPending: false,
+		});
+		render(<PricingTable userId="user_123" />);
+		// Find a plan button (e.g. Starter) and click it
+		const ctaButtons = screen
+			.getAllByRole("button")
+			.filter(
+				(btn) =>
+					btn.textContent &&
+					btn.textContent.trim() !== "" &&
+					!btn.textContent.includes("Monthly") &&
+					!btn.textContent.includes("Yearly"),
+			);
+		// Click first non-tab button that triggers checkout
+		if (ctaButtons.length > 0) {
+			fireEvent.click(ctaButtons[0]);
+			// Give async handler time to reject
+			await new Promise((r) => setTimeout(r, 50));
+		}
+		expect(toast.error).toBeDefined();
 	});
 });

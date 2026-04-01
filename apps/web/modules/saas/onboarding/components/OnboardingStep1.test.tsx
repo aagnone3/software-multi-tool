@@ -4,6 +4,13 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OnboardingStep1 } from "./OnboardingStep1";
 
+vi.mock("sonner", () => ({
+	toast: {
+		error: vi.fn(),
+		success: vi.fn(),
+	},
+}));
+
 const mockUpdateUser = vi.hoisted(() => vi.fn());
 const mockUseSession = vi.hoisted(() => vi.fn());
 
@@ -20,13 +27,19 @@ vi.mock("@saas/auth/hooks/use-session", () => ({
 vi.mock("@saas/settings/components/UserAvatarUpload", () => ({
 	UserAvatarUpload: ({
 		onSuccess,
+		onError,
 	}: {
 		onSuccess: () => void;
 		onError: () => void;
 	}) => (
-		<button type="button" onClick={onSuccess}>
-			Upload Avatar
-		</button>
+		<>
+			<button type="button" onClick={onSuccess}>
+				Upload Avatar
+			</button>
+			<button type="button" onClick={onError}>
+				Fail Avatar Upload
+			</button>
+		</>
 	),
 }));
 
@@ -62,6 +75,18 @@ describe("OnboardingStep1", () => {
 			expect(mockUpdateUser).toHaveBeenCalledWith({ name: "New Name" });
 			expect(onCompleted).toHaveBeenCalled();
 		});
+	});
+
+	it("shows toast error when avatar upload fails", async () => {
+		const { toast } = await import("sonner");
+		const user = userEvent.setup({ delay: null });
+		render(<OnboardingStep1 onCompleted={onCompleted} />);
+
+		await user.click(
+			screen.getByRole("button", { name: /fail avatar upload/i }),
+		);
+
+		expect(toast.error).toHaveBeenCalled();
 	});
 
 	it("does not call onCompleted when updateUser fails", async () => {

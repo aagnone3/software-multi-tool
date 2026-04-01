@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 const plans = config.payments.plans as Config["payments"]["plans"];
 
@@ -81,6 +82,7 @@ export function PricingTable({
 			window.location.href = checkoutLink;
 		} catch (error) {
 			console.error(error);
+			toast.error("Failed to start checkout. Please try again.");
 		} finally {
 			setLoading(false);
 		}
