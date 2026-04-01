@@ -4,6 +4,47 @@ import { describe, expect, it, vi } from "vitest";
 import { ActivePlan } from "./ActivePlan";
 import { ActivePlanBadge } from "./ActivePlanBadge";
 
+vi.mock("@repo/config", () => ({
+	config: {
+		payments: {
+			plans: {
+				free: { isFree: true },
+				starter: {
+					prices: [
+						{
+							type: "recurring",
+							interval: "month",
+							intervalCount: 1,
+							amount: 999,
+							currency: "usd",
+							hidden: false,
+						},
+					],
+				},
+				pro: {
+					prices: [
+						{
+							type: "recurring",
+							interval: "month",
+							intervalCount: 1,
+							amount: 2900,
+							currency: "usd",
+							hidden: false,
+						},
+						{
+							type: "recurring",
+							interval: "year",
+							amount: 27840,
+							currency: "usd",
+							hidden: false,
+						},
+					],
+				},
+			},
+		},
+	},
+}));
+
 const mockPlanData = {
 	free: {
 		title: "Free",
@@ -176,7 +217,7 @@ describe("ActivePlan", () => {
 		});
 
 		render(<ActivePlan />);
-		expect(screen.getByText(/month/)).toBeInTheDocument();
+		expect(screen.getAllByText(/month/).length).toBeGreaterThan(0);
 	});
 
 	it("renders customer portal button when purchaseId present", () => {
@@ -253,5 +294,88 @@ describe("ActivePlan", () => {
 		expect(
 			container.querySelector('[data-test="starter-pro-upgrade-nudge"]'),
 		).not.toBeInTheDocument();
+	});
+
+	it("shows annual billing upsell for Pro monthly subscribers", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "pro",
+				price: {
+					amount: 2900,
+					currency: "USD",
+					interval: "month",
+					intervalCount: 1,
+				},
+			},
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="annual-billing-upsell"]'),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-test="annual-billing-upsell-cta"]'),
+		).toBeInTheDocument();
+		// heading mentions savings
+		expect(
+			screen.getByText(/save \d+% with annual billing/i),
+		).toBeInTheDocument();
+		expect(screen.getAllByText(/Switch to annual/i).length).toBeGreaterThan(
+			0,
+		);
+	});
+
+	it("does not show annual billing upsell for Pro annual subscribers", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "pro",
+				price: {
+					amount: 27840,
+					currency: "USD",
+					interval: "year",
+					intervalCount: 1,
+				},
+			},
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="annual-billing-upsell"]'),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not show annual billing upsell for Starter plan", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="annual-billing-upsell"]'),
+		).not.toBeInTheDocument();
+	});
+
+	it("annual billing upsell links to billing page", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "pro",
+				price: {
+					amount: 2900,
+					currency: "USD",
+					interval: "month",
+					intervalCount: 1,
+				},
+			},
+		});
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="annual-billing-upsell-cta"]',
+		);
+		expect(cta).toHaveAttribute("href", "/app/billing");
 	});
 });
