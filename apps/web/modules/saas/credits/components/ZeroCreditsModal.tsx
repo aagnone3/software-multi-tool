@@ -17,7 +17,7 @@ import { useActiveOrganization } from "../../organizations/hooks/use-active-orga
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 export function ZeroCreditsModal() {
-	const { balance, isLoading } = useCreditsBalance();
+	const { balance, isLoading, isStarterPlan } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 	const { track } = useProductAnalytics();
 	const [dismissed, setDismissed] = React.useState(false);
@@ -44,6 +44,16 @@ export function ZeroCreditsModal() {
 		}
 	}, [isOpen, balance, track]);
 
+	const description = isStarterPlan
+		? "You've hit your Starter credit limit. Upgrade to Pro to get 500 credits/month, scheduled runs, and bulk actions — or buy a one-time pack."
+		: "Get more credits to continue using AI tools. Upgrade to Pro for 500 credits/month, or buy a one-time pack.";
+
+	const proFeatureText = isStarterPlan
+		? "500 credits/month · scheduled runs · bulk actions · priority processing"
+		: "500 credits/month · all tools · priority processing";
+
+	const upgradeCTAText = isStarterPlan ? "Upgrade to Pro" : "Upgrade to Pro";
+
 	return (
 		<Dialog
 			open={isOpen}
@@ -62,8 +72,7 @@ export function ZeroCreditsModal() {
 						You&apos;ve used all your credits
 					</DialogTitle>
 					<DialogDescription className="text-center">
-						Get more credits to continue using AI tools. Upgrade to
-						Pro for 500 credits/month, or buy a one-time pack.
+						{description}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -75,8 +84,7 @@ export function ZeroCreditsModal() {
 								Pro Plan — $29/month
 							</p>
 							<p className="text-xs text-indigo-700 dark:text-indigo-300">
-								500 credits/month · all tools · priority
-								processing
+								{proFeatureText}
 							</p>
 						</div>
 					</div>
@@ -100,8 +108,15 @@ export function ZeroCreditsModal() {
 						variant="primary"
 						className="w-full bg-indigo-600 hover:bg-indigo-700"
 					>
-						<Link href={billingPath}>Upgrade to Pro</Link>
+						<Link href={billingPath}>{upgradeCTAText}</Link>
 					</Button>
+					{isStarterPlan && (
+						<Button asChild variant="outline" className="w-full">
+							<Link href="/pricing#pricing-plan-pro">
+								Compare plans
+							</Link>
+						</Button>
+					)}
 					<Button asChild variant="outline" className="w-full">
 						<Link href={billingPath}>Buy Credits</Link>
 					</Button>

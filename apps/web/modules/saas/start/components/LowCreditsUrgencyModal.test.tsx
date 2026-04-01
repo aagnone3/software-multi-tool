@@ -188,3 +188,88 @@ describe("LowCreditsUrgencyModal", () => {
 		);
 	});
 });
+
+describe("LowCreditsUrgencyModal - Starter plan", () => {
+	beforeEach(() => {
+		localStorage.clear();
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+	});
+
+	function makeBalance(override: Record<string, unknown>) {
+		return {
+			remaining: 80,
+			used: 420,
+			total: 500,
+			...override,
+		};
+	}
+
+	it("shows Starter-specific description for Starter plan users", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance({}),
+			isLoading: false,
+			isLowCredits: true,
+			isStarterPlan: true,
+			percentageUsed: 84,
+			totalCredits: 500,
+		});
+		render(<LowCreditsUrgencyModal userId="user-starter" />);
+		await screen.findByText("Running Low on Credits");
+		expect(
+			screen.getByText(/upgrade to pro for 500 credits\/month/i),
+		).toBeInTheDocument();
+	});
+
+	it("shows 'Upgrade to Pro' CTA for Starter plan users", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance({}),
+			isLoading: false,
+			isLowCredits: true,
+			isStarterPlan: true,
+			percentageUsed: 84,
+			totalCredits: 500,
+		});
+		render(<LowCreditsUrgencyModal userId="user-starter" />);
+		await screen.findByText("Running Low on Credits");
+		expect(
+			screen.getByRole("link", { name: /upgrade to pro/i }),
+		).toBeInTheDocument();
+	});
+
+	it("shows 'Compare plans' link for Starter plan users", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance({}),
+			isLoading: false,
+			isLowCredits: true,
+			isStarterPlan: true,
+			percentageUsed: 84,
+			totalCredits: 500,
+		});
+		render(<LowCreditsUrgencyModal userId="user-starter" />);
+		await screen.findByText("Running Low on Credits");
+		const compareLink = screen.getByRole("link", {
+			name: /compare plans/i,
+		});
+		expect(compareLink).toBeInTheDocument();
+		expect(compareLink).toHaveAttribute(
+			"href",
+			"/pricing#pricing-plan-pro",
+		);
+	});
+
+	it("does not show 'Compare plans' link for free plan users", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance({}),
+			isLoading: false,
+			isLowCredits: true,
+			isStarterPlan: false,
+			percentageUsed: 84,
+			totalCredits: 500,
+		});
+		render(<LowCreditsUrgencyModal />);
+		await screen.findByText("Running Low on Credits");
+		expect(
+			screen.queryByRole("link", { name: /compare plans/i }),
+		).not.toBeInTheDocument();
+	});
+});

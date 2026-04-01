@@ -140,3 +140,84 @@ describe("ZeroCreditsModal", () => {
 		).not.toBeInTheDocument();
 	});
 });
+
+describe("ZeroCreditsModal - Starter plan", () => {
+	beforeEach(() => {
+		mockUseActiveOrganization.mockReturnValue({
+			activeOrganization: null,
+		});
+	});
+
+	it("shows Starter-specific description for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "starter" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+
+		render(<ZeroCreditsModal />);
+		expect(
+			screen.getByText(/you've hit your starter credit limit/i),
+		).toBeInTheDocument();
+	});
+
+	it("shows 'Compare plans' link for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "starter" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+
+		render(<ZeroCreditsModal />);
+		const compareLink = screen.getByRole("link", {
+			name: /compare plans/i,
+		});
+		expect(compareLink).toBeInTheDocument();
+		expect(compareLink).toHaveAttribute(
+			"href",
+			"/pricing#pricing-plan-pro",
+		);
+	});
+
+	it("does not show 'Compare plans' link for free plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "free" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: false,
+		});
+
+		render(<ZeroCreditsModal />);
+		expect(
+			screen.queryByRole("link", { name: /compare plans/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows Pro-exclusive feature text for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "starter" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+
+		render(<ZeroCreditsModal />);
+		// The pro feature row shows "scheduled runs · bulk actions · priority processing"
+		const featureEls = screen.getAllByText(/scheduled runs/i);
+		expect(featureEls.length).toBeGreaterThan(0);
+	});
+});

@@ -48,8 +48,14 @@ export function LowCreditsUrgencyModal({
 	userId,
 }: LowCreditsUrgencyModalProps) {
 	const { activeOrganization } = useActiveOrganization();
-	const { balance, isLoading, isLowCredits, percentageUsed, totalCredits } =
-		useCreditsBalance();
+	const {
+		balance,
+		isLoading,
+		isLowCredits,
+		isStarterPlan,
+		percentageUsed,
+		totalCredits,
+	} = useCreditsBalance();
 	const [open, setOpen] = useState(false);
 	const [hasChecked, setHasChecked] = useState(false);
 
@@ -112,8 +118,9 @@ export function LowCreditsUrgencyModal({
 						</DialogTitle>
 					</div>
 					<DialogDescription>
-						You've used {percentageUsed}% of your credits. Upgrade
-						now to keep your workflows running without interruption.
+						{isStarterPlan
+							? `You've used ${percentageUsed}% of your Starter credits. Upgrade to Pro for 500 credits/month, scheduled runs, and bulk actions.`
+							: `You've used ${percentageUsed}% of your credits. Upgrade now to keep your workflows running without interruption.`}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -141,9 +148,25 @@ export function LowCreditsUrgencyModal({
 					<Button asChild className="w-full gap-2">
 						<Link href={billingPath} onClick={handleDismiss}>
 							<SparklesIcon className="size-4" />
-							Upgrade Plan for More Credits
+							{isStarterPlan
+								? "Upgrade to Pro"
+								: "Upgrade Plan for More Credits"}
 						</Link>
 					</Button>
+					{isStarterPlan && (
+						<Button
+							variant="outline"
+							asChild
+							className="w-full gap-2"
+						>
+							<Link
+								href="/pricing#pricing-plan-pro"
+								onClick={handleDismiss}
+							>
+								Compare plans
+							</Link>
+						</Button>
+					)}
 					<Button variant="outline" asChild className="w-full gap-2">
 						<Link href={billingPath} onClick={handleDismiss}>
 							<ZapIcon className="size-4" />
