@@ -68,6 +68,22 @@ type ProductEvent =
 	| {
 			name: "pro_trial_offer_dismissed";
 			props: { plan_id: string; source: string };
+	  }
+	| {
+			name: "referral_link_copied";
+			props: { source: string };
+	  }
+	| {
+			name: "referral_widget_viewed";
+			props: { source: string };
+	  }
+	| {
+			name: "invite_nudge_shown";
+			props: { completed_job_count: number; source: string };
+	  }
+	| {
+			name: "invite_cta_clicked";
+			props: { completed_job_count: number; source: string };
 	  };
 
 export type { ProductEvent };

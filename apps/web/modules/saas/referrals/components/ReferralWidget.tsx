@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
@@ -34,6 +35,7 @@ function buildReferralLink(userId: string, orgSlug?: string): string {
 export function ReferralWidget({ className }: ReferralWidgetProps) {
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [copied, setCopied] = useState(false);
 	const [referralLink, setReferralLink] = useState("");
 
@@ -42,8 +44,12 @@ export function ReferralWidget({ className }: ReferralWidgetProps) {
 			setReferralLink(
 				buildReferralLink(user.id, activeOrganization?.slug),
 			);
+			track({
+				name: "referral_widget_viewed",
+				props: { source: "dashboard" },
+			});
 		}
-	}, [user?.id, activeOrganization?.slug]);
+	}, [user?.id, activeOrganization?.slug, track]);
 
 	const handleCopy = useCallback(() => {
 		if (!referralLink) {
@@ -53,6 +59,10 @@ export function ReferralWidget({ className }: ReferralWidgetProps) {
 			.writeText(referralLink)
 			.then(() => {
 				setCopied(true);
+				track({
+					name: "referral_link_copied",
+					props: { source: "dashboard" },
+				});
 				toast.success("Referral link copied!", {
 					description: "Share it with friends to earn free credits.",
 				});
@@ -61,7 +71,7 @@ export function ReferralWidget({ className }: ReferralWidgetProps) {
 			.catch(() => {
 				toast.error("Failed to copy link");
 			});
-	}, [referralLink]);
+	}, [referralLink, track]);
 
 	if (!user) {
 		return null;
