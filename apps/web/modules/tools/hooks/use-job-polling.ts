@@ -5,6 +5,7 @@ import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 const POLLING_INTERVALS = {
 	PROCESSING: 2000, // Poll every 2 seconds while processing
@@ -131,6 +132,9 @@ export function useCreateJob() {
 				props: { tool_slug: toolSlug, plan_id: planId },
 			});
 		},
+		onError: () => {
+			toast.error("Failed to start job. Please try again.");
+		},
 	});
 }
 
@@ -149,6 +153,9 @@ export function useCancelJob() {
 			queryClient.invalidateQueries({
 				queryKey: orpc.jobs.list.queryOptions({ input: {} }).queryKey,
 			});
+		},
+		onError: () => {
+			toast.error("Failed to cancel job. Please try again.");
 		},
 	});
 }
