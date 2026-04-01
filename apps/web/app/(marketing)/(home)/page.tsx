@@ -13,6 +13,7 @@ import { Testimonials } from "@marketing/home/components/Testimonials";
 import { WhoIsItFor } from "@marketing/home/components/WhoIsItFor";
 import { config } from "@repo/config";
 import type { Metadata } from "next";
+import React from "react";
 
 const siteUrl =
 	process.env.NEXT_PUBLIC_SITE_URL ?? "https://softwaremultitool.com";
