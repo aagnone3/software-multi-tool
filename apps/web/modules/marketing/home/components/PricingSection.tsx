@@ -1,5 +1,6 @@
 "use client";
 import { PricingTable } from "@saas/payments/components/PricingTable";
+import React from "react";
 import { PricingFaq } from "./PricingFaq";
 import { PricingTrustBar } from "./PricingTrustBar";
 

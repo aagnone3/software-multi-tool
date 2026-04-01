@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export function SocialShareButtons({
-	title,
-	path,
-}: {
-	title: string;
-	path: string;
-}) {
+export function SocialShareButtons({ title }: { title: string }) {
 	const [currentUrl, setCurrentUrl] = useState("");
 
 	useEffect(() => {
@@ -53,7 +47,9 @@ export function SocialShareButtons({
 		},
 	];
 
-	if (!currentUrl) return null;
+	if (!currentUrl) {
+		return null;
+	}
 
 	return (
 		<div className="mt-8 flex items-center gap-3 border-t border-border pt-8">
