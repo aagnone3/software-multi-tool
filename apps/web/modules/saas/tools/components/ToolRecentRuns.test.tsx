@@ -86,7 +86,7 @@ describe("ToolRecentRuns", () => {
 		expect(screen.getByText("Failed")).toBeDefined();
 	});
 
-	it("shows 'View all' link to /app/jobs", () => {
+	it("shows 'View all' link to tool-specific history page", () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [makeJob()],
 			isLoading: false,
@@ -95,7 +95,9 @@ describe("ToolRecentRuns", () => {
 		});
 		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
 		const link = screen.getByRole("link", { name: /view all/i });
-		expect(link.getAttribute("href")).toBe("/app/jobs");
+		expect(link.getAttribute("href")).toBe(
+			"/app/tools/contract-analyzer/history",
+		);
 	});
 
 	it("shows View link to /app/jobs/[id] for completed jobs", () => {
@@ -122,6 +124,36 @@ describe("ToolRecentRuns", () => {
 		const viewLinks = screen.queryAllByRole("link", { name: /^view$/i });
 		expect(viewLinks.length).toBeGreaterThan(0);
 		expect(viewLinks[0].getAttribute("href")).toContain("/app/jobs/job-1");
+	});
+
+	it("shows View link for failed jobs too", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [makeJob({ id: "job-failed", status: "FAILED" })],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		});
+		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
+		const viewLinks = screen.getAllByRole("link", { name: /^view$/i });
+		expect(viewLinks.length).toBeGreaterThan(0);
+		expect(viewLinks[0].getAttribute("href")).toContain(
+			"/app/jobs/job-failed",
+		);
+	});
+
+	it("does not show View link for pending or processing jobs", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				makeJob({ status: "PENDING" }),
+				makeJob({ id: "job-2", status: "PROCESSING" }),
+			],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		});
+		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
+		const viewLinks = screen.queryAllByRole("link", { name: /^view$/i });
+		expect(viewLinks).toHaveLength(0);
 	});
 
 	it("passes toolSlug and limit=3 to useJobsList", () => {
