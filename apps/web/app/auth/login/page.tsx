@@ -1,4 +1,5 @@
 import { LoginForm } from "@saas/auth/components/LoginForm";
+import React from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
