@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { Button } from "@ui/components/button";
 import {
@@ -47,6 +48,7 @@ function markShown(key: string): void {
 
 export function ExitIntentUpgradeModal() {
 	const { isFreePlan, isStarterPlan, isLoading } = useCreditsBalance();
+	const { track } = useProductAnalytics();
 	const [open, setOpen] = useState(false);
 	const triggeredRef = useRef(false);
 
@@ -64,6 +66,13 @@ export function ExitIntentUpgradeModal() {
 			triggeredRef.current = true;
 			markShown(storageKey);
 			setOpen(true);
+			track({
+				name: "exit_intent_modal_shown",
+				props: {
+					plan_id: isStarterPlan ? "starter" : "free",
+					source: "exit_intent",
+				},
+			});
 		},
 		[isEligible, isLoading, storageKey],
 	);
@@ -79,6 +88,31 @@ export function ExitIntentUpgradeModal() {
 	const handleClose = useCallback(() => {
 		setOpen(false);
 	}, []);
+
+	const handleUpgradeClick = useCallback(() => {
+		track({
+			name: "upgrade_cta_clicked",
+			props: {
+				source: isStarterPlan
+					? "exit_intent_starter_to_pro"
+					: "exit_intent_free_to_paid",
+				plan_id: isStarterPlan ? "starter" : "free",
+				target_plan: isStarterPlan ? "pro" : "starter",
+			},
+		});
+		handleClose();
+	}, [track, isStarterPlan, handleClose]);
+
+	const handleDismiss = useCallback(() => {
+		track({
+			name: "exit_intent_modal_dismissed",
+			props: {
+				plan_id: isStarterPlan ? "starter" : "free",
+				source: "exit_intent",
+			},
+		});
+		handleClose();
+	}, [track, isStarterPlan, handleClose]);
 
 	if (isLoading || !isEligible) return null;
 
@@ -158,7 +192,7 @@ export function ExitIntentUpgradeModal() {
 						<Button
 							asChild
 							className="w-full"
-							onClick={handleClose}
+							onClick={handleUpgradeClick}
 						>
 							<Link href="/app/settings/billing">
 								{isStarterPlan
@@ -170,7 +204,7 @@ export function ExitIntentUpgradeModal() {
 						<Button
 							variant="ghost"
 							className="w-full text-muted-foreground"
-							onClick={handleClose}
+							onClick={handleDismiss}
 						>
 							{isStarterPlan
 								? "No thanks, Starter is fine"

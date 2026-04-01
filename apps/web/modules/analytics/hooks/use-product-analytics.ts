@@ -42,7 +42,33 @@ type ProductEvent =
 			props: { from_plan: string; to_plan: string };
 	  }
 	| { name: "onboarding_completed"; props: { plan_id: string } }
-	| { name: "first_tool_run"; props: { tool_slug: string } };
+	| { name: "first_tool_run"; props: { tool_slug: string } }
+	| {
+			name: "pricing_plan_selected";
+			props: {
+				plan_id: string;
+				billing_interval: string;
+				source: string;
+				current_plan: string;
+				authenticated: boolean;
+			};
+	  }
+	| {
+			name: "pricing_contact_sales_clicked";
+			props: { source: string; current_plan: string };
+	  }
+	| {
+			name: "exit_intent_modal_shown";
+			props: { plan_id: string; source: string };
+	  }
+	| {
+			name: "exit_intent_modal_dismissed";
+			props: { plan_id: string; source: string };
+	  }
+	| {
+			name: "pro_trial_offer_dismissed";
+			props: { plan_id: string; source: string };
+	  };
 
 export type { ProductEvent };
 
