@@ -3,6 +3,13 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TagInput } from "./TagInput";
 
+const { mockToastError } = vi.hoisted(() => ({
+	mockToastError: vi.fn(),
+}));
+vi.mock("sonner", () => ({
+	toast: { error: mockToastError, success: vi.fn() },
+}));
+
 const { mockAddTag, mockRemoveTag, mockInvalidateQueries } = vi.hoisted(() => ({
 	mockAddTag: vi.fn(),
 	mockRemoveTag: vi.fn(),
@@ -21,10 +28,21 @@ vi.mock("@shared/lib/orpc-client", () => ({
 vi.mock("@tanstack/react-query", () => ({
 	useMutation: ({
 		mutationFn,
+		onSuccess,
+		onError,
 	}: {
-		mutationFn: (arg: unknown) => unknown;
+		mutationFn: (arg: unknown) => Promise<unknown>;
+		onSuccess?: (data: unknown) => void;
+		onError?: (error: unknown) => void;
 	}) => ({
-		mutate: (arg: unknown) => mutationFn(arg),
+		mutate: async (arg: unknown) => {
+			try {
+				const data = await mutationFn(arg);
+				onSuccess?.(data);
+			} catch (err) {
+				onError?.(err);
+			}
+		},
 		isPending: false,
 	}),
 	useQueryClient: () => ({
@@ -148,5 +166,19 @@ describe("TagInput", () => {
 		const input = screen.getByPlaceholderText("Tag name...");
 		fireEvent.keyDown(input, { key: "Escape" });
 		expect(screen.queryByPlaceholderText("Tag name...")).toBeNull();
+	});
+
+	it("shows error toast when addTag fails", async () => {
+		mockAddTag.mockRejectedValue(new Error("network error"));
+		render(<TagInput {...defaultProps} />);
+		fireEvent.click(screen.getByText("Create new tag..."));
+		const input = screen.getByPlaceholderText("Tag name...");
+		fireEvent.change(input, { target: { value: "bad-tag" } });
+		fireEvent.keyDown(input, { key: "Enter" });
+		// Wait for async mutation
+		await new Promise((r) => setTimeout(r, 0));
+		expect(mockToastError).toHaveBeenCalledWith(
+			"Failed to add tag. Please try again.",
+		);
 	});
 });

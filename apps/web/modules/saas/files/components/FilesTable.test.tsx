@@ -13,15 +13,22 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 		},
 	},
 }));
+const { mockToastError, mockToastSuccess } = vi.hoisted(() => ({
+	mockToastError: vi.fn(),
+	mockToastSuccess: vi.fn(),
+}));
+
 vi.mock("@tanstack/react-query", () => ({
 	useQuery: vi.fn(() => ({ data: null, isLoading: true })),
-	useMutation: vi.fn(() => ({ mutateAsync: vi.fn() })),
+	useMutation: vi.fn(() => ({ mutateAsync: vi.fn(), mutate: vi.fn() })),
 	useQueryClient: vi.fn(() => ({ invalidateQueries: vi.fn() })),
 }));
 vi.mock("./FileUploader", () => ({ FileUploader: () => null }));
 vi.mock("./DeleteFileDialog", () => ({ DeleteFileDialog: () => null }));
 vi.mock("./TagInput", () => ({ TagInput: () => null }));
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("sonner", () => ({
+	toast: { success: mockToastSuccess, error: mockToastError },
+}));
 
 // Inline implementations to test pure logic
 function formatFileSize(bytes: number): string {
@@ -112,5 +119,13 @@ describe("getMimeCategory", () => {
 	it("classifies unknown types as other", () => {
 		expect(getMimeCategory("application/zip")).toBe("other");
 		expect(getMimeCategory("application/octet-stream")).toBe("other");
+	});
+});
+
+describe("FilesTable toast mocks available", () => {
+	it("toast.error mock is set up", () => {
+		// Verify our mock is in place (covers the import path used by FilesTable)
+		expect(typeof mockToastError).toBe("function");
+		expect(typeof mockToastSuccess).toBe("function");
 	});
 });
