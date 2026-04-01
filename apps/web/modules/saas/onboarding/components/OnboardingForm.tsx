@@ -5,6 +5,7 @@ import { clearCache } from "@shared/lib/cache";
 import { Progress } from "@ui/components/progress";
 import { useSearchParams } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
 import { OnboardingStep2 } from "./OnboardingStep2";
@@ -35,12 +36,15 @@ export function OnboardingForm() {
 	};
 
 	const onCompleted = async () => {
-		await authClient.updateUser({
-			onboardingComplete: true,
-		});
-
-		await clearCache();
-		router.replace(redirectTo ?? "/app");
+		try {
+			await authClient.updateUser({
+				onboardingComplete: true,
+			});
+			await clearCache();
+			router.replace(redirectTo ?? "/app");
+		} catch {
+			toast.error("Failed to complete onboarding. Please try again.");
+		}
 	};
 
 	const steps = [
