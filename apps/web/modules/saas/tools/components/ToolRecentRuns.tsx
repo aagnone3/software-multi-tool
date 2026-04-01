@@ -119,7 +119,9 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 						className="h-7 text-xs"
 						asChild
 					>
-						<Link href="/app/jobs">View all</Link>
+						<Link href={`/app/tools/${toolSlug}/history`}>
+							View all
+						</Link>
 					</Button>
 				</div>
 			</CardHeader>
@@ -127,7 +129,9 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 				{jobs.map((job) => {
 					const status = job.status as JobStatus;
 					const detailUrl =
-						status === "COMPLETED" ? `/app/jobs/${job.id}` : null;
+						status !== "PENDING" && status !== "PROCESSING"
+							? `/app/jobs/${job.id}`
+							: null;
 
 					return (
 						<div
