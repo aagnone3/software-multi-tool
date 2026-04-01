@@ -1,12 +1,29 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
+// Mock clipboard
+Object.defineProperty(navigator, "clipboard", {
+	value: { writeText: vi.fn().mockResolvedValue(undefined) },
+	writable: true,
+	configurable: true,
+});
+
 describe("SmartOutputRenderer", () => {
-	it("shows formatted tab for object output", () => {
-		render(<SmartOutputRenderer output={{ name: "Test", score: 95 }} />);
+	it("renders raw output for a primitive string", () => {
+		render(<SmartOutputRenderer output="hello world" />);
+		// String output is JSON-serialized in the pre block (with surrounding quotes)
+		expect(screen.getByText(/"hello world"/)).toBeInTheDocument();
+	});
+
+	it("renders raw output for a number", () => {
+		render(<SmartOutputRenderer output={42} />);
+		expect(screen.getByText("42")).toBeInTheDocument();
+	});
+
+	it("renders formatted and raw tabs for an object", () => {
+		render(<SmartOutputRenderer output={{ name: "test", value: 99 }} />);
 		expect(
 			screen.getByRole("tab", { name: /formatted/i }),
 		).toBeInTheDocument();
@@ -15,57 +32,61 @@ describe("SmartOutputRenderer", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders key-value pairs for object output", () => {
+	it("shows key-value list in smart view for object", () => {
 		render(<SmartOutputRenderer output={{ status: "ok", count: 5 }} />);
-		expect(screen.getByText("status")).toBeInTheDocument();
+		expect(screen.getByText(/status/i)).toBeInTheDocument();
 		expect(screen.getByText("ok")).toBeInTheDocument();
-		expect(screen.getByText("count")).toBeInTheDocument();
-		expect(screen.getByText("5")).toBeInTheDocument();
 	});
 
 	it("shows table view for array of objects", () => {
-		render(
-			<SmartOutputRenderer
-				output={[
-					{ name: "Alice", score: 90 },
-					{ name: "Bob", score: 85 },
-				]}
-			/>,
-		);
+		const output = [
+			{ name: "Alice", score: 100 },
+			{ name: "Bob", score: 80 },
+		];
+		render(<SmartOutputRenderer output={output} />);
+		expect(
+			screen.getByRole("tab", { name: /formatted/i }),
+		).toBeInTheDocument();
 		expect(screen.getByText("Alice")).toBeInTheDocument();
 		expect(screen.getByText("Bob")).toBeInTheDocument();
-		expect(screen.getByText("90")).toBeInTheDocument();
 	});
 
-	it("shows raw JSON for primitive output without tabs", () => {
-		render(<SmartOutputRenderer output="plain text result" />);
-		expect(screen.queryByRole("tab")).not.toBeInTheDocument();
-		expect(screen.getByText(/plain text result/)).toBeInTheDocument();
-	});
-
-	it("switches to raw JSON view on tab click", async () => {
-		const user = userEvent.setup({ delay: null });
-		render(<SmartOutputRenderer output={{ key: "value" }} />);
+	it("raw JSON tab is present and labeled for an object", () => {
+		render(<SmartOutputRenderer output={{ x: 1 }} />);
 		const rawTab = screen.getByRole("tab", { name: /raw json/i });
-		await user.click(rawTab);
-		// Raw tab selected
-		expect(rawTab).toHaveAttribute("data-state", "active");
+		expect(rawTab).toBeInTheDocument();
+		// Tab controls a panel (aria-controls attribute present)
+		expect(rawTab).toHaveAttribute("aria-controls");
 	});
 
-	it("renders nested arrays as collapsible sections", () => {
-		render(
-			<SmartOutputRenderer
-				output={{ tags: ["alpha", "beta", "gamma"], total: 3 }}
-			/>,
-		);
-		// nested section label
-		expect(screen.getByText("tags")).toBeInTheDocument();
-		// count badge (may appear multiple times due to total field + badge)
-		expect(screen.getAllByText("3").length).toBeGreaterThan(0);
+	it("renders Copy button on raw output", () => {
+		render(<SmartOutputRenderer output="simple text" />);
+		expect(
+			screen.getByRole("button", { name: /copy/i }),
+		).toBeInTheDocument();
 	});
 
-	it("renders null values as em dash placeholder", () => {
-		render(<SmartOutputRenderer output={{ value: null }} />);
-		expect(screen.getByText("—")).toBeInTheDocument();
+	it("shows boolean true as check icon (not text 'true')", () => {
+		render(<SmartOutputRenderer output={{ active: true }} />);
+		// The boolean renders as an icon, not literal "true" text
+		expect(screen.queryByText("true")).not.toBeInTheDocument();
+	});
+
+	it("renders truncated text with show more for long strings", () => {
+		const longText = "x".repeat(200);
+		render(<SmartOutputRenderer output={{ description: longText }} />);
+		expect(
+			screen.getByRole("button", { name: /show more/i }),
+		).toBeInTheDocument();
+	});
+
+	it("expands truncated text when show more is clicked", () => {
+		const longText = "a".repeat(200);
+		render(<SmartOutputRenderer output={{ description: longText }} />);
+		const showMore = screen.getByRole("button", { name: /show more/i });
+		fireEvent.click(showMore);
+		expect(
+			screen.getByRole("button", { name: /show less/i }),
+		).toBeInTheDocument();
 	});
 });

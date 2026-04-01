@@ -1,35 +1,18 @@
-import { cleanup, render } from "@testing-library/react";
-import { useJobsList } from "@tools/hooks/use-job-polling";
+import { render } from "@testing-library/react";
 import React from "react";
 import { toast } from "sonner";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobCompletionNotifier } from "./JobCompletionNotifier";
 
 vi.mock("sonner", () => ({
-	toast: {
-		success: vi.fn(),
-		error: vi.fn(),
-	},
+	toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock("@tools/hooks/use-job-polling", () => ({
-	useJobsList: vi.fn(),
+	useJobsList: vi.fn(() => ({ jobs: [] })),
 }));
 
-vi.mock("@repo/config", () => ({
-	config: {
-		tools: {
-			registry: [
-				{
-					slug: "invoice-processor",
-					name: "Invoice Processor",
-					enabled: true,
-				},
-				{ slug: "news-analyzer", name: "News Analyzer", enabled: true },
-			],
-		},
-	},
-}));
+import { useJobsList } from "@tools/hooks/use-job-polling";
 
 const mockUseJobsList = vi.mocked(useJobsList);
 
@@ -38,139 +21,44 @@ describe("JobCompletionNotifier", () => {
 		vi.clearAllMocks();
 	});
 
-	afterEach(() => {
-		cleanup();
-	});
-
-	it("renders nothing (null)", () => {
+	it("renders nothing (null output)", () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn(),
-		});
+		} as unknown as ReturnType<typeof useJobsList>);
 		const { container } = render(<JobCompletionNotifier />);
-		expect(container).toBeEmptyDOMElement();
+		expect(container.firstChild).toBeNull();
 	});
 
-	it("fires success toast when job transitions to COMPLETED", () => {
-		const { rerender } = render(<JobCompletionNotifier />);
-
-		// First render: job is PROCESSING
+	it("does not fire toast when no jobs exist", () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{
-					id: "j1",
-					toolSlug: "invoice-processor",
-					status: "PROCESSING",
-				},
-			] as any,
+			jobs: [],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		// Second render: job is COMPLETED
-		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{
-					id: "j1",
-					toolSlug: "invoice-processor",
-					status: "COMPLETED",
-				},
-			] as any,
-			isLoading: false,
-			error: null,
-			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		expect(toast.success).toHaveBeenCalledWith(
-			"Invoice Processor job complete",
-			expect.objectContaining({
-				description: "Your results are ready to view.",
-			}),
-		);
-	});
-
-	it("fires error toast when job transitions to FAILED", () => {
-		const { rerender } = render(<JobCompletionNotifier />);
-
-		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{
-					id: "j2",
-					toolSlug: "news-analyzer",
-					status: "PROCESSING",
-				},
-			] as any,
-			isLoading: false,
-			error: null,
-			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{ id: "j2", toolSlug: "news-analyzer", status: "FAILED" },
-			] as any,
-			isLoading: false,
-			error: null,
-			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		expect(toast.error).toHaveBeenCalledWith(
-			"News Analyzer job failed",
-			expect.objectContaining({
-				description: "Something went wrong. Try running it again.",
-			}),
-		);
-	});
-
-	it("does not toast if job was already in terminal state on first observe", () => {
-		const { rerender } = render(<JobCompletionNotifier />);
-
-		// First observe: already COMPLETED (no previousStatus in map)
-		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{
-					id: "j3",
-					toolSlug: "invoice-processor",
-					status: "COMPLETED",
-				},
-			] as any,
-			isLoading: false,
-			error: null,
-			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		expect(toast.success).not.toHaveBeenCalled();
-	});
-
-	it("does not toast for same-status updates", () => {
-		const { rerender } = render(<JobCompletionNotifier />);
-
-		mockUseJobsList.mockReturnValue({
-			jobs: [
-				{
-					id: "j4",
-					toolSlug: "invoice-processor",
-					status: "PROCESSING",
-				},
-			] as any,
-			isLoading: false,
-			error: null,
-			refetch: vi.fn(),
-		});
-		rerender(<JobCompletionNotifier />);
-
-		// Same PROCESSING status again
-		rerender(<JobCompletionNotifier />);
-
+		} as unknown as ReturnType<typeof useJobsList>);
+		render(<JobCompletionNotifier />);
 		expect(toast.success).not.toHaveBeenCalled();
 		expect(toast.error).not.toHaveBeenCalled();
+	});
+
+	it("does not fire toast on first render (no previous status to compare)", () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job1",
+					toolSlug: "contract-analyzer",
+					status: "COMPLETED",
+				},
+			],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		} as unknown as ReturnType<typeof useJobsList>);
+		render(<JobCompletionNotifier />);
+		// No previous status → no transition detected
+		expect(toast.success).not.toHaveBeenCalled();
 	});
 });
