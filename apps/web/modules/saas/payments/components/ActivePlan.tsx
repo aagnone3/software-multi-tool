@@ -3,10 +3,19 @@
 import { usePlanData } from "@saas/payments/hooks/plan-data";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
-import { BadgeCheckIcon, CheckIcon } from "lucide-react";
+import { BadgeCheckIcon, CheckIcon, ZapIcon } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 import { CustomerPortalButton } from "../../settings/components/CustomerPortalButton";
 import { SubscriptionStatusBadge } from "../../settings/components/SubscriptionStatusBadge";
+
+const PRO_EXCLUSIVE_FEATURES = [
+	"500 credits/month (5× more than Starter)",
+	"Tool scheduler — automate recurring runs",
+	"Bulk actions on job history",
+	"Custom input templates",
+	"Usage data export",
+];
 
 export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	const { planData } = usePlanData();
@@ -23,6 +32,7 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	}
 
 	const price = "price" in activePlan ? activePlan.price : null;
+	const isStarterPlan = activePlan.id === "starter";
 
 	const formatMonth = (count: number) =>
 		count === 1 ? "month" : `${count} months`;
@@ -90,6 +100,48 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 					</div>
 				)}
 			</div>
+
+			{isStarterPlan && (
+				<div
+					className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4"
+					data-test="starter-pro-upgrade-nudge"
+				>
+					<div className="mb-3 flex items-center gap-2">
+						<ZapIcon className="size-4 text-primary" />
+						<p className="font-semibold text-sm">
+							Unlock more with Pro
+						</p>
+					</div>
+					<ul className="mb-4 grid list-none gap-1.5 text-sm text-foreground/70">
+						{PRO_EXCLUSIVE_FEATURES.map((feature) => (
+							<li
+								key={feature}
+								className="flex items-start gap-2"
+							>
+								<CheckIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
+								<span>{feature}</span>
+							</li>
+						))}
+					</ul>
+					<div className="flex flex-wrap gap-2">
+						<Link
+							href="/app/billing?upgrade=pro"
+							className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+							data-test="starter-upgrade-to-pro-cta"
+						>
+							<ZapIcon className="size-3.5" />
+							Upgrade to Pro — $29/mo
+						</Link>
+						<Link
+							href="/pricing#pricing-plan-pro"
+							className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+							data-test="starter-compare-plans-cta"
+						>
+							Compare plans
+						</Link>
+					</div>
+				</div>
+			)}
 		</SettingsItem>
 	);
 }

@@ -10,6 +10,11 @@ const mockPlanData = {
 		features: ["5 jobs/month", "Basic support"],
 		description: "Free tier",
 	},
+	starter: {
+		title: "Starter",
+		features: ["100 credits/month", "Rollover credits"],
+		description: "Starter tier",
+	},
 	pro: {
 		title: "Pro",
 		features: ["Unlimited jobs", "Priority support"],
@@ -193,5 +198,60 @@ describe("ActivePlan", () => {
 
 		render(<ActivePlan organizationId="org-123" />);
 		expect(mockUsePurchases).toHaveBeenCalledWith("org-123");
+	});
+
+	it("shows Pro upgrade nudge for Starter plan users", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="starter-pro-upgrade-nudge"]'),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-test="starter-upgrade-to-pro-cta"]'),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector('[data-test="starter-compare-plans-cta"]'),
+		).toBeInTheDocument();
+		expect(screen.getByText(/Upgrade to Pro/)).toBeInTheDocument();
+		expect(screen.getByText("Compare plans")).toBeInTheDocument();
+	});
+
+	it("shows Pro-exclusive feature copy in Starter upgrade nudge", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+
+		render(<ActivePlan />);
+		expect(screen.getByText(/500 credits\/month/)).toBeInTheDocument();
+		expect(screen.getByText(/Tool scheduler/)).toBeInTheDocument();
+	});
+
+	it("does not show Pro upgrade nudge for Pro plan users", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "pro" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="starter-pro-upgrade-nudge"]'),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not show Pro upgrade nudge for Free plan users", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "free" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="starter-pro-upgrade-nudge"]'),
+		).not.toBeInTheDocument();
 	});
 });
