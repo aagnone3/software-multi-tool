@@ -10,7 +10,8 @@ import React, { useEffect, useState } from "react";
 export function StickyCta() {
 	const [visible, setVisible] = useState(false);
 	const [dismissed, setDismissed] = useState(false);
-	const { isFreePlan, isLoading, balance } = useCreditsBalance();
+	const { isFreePlan, isStarterPlan, isLoading, balance } =
+		useCreditsBalance();
 	const { track } = useProductAnalytics();
 
 	const handleCtaClick = () => {
@@ -40,28 +41,50 @@ export function StickyCta() {
 		setVisible(false);
 	};
 
-	// Hide for authenticated Pro (paid) users only.
-	// - Anonymous visitors: balance=undefined, isFreePlan=false → show CTA
-	// - Free plan users: balance exists, isFreePlan=true → show CTA
-	// - Pro users: balance exists, isFreePlan=false, !isLoading → hide CTA
-	const isPaidUser = !isLoading && balance !== undefined && !isFreePlan;
+	// Determine what to show:
+	// - Anonymous / free plan → "Start free" CTA
+	// - Starter plan → Starter→Pro upsell CTA
+	// - Pro (paid, not free, not starter) → hide entirely
+	const isProUser =
+		!isLoading && balance !== undefined && !isFreePlan && !isStarterPlan;
 
-	if (!visible || dismissed || isPaidUser) {
+	if (!visible || dismissed || isProUser) {
 		return null;
 	}
+
+	const isStarter = !isLoading && balance !== undefined && isStarterPlan;
 
 	return (
 		<div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4 duration-300">
 			<div className="flex items-center gap-3 rounded-full border border-border/50 bg-background/95 px-5 py-3 shadow-lg backdrop-blur-sm">
-				<p className="text-foreground text-sm font-medium whitespace-nowrap">
-					Start free — 10 credits, no card needed
-				</p>
-				<Button size="sm" variant="primary" asChild>
-					<Link href="/auth/signup" onClick={handleCtaClick}>
-						Get started
-						<ArrowRightIcon className="ml-1.5 size-3.5" />
-					</Link>
-				</Button>
+				{isStarter ? (
+					<>
+						<p className="text-foreground text-sm font-medium whitespace-nowrap">
+							Unlock scheduler, bulk actions &amp; more
+						</p>
+						<Button size="sm" variant="primary" asChild>
+							<Link
+								href="/app/settings/billing"
+								onClick={handleCtaClick}
+							>
+								Upgrade to Pro
+								<ArrowRightIcon className="ml-1.5 size-3.5" />
+							</Link>
+						</Button>
+					</>
+				) : (
+					<>
+						<p className="text-foreground text-sm font-medium whitespace-nowrap">
+							Start free — 10 credits, no card needed
+						</p>
+						<Button size="sm" variant="primary" asChild>
+							<Link href="/auth/signup" onClick={handleCtaClick}>
+								Get started
+								<ArrowRightIcon className="ml-1.5 size-3.5" />
+							</Link>
+						</Button>
+					</>
+				)}
 				<button
 					type="button"
 					onClick={handleDismiss}
