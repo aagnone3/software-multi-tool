@@ -1,6 +1,7 @@
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import type { Metadata } from "next";
+import React from "react";
 
 export const metadata: Metadata = {
 	title: "Changelog",
