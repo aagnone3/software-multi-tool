@@ -2,6 +2,7 @@ import { PostListItem } from "@marketing/blog/components/PostListItem";
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
 import { config } from "@repo/config";
 import { notFound } from "next/navigation";
+import React from "react";
 
 /** Default locale (English only - i18n removed) */
 const DEFAULT_LOCALE = "en";

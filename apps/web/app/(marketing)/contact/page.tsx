@@ -1,6 +1,7 @@
 import { ContactForm } from "@marketing/home/components/ContactForm";
 import { config } from "@repo/config";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export async function generateMetadata() {
 	return {
