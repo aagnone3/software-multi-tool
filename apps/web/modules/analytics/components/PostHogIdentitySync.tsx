@@ -2,6 +2,7 @@
 
 import { useSession } from "@saas/auth/hooks/use-session";
 import { usePurchases } from "@saas/payments/hooks/purchases";
+import React from "react";
 import { PostHogIdentityProvider } from "./PostHogIdentityProvider";
 
 /**

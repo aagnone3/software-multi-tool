@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@ui/lib";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface FloatingShapeProps {
 	className?: string;
