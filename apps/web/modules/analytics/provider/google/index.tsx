@@ -1,4 +1,6 @@
-"use client";
+import React from "react";
+
+("use client");
 
 import { GoogleAnalytics, sendGAEvent } from "@next/third-parties/google";
 
