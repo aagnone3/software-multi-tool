@@ -3,6 +3,7 @@
 import { createQueryClient } from "@shared/lib/query-client";
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
+import React from "react";
 
 let clientQueryClientSingleton: QueryClient;
 function getQueryClient() {
