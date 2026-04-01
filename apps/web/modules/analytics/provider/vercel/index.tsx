@@ -1,4 +1,6 @@
-"use client";
+import React from "react";
+
+("use client");
 
 // @ts-expect-error package is not installed per default
 import { track } from "@vercel/analytics";
