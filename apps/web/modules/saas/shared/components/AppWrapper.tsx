@@ -8,6 +8,7 @@ import { ExitIntentUpgradeModal } from "@saas/shared/components/ExitIntentUpgrad
 import { NavBar } from "@saas/shared/components/NavBar";
 import { cn } from "@ui/lib";
 import type { PropsWithChildren } from "react";
+import React from "react";
 
 /** Subtle animated background for the sidebar area */
 function SidebarBackground() {
