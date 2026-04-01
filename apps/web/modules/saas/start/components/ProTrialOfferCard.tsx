@@ -11,11 +11,18 @@ import React, { useCallback, useState } from "react";
 
 const STORAGE_KEY = "pro-trial-offer-dismissed";
 
-const TRIAL_FEATURES = [
+const FREE_TRIAL_FEATURES = [
 	"500 credits included — no card required",
 	"Priority job processing",
 	"Unlimited tool access for 7 days",
 	"Cancel anytime, no commitment",
+];
+
+const STARTER_UPGRADE_FEATURES = [
+	"500 credits/month — 5× more than Starter",
+	"Scheduled & automated runs",
+	"Bulk job processing",
+	"Pre-built workflow templates",
 ];
 
 interface ProTrialOfferCardProps {
@@ -23,7 +30,7 @@ interface ProTrialOfferCardProps {
 }
 
 export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
-	const { isFreePlan, isLoading } = useCreditsBalance();
+	const { isFreePlan, isStarterPlan, isLoading } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 
 	const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -38,7 +45,7 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 		setDismissed(true);
 	}, []);
 
-	if (isLoading || !isFreePlan || dismissed) {
+	if (isLoading || (!isFreePlan && !isStarterPlan) || dismissed) {
 		return null;
 	}
 
@@ -71,21 +78,34 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 						<div>
 							<div className="flex items-center gap-2">
 								<h3 className="font-semibold text-sm">
-									Try Pro free for 7 days
+									{isStarterPlan
+										? "Upgrade to Pro — unlock the full toolkit"
+										: "Try Pro free for 7 days"}
 								</h3>
-								<Badge className="text-xs bg-primary/15 text-primary border-primary/20 hover:bg-primary/20">
-									<SparklesIcon className="size-3 mr-1" />
-									No card needed
-								</Badge>
+								{isStarterPlan ? (
+									<Badge className="text-xs bg-primary/15 text-primary border-primary/20 hover:bg-primary/20">
+										<SparklesIcon className="size-3 mr-1" />
+										From $29/mo
+									</Badge>
+								) : (
+									<Badge className="text-xs bg-primary/15 text-primary border-primary/20 hover:bg-primary/20">
+										<SparklesIcon className="size-3 mr-1" />
+										No card needed
+									</Badge>
+								)}
 							</div>
 							<p className="mt-0.5 text-xs text-muted-foreground">
-								Unlock everything Pro has to offer — completely
-								free, no commitment.
+								{isStarterPlan
+									? "You're on Starter. Pro gives you 5× more credits plus automation, bulk actions, and templates."
+									: "Unlock everything Pro has to offer — completely free, no commitment."}
 							</p>
 						</div>
 
 						<ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-							{TRIAL_FEATURES.map((feature) => (
+							{(isStarterPlan
+								? STARTER_UPGRADE_FEATURES
+								: FREE_TRIAL_FEATURES
+							).map((feature) => (
 								<li
 									key={feature}
 									className="flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -98,7 +118,11 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 
 						<div className="flex items-center gap-2">
 							<Button asChild size="sm" className="text-xs h-8">
-								<Link href={billingPath}>Start free trial</Link>
+								<Link href={billingPath}>
+									{isStarterPlan
+										? "Upgrade to Pro"
+										: "Start free trial"}
+								</Link>
 							</Button>
 							<Button
 								asChild
@@ -106,7 +130,17 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 								variant="ghost"
 								className="text-xs h-8 text-muted-foreground"
 							>
-								<Link href="/pricing">See pricing</Link>
+								<Link
+									href={
+										isStarterPlan
+											? "/pricing#pricing-plan-pro"
+											: "/pricing"
+									}
+								>
+									{isStarterPlan
+										? "Compare plans"
+										: "See pricing"}
+								</Link>
 							</Button>
 						</div>
 					</div>

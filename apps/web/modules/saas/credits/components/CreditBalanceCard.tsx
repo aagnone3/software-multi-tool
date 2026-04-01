@@ -42,6 +42,7 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 		percentageUsed,
 		isLowCredits,
 		isFreePlan,
+		isStarterPlan,
 	} = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 
@@ -211,18 +212,18 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 					</p>
 				</div>
 
-				{/* Upgrade nudge: shown when on free plan or when credits are low */}
-				{(isFreePlan || isLowCredits) && (
+				{/* Upgrade nudge: shown when on free plan, starter plan with low credits, or when credits are low */}
+				{(isFreePlan || isStarterPlan || isLowCredits) && (
 					<div
 						className={cn(
 							"rounded-lg border p-4",
-							isFreePlan
+							isFreePlan || isStarterPlan
 								? "border-primary/20 bg-primary/5"
 								: "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950",
 						)}
 					>
 						<div className="flex items-start gap-3">
-							{isFreePlan ? (
+							{isFreePlan || isStarterPlan ? (
 								<ArrowUpCircleIcon className="mt-0.5 size-5 shrink-0 text-primary" />
 							) : (
 								<ZapIcon className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -231,44 +232,69 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 								<p
 									className={cn(
 										"text-sm font-semibold",
-										isFreePlan
+										isFreePlan || isStarterPlan
 											? "text-primary"
 											: "text-amber-800 dark:text-amber-200",
 									)}
 								>
 									{isFreePlan
 										? "Upgrade for 10× more credits"
-										: "Running low — top up or upgrade"}
+										: isStarterPlan
+											? "Unlock Pro — more credits & power"
+											: "Running low — top up or upgrade"}
 								</p>
 								<p
 									className={cn(
 										"mt-0.5 text-xs",
-										isFreePlan
+										isFreePlan || isStarterPlan
 											? "text-primary/70"
 											: "text-amber-700 dark:text-amber-300",
 									)}
 								>
 									{isFreePlan
 										? "Starter plan: 100 credits/month for $4.99. Unused credits roll over."
-										: "Keep your workflows running without interruption."}
+										: isStarterPlan
+											? "Pro includes 500 credits/month, scheduled runs, bulk actions, and templates — starting at $29/mo."
+											: "Keep your workflows running without interruption."}
 								</p>
-								<Button
-									asChild
-									size="sm"
-									className={cn(
-										"mt-3 w-full",
-										!isFreePlan &&
-											"bg-amber-600 hover:bg-amber-700 text-white border-0",
+								<div className="mt-3 flex gap-2">
+									<Button
+										asChild
+										size="sm"
+										className={cn(
+											"flex-1",
+											!isFreePlan &&
+												!isStarterPlan &&
+												"bg-amber-600 hover:bg-amber-700 text-white border-0",
+										)}
+										variant={
+											isFreePlan || isStarterPlan
+												? "primary"
+												: "outline"
+										}
+									>
+										<Link href={billingPath}>
+											{isFreePlan
+												? "Upgrade to Starter"
+												: isStarterPlan
+													? "Upgrade to Pro"
+													: "Add credits / upgrade"}
+											<ChevronRightIcon className="ml-1.5 size-3.5" />
+										</Link>
+									</Button>
+									{isStarterPlan && (
+										<Button
+											asChild
+											size="sm"
+											variant="outline"
+											className="flex-1"
+										>
+											<Link href="/pricing#pricing-plan-pro">
+												Compare plans
+											</Link>
+										</Button>
 									)}
-									variant={isFreePlan ? "primary" : "outline"}
-								>
-									<Link href={billingPath}>
-										{isFreePlan
-											? "Upgrade to Starter"
-											: "Add credits / upgrade"}
-										<ChevronRightIcon className="ml-1.5 size-3.5" />
-									</Link>
-								</Button>
+								</div>
 							</div>
 						</div>
 					</div>

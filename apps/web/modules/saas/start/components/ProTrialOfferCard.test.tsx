@@ -163,4 +163,52 @@ describe("ProTrialOfferCard", () => {
 		const startLink = screen.getByText("Start free trial").closest("a");
 		expect(startLink).toHaveAttribute("href", "/app/settings/billing");
 	});
+
+	it("shows Starter→Pro upgrade card when on starter plan", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLoading: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+
+		render(<ProTrialOfferCard />);
+		expect(screen.getByTestId("pro-trial-offer-card")).toBeInTheDocument();
+		expect(
+			screen.getByText("Upgrade to Pro — unlock the full toolkit"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("500 credits/month — 5× more than Starter"),
+		).toBeInTheDocument();
+	});
+
+	it("shows 'Upgrade to Pro' CTA and 'Compare plans' link for starter users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLoading: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+
+		render(<ProTrialOfferCard />);
+		const upgradeLink = screen.getByText("Upgrade to Pro").closest("a");
+		expect(upgradeLink).toHaveAttribute("href", "/app/settings/billing");
+		const compareLink = screen.getByText("Compare plans").closest("a");
+		expect(compareLink).toHaveAttribute(
+			"href",
+			"/pricing#pricing-plan-pro",
+		);
+	});
+
+	it("hides card for non-free non-starter users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: false,
+			isLoading: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+
+		render(<ProTrialOfferCard />);
+		expect(screen.queryByTestId("pro-trial-offer-card")).toBeNull();
+	});
 });
