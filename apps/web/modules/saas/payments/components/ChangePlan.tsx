@@ -1,6 +1,7 @@
 "use client";
 import { PricingTable } from "@saas/payments/components/PricingTable";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
+import React from "react";
 
 export function ChangePlan({
 	organizationId,
