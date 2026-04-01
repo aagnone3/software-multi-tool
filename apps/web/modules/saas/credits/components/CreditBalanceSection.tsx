@@ -6,14 +6,15 @@ import { useCreditsBalance } from "../hooks/use-credits-balance";
 import { CreditBalanceCard } from "./CreditBalanceCard";
 
 export function CreditBalanceSection() {
-	const { balance, isLoading, isFreePlan } = useCreditsBalance();
+	const { balance, isLoading, isFreePlan, isStarterPlan } =
+		useCreditsBalance();
 	const isZeroCredits =
 		!isLoading && balance !== undefined && balance.totalAvailable === 0;
 
 	return (
 		<div className="space-y-3">
 			<CreditBalanceCard />
-			{isFreePlan && isZeroCredits && (
+			{(isFreePlan || isStarterPlan) && isZeroCredits && (
 				<EmptyStateUpgradeNudge context="credits" />
 			)}
 		</div>
