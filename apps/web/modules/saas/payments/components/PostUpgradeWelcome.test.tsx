@@ -19,29 +19,46 @@ describe("PostUpgradeWelcome", () => {
 		expect(screen.getByText(/now on Pro/i)).toBeDefined();
 	});
 
-	it("renders all feature highlights", () => {
+	it("renders the included benefits list", () => {
 		render(<PostUpgradeWelcome />);
-		expect(screen.getByText("Credits unlocked")).toBeDefined();
-		expect(screen.getByText("Priority processing")).toBeDefined();
-		expect(screen.getByText("All tools included")).toBeDefined();
+		expect(screen.getByText(/500 credits\/month/i)).toBeDefined();
+		expect(screen.getByText(/priority processing/i)).toBeDefined();
+		expect(screen.getByText(/all tools unlocked/i)).toBeDefined();
 	});
 
-	it("renders a CTA link to run the first pro tool", () => {
+	it("renders all three Pro-exclusive feature cards", () => {
 		render(<PostUpgradeWelcome />);
-		const link = screen.getByRole("link", {
+		expect(screen.getByText("Scheduler")).toBeDefined();
+		expect(screen.getByText("Bulk Actions")).toBeDefined();
+		expect(screen.getByText("Input Templates")).toBeDefined();
+	});
+
+	it("renders the suggested first steps checklist", () => {
+		render(<PostUpgradeWelcome />);
+		expect(screen.getByText(/Suggested first steps/i)).toBeDefined();
+		expect(screen.getByText(/Run a tool/i)).toBeDefined();
+		expect(screen.getByText(/Schedule a recurring run/i)).toBeDefined();
+		expect(screen.getByText(/Save a template/i)).toBeDefined();
+	});
+
+	it("renders a CTA link to run the first pro tool with tool href", () => {
+		render(<PostUpgradeWelcome />);
+		const links = screen.getAllByRole("link", {
 			name: /run your first pro tool/i,
 		});
-		expect(link).toBeDefined();
-		expect((link as HTMLAnchorElement).href).toContain(
+		expect(links.length).toBeGreaterThan(0);
+		expect((links[0] as HTMLAnchorElement).href).toContain(
 			"/app/tools/invoice-processor",
 		);
 	});
 
 	it("renders a browse all tools link", () => {
 		render(<PostUpgradeWelcome />);
-		const link = screen.getByRole("link", { name: /browse all tools/i });
-		expect(link).toBeDefined();
-		expect((link as HTMLAnchorElement).href).toContain("/app/tools");
+		const links = screen.getAllByRole("link", {
+			name: /browse all tools/i,
+		});
+		expect(links.length).toBeGreaterThan(0);
+		expect((links[0] as HTMLAnchorElement).href).toContain("/app/tools");
 	});
 
 	it("renders a billing management link", () => {
@@ -57,7 +74,6 @@ describe("PostUpgradeWelcome", () => {
 		vi.doMock("@saas/tools/hooks/use-tools", () => ({
 			useTools: () => ({ enabledTools: [] }),
 		}));
-		// Simple structural check — component renders without crash
 		render(<PostUpgradeWelcome />);
 		expect(screen.getByText(/now on Pro/i)).toBeDefined();
 	});
