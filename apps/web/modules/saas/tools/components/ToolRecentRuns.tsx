@@ -80,11 +80,6 @@ function formatRelativeTime(dateStr: string | Date): string {
 	return `${days}d ago`;
 }
 
-const DETAIL_ROUTES: Record<string, string> = {
-	"news-analyzer": "/app/tools/news-analyzer",
-	"speaker-separation": "/app/tools/speaker-separation",
-};
-
 export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 	const { jobs, isLoading } = useJobsList(toolSlug, 3);
 
@@ -131,13 +126,8 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 			<CardContent className="space-y-2">
 				{jobs.map((job) => {
 					const status = job.status as JobStatus;
-					const detailBase = DETAIL_ROUTES[toolSlug];
 					const detailUrl =
-						status === "COMPLETED"
-							? detailBase
-								? `${detailBase}/${job.id}`
-								: `/app/jobs/${job.id}`
-							: null;
+						status === "COMPLETED" ? `/app/jobs/${job.id}` : null;
 
 					return (
 						<div

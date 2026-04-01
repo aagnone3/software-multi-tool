@@ -58,6 +58,7 @@ export function ToolCompareView() {
 
 	const leftTool = enabledTools.find((t) => t.slug === leftSlug);
 	const rightTool = enabledTools.find((t) => t.slug === rightSlug);
+	const isSameTool = leftSlug === rightSlug && leftSlug !== "";
 
 	return (
 		<div className="space-y-6">
@@ -99,7 +100,13 @@ export function ToolCompareView() {
 				</div>
 			</div>
 
-			{leftTool && rightTool && (
+			{isSameTool && (
+				<p className="text-sm text-muted-foreground text-center">
+					Select two different tools to compare them.
+				</p>
+			)}
+
+			{leftTool && rightTool && !isSameTool && (
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-base">Comparison</CardTitle>

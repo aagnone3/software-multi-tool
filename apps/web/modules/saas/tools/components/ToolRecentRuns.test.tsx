@@ -98,7 +98,7 @@ describe("ToolRecentRuns", () => {
 		expect(link.getAttribute("href")).toBe("/app/jobs");
 	});
 
-	it("shows View link for tools with dedicated detail routes", () => {
+	it("shows View link to /app/jobs/[id] for completed jobs", () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [makeJob({ toolSlug: "news-analyzer" })],
 			isLoading: false,
@@ -108,12 +108,10 @@ describe("ToolRecentRuns", () => {
 		render(<ToolRecentRuns toolSlug="news-analyzer" />);
 		const viewLinks = screen.getAllByRole("link", { name: /^view$/i });
 		expect(viewLinks.length).toBeGreaterThan(0);
-		expect(viewLinks[0].getAttribute("href")).toContain(
-			"/app/tools/news-analyzer/",
-		);
+		expect(viewLinks[0].getAttribute("href")).toContain("/app/jobs/");
 	});
 
-	it("shows View link to /app/jobs/[id] for non-detail-route tools", () => {
+	it("shows View link to /app/jobs/[id] for any tool slug", () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [makeJob({ toolSlug: "contract-analyzer" })],
 			isLoading: false,
@@ -123,7 +121,7 @@ describe("ToolRecentRuns", () => {
 		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
 		const viewLinks = screen.queryAllByRole("link", { name: /^view$/i });
 		expect(viewLinks.length).toBeGreaterThan(0);
-		expect(viewLinks[0].getAttribute("href")).toContain("/app/jobs/");
+		expect(viewLinks[0].getAttribute("href")).toContain("/app/jobs/job-1");
 	});
 
 	it("passes toolSlug and limit=3 to useJobsList", () => {
