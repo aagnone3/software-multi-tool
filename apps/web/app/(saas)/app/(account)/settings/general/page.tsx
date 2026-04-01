@@ -4,6 +4,7 @@ import { ChangeNameForm } from "@saas/settings/components/ChangeNameForm";
 import { UserAvatarForm } from "@saas/settings/components/UserAvatarForm";
 import { SettingsList } from "@saas/shared/components/SettingsList";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export async function generateMetadata() {
 	return {

@@ -4,6 +4,7 @@ import { ToolsGrid } from "@saas/tools/components/ToolsGrid";
 import { Button } from "@ui/components/button";
 import { BarChart3Icon, GitCompareArrowsIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 export default function ToolsPage() {
 	return (

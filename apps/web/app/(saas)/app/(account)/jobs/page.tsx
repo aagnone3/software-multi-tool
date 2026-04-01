@@ -1,4 +1,5 @@
 import { JobsHistoryPage } from "@saas/jobs/components/JobsHistoryPage";
+import React from "react";
 
 export async function generateMetadata() {
 	return {
