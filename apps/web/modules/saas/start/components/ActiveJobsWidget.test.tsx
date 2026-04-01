@@ -137,3 +137,15 @@ describe("ActiveJobsWidget", () => {
 		);
 	});
 });
+
+describe("ActiveJobsWidget error state", () => {
+	it("shows error state when jobs query fails", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [],
+			isLoading: false,
+			isError: true,
+		});
+		render(<ActiveJobsWidget />);
+		expect(screen.getByText("Failed to load jobs")).toBeDefined();
+	});
+});

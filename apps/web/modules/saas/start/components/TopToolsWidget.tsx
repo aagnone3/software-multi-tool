@@ -11,7 +11,12 @@ import {
 } from "@ui/components/card";
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
-import { BarChart3Icon, ChevronRightIcon, WrenchIcon } from "lucide-react";
+import {
+	AlertCircleIcon,
+	BarChart3Icon,
+	ChevronRightIcon,
+	WrenchIcon,
+} from "lucide-react";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
@@ -32,7 +37,7 @@ export function TopToolsWidget({
 	className,
 	maxTools = 5,
 }: TopToolsWidgetProps) {
-	const { jobs, isLoading } = useRecentJobs(50);
+	const { jobs, isLoading, isError } = useRecentJobs(50);
 	const { enabledTools } = useTools();
 
 	const topTools = useMemo<TopToolEntry[]>(() => {
@@ -61,6 +66,27 @@ export function TopToolsWidget({
 				};
 			});
 	}, [jobs, enabledTools, maxTools]);
+
+	if (isError) {
+		return (
+			<Card className={className}>
+				<CardHeader className="pb-3">
+					<CardTitle className="flex items-center gap-2">
+						<BarChart3Icon className="size-5" />
+						Top Tools
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex flex-col items-center justify-center py-6 text-center">
+						<AlertCircleIcon className="size-8 text-destructive/60 mb-2" />
+						<p className="text-sm text-muted-foreground">
+							Failed to load usage data
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	if (isLoading) {
 		return (
