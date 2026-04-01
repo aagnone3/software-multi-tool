@@ -70,6 +70,38 @@ describe("CreditBalanceSection", () => {
 			balance: { ...baseBalance, plan: { id: "pro", name: "Pro" } },
 			isLoading: false,
 			isFreePlan: false,
+			isStarterPlan: false,
+		});
+		render(<CreditBalanceSection />);
+		expect(screen.queryByTestId("empty-state-nudge")).toBeNull();
+	});
+
+	it("shows EmptyStateUpgradeNudge for Starter user with zero credits", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...baseBalance,
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		render(<CreditBalanceSection />);
+		const nudge = screen.getByTestId("empty-state-nudge");
+		expect(nudge).toBeDefined();
+		expect(nudge.getAttribute("data-context")).toBe("credits");
+	});
+
+	it("does NOT show nudge for Starter user with remaining credits", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...baseBalance,
+				totalAvailable: 10,
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			isFreePlan: false,
+			isStarterPlan: true,
 		});
 		render(<CreditBalanceSection />);
 		expect(screen.queryByTestId("empty-state-nudge")).toBeNull();

@@ -45,7 +45,7 @@ export function LowCreditsWarning({
 	threshold = 0.2,
 	showActionButtons = true,
 }: LowCreditsWarningProps) {
-	const { balance, isLoading } = useCreditsBalance();
+	const { balance, isLoading, isStarterPlan } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
 	const [alertSettings, setAlertSettings] = useState<{
 		enabled: boolean;
@@ -106,12 +106,27 @@ export function LowCreditsWarning({
 			</div>
 			{showActionButtons && (
 				<div className="flex shrink-0 gap-2">
-					<Button asChild variant="secondary" size="sm">
-						<Link href={billingPath}>Buy Credits</Link>
-					</Button>
-					<Button asChild variant="primary" size="sm">
-						<Link href={billingPath}>Upgrade Plan</Link>
-					</Button>
+					{isStarterPlan ? (
+						<>
+							<Button asChild variant="secondary" size="sm">
+								<Link href="/pricing#pricing-plan-pro">
+									Compare plans
+								</Link>
+							</Button>
+							<Button asChild variant="primary" size="sm">
+								<Link href={billingPath}>Upgrade to Pro</Link>
+							</Button>
+						</>
+					) : (
+						<>
+							<Button asChild variant="secondary" size="sm">
+								<Link href={billingPath}>Buy Credits</Link>
+							</Button>
+							<Button asChild variant="primary" size="sm">
+								<Link href={billingPath}>Upgrade Plan</Link>
+							</Button>
+						</>
+					)}
 				</div>
 			)}
 		</Alert>

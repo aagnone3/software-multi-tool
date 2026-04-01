@@ -158,4 +158,35 @@ describe("LowCreditsWarning", () => {
 		render(<LowCreditsWarning showActionButtons={false} />);
 		expect(screen.queryAllByTestId("button")).toHaveLength(0);
 	});
+
+	it("shows Upgrade to Pro and Compare plans CTAs for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...makeBalance(10, 100, "Starter"),
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		render(<LowCreditsWarning />);
+		const links = Array.from(document.querySelectorAll("a"));
+		const linkTexts = links.map((l) => l.textContent);
+		expect(linkTexts).toContain("Upgrade to Pro");
+		expect(linkTexts).toContain("Compare plans");
+	});
+
+	it("shows Buy Credits and Upgrade Plan CTAs for Free plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance(10, 100),
+			isLoading: false,
+			isStarterPlan: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		render(<LowCreditsWarning />);
+		const links = Array.from(document.querySelectorAll("a"));
+		const linkTexts = links.map((l) => l.textContent);
+		expect(linkTexts).toContain("Buy Credits");
+		expect(linkTexts).toContain("Upgrade Plan");
+	});
 });
