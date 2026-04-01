@@ -40,6 +40,7 @@ import {
 	TrashIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { DeleteFileDialog } from "./DeleteFileDialog";
 import { FileUploader } from "./FileUploader";
 import { TagInput } from "./TagInput";
@@ -135,15 +136,23 @@ export function FilesTable(_props: FilesTableProps) {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["files"] });
 			setFileToDelete(null);
+			toast.success("File deleted");
+		},
+		onError: () => {
+			toast.error("Failed to delete file. Please try again.");
 		},
 	});
 
 	// Download handler
 	const handleDownload = async (fileId: string) => {
-		const { downloadUrl } = await orpcClient.files.getDownloadUrl({
-			fileId,
-		});
-		window.open(downloadUrl, "_blank");
+		try {
+			const { downloadUrl } = await orpcClient.files.getDownloadUrl({
+				fileId,
+			});
+			window.open(downloadUrl, "_blank");
+		} catch {
+			toast.error("Failed to download file. Please try again.");
+		}
 	};
 
 	const files = filesQuery.data?.files ?? [];

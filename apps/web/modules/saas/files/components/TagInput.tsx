@@ -11,6 +11,7 @@ import {
 } from "@ui/components/dropdown-menu";
 import { PlusIcon, XIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 interface Tag {
 	id: string;
@@ -80,6 +81,9 @@ export function TagInput({
 			setNewTagName("");
 			setIsAddingTag(false);
 		},
+		onError: () => {
+			toast.error("Failed to add tag. Please try again.");
+		},
 	});
 
 	// Remove tag mutation
@@ -88,6 +92,9 @@ export function TagInput({
 			orpcClient.files.removeTag({ fileId, tagId }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["files"] });
+		},
+		onError: () => {
+			toast.error("Failed to remove tag. Please try again.");
 		},
 	});
 
