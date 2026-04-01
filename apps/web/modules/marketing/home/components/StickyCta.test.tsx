@@ -19,6 +19,7 @@ vi.mock("next/link", () => ({
 
 type CreditsBalanceMock = {
 	isFreePlan: boolean;
+	isStarterPlan: boolean;
 	isLoading: boolean;
 	balance: { plan: { id: string; name: string } } | undefined;
 };
@@ -46,6 +47,7 @@ describe("StickyCta", () => {
 		// Default: anonymous visitor — no balance, not loading
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLoading: false,
 			balance: undefined,
 		});
@@ -61,9 +63,9 @@ describe("StickyCta", () => {
 	});
 
 	it("becomes visible for anonymous user (no balance) when scrollY > 400", () => {
-		// anonymous: balance=undefined → not a paid user
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLoading: false,
 			balance: undefined,
 		});
@@ -75,6 +77,7 @@ describe("StickyCta", () => {
 	it("becomes visible for free-plan user when scrollY > 400", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});
@@ -83,22 +86,53 @@ describe("StickyCta", () => {
 		expect(screen.getByText(/start free/i)).toBeTruthy();
 	});
 
-	it("is hidden for Pro (paid) user even when scrollY > 400", () => {
-		// Pro: balance exists, isFreePlan=false, not loading
+	it("shows Starter→Pro upsell CTA for Starter plan users", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: true,
 			isLoading: false,
-			balance: { plan: { id: "pro", name: "Pro" } },
+			balance: { plan: { id: "starter", name: "Starter" } },
+		});
+		render(<StickyCta />);
+		scrollPast400();
+		expect(screen.getByText(/unlock scheduler/i)).toBeTruthy();
+		const link = screen.getByRole("link", { name: /upgrade to pro/i });
+		expect(link).toBeTruthy();
+		expect((link as HTMLAnchorElement).href).toContain(
+			"/app/settings/billing",
+		);
+	});
+
+	it("does NOT show 'start free' copy for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: true,
+			isLoading: false,
+			balance: { plan: { id: "starter", name: "Starter" } },
 		});
 		render(<StickyCta />);
 		scrollPast400();
 		expect(screen.queryByText(/start free/i)).toBeNull();
 	});
 
+	it("is hidden for Pro (paid) user even when scrollY > 400", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: false,
+			isLoading: false,
+			balance: { plan: { id: "pro", name: "Pro" } },
+		});
+		render(<StickyCta />);
+		scrollPast400();
+		expect(screen.queryByText(/start free/i)).toBeNull();
+		expect(screen.queryByText(/upgrade to pro/i)).toBeNull();
+	});
+
 	it("is not suppressed while plan is still loading", () => {
 		// While loading we can't confirm Pro status — show the CTA
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
+			isStarterPlan: false,
 			isLoading: true,
 			balance: undefined,
 		});
@@ -107,9 +141,10 @@ describe("StickyCta", () => {
 		expect(screen.getByText(/start free/i)).toBeTruthy();
 	});
 
-	it("contains a signup link", () => {
+	it("contains a signup link for anonymous/free users", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});
@@ -123,6 +158,7 @@ describe("StickyCta", () => {
 	it("hides when dismissed", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: true,
+			isStarterPlan: false,
 			isLoading: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});

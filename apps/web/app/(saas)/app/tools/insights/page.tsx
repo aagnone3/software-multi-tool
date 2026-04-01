@@ -6,6 +6,7 @@ import { ToolInsightsDashboard } from "@saas/tools/components/ToolInsightsDashbo
 import { Button } from "@ui/components/button";
 import { WrenchIcon } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 export default function ToolInsightsPage() {
 	return (

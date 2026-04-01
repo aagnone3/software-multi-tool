@@ -1,4 +1,5 @@
 import { JobDetailPage } from "@saas/jobs/components/JobDetailPage";
+import React from "react";
 
 interface JobDetailPageProps {
 	params: Promise<{
