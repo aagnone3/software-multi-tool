@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { type Config, config } from "@repo/config";
 import { usePlanData } from "@saas/payments/hooks/plan-data";
 import type { PlanId } from "@saas/payments/types";
@@ -39,6 +40,7 @@ export function PricingTable({
 	const localeCurrency = useLocaleCurrency();
 	const [loading, setLoading] = useState<PlanId | false>(false);
 	const [interval, setInterval] = useState<"month" | "year">("month");
+	const { track } = useProductAnalytics();
 
 	const { planData } = usePlanData();
 
@@ -53,6 +55,17 @@ export function PricingTable({
 	);
 
 	const onSelectPlan = async (planId: PlanId, productId?: string) => {
+		track({
+			name: "pricing_plan_selected",
+			props: {
+				plan_id: planId,
+				billing_interval: interval,
+				source: "pricing_table",
+				current_plan: activePlanId ?? "none",
+				authenticated: !!(userId || organizationId),
+			},
+		});
+
 		if (!(userId || organizationId)) {
 			router.push("/auth/signup");
 			return;
@@ -377,7 +390,20 @@ export function PricingTable({
 												variant="light"
 												asChild
 											>
-												<Link href="/contact">
+												<Link
+													href="/contact"
+													onClick={() =>
+														track({
+															name: "pricing_contact_sales_clicked",
+															props: {
+																source: "pricing_table",
+																current_plan:
+																	activePlanId ??
+																	"none",
+															},
+														})
+													}
+												>
 													<PhoneIcon className="mr-2 size-4" />
 													Contact sales
 												</Link>

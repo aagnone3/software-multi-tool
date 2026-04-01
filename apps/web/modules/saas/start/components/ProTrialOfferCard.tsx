@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Badge } from "@ui/components/badge";
@@ -32,6 +33,7 @@ interface ProTrialOfferCardProps {
 export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 	const { isFreePlan, isStarterPlan, isLoading } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const [dismissed, setDismissed] = useState<boolean>(() => {
 		if (typeof window === "undefined") {
@@ -41,9 +43,16 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 	});
 
 	const handleDismiss = useCallback(() => {
+		track({
+			name: "pro_trial_offer_dismissed",
+			props: {
+				plan_id: isStarterPlan ? "starter" : "free",
+				source: "dashboard_trial_card",
+			},
+		});
 		localStorage.setItem(STORAGE_KEY, "true");
 		setDismissed(true);
-	}, []);
+	}, [track, isStarterPlan]);
 
 	if (isLoading || (!isFreePlan && !isStarterPlan) || dismissed) {
 		return null;
@@ -118,7 +127,25 @@ export function ProTrialOfferCard({ className }: ProTrialOfferCardProps) {
 
 						<div className="flex items-center gap-2">
 							<Button asChild size="sm" className="text-xs h-8">
-								<Link href={billingPath}>
+								<Link
+									href={billingPath}
+									onClick={() =>
+										track({
+											name: "upgrade_cta_clicked",
+											props: {
+												source: isStarterPlan
+													? "dashboard_trial_card_starter"
+													: "dashboard_trial_card_free",
+												plan_id: isStarterPlan
+													? "starter"
+													: "free",
+												target_plan: isStarterPlan
+													? "pro"
+													: "starter",
+											},
+										})
+									}
+								>
 									{isStarterPlan
 										? "Upgrade to Pro"
 										: "Start free trial"}
