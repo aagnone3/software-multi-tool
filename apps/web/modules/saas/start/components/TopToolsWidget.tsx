@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -18,7 +19,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface TopToolEntry {
@@ -39,6 +40,17 @@ export function TopToolsWidget({
 }: TopToolsWidgetProps) {
 	const { jobs, isLoading, isError } = useRecentJobs(50);
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
+
+	const handleToolClick = useCallback(
+		(tool: TopToolEntry, rank: number) => {
+			track({
+				name: "dashboard_top_tool_clicked",
+				props: { tool_slug: tool.slug, tool_name: tool.name, rank },
+			});
+		},
+		[track],
+	);
 
 	const topTools = useMemo<TopToolEntry[]>(() => {
 		if (!jobs.length) {
@@ -155,11 +167,12 @@ export function TopToolsWidget({
 				<CardDescription>Your most-used tools</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				{topTools.map((tool) => (
+				{topTools.map((tool, index) => (
 					<Link
 						key={tool.slug}
 						href={`/app/tools/${tool.slug}`}
 						className="block group"
+						onClick={() => handleToolClick(tool, index + 1)}
 					>
 						<div className="flex items-center justify-between mb-1">
 							<span className="text-sm font-medium group-hover:text-primary transition-colors truncate">

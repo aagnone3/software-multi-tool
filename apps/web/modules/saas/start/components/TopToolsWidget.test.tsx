@@ -1,8 +1,9 @@
 "use client";
 
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockJobs = [
 	{
@@ -24,6 +25,11 @@ const mockJobs = [
 		createdAt: new Date(),
 	},
 ];
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: () => ({
@@ -108,5 +114,28 @@ describe("TopToolsWidget", () => {
 		render(<TopToolsWidget />);
 		const link = screen.getByRole("link", { name: /view all jobs/i });
 		expect(link).toHaveAttribute("href", "/app/jobs");
+	});
+
+	describe("analytics", () => {
+		beforeEach(() => {
+			mockTrack.mockClear();
+		});
+
+		it("tracks tool click with slug, name, and rank", async () => {
+			const user = userEvent.setup();
+			render(<TopToolsWidget />);
+			const toolLink = screen.getAllByRole("link", {
+				name: /Document Analyzer/i,
+			})[0];
+			await user.click(toolLink);
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "dashboard_top_tool_clicked",
+				props: {
+					tool_slug: "document-analyzer",
+					tool_name: "Document Analyzer",
+					rank: 1,
+				},
+			});
+		});
 	});
 });

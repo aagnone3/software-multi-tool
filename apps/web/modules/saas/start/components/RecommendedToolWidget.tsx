@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { useJobsList } from "@tools/hooks/use-job-polling";
@@ -59,6 +60,7 @@ export function RecommendedToolWidget({
 	const { enabledTools } = useTools();
 	const { activeOrganization } = useActiveOrganization();
 	const { jobs } = useJobsList(undefined, 100);
+	const { track } = useProductAnalytics();
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 	const [isClient, setIsClient] = useState(false);
 
@@ -236,7 +238,16 @@ export function RecommendedToolWidget({
 				<Button className="w-full" asChild>
 					<Link
 						href={`${basePath}/tools/${currentTool.slug}`}
-						onClick={rotateToNext}
+						onClick={() => {
+							track({
+								name: "dashboard_recommended_tool_clicked",
+								props: {
+									tool_slug: currentTool.slug,
+									tool_name: currentTool.name,
+								},
+							});
+							rotateToNext();
+						}}
 					>
 						Try it
 						<ChevronRightIcon className="size-4 ml-1" />

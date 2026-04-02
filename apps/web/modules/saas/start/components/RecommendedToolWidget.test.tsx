@@ -19,6 +19,11 @@ vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobsList: useJobsListMock,
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
@@ -166,5 +171,18 @@ describe("RecommendedToolWidget", () => {
 		render(<RecommendedToolWidget />);
 		// news-analyzer (untried) should appear first
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
+	});
+
+	it("tracks tool click when Try it is clicked", () => {
+		useToolsMock.mockReturnValue({ enabledTools: mockTools });
+		useJobsListMock.mockReturnValue({ jobs: [] });
+		render(<RecommendedToolWidget />);
+		const tryItLink = screen.getByRole("link", { name: /try it/i });
+		fireEvent.click(tryItLink);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "dashboard_recommended_tool_clicked",
+			}),
+		);
 	});
 });

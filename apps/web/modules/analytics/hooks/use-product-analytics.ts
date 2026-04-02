@@ -258,6 +258,18 @@ type ProductEvent =
 	| {
 			name: "dashboard_getting_started_step_clicked";
 			props: { step_id: string; is_complete: boolean };
+	  }
+	| {
+			name: "dashboard_top_tool_clicked";
+			props: { tool_slug: string; tool_name: string; rank: number };
+	  }
+	| {
+			name: "dashboard_recommended_tool_clicked";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "dashboard_active_job_view_clicked";
+			props: { job_id: string; tool_slug: string; job_status: string };
 	  };
 
 export type { ProductEvent };
