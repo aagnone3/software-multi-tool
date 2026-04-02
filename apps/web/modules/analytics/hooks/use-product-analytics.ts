@@ -378,6 +378,27 @@ type ProductEvent =
 				page_label: string;
 				from_recent: boolean;
 			};
+	  }
+	| {
+			name: "tool_card_open_clicked";
+			props: {
+				tool_slug: string;
+				tool_name: string;
+				is_recently_used: boolean;
+				is_favorite: boolean;
+			};
+	  }
+	| {
+			name: "tool_card_favorite_toggled";
+			props: {
+				tool_slug: string;
+				tool_name: string;
+				is_favorited: boolean;
+			};
+	  }
+	| {
+			name: "tool_card_preview_clicked";
+			props: { tool_slug: string; tool_name: string };
 	  };
 
 export type { ProductEvent };
