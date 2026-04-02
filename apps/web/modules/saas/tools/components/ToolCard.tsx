@@ -1,3 +1,4 @@
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { ToolConfig } from "@repo/config/types";
 import { Button } from "@ui/components/button";
 import {
@@ -103,6 +104,7 @@ export function ToolCard({
 	onPreview,
 }: ToolCardProps) {
 	const Icon = getToolIcon(tool.icon);
+	const { track } = useProductAnalytics();
 
 	if (isComingSoon) {
 		return (
@@ -190,6 +192,14 @@ export function ToolCard({
 										)}
 										onClick={(e) => {
 											e.preventDefault();
+											track({
+												name: "tool_card_favorite_toggled",
+												props: {
+													tool_slug: tool.slug,
+													tool_name: tool.name,
+													is_favorited: !isFavorite,
+												},
+											});
 											onToggleFavorite(tool.slug);
 										}}
 										aria-label={
@@ -279,6 +289,13 @@ export function ToolCard({
 							className="flex-none opacity-0 group-hover:opacity-100 transition-opacity"
 							onClick={(e) => {
 								e.preventDefault();
+								track({
+									name: "tool_card_preview_clicked",
+									props: {
+										tool_slug: tool.slug,
+										tool_name: tool.name,
+									},
+								});
 								onPreview(tool.slug);
 							}}
 							aria-label={`Preview ${tool.name}`}
@@ -286,7 +303,21 @@ export function ToolCard({
 							Preview
 						</Button>
 					)}
-					<Link href={`/app/tools/${tool.slug}`} className="flex-1">
+					<Link
+						href={`/app/tools/${tool.slug}`}
+						className="flex-1"
+						onClick={() => {
+							track({
+								name: "tool_card_open_clicked",
+								props: {
+									tool_slug: tool.slug,
+									tool_name: tool.name,
+									is_recently_used: isRecentlyUsed,
+									is_favorite: isFavorite,
+								},
+							});
+						}}
+					>
 						<Button className="w-full" variant="outline">
 							Open Tool
 						</Button>
