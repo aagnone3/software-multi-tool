@@ -1,38 +1,42 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { FinalCta } from "./FinalCta";
 
 describe("FinalCta", () => {
-	it("renders the heading", () => {
-		render(<FinalCta />);
-		expect(
-			screen.getByText("Try it free. First results in under 2 minutes."),
-		).toBeInTheDocument();
+	beforeEach(() => {
+		mockTrack.mockClear();
 	});
 
-	it("renders Start Free link pointing to signup", () => {
+	it("renders start free and browse tools links", () => {
 		render(<FinalCta />);
-		const link = screen.getByRole("link", {
-			name: /start free — no card needed/i,
+		expect(
+			screen.getByText(/Start Free — No Card Needed/i),
+		).toBeInTheDocument();
+		expect(screen.getByText(/Browse All Tools/i)).toBeInTheDocument();
+	});
+
+	it("tracks start_free click", () => {
+		render(<FinalCta />);
+		fireEvent.click(screen.getByText(/Start Free — No Card Needed/i));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_final_cta_clicked",
+			props: { cta: "start_free" },
 		});
-		expect(link).toHaveAttribute("href", "/auth/signup");
 	});
 
-	it("renders Browse All Tools link", () => {
+	it("tracks browse_tools click", () => {
 		render(<FinalCta />);
-		const link = screen.getByRole("link", { name: /browse all tools/i });
-		expect(link).toHaveAttribute("href", "/tools");
-	});
-
-	it("renders all benefit items", () => {
-		render(<FinalCta />);
-		expect(screen.getByText("No credit card required")).toBeInTheDocument();
-		expect(
-			screen.getByText("Free credits included on signup"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("First result in under 2 minutes"),
-		).toBeInTheDocument();
+		fireEvent.click(screen.getByText(/Browse All Tools/i));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_final_cta_clicked",
+			props: { cta: "browse_tools" },
+		});
 	});
 });

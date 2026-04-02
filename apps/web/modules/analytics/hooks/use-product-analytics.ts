@@ -334,6 +334,30 @@ type ProductEvent =
 	| {
 			name: "related_tool_learn_more_clicked";
 			props: { tool_slug: string; source_tags: string };
+	  }
+	| {
+			name: "marketing_final_cta_clicked";
+			props: { cta: "start_free" | "browse_tools" };
+	  }
+	| {
+			name: "marketing_exit_intent_shown";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "marketing_exit_intent_cta_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "marketing_exit_intent_dismissed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "marketing_mid_post_cta_clicked";
+			props: { post_slug: string };
+	  }
+	| {
+			name: "social_share_clicked";
+			props: { platform: string; post_slug: string };
 	  };
 
 export type { ProductEvent };

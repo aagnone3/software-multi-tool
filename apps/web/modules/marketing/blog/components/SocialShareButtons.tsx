@@ -1,9 +1,14 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 export function SocialShareButtons({ title }: { title: string }) {
 	const [currentUrl, setCurrentUrl] = useState("");
+	const { track } = useProductAnalytics();
+	const pathname = usePathname();
+	const postSlug = pathname?.split("/").pop() ?? "unknown";
 
 	useEffect(() => {
 		setCurrentUrl(window.location.href);
@@ -15,6 +20,7 @@ export function SocialShareButtons({ title }: { title: string }) {
 	const shareLinks = [
 		{
 			name: "Twitter / X",
+			platform: "twitter",
 			href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
 			icon: (
 				<svg
@@ -31,6 +37,7 @@ export function SocialShareButtons({ title }: { title: string }) {
 		},
 		{
 			name: "LinkedIn",
+			platform: "linkedin",
 			href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
 			icon: (
 				<svg
@@ -61,6 +68,15 @@ export function SocialShareButtons({ title }: { title: string }) {
 					target="_blank"
 					rel="noopener noreferrer"
 					aria-label={`Share on ${link.name}`}
+					onClick={() =>
+						track({
+							name: "social_share_clicked",
+							props: {
+								platform: link.platform,
+								post_slug: postSlug,
+							},
+						})
+					}
 					className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm transition-colors hover:bg-muted"
 				>
 					{link.icon}

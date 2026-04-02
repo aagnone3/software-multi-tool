@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { X } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -10,12 +11,14 @@ const DISMISS_DAYS = 7;
 export function ExitIntentModal() {
 	const [visible, setVisible] = useState(false);
 	const triggered = useRef(false);
+	const { track } = useProductAnalytics();
 
 	const dismiss = useCallback(() => {
+		track({ name: "marketing_exit_intent_dismissed", props: {} });
 		setVisible(false);
 		const expires = Date.now() + DISMISS_DAYS * 24 * 60 * 60 * 1000;
 		localStorage.setItem(STORAGE_KEY, String(expires));
-	}, []);
+	}, [track]);
 
 	useEffect(() => {
 		const suppressed = localStorage.getItem(STORAGE_KEY);
@@ -26,13 +29,14 @@ export function ExitIntentModal() {
 			if (e.clientY <= 10) {
 				triggered.current = true;
 				setVisible(true);
+				track({ name: "marketing_exit_intent_shown", props: {} });
 			}
 		};
 
 		document.addEventListener("mouseleave", handleMouseLeave);
 		return () =>
 			document.removeEventListener("mouseleave", handleMouseLeave);
-	}, []);
+	}, [track]);
 
 	if (!visible) return null;
 
@@ -77,7 +81,13 @@ export function ExitIntentModal() {
 
 					<Link
 						href="/auth/signup"
-						onClick={dismiss}
+						onClick={() => {
+							track({
+								name: "marketing_exit_intent_cta_clicked",
+								props: {},
+							});
+							dismiss();
+						}}
 						className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm shadow hover:bg-primary/90 transition-colors"
 					>
 						Claim my free credits →

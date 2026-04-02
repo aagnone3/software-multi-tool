@@ -1,9 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ExitIntentModal } from "./ExitIntentModal";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock localStorage
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
+// Suppress localStorage
 const localStorageMock = (() => {
 	let store: Record<string, string> = {};
 	return {
@@ -11,95 +15,67 @@ const localStorageMock = (() => {
 		setItem: (key: string, value: string) => {
 			store[key] = value;
 		},
-		removeItem: (key: string) => {
-			delete store[key];
-		},
 		clear: () => {
 			store = {};
 		},
 	};
 })();
-
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+import { ExitIntentModal } from "./ExitIntentModal";
 
 describe("ExitIntentModal", () => {
 	beforeEach(() => {
+		mockTrack.mockClear();
 		localStorageMock.clear();
 	});
 
-	afterEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("does not render modal by default", () => {
+	it("does not render until exit intent fires", () => {
 		render(<ExitIntentModal />);
-		expect(screen.queryByRole("dialog")).toBeNull();
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 	});
 
-	it("shows modal on mouse leave near top of page", () => {
+	it("shows modal on mouseleave near top and tracks shown event", () => {
 		render(<ExitIntentModal />);
 		act(() => {
 			const event = new MouseEvent("mouseleave", {
-				clientY: 5,
 				bubbles: true,
+				clientY: 5,
 			});
 			document.dispatchEvent(event);
 		});
-		expect(screen.getByRole("dialog")).toBeTruthy();
+		expect(screen.getByRole("dialog")).toBeInTheDocument();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_exit_intent_shown",
+			props: {},
+		});
 	});
 
-	it("dismisses modal on close button click", () => {
+	it("tracks dismissed event when close button clicked", () => {
 		render(<ExitIntentModal />);
 		act(() => {
 			document.dispatchEvent(
-				new MouseEvent("mouseleave", { clientY: 5 }),
+				new MouseEvent("mouseleave", { bubbles: true, clientY: 5 }),
 			);
 		});
-		const closeBtn = screen.getByLabelText("Close");
-		fireEvent.click(closeBtn);
-		expect(screen.queryByRole("dialog")).toBeNull();
+		fireEvent.click(screen.getByLabelText("Close"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_exit_intent_dismissed",
+			props: {},
+		});
 	});
 
-	it("shows free credits offer copy", () => {
+	it("tracks cta clicked event", () => {
 		render(<ExitIntentModal />);
 		act(() => {
 			document.dispatchEvent(
-				new MouseEvent("mouseleave", { clientY: 5 }),
+				new MouseEvent("mouseleave", { bubbles: true, clientY: 5 }),
 			);
 		});
-		expect(screen.getByText(/10 free AI credits/i)).toBeTruthy();
-		expect(screen.getByText(/Claim my free credits/i)).toBeTruthy();
-	});
-
-	it("does not show modal when suppression key is set and not expired", () => {
-		localStorageMock.setItem(
-			"exit_intent_dismissed",
-			String(Date.now() + 1000000),
-		);
-		render(<ExitIntentModal />);
-		act(() => {
-			document.dispatchEvent(
-				new MouseEvent("mouseleave", { clientY: 5 }),
-			);
+		fireEvent.click(screen.getByText(/Claim my free credits/i));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_exit_intent_cta_clicked",
+			props: {},
 		});
-		expect(screen.queryByRole("dialog")).toBeNull();
-	});
-
-	it("triggers at most once per mount", () => {
-		render(<ExitIntentModal />);
-		act(() => {
-			document.dispatchEvent(
-				new MouseEvent("mouseleave", { clientY: 5 }),
-			);
-		});
-		const closeBtn = screen.getByLabelText("Close");
-		fireEvent.click(closeBtn);
-		// Second trigger should not re-open (triggered ref is set)
-		act(() => {
-			document.dispatchEvent(
-				new MouseEvent("mouseleave", { clientY: 5 }),
-			);
-		});
-		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 });

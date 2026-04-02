@@ -1,3 +1,6 @@
+"use client";
+
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, CheckCircleIcon } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +13,8 @@ const benefits = [
 ];
 
 export function FinalCta() {
+	const { track } = useProductAnalytics();
+
 	return (
 		<section className="py-16 lg:py-24">
 			<div className="container max-w-4xl">
@@ -36,7 +41,15 @@ export function FinalCta() {
 								className="min-w-[200px] bg-white text-primary hover:bg-white/90"
 								asChild
 							>
-								<Link href="/auth/signup">
+								<Link
+									href="/auth/signup"
+									onClick={() =>
+										track({
+											name: "marketing_final_cta_clicked",
+											props: { cta: "start_free" },
+										})
+									}
+								>
 									Start Free — No Card Needed
 									<ArrowRightIcon className="ml-2 size-4" />
 								</Link>
@@ -47,7 +60,17 @@ export function FinalCta() {
 								className="text-white/90 hover:bg-white/10 hover:text-white"
 								asChild
 							>
-								<Link href="/tools">Browse All Tools</Link>
+								<Link
+									href="/tools"
+									onClick={() =>
+										track({
+											name: "marketing_final_cta_clicked",
+											props: { cta: "browse_tools" },
+										})
+									}
+								>
+									Browse All Tools
+								</Link>
 							</Button>
 						</div>
 
