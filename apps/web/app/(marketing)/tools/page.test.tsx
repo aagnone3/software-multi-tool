@@ -116,4 +116,21 @@ describe("ToolsMarketingPage", () => {
 		const links = screen.getAllByRole("link", { name: /start for free/i });
 		expect(links.length).toBeGreaterThan(0);
 	});
+
+	it("renders ItemList JSON-LD structured data for tools", () => {
+		const { container } = render(<ToolsMarketingPage />);
+		const scripts = container.querySelectorAll(
+			'script[type="application/ld+json"]',
+		);
+		const jsonLdTexts = Array.from(scripts).map((s) =>
+			JSON.parse(s.textContent ?? "{}"),
+		);
+		const itemList = jsonLdTexts.find((j) => j["@type"] === "ItemList");
+		expect(itemList).toBeDefined();
+		expect(itemList?.numberOfItems).toBe(2);
+		expect(itemList?.itemListElement[0].name).toBe("Meeting Summarizer");
+		expect(itemList?.itemListElement[0].url).toBe(
+			"https://example.com/tools/meeting-summarizer",
+		);
+	});
 });
