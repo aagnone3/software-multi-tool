@@ -4,6 +4,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OnboardingStep2 } from "./OnboardingStep2";
 
+const mockTrack = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock config to control which tools are enabled
 vi.mock("@repo/config", () => ({
 	config: {
@@ -126,5 +131,47 @@ describe("OnboardingStep2", () => {
 		await user.click(link);
 
 		expect(onCompleted).toHaveBeenCalledOnce();
+	});
+
+	it("tracks onboarding_step2_tool_selected when a tool is clicked", async () => {
+		const user = userEvent.setup();
+		render(<OnboardingStep2 onCompleted={onCompleted} />);
+
+		await user.click(screen.getByText("Process invoices"));
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "onboarding_step2_tool_selected",
+			props: { tool_slug: "invoice-processor" },
+		});
+	});
+
+	it("tracks onboarding_step2_skipped and completed with skipped=true when Skip is clicked", async () => {
+		const user = userEvent.setup();
+		render(<OnboardingStep2 onCompleted={onCompleted} />);
+
+		await user.click(screen.getByText("Skip for now"));
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "onboarding_step2_skipped",
+			props: {},
+		});
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "onboarding_step2_completed",
+			props: { tool_slug: null, skipped: true },
+		});
+	});
+
+	it("tracks onboarding_step2_completed with tool_slug when Try CTA is clicked", async () => {
+		const user = userEvent.setup();
+		render(<OnboardingStep2 onCompleted={onCompleted} />);
+
+		await user.click(screen.getByText("Summarize meetings"));
+		const link = screen.getByRole("link");
+		await user.click(link);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "onboarding_step2_completed",
+			props: { tool_slug: "meeting-summarizer", skipped: false },
+		});
 	});
 });

@@ -11,6 +11,11 @@ vi.mock("sonner", () => ({
 	},
 }));
 
+const mockTrack = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockUpdateUser = vi.hoisted(() => vi.fn());
 const mockUseSession = vi.hoisted(() => vi.fn());
 
@@ -87,6 +92,39 @@ describe("OnboardingStep1", () => {
 		);
 
 		expect(toast.error).toHaveBeenCalled();
+	});
+
+	it("tracks onboarding_step1_completed on success", async () => {
+		mockUpdateUser.mockResolvedValue({});
+		const user = userEvent.setup({ delay: null });
+		render(<OnboardingStep1 onCompleted={onCompleted} />);
+
+		await user.click(screen.getByRole("button", { name: /continue/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "onboarding_step1_completed",
+				props: { has_avatar: false },
+			});
+		});
+	});
+
+	it("tracks has_avatar true when avatar was uploaded", async () => {
+		mockUpdateUser.mockResolvedValue({});
+		const user = userEvent.setup({ delay: null });
+		render(<OnboardingStep1 onCompleted={onCompleted} />);
+
+		await user.click(
+			screen.getByRole("button", { name: /upload avatar/i }),
+		);
+		await user.click(screen.getByRole("button", { name: /continue/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "onboarding_step1_completed",
+				props: { has_avatar: true },
+			});
+		});
 	});
 
 	it("does not call onCompleted when updateUser fails", async () => {
