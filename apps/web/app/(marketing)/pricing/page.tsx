@@ -22,27 +22,30 @@ import React from "react";
 const siteUrl = getBaseUrl();
 
 export const metadata: Metadata = {
-	title: `Pricing — ${config.appName}`,
-	description: `Simple, transparent pricing for ${config.appName}. Start free, upgrade when you need more. No hidden fees, no long-term contracts.`,
+	title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
+	description:
+		"Simple, transparent AI tools pricing. Start free, upgrade when you need more. No hidden fees, no long-term contracts. Pay-per-use credits for 10+ AI business tools.",
 	alternates: { canonical: `${siteUrl}/pricing` },
 	openGraph: {
 		type: "website",
 		url: `${siteUrl}/pricing`,
-		title: `Pricing — ${config.appName}`,
-		description: `Simple, transparent pricing for ${config.appName}. Start free, upgrade when you need more.`,
+		title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
+		description:
+			"Simple, transparent AI tools pricing. Start free, upgrade when you need more.",
 		images: [
 			{
-				url: `${siteUrl}/api/og?title=${encodeURIComponent(`Pricing — ${config.appName}`)}&description=${encodeURIComponent("Start free, upgrade when you need more. No hidden fees.")}`,
+				url: `${siteUrl}/api/og?title=${encodeURIComponent(`AI Tools Pricing — ${config.appName}`)}&description=${encodeURIComponent("Start free, upgrade when you need more. No hidden fees.")}`,
 				width: 1200,
 				height: 630,
-				alt: `Pricing — ${config.appName}`,
+				alt: `AI Tools Pricing — ${config.appName}`,
 			},
 		],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: `Pricing — ${config.appName}`,
-		description: `Simple, transparent pricing for ${config.appName}. Start free, upgrade when you need more.`,
+		title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
+		description:
+			"Simple, transparent AI tools pricing. Start free, upgrade when you need more.",
 	},
 };
 

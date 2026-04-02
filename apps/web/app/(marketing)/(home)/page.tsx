@@ -77,10 +77,19 @@ const orgJsonLd = {
 	"@type": "Organization",
 	name: config.appName,
 	url: siteUrl,
-	logo: `${siteUrl}/logo.png`,
+	logo: {
+		"@type": "ImageObject",
+		url: `${siteUrl}/logo.png`,
+		width: 512,
+		height: 512,
+	},
 	description:
 		config.appDescription ?? "AI-powered business tools for small teams.",
-	sameAs: [],
+	contactPoint: {
+		"@type": "ContactPoint",
+		contactType: "customer support",
+		url: `${siteUrl}/contact`,
+	},
 };
 
 const softwareAppJsonLd = {
