@@ -451,6 +451,10 @@ type ProductEvent =
 				method: "password" | "magic-link" | "passkey" | "oauth";
 				error_code?: string;
 			};
+	  }
+	| {
+			name: "password_reset_requested";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };
