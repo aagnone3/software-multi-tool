@@ -1,9 +1,18 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PricingFaq } from "./PricingFaq";
 
+const { mockTrack } = vi.hoisted(() => ({ mockTrack: vi.fn() }));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 describe("PricingFaq", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 	it("renders the section heading", () => {
 		render(<PricingFaq />);
 		expect(
@@ -39,6 +48,25 @@ describe("PricingFaq", () => {
 		expect(
 			screen.queryByText(/Your tools simply pause/),
 		).not.toBeInTheDocument();
+	});
+
+	it("tracks pricing_faq_expanded on first click", () => {
+		render(<PricingFaq />);
+		const firstButton = screen.getAllByRole("button")[0];
+		fireEvent.click(firstButton);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "pricing_faq_expanded",
+			props: { question: "What happens when I run out of credits?" },
+		});
+	});
+
+	it("does not track on collapse (second click)", () => {
+		render(<PricingFaq />);
+		const firstButton = screen.getAllByRole("button")[0];
+		fireEvent.click(firstButton);
+		mockTrack.mockClear();
+		fireEvent.click(firstButton);
+		expect(mockTrack).not.toHaveBeenCalled();
 	});
 
 	it("sets aria-expanded correctly", () => {

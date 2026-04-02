@@ -5,7 +5,10 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ContactForm } from "./ContactForm";
 
-const mockMutateAsync = vi.fn();
+const { mockMutateAsync, mockTrack } = vi.hoisted(() => ({
+	mockMutateAsync: vi.fn(),
+	mockTrack: vi.fn(),
+}));
 
 vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: {
@@ -15,6 +18,10 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 			},
 		},
 	},
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 function renderContactForm() {
@@ -64,6 +71,28 @@ describe("ContactForm", () => {
 			expect(
 				screen.getByText(/message has been sent successfully/i),
 			).toBeInTheDocument();
+		});
+	});
+
+	it("tracks contact_form_submitted on successful submission", async () => {
+		mockMutateAsync.mockResolvedValueOnce({});
+		renderContactForm();
+
+		await userEvent.type(screen.getByLabelText(/name/i), "Jane");
+		await userEvent.type(
+			screen.getByLabelText(/email/i),
+			"jane@example.com",
+		);
+		await userEvent.type(screen.getByLabelText(/message/i), "Hello there!");
+		await userEvent.click(
+			screen.getByRole("button", { name: /send message/i }),
+		);
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "contact_form_submitted",
+				props: {},
+			});
 		});
 	});
 

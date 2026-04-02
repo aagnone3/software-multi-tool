@@ -270,6 +270,18 @@ type ProductEvent =
 	| {
 			name: "dashboard_active_job_view_clicked";
 			props: { job_id: string; tool_slug: string; job_status: string };
+	  }
+	| {
+			name: "contact_form_submitted";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "newsletter_subscribed";
+			props: { source: string };
+	  }
+	| {
+			name: "pricing_faq_expanded";
+			props: { question: string };
 	  };
 
 export type { ProductEvent };

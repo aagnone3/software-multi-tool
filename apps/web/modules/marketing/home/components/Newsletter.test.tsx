@@ -5,7 +5,14 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Newsletter } from "./Newsletter";
 
-const mockMutateAsync = vi.fn();
+const { mockMutateAsync, mockTrack } = vi.hoisted(() => ({
+	mockMutateAsync: vi.fn(),
+	mockTrack: vi.fn(),
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: {
@@ -62,6 +69,26 @@ describe("Newsletter", () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(/subscribed/i)).toBeInTheDocument();
+		});
+	});
+
+	it("tracks newsletter_subscribed on successful subscription", async () => {
+		mockMutateAsync.mockResolvedValueOnce({});
+		renderNewsletter();
+
+		await userEvent.type(
+			screen.getByPlaceholderText("Email"),
+			"user@example.com",
+		);
+		await userEvent.click(
+			screen.getByRole("button", { name: /subscribe/i }),
+		);
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_subscribed",
+				props: { source: "marketing_page" },
+			});
 		});
 	});
 

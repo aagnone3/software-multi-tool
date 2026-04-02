@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	type ContactFormValues,
@@ -24,6 +25,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 
 export function ContactForm() {
+	const { track } = useProductAnalytics();
 	const contactFormMutation = useMutation(
 		orpc.contact.submit.mutationOptions(),
 	);
@@ -40,6 +42,7 @@ export function ContactForm() {
 	const onSubmit = form.handleSubmit(async (values) => {
 		try {
 			await contactFormMutation.mutateAsync(values);
+			track({ name: "contact_form_submitted", props: {} });
 		} catch {
 			form.setError("root", {
 				message:

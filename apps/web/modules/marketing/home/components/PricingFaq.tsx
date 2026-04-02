@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { cn } from "@ui/lib";
 import React, { useState } from "react";
 
@@ -31,12 +32,22 @@ const PRICING_FAQS = [
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
 	const [open, setOpen] = useState(false);
+	const { track } = useProductAnalytics();
 	return (
 		<div className="border-b last:border-b-0">
 			<button
 				type="button"
 				className="flex w-full items-center justify-between py-4 text-left font-medium text-base hover:text-primary transition-colors"
-				onClick={() => setOpen((v) => !v)}
+				onClick={() => {
+					const next = !open;
+					setOpen(next);
+					if (next) {
+						track({
+							name: "pricing_faq_expanded",
+							props: { question },
+						});
+					}
+				}}
 				aria-expanded={open}
 			>
 				<span>{question}</span>
