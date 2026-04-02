@@ -132,4 +132,77 @@ describe("CreditRunwayBanner", () => {
 		await user.click(dismissBtn);
 		expect(screen.queryByText(/your credits will run out in/i)).toBeNull();
 	});
+
+	it("shows Upgrade to Pro CTA for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		render(<CreditRunwayBanner />);
+		expect(
+			screen.getByRole("link", { name: /Upgrade to Pro/i }),
+		).toBeDefined();
+		expect(
+			screen.getByRole("link", { name: /Compare plans/i }),
+		).toBeDefined();
+		expect(screen.queryByRole("link", { name: /Buy Credits/i })).toBeNull();
+	});
+
+	it("shows 5× credits hint for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		render(<CreditRunwayBanner />);
+		expect(screen.getByText(/5× more credits/i)).toBeDefined();
+	});
+
+	it("shows Buy Credits CTA for free plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: false,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		render(<CreditRunwayBanner />);
+		expect(
+			screen.getByRole("link", { name: /Buy Credits/i }),
+		).toBeDefined();
+		expect(
+			screen.queryByRole("link", { name: /Upgrade to Pro/i }),
+		).toBeNull();
+	});
+
+	it("Upgrade to Pro links to billing settings for Starter with org", () => {
+		mockUseActiveOrganization.mockReturnValue({
+			activeOrganization: { slug: "my-org" },
+		});
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		render(<CreditRunwayBanner />);
+		const link = screen.getByRole("link", { name: /Upgrade to Pro/i });
+		expect((link as HTMLAnchorElement).href).toContain(
+			"/app/my-org/settings/billing",
+		);
+	});
 });

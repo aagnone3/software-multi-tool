@@ -36,7 +36,11 @@ function dismissFor24Hours(): void {
 }
 
 export function CreditRunwayBanner() {
-	const { totalCredits, isLoading: balanceLoading } = useCreditsBalance();
+	const {
+		totalCredits,
+		isLoading: balanceLoading,
+		isStarterPlan,
+	} = useCreditsBalance();
 	const { jobs, isLoading: jobsLoading } = useJobsList(undefined, 50);
 	const { activeOrganization } = useActiveOrganization();
 	const [dismissed, setDismissed] = useState(true); // start dismissed until hydrated
@@ -106,19 +110,54 @@ export function CreditRunwayBanner() {
 			<div className="flex items-center gap-2">
 				<AlertTriangleIcon className="size-4 shrink-0 text-orange-500" />
 				<span>
-					At your current pace, your credits will run out in{" "}
-					<strong>{label}</strong>.
+					{isStarterPlan ? (
+						<>
+							At your current pace, your credits will run out in{" "}
+							<strong>{label}</strong>.{" "}
+							<span className="text-orange-700 dark:text-orange-300">
+								Pro gives you 5× more credits per month.
+							</span>
+						</>
+					) : (
+						<>
+							At your current pace, your credits will run out in{" "}
+							<strong>{label}</strong>.
+						</>
+					)}
 				</span>
 			</div>
 			<div className="flex items-center gap-2 shrink-0">
-				<Button
-					asChild
-					size="sm"
-					variant="outline"
-					className="border-orange-400 text-orange-800 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-900 h-7 px-3"
-				>
-					<Link href={billingHref}>Buy Credits</Link>
-				</Button>
+				{isStarterPlan ? (
+					<>
+						<Button
+							asChild
+							size="sm"
+							variant="outline"
+							className="border-orange-400 text-orange-800 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-900 h-7 px-3"
+						>
+							<Link href={billingHref}>Upgrade to Pro</Link>
+						</Button>
+						<Button
+							asChild
+							size="sm"
+							variant="ghost"
+							className="text-orange-700 dark:text-orange-300 h-7 px-2"
+						>
+							<Link href="/pricing#pricing-plan-pro">
+								Compare plans
+							</Link>
+						</Button>
+					</>
+				) : (
+					<Button
+						asChild
+						size="sm"
+						variant="outline"
+						className="border-orange-400 text-orange-800 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-900 h-7 px-3"
+					>
+						<Link href={billingHref}>Buy Credits</Link>
+					</Button>
+				)}
 				<button
 					type="button"
 					aria-label="Dismiss"
