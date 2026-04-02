@@ -173,6 +173,14 @@ type ProductEvent =
 			props: { cta_type: "signup" | "pricing" };
 	  }
 	| {
+			name: "integrations_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "use_cases_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
 			name: "credit_pack_purchase_started";
 			props: {
 				pack_id: string;

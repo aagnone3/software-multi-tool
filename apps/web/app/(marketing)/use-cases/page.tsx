@@ -1,5 +1,6 @@
 "use client";
 
+import { UseCasesPageTracker } from "@marketing/shared/components/UseCasesPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import Link from "next/link";
@@ -125,6 +126,7 @@ const useCases = [
 export default function UseCasesPage() {
 	return (
 		<div className="min-h-screen bg-background">
+			<UseCasesPageTracker />
 			{/* Hero */}
 			<section className="border-b bg-gradient-to-b from-muted/30 to-background px-4 py-20 text-center">
 				<div className="mx-auto max-w-4xl">
