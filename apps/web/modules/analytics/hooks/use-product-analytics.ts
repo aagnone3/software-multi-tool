@@ -358,6 +358,26 @@ type ProductEvent =
 	| {
 			name: "social_share_clicked";
 			props: { platform: string; post_slug: string };
+	  }
+	| {
+			name: "command_palette_opened";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "command_palette_tool_selected";
+			props: {
+				tool_slug: string;
+				tool_name: string;
+				from_recent: boolean;
+			};
+	  }
+	| {
+			name: "command_palette_page_selected";
+			props: {
+				page_id: string;
+				page_label: string;
+				from_recent: boolean;
+			};
 	  };
 
 export type { ProductEvent };

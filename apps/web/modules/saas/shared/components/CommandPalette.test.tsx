@@ -5,6 +5,11 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommandPalette } from "./CommandPalette";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("cmdk", () => {
 	const CommandRoot = ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
@@ -190,6 +195,7 @@ describe("CommandPalette", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockTrack.mockClear();
 		vi.mocked(useRouter).mockReturnValue({
 			push: mockPush,
 			back: vi.fn(),
@@ -376,5 +382,48 @@ describe("CommandPalette", () => {
 
 		expect(screen.getByText("First test tool")).toBeInTheDocument();
 		expect(screen.getByText("Second test tool")).toBeInTheDocument();
+	});
+
+	it("tracks command_palette_opened when isOpen becomes true", () => {
+		renderCommandPalette();
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "command_palette_opened",
+			props: {},
+		});
+	});
+
+	it("tracks command_palette_tool_selected when a tool is clicked", () => {
+		renderCommandPalette();
+		mockTrack.mockClear();
+
+		const tool = screen.getByText("Test Tool 1");
+		fireEvent.click(tool);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "command_palette_tool_selected",
+			props: {
+				tool_slug: "test-tool-1",
+				tool_name: "Test Tool 1",
+				from_recent: false,
+			},
+		});
+	});
+
+	it("tracks command_palette_page_selected when a page is clicked", () => {
+		renderCommandPalette();
+		mockTrack.mockClear();
+
+		const page = screen.getByText("Chat");
+		fireEvent.click(page);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "command_palette_page_selected",
+			props: {
+				page_id: "chatbot",
+				page_label: "Chat",
+				from_recent: false,
+			},
+		});
 	});
 });
