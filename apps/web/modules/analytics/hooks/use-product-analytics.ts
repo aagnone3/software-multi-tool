@@ -210,6 +210,30 @@ type ProductEvent =
 				notification_type: string;
 				was_unread: boolean;
 			};
+	  }
+	| {
+			name: "tool_feedback_submitted";
+			props: {
+				tool_slug: string;
+				rating: "POSITIVE" | "NEGATIVE";
+				job_id?: string;
+			};
+	  }
+	| {
+			name: "tool_feedback_updated";
+			props: {
+				tool_slug: string;
+				rating: "POSITIVE" | "NEGATIVE";
+				job_id?: string;
+			};
+	  }
+	| {
+			name: "newsletter_subscribe_submitted";
+			props: { source: string };
+	  }
+	| {
+			name: "newsletter_subscribe_succeeded";
+			props: { source: string };
 	  };
 
 export type { ProductEvent };

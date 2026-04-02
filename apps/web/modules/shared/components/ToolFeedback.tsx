@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
@@ -39,6 +40,7 @@ export function ToolFeedback({
 	className,
 	onFeedbackSubmitted,
 }: ToolFeedbackProps) {
+	const { track } = useProductAnalytics();
 	const [currentRating, setCurrentRating] = useState<
 		"POSITIVE" | "NEGATIVE" | null
 	>(null);
@@ -81,6 +83,10 @@ export function ToolFeedback({
 					setFeedbackId(result.feedback.id);
 				}
 				onFeedbackSubmitted?.(rating);
+				track({
+					name: "tool_feedback_updated",
+					props: { tool_slug: toolSlug, rating, job_id: jobId },
+				});
 				toast.success("Feedback updated!");
 			} else {
 				// Create new feedback
@@ -92,6 +98,10 @@ export function ToolFeedback({
 				setCurrentRating(rating);
 				setFeedbackId(result.feedback.id);
 				onFeedbackSubmitted?.(rating);
+				track({
+					name: "tool_feedback_submitted",
+					props: { tool_slug: toolSlug, rating, job_id: jobId },
+				});
 				toast.success("Thank you for your feedback!");
 			}
 		} catch {

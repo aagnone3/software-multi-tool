@@ -1,11 +1,18 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { BlogNewsletterCta } from "./BlogNewsletterCta";
 
 describe("BlogNewsletterCta", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		mockTrack.mockReset();
 	});
 
 	it("renders heading and email input", () => {
@@ -56,6 +63,26 @@ describe("BlogNewsletterCta", () => {
 
 		await waitFor(() => {
 			expect(screen.getByText(/something went wrong/i)).toBeTruthy();
+		});
+	});
+
+	it("tracks newsletter_subscribe_submitted and newsletter_subscribe_succeeded on success", async () => {
+		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+
+		render(<BlogNewsletterCta />);
+		const input = screen.getByPlaceholderText("your@email.com");
+		fireEvent.change(input, { target: { value: "test@example.com" } });
+		fireEvent.click(screen.getByRole("button", { name: /subscribe/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_subscribe_submitted",
+				props: { source: "blog_newsletter_cta" },
+			});
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_subscribe_succeeded",
+				props: { source: "blog_newsletter_cta" },
+			});
 		});
 	});
 });
