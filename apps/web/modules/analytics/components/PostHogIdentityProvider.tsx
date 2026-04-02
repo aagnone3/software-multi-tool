@@ -35,6 +35,10 @@ export function PostHogIdentityProvider({
 			...(name && { name }),
 		});
 
+		// Authenticated users implicitly consent to analytics by creating an account.
+		// Opt in unconditionally — cookie banner consent is only for anonymous visitors.
+		posthog.opt_in_capturing();
+
 		if (organizationId) {
 			posthog.group("organization", organizationId, {
 				...(planId && { plan: planId }),
@@ -45,6 +49,8 @@ export function PostHogIdentityProvider({
 
 		return () => {
 			if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+				// On logout, revert to requiring explicit consent for anonymous sessions.
+				posthog.opt_out_capturing();
 				posthog.reset();
 			}
 		};

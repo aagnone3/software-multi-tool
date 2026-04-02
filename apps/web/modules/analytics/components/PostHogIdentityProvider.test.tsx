@@ -5,12 +5,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const posthogIdentifyMock = vi.hoisted(() => vi.fn());
 const posthogGroupMock = vi.hoisted(() => vi.fn());
 const posthogResetMock = vi.hoisted(() => vi.fn());
+const posthogOptInMock = vi.hoisted(() => vi.fn());
+const posthogOptOutMock = vi.hoisted(() => vi.fn());
 
 vi.mock("posthog-js", () => ({
 	default: {
 		identify: posthogIdentifyMock,
 		group: posthogGroupMock,
 		reset: posthogResetMock,
+		opt_in_capturing: posthogOptInMock,
+		opt_out_capturing: posthogOptOutMock,
 	},
 }));
 
@@ -71,6 +75,19 @@ describe("PostHogIdentityProvider", () => {
 		const { unmount } = render(<PostHogIdentityProvider userId="user-1" />);
 		unmount();
 		expect(posthogResetMock).toHaveBeenCalled();
+	});
+
+	it("calls posthog.opt_in_capturing after identifying authenticated user", () => {
+		vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "test-key");
+		render(<PostHogIdentityProvider userId="user-1" />);
+		expect(posthogOptInMock).toHaveBeenCalled();
+	});
+
+	it("calls posthog.opt_out_capturing on unmount", () => {
+		vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "test-key");
+		const { unmount } = render(<PostHogIdentityProvider userId="user-1" />);
+		unmount();
+		expect(posthogOptOutMock).toHaveBeenCalled();
 	});
 
 	it("omits null email and name from identify traits", () => {
