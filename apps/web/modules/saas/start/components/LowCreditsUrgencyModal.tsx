@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
@@ -56,8 +57,10 @@ export function LowCreditsUrgencyModal({
 		percentageUsed,
 		totalCredits,
 	} = useCreditsBalance();
+	const { track } = useProductAnalytics();
 	const [open, setOpen] = useState(false);
 	const [hasChecked, setHasChecked] = useState(false);
+	const planLabel = isStarterPlan ? "starter" : "free";
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -89,9 +92,26 @@ export function LowCreditsUrgencyModal({
 		}
 
 		setOpen(true);
-	}, [isLoading, balance, isLowCredits, userId, hasChecked]);
+		track({
+			name: "low_credits_modal_shown",
+			props: { percent_used: percentageUsed, plan: planLabel },
+		});
+	}, [
+		isLoading,
+		balance,
+		isLowCredits,
+		userId,
+		hasChecked,
+		track,
+		percentageUsed,
+		planLabel,
+	]);
 
 	const handleDismiss = () => {
+		track({
+			name: "low_credits_modal_dismissed",
+			props: { percent_used: percentageUsed, plan: planLabel },
+		});
 		setDismissed(userId);
 		setOpen(false);
 	};
@@ -146,7 +166,21 @@ export function LowCreditsUrgencyModal({
 				{/* CTAs */}
 				<div className="flex flex-col gap-2 mt-2">
 					<Button asChild className="w-full gap-2">
-						<Link href={billingPath} onClick={handleDismiss}>
+						<Link
+							href={billingPath}
+							onClick={() => {
+								track({
+									name: "low_credits_modal_upgrade_clicked",
+									props: {
+										plan: planLabel,
+										cta: isStarterPlan
+											? "upgrade_to_pro"
+											: "upgrade_plan",
+									},
+								});
+								handleDismiss();
+							}}
+						>
 							<SparklesIcon className="size-4" />
 							{isStarterPlan
 								? "Upgrade to Pro"
