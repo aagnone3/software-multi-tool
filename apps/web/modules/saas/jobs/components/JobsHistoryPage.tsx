@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
@@ -37,7 +38,7 @@ import {
 	XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type JobStatus =
@@ -267,6 +268,12 @@ const PAGE_SIZE = 20;
 
 export function JobsHistoryPage() {
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		track({ name: "jobs_history_page_viewed", props: {} });
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 	const [pageSize, setPageSize] = useState(PAGE_SIZE);
 	const { jobs, isLoading, refetch, hasMore } = useJobsListPaginated({
 		limit: pageSize,
@@ -300,10 +307,16 @@ export function JobsHistoryPage() {
 				ids.map((jobId) => orpcClient.jobs.delete({ jobId })),
 			);
 		},
-		onSuccess: () => {
+		onSuccess: (_data, ids) => {
 			toast.success(
 				`Deleted ${selectedIds.size} job${selectedIds.size !== 1 ? "s" : ""}`,
 			);
+			for (const jobId of ids) {
+				track({
+					name: "jobs_history_job_deleted",
+					props: { job_id: jobId },
+				});
+			}
 			setSelectedIds(new Set());
 			queryClient.invalidateQueries({ queryKey: orpc.jobs.list.key() });
 		},
@@ -413,7 +426,11 @@ export function JobsHistoryPage() {
 		link.download = `job-history-${new Date().toISOString().split("T")[0]}.csv`;
 		link.click();
 		URL.revokeObjectURL(url);
-	}, [filteredJobs]);
+		track({
+			name: "jobs_history_csv_exported",
+			props: { row_count: filteredJobs.length },
+		});
+	}, [filteredJobs, track]);
 
 	return (
 		<div className="space-y-6">

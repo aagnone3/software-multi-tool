@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { EmptyStateUpgradeNudge } from "@saas/shared/components/EmptyStateUpgradeNudge";
@@ -24,7 +25,7 @@ import {
 	XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type JobStatus =
@@ -83,12 +84,21 @@ interface ToolHistoryPageProps {
 
 export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [search, setSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState<JobStatus | "ALL">("ALL");
 	const [fromDate, setFromDate] = useState("");
 	const [toDate, setToDate] = useState("");
 	const debouncedSearch = useDebounce(search, 300);
 	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		track({
+			name: "tool_history_page_viewed",
+			props: { tool_slug: toolSlug },
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [toolSlug]);
 
 	const { jobs, isLoading } = useJobsListPaginated({ toolSlug, limit: 100 });
 
@@ -153,13 +163,21 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 		a.download = `${toolSlug}-history.csv`;
 		a.click();
 		URL.revokeObjectURL(url);
-	}, [filtered, toolSlug]);
+		track({
+			name: "tool_history_csv_exported",
+			props: { tool_slug: toolSlug, row_count: filtered.length },
+		});
+	}, [filtered, toolSlug, track]);
 
 	const { mutate: deleteJob } = useMutation({
 		mutationFn: (jobId: string) => orpcClient.jobs.delete({ jobId }),
-		onSuccess: () => {
+		onSuccess: (_data, jobId) => {
 			queryClient.invalidateQueries({ queryKey: orpc.jobs.list.key() });
 			toast.success("Job deleted");
+			track({
+				name: "tool_history_job_deleted",
+				props: { tool_slug: toolSlug, job_id: jobId },
+			});
 		},
 		onError: () => toast.error("Failed to delete job"),
 	});

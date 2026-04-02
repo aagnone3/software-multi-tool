@@ -45,6 +45,10 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: { jobs: { list: { key: () => ["jobs", "list"] } } },
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 vi.mock("@saas/payments/hooks/purchases", () => ({
 	usePurchases: vi.fn(() => ({ activePlan: { id: "free", name: "Free" } })),
 }));
@@ -170,5 +174,18 @@ describe("ToolHistoryPage", () => {
 		expect(
 			screen.getByText(/No runs yet for this tool/i),
 		).toBeInTheDocument();
+	});
+
+	it("tracks tool_history_page_viewed on mount", () => {
+		render(
+			<ToolHistoryPage
+				toolSlug="news-analyzer"
+				toolName="News Analyzer"
+			/>,
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_history_page_viewed",
+			props: { tool_slug: "news-analyzer" },
+		});
 	});
 });
