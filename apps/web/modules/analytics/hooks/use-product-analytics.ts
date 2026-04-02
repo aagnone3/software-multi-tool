@@ -306,6 +306,26 @@ type ProductEvent =
 	| {
 			name: "onboarding_step2_completed";
 			props: { tool_slug: string | null; skipped: boolean };
+	  }
+	| {
+			name: "low_credits_modal_shown";
+			props: { percent_used: number; plan: string };
+	  }
+	| {
+			name: "low_credits_modal_dismissed";
+			props: { percent_used: number; plan: string };
+	  }
+	| {
+			name: "low_credits_modal_upgrade_clicked";
+			props: { plan: string; cta: string };
+	  }
+	| {
+			name: "daily_goal_set";
+			props: { goal: number };
+	  }
+	| {
+			name: "daily_goal_completed";
+			props: { goal: number; total_completed: number };
 	  };
 
 export type { ProductEvent };
