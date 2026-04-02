@@ -1,16 +1,28 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { RelatedToolCta } from "./RelatedToolCta";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 describe("RelatedToolCta", () => {
@@ -113,5 +125,52 @@ describe("RelatedToolCta", () => {
 	it("is case-insensitive for tag matching", () => {
 		render(<RelatedToolCta tags={["Contracts"]} />);
 		expect(screen.getByText("Contract Analyzer")).toBeTruthy();
+	});
+
+	it("tracks related_tool_cta_clicked when primary CTA is clicked", async () => {
+		const user = userEvent.setup();
+		render(<RelatedToolCta tags={["contracts"]} />);
+		const ctaLink = screen.getByRole("link", {
+			name: /analyze a contract free/i,
+		});
+		await user.click(ctaLink);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "related_tool_cta_clicked",
+			props: {
+				tool_slug: "contract-analyzer",
+				source_tags: "contracts",
+				cta_text: "Analyze a Contract Free",
+			},
+		});
+	});
+
+	it("tracks related_tool_learn_more_clicked when learn more is clicked", async () => {
+		const user = userEvent.setup();
+		render(<RelatedToolCta tags={["invoices"]} />);
+		const learnMore = screen.getByRole("link", { name: /learn more/i });
+		await user.click(learnMore);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "related_tool_learn_more_clicked",
+			props: {
+				tool_slug: "invoice-processor",
+				source_tags: "invoices",
+			},
+		});
+	});
+
+	it("includes all tags in source_tags when multiple tags provided", async () => {
+		const user = userEvent.setup();
+		render(<RelatedToolCta tags={["contracts", "finance"]} />);
+		const ctaLink = screen.getByRole("link", {
+			name: /analyze a contract free/i,
+		});
+		await user.click(ctaLink);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				props: expect.objectContaining({
+					source_tags: "contracts,finance",
+				}),
+			}),
+		);
 	});
 });

@@ -326,6 +326,14 @@ type ProductEvent =
 	| {
 			name: "daily_goal_completed";
 			props: { goal: number; total_completed: number };
+	  }
+	| {
+			name: "related_tool_cta_clicked";
+			props: { tool_slug: string; source_tags: string; cta_text: string };
+	  }
+	| {
+			name: "related_tool_learn_more_clicked";
+			props: { tool_slug: string; source_tags: string };
 	  };
 
 export type { ProductEvent };

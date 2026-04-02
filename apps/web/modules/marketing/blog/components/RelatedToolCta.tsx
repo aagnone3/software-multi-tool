@@ -1,9 +1,10 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useCallback } from "react";
 
 type RelatedTool = {
 	slug: string;
@@ -101,6 +102,36 @@ type Props = {
 
 export function RelatedToolCta({ tags = [] }: Props) {
 	const tool = getToolFromTags(tags);
+	const { track } = useProductAnalytics();
+	const sourceTags = tags.join(",");
+
+	const handleCtaClick = useCallback(() => {
+		if (!tool) {
+			return;
+		}
+		track({
+			name: "related_tool_cta_clicked",
+			props: {
+				tool_slug: tool.slug,
+				source_tags: sourceTags,
+				cta_text: tool.ctaText,
+			},
+		});
+	}, [track, tool, sourceTags]);
+
+	const handleLearnMoreClick = useCallback(() => {
+		if (!tool) {
+			return;
+		}
+		track({
+			name: "related_tool_learn_more_clicked",
+			props: {
+				tool_slug: tool.slug,
+				source_tags: sourceTags,
+			},
+		});
+	}, [track, tool, sourceTags]);
+
 	if (!tool) {
 		return null;
 	}
@@ -123,13 +154,19 @@ export function RelatedToolCta({ tags = [] }: Props) {
 						<Button asChild size="sm">
 							<Link
 								href={`/auth/signup?redirect=/app/tools/${tool.slug}`}
+								onClick={handleCtaClick}
 							>
 								{tool.ctaText}
 								<ArrowRightIcon className="ml-2 h-4 w-4" />
 							</Link>
 						</Button>
 						<Button asChild variant="outline" size="sm">
-							<Link href={`/tools/${tool.slug}`}>Learn more</Link>
+							<Link
+								href={`/tools/${tool.slug}`}
+								onClick={handleLearnMoreClick}
+							>
+								Learn more
+							</Link>
 						</Button>
 					</div>
 				</div>
