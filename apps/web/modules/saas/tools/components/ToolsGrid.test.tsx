@@ -4,6 +4,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolsGrid } from "./ToolsGrid";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
 	useRecentJobs: () => ({ recentToolSlugs: [], recentToolsMap: new Map() }),
 }));
@@ -222,5 +227,18 @@ describe("ToolsGrid", () => {
 		});
 		await user.click(removeBtn);
 		expect(screen.queryByText("invoice")).not.toBeInTheDocument();
+	});
+
+	it("tracks tools_grid_searched on search blur with query", async () => {
+		mockTrack.mockClear();
+		const user = userEvent.setup({ delay: null });
+		render(<ToolsGrid />);
+		const search = screen.getByPlaceholderText("Search tools…");
+		await user.type(search, "invoice");
+		await user.tab();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tools_grid_searched",
+			props: { query: "invoice" },
+		});
 	});
 });
