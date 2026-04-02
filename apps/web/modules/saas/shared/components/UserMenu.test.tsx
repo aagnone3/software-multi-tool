@@ -2,12 +2,16 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockSignOut, mockUseSession } = vi.hoisted(() => ({
+const { mockSignOut, mockUseSession, mockTrack } = vi.hoisted(() => ({
 	mockSignOut: vi.fn(),
 	mockUseSession: vi.fn(),
+	mockTrack: vi.fn(),
 }));
 vi.mock("@repo/auth/client", () => ({
 	authClient: { signOut: mockSignOut },
+}));
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@repo/config", () => ({
@@ -170,5 +174,22 @@ describe("UserMenu", () => {
 		expect(screen.getByText("Documentation")).toBeInTheDocument();
 		expect(screen.getByText("Home")).toBeInTheDocument();
 		expect(screen.getByText("Logout")).toBeInTheDocument();
+	});
+
+	it("tracks user_logged_out on logout click", async () => {
+		const { fireEvent } = await import("@testing-library/react");
+		mockSignOut.mockImplementation(({ fetchOptions }) => {
+			// do not call onSuccess to avoid window.location mutation in tests
+		});
+		mockUseSession.mockReturnValue({
+			user: { name: "Alice", email: "alice@example.com", image: null },
+		});
+		render(<UserMenu />);
+		fireEvent.click(screen.getByText("Logout"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "user_logged_out",
+			props: {},
+		});
+		expect(mockSignOut).toHaveBeenCalled();
 	});
 });

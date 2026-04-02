@@ -483,6 +483,14 @@ type ProductEvent =
 				product_id: string;
 				current_plan: string;
 			};
+	  }
+	| {
+			name: "user_logged_out";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "streak_milestone_reached";
+			props: { streak_days: number; is_best: boolean };
 	  };
 
 export type { ProductEvent };

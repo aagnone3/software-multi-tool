@@ -1,9 +1,10 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { cn } from "@ui/lib";
 import { FlameIcon } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface StreakWidgetProps {
@@ -66,10 +67,26 @@ function getStreakFromJobs(jobs: { completedAt: string | null }[]): {
 	return { current, best: Math.max(best, current) };
 }
 
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 90];
+
 export function StreakWidget({ className }: StreakWidgetProps) {
 	const { jobs, isLoading } = useRecentJobs(100);
+	const { track } = useProductAnalytics();
+	const trackedMilestone = useRef<number | null>(null);
 
 	const { current, best } = useMemo(() => getStreakFromJobs(jobs), [jobs]);
+
+	useEffect(() => {
+		if (isLoading || current === 0) return;
+		const milestone = STREAK_MILESTONES.filter((m) => current >= m).at(-1);
+		if (milestone && trackedMilestone.current !== milestone) {
+			trackedMilestone.current = milestone;
+			track({
+				name: "streak_milestone_reached",
+				props: { streak_days: current, is_best: current >= best },
+			});
+		}
+	}, [current, best, isLoading, track]);
 
 	if (isLoading) return null;
 

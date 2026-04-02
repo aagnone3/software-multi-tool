@@ -4,9 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StreakWidget } from "./StreakWidget";
 
 const mockUseRecentJobs = vi.fn();
+const mockTrack = vi.fn();
 
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: () => mockUseRecentJobs(),
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 function makeJob(daysAgo: number): {
@@ -88,5 +93,26 @@ describe("StreakWidget", () => {
 		mockUseRecentJobs.mockReturnValue({ jobs: [], isLoading: false });
 		render(<StreakWidget />);
 		expect(screen.getByText("Activity Streak")).toBeInTheDocument();
+	});
+
+	it("fires streak_milestone_reached when streak hits a milestone (3 days)", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [makeJob(0), makeJob(1), makeJob(2)],
+			isLoading: false,
+		});
+		render(<StreakWidget />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "streak_milestone_reached",
+			props: { streak_days: 3, is_best: true },
+		});
+	});
+
+	it("does not fire streak_milestone_reached below first milestone (2 days)", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [makeJob(0), makeJob(1)],
+			isLoading: false,
+		});
+		render(<StreakWidget />);
+		expect(mockTrack).not.toHaveBeenCalled();
 	});
 });
