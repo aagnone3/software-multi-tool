@@ -1193,8 +1193,37 @@ export default async function CompetitorPage({
 			{
 				"@type": "ListItem",
 				position: 2,
+				name: "Comparisons",
+				item: `${siteUrl}/vs`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
 				name: `vs ${page.name}`,
 				item: `${siteUrl}/vs/${page.slug}`,
+			},
+		],
+	};
+
+	const faqJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		mainEntity: [
+			{
+				"@type": "Question",
+				name: `Why switch from ${page.name} to ${config.appName}?`,
+				acceptedAnswer: {
+					"@type": "Answer",
+					text: page.switchReasons.join(" "),
+				},
+			},
+			{
+				"@type": "Question",
+				name: `How does ${config.appName} compare to ${page.name}?`,
+				acceptedAnswer: {
+					"@type": "Answer",
+					text: page.advantages.join(" "),
+				},
 			},
 		],
 	};
@@ -1210,6 +1239,13 @@ export default async function CompetitorPage({
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(breadcrumbJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(faqJsonLd),
 				}}
 			/>
 

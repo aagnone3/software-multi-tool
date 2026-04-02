@@ -917,6 +917,12 @@ export default async function IndustryPage({
 			{
 				"@type": "ListItem",
 				position: 2,
+				name: "Industries",
+				item: `${siteUrl}/for`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
 				name: `For ${page.persona}`,
 				item: `${siteUrl}/for/${industry}`,
 			},

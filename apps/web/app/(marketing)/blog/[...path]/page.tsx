@@ -86,13 +86,18 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 		headline: title,
 		description: post.excerpt ?? "",
 		datePublished: date,
+		dateModified: date,
 		author: authorName
 			? { "@type": "Person", name: authorName }
-			: { "@type": "Organization", name: "Software Multi-Tool" },
+			: { "@type": "Organization", name: config.appName },
 		publisher: {
 			"@type": "Organization",
-			name: "Software Multi-Tool",
+			name: config.appName,
 			url: siteUrl,
+		},
+		mainEntityOfPage: {
+			"@type": "WebPage",
+			"@id": `${siteUrl}/blog/${slug}`,
 		},
 		...(image
 			? {
@@ -103,6 +108,26 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 			: {}),
 	};
 
+	const breadcrumbJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Blog",
+				item: `${siteUrl}/blog`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
+				name: title,
+				item: `${siteUrl}/blog/${slug}`,
+			},
+		],
+	};
+
 	return (
 		<>
 			<script
@@ -110,6 +135,13 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(articleJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(breadcrumbJsonLd),
 				}}
 			/>
 			<div className="container max-w-6xl pt-32 pb-24">

@@ -34,6 +34,10 @@ vi.mock("@marketing/blog/components/PostListItem", () => ({
 	),
 }));
 
+vi.mock("@repo/utils", () => ({
+	getBaseUrl: vi.fn().mockReturnValue("https://softwaremultitool.com"),
+}));
+
 vi.mock("@repo/config", () => ({
 	config: {
 		appName: "TestApp",
@@ -86,10 +90,9 @@ describe("BlogListPage", () => {
 		(config.ui.blog as { enabled: boolean }).enabled = true;
 	});
 
-	it("generateMetadata returns correct title", async () => {
-		const { generateMetadata } = await import("./page");
-		const meta = await generateMetadata();
-		expect(meta.title).toContain("Blog");
-		expect(meta.title).toContain("TestApp");
+	it("metadata export contains correct title", async () => {
+		const { metadata } = await import("./page");
+		expect(metadata.title).toContain("Blog");
+		expect(metadata.title).toContain("TestApp");
 	});
 });
