@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { Button } from "@ui/components/button";
@@ -463,6 +464,7 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 					</div>
 				</section>
 			</main>
+			<StickyCta />
 		</>
 	);
 }
