@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -26,6 +27,7 @@ export function UntriedToolsWidget({
 }: UntriedToolsWidgetProps) {
 	const { enabledTools } = useTools();
 	const { jobs } = useRecentJobs(100);
+	const { track } = useProductAnalytics();
 
 	// Find tools the user has never run
 	const usedSlugs = new Set(jobs.map((j) => j.toolSlug));
@@ -55,6 +57,15 @@ export function UntriedToolsWidget({
 						key={tool.slug}
 						href={`/app/tools/${tool.slug}`}
 						className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50 transition-colors group"
+						onClick={() =>
+							track({
+								name: "untried_tool_clicked",
+								props: {
+									tool_slug: tool.slug,
+									tool_name: tool.name,
+								},
+							})
+						}
 					>
 						<div className="min-w-0">
 							<p className="text-sm font-medium group-hover:text-primary transition-colors truncate">

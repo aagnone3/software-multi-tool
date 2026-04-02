@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import React, { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -60,6 +61,7 @@ function saveMilestone(milestone: number): void {
 export function MilestoneNotifier() {
 	const result = useJobsList();
 	const checkedRef = useRef(false);
+	const { track } = useProductAnalytics();
 
 	useEffect(() => {
 		if (result.isLoading || checkedRef.current) return;
@@ -84,11 +86,18 @@ export function MilestoneNotifier() {
 					description,
 					duration: 6000,
 				});
+				track({
+					name: "milestone_reached",
+					props: {
+						milestone_count: milestone,
+						total_completed: completedCount,
+					},
+				});
 				// Only fire the highest unnotified milestone
 				break;
 			}
 		}
-	}, [result.isLoading, result.jobs]);
+	}, [result.isLoading, result.jobs, track]);
 
 	return null;
 }

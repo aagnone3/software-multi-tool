@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -40,6 +41,11 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -117,6 +123,17 @@ describe("FailedJobsRetryWidget", () => {
 		expect(
 			screen.getByRole("link", { name: /view all failed jobs/i }),
 		).toHaveAttribute("href", "/app/jobs?status=FAILED");
+	});
+
+	it("tracks failed_job_retry_clicked when retry button clicked", async () => {
+		mockState.jobs = [baseJob];
+		render(<FailedJobsRetryWidget />);
+		const retryBtn = screen.getByRole("link", { name: /retry/i });
+		await userEvent.click(retryBtn);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "failed_job_retry_clicked",
+			props: { tool_slug: "news-analyzer" },
+		});
 	});
 
 	it("respects maxJobs prop", () => {
