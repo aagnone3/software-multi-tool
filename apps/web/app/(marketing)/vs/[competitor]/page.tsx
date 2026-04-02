@@ -39,7 +39,7 @@ const competitors: CompetitorPage[] = [
 		slug: "otter-ai",
 		name: "Otter.ai",
 		headline: `${config.appName} vs Otter.ai — More Than Meeting Notes`,
-		description: `Comparing ${config.appName} and Otter.ai for meeting transcription, summarization, and AI-powered business automation.`,
+		description: `${config.appName} vs Otter.ai: get AI meeting summaries, speaker diarization, invoice processing, and contract analysis — all in one tool. Otter.ai does notes; we do your entire back office.`,
 		ourPitch: "A full AI productivity suite beyond meeting notes",
 		theirPitch: "Meeting transcription and note-taking focused",
 		comparison: [
@@ -71,7 +71,7 @@ const competitors: CompetitorPage[] = [
 		slug: "fireflies-ai",
 		name: "Fireflies.ai",
 		headline: `${config.appName} vs Fireflies.ai — Beyond Meeting Intelligence`,
-		description: `Comparing ${config.appName} and Fireflies.ai for AI meeting summaries, transcription, and business workflow automation.`,
+		description: `${config.appName} vs Fireflies.ai: beyond meeting intelligence — analyze invoices, contracts, expenses, and customer feedback with AI. One platform for your whole workflow.`,
 		ourPitch: "AI tools for every business workflow, not just meetings",
 		theirPitch: "Meeting intelligence and CRM integration focused",
 		comparison: [
@@ -102,7 +102,7 @@ const competitors: CompetitorPage[] = [
 		slug: "docparser",
 		name: "Docparser",
 		headline: `${config.appName} vs Docparser — AI Understanding vs Rule-Based Parsing`,
-		description: `Comparing ${config.appName} and Docparser for invoice processing, document extraction, and intelligent data capture.`,
+		description: `${config.appName} vs Docparser: AI invoice processing with no template setup required. Upload any PDF or image and extract vendor, amounts, and line items instantly — no rule configuration.`,
 		ourPitch: "AI-powered document understanding without template setup",
 		theirPitch: "Template-based document parsing with custom rules",
 		comparison: [
@@ -136,7 +136,7 @@ const competitors: CompetitorPage[] = [
 		slug: "zapier",
 		name: "Zapier",
 		headline: `${config.appName} vs Zapier — AI Document Intelligence vs Workflow Automation`,
-		description: `Comparing ${config.appName} and Zapier for AI-powered document processing, meeting summarization, and business automation.`,
+		description: `${config.appName} vs Zapier: AI-native document intelligence vs workflow glue. Summarize meetings, extract invoices, analyze contracts — without building automations from scratch.`,
 		ourPitch:
 			"AI-native document analysis and processing for business workflows",
 		theirPitch: "No-code workflow automation connecting third-party apps",
@@ -168,7 +168,7 @@ const competitors: CompetitorPage[] = [
 		slug: "notion-ai",
 		name: "Notion AI",
 		headline: `${config.appName} vs Notion AI — Specialized Tools vs All-in-One Workspace`,
-		description: `Comparing ${config.appName} and Notion AI for document summarization, meeting notes, business automation, and AI productivity.`,
+		description: `${config.appName} vs Notion AI: purpose-built AI tools for invoices, contracts, meetings, and expenses — vs a general-purpose workspace add-on. Specialized AI beats a feature tag.`,
 		ourPitch: "Specialized AI tools for document-heavy business workflows",
 		theirPitch: "AI writing and summarization inside a team wiki/notes app",
 		comparison: [
@@ -199,7 +199,7 @@ const competitors: CompetitorPage[] = [
 		slug: "adobe-acrobat-ai",
 		name: "Adobe Acrobat AI",
 		headline: `${config.appName} vs Adobe Acrobat AI — Purpose-Built vs PDF Suite Add-On`,
-		description: `Comparing ${config.appName} and Adobe Acrobat AI Assistant for contract analysis, invoice processing, and business document intelligence.`,
+		description: `${config.appName} vs Adobe Acrobat AI: AI contract review, invoice extraction, and meeting summaries starting free — without a $24/mo Acrobat Pro subscription.`,
 		ourPitch:
 			"Affordable AI document processing without an Adobe subscription",
 		theirPitch: "AI Q&A assistant built into the Adobe Acrobat PDF suite",
@@ -235,7 +235,7 @@ const competitors: CompetitorPage[] = [
 		slug: "microsoft-copilot",
 		name: "Microsoft Copilot",
 		headline: `${config.appName} vs Microsoft Copilot — Specialized AI vs Office Add-On`,
-		description: `Comparing ${config.appName} and Microsoft Copilot for business document analysis, invoice processing, and meeting summarization.`,
+		description: `${config.appName} vs Microsoft Copilot: structured AI tools for invoices, contracts, expenses, and meetings — no Microsoft 365 subscription or IT setup required.`,
 		ourPitch:
 			"Affordable AI tools built for document workflows — no Microsoft 365 required",
 		theirPitch: "AI assistant woven into the Microsoft 365 suite",
@@ -267,7 +267,7 @@ const competitors: CompetitorPage[] = [
 		slug: "google-gemini",
 		name: "Google Gemini",
 		headline: `${config.appName} vs Google Gemini — Purpose-Built Workflows vs General AI`,
-		description: `Comparing ${config.appName} and Google Gemini for business document processing, meeting summarization, and invoice extraction.`,
+		description: `${config.appName} vs Google Gemini: structured, repeatable AI workflows for invoices, contracts, and meeting notes — not a chat interface where you manually prompt everything.`,
 		ourPitch:
 			"Repeatable AI workflows for business documents — not a chatbot",
 		theirPitch: "Google's general-purpose multimodal AI assistant",
@@ -298,7 +298,7 @@ const competitors: CompetitorPage[] = [
 		slug: "descript",
 		name: "Descript",
 		headline: `${config.appName} vs Descript — Document Intelligence vs Audio Editing`,
-		description: `Comparing ${config.appName} and Descript for meeting transcription, speaker separation, and audio file processing.`,
+		description: `${config.appName} vs Descript: AI speaker diarization and meeting summaries without the video editing suite. Built for business teams, not content creators.`,
 		ourPitch:
 			"Meeting summaries and speaker-labeled transcripts — no video editor",
 		theirPitch: "Audio and video editor with built-in transcription",
@@ -333,7 +333,7 @@ const competitors: CompetitorPage[] = [
 		slug: "chatgpt",
 		name: "ChatGPT",
 		headline: `${config.appName} vs ChatGPT — Purpose-Built vs General AI`,
-		description: `Comparing ${config.appName} and ChatGPT for business document analysis, meeting summarization, and invoice processing.`,
+		description: `${config.appName} vs ChatGPT: structured AI workflows for invoices, contracts, and meetings — no prompt engineering, no copy-paste. Just upload and get results.`,
 		ourPitch: "Purpose-built AI workflows for business documents",
 		theirPitch: "General-purpose AI assistant for any task",
 		comparison: [
@@ -373,7 +373,7 @@ const competitors: CompetitorPage[] = [
 		slug: "tldv",
 		name: "tl;dv",
 		headline: `${config.appName} vs tl;dv — Beyond Meeting Recordings`,
-		description: `Comparing ${config.appName} and tl;dv for AI meeting summaries, transcription, and business document automation.`,
+		description: `${config.appName} vs tl;dv: AI meeting summaries plus invoice processing, contract review, and expense categorization — a full back-office AI suite, not just a recorder.`,
 		ourPitch:
 			"A complete AI productivity suite: meetings, documents, invoices, and more",
 		theirPitch: "Meeting recording and highlight clip focused",
@@ -406,7 +406,7 @@ const competitors: CompetitorPage[] = [
 		slug: "fathom",
 		name: "Fathom",
 		headline: `${config.appName} vs Fathom — More Than a Notetaker`,
-		description: `Comparing ${config.appName} and Fathom for AI meeting notes, document automation, and business productivity.`,
+		description: `${config.appName} vs Fathom: go beyond Zoom summaries — extract invoices, analyze contracts, categorize expenses, and separate speakers. More tools, one subscription.`,
 		ourPitch:
 			"AI productivity suite for documents, meetings, and business data",
 		theirPitch: "AI meeting notetaker for sales and customer calls",
@@ -439,7 +439,7 @@ const competitors: CompetitorPage[] = [
 		slug: "claude-ai",
 		name: "Claude AI",
 		headline: `${config.appName} vs Claude AI — Structured Workflows vs Open Chat`,
-		description: `Comparing ${config.appName} and Anthropic Claude for business document processing, structured data extraction, and AI automation.`,
+		description: `${config.appName} vs Claude AI: purpose-built business AI tools with no prompting required. Extract invoices, review contracts, and summarize meetings with one click — powered by the same underlying AI.`,
 		ourPitch:
 			"Purpose-built workflows for specific business document tasks",
 		theirPitch: "General-purpose AI assistant and chat interface",
@@ -476,7 +476,7 @@ const competitors: CompetitorPage[] = [
 		slug: "loom",
 		name: "Loom",
 		headline: `${config.appName} vs Loom — Video Messaging vs AI Document Processing`,
-		description: `Comparing ${config.appName} and Loom for business communication, meeting notes, and AI-powered document automation.`,
+		description: `${config.appName} vs Loom: AI that processes your documents and meetings, not just records them. Summarize, extract, and analyze — without watching the playback.`,
 		ourPitch:
 			"AI toolkit for processing documents, audio, and business data",
 		theirPitch: "Async video messaging and screen recording tool",
@@ -509,7 +509,7 @@ const competitors: CompetitorPage[] = [
 		slug: "rev",
 		name: "Rev",
 		headline: `${config.appName} vs Rev — AI Transcription vs Full Business AI Suite`,
-		description: `Comparing ${config.appName} and Rev for transcription, speaker separation, and AI document processing for businesses.`,
+		description: `${config.appName} vs Rev: AI transcription with speaker separation plus invoice processing, contract analysis, and meeting summaries — more tools at a lower per-use cost.`,
 		ourPitch:
 			"Complete AI toolkit: meetings, documents, expenses, and more",
 		theirPitch: "Transcription and captioning service for audio/video",
@@ -542,7 +542,7 @@ const competitors: CompetitorPage[] = [
 		slug: "sonix",
 		name: "Sonix",
 		headline: `${config.appName} vs Sonix — Automated Transcription vs AI Business Suite`,
-		description: `Comparing ${config.appName} and Sonix for automated transcription, meeting summaries, and AI-powered document workflows.`,
+		description: `${config.appName} vs Sonix: AI transcription and speaker diarization plus a full document intelligence suite. Stop juggling multiple tools for every business workflow.`,
 		ourPitch:
 			"AI toolkit for documents, audio, expenses, and business data",
 		theirPitch: "Automated transcription with editing and translation",
@@ -575,7 +575,7 @@ const competitors: CompetitorPage[] = [
 		slug: "nanonets",
 		name: "Nanonets",
 		headline: `${config.appName} vs Nanonets — Document AI vs All-in-One Business AI`,
-		description: `Comparing ${config.appName} and Nanonets for invoice processing, document extraction, and AI-powered business automation.`,
+		description: `${config.appName} vs Nanonets: AI invoice extraction without enterprise pricing or custom model training. Start free, get structured data from any invoice PDF in seconds.`,
 		ourPitch:
 			"All-in-one AI: meetings, documents, expenses, news, and more",
 		theirPitch: "AI document processing and OCR extraction platform",
@@ -608,7 +608,7 @@ const competitors: CompetitorPage[] = [
 		slug: "rossum",
 		name: "Rossum",
 		headline: `${config.appName} vs Rossum — Enterprise Document AI vs Accessible AI Suite`,
-		description: `Comparing ${config.appName} and Rossum for invoice capture, document processing, and AI automation for business teams.`,
+		description: `${config.appName} vs Rossum: AI invoice capture and document processing for SMBs — without enterprise contracts or per-document pricing that punishes growth.`,
 		ourPitch: "Accessible AI toolkit for small and mid-size business teams",
 		theirPitch: "Enterprise document capture and intelligent automation",
 		comparison: [
@@ -640,7 +640,7 @@ const competitors: CompetitorPage[] = [
 		slug: "bardeen",
 		name: "Bardeen",
 		headline: `${config.appName} vs Bardeen — Browser Automation vs AI Document Processing`,
-		description: `Comparing ${config.appName} and Bardeen for business automation, document AI, and workflow efficiency for small teams.`,
+		description: `${config.appName} vs Bardeen: AI document processing without browser automation setup. Invoices, contracts, meetings — just upload and get results, no playbook required.`,
 		ourPitch:
 			"AI toolkit for processing documents, audio, and business data",
 		theirPitch: "Browser automation and web scraping for no-code workflows",
@@ -673,7 +673,7 @@ const competitors: CompetitorPage[] = [
 		slug: "make",
 		name: "Make (Integromat)",
 		headline: `${config.appName} vs Make — Workflow Automation vs Specialized AI Processing`,
-		description: `Comparing ${config.appName} and Make (formerly Integromat) for AI document automation, meeting summaries, and business data processing.`,
+		description: `${config.appName} vs Make (Integromat): AI-native document intelligence without scenario builders. Extract, summarize, and analyze — no workflow diagrams needed.`,
 		ourPitch: "Purpose-built AI for documents, meetings, and business data",
 		theirPitch:
 			"Visual workflow automation platform connecting apps and APIs",
@@ -706,7 +706,7 @@ const competitors: CompetitorPage[] = [
 		slug: "assemblyai",
 		name: "AssemblyAI",
 		headline: `${config.appName} vs AssemblyAI — Business Tools, Not Just an API`,
-		description: `Comparing ${config.appName} and AssemblyAI for transcription, meeting summaries, and AI-powered document processing.`,
+		description: `${config.appName} vs AssemblyAI: business-ready AI transcription and speaker diarization without API integration. Upload audio and get summaries — no developer required.`,
 		ourPitch: "A complete AI productivity suite with no code required",
 		theirPitch:
 			"Developer-focused transcription and audio intelligence API",
@@ -739,7 +739,7 @@ const competitors: CompetitorPage[] = [
 		slug: "deepgram",
 		name: "Deepgram",
 		headline: `${config.appName} vs Deepgram — Beyond Fast Transcription`,
-		description: `Comparing ${config.appName} and Deepgram for audio transcription, meeting intelligence, and business document processing.`,
+		description: `${config.appName} vs Deepgram: real-time AI transcription for business teams without API setup. Speaker separation, meeting summaries, and document workflows — all in one UI.`,
 		ourPitch:
 			"Complete business AI tools, not just transcription infrastructure",
 		theirPitch: "High-speed audio transcription API for developers",
@@ -772,7 +772,7 @@ const competitors: CompetitorPage[] = [
 		slug: "hyper-ai",
 		name: "Hyper AI",
 		headline: `${config.appName} vs Hyper — Purpose-Built Business AI`,
-		description: `Comparing ${config.appName} and Hyper for AI-powered business automation, document processing, and meeting intelligence.`,
+		description: `${config.appName} vs Hyper AI: AI business tools with broader document coverage — invoices, contracts, feedback, expenses, and meetings — with no per-seat pricing.`,
 		ourPitch: "Specialized AI tools for 8 core business workflows",
 		theirPitch: "General-purpose AI assistant for workplace tasks",
 		comparison: [
@@ -804,7 +804,7 @@ const competitors: CompetitorPage[] = [
 		slug: "grain",
 		name: "Grain",
 		headline: `${config.appName} vs Grain — More Than Meeting Highlights`,
-		description: `Comparing ${config.appName} and Grain for meeting recording, AI summaries, and business document AI tools.`,
+		description: `${config.appName} vs Grain: AI meeting summaries and highlights plus invoice processing, contract review, and speaker diarization. Don't pay two tools when one does more.`,
 		ourPitch: "A full AI business tool suite beyond meeting clips",
 		theirPitch: "Meeting recording and highlight clip sharing",
 		comparison: [
@@ -836,7 +836,7 @@ const competitors: CompetitorPage[] = [
 		slug: "abbyy",
 		name: "ABBYY",
 		headline: `${config.appName} vs ABBYY — Modern AI Without the Enterprise Price Tag`,
-		description: `Comparing ${config.appName} and ABBYY for document processing, invoice extraction, and intelligent document processing.`,
+		description: `${config.appName} vs ABBYY: AI invoice extraction and document processing for SMBs — without ABBYY's enterprise pricing, OCR engine setup, or IT procurement cycle.`,
 		ourPitch: "Modern AI document tools with simple credit-based pricing",
 		theirPitch: "Enterprise intelligent document processing platform",
 		comparison: [
@@ -872,7 +872,7 @@ const competitors: CompetitorPage[] = [
 		slug: "aws-textract",
 		name: "AWS Textract",
 		headline: `${config.appName} vs AWS Textract — Business-Ready AI Without the Cloud Complexity`,
-		description: `Comparing ${config.appName} and AWS Textract for document extraction, invoice processing, and business AI workflows.`,
+		description: `${config.appName} vs AWS Textract: AI invoice and document extraction with no AWS account, IAM setup, or per-page pricing. Upload a PDF, get structured data — that's it.`,
 		ourPitch: "Business-ready AI tools with zero infrastructure overhead",
 		theirPitch: "Developer-focused OCR and document extraction API",
 		comparison: [
@@ -902,7 +902,7 @@ const competitors: CompetitorPage[] = [
 		slug: "azure-ai-document",
 		name: "Azure AI Document Intelligence",
 		headline: `${config.appName} vs Azure AI Document Intelligence — AI for Business Teams`,
-		description: `Comparing ${config.appName} and Azure AI Document Intelligence for invoice extraction, contract review, and business productivity.`,
+		description: `${config.appName} vs Azure AI Document Intelligence: invoice extraction, contract review, and meeting summaries in a ready-to-use UI — no Azure subscription or SDK integration.`,
 		ourPitch: "A complete AI productivity suite for business teams",
 		theirPitch: "Enterprise document processing API from Microsoft",
 		comparison: [
@@ -932,7 +932,7 @@ const competitors: CompetitorPage[] = [
 		slug: "eightfold-ai",
 		name: "Eightfold AI",
 		headline: `${config.appName} vs Eightfold AI — Practical AI Tools for Every Business`,
-		description: `Comparing ${config.appName} and Eightfold AI for business automation, document analysis, and AI productivity tools.`,
+		description: `${config.appName} vs Eightfold AI: general-purpose AI document tools vs HR-focused AI. For invoices, contracts, meetings, and expense analysis — ${config.appName} covers the full back office.`,
 		ourPitch: "Practical AI tools for any business team",
 		theirPitch: "Enterprise talent intelligence platform",
 		comparison: [
@@ -962,7 +962,7 @@ const competitors: CompetitorPage[] = [
 		slug: "kofax",
 		name: "Kofax",
 		headline: `${config.appName} vs Kofax — Modern AI Without Legacy Complexity`,
-		description: `Comparing ${config.appName} and Kofax for invoice processing, document capture, and business automation.`,
+		description: `${config.appName} vs Kofax: AI invoice processing and document capture for SMBs — at a fraction of the cost, with no implementation project or dedicated IT team required.`,
 		ourPitch: "Modern LLM-powered AI for business teams",
 		theirPitch:
 			"Legacy enterprise document capture and automation platform",
@@ -997,7 +997,7 @@ const competitors: CompetitorPage[] = [
 		slug: "docsumo",
 		name: "Docsumo",
 		headline: `${config.appName} vs Docsumo — Beyond Document Extraction`,
-		description: `Comparing ${config.appName} and Docsumo for invoice processing, document data extraction, and business AI tools.`,
+		description: `${config.appName} vs Docsumo: AI invoice data extraction with a broader toolset — contracts, meetings, expenses, and feedback — at SMB-friendly per-credit pricing.`,
 		ourPitch: "A full AI productivity suite, not just document parsing",
 		theirPitch: "Document data extraction and classification platform",
 		comparison: [
@@ -1031,7 +1031,7 @@ const competitors: CompetitorPage[] = [
 		slug: "sensible",
 		name: "Sensible",
 		headline: `${config.appName} vs Sensible — AI Without the Config Tax`,
-		description: `Comparing ${config.appName} and Sensible for document data extraction, invoice processing, and business automation.`,
+		description: `${config.appName} vs Sensible: AI document extraction with no JSON schema configuration or developer setup. Upload an invoice or contract and get structured results immediately.`,
 		ourPitch:
 			"Ready-to-use AI tools for business teams without technical setup",
 		theirPitch: "Developer-focused document extraction with custom configs",
@@ -1062,7 +1062,7 @@ const competitors: CompetitorPage[] = [
 		slug: "hyperscience",
 		name: "HyperScience",
 		headline: `${config.appName} vs HyperScience — Enterprise Power Without Enterprise Price`,
-		description: `Comparing ${config.appName} and HyperScience for intelligent document processing, automation, and business AI tools.`,
+		description: `${config.appName} vs HyperScience: intelligent document processing for SMBs — without enterprise contracts, custom model training, or multi-month implementations.`,
 		ourPitch: "Modern LLM-powered AI for growing teams",
 		theirPitch: "Enterprise intelligent document processing and automation",
 		comparison: [
@@ -1096,7 +1096,7 @@ const competitors: CompetitorPage[] = [
 		slug: "instabase",
 		name: "Instabase",
 		headline: `${config.appName} vs Instabase — AI Automation That's Actually Accessible`,
-		description: `Comparing ${config.appName} and Instabase for document understanding, automation, and business AI productivity.`,
+		description: `${config.appName} vs Instabase: AI document understanding for small and mid-size businesses — start free without a sales call, data-center deployment, or platform fee.`,
 		ourPitch: "Ready-to-use AI tools without platform engineering",
 		theirPitch: "Enterprise document understanding and automation platform",
 		comparison: [
