@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { usePinnedJobs } from "@tools/hooks/use-pinned-jobs";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
@@ -21,6 +22,7 @@ function formatPinnedAt(iso: string): string {
 
 export function PinnedJobsWidget() {
 	const { pinnedJobs, unpinJob } = usePinnedJobs();
+	const { track } = useProductAnalytics();
 
 	if (pinnedJobs.length === 0) {
 		return (
@@ -68,6 +70,15 @@ export function PinnedJobsWidget() {
 									<Link
 										href={`/app/jobs/${job.id}`}
 										className="truncate font-medium text-sm hover:underline"
+										onClick={() =>
+											track({
+												name: "dashboard_pinned_job_clicked",
+												props: {
+													job_id: job.id,
+													tool_name: job.toolName,
+												},
+											})
+										}
 									>
 										{job.toolName}
 									</Link>

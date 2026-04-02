@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
@@ -13,6 +14,7 @@ interface QuickActionsProps {
 
 export function QuickActions({ className }: QuickActionsProps) {
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const basePath = activeOrganization
 		? `/app/${activeOrganization.slug}`
@@ -49,7 +51,18 @@ export function QuickActions({ className }: QuickActionsProps) {
 					className="flex-1 min-w-[140px] h-auto py-3 px-4 gap-3 justify-start"
 					asChild
 				>
-					<Link href={action.href}>
+					<Link
+						href={action.href}
+						onClick={() =>
+							track({
+								name: "dashboard_quick_action_clicked",
+								props: {
+									action_label: action.label,
+									href: action.href,
+								},
+							})
+						}
+					>
 						<action.icon className="size-5 shrink-0 text-primary" />
 						<div className="text-left">
 							<p className="font-medium">{action.label}</p>

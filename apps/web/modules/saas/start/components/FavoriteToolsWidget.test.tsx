@@ -1,10 +1,16 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FavoriteToolsWidget } from "./FavoriteToolsWidget";
 
+const mockTrack = vi.fn();
 const mockUseFavoriteTools = vi.fn();
 const mockUseTools = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/tools/hooks/use-favorite-tools", () => ({
 	useFavoriteTools: () => mockUseFavoriteTools(),
@@ -18,10 +24,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 const enabledTools = [
@@ -71,5 +83,18 @@ describe("FavoriteToolsWidget", () => {
 		render(<FavoriteToolsWidget />);
 		expect(screen.getByText("Favorites")).toBeInTheDocument();
 		expect(screen.getByText("Your bookmarked tools")).toBeInTheDocument();
+	});
+
+	it("tracks dashboard_favorite_tool_clicked on tool link click", async () => {
+		mockUseFavoriteTools.mockReturnValue({
+			favorites: new Set(["news-analyzer"]),
+		});
+		render(<FavoriteToolsWidget />);
+		const link = screen.getByRole("link", { name: /News Analyzer/i });
+		await userEvent.click(link);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "dashboard_favorite_tool_clicked",
+			props: { tool_slug: "news-analyzer", tool_name: "News Analyzer" },
+		});
 	});
 });

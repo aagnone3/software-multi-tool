@@ -234,6 +234,18 @@ type ProductEvent =
 	| {
 			name: "newsletter_subscribe_succeeded";
 			props: { source: string };
+	  }
+	| {
+			name: "dashboard_quick_action_clicked";
+			props: { action_label: string; href: string };
+	  }
+	| {
+			name: "dashboard_favorite_tool_clicked";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "dashboard_pinned_job_clicked";
+			props: { job_id: string; tool_name: string };
 	  };
 
 export type { ProductEvent };
