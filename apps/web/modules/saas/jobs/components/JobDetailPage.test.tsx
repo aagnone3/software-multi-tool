@@ -4,6 +4,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobDetailPage } from "./JobDetailPage";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobPolling: vi.fn(),
 }));
@@ -205,5 +210,34 @@ describe("JobDetailPage", () => {
 		expect(
 			screen.getByRole("button", { name: "Share job link" }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks job_detail_page_viewed when job loads", () => {
+		mockUseJobPolling.mockReturnValue({
+			job: baseJob,
+			isLoading: false,
+			invalidateJob: vi.fn(),
+		});
+		render(<JobDetailPage jobId="job-abc123" />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "job_detail_page_viewed",
+			props: {
+				job_id: "job-abc123",
+				tool_slug: "news-analyzer",
+				status: "COMPLETED",
+			},
+		});
+	});
+
+	it("does not track page_viewed while loading", () => {
+		mockUseJobPolling.mockReturnValue({
+			job: undefined,
+			isLoading: true,
+			invalidateJob: vi.fn(),
+		});
+		render(<JobDetailPage jobId="job-abc123" />);
+		expect(mockTrack).not.toHaveBeenCalledWith(
+			expect.objectContaining({ name: "job_detail_page_viewed" }),
+		);
 	});
 });

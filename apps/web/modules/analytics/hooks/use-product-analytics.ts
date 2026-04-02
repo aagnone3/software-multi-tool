@@ -541,6 +541,22 @@ type ProductEvent =
 	| {
 			name: "jobs_history_csv_exported";
 			props: { row_count: number };
+	  }
+	| {
+			name: "job_detail_page_viewed";
+			props: { job_id: string; tool_slug: string; status: string };
+	  }
+	| {
+			name: "job_detail_output_downloaded";
+			props: { job_id: string; tool_slug: string };
+	  }
+	| {
+			name: "job_detail_link_shared";
+			props: { job_id: string; tool_slug: string };
+	  }
+	| {
+			name: "job_detail_pin_toggled";
+			props: { job_id: string; tool_slug: string; pinned: boolean };
 	  };
 
 export type { ProductEvent };

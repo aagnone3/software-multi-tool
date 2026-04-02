@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useJobPolling } from "@tools/hooks/use-job-polling";
 import { usePinnedJobs } from "@tools/hooks/use-pinned-jobs";
@@ -26,7 +27,7 @@ import {
 	XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { JobNotesPanel } from "./JobNotesPanel";
 import { JobResultsUpgradeNudge } from "./JobResultsUpgradeNudge";
@@ -115,6 +116,20 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 	const { job, isLoading } = useJobPolling(jobId);
 	const [shared, setShared] = useState(false);
 	const { pinJob, unpinJob, isPinned } = usePinnedJobs();
+	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		if (job) {
+			track({
+				name: "job_detail_page_viewed",
+				props: {
+					job_id: job.id,
+					tool_slug: job.toolSlug ?? "",
+					status: job.status,
+				},
+			});
+		}
+	}, [job?.id]);
 
 	const handleDownload = () => {
 		if (!job?.output) {
@@ -130,6 +145,10 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 		a.click();
 		URL.revokeObjectURL(url);
 		toast.success("Output downloaded");
+		track({
+			name: "job_detail_output_downloaded",
+			props: { job_id: jobId, tool_slug: job?.toolSlug ?? "" },
+		});
 	};
 
 	const handleShare = async () => {
@@ -138,6 +157,10 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 			await navigator.clipboard.writeText(url);
 			setShared(true);
 			toast.success("Job link copied to clipboard");
+			track({
+				name: "job_detail_link_shared",
+				props: { job_id: jobId, tool_slug: job?.toolSlug ?? "" },
+			});
 			setTimeout(() => setShared(false), 2000);
 		} catch {
 			toast.error("Failed to copy link");
@@ -209,6 +232,14 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 							if (isPinned(job.id)) {
 								unpinJob(job.id);
 								toast.info("Unpinned from dashboard");
+								track({
+									name: "job_detail_pin_toggled",
+									props: {
+										job_id: job.id,
+										tool_slug: job.toolSlug ?? "",
+										pinned: false,
+									},
+								});
 							} else {
 								pinJob({
 									id: job.id,
@@ -216,6 +247,14 @@ export function JobDetailPage({ jobId }: { jobId: string }) {
 									toolName: getToolName(job.toolSlug ?? ""),
 								});
 								toast.success("Pinned to dashboard");
+								track({
+									name: "job_detail_pin_toggled",
+									props: {
+										job_id: job.id,
+										tool_slug: job.toolSlug ?? "",
+										pinned: true,
+									},
+								});
 							}
 						}}
 						aria-label={
