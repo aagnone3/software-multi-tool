@@ -198,6 +198,18 @@ type ProductEvent =
 	| {
 			name: "billing_settings_annual_upsell_clicked";
 			props: { plan_id: string; savings_pct: number };
+	  }
+	| {
+			name: "dashboard_recently_viewed_tool_clicked";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "dashboard_notification_clicked";
+			props: {
+				notification_id: string;
+				notification_type: string;
+				was_unread: boolean;
+			};
 	  };
 
 export type { ProductEvent };

@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { RecentlyViewedToolsWidget } from "./RecentlyViewedToolsWidget";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/tools/hooks/use-recently-viewed-tools", () => ({
 	useRecentlyViewedTools: vi.fn(),
@@ -114,6 +120,22 @@ describe("RecentlyViewedToolsWidget", () => {
 		expect(
 			screen.getByRole("link", { name: /browse all tools/i }),
 		).toBeTruthy();
+	});
+
+	it("tracks analytics when a tool link is clicked", async () => {
+		mockUseRecentlyViewedTools.mockReturnValue({
+			recentTools: [
+				{ slug: "news-analyzer", viewedAt: "2026-03-22T20:00:00Z" },
+			],
+			recordView: vi.fn(),
+		});
+		defaultToolsHook();
+		render(<RecentlyViewedToolsWidget />);
+		await userEvent.click(screen.getByText("News Analyzer"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "dashboard_recently_viewed_tool_clicked",
+			props: { tool_slug: "news-analyzer", tool_name: "News Analyzer" },
+		});
 	});
 
 	it("skips unknown slugs (not in registry or enabled tools)", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	useMarkNotificationAsReadMutation,
 	useNotificationsQuery,
@@ -78,6 +79,7 @@ export function NotificationsWidget({
 	const { data: unreadData } = useNotificationsUnreadCountQuery();
 	const { data, isLoading } = useNotificationsQuery({ limit: maxItems });
 	const markAsReadMutation = useMarkNotificationAsReadMutation();
+	const { track } = useProductAnalytics();
 
 	const notifications = data?.notifications ?? [];
 	const unreadCount = unreadData?.unreadCount ?? 0;
@@ -85,8 +87,17 @@ export function NotificationsWidget({
 	const handleNotificationClick = (
 		id: string,
 		read: boolean,
+		type: string,
 		actionUrl?: string | null,
 	) => {
+		track({
+			name: "dashboard_notification_clicked",
+			props: {
+				notification_id: id,
+				notification_type: type,
+				was_unread: !read,
+			},
+		});
 		if (!read) {
 			markAsReadMutation.mutate(id);
 		}
@@ -180,6 +191,7 @@ export function NotificationsWidget({
 											handleNotificationClick(
 												notification.id,
 												notification.read,
+												notification.type,
 												notification.actionUrl,
 											)
 										}
