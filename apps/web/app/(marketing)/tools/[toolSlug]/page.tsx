@@ -245,7 +245,8 @@ export async function generateMetadata({
 
 	const siteUrl = getBaseUrl();
 	const title = `${tool.name} — AI-Powered | ${config.appName}`;
-	const description = `${tool.description}. No technical knowledge required. Start free with ${tool.creditCost} credit${tool.creditCost === 1 ? "" : "s"} per use.`;
+	const fallbackDescription = `${tool.description}. No technical knowledge required. Start free with ${tool.creditCost} credit${tool.creditCost === 1 ? "" : "s"} per use.`;
+	const description = tool.seoDescription ?? fallbackDescription;
 
 	return {
 		title,

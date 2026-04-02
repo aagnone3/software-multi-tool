@@ -54,6 +54,12 @@ export interface ToolConfig {
 	slug: string;
 	name: string;
 	description: string;
+	/**
+	 * Optional longer SEO meta description for tool landing pages.
+	 * When provided, used instead of the auto-generated description in <meta name="description">.
+	 * Should be 140–160 characters, keyword-rich, and action-oriented.
+	 */
+	seoDescription?: string;
 	icon: string;
 	/** Whether the tool is accessible without authentication */
 	public: boolean;
