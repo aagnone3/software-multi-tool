@@ -929,6 +929,31 @@ export default async function IndustryPage({
 		],
 	};
 
+	const serviceJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "Service",
+		name: page.title,
+		description: page.description,
+		url: `${siteUrl}/for/${industry}`,
+		provider: {
+			"@type": "Organization",
+			name: config.appName,
+			url: siteUrl,
+		},
+		audience: {
+			"@type": "Audience",
+			audienceType: page.persona,
+		},
+		serviceType: "AI-Powered Business Automation",
+		offers: {
+			"@type": "Offer",
+			price: "0",
+			priceCurrency: "USD",
+			description:
+				"Start free with credits included. No credit card required.",
+		},
+	};
+
 	return (
 		<>
 			<script
@@ -936,6 +961,13 @@ export default async function IndustryPage({
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(breadcrumbJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(serviceJsonLd),
 				}}
 			/>
 
