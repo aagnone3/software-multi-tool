@@ -1,6 +1,7 @@
 "use client";
 
 import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
@@ -39,6 +40,7 @@ export function FirstJobCelebrationModal({
 	const jobs = allJobs.filter((j) => j.status === "COMPLETED");
 	const [open, setOpen] = useState(false);
 	const { track } = useProductAnalytics();
+	const { balance } = useCreditsBalance();
 
 	const billingHref = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -46,9 +48,13 @@ export function FirstJobCelebrationModal({
 
 	useEffect(() => {
 		// Only fire for the very first completed job
-		if (jobs.length !== 1) return;
+		if (jobs.length !== 1) {
+			return;
+		}
 		const alreadyShown = localStorage.getItem(STORAGE_KEY);
-		if (alreadyShown === "true") return;
+		if (alreadyShown === "true") {
+			return;
+		}
 		// Small delay so the job result is visible before the modal pops
 		const timer = setTimeout(() => {
 			setOpen(true);
@@ -72,7 +78,9 @@ export function FirstJobCelebrationModal({
 		<Dialog
 			open={open}
 			onOpenChange={(v) => {
-				if (!v) handleClose("dismiss");
+				if (!v) {
+					handleClose("dismiss");
+				}
 			}}
 		>
 			<DialogContent className="sm:max-w-md">
@@ -134,7 +142,9 @@ export function FirstJobCelebrationModal({
 						className="w-full"
 						onClick={() => handleClose("dismiss")}
 					>
-						Keep exploring (9 credits left)
+						{balance?.remaining != null
+							? `Keep exploring (${balance.remaining} credit${balance.remaining === 1 ? "" : "s"} left)`
+							: "Keep exploring for now"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
