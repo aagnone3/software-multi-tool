@@ -1,10 +1,11 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, SparklesIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface JobResultsUpgradeNudgeProps {
 	organizationId?: string;
@@ -21,9 +22,21 @@ export function JobResultsUpgradeNudge({
 	className,
 }: JobResultsUpgradeNudgeProps) {
 	const { activePlan } = usePurchases(organizationId);
+	const { track } = useProductAnalytics();
 
 	const isFreePlan = activePlan?.id === "free";
 	const isStarterPlan = activePlan?.id === "starter";
+	const planId = activePlan?.id ?? "unknown";
+
+	useEffect(() => {
+		if (activePlan && (isFreePlan || isStarterPlan)) {
+			track({
+				name: "upgrade_nudge_shown",
+				props: { source: "job_results_upgrade_nudge", plan_id: planId },
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activePlan?.id]);
 
 	if (!activePlan || (!isFreePlan && !isStarterPlan)) {
 		return null;
@@ -56,10 +69,36 @@ export function JobResultsUpgradeNudge({
 					</div>
 					<div className="flex shrink-0 gap-2">
 						<Button asChild variant="outline" size="sm">
-							<Link href="#pricing-plan-pro">Compare plans</Link>
+							<Link
+								href="#pricing-plan-pro"
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "job_results_upgrade_nudge",
+											plan_id: planId,
+											cta_label: "compare_plans",
+										},
+									})
+								}
+							>
+								Compare plans
+							</Link>
 						</Button>
 						<Button asChild size="sm">
-							<Link href={`${billingHref}#pricing`}>
+							<Link
+								href={`${billingHref}#pricing`}
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "job_results_upgrade_nudge",
+											plan_id: planId,
+											cta_label: "upgrade_to_pro",
+										},
+									})
+								}
+							>
 								Upgrade to Pro
 								<ArrowRightIcon className="ml-1.5 size-3.5" />
 							</Link>
@@ -92,7 +131,19 @@ export function JobResultsUpgradeNudge({
 				</div>
 				<div className="flex shrink-0 gap-2">
 					<Button asChild size="sm">
-						<Link href={`${billingHref}#pricing`}>
+						<Link
+							href={`${billingHref}#pricing`}
+							onClick={() =>
+								track({
+									name: "upgrade_nudge_cta_clicked",
+									props: {
+										source: "job_results_upgrade_nudge",
+										plan_id: planId,
+										cta_label: "upgrade",
+									},
+								})
+							}
+						>
 							Upgrade
 							<ArrowRightIcon className="ml-1.5 size-3.5" />
 						</Link>
