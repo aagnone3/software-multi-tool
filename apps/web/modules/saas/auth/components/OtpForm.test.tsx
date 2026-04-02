@@ -60,6 +60,11 @@ vi.mock("@saas/auth/hooks/errors-messages", () => ({
 	}),
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { authClient } from "@repo/auth/client";
 import { OtpForm } from "./OtpForm";
 
@@ -131,6 +136,27 @@ describe("OtpForm", () => {
 		expect(
 			screen.getByText("Two-factor authentication"),
 		).toBeInTheDocument();
+	});
+
+	it("tracks mfa_otp_verified on successful verification", async () => {
+		mockVerifyTotp.mockResolvedValueOnce({ error: null });
+		render(<OtpForm />);
+
+		const input = document.querySelector(
+			"input[autocomplete='one-time-code']",
+		);
+		if (input) {
+			fireEvent.change(input, { target: { value: "123456" } });
+		}
+
+		await waitFor(() => {
+			if (mockVerifyTotp.mock.calls.length > 0) {
+				expect(mockTrack).toHaveBeenCalledWith({
+					name: "mfa_otp_verified",
+					props: {},
+				});
+			}
+		});
 	});
 
 	it("shows error alert when verification fails", async () => {

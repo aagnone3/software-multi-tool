@@ -455,6 +455,14 @@ type ProductEvent =
 	| {
 			name: "password_reset_requested";
 			props: Record<string, never>;
+	  }
+	| {
+			name: "password_reset_completed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "mfa_otp_verified";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };
