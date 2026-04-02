@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useRecentJobs } from "@saas/start/hooks/use-recent-jobs";
 import { useFavoriteTools } from "@saas/tools/hooks/use-favorite-tools";
 import { getVisibleTools } from "@saas/tools/lib/tool-flags";
@@ -117,6 +118,7 @@ export function ToolsGrid() {
 		[recentToolSlugs],
 	);
 	const { favorites, isFavorite, toggleFavorite } = useFavoriteTools();
+	const { track } = useProductAnalytics();
 
 	/** Sorted, deduplicated list of available categories */
 	const categories = useMemo(() => {
@@ -198,8 +200,12 @@ export function ToolsGrid() {
 		// Save non-empty queries when user leaves the field
 		if (searchQuery.trim()) {
 			addSearch(searchQuery);
+			track({
+				name: "tools_grid_searched",
+				props: { query: searchQuery.trim() },
+			});
 		}
-	}, [searchQuery, addSearch]);
+	}, [searchQuery, addSearch, track]);
 
 	const applyRecentSearch = useCallback((query: string) => {
 		setSearchQuery(query);
@@ -284,7 +290,13 @@ export function ToolsGrid() {
 					</div>
 					<Select
 						value={sortBy}
-						onValueChange={(v) => setSortBy(v as SortOption)}
+						onValueChange={(v) => {
+							setSortBy(v as SortOption);
+							track({
+								name: "tools_grid_sorted",
+								props: { sort_by: v },
+							});
+						}}
 					>
 						<SelectTrigger className="w-44" aria-label="Sort tools">
 							<SelectValue placeholder="Sort by…" />
@@ -328,7 +340,13 @@ export function ToolsGrid() {
 								activeCategory === cat ? "primary" : "outline"
 							}
 							size="sm"
-							onClick={() => setActiveCategory(cat)}
+							onClick={() => {
+								setActiveCategory(cat);
+								track({
+									name: "tools_grid_category_filtered",
+									props: { category: cat },
+								});
+							}}
 							className={cn(
 								"rounded-full",
 								activeCategory === cat && "shadow-sm",

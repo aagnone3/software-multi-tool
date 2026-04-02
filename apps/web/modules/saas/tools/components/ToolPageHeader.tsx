@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { ToolConfig } from "@repo/config/types";
 import { Button } from "@ui/components/button";
 import {
@@ -25,6 +26,7 @@ interface ToolPageHeaderProps {
 
 export function ToolPageHeader({ tool }: ToolPageHeaderProps) {
 	const [copied, setCopied] = useState(false);
+	const { track } = useProductAnalytics();
 
 	const handleShare = useCallback(async () => {
 		try {
@@ -32,10 +34,14 @@ export function ToolPageHeader({ tool }: ToolPageHeaderProps) {
 			await navigator.clipboard.writeText(url);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
+			track({
+				name: "tool_page_share_clicked",
+				props: { tool_slug: tool.slug },
+			});
 		} catch {
 			// fallback: do nothing
 		}
-	}, []);
+	}, [tool.slug, track]);
 
 	return (
 		<div className="mb-6">
