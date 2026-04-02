@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsFeatureEnabled } from "@analytics";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -47,6 +48,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
+	const { track } = useProductAnalytics();
 	const searchParams = useSearchParams();
 
 	const [showPassword, setShowPassword] = useState(false);
@@ -101,6 +103,15 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				throw error;
 			}
 
+			track({
+				name: "user_signed_up",
+				props: {
+					method: config.auth.enablePasswordLogin
+						? "email"
+						: "magic-link",
+				},
+			});
+
 			if (invitationOnlyMode) {
 				const { error } =
 					await authClient.organization.acceptInvitation({
@@ -114,12 +125,21 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				router.push(config.auth.redirectAfterSignIn);
 			}
 		} catch (e) {
+			const errorCode =
+				e && typeof e === "object" && "code" in e
+					? (e.code as string)
+					: undefined;
+			track({
+				name: "auth_signup_failed",
+				props: {
+					method: config.auth.enablePasswordLogin
+						? "email"
+						: "magic-link",
+					error_code: errorCode,
+				},
+			});
 			form.setError("root", {
-				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
-						: undefined,
-				),
+				message: getAuthErrorMessage(errorCode),
 			});
 		}
 	});

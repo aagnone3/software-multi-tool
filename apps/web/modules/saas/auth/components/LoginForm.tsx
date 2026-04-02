@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsFeatureEnabled } from "@analytics";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -62,6 +63,7 @@ export function LoginForm() {
 	const { getAuthErrorMessage } = useAuthErrorMessages();
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 	const searchParams = useSearchParams();
 	const { user, loaded: sessionLoaded } = useSession();
 
@@ -114,6 +116,10 @@ export function LoginForm() {
 					queryKey: sessionQueryKey,
 				});
 
+				track({
+					name: "user_logged_in",
+					props: { method: "password" },
+				});
 				router.replace(redirectPath);
 			} else {
 				const { error } = await authClient.signIn.magicLink({
@@ -124,14 +130,27 @@ export function LoginForm() {
 				if (error) {
 					throw error;
 				}
+
+				track({
+					name: "user_logged_in",
+					props: { method: "magic-link" },
+				});
 			}
 		} catch (e) {
+			const errorCode =
+				e && typeof e === "object" && "code" in e
+					? (e.code as string)
+					: undefined;
+			track({
+				name: "auth_login_failed",
+				props: {
+					method:
+						values.mode === "password" ? "password" : "magic-link",
+					error_code: errorCode,
+				},
+			});
 			form.setError("root", {
-				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
-						: undefined,
-				),
+				message: getAuthErrorMessage(errorCode),
 			});
 		}
 	};
@@ -140,14 +159,19 @@ export function LoginForm() {
 		try {
 			await authClient.signIn.passkey();
 
+			track({ name: "user_logged_in", props: { method: "passkey" } });
 			router.replace(redirectPath);
 		} catch (e) {
+			const errorCode =
+				e && typeof e === "object" && "code" in e
+					? (e.code as string)
+					: undefined;
+			track({
+				name: "auth_login_failed",
+				props: { method: "passkey", error_code: errorCode },
+			});
 			form.setError("root", {
-				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
-						: undefined,
-				),
+				message: getAuthErrorMessage(errorCode),
 			});
 		}
 	};

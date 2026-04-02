@@ -423,6 +423,34 @@ type ProductEvent =
 	| {
 			name: "tools_navbar_tool_clicked";
 			props: { tool_slug: string };
+	  }
+	| {
+			name: "user_signed_up";
+			props: {
+				method: "email" | "magic-link" | "oauth";
+				provider?: string;
+			};
+	  }
+	| {
+			name: "user_logged_in";
+			props: {
+				method: "password" | "magic-link" | "passkey" | "oauth";
+				provider?: string;
+			};
+	  }
+	| {
+			name: "auth_signup_failed";
+			props: {
+				method: "email" | "magic-link" | "oauth";
+				error_code?: string;
+			};
+	  }
+	| {
+			name: "auth_login_failed";
+			props: {
+				method: "password" | "magic-link" | "passkey" | "oauth";
+				error_code?: string;
+			};
 	  };
 
 export type { ProductEvent };
