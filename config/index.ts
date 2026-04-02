@@ -12,6 +12,8 @@ export const config = {
 				slug: "bg-remover",
 				name: "Background Remover",
 				description: "Remove backgrounds from images with AI",
+				seoDescription:
+					"Instantly remove image backgrounds with AI — no Photoshop skills needed. Upload a photo and get a clean, transparent PNG in seconds. Free to try.",
 				icon: "image-minus",
 				public: true,
 				enabled: false,
@@ -26,6 +28,8 @@ export const config = {
 				name: "Speaker Separation",
 				description:
 					"Separate and identify speakers in audio files with timestamps and transcripts",
+				seoDescription:
+					"AI speaker diarization: automatically separate multiple speakers in any audio file and get a timestamped transcript. Ideal for interviews, meetings, and podcasts.",
 				icon: "audio-lines",
 				public: false, // Requires authentication (no anonymous access)
 				enabled: true,
@@ -40,6 +44,8 @@ export const config = {
 				slug: "news-analyzer",
 				name: "News Analyzer",
 				description: "Analyze news articles for bias and sentiment",
+				seoDescription:
+					"Detect bias, sentiment, and credibility signals in any news article with AI. Paste a URL or text and get an instant analysis. Great for researchers and fact-checkers.",
 				icon: "newspaper",
 				public: true,
 				enabled: true,
@@ -54,6 +60,8 @@ export const config = {
 				name: "Invoice Processor",
 				description:
 					"Extract data from invoices using AI for easy accounting integration",
+				seoDescription:
+					"Extract vendor, amount, line items, and due dates from any invoice PDF or image with AI. Cut manual data entry by 80% and sync to QuickBooks, Xero, or your accounting system.",
 				icon: "receipt",
 				public: true,
 				enabled: true,
@@ -68,6 +76,8 @@ export const config = {
 				name: "Contract Analyzer",
 				description:
 					"Analyze contracts for key terms, risks, and obligations",
+				seoDescription:
+					"AI contract review: instantly extract key clauses, payment terms, liability caps, and red flags from any contract PDF. First-pass legal review in seconds, not hours.",
 				icon: "file-text",
 				public: true,
 				enabled: false,
@@ -83,6 +93,8 @@ export const config = {
 				name: "Customer Feedback Analyzer",
 				description:
 					"Analyze customer reviews and feedback for sentiment and insights",
+				seoDescription:
+					"Turn customer reviews, NPS responses, and support tickets into actionable insights with AI. Identify themes, sentiment trends, and priority issues in minutes.",
 				icon: "message-square-text",
 				public: true,
 				enabled: false,
@@ -97,6 +109,8 @@ export const config = {
 				name: "Expense Categorizer",
 				description:
 					"Automatically categorize expenses for tax and accounting purposes",
+				seoDescription:
+					"Automatically categorize business expenses from CSV or bank exports using AI. IRS-compliant categories, anomaly detection, and budget variance reports — ready in seconds.",
 				icon: "wallet",
 				public: true,
 				enabled: false,
@@ -111,6 +125,8 @@ export const config = {
 				name: "Meeting Summarizer",
 				description:
 					"Summarize meeting notes and extract action items automatically",
+				seoDescription:
+					"AI meeting summarizer: paste notes or a transcript and get a concise summary with action items, owners, and deadlines. Stop rewriting the same meeting recap email.",
 				icon: "clipboard-list",
 				public: true,
 				enabled: false,
@@ -125,6 +141,8 @@ export const config = {
 				name: "Diagram Editor",
 				description:
 					"Create and visualize diagrams with Mermaid syntax and live preview",
+				seoDescription:
+					"Free online diagram editor with live Mermaid preview. Create flowcharts, sequence diagrams, ERDs, and more with syntax highlighting and instant rendering — no install needed.",
 				icon: "git-branch",
 				public: true,
 				enabled: true,
