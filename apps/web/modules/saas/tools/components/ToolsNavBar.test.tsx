@@ -1,14 +1,20 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolsNavBar } from "./ToolsNavBar";
 
-const { mockUsePathname } = vi.hoisted(() => ({
+const { mockUsePathname, mockTrack } = vi.hoisted(() => ({
 	mockUsePathname: vi.fn(() => "/app/tools"),
+	mockTrack: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
 	usePathname: mockUsePathname,
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@saas/auth/hooks/use-session", () => ({
@@ -31,10 +37,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 vi.mock("@repo/config", () => ({
@@ -107,5 +119,37 @@ describe("ToolsNavBar", () => {
 		render(<ToolsNavBar />);
 		// In this test the module cache has logged-in user, so UserMenu is shown
 		expect(screen.getByTestId("user-menu")).toBeDefined();
+	});
+
+	it("tracks click on All Tools nav link", async () => {
+		render(<ToolsNavBar />);
+		const allToolsLink = screen
+			.getAllByRole("link")
+			.find((l) => l.getAttribute("href") === "/app/tools");
+		expect(allToolsLink).toBeDefined();
+		await userEvent.click(allToolsLink!);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "tools_navbar_all_tools_clicked" }),
+		);
+	});
+
+	it("tracks click on tool shortcut nav link", async () => {
+		render(<ToolsNavBar />);
+		const toolLink = screen
+			.getAllByRole("link")
+			.find(
+				(l) =>
+					l.getAttribute("href") === "/app/tools/meeting-summarizer",
+			);
+		expect(toolLink).toBeDefined();
+		await userEvent.click(toolLink!);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "tools_navbar_tool_clicked",
+				props: expect.objectContaining({
+					tool_slug: "meeting-summarizer",
+				}),
+			}),
+		);
 	});
 });

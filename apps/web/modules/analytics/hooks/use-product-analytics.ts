@@ -395,6 +395,14 @@ type ProductEvent =
 	| {
 			name: "tool_page_share_clicked";
 			props: { tool_slug: string };
+	  }
+	| {
+			name: "tools_navbar_all_tools_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "tools_navbar_tool_clicked";
+			props: { tool_slug: string };
 	  };
 
 export type { ProductEvent };
