@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -63,32 +64,80 @@ export function WelcomeModal({ className: _className }: WelcomeModalProps) {
 	const [open, setOpen] = useState(false);
 	const [step, setStep] = useState(0);
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 
 	useEffect(() => {
 		const dismissed = localStorage.getItem(STORAGE_KEY);
 		if (!dismissed) {
 			// Small delay so the dashboard loads first
-			const timer = setTimeout(() => setOpen(true), 800);
+			const timer = setTimeout(() => {
+				setOpen(true);
+				track({
+					name: "welcome_modal_shown",
+					props: { source: "dashboard" },
+				});
+				track({
+					name: "welcome_modal_step_viewed",
+					props: {
+						step_index: 0,
+						step_title: STEPS[0].title,
+						source: "dashboard",
+					},
+				});
+			}, 800);
 			return () => clearTimeout(timer);
 		}
-	}, []);
+	}, [track]);
 
 	const handleClose = () => {
 		localStorage.setItem(STORAGE_KEY, "true");
 		setOpen(false);
 	};
 
+	const handleSkip = () => {
+		track({
+			name: "welcome_modal_skipped",
+			props: { step_index: step, source: "dashboard" },
+		});
+		handleClose();
+	};
+
 	const handleNext = () => {
 		if (step < STEPS.length - 1) {
-			setStep(step + 1);
+			const nextStep = step + 1;
+			setStep(nextStep);
+			track({
+				name: "welcome_modal_step_viewed",
+				props: {
+					step_index: nextStep,
+					step_title: STEPS[nextStep].title,
+					source: "dashboard",
+				},
+			});
 		} else {
+			track({
+				name: "welcome_modal_completed",
+				props: {
+					first_tool_slug: enabledTools[0]?.slug,
+					source: "dashboard",
+				},
+			});
 			handleClose();
 		}
 	};
 
 	const handlePrev = () => {
 		if (step > 0) {
-			setStep(step - 1);
+			const prevStep = step - 1;
+			setStep(prevStep);
+			track({
+				name: "welcome_modal_step_viewed",
+				props: {
+					step_index: prevStep,
+					step_title: STEPS[prevStep].title,
+					source: "dashboard",
+				},
+			});
 		}
 	};
 
@@ -138,7 +187,7 @@ export function WelcomeModal({ className: _className }: WelcomeModalProps) {
 						>
 							Back
 						</Button>
-						<Button variant="ghost" onClick={handleClose} size="sm">
+						<Button variant="ghost" onClick={handleSkip} size="sm">
 							Skip tour
 						</Button>
 						{isLast ? (

@@ -84,6 +84,34 @@ type ProductEvent =
 	| {
 			name: "invite_cta_clicked";
 			props: { completed_job_count: number; source: string };
+	  }
+	| {
+			name: "welcome_modal_shown";
+			props: { source: string };
+	  }
+	| {
+			name: "welcome_modal_step_viewed";
+			props: { step_index: number; step_title: string; source: string };
+	  }
+	| {
+			name: "welcome_modal_skipped";
+			props: { step_index: number; source: string };
+	  }
+	| {
+			name: "welcome_modal_completed";
+			props: { first_tool_slug?: string; source: string };
+	  }
+	| {
+			name: "onboarding_checklist_step_clicked";
+			props: { step_id: string; is_complete: boolean; source: string };
+	  }
+	| {
+			name: "onboarding_checklist_dismissed";
+			props: {
+				completed_count: number;
+				total_count: number;
+				source: string;
+			};
 	  };
 
 export type { ProductEvent };
