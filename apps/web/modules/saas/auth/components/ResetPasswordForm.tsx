@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -34,6 +35,7 @@ export function ResetPasswordForm() {
 	const { user } = useSession();
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
+	const { track } = useProductAnalytics();
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token");
 
@@ -54,6 +56,8 @@ export function ResetPasswordForm() {
 			if (error) {
 				throw error;
 			}
+
+			track({ name: "password_reset_completed", props: {} });
 
 			if (user) {
 				router.push(config.auth.redirectAfterSignIn);

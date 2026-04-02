@@ -40,6 +40,11 @@ vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: () => ({ user: null }),
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 describe("ResetPasswordForm", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -114,5 +119,26 @@ describe("ResetPasswordForm", () => {
 		expect(
 			screen.getByRole("link", { name: /back to sign in/i }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks password_reset_completed on success", async () => {
+		const user = userEvent.setup({ delay: null });
+		mockResetPassword.mockResolvedValueOnce({ error: null });
+		await renderForm();
+		await user.type(
+			document.querySelector(
+				'input[type="password"]',
+			) as HTMLInputElement,
+			"newpassword123",
+		);
+		await user.click(
+			screen.getByRole("button", { name: /reset password/i }),
+		);
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "password_reset_completed",
+				props: {},
+			});
+		});
 	});
 });

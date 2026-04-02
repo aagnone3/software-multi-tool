@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -37,6 +38,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function OtpForm() {
 	const router = useRouter();
 	const { getAuthErrorMessage } = useAuthErrorMessages();
+	const { track } = useProductAnalytics();
 	const searchParams = useSearchParams();
 
 	const invitationId = searchParams.get("invitationId");
@@ -62,6 +64,8 @@ export function OtpForm() {
 			if (error) {
 				throw error;
 			}
+
+			track({ name: "mfa_otp_verified", props: {} });
 
 			router.replace(redirectPath);
 		} catch (e) {
