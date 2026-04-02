@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
@@ -8,6 +9,7 @@ import React from "react";
 import { toast } from "sonner";
 
 export function CustomerPortalButton({ purchaseId }: { purchaseId: string }) {
+	const { track } = useProductAnalytics();
 	const createCustomerPortalMutation = useMutation(
 		orpc.payments.createCustomerPortalLink.mutationOptions(),
 	);
@@ -20,6 +22,7 @@ export function CustomerPortalButton({ purchaseId }: { purchaseId: string }) {
 					redirectUrl: window.location.href,
 				});
 
+			track({ name: "settings_customer_portal_opened", props: {} });
 			window.location.href = customerPortalLink;
 		} catch {
 			toast.error(

@@ -489,6 +489,9 @@ type ProductEvent =
 	| { name: "settings_session_revoked"; props: Record<string, never> }
 	| { name: "settings_passkey_added"; props: Record<string, never> }
 	| { name: "settings_passkey_deleted"; props: Record<string, never> }
+	| { name: "settings_avatar_changed"; props: Record<string, never> }
+	| { name: "settings_customer_portal_opened"; props: Record<string, never> }
+	| { name: "settings_set_password_clicked"; props: Record<string, never> }
 	| {
 			name: "settings_social_account_linked";
 			props: { provider: string };
