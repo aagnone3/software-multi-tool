@@ -509,6 +509,14 @@ type ProductEvent =
 	| {
 			name: "streak_milestone_reached";
 			props: { streak_days: number; is_best: boolean };
+	  }
+	| {
+			name: "hero_cta_clicked";
+			props: { cta: "signup" | "see_all_tools"; position: "hero" };
+	  }
+	| {
+			name: "home_features_tool_clicked";
+			props: { tool_id: string; tool_title: string };
 	  };
 
 export type { ProductEvent };

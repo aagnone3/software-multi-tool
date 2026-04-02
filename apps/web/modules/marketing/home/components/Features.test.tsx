@@ -1,6 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { Features } from "./Features";
 
 describe("Features", () => {
@@ -40,5 +47,15 @@ describe("Features", () => {
 		const { container } = render(<Features />);
 		const section = container.querySelector("section");
 		expect(section).toBeTruthy();
+	});
+
+	it("tracks tool click when Try it link is clicked", async () => {
+		render(<Features />);
+		const links = screen.getAllByText("Try it →");
+		await userEvent.click(links[0]);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "home_features_tool_clicked",
+			props: expect.objectContaining({ tool_id: expect.any(String) }),
+		});
 	});
 });
