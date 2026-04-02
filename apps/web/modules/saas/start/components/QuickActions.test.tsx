@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { QuickActions } from "./QuickActions";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => ({ activeOrganization: null }),
@@ -11,10 +17,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 describe("QuickActions", () => {
@@ -49,5 +61,15 @@ describe("QuickActions", () => {
 		expect(screen.getByText("Start an AI conversation")).toBeDefined();
 		expect(screen.getByText("Explore available tools")).toBeDefined();
 		expect(screen.getByText("Check your credits usage")).toBeDefined();
+	});
+
+	it("tracks dashboard_quick_action_clicked when a link is clicked", async () => {
+		render(<QuickActions />);
+		const link = screen.getByText("New Chat").closest("a")!;
+		await userEvent.click(link);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "dashboard_quick_action_clicked",
+			props: { action_label: "New Chat", href: "/app/chatbot" },
+		});
 	});
 });

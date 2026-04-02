@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useFavoriteTools } from "@saas/tools/hooks/use-favorite-tools";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
@@ -22,6 +23,7 @@ interface FavoriteToolsWidgetProps {
 export function FavoriteToolsWidget({ className }: FavoriteToolsWidgetProps) {
 	const { favorites } = useFavoriteTools();
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 
 	const favoriteTools = enabledTools.filter((tool) =>
 		favorites.has(tool.slug),
@@ -76,6 +78,15 @@ export function FavoriteToolsWidget({ className }: FavoriteToolsWidgetProps) {
 						key={tool.slug}
 						href={`/app/tools/${tool.slug}`}
 						className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50 transition-colors group"
+						onClick={() =>
+							track({
+								name: "dashboard_favorite_tool_clicked",
+								props: {
+									tool_slug: tool.slug,
+									tool_name: tool.name,
+								},
+							})
+						}
 					>
 						<span className="text-sm font-medium group-hover:text-primary transition-colors truncate">
 							{tool.name}
