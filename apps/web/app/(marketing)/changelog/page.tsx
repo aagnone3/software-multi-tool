@@ -3,13 +3,23 @@ import { getBaseUrl } from "@repo/utils";
 import type { Metadata } from "next";
 import React from "react";
 
+const siteUrl = getBaseUrl();
+
 export const metadata: Metadata = {
-	title: "Changelog",
-	description: `Stay up to date with the latest improvements and new features added to ${config.appName}.`,
+	title: `Changelog — What's New | ${config.appName}`,
+	description: `Stay up to date with the latest improvements, new AI tools, and features added to ${config.appName}. New releases every month.`,
+	alternates: { canonical: `${siteUrl}/changelog` },
 	openGraph: {
-		title: `Changelog | ${config.appName}`,
-		description: `Stay up to date with the latest improvements and new features added to ${config.appName}.`,
-		url: `${getBaseUrl()}/changelog`,
+		type: "website",
+		url: `${siteUrl}/changelog`,
+		title: `Changelog — What's New | ${config.appName}`,
+		description: `New features, AI tool updates, and improvements to ${config.appName}. See what we've shipped recently.`,
+		siteName: config.appName,
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: `Changelog — What's New | ${config.appName}`,
+		description: `New features, AI tool updates, and improvements to ${config.appName}. See what we've shipped recently.`,
 	},
 };
 
