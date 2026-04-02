@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useConfirmationAlert } from "@saas/shared/components/ConfirmationAlertProvider";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 export function DeleteAccountForm() {
 	const { reloadSession } = useSession();
 	const { confirm } = useConfirmationAlert();
+	const { track } = useProductAnalytics();
 
 	const deleteUserMutation = useMutation({
 		mutationFn: async () => {
@@ -23,10 +25,12 @@ export function DeleteAccountForm() {
 		},
 		onSuccess: () => {
 			toast.success("Account was deleted successfully");
+			track({ name: "settings_account_deleted", props: {} });
 			reloadSession();
 		},
 		onError: () => {
 			toast.error("Could not delete account");
+			track({ name: "settings_account_delete_failed", props: {} });
 		},
 	});
 

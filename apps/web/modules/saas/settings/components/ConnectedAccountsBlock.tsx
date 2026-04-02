@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import {
 	type OAuthProvider,
@@ -13,6 +14,7 @@ import React from "react";
 
 export function ConnectedAccountsBlock() {
 	const { data, isPending } = useUserAccountsQuery();
+	const { track } = useProductAnalytics();
 
 	const isProviderLinked = (provider: OAuthProvider) =>
 		data?.some((account) => account.providerId === provider);
@@ -20,6 +22,10 @@ export function ConnectedAccountsBlock() {
 	const linkProvider = (provider: OAuthProvider) => {
 		const callbackURL = window.location.href;
 		if (!isProviderLinked(provider)) {
+			track({
+				name: "settings_social_account_linked",
+				props: { provider },
+			});
 			authClient.linkSocial({
 				provider,
 				callbackURL,

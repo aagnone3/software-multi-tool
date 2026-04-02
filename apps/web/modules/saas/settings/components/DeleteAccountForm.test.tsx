@@ -32,6 +32,11 @@ vi.mock("@tanstack/react-query", () => ({
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@saas/shared/components/SettingsItem", () => ({
 	SettingsItem: ({ children, title }: any) => (
 		<div>

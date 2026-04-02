@@ -12,6 +12,11 @@ vi.mock("@repo/auth/client", () => ({
 	},
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockReloadSession = vi.fn();
 vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: () => ({
@@ -53,7 +58,7 @@ describe("ChangeEmailForm", () => {
 		expect(input.value).toBe("user@example.com");
 	});
 
-	it("shows success toast and reloads session on success", async () => {
+	it("shows success toast, tracks event, and reloads session on success", async () => {
 		const user = userEvent.setup();
 		mockChangeEmail.mockResolvedValue({ error: null });
 		render(<ChangeEmailForm />);
@@ -66,10 +71,14 @@ describe("ChangeEmailForm", () => {
 				"Email was updated successfully",
 			);
 			expect(mockReloadSession).toHaveBeenCalled();
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "settings_email_changed",
+				props: {},
+			});
 		});
 	});
 
-	it("shows error toast on failure", async () => {
+	it("shows error toast and tracks failure event on failure", async () => {
 		const user = userEvent.setup();
 		mockChangeEmail.mockResolvedValue({ error: { message: "failed" } });
 		render(<ChangeEmailForm />);
@@ -81,6 +90,10 @@ describe("ChangeEmailForm", () => {
 			expect(mockToastError).toHaveBeenCalledWith(
 				"Could not update email",
 			);
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "settings_email_change_failed",
+				props: {},
+			});
 		});
 	});
 });
