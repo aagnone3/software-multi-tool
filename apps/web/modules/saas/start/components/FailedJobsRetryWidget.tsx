@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -104,6 +105,7 @@ export function FailedJobsRetryWidget({
 	const { jobs, isLoading } = useRecentJobs(50);
 	const queryClient = useQueryClient();
 	const [retryingJob, setRetryingJob] = useState<string | null>(null);
+	const { track } = useProductAnalytics();
 
 	const failedJobs = jobs
 		.filter((j) => j.status === "FAILED")
@@ -115,6 +117,10 @@ export function FailedJobsRetryWidget({
 
 	async function handleRetry(toolSlug: string) {
 		setRetryingJob(toolSlug);
+		track({
+			name: "failed_job_retry_clicked",
+			props: { tool_slug: toolSlug },
+		});
 		try {
 			await orpcClient.jobs.create({
 				toolSlug,

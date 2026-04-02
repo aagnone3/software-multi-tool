@@ -270,6 +270,26 @@ type ProductEvent =
 	| {
 			name: "dashboard_active_job_view_clicked";
 			props: { job_id: string; tool_slug: string; job_status: string };
+	  }
+	| {
+			name: "first_job_celebration_shown";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "first_job_celebration_cta_clicked";
+			props: { cta: "upgrade" | "dismiss" };
+	  }
+	| {
+			name: "milestone_reached";
+			props: { milestone_count: number; total_completed: number };
+	  }
+	| {
+			name: "untried_tool_clicked";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "failed_job_retry_clicked";
+			props: { tool_slug: string };
 	  };
 
 export type { ProductEvent };
