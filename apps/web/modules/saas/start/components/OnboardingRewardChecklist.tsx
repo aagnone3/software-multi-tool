@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
@@ -40,6 +41,7 @@ export function OnboardingRewardChecklist({
 	const { jobs, isLoading: jobsLoading } = useRecentJobs(5);
 	const [isDismissed, setIsDismissed] = useState(false);
 	const [hasHydrated, setHasHydrated] = useState(false);
+	const { track } = useProductAnalytics();
 
 	useEffect(() => {
 		const dismissed = localStorage.getItem(STORAGE_KEY);
@@ -49,7 +51,15 @@ export function OnboardingRewardChecklist({
 		setHasHydrated(true);
 	}, []);
 
-	const handleDismiss = () => {
+	const handleDismiss = (completedCount: number, totalCount: number) => {
+		track({
+			name: "onboarding_checklist_dismissed",
+			props: {
+				completed_count: completedCount,
+				total_count: totalCount,
+				source: "dashboard",
+			},
+		});
 		localStorage.setItem(STORAGE_KEY, "true");
 		setIsDismissed(true);
 	};
@@ -121,7 +131,9 @@ export function OnboardingRewardChecklist({
 						variant="ghost"
 						size="icon"
 						className="size-8 -mr-2 -mt-1"
-						onClick={handleDismiss}
+						onClick={() =>
+							handleDismiss(completedCount, steps.length)
+						}
 					>
 						<XIcon className="size-4" />
 						<span className="sr-only">Dismiss</span>
@@ -150,6 +162,16 @@ export function OnboardingRewardChecklist({
 						<li key={step.id}>
 							<Link
 								href={step.href}
+								onClick={() =>
+									track({
+										name: "onboarding_checklist_step_clicked",
+										props: {
+											step_id: step.id,
+											is_complete: step.isComplete,
+											source: "dashboard",
+										},
+									})
+								}
 								className={cn(
 									"flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50",
 									step.isComplete && "opacity-60",
