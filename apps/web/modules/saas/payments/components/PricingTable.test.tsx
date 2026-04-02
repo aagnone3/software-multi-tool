@@ -91,6 +91,11 @@ vi.mock("@shared/hooks/locale-currency", () => ({
 	useLocaleCurrency: () => "usd",
 }));
 
+const mockTrack = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@shared/hooks/router", () => ({
 	useRouter: () => ({
 		push: vi.fn(),
@@ -243,5 +248,59 @@ describe("PricingTable", () => {
 			await new Promise((r) => setTimeout(r, 50));
 		}
 		expect(toast.error).toBeDefined();
+	});
+
+	it("tracks checkout_started when checkout link is obtained", async () => {
+		mockTrack.mockClear();
+		const mockMutateAsync = vi.fn().mockResolvedValue({
+			checkoutLink: "https://stripe.example.com/checkout",
+		});
+		(useMutation as ReturnType<typeof vi.fn>).mockReturnValue({
+			mutateAsync: mockMutateAsync,
+			isPending: false,
+		});
+
+		// Suppress window.location.href assignment
+		Object.defineProperty(window, "location", {
+			value: { ...window.location, href: "" },
+			writable: true,
+		});
+
+		// activePlanId="free" hides the free plan card so the first "Choose plan" button belongs to a paid plan
+		render(<PricingTable userId="user_123" activePlanId="free" />);
+		const ctaButtons = screen.getAllByText(/Get started|Choose plan/i);
+		expect(ctaButtons.length).toBeGreaterThan(0);
+		fireEvent.click(ctaButtons[0]);
+		await new Promise((r) => setTimeout(r, 100));
+
+		const checkoutCall = mockTrack.mock.calls.find(
+			(c) => c[0]?.name === "checkout_started",
+		);
+		expect(checkoutCall).toBeDefined();
+		expect(checkoutCall?.[0].props).toMatchObject({
+			price_type: "subscription",
+		});
+	});
+
+	it("tracks checkout_failed when checkout mutation throws", async () => {
+		mockTrack.mockClear();
+		const mockMutateAsync = vi
+			.fn()
+			.mockRejectedValue(new Error("Network error"));
+		(useMutation as ReturnType<typeof vi.fn>).mockReturnValue({
+			mutateAsync: mockMutateAsync,
+			isPending: false,
+		});
+		// activePlanId="free" hides the free plan card so the first "Choose plan" button belongs to a paid plan
+		render(<PricingTable userId="user_123" activePlanId="free" />);
+		const ctaButtons = screen.getAllByText(/Get started|Choose plan/i);
+		expect(ctaButtons.length).toBeGreaterThan(0);
+		fireEvent.click(ctaButtons[0]);
+		await new Promise((r) => setTimeout(r, 100));
+
+		const failedCall = mockTrack.mock.calls.find(
+			(c) => c[0]?.name === "checkout_failed",
+		);
+		expect(failedCall).toBeDefined();
 	});
 });
