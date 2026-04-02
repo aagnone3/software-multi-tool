@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: vi.fn(),
 }));
@@ -42,6 +46,7 @@ describe("DailyGoalWidget", () => {
 	beforeEach(() => {
 		localStorageMock.clear();
 		vi.clearAllMocks();
+		mockTrack.mockReset();
 	});
 
 	it("returns null when loading", () => {
@@ -128,5 +133,38 @@ describe("DailyGoalWidget", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Edit goal" }));
 		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 		expect(screen.getByText("/ 3 runs")).toBeDefined();
+	});
+
+	it("tracks daily_goal_set when goal is saved", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [],
+			isLoading: false,
+		} as any);
+		render(<DailyGoalWidget />);
+		fireEvent.click(screen.getByRole("button", { name: "Edit goal" }));
+		fireEvent.change(screen.getByRole("spinbutton"), {
+			target: { value: "5" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "daily_goal_set",
+			props: { goal: 5 },
+		});
+	});
+
+	it("tracks daily_goal_completed when goal is first met", () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [
+				{ id: "1", status: "COMPLETED", createdAt: TODAY },
+				{ id: "2", status: "COMPLETED", createdAt: TODAY },
+				{ id: "3", status: "COMPLETED", createdAt: TODAY },
+			],
+			isLoading: false,
+		} as any);
+		render(<DailyGoalWidget />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "daily_goal_completed",
+			props: { goal: 3, total_completed: 3 },
+		});
 	});
 });

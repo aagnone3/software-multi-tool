@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -17,7 +18,7 @@ import {
 	PencilIcon,
 	TargetIcon,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface DailyGoalWidgetProps {
@@ -36,6 +37,8 @@ export function DailyGoalWidget({ className }: DailyGoalWidgetProps) {
 	const [goal, setGoal] = useState<number>(DEFAULT_GOAL);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editValue, setEditValue] = useState<string>("");
+	const { track } = useProductAnalytics();
+	const goalMetTrackedRef = useRef(false);
 
 	// Load goal from localStorage
 	useEffect(() => {
@@ -66,6 +69,17 @@ export function DailyGoalWidget({ className }: DailyGoalWidgetProps) {
 	);
 	const isGoalMet = todayCompletedCount >= goal;
 
+	// Track goal completion once per session when the goal is first met
+	useEffect(() => {
+		if (isGoalMet && !goalMetTrackedRef.current && !isLoading) {
+			goalMetTrackedRef.current = true;
+			track({
+				name: "daily_goal_completed",
+				props: { goal, total_completed: todayCompletedCount },
+			});
+		}
+	}, [isGoalMet, goal, todayCompletedCount, isLoading, track]);
+
 	const handleEditSave = () => {
 		const parsed = Number.parseInt(editValue, 10);
 		if (!Number.isNaN(parsed) && parsed > 0 && parsed <= 50) {
@@ -75,6 +89,7 @@ export function DailyGoalWidget({ className }: DailyGoalWidgetProps) {
 			} catch {
 				// ignore
 			}
+			track({ name: "daily_goal_set", props: { goal: parsed } });
 		}
 		setIsEditing(false);
 	};
