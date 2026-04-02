@@ -399,6 +399,30 @@ type ProductEvent =
 	| {
 			name: "tool_card_preview_clicked";
 			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "tools_grid_searched";
+			props: { query: string };
+	  }
+	| {
+			name: "tools_grid_sorted";
+			props: { sort_by: string };
+	  }
+	| {
+			name: "tools_grid_category_filtered";
+			props: { category: string };
+	  }
+	| {
+			name: "tool_page_share_clicked";
+			props: { tool_slug: string };
+	  }
+	| {
+			name: "tools_navbar_all_tools_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "tools_navbar_tool_clicked";
+			props: { tool_slug: string };
 	  };
 
 export type { ProductEvent };

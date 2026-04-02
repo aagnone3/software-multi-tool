@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { UserMenu } from "@saas/shared/components/UserMenu";
@@ -13,6 +14,7 @@ import React from "react";
 export function ToolsNavBar() {
 	const pathname = usePathname();
 	const { user } = useSession();
+	const { track } = useProductAnalytics();
 
 	const enabledTools = config.tools.registry.filter((tool) => tool.enabled);
 
@@ -25,7 +27,15 @@ export function ToolsNavBar() {
 					</Link>
 
 					<div className="hidden items-center gap-1 md:flex">
-						<Link href="/app/tools">
+						<Link
+							href="/app/tools"
+							onClick={() =>
+								track({
+									name: "tools_navbar_all_tools_clicked",
+									props: {},
+								})
+							}
+						>
 							<Button
 								variant={
 									pathname === "/app/tools"
@@ -44,6 +54,12 @@ export function ToolsNavBar() {
 							<Link
 								key={tool.slug}
 								href={`/app/tools/${tool.slug}`}
+								onClick={() =>
+									track({
+										name: "tools_navbar_tool_clicked",
+										props: { tool_slug: tool.slug },
+									})
+								}
 							>
 								<Button
 									variant={

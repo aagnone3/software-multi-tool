@@ -4,6 +4,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolPageHeader } from "./ToolPageHeader";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("./ToolFeedbackButton", () => ({
 	ToolFeedbackButton: () => null,
 }));
@@ -99,5 +104,15 @@ describe("ToolPageHeader", () => {
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
 			"http://localhost/app/tools/news-analyzer",
 		);
+	});
+
+	it("tracks tool_page_share_clicked on share", async () => {
+		render(<ToolPageHeader tool={baseTool} />);
+		const btn = screen.getByRole("button", { name: /copy link/i });
+		await userEvent.click(btn);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_page_share_clicked",
+			props: { tool_slug: "news-analyzer" },
+		});
 	});
 });
