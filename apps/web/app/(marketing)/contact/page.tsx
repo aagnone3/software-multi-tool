@@ -1,11 +1,28 @@
 import { ContactForm } from "@marketing/home/components/ContactForm";
 import { config } from "@repo/config";
+import { getBaseUrl } from "@repo/utils";
 import { redirect } from "next/navigation";
 import React from "react";
 
+const siteUrl = getBaseUrl();
+
 export async function generateMetadata() {
 	return {
-		title: "Contact us",
+		title: `Contact Us — ${config.appName}`,
+		description: `Get in touch with the ${config.appName} team. We're here to help with questions about AI tools, billing, or anything else.`,
+		alternates: { canonical: `${siteUrl}/contact` },
+		openGraph: {
+			type: "website",
+			url: `${siteUrl}/contact`,
+			title: `Contact Us — ${config.appName}`,
+			description: `Have a question? Reach out to the ${config.appName} team. We respond quickly.`,
+			siteName: config.appName,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `Contact Us — ${config.appName}`,
+			description: `Have a question? Reach out to the ${config.appName} team.`,
+		},
 	};
 }
 

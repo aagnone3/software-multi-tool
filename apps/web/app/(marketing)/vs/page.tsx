@@ -17,6 +17,20 @@ export const metadata: Metadata = {
 		url: `${siteUrl}/vs`,
 		title: `${config.appName} vs Alternatives`,
 		description: `Compare ${config.appName} with leading AI tools. See which is right for your business.`,
+		siteName: config.appName,
+		images: [
+			{
+				url: `${siteUrl}/api/og?title=${encodeURIComponent(`${config.appName} vs Alternatives`)}&description=${encodeURIComponent("Compare AI tools for small business. See features, pricing, and ease of use.")}`,
+				width: 1200,
+				height: 630,
+				alt: `${config.appName} vs Alternatives — AI Tool Comparisons`,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: `${config.appName} vs Alternatives — AI Tool Comparisons`,
+		description: `Compare ${config.appName} with Otter.ai, Fireflies, Docparser, ChatGPT, Zapier, Notion AI, and more. See which is right for your business.`,
 	},
 };
 

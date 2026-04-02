@@ -20,6 +20,21 @@ export const metadata: Metadata = {
 		title: `AI Tools by Industry — ${config.appName}`,
 		description:
 			"Discover how professionals in accounting, law, consulting, HR, real estate, and more are using AI tools to save hours every week.",
+		siteName: config.appName,
+		images: [
+			{
+				url: `${siteUrl}/api/og?title=${encodeURIComponent(`AI Tools by Industry — ${config.appName}`)}&description=${encodeURIComponent("AI tools for accountants, lawyers, consultants, HR, and more.")}`,
+				width: 1200,
+				height: 630,
+				alt: `AI Tools by Industry — ${config.appName}`,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: `AI Tools by Industry — ${config.appName}`,
+		description:
+			"Discover how professionals in accounting, law, consulting, HR, real estate, and more are using AI tools to save hours every week.",
 	},
 };
 
