@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { usePlanData } from "@saas/payments/hooks/plan-data";
 import { usePurchases } from "@saas/payments/hooks/purchases";
@@ -60,6 +61,7 @@ function getAnnualSavingsPct(planId: string): number | null {
 export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	const { planData } = usePlanData();
 	const { activePlan } = usePurchases(organizationId);
+	const { track } = useProductAnalytics();
 
 	if (!activePlan) {
 		return null;
@@ -173,6 +175,15 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 						href="/app/billing"
 						className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
 						data-test="annual-billing-upsell-cta"
+						onClick={() =>
+							track({
+								name: "billing_settings_annual_upsell_clicked",
+								props: {
+									plan_id: activePlan.id,
+									savings_pct: annualSavingsPct ?? 0,
+								},
+							})
+						}
 					>
 						<CalendarCheckIcon className="size-3.5" />
 						Switch to annual — save {annualSavingsPct}%
@@ -208,6 +219,12 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 							href="/app/billing?upgrade=pro"
 							className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
 							data-test="starter-upgrade-to-pro-cta"
+							onClick={() =>
+								track({
+									name: "billing_settings_starter_upgrade_clicked",
+									props: { plan_id: activePlan.id },
+								})
+							}
 						>
 							<ZapIcon className="size-3.5" />
 							Upgrade to Pro — $29/mo
@@ -216,6 +233,12 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 							href="/pricing#pricing-plan-pro"
 							className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
 							data-test="starter-compare-plans-cta"
+							onClick={() =>
+								track({
+									name: "billing_settings_compare_plans_clicked",
+									props: { plan_id: activePlan.id },
+								})
+							}
 						>
 							Compare plans
 						</Link>
