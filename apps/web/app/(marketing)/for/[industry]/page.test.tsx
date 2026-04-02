@@ -32,6 +32,10 @@ vi.mock("lucide-react", () => ({
 	CheckCircleIcon: () => <span>✓</span>,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => null,
+}));
+
 import IndustryPage, { generateMetadata, generateStaticParams } from "./page";
 
 describe("IndustryPage", () => {

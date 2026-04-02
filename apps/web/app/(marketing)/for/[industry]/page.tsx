@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { ArrowRightIcon, CheckCircleIcon } from "lucide-react";
@@ -1073,6 +1074,7 @@ export default async function IndustryPage({
 					</div>
 				</section>
 			</div>
+			<StickyCta />
 		</>
 	);
 }
