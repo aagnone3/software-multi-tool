@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { useAuthErrorMessages } from "@saas/auth/hooks/errors-messages";
@@ -28,6 +29,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function ForgotPasswordForm() {
 	const { getAuthErrorMessage } = useAuthErrorMessages();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -51,6 +53,8 @@ export function ForgotPasswordForm() {
 			if (error) {
 				throw error;
 			}
+
+			track({ name: "password_reset_requested", props: {} });
 		} catch (e) {
 			form.setError("root", {
 				message: getAuthErrorMessage(
