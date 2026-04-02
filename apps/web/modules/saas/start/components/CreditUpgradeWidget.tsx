@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Badge } from "@ui/components/badge";
@@ -32,6 +33,7 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 		totalCredits,
 	} = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	if (isLoading || !balance) {
 		return null;
@@ -144,7 +146,29 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 
 				<div className="flex gap-2">
 					<Button asChild size="sm" className="flex-1">
-						<Link href={billingPath}>
+						<Link
+							href={billingPath}
+							onClick={() =>
+								track({
+									name: "upgrade_cta_clicked",
+									props: {
+										source: isFreePlan
+											? "credit_upgrade_widget_free"
+											: isStarterPlan
+												? "credit_upgrade_widget_starter"
+												: "credit_upgrade_widget_low",
+										plan_id: isFreePlan
+											? "free"
+											: isStarterPlan
+												? "starter"
+												: "pro",
+										target_plan: isFreePlan
+											? "starter"
+											: "pro",
+									},
+								})
+							}
+						>
 							<ZapIcon className="size-3.5 mr-1.5" />
 							{isFreePlan || isStarterPlan
 								? "Upgrade to Pro"
@@ -153,7 +177,23 @@ export function CreditUpgradeWidget({ className }: CreditUpgradeWidgetProps) {
 					</Button>
 					{(isFreePlan || isStarterPlan) && (
 						<Button asChild size="sm" variant="outline">
-							<Link href="/pricing#pricing-plan-pro">
+							<Link
+								href="/pricing#pricing-plan-pro"
+								onClick={() =>
+									track({
+										name: "upgrade_cta_clicked",
+										props: {
+											source: isFreePlan
+												? "credit_upgrade_widget_compare_free"
+												: "credit_upgrade_widget_compare_starter",
+											plan_id: isFreePlan
+												? "free"
+												: "starter",
+											target_plan: "pro",
+										},
+									})
+								}
+							>
 								Compare plans
 								<ArrowRightIcon className="size-3.5 ml-1.5" />
 							</Link>

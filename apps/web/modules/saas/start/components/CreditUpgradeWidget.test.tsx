@@ -1,8 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreditUpgradeWidget } from "./CreditUpgradeWidget";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
 	useCreditsBalance: vi.fn(),
 }));
@@ -233,5 +238,69 @@ describe("CreditUpgradeWidget", () => {
 		expect(
 			screen.getByRole("link", { name: /compare plans/i }),
 		).toHaveAttribute("href", "/pricing#pricing-plan-pro");
+	});
+
+	it("tracks upgrade CTA click for free plan users", async () => {
+		setup({}, true);
+		render(<CreditUpgradeWidget />);
+		await userEvent.click(
+			screen.getByRole("link", { name: /upgrade to pro/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_cta_clicked",
+				props: expect.objectContaining({
+					source: "credit_upgrade_widget_free",
+					plan_id: "free",
+					target_plan: "starter",
+				}),
+			}),
+		);
+	});
+
+	it("tracks upgrade CTA click for starter plan users", async () => {
+		setup(
+			{
+				included: 200,
+				used: 50,
+				totalAvailable: 150,
+				plan: { id: "starter", name: "Starter" },
+			},
+			false,
+			false,
+			true,
+		);
+		render(<CreditUpgradeWidget />);
+		await userEvent.click(
+			screen.getByRole("link", { name: /upgrade to pro/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_cta_clicked",
+				props: expect.objectContaining({
+					source: "credit_upgrade_widget_starter",
+					plan_id: "starter",
+					target_plan: "pro",
+				}),
+			}),
+		);
+	});
+
+	it("tracks compare plans CTA click for free plan users", async () => {
+		setup({}, true);
+		render(<CreditUpgradeWidget />);
+		await userEvent.click(
+			screen.getByRole("link", { name: /compare plans/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_cta_clicked",
+				props: expect.objectContaining({
+					source: "credit_upgrade_widget_compare_free",
+					plan_id: "free",
+					target_plan: "pro",
+				}),
+			}),
+		);
 	});
 });
