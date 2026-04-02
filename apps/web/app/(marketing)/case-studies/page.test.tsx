@@ -21,6 +21,10 @@ vi.mock("next/link", () => ({
 	}) => <a href={href}>{children}</a>,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 describe("CaseStudiesPage", () => {
 	it("renders the hero heading", () => {
 		render(<CaseStudiesPage />);
@@ -47,5 +51,10 @@ describe("CaseStudiesPage", () => {
 		render(<CaseStudiesPage />);
 		// At least one blockquote with a quote from a customer
 		expect(screen.getByText(/we used to dread/i)).toBeInTheDocument();
+	});
+
+	it("renders StickyCta", () => {
+		render(<CaseStudiesPage />);
+		expect(screen.getByTestId("sticky-cta")).toBeInTheDocument();
 	});
 });

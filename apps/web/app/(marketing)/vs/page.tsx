@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { ArrowRightIcon } from "lucide-react";
@@ -123,6 +124,7 @@ export default function VsIndexPage() {
 					))}
 				</div>
 			</div>
+			<StickyCta />
 		</section>
 	);
 }
