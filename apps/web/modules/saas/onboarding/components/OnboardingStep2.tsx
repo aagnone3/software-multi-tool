@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
@@ -63,6 +64,7 @@ const toolSuggestions = [
 ];
 
 export function OnboardingStep2({ onCompleted }: { onCompleted: () => void }) {
+	const { track } = useProductAnalytics();
 	const [selected, setSelected] = useState<string | null>(null);
 
 	const enabledSlugs = new Set<string>(
@@ -93,7 +95,13 @@ export function OnboardingStep2({ onCompleted }: { onCompleted: () => void }) {
 					<button
 						key={slug}
 						type="button"
-						onClick={() => setSelected(slug)}
+						onClick={() => {
+							setSelected(slug);
+							track({
+								name: "onboarding_step2_tool_selected",
+								props: { tool_slug: slug },
+							});
+						}}
 						className={cn(
 							"flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50",
 							selected === slug
@@ -114,7 +122,13 @@ export function OnboardingStep2({ onCompleted }: { onCompleted: () => void }) {
 				{selected && firstTool ? (
 					<Button
 						asChild
-						onClick={onCompleted}
+						onClick={() => {
+							track({
+								name: "onboarding_step2_completed",
+								props: { tool_slug: selected, skipped: false },
+							});
+							onCompleted();
+						}}
 						className="w-full sm:w-auto"
 					>
 						<Link href={`/app/tools/${firstTool.slug}`}>
@@ -124,7 +138,16 @@ export function OnboardingStep2({ onCompleted }: { onCompleted: () => void }) {
 						</Link>
 					</Button>
 				) : (
-					<Button onClick={onCompleted} className="w-full sm:w-auto">
+					<Button
+						onClick={() => {
+							track({
+								name: "onboarding_step2_completed",
+								props: { tool_slug: null, skipped: false },
+							});
+							onCompleted();
+						}}
+						className="w-full sm:w-auto"
+					>
 						Go to dashboard
 						<ArrowRightIcon className="ml-2 size-4" />
 					</Button>
@@ -132,7 +155,17 @@ export function OnboardingStep2({ onCompleted }: { onCompleted: () => void }) {
 				{!selected && (
 					<button
 						type="button"
-						onClick={onCompleted}
+						onClick={() => {
+							track({
+								name: "onboarding_step2_skipped",
+								props: {},
+							});
+							track({
+								name: "onboarding_step2_completed",
+								props: { tool_slug: null, skipped: true },
+							});
+							onCompleted();
+						}}
 						className="text-center text-foreground/50 text-xs hover:text-foreground/70"
 					>
 						Skip for now

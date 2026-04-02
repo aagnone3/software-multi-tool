@@ -290,6 +290,22 @@ type ProductEvent =
 	| {
 			name: "failed_job_retry_clicked";
 			props: { tool_slug: string };
+	  }
+	| {
+			name: "onboarding_step1_completed";
+			props: { has_avatar: boolean };
+	  }
+	| {
+			name: "onboarding_step2_tool_selected";
+			props: { tool_slug: string };
+	  }
+	| {
+			name: "onboarding_step2_skipped";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "onboarding_step2_completed";
+			props: { tool_slug: string | null; skipped: boolean };
 	  };
 
 export type { ProductEvent };

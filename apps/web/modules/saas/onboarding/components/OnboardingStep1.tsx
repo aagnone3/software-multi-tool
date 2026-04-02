@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
@@ -29,6 +30,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 	const { user } = useSession();
+	const { track } = useProductAnalytics();
+	const [hasUploadedAvatar, setHasUploadedAvatar] = React.useState(false);
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -48,6 +51,11 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		try {
 			await authClient.updateUser({
 				name,
+			});
+
+			track({
+				name: "onboarding_step1_completed",
+				props: { has_avatar: hasUploadedAvatar },
 			});
 
 			onCompleted();
@@ -90,7 +98,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 						<FormControl>
 							<UserAvatarUpload
 								onSuccess={() => {
-									return;
+									setHasUploadedAvatar(true);
 								}}
 								onError={() => {
 									toast.error(
