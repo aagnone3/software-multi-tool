@@ -1,17 +1,29 @@
 import type { ToolConfig } from "@repo/config/types";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolCard } from "./ToolCard";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 vi.mock("@repo/config", () => ({
@@ -88,6 +100,57 @@ describe("ToolCard", () => {
 		const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString(); // 5 minutes ago
 		render(<ToolCard tool={baseTool} isRecentlyUsed lastUsedAt={recent} />);
 		expect(screen.getByText("5m ago")).toBeInTheDocument();
+	});
+
+	it("tracks tool_card_open_clicked when Open Tool link is clicked", async () => {
+		mockTrack.mockClear();
+		render(<ToolCard tool={baseTool} isRecentlyUsed isFavorite />);
+		await userEvent.click(screen.getByRole("link", { name: /open tool/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_card_open_clicked",
+			props: {
+				tool_slug: "test-tool",
+				tool_name: "Test Tool",
+				is_recently_used: true,
+				is_favorite: true,
+			},
+		});
+	});
+
+	it("tracks tool_card_favorite_toggled when favorite button is clicked", async () => {
+		mockTrack.mockClear();
+		const onToggle = vi.fn();
+		render(
+			<ToolCard
+				tool={baseTool}
+				isFavorite={false}
+				onToggleFavorite={onToggle}
+			/>,
+		);
+		await userEvent.click(
+			screen.getByRole("button", { name: /add to favorites/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_card_favorite_toggled",
+			props: {
+				tool_slug: "test-tool",
+				tool_name: "Test Tool",
+				is_favorited: true,
+			},
+		});
+	});
+
+	it("tracks tool_card_preview_clicked when Preview button is clicked", async () => {
+		mockTrack.mockClear();
+		const onPreview = vi.fn();
+		render(<ToolCard tool={baseTool} onPreview={onPreview} />);
+		await userEvent.click(
+			screen.getByRole("button", { name: /preview test tool/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_card_preview_clicked",
+			props: { tool_slug: "test-tool", tool_name: "Test Tool" },
+		});
 	});
 
 	it("renders known icons for each supported icon name", () => {
