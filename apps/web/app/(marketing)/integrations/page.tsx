@@ -1,3 +1,4 @@
+import { IntegrationsPageTracker } from "@marketing/shared/components/IntegrationsPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import type { Metadata } from "next";
@@ -169,6 +170,7 @@ export default function IntegrationsPage() {
 
 	return (
 		<>
+			<IntegrationsPageTracker />
 			<script
 				type="application/ld+json"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
