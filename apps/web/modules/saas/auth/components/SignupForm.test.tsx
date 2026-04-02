@@ -45,6 +45,12 @@ vi.mock("@analytics", () => ({
 	useIsFeatureEnabled: () => false,
 }));
 
+// Mock product analytics
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock saas auth hooks
 vi.mock("@saas/auth/hooks/errors-messages", () => ({
 	useAuthErrorMessages: () => ({
@@ -195,5 +201,60 @@ describe("SignupForm", () => {
 
 		await user.click(toggleBtn);
 		expect(passwordInput.type).toBe("password");
+	});
+
+	it("tracks user_signed_up on successful signup", async () => {
+		mockSignUpEmail.mockResolvedValueOnce({ error: null });
+		const user = userEvent.setup({ delay: null });
+		render(<SignupForm />);
+
+		await user.type(screen.getByLabelText(/name/i), "Test User");
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(
+			document.querySelector(
+				'input[type="password"]',
+			) as HTMLInputElement,
+			"password123",
+		);
+		await user.click(
+			screen.getByRole("button", { name: /create free account/i }),
+		);
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith(
+				expect.objectContaining({ name: "user_signed_up" }),
+			);
+		});
+	});
+
+	it("tracks auth_signup_failed on error", async () => {
+		mockSignUpEmail.mockResolvedValueOnce({
+			error: { code: "EMAIL_TAKEN" },
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<SignupForm />);
+
+		await user.type(screen.getByLabelText(/name/i), "Test User");
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(
+			document.querySelector(
+				'input[type="password"]',
+			) as HTMLInputElement,
+			"password123",
+		);
+		await user.click(
+			screen.getByRole("button", { name: /create free account/i }),
+		);
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: "auth_signup_failed",
+					props: expect.objectContaining({
+						error_code: "EMAIL_TAKEN",
+					}),
+				}),
+			);
+		});
 	});
 });

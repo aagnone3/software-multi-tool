@@ -79,6 +79,12 @@ vi.mock("@analytics", () => ({
 	useIsFeatureEnabled: () => false,
 }));
 
+// Mock product analytics
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock OrganizationInvitationAlert
 vi.mock("@saas/organizations/components/OrganizationInvitationAlert", () => ({
 	OrganizationInvitationAlert: () => (
@@ -244,5 +250,53 @@ describe("LoginForm", () => {
 				document.querySelector('input[type="text"]'),
 			).toBeInTheDocument();
 		}
+	});
+
+	it("tracks user_logged_in on successful password login", async () => {
+		mockSignInEmail.mockResolvedValueOnce({ data: {}, error: null });
+		const user = userEvent.setup({ delay: null });
+		render(<LoginForm />);
+
+		const passwordInput = document.querySelector(
+			'input[type="password"]',
+		) as HTMLInputElement;
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(passwordInput, "password123");
+		await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: "user_logged_in",
+					props: expect.objectContaining({ method: "password" }),
+				}),
+			);
+		});
+	});
+
+	it("tracks auth_login_failed on error", async () => {
+		mockSignInEmail.mockResolvedValueOnce({
+			error: { code: "INVALID_PASSWORD" },
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<LoginForm />);
+
+		const passwordInput = document.querySelector(
+			'input[type="password"]',
+		) as HTMLInputElement;
+		await user.type(screen.getByLabelText(/email/i), "user@example.com");
+		await user.type(passwordInput, "wrong");
+		await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: "auth_login_failed",
+					props: expect.objectContaining({
+						error_code: "INVALID_PASSWORD",
+					}),
+				}),
+			);
+		});
 	});
 });
