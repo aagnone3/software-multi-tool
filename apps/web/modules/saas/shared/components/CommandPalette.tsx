@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import type { ToolConfig } from "@repo/config/types";
 import { useSession } from "@saas/auth/hooks/use-session";
@@ -84,6 +85,7 @@ function addRecentItem(id: string, type: RecentItemType): void {
 
 export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 	const router = useRouter();
+	const { track } = useProductAnalytics();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
 	const { enabledTools, visibleTools } = useTools();
@@ -160,12 +162,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		setRecentItems(getRecentItems());
 	}, []);
 
-	// Auto-focus input when palette opens
+	// Auto-focus input when palette opens + track open event
 	useEffect(() => {
 		if (isOpen) {
 			inputRef.current?.focus();
+			track({ name: "command_palette_opened", props: {} });
 		}
-	}, [isOpen]);
+	}, [isOpen, track]);
 
 	// Handle keyboard shortcuts
 	useEffect(() => {
@@ -195,16 +198,32 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		}
 	}, [isOpen]);
 
-	const handleSelectTool = (tool: ToolConfig) => {
+	const handleSelectTool = (tool: ToolConfig, fromRecent = false) => {
 		addRecentItem(tool.slug, "tool");
 		setRecentItems(getRecentItems());
+		track({
+			name: "command_palette_tool_selected",
+			props: {
+				tool_slug: tool.slug,
+				tool_name: tool.name,
+				from_recent: fromRecent,
+			},
+		});
 		router.push(`/app/tools/${tool.slug}`);
 		onClose();
 	};
 
-	const handleSelectPage = (page: NavigationItem) => {
+	const handleSelectPage = (page: NavigationItem, fromRecent = false) => {
 		addRecentItem(page.id, "page");
 		setRecentItems(getRecentItems());
+		track({
+			name: "command_palette_page_selected",
+			props: {
+				page_id: page.id,
+				page_label: page.label,
+				from_recent: fromRecent,
+			},
+		});
 		router.push(page.href);
 		onClose();
 	};
@@ -275,7 +294,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 												key={`tool-${tool.slug}`}
 												value={tool.slug}
 												onSelect={() =>
-													handleSelectTool(tool)
+													handleSelectTool(tool, true)
 												}
 												className="relative flex cursor-pointer select-none items-center gap-3 rounded-sm px-2 py-2.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground"
 											>
@@ -300,7 +319,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 											key={`page-${page.id}`}
 											value={page.id}
 											onSelect={() =>
-												handleSelectPage(page)
+												handleSelectPage(page, true)
 											}
 											className="relative flex cursor-pointer select-none items-center gap-3 rounded-sm px-2 py-2.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground"
 										>
