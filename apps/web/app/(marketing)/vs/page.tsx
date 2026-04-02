@@ -83,9 +83,30 @@ const comparisons = [
 	},
 ];
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ItemList",
+	name: `${config.appName} vs Alternatives`,
+	description: `Compare ${config.appName} with leading AI tools for business automation and document intelligence.`,
+	url: `${siteUrl}/vs`,
+	numberOfItems: comparisons.length,
+	itemListElement: comparisons.map((c, i) => ({
+		"@type": "ListItem",
+		position: i + 1,
+		name: `${config.appName} vs ${c.name}`,
+		url: `${siteUrl}/vs/${c.slug}`,
+		description: c.diff,
+	})),
+};
+
 export default function VsIndexPage() {
 	return (
 		<section className="py-20">
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
 			<div className="container mx-auto max-w-4xl px-4">
 				<div className="mb-12 text-center">
 					<p className="mb-3 font-semibold text-primary text-sm uppercase tracking-wider">

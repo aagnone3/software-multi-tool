@@ -103,9 +103,31 @@ const INDUSTRY_CARDS = [
 	},
 ];
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ItemList",
+	name: `${config.appName} — AI Tools by Industry`,
+	description:
+		"Discover how professionals in accounting, law, consulting, HR, real estate, and more are using AI tools to save hours every week.",
+	url: `${siteUrl}/for`,
+	numberOfItems: INDUSTRY_CARDS.length,
+	itemListElement: INDUSTRY_CARDS.map((card, i) => ({
+		"@type": "ListItem",
+		position: i + 1,
+		name: card.title,
+		url: `${siteUrl}/for/${card.slug}`,
+		description: card.description,
+	})),
+};
+
 export default function ForIndexPage() {
 	return (
 		<div className="container mx-auto max-w-5xl px-4 py-16">
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
 			<div className="mb-12 text-center">
 				<h1 className="mb-4 font-bold text-4xl tracking-tight">
 					AI Tools for Every Industry
