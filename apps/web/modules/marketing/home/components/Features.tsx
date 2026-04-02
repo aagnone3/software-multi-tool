@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	ClipboardListIcon,
 	FileTextIcon,
@@ -12,7 +13,7 @@ import {
 	WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useCallback } from "react";
 
 interface Tool {
 	id: string;
@@ -92,6 +93,18 @@ const tools: Tool[] = [
 ];
 
 export function Features() {
+	const { track } = useProductAnalytics();
+
+	const handleToolClick = useCallback(
+		(tool: Tool) => {
+			track({
+				name: "home_features_tool_clicked",
+				props: { tool_id: tool.id, tool_title: tool.title },
+			});
+		},
+		[track],
+	);
+
 	return (
 		<section
 			id="features"
@@ -132,6 +145,7 @@ export function Features() {
 								<Link
 									href={tool.href}
 									className="mt-4 inline-block text-primary text-sm hover:underline"
+									onClick={() => handleToolClick(tool)}
 								>
 									Try it →
 								</Link>

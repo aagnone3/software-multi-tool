@@ -1,12 +1,6 @@
-import { Button } from "@ui/components/button";
-import {
-	ArrowRightIcon,
-	CheckIcon,
-	ClockIcon,
-	SparklesIcon,
-} from "lucide-react";
-import Link from "next/link";
+import { CheckIcon, ClockIcon, SparklesIcon } from "lucide-react";
 import React from "react";
+import { HeroCta } from "./HeroCta";
 
 const highlights = [
 	"Summarizes a 1-hour meeting in under 30 seconds",
@@ -44,17 +38,7 @@ export function Hero() {
 					))}
 				</ul>
 
-				<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-					<Button size="lg" variant="primary" asChild>
-						<Link href="/auth/signup">
-							Try Free — No Card Required
-							<ArrowRightIcon className="ml-2 size-4" />
-						</Link>
-					</Button>
-					<Button variant="outline" size="lg" asChild>
-						<Link href="/tools">See All Tools</Link>
-					</Button>
-				</div>
+				<HeroCta />
 
 				<p className="mt-5 flex items-center justify-center gap-1.5 text-foreground/50 text-sm">
 					<ClockIcon className="size-3.5" />
