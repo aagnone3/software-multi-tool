@@ -1,6 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const trackMock = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: trackMock }),
+}));
+
 import { RecentChatsWidget } from "./RecentChatsWidget";
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
@@ -116,5 +122,38 @@ describe("RecentChatsWidget error state", () => {
 		});
 		render(<RecentChatsWidget />);
 		expect(screen.getByText("Failed to load chats")).toBeDefined();
+	});
+});
+
+describe("RecentChatsWidget analytics", () => {
+	it("tracks analytics when a chat link is clicked", () => {
+		const now = new Date();
+		mockUseQuery.mockReturnValue({
+			data: {
+				chats: [
+					{
+						id: "chat-abc",
+						title: "My Chat Session",
+						createdAt: now.toISOString(),
+						messages: [],
+					},
+				],
+			},
+			isLoading: false,
+			isError: false,
+		});
+
+		render(<RecentChatsWidget />);
+		const link = screen.getByText("My Chat Session").closest("a");
+		expect(link).not.toBeNull();
+		fireEvent.click(link!);
+
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "dashboard_recent_chat_clicked",
+			props: {
+				chat_id: "chat-abc",
+				source: "dashboard_recent_chats_widget",
+			},
+		});
 	});
 });

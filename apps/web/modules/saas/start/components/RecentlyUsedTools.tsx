@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { ToolConfig } from "@repo/config/types";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
@@ -78,6 +79,7 @@ export function RecentlyUsedTools({
 }: RecentlyUsedToolsProps) {
 	const { recentToolSlugs, recentToolsMap, isLoading } = useRecentJobs(20);
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 
 	// Get tool configs for recent tools - only show enabled tools
 	const recentTools: Array<{ tool: ToolConfig; lastUsed: string }> = [];
@@ -172,6 +174,15 @@ export function RecentlyUsedTools({
 							key={tool.slug}
 							href={`/app/tools/${tool.slug}`}
 							className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+							onClick={() =>
+								track({
+									name: "dashboard_recently_used_tool_clicked",
+									props: {
+										tool_slug: tool.slug,
+										tool_name: tool.name,
+									},
+								})
+							}
 						>
 							<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
 								<Icon className="size-5" />
