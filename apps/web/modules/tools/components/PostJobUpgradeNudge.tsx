@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
@@ -21,6 +22,7 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 	const { balance, isLoading, isFreePlan, isStarterPlan, isLowCredits } =
 		useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [show, setShow] = useState(false);
 
 	// Billing path — org-scoped if applicable
@@ -33,6 +35,29 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 		const timer = setTimeout(() => setShow(true), 600);
 		return () => clearTimeout(timer);
 	}, []);
+
+	// Track nudge shown once it becomes visible
+	const planId = isFreePlan ? "free" : isStarterPlan ? "starter" : "pro";
+	useEffect(() => {
+		if (
+			show &&
+			!isLoading &&
+			(isFreePlan || isStarterPlan || isLowCredits)
+		) {
+			track({
+				name: "upgrade_nudge_shown",
+				props: {
+					source: "post_job_upgrade_nudge",
+					plan_id: planId,
+					context:
+						isLowCredits && !isFreePlan && !isStarterPlan
+							? "low_credits"
+							: undefined,
+				},
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [show, isLoading]);
 
 	// Only show for free/starter plan users or those low on credits
 	if (
@@ -68,13 +93,37 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 								: "Upgrade to Pro for 500 credits/month, rollover, and priority processing."}
 						</p>
 						<div className="mt-3 flex flex-wrap gap-2">
-							<Link href={billingPath}>
+							<Link
+								href={billingPath}
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "post_job_upgrade_nudge",
+											plan_id: "free",
+											cta_label: "upgrade_to_pro",
+										},
+									})
+								}
+							>
 								<Button size="sm" className="gap-1.5">
 									<ZapIcon className="size-3.5" />
 									Upgrade to Pro
 								</Button>
 							</Link>
-							<Link href={billingPath}>
+							<Link
+								href={billingPath}
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "post_job_upgrade_nudge",
+											plan_id: "free",
+											cta_label: "view_plans",
+										},
+									})
+								}
+							>
 								<Button
 									variant="outline"
 									size="sm"
@@ -114,13 +163,37 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 							workflow.
 						</p>
 						<div className="mt-3 flex flex-wrap gap-2">
-							<Link href={billingPath}>
+							<Link
+								href={billingPath}
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "post_job_upgrade_nudge",
+											plan_id: "starter",
+											cta_label: "upgrade_to_pro",
+										},
+									})
+								}
+							>
 								<Button size="sm" className="gap-1.5">
 									<ZapIcon className="size-3.5" />
 									Upgrade to Pro
 								</Button>
 							</Link>
-							<Link href="/pricing#pricing-plan-pro">
+							<Link
+								href="/pricing#pricing-plan-pro"
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "post_job_upgrade_nudge",
+											plan_id: "starter",
+											cta_label: "compare_plans",
+										},
+									})
+								}
+							>
 								<Button
 									variant="outline"
 									size="sm"
@@ -159,7 +232,20 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 						this month. Top up to keep running tools.
 					</p>
 					<div className="mt-3 flex flex-wrap gap-2">
-						<Link href={billingPath}>
+						<Link
+							href={billingPath}
+							onClick={() =>
+								track({
+									name: "upgrade_nudge_cta_clicked",
+									props: {
+										source: "post_job_upgrade_nudge",
+										plan_id: planId,
+										cta_label: "buy_credits",
+										context: "low_credits",
+									},
+								})
+							}
+						>
 							<Button
 								size="sm"
 								className="gap-1.5 border-amber-400 bg-amber-500 text-white hover:bg-amber-600"
@@ -167,7 +253,20 @@ export function PostJobUpgradeNudge({ className }: PostJobUpgradeNudgeProps) {
 								Buy credits
 							</Button>
 						</Link>
-						<Link href={billingPath}>
+						<Link
+							href={billingPath}
+							onClick={() =>
+								track({
+									name: "upgrade_nudge_cta_clicked",
+									props: {
+										source: "post_job_upgrade_nudge",
+										plan_id: planId,
+										cta_label: "upgrade_plan",
+										context: "low_credits",
+									},
+								})
+							}
+						>
 							<Button
 								variant="outline"
 								size="sm"

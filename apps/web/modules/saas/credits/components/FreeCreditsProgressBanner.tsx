@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import { Progress } from "@ui/components/progress";
@@ -98,6 +99,7 @@ export function FreeCreditsProgressBanner() {
 	const { balance, isLoading, isFreePlan, isStarterPlan } =
 		useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	// Start hidden to avoid SSR flash; hydrate from localStorage in useEffect
 	const [hidden, setHidden] = useState(true);
 
@@ -109,14 +111,31 @@ export function FreeCreditsProgressBanner() {
 		}
 	}, [isFreePlan, isStarterPlan]);
 
+	const used = balance?.used ?? 0;
+	const total = balance?.included ?? 0;
+	const pctUsed = total > 0 ? Math.round((used / total) * 100) : 0;
+	const planId = isFreePlan ? "free" : isStarterPlan ? "starter" : "unknown";
+
+	// Track banner shown once visible
+	useEffect(() => {
+		if (!hidden && !isLoading && balance) {
+			track({
+				name: "credits_banner_shown",
+				props: {
+					source: "free_credits_progress_banner",
+					plan_id: planId,
+					pct_used: pctUsed,
+				},
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hidden, isLoading]);
+
 	if (isLoading || !balance || hidden) {
 		return null;
 	}
 
-	const used = balance.used;
-	const total = balance.included;
 	const remaining = balance.remaining;
-	const pctUsed = total > 0 ? Math.round((used / total) * 100) : 0;
 
 	const billingHref = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -145,6 +164,14 @@ export function FreeCreditsProgressBanner() {
 		const handleDismiss = () => {
 			dismissFree();
 			setHidden(true);
+			track({
+				name: "credits_banner_dismissed",
+				props: {
+					source: "free_credits_progress_banner",
+					plan_id: "free",
+					pct_used: pctUsed,
+				},
+			});
 		};
 
 		return (
@@ -173,7 +200,21 @@ export function FreeCreditsProgressBanner() {
 						variant="outline"
 						className={`h-7 px-3 ${c.btn}`}
 					>
-						<Link href={billingHref}>Upgrade for more</Link>
+						<Link
+							href={billingHref}
+							onClick={() =>
+								track({
+									name: "credits_banner_cta_clicked",
+									props: {
+										source: "free_credits_progress_banner",
+										plan_id: "free",
+										cta_label: "upgrade_for_more",
+									},
+								})
+							}
+						>
+							Upgrade for more
+						</Link>
 					</Button>
 					{urgencyLevel === "low" && (
 						<button
@@ -211,6 +252,14 @@ export function FreeCreditsProgressBanner() {
 		const handleDismiss = () => {
 			dismissStarterFor24Hours();
 			setHidden(true);
+			track({
+				name: "credits_banner_dismissed",
+				props: {
+					source: "free_credits_progress_banner",
+					plan_id: "starter",
+					pct_used: pctUsed,
+				},
+			});
 		};
 
 		return (
@@ -240,7 +289,21 @@ export function FreeCreditsProgressBanner() {
 						variant="outline"
 						className={`h-7 px-3 ${c.btn}`}
 					>
-						<Link href={billingHref}>Upgrade to Pro</Link>
+						<Link
+							href={billingHref}
+							onClick={() =>
+								track({
+									name: "credits_banner_cta_clicked",
+									props: {
+										source: "free_credits_progress_banner",
+										plan_id: "starter",
+										cta_label: "upgrade_to_pro",
+									},
+								})
+							}
+						>
+							Upgrade to Pro
+						</Link>
 					</Button>
 					<button
 						type="button"

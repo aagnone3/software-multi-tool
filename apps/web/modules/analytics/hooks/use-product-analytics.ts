@@ -112,6 +112,31 @@ type ProductEvent =
 				total_count: number;
 				source: string;
 			};
+	  }
+	| {
+			name: "upgrade_nudge_shown";
+			props: { source: string; plan_id: string; context?: string };
+	  }
+	| {
+			name: "upgrade_nudge_cta_clicked";
+			props: {
+				source: string;
+				plan_id: string;
+				cta_label: string;
+				context?: string;
+			};
+	  }
+	| {
+			name: "credits_banner_shown";
+			props: { source: string; plan_id: string; pct_used: number };
+	  }
+	| {
+			name: "credits_banner_cta_clicked";
+			props: { source: string; plan_id: string; cta_label: string };
+	  }
+	| {
+			name: "credits_banner_dismissed";
+			props: { source: string; plan_id: string; pct_used: number };
 	  };
 
 export type { ProductEvent };
