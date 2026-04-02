@@ -517,6 +517,30 @@ type ProductEvent =
 	| {
 			name: "home_features_tool_clicked";
 			props: { tool_id: string; tool_title: string };
+	  }
+	| {
+			name: "tool_history_page_viewed";
+			props: { tool_slug: string };
+	  }
+	| {
+			name: "tool_history_job_deleted";
+			props: { tool_slug: string; job_id: string };
+	  }
+	| {
+			name: "tool_history_csv_exported";
+			props: { tool_slug: string; row_count: number };
+	  }
+	| {
+			name: "jobs_history_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "jobs_history_job_deleted";
+			props: { job_id: string };
+	  }
+	| {
+			name: "jobs_history_csv_exported";
+			props: { row_count: number };
 	  };
 
 export type { ProductEvent };

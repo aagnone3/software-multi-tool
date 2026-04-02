@@ -94,6 +94,11 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 	},
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
@@ -430,6 +435,14 @@ describe("JobsHistoryPage", () => {
 			fireEvent.click(exportBtn);
 			expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
 			expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:url");
+		});
+	});
+
+	it("tracks jobs_history_page_viewed on mount", () => {
+		renderWithQuery(<JobsHistoryPage />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "jobs_history_page_viewed",
+			props: {},
 		});
 	});
 });
