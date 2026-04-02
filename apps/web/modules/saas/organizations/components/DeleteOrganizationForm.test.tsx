@@ -9,12 +9,18 @@ const {
 	mockSetActiveOrganization,
 	mockReplace,
 	mockDelete,
+	mockTrack,
 } = vi.hoisted(() => ({
 	mockConfirm: vi.fn(),
 	mockRefetch: vi.fn(),
 	mockSetActiveOrganization: vi.fn(),
 	mockReplace: vi.fn(),
 	mockDelete: vi.fn(),
+	mockTrack: vi.fn(),
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@repo/auth/client", () => ({
@@ -93,6 +99,10 @@ describe("DeleteOrganizationForm", () => {
 		);
 		expect(mockDelete).toHaveBeenCalledWith({ organizationId: "org-1" });
 		expect(toast.success).toHaveBeenCalled();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "org_deleted",
+			props: {},
+		});
 		expect(mockSetActiveOrganization).toHaveBeenCalledWith(null);
 		expect(mockRefetch).toHaveBeenCalled();
 		expect(mockReplace).toHaveBeenCalledWith("/app");

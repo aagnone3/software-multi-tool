@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useOrganizationListQuery } from "@saas/organizations/lib/api";
@@ -16,6 +17,7 @@ export function DeleteOrganizationForm() {
 	const { refetch: reloadOrganizations } = useOrganizationListQuery();
 	const { activeOrganization, setActiveOrganization } =
 		useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	if (!activeOrganization) {
 		return null;
@@ -39,6 +41,7 @@ export function DeleteOrganizationForm() {
 				}
 
 				toast.success("Your organization has been deleted.");
+				track({ name: "org_deleted", props: {} });
 				await setActiveOrganization(null);
 				await reloadOrganizations();
 				router.replace("/app");

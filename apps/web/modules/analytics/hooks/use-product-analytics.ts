@@ -571,6 +571,18 @@ type ProductEvent =
 	| {
 			name: "job_detail_pin_toggled";
 			props: { job_id: string; tool_slug: string; pinned: boolean };
+	  }
+	| {
+			name: "org_created";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "org_deleted";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "org_member_invited";
+			props: { role: string };
 	  };
 
 export type { ProductEvent };

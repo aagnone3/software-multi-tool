@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import {
@@ -38,6 +39,7 @@ export function CreateOrganizationForm({
 	const queryClient = useQueryClient();
 	const { setActiveOrganization } = useActiveOrganization();
 	const createOrganizationMutation = useCreateOrganizationMutation();
+	const { track } = useProductAnalytics();
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -62,6 +64,7 @@ export function CreateOrganizationForm({
 				queryKey: organizationListQueryKey,
 			});
 
+			track({ name: "org_created", props: {} });
 			router.replace(`/app/${newOrganization.slug}`);
 		} catch {
 			toast.error(

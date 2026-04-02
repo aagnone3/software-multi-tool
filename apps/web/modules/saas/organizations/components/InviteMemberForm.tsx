@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { OrganizationRoleSelect } from "@saas/organizations/components/OrganizationRoleSelect";
@@ -34,6 +35,7 @@ export function InviteMemberForm({
 	organizationId: string;
 }) {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -61,6 +63,7 @@ export function InviteMemberForm({
 			});
 
 			toast.success("Member invited");
+			track({ name: "org_member_invited", props: { role: values.role } });
 		} catch {
 			toast.error("Could not invite member");
 		}
