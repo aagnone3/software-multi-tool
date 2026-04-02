@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useUserPasskeysQuery } from "@saas/auth/lib/api";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
@@ -13,6 +14,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en");
 
 export function PasskeysBlock() {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 
 	const { data: passkeys, isPending } = useUserPasskeysQuery();
 
@@ -22,6 +24,7 @@ export function PasskeysBlock() {
 				onSuccess: () => {
 					queryClient.invalidateQueries({ queryKey: ["passkeys"] });
 					toast.success("Passkey added");
+					track({ name: "settings_passkey_added", props: {} });
 				},
 				onError: () => {
 					toast.error("Could not add passkey");
@@ -36,6 +39,7 @@ export function PasskeysBlock() {
 				await authClient.passkey.deletePasskey({
 					id,
 				});
+				track({ name: "settings_passkey_deleted", props: {} });
 			},
 			{
 				loading: "Deleting passkey...",

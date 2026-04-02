@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
@@ -14,6 +15,7 @@ export function ActiveSessionsBlock() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { session: currentSession } = useSession();
+	const { track } = useProductAnalytics();
 
 	const { data: sessions, isPending } = useQuery({
 		queryKey: ["active-sessions"],
@@ -36,6 +38,7 @@ export function ActiveSessionsBlock() {
 			{
 				onSuccess: () => {
 					toast.success("Session revoked");
+					track({ name: "settings_session_revoked", props: {} });
 
 					queryClient.invalidateQueries({
 						queryKey: ["active-sessions"],

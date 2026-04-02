@@ -478,6 +478,17 @@ type ProductEvent =
 	| { name: "settings_password_change_failed"; props: Record<string, never> }
 	| { name: "settings_account_deleted"; props: Record<string, never> }
 	| { name: "settings_account_delete_failed"; props: Record<string, never> }
+	| { name: "settings_name_changed"; props: Record<string, never> }
+	| {
+			name: "settings_notification_updated";
+			props: { category: string; channel: string; enabled: boolean };
+	  }
+	| { name: "settings_data_export_requested"; props: Record<string, never> }
+	| { name: "settings_2fa_enabled"; props: Record<string, never> }
+	| { name: "settings_2fa_disabled"; props: Record<string, never> }
+	| { name: "settings_session_revoked"; props: Record<string, never> }
+	| { name: "settings_passkey_added"; props: Record<string, never> }
+	| { name: "settings_passkey_deleted"; props: Record<string, never> }
 	| {
 			name: "settings_social_account_linked";
 			props: { provider: string };
