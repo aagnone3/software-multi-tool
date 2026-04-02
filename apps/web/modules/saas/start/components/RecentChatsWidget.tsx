@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -57,6 +58,7 @@ export function RecentChatsWidget({
 	maxChats = 4,
 }: RecentChatsWidgetProps) {
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const basePath = activeOrganization
 		? `/app/${activeOrganization.slug}`
@@ -192,6 +194,15 @@ export function RecentChatsWidget({
 							key={chat.id}
 							href={`${basePath}/chatbot?chatId=${chat.id}`}
 							className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+							onClick={() =>
+								track({
+									name: "dashboard_recent_chat_clicked",
+									props: {
+										chat_id: chat.id,
+										source: "dashboard_recent_chats_widget",
+									},
+								})
+							}
 						>
 							<div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
 								<MessageSquareIcon className="size-5" />

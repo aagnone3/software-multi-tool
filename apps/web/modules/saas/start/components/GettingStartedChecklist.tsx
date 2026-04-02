@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
@@ -38,6 +39,7 @@ export function GettingStartedChecklist({
 	const { activeOrganization } = useActiveOrganization();
 	const { jobs, isLoading: jobsLoading } = useRecentJobs(1);
 	const [isDismissed, setIsDismissed] = useState(false);
+	const { track } = useProductAnalytics();
 
 	// Load dismissed state from localStorage
 	useEffect(() => {
@@ -149,6 +151,15 @@ export function GettingStartedChecklist({
 									"flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50",
 									item.isComplete && "opacity-60",
 								)}
+								onClick={() =>
+									track({
+										name: "dashboard_getting_started_step_clicked",
+										props: {
+											step_id: item.id,
+											is_complete: item.isComplete,
+										},
+									})
+								}
 							>
 								{item.isComplete ? (
 									<CheckCircle2Icon className="size-5 text-green-500 shrink-0" />

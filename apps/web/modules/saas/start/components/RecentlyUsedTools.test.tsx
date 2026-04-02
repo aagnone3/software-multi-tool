@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RecentlyUsedTools } from "./RecentlyUsedTools";
@@ -7,6 +7,7 @@ import { RecentlyUsedTools } from "./RecentlyUsedTools";
 // Mock hooks
 const useRecentJobsMock = vi.hoisted(() => vi.fn());
 const useToolsMock = vi.hoisted(() => vi.fn());
+const trackMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: useRecentJobsMock,
@@ -14,6 +15,10 @@ vi.mock("../hooks/use-recent-jobs", () => ({
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
 	useTools: useToolsMock,
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: trackMock }),
 }));
 
 vi.mock("next/link", () => ({
@@ -216,5 +221,37 @@ describe("RecentlyUsedTools", () => {
 		render(<RecentlyUsedTools />, { wrapper: createWrapper() });
 
 		expect(screen.getByText("30m ago")).toBeInTheDocument();
+	});
+
+	it("tracks analytics when a tool link is clicked", () => {
+		const recentToolsMap = new Map([
+			[
+				"news-analyzer",
+				{
+					id: "job-1",
+					toolSlug: "news-analyzer",
+					status: "COMPLETED",
+					createdAt: new Date().toISOString(),
+					completedAt: null,
+				},
+			],
+		]);
+
+		useRecentJobsMock.mockReturnValue({
+			recentToolSlugs: ["news-analyzer"],
+			recentToolsMap,
+			isLoading: false,
+		});
+
+		render(<RecentlyUsedTools />, { wrapper: createWrapper() });
+
+		const link = screen.getByText("News Analyzer").closest("a");
+		expect(link).not.toBeNull();
+		fireEvent.click(link!);
+
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "dashboard_recently_used_tool_clicked",
+			props: { tool_slug: "news-analyzer", tool_name: "News Analyzer" },
+		});
 	});
 });

@@ -2,6 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const trackMock = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: trackMock }),
+}));
+
 // Mocks
 vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: vi.fn(),
@@ -132,5 +137,17 @@ describe("GettingStartedChecklist", () => {
 		render(<GettingStartedChecklist />);
 		const toolLink = screen.getByText("Try your first tool").closest("a");
 		expect(toolLink?.getAttribute("href")).toBe("/app/tools");
+	});
+
+	it("tracks analytics when a checklist step link is clicked", () => {
+		render(<GettingStartedChecklist />);
+		const link = screen.getByText("Try your first tool").closest("a");
+		expect(link).not.toBeNull();
+		fireEvent.click(link!);
+
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "dashboard_getting_started_step_clicked",
+			props: { step_id: "first-tool", is_complete: false },
+		});
 	});
 });
