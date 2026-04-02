@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { Button } from "@ui/components/button";
 import {
@@ -103,7 +104,13 @@ function JobStatusText({ status }: { status: Job["status"] }) {
 	}
 }
 
-function ActiveJobRow({ job }: { job: Job }) {
+function ActiveJobRow({
+	job,
+	onViewClick,
+}: {
+	job: Job;
+	onViewClick?: (job: Job) => void;
+}) {
 	const toolName = getToolName(job.toolSlug);
 	const detailUrl = getJobDetailUrl(job.toolSlug, job.id);
 	const isActive = ACTIVE_STATUSES.has(job.status);
@@ -134,7 +141,7 @@ function ActiveJobRow({ job }: { job: Job }) {
 					className="shrink-0 h-7 px-2"
 					asChild
 				>
-					<Link href={detailUrl}>
+					<Link href={detailUrl} onClick={() => onViewClick?.(job)}>
 						<ExternalLinkIcon className="size-3 mr-1" />
 						View
 					</Link>
@@ -150,6 +157,7 @@ interface ActiveJobsWidgetProps {
 
 export function ActiveJobsWidget({ className }: ActiveJobsWidgetProps) {
 	const { jobs, isLoading, isError } = useRecentJobs(20);
+	const { track } = useProductAnalytics();
 	const [, setTick] = useState(0);
 
 	// Re-render every 30s so "recently completed" threshold stays accurate
@@ -225,7 +233,20 @@ export function ActiveJobsWidget({ className }: ActiveJobsWidgetProps) {
 			<CardContent>
 				<div className="divide-y">
 					{activeJobs.map((job) => (
-						<ActiveJobRow key={job.id} job={job} />
+						<ActiveJobRow
+							key={job.id}
+							job={job}
+							onViewClick={(j) =>
+								track({
+									name: "dashboard_active_job_view_clicked",
+									props: {
+										job_id: j.id,
+										tool_slug: j.toolSlug,
+										job_status: j.status,
+									},
+								})
+							}
+						/>
 					))}
 				</div>
 				<div className="pt-2">

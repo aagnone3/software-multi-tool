@@ -1,10 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockUseRecentJobs = vi.fn();
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: () => mockUseRecentJobs(),
+}));
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@repo/config", () => ({
@@ -26,10 +31,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 import { ActiveJobsWidget } from "./ActiveJobsWidget";
@@ -147,5 +158,33 @@ describe("ActiveJobsWidget error state", () => {
 		});
 		render(<ActiveJobsWidget />);
 		expect(screen.getByText("Failed to load jobs")).toBeDefined();
+	});
+});
+
+describe("ActiveJobsWidget analytics", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
+
+	it("tracks view click for completed jobs", () => {
+		const completedJob = makeJob({
+			status: "COMPLETED",
+			completedAt: new Date().toISOString(),
+		});
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [completedJob],
+			isLoading: false,
+		});
+		render(<ActiveJobsWidget />);
+		const viewLink = screen.getByRole("link", { name: /view/i });
+		fireEvent.click(viewLink);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "dashboard_active_job_view_clicked",
+			props: {
+				job_id: completedJob.id,
+				tool_slug: completedJob.toolSlug,
+				job_status: "COMPLETED",
+			},
+		});
 	});
 });
