@@ -22,6 +22,51 @@ Object.defineProperty(window, "location", {
 // Store the mock mutation function for control in tests
 let mockMutateAsync: Mock;
 
+// Mock @repo/config getCreditPacks
+vi.mock("@repo/config", () => ({
+	getCreditPacks: () => [
+		{
+			id: "boost",
+			name: "Boost",
+			credits: 50,
+			amount: 4.99,
+			currency: "USD",
+		},
+		{
+			id: "bundle",
+			name: "Bundle",
+			credits: 200,
+			amount: 14.99,
+			currency: "USD",
+		},
+		{
+			id: "vault",
+			name: "Vault",
+			credits: 500,
+			amount: 29.99,
+			currency: "USD",
+		},
+	],
+}));
+
+// Mock useProductAnalytics
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
+// Mock useCreditsBalance to avoid react-query/orpc dependency chain
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: () => ({
+		isFreePlan: false,
+		isStarterPlan: false,
+		isProPlan: true,
+		creditBalance: 100,
+		totalCreditsUsed: 0,
+		creditUsagePercentage: 0,
+		isLoading: false,
+	}),
+}));
+
 // Mock the oRPC query utils before importing the hook
 vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: {
