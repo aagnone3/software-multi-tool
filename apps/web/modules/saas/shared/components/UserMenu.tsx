@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { DropdownMenuSub } from "@radix-ui/react-dropdown-menu";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
@@ -36,6 +37,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 	const { user } = useSession();
 	const { setTheme: setCurrentTheme, theme: currentTheme } = useTheme();
 	const [theme, setTheme] = useState<string>(currentTheme ?? "system");
+	const { track } = useProductAnalytics();
 
 	const colorModeOptions = [
 		{
@@ -56,6 +58,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 	];
 
 	const onLogout = () => {
+		track({ name: "user_logged_out", props: {} });
 		authClient.signOut({
 			fetchOptions: {
 				onSuccess: async () => {
