@@ -171,6 +171,21 @@ type ProductEvent =
 	| {
 			name: "case_studies_page_cta_clicked";
 			props: { cta_type: "signup" | "pricing" };
+	  }
+	| {
+			name: "credit_pack_purchase_started";
+			props: {
+				pack_id: string;
+				pack_name: string;
+				credits: number;
+				amount: number;
+				currency: string;
+				plan_id: string;
+			};
+	  }
+	| {
+			name: "credit_pack_purchase_failed";
+			props: { pack_id: string; error_message: string; plan_id: string };
 	  };
 
 export type { ProductEvent };
