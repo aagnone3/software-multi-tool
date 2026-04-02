@@ -1,11 +1,13 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { MailIcon } from "lucide-react";
 import React, { useState } from "react";
 
 export function BlogNewsletterCta() {
+	const { track } = useProductAnalytics();
 	const [email, setEmail] = useState("");
 	const [status, setStatus] = useState<
 		"idle" | "submitting" | "done" | "error"
@@ -15,6 +17,10 @@ export function BlogNewsletterCta() {
 		e.preventDefault();
 		if (!email) return;
 		setStatus("submitting");
+		track({
+			name: "newsletter_subscribe_submitted",
+			props: { source: "blog_newsletter_cta" },
+		});
 		try {
 			const res = await fetch("/api/newsletter", {
 				method: "POST",
@@ -23,6 +29,10 @@ export function BlogNewsletterCta() {
 			});
 			if (res.ok) {
 				setStatus("done");
+				track({
+					name: "newsletter_subscribe_succeeded",
+					props: { source: "blog_newsletter_cta" },
+				});
 			} else {
 				setStatus("error");
 			}

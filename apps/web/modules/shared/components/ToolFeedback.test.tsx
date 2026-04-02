@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // --- mocks ---
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockCreateMutateAsync = vi.fn();
 const mockUpdateMutateAsync = vi.fn();
 const mockGetForJobQueryFn = vi.fn();
@@ -77,6 +82,7 @@ const createWrapper = () => {
 describe("ToolFeedback", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockTrack.mockReset();
 		mockGetForJobQueryFn.mockResolvedValue({ feedback: null });
 		mockCreateMutateAsync.mockResolvedValue({ feedback: { id: "new-id" } });
 		mockUpdateMutateAsync.mockResolvedValue({
@@ -154,5 +160,21 @@ describe("ToolFeedback", () => {
 			{ wrapper: createWrapper() },
 		);
 		expect(container.querySelector(".custom-class")).toBeInTheDocument();
+	});
+
+	it("calls create mutation when thumbs up is clicked with no prior feedback", async () => {
+		render(<ToolFeedback toolSlug="news-analyzer" />, {
+			wrapper: createWrapper(),
+		});
+
+		// No jobId → no query → button is not disabled
+		const upButton = screen.getByTitle("This was helpful");
+		fireEvent.click(upButton);
+
+		await waitFor(() => {
+			expect(mockCreateMutateAsync).toHaveBeenCalledWith(
+				expect.objectContaining({ rating: "POSITIVE" }),
+			);
+		});
 	});
 });
