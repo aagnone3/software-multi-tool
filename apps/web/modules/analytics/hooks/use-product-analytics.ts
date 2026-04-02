@@ -137,6 +137,24 @@ type ProductEvent =
 	| {
 			name: "credits_banner_dismissed";
 			props: { source: string; plan_id: string; pct_used: number };
+	  }
+	| {
+			name: "roi_calculator_cta_clicked";
+			props: {
+				use_cases: string[];
+				team_size: number;
+				hourly_rate: number;
+				roi_pct: number;
+				annual_savings: number;
+			};
+	  }
+	| {
+			name: "roi_calculator_use_case_toggled";
+			props: {
+				use_case_id: string;
+				selected: boolean;
+				total_selected: number;
+			};
 	  };
 
 export type { ProductEvent };

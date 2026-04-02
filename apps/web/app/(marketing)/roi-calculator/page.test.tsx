@@ -3,6 +3,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import RoiCalculatorPage from "./page";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@repo/utils", () => ({
 	getBaseUrl: () => "https://softwaremultitool.com",
 }));
@@ -11,14 +16,21 @@ vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 describe("RoiCalculatorPage", () => {
 	beforeEach(() => {
+		mockTrack.mockClear();
 		render(<RoiCalculatorPage />);
 	});
 
@@ -64,5 +76,38 @@ describe("RoiCalculatorPage", () => {
 			'script[type="application/ld+json"]',
 		);
 		expect(scripts.length).toBeGreaterThanOrEqual(0);
+	});
+
+	it("tracks use case toggle when a use case button is clicked", () => {
+		// Find the "Expense categorization" button (not pre-selected)
+		const expenseBtn = screen
+			.getByText(/Expense categorization/i)
+			.closest("button");
+		expect(expenseBtn).toBeDefined();
+		fireEvent.click(expenseBtn!);
+		const toggleCall = mockTrack.mock.calls.find(
+			([e]) => e.name === "roi_calculator_use_case_toggled",
+		);
+		expect(toggleCall).toBeDefined();
+		expect(toggleCall![0].props.use_case_id).toBe("expenses");
+		expect(toggleCall![0].props.selected).toBe(true);
+	});
+
+	it("tracks CTA click with calculator state", () => {
+		const ctaLinks = screen.getAllByRole("link");
+		const ctaLink = ctaLinks.find((l) =>
+			l.textContent?.toLowerCase().includes("start saving"),
+		);
+		expect(ctaLink).toBeDefined();
+		fireEvent.click(ctaLink!);
+		const ctaCall = mockTrack.mock.calls.find(
+			([e]) => e.name === "roi_calculator_cta_clicked",
+		);
+		expect(ctaCall).toBeDefined();
+		expect(ctaCall![0].props).toMatchObject({
+			team_size: 3,
+			hourly_rate: 75,
+		});
+		expect(Array.isArray(ctaCall![0].props.use_cases)).toBe(true);
 	});
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { getBaseUrl } from "@repo/utils";
 import {
 	BriefcaseIcon,
@@ -9,7 +10,7 @@ import {
 	TrendingUpIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 const siteUrl = getBaseUrl();
 
@@ -65,18 +66,31 @@ export default function RoiCalculatorPage() {
 		new Set(["meetings", "invoices"]),
 	);
 	const [teamSize, setTeamSize] = useState(3);
+	const { track } = useProductAnalytics();
 
-	const toggleUseCase = (id: string) => {
-		setSelectedUseCases((prev) => {
-			const next = new Set(prev);
-			if (next.has(id)) {
-				next.delete(id);
-			} else {
-				next.add(id);
-			}
-			return next;
-		});
-	};
+	const toggleUseCase = useCallback(
+		(id: string) => {
+			setSelectedUseCases((prev) => {
+				const next = new Set(prev);
+				const nowSelected = !next.has(id);
+				if (nowSelected) {
+					next.add(id);
+				} else {
+					next.delete(id);
+				}
+				track({
+					name: "roi_calculator_use_case_toggled",
+					props: {
+						use_case_id: id,
+						selected: nowSelected,
+						total_selected: next.size,
+					},
+				});
+				return next;
+			});
+		},
+		[track],
+	);
 
 	const selectedCases = useCases.filter((uc) => selectedUseCases.has(uc.id));
 	const totalHoursPerMonth = selectedCases.reduce(
@@ -366,6 +380,24 @@ export default function RoiCalculatorPage() {
 									<Link
 										href="/auth/signup"
 										className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+										onClick={() =>
+											track({
+												name: "roi_calculator_cta_clicked",
+												props: {
+													use_cases:
+														Array.from(
+															selectedUseCases,
+														),
+													team_size: teamSize,
+													hourly_rate: hourlyRate,
+													roi_pct: Math.round(roi),
+													annual_savings:
+														Math.round(
+															annualSavings,
+														),
+												},
+											})
+										}
 									>
 										Start saving time today
 									</Link>
