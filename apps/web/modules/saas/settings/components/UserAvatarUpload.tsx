@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { Spinner } from "@shared/components/Spinner";
@@ -20,6 +21,7 @@ export function UserAvatarUpload({
 }) {
 	const router = useRouter();
 	const { user, reloadSession } = useSession();
+	const { track } = useProductAnalytics();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
@@ -78,6 +80,8 @@ export function UserAvatarUpload({
 			}
 
 			await reloadSession();
+
+			track({ name: "settings_avatar_changed", props: {} });
 
 			// Refresh server components to update sidebar avatar
 			router.refresh();

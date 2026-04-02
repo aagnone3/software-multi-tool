@@ -10,12 +10,18 @@ const {
 	mockReplace,
 	mockSetActiveOrganization,
 	mockToastError,
+	mockTrack,
 } = vi.hoisted(() => ({
 	mockMutateAsync: vi.fn(),
 	mockInvalidateQueries: vi.fn(),
 	mockReplace: vi.fn(),
 	mockSetActiveOrganization: vi.fn(),
 	mockToastError: vi.fn(),
+	mockTrack: vi.fn(),
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -75,6 +81,10 @@ describe("CreateOrganizationForm", () => {
 				name: "My New Org",
 			});
 			expect(mockSetActiveOrganization).toHaveBeenCalledWith("my-org");
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "org_created",
+				props: {},
+			});
 			expect(mockReplace).toHaveBeenCalledWith("/app/my-org");
 		});
 	});

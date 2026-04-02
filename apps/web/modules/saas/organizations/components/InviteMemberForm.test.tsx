@@ -9,11 +9,17 @@ const {
 	mockInviteMember,
 	mockToastSuccess,
 	mockToastError,
+	mockTrack,
 } = vi.hoisted(() => ({
 	mockInvalidateQueries: vi.fn(),
 	mockInviteMember: vi.fn(),
 	mockToastSuccess: vi.fn(),
 	mockToastError: vi.fn(),
+	mockTrack: vi.fn(),
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -96,6 +102,10 @@ describe("InviteMemberForm", () => {
 				}),
 			);
 			expect(mockToastSuccess).toHaveBeenCalledWith("Member invited");
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "org_member_invited",
+				props: { role: "member" },
+			});
 		});
 	});
 

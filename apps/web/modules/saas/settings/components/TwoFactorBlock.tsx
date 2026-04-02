@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useUserAccountsQuery } from "@saas/auth/lib/api";
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 
 export function TwoFactorBlock() {
 	const { user, reloadSession } = useSession();
+	const { track } = useProductAnalytics();
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [dialogView, setDialogView] = useState<"password" | "totp-url">(
@@ -96,6 +98,7 @@ export function TwoFactorBlock() {
 			toast.success(
 				"Two-factor authentication has been disabled successfully.",
 			);
+			track({ name: "settings_2fa_disabled", props: {} });
 
 			reloadSession();
 		},
@@ -121,6 +124,7 @@ export function TwoFactorBlock() {
 			toast.success(
 				"Two-factor authentication has been enabled successfully.",
 			);
+			track({ name: "settings_2fa_enabled", props: {} });
 
 			reloadSession();
 			setDialogOpen(false);

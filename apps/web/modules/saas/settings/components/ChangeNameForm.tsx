@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
@@ -19,6 +20,7 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export function ChangeNameForm() {
 	const { user, reloadSession } = useSession();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
@@ -38,6 +40,7 @@ export function ChangeNameForm() {
 		}
 
 		toast.success("Name was updated successfully");
+		track({ name: "settings_name_changed", props: {} });
 
 		reloadSession();
 

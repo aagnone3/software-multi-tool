@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
@@ -19,6 +20,7 @@ const gdprExportsQueryKey = ["gdpr-exports"] as const;
 
 export function DataExportForm() {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 
 	// Fetch recent exports
 	const { data: exportsData, isLoading: isLoadingExports } = useQuery({
@@ -40,6 +42,7 @@ export function DataExportForm() {
 		},
 		onSuccess: (data) => {
 			toast.success(data.message);
+			track({ name: "settings_data_export_requested", props: {} });
 			// Refresh the exports list
 			queryClient.invalidateQueries({ queryKey: gdprExportsQueryKey });
 		},

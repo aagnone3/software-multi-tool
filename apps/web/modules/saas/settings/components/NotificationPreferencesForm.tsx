@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Label } from "@ui/components/label";
@@ -52,6 +53,7 @@ const CHANNELS = [
 
 export function NotificationPreferencesForm() {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 
 	const { data, isLoading, error } = useQuery(
 		orpc.notifications.getPreferences.queryOptions({ input: {} }),
@@ -94,6 +96,10 @@ export function NotificationPreferencesForm() {
 			);
 
 			toast.success("Preferences updated");
+			track({
+				name: "settings_notification_updated",
+				props: { category, channel, enabled: checked },
+			});
 		} catch {
 			toast.error("Failed to update preferences");
 		}

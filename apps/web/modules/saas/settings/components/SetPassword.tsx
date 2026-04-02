@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 
 export function SetPasswordForm() {
 	const { user } = useSession();
+	const { track } = useProductAnalytics();
 	const [submitting, setSubmitting] = useState(false);
 
 	const onSubmit = async () => {
@@ -15,6 +17,7 @@ export function SetPasswordForm() {
 			return;
 		}
 
+		track({ name: "settings_set_password_clicked", props: {} });
 		setSubmitting(true);
 
 		await authClient.requestPasswordReset(
