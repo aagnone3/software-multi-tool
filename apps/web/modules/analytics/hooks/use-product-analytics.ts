@@ -155,6 +155,22 @@ type ProductEvent =
 				selected: boolean;
 				total_selected: number;
 			};
+	  }
+	| {
+			name: "competitor_page_viewed";
+			props: { competitor_slug: string; competitor_name: string };
+	  }
+	| {
+			name: "competitor_page_cta_clicked";
+			props: {
+				competitor_slug: string;
+				cta_type: "signup" | "pricing";
+				position: "hero" | "footer";
+			};
+	  }
+	| {
+			name: "case_studies_page_cta_clicked";
+			props: { cta_type: "signup" | "pricing" };
 	  };
 
 export type { ProductEvent };

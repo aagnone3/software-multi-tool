@@ -34,6 +34,19 @@ vi.mock("lucide-react", () => ({
 	XCircleIcon: () => <span>✗</span>,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
+vi.mock("@marketing/shared/components/CompetitorPageTracker", () => ({
+	CompetitorPageTracker: () => null,
+}));
+
+vi.mock("@marketing/shared/components/CompetitorCtaTracker", () => ({
+	CompetitorCtaTracker: ({ children }: { children: React.ReactNode }) =>
+		children,
+}));
+
 import CompetitorPage, { generateMetadata, generateStaticParams } from "./page";
 
 describe("CompetitorPage", () => {
@@ -73,5 +86,22 @@ describe("CompetitorPage", () => {
 			params: Promise.resolve({ competitor: "nope" }),
 		});
 		expect(meta).toEqual({});
+	});
+
+	it("renders StickyCta on competitor page", async () => {
+		const Page = await CompetitorPage({
+			params: Promise.resolve({ competitor: "chatgpt" }),
+		});
+		render(Page);
+		expect(screen.getByTestId("sticky-cta")).toBeInTheDocument();
+	});
+
+	it("renders CompetitorPageTracker on competitor page", async () => {
+		const Page = await CompetitorPage({
+			params: Promise.resolve({ competitor: "notion-ai" }),
+		});
+		render(Page);
+		// CompetitorPageTracker returns null but should not throw
+		expect(screen.getAllByText(/Notion AI/i).length).toBeGreaterThan(0);
 	});
 });

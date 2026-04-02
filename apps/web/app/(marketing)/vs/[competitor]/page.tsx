@@ -1,3 +1,6 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
+import { CompetitorCtaTracker } from "@marketing/shared/components/CompetitorCtaTracker";
+import { CompetitorPageTracker } from "@marketing/shared/components/CompetitorPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import {
@@ -1198,6 +1201,10 @@ export default async function CompetitorPage({
 
 	return (
 		<>
+			<CompetitorPageTracker
+				competitorSlug={page.slug}
+				competitorName={page.name}
+			/>
 			<script
 				type="application/ld+json"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD
@@ -1219,19 +1226,31 @@ export default async function CompetitorPage({
 						{page.description}
 					</p>
 					<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-						<Link
-							href="/auth/signup"
-							className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
+						<CompetitorCtaTracker
+							competitorSlug={page.slug}
+							ctaType="signup"
+							position="hero"
 						>
-							Try {config.appName} Free
-							<ArrowRightIcon className="size-4" />
-						</Link>
-						<Link
-							href="/pricing"
-							className="inline-flex items-center rounded-lg border border-border px-6 py-3 font-semibold transition hover:bg-accent"
+							<Link
+								href="/auth/signup"
+								className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
+							>
+								Try {config.appName} Free
+								<ArrowRightIcon className="size-4" />
+							</Link>
+						</CompetitorCtaTracker>
+						<CompetitorCtaTracker
+							competitorSlug={page.slug}
+							ctaType="pricing"
+							position="hero"
 						>
-							See Pricing
-						</Link>
+							<Link
+								href="/pricing"
+								className="inline-flex items-center rounded-lg border border-border px-6 py-3 font-semibold transition hover:bg-accent"
+							>
+								See Pricing
+							</Link>
+						</CompetitorCtaTracker>
 					</div>
 				</div>
 			</section>
@@ -1362,22 +1381,36 @@ export default async function CompetitorPage({
 						Try {config.appName} free. No credit card required.
 					</p>
 					<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-						<Link
-							href="/auth/signup"
-							className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
+						<CompetitorCtaTracker
+							competitorSlug={page.slug}
+							ctaType="signup"
+							position="footer"
 						>
-							Start Free — No Credit Card
-							<ArrowRightIcon className="size-4" />
-						</Link>
-						<Link
-							href="/pricing"
-							className="text-foreground/60 text-sm underline underline-offset-4 hover:text-foreground"
+							<Link
+								href="/auth/signup"
+								className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
+							>
+								Start Free — No Credit Card
+								<ArrowRightIcon className="size-4" />
+							</Link>
+						</CompetitorCtaTracker>
+						<CompetitorCtaTracker
+							competitorSlug={page.slug}
+							ctaType="pricing"
+							position="footer"
 						>
-							Compare plans →
-						</Link>
+							<Link
+								href="/pricing"
+								className="text-foreground/60 text-sm underline underline-offset-4 hover:text-foreground"
+							>
+								Compare plans →
+							</Link>
+						</CompetitorCtaTracker>
 					</div>
 				</div>
 			</section>
+
+			<StickyCta />
 		</>
 	);
 }

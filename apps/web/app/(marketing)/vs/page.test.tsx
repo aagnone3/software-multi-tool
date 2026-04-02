@@ -25,6 +25,10 @@ vi.mock("lucide-react", () => ({
 	ArrowRightIcon: () => <svg data-testid="arrow-right" />,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 describe("VsPage", () => {
 	it("renders the page heading", () => {
 		render(<VsPage />);
@@ -36,5 +40,10 @@ describe("VsPage", () => {
 		// Should have links to individual competitor comparison pages
 		const links = screen.getAllByRole("link");
 		expect(links.length).toBeGreaterThan(0);
+	});
+
+	it("renders StickyCta", () => {
+		render(<VsPage />);
+		expect(screen.getByTestId("sticky-cta")).toBeInTheDocument();
 	});
 });
