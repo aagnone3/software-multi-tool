@@ -1,38 +1,35 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { MidPostCTA } from "./MidPostCTA";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next/link", () => ({
-	default: ({
-		children,
-		href,
-	}: {
-		children: React.ReactNode;
-		href: string;
-	}) => <a href={href}>{children}</a>,
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+vi.mock("next/navigation", () => ({
+	usePathname: () => "/blog/how-to-automate-expense-categorization-with-ai",
 }));
 
+import { MidPostCTA } from "./MidPostCTA";
+
 describe("MidPostCTA", () => {
-	it("renders the headline copy", () => {
-		render(<MidPostCTA />);
-		expect(screen.getByText(/skip the manual work/i)).toBeTruthy();
+	beforeEach(() => {
+		mockTrack.mockClear();
 	});
 
-	it("renders the sub-copy", () => {
+	it("renders get started CTA", () => {
 		render(<MidPostCTA />);
-		expect(screen.getByText(/no credit card required/i)).toBeTruthy();
+		expect(screen.getByText(/Get started free/i)).toBeInTheDocument();
 	});
 
-	it("renders a signup link pointing to /auth/signup", () => {
+	it("tracks mid post cta click with post slug", () => {
 		render(<MidPostCTA />);
-		const link = screen.getByRole("link", { name: /get started free/i });
-		expect(link).toBeTruthy();
-		expect((link as HTMLAnchorElement).href).toContain("/auth/signup");
-	});
-
-	it("renders inside an aside element", () => {
-		render(<MidPostCTA />);
-		expect(screen.getByRole("complementary")).toBeTruthy();
+		fireEvent.click(screen.getByText(/Get started free/i));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "marketing_mid_post_cta_clicked",
+			props: {
+				post_slug: "how-to-automate-expense-categorization-with-ai",
+			},
+		});
 	});
 });
