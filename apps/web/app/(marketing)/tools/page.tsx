@@ -116,6 +116,23 @@ export default function ToolsMarketingPage() {
 		],
 	};
 
+	const toolsListJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "ItemList",
+		name: `AI Business Tools — ${config.appName}`,
+		description:
+			"AI-powered tools for small businesses: invoice processing, meeting summarization, contract analysis, speaker separation, news analysis, and more.",
+		url: `${siteUrl}/tools`,
+		numberOfItems: tools.length,
+		itemListElement: tools.map((tool, index) => ({
+			"@type": "ListItem",
+			position: index + 1,
+			name: tool.name,
+			description: TOOL_DESCRIPTIONS[tool.slug] ?? tool.description,
+			url: `${siteUrl}/tools/${tool.slug}`,
+		})),
+	};
+
 	return (
 		<>
 			<script
@@ -123,6 +140,13 @@ export default function ToolsMarketingPage() {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{
 					__html: JSON.stringify(breadcrumbJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(toolsListJsonLd),
 				}}
 			/>
 			<div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
