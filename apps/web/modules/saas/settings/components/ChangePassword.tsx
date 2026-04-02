@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
@@ -25,6 +26,7 @@ const formSchema = z.object({
 
 export function ChangePasswordForm() {
 	const router = useRouter();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -42,11 +44,12 @@ export function ChangePasswordForm() {
 
 		if (error) {
 			toast.error("Could not update password");
-
+			track({ name: "settings_password_change_failed", props: {} });
 			return;
 		}
 
 		toast.success("Password was updated successfully");
+		track({ name: "settings_password_changed", props: {} });
 		form.reset({});
 		router.refresh();
 	});

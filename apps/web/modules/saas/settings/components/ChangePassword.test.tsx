@@ -16,6 +16,11 @@ vi.mock("@repo/auth/client", () => ({
 	},
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@shared/hooks/router", () => ({
 	useRouter: () => ({ refresh: mockRefresh }),
 }));

@@ -14,6 +14,11 @@ vi.mock("@repo/auth/client", () => ({
 	},
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@saas/auth/lib/api", () => ({
 	useUserAccountsQuery: () => mockUseUserAccountsQuery(),
 }));
@@ -123,5 +128,19 @@ describe("ConnectedAccountsBlock", () => {
 		const [connectBtn] = screen.getAllByText("Connect");
 		await userEvent.click(connectBtn);
 		expect(mockLinkSocial).toHaveBeenCalled();
+	});
+
+	it("tracks settings_social_account_linked when connect button clicked", async () => {
+		mockUseUserAccountsQuery.mockReturnValue({
+			data: [],
+			isPending: false,
+		});
+		render(<ConnectedAccountsBlock />);
+		const [connectBtn] = screen.getAllByText("Connect");
+		await userEvent.click(connectBtn);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "settings_social_account_linked",
+			props: { provider: "google" },
+		});
 	});
 });
