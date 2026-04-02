@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useRecentlyViewedTools } from "@saas/tools/hooks/use-recently-viewed-tools";
 import { useTools } from "@saas/tools/hooks/use-tools";
@@ -29,6 +30,7 @@ export function RecentlyViewedToolsWidget({
 }: RecentlyViewedToolsWidgetProps) {
 	const { recentTools } = useRecentlyViewedTools();
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 
 	if (recentTools.length === 0) return null;
 
@@ -66,6 +68,15 @@ export function RecentlyViewedToolsWidget({
 							<Link
 								href={`/app/tools/${tool.slug}`}
 								className="text-sm hover:underline font-medium truncate max-w-[60%]"
+								onClick={() =>
+									track({
+										name: "dashboard_recently_viewed_tool_clicked",
+										props: {
+											tool_slug: tool.slug,
+											tool_name: tool.name,
+										},
+									})
+								}
 							>
 								{tool.name}
 							</Link>

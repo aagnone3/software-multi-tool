@@ -6,6 +6,11 @@ import { NotificationsWidget } from "./NotificationsWidget";
 
 const mockMarkAsRead = vi.fn();
 const mockRouterPush = vi.fn();
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockRouterPush }),
@@ -138,6 +143,21 @@ describe("NotificationsWidget", () => {
 		const btn = screen.getByText("Info notification").closest("button")!;
 		await userEvent.click(btn);
 		expect(mockRouterPush).toHaveBeenCalledWith("/app/settings");
+	});
+
+	it("tracks analytics when a notification is clicked", async () => {
+		setupMocks();
+		render(<NotificationsWidget />);
+		const btn = screen.getByText("Info notification").closest("button")!;
+		await userEvent.click(btn);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "dashboard_notification_clicked",
+			props: {
+				notification_id: "n1",
+				notification_type: "info",
+				was_unread: true,
+			},
+		});
 	});
 
 	it("shows view all link", () => {
