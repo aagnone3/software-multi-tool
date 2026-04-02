@@ -186,6 +186,18 @@ type ProductEvent =
 	| {
 			name: "credit_pack_purchase_failed";
 			props: { pack_id: string; error_message: string; plan_id: string };
+	  }
+	| {
+			name: "billing_settings_starter_upgrade_clicked";
+			props: { plan_id: string };
+	  }
+	| {
+			name: "billing_settings_compare_plans_clicked";
+			props: { plan_id: string };
+	  }
+	| {
+			name: "billing_settings_annual_upsell_clicked";
+			props: { plan_id: string; savings_pct: number };
 	  };
 
 export type { ProductEvent };

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ActivePlan } from "./ActivePlan";
@@ -65,6 +66,11 @@ const mockPlanData = {
 
 const mockUsePlanData = vi.hoisted(() => vi.fn());
 const mockUsePurchases = vi.hoisted(() => vi.fn());
+const mockTrack = vi.hoisted(() => vi.fn());
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/payments/hooks/plan-data", () => ({
 	usePlanData: mockUsePlanData,
@@ -377,5 +383,70 @@ describe("ActivePlan", () => {
 			'[data-test="annual-billing-upsell-cta"]',
 		);
 		expect(cta).toHaveAttribute("href", "/app/billing");
+	});
+
+	it("tracks analytics when Starter upgrade CTA is clicked", async () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+		mockTrack.mockClear();
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="starter-upgrade-to-pro-cta"]',
+		) as HTMLElement;
+		await userEvent.click(cta);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "billing_settings_starter_upgrade_clicked",
+			props: { plan_id: "starter" },
+		});
+	});
+
+	it("tracks analytics when Starter compare plans CTA is clicked", async () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+		mockTrack.mockClear();
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="starter-compare-plans-cta"]',
+		) as HTMLElement;
+		await userEvent.click(cta);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "billing_settings_compare_plans_clicked",
+			props: { plan_id: "starter" },
+		});
+	});
+
+	it("tracks analytics when annual billing upsell CTA is clicked", async () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "pro",
+				price: {
+					amount: 2900,
+					currency: "USD",
+					interval: "month",
+					intervalCount: 1,
+				},
+			},
+		});
+		mockTrack.mockClear();
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="annual-billing-upsell-cta"]',
+		) as HTMLElement;
+		await userEvent.click(cta);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "billing_settings_annual_upsell_clicked",
+			props: { plan_id: "pro", savings_pct: expect.any(Number) },
+		});
 	});
 });
