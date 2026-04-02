@@ -83,18 +83,43 @@ export function PricingTable({
 		setLoading(planId);
 
 		try {
+			const priceType =
+				price.type === "one-time" ? "one-time" : "subscription";
+			const hasTrial =
+				"trialPeriodDays" in price && !!price.trialPeriodDays;
+
 			const { checkoutLink } =
 				await createCheckoutLinkMutation.mutateAsync({
-					type:
-						price.type === "one-time" ? "one-time" : "subscription",
+					type: priceType,
 					productId: price.productId,
 					organizationId,
 					redirectUrl: `${window.location.origin}/app/welcome`,
 				});
 
+			track({
+				name: "checkout_started",
+				props: {
+					plan_id: planId,
+					billing_interval: interval,
+					product_id: price.productId,
+					price_type: priceType,
+					has_trial: hasTrial,
+					current_plan: activePlanId ?? "none",
+				},
+			});
+
 			window.location.href = checkoutLink;
 		} catch (error) {
 			console.error(error);
+			track({
+				name: "checkout_failed",
+				props: {
+					plan_id: planId,
+					billing_interval: interval,
+					product_id: price.productId ?? "",
+					current_plan: activePlanId ?? "none",
+				},
+			});
 			toast.error("Failed to start checkout. Please try again.");
 		} finally {
 			setLoading(false);

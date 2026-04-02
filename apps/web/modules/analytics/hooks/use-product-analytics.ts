@@ -463,6 +463,26 @@ type ProductEvent =
 	| {
 			name: "mfa_otp_verified";
 			props: Record<string, never>;
+	  }
+	| {
+			name: "checkout_started";
+			props: {
+				plan_id: string;
+				billing_interval: string;
+				product_id: string;
+				price_type: "one-time" | "subscription";
+				has_trial: boolean;
+				current_plan: string;
+			};
+	  }
+	| {
+			name: "checkout_failed";
+			props: {
+				plan_id: string;
+				billing_interval: string;
+				product_id: string;
+				current_plan: string;
+			};
 	  };
 
 export type { ProductEvent };
