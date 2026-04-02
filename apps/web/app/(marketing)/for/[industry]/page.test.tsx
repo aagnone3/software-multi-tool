@@ -88,4 +88,44 @@ describe("IndustryPage", () => {
 		});
 		expect(meta).toEqual({});
 	});
+
+	it("renders Service JSON-LD structured data", async () => {
+		const Page = await IndustryPage({
+			params: Promise.resolve({ industry: "accountants" }),
+		});
+		const { container } = render(Page);
+
+		const scripts = container.querySelectorAll(
+			'script[type="application/ld+json"]',
+		);
+		const jsonLdContents = Array.from(scripts).map((s) =>
+			JSON.parse(s.innerHTML),
+		);
+
+		const service = jsonLdContents.find((d) => d["@type"] === "Service");
+		expect(service).toBeDefined();
+		expect(service?.name).toContain("Accountants");
+		expect(service?.provider?.name).toBe("TestApp");
+		expect(service?.audience?.audienceType).toContain("Accountants");
+	});
+
+	it("renders BreadcrumbList JSON-LD structured data", async () => {
+		const Page = await IndustryPage({
+			params: Promise.resolve({ industry: "accountants" }),
+		});
+		const { container } = render(Page);
+
+		const scripts = container.querySelectorAll(
+			'script[type="application/ld+json"]',
+		);
+		const jsonLdContents = Array.from(scripts).map((s) =>
+			JSON.parse(s.innerHTML),
+		);
+
+		const breadcrumb = jsonLdContents.find(
+			(d) => d["@type"] === "BreadcrumbList",
+		);
+		expect(breadcrumb).toBeDefined();
+		expect(breadcrumb?.itemListElement).toHaveLength(3);
+	});
 });
