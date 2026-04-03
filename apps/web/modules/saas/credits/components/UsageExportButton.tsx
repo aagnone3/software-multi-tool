@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { DownloadIcon } from "lucide-react";
 import React from "react";
@@ -28,6 +29,7 @@ function downloadCSV(filename: string, rows: string[][]): void {
 }
 
 export function UsageExportButton() {
+	const { track } = useProductAnalytics();
 	const { byTool, byPeriod, totalUsed, totalOverage, isLoading } =
 		useUsageStats();
 
@@ -57,6 +59,13 @@ export function UsageExportButton() {
 		];
 
 		downloadCSV(`usage-report-${now}.csv`, [...toolRows, ...periodRows]);
+		track({
+			name: "usage_report_exported",
+			props: {
+				tool_count: byTool.length,
+				period_count: byPeriod.length,
+			},
+		});
 	};
 
 	return (

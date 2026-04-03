@@ -6,6 +6,11 @@ import { CreditAlertSettings } from "./CreditAlertSettings";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const localStorageMock = (() => {
 	let store: Record<string, string> = {};
 	return {
@@ -27,6 +32,7 @@ Object.defineProperty(window, "localStorage", { value: localStorageMock });
 describe("CreditAlertSettings", () => {
 	beforeEach(() => {
 		localStorageMock.clear();
+		mockTrack.mockClear();
 	});
 
 	it("renders toggle and threshold input", async () => {
@@ -85,6 +91,37 @@ describe("CreditAlertSettings", () => {
 			localStorageMock.getItem("credit-alert-settings")!,
 		);
 		expect(stored.threshold).toBe(250);
+	});
+
+	it("tracks credit_alert_threshold_saved on Save click", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<CreditAlertSettings />);
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText("Alert threshold (credits)"),
+			).toBeInTheDocument();
+		});
+		const input = screen.getByLabelText("Alert threshold (credits)");
+		await user.clear(input);
+		await user.type(input, "200");
+		await user.click(screen.getByRole("button", { name: /save/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_alert_threshold_saved",
+			props: { threshold: 200 },
+		});
+	});
+
+	it("tracks credit_alert_toggled when toggling switch", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<CreditAlertSettings />);
+		await waitFor(() => {
+			expect(screen.getByRole("switch")).toBeInTheDocument();
+		});
+		await user.click(screen.getByRole("switch"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_alert_toggled",
+			props: { enabled: false },
+		});
 	});
 
 	it("shows error toast for invalid threshold", async () => {
