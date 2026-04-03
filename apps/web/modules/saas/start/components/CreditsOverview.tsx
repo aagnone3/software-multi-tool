@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
@@ -39,6 +40,7 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 	const { activeOrganization } = useActiveOrganization();
 
 	const isLoading = balanceLoading || usageLoading;
+	const { track } = useProductAnalytics();
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -198,6 +200,17 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 								size="sm"
 								className="flex-1"
 								asChild
+								onClick={() =>
+									track({
+										name: "upgrade_nudge_cta_clicked",
+										props: {
+											source: "credits_overview_widget",
+											plan_id: "starter",
+
+											cta_label: "upgrade_to_pro",
+										},
+									})
+								}
 							>
 								<Link href={`${billingPath}?upgrade=pro`}>
 									<SparklesIcon className="size-3.5 mr-1" />
