@@ -28,9 +28,11 @@ describe("run-supabase-cli.sh", () => {
 	it("should fall back to a pinned pnpm dlx supabase invocation", async () => {
 		const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
 		expect(stdout).toContain(
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: bash script content intentionally uses ${...} interpolation syntax
 			'SUPABASE_CLI_VERSION="${SUPABASE_CLI_VERSION:-2.81.2}"',
 		);
 		expect(stdout).toContain(
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: bash script content intentionally uses ${...} interpolation syntax
 			'exec pnpm dlx "supabase@${SUPABASE_CLI_VERSION}" "$@"',
 		);
 	});
