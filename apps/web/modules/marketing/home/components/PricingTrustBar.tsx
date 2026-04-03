@@ -32,7 +32,7 @@ export function PricingTrustBar({ className }: { className?: string }) {
 			<div className="flex items-center gap-2">
 				<ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
 				<span>
-					<strong className="text-foreground">14-day</strong>{" "}
+					<strong className="text-foreground">30-day</strong>{" "}
 					money-back guarantee
 				</span>
 			</div>
