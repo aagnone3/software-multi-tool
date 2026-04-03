@@ -1,4 +1,6 @@
 import { StickyCta } from "@marketing/home/components/StickyCta";
+import { ToolLandingCtaTracker } from "@marketing/tools/components/ToolLandingCtaTracker";
+import { ToolLandingPageTracker } from "@marketing/tools/components/ToolLandingPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { Button } from "@ui/components/button";
@@ -241,7 +243,9 @@ export async function generateMetadata({
 		(t) => t.slug === toolSlug && t.enabled,
 	);
 
-	if (!tool) return { title: "Tool Not Found" };
+	if (!tool) {
+		return { title: "Tool Not Found" };
+	}
 
 	const siteUrl = getBaseUrl();
 	const title = `${tool.name} — AI-Powered | ${config.appName}`;
@@ -285,7 +289,9 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 		(t) => t.slug === toolSlug && t.enabled,
 	);
 
-	if (!tool) notFound();
+	if (!tool) {
+		notFound();
+	}
 
 	const Icon = TOOL_ICONS[tool.icon] ?? SparklesIcon;
 	const features = TOOL_FEATURES[toolSlug] ?? [];
@@ -366,6 +372,7 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 					}}
 				/>
 			)}
+			<ToolLandingPageTracker toolSlug={toolSlug} toolName={tool.name} />
 			<main>
 				{/* Hero */}
 				<section className="container pt-32 pb-16 text-center md:pt-40 lg:pb-24">
@@ -456,12 +463,11 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 							Sign up free and get credits to start immediately.
 							No credit card required.
 						</p>
-						<Button size="lg" variant="primary" asChild>
-							<Link href="/auth/signup">
-								Get Started Free
-								<ArrowRightIcon className="ml-2 size-4" />
-							</Link>
-						</Button>
+						<ToolLandingCtaTracker
+							toolSlug={toolSlug}
+							toolName={tool.name}
+							source="tool_marketing_page_cta_section"
+						/>
 					</div>
 				</section>
 			</main>

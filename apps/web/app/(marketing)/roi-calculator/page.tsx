@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 
-const siteUrl = getBaseUrl();
+const _siteUrl = getBaseUrl();
 
 interface UseCase {
 	id: string;

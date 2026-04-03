@@ -665,6 +665,18 @@ type ProductEvent =
 	| {
 			name: "payment_issue_alert_cta_clicked";
 			props: { status: string; source: string };
+	  }
+	| {
+			name: "tool_marketing_page_viewed";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
+			name: "tool_marketing_cta_clicked";
+			props: { tool_slug: string; tool_name: string; source: string };
+	  }
+	| {
+			name: "tools_index_page_viewed";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };
