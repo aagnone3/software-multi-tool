@@ -16,7 +16,9 @@ vi.mock("@ui/components/button", () => ({
 		asChild?: boolean;
 		[key: string]: unknown;
 	}) => {
-		if (asChild) return <>{children}</>;
+		if (asChild) {
+			return <>{children}</>;
+		}
 		return (
 			<button onClick={onClick} {...props}>
 				{children}

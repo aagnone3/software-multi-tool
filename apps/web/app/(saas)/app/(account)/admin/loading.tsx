@@ -15,11 +15,7 @@ export default function AdminLoading() {
 			{/* Stats cards */}
 			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 				{Array.from({ length: 3 }).map((_, i) => (
-					<div
-						// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-						key={i}
-						className="rounded-lg border p-4 space-y-2"
-					>
+					<div key={i} className="rounded-lg border p-4 space-y-2">
 						<Skeleton className="h-4 w-24" />
 						<Skeleton className="h-8 w-16" />
 					</div>
@@ -36,7 +32,6 @@ export default function AdminLoading() {
 				</div>
 				{Array.from({ length: 10 }).map((_, i) => (
 					<div
-						// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
 						key={i}
 						className="flex items-center gap-4 px-4 py-3 border-b last:border-0"
 					>

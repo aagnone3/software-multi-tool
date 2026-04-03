@@ -33,7 +33,6 @@ export default function FilesLoading() {
 				{/* Table rows */}
 				{Array.from({ length: 8 }).map((_, i) => (
 					<div
-						// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
 						key={i}
 						className="flex items-center gap-4 px-4 py-3 border-b last:border-0"
 					>

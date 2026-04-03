@@ -11,7 +11,6 @@ export default function ChatbotLoading() {
 					<Skeleton className="h-8 w-8 rounded-md" />
 				</div>
 				{Array.from({ length: 5 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
 					<Skeleton key={i} className="h-10 w-full rounded-md" />
 				))}
 			</div>
