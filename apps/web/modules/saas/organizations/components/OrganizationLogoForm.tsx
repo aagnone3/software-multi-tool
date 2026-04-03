@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
@@ -16,6 +17,7 @@ import { OrganizationLogo } from "./OrganizationLogo";
 
 export function OrganizationLogoForm() {
 	const router = useRouter();
+	const { track } = useProductAnalytics();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
@@ -82,6 +84,7 @@ export function OrganizationLogoForm() {
 			}
 
 			toast.success("Logo was updated successfully");
+			track({ name: "org_logo_updated", props: {} });
 
 			refetchActiveOrganization();
 			queryClient.invalidateQueries({

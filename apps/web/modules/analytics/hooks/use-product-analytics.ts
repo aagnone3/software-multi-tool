@@ -792,7 +792,15 @@ type ProductEvent =
 	| {
 			name: "usage_trend_period_toggled";
 			props: { period: "week" | "month" };
-	  };
+	  }
+	| {
+			name: "no_credits_modal_shown";
+			props: { tool_name?: string; credit_cost?: number };
+	  }
+	| { name: "org_invitation_accepted"; props: { organization_slug: string } }
+	| { name: "org_invitation_rejected"; props: { organization_slug: string } }
+	| { name: "org_name_updated"; props: Record<string, never> }
+	| { name: "org_logo_updated"; props: Record<string, never> };
 
 export type { ProductEvent };
 

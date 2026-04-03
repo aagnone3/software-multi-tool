@@ -29,17 +29,38 @@ vi.mock("../hooks/use-credits-balance", () => ({
 	useCreditsBalance: () => mockUseCreditsBalance(),
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 describe("NoCreditsModal", () => {
 	beforeEach(() => {
 		mockUseCreditsBalance.mockReturnValue({
 			isStarterPlan: false,
 			isFreePlan: true,
 		});
+		mockTrack.mockClear();
 	});
 
 	it("renders when open", () => {
 		render(<NoCreditsModal open={true} onClose={vi.fn()} />);
 		expect(screen.getByText("Out of credits")).toBeInTheDocument();
+	});
+
+	it("fires no_credits_modal_shown when opened", () => {
+		render(
+			<NoCreditsModal
+				open={true}
+				onClose={vi.fn()}
+				toolName="Invoice Processor"
+				creditCost={5}
+			/>,
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "no_credits_modal_shown",
+			props: { tool_name: "Invoice Processor", credit_cost: 5 },
+		});
 	});
 
 	it("does not render when closed", () => {

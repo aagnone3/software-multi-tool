@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
@@ -17,7 +18,7 @@ import {
 	ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useCreditsBalance } from "../hooks/use-credits-balance";
 
 interface NoCreditsModalProps {
@@ -37,6 +38,16 @@ export function NoCreditsModal({
 }: NoCreditsModalProps) {
 	const { activeOrganization } = useActiveOrganization();
 	const { isStarterPlan, isFreePlan } = useCreditsBalance();
+	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		if (open) {
+			track({
+				name: "no_credits_modal_shown",
+				props: { tool_name: toolName, credit_cost: creditCost },
+			});
+		}
+	}, [open]);
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
