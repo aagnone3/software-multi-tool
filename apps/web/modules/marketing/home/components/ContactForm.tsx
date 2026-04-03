@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	type ContactFormValues,
@@ -27,6 +28,7 @@ export function ContactForm() {
 	const contactFormMutation = useMutation(
 		orpc.contact.submit.mutationOptions(),
 	);
+	const { track } = useProductAnalytics();
 
 	const form = useForm<ContactFormValues>({
 		resolver: zodResolver(contactFormSchema),
@@ -38,9 +40,15 @@ export function ContactForm() {
 	});
 
 	const onSubmit = form.handleSubmit(async (values) => {
+		track({
+			name: "contact_form_submitted",
+			props: { has_message: values.message.length > 0 },
+		});
 		try {
 			await contactFormMutation.mutateAsync(values);
+			track({ name: "contact_form_succeeded", props: {} });
 		} catch {
+			track({ name: "contact_form_failed", props: {} });
 			form.setError("root", {
 				message:
 					"We are sorry, but we were unable to send your message. Please try again later.",

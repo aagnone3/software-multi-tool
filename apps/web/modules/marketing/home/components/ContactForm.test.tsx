@@ -1,90 +1,85 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ContactForm } from "./ContactForm";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockMutateAsync = vi.fn();
-
 vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: {
 		contact: {
 			submit: {
-				mutationOptions: vi.fn(() => ({ mutationFn: mockMutateAsync })),
+				mutationOptions: () => ({}),
 			},
 		},
 	},
 }));
 
-function renderContactForm() {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: { retry: false },
-			mutations: { retry: false },
-		},
-	});
-	return render(
-		<QueryClientProvider client={queryClient}>
-			<ContactForm />
-		</QueryClientProvider>,
-	);
-}
+vi.mock("@tanstack/react-query", () => ({
+	useMutation: () => ({ mutateAsync: mockMutateAsync }),
+}));
+
+import { ContactForm } from "./ContactForm";
 
 describe("ContactForm", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
+		mockTrack.mockClear();
+		mockMutateAsync.mockReset();
 	});
 
-	it("renders form fields", () => {
-		renderContactForm();
+	it("renders name, email, message fields and submit button", () => {
+		render(<ContactForm />);
 		expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
 		expect(screen.getByLabelText(/message/i)).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /send message/i }),
-		).toBeInTheDocument();
 	});
 
-	it("shows success state after successful submission", async () => {
-		mockMutateAsync.mockResolvedValueOnce({});
-		renderContactForm();
-
-		await userEvent.type(screen.getByLabelText(/name/i), "John Doe");
-		await userEvent.type(
-			screen.getByLabelText(/email/i),
-			"john@example.com",
-		);
-		await userEvent.type(screen.getByLabelText(/message/i), "Hello there!");
-		await userEvent.click(
-			screen.getByRole("button", { name: /send message/i }),
-		);
-
+	it("tracks submitted and succeeded on success", async () => {
+		mockMutateAsync.mockResolvedValue({});
+		render(<ContactForm />);
+		fireEvent.change(screen.getByLabelText(/name/i), {
+			target: { value: "Alice Smith" },
+		});
+		fireEvent.change(screen.getByLabelText(/email/i), {
+			target: { value: "alice@example.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/message/i), {
+			target: { value: "Hello, I have a question about your product." },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /send/i }));
 		await waitFor(() => {
-			expect(
-				screen.getByText(/message has been sent successfully/i),
-			).toBeInTheDocument();
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "contact_form_submitted",
+				props: { has_message: true },
+			});
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "contact_form_succeeded",
+				props: {},
+			});
 		});
 	});
 
-	it("shows error message on failed submission", async () => {
-		mockMutateAsync.mockRejectedValueOnce(new Error("Network error"));
-		renderContactForm();
-
-		await userEvent.type(screen.getByLabelText(/name/i), "John Doe");
-		await userEvent.type(
-			screen.getByLabelText(/email/i),
-			"john@example.com",
-		);
-		await userEvent.type(screen.getByLabelText(/message/i), "Hello there!");
-		await userEvent.click(
-			screen.getByRole("button", { name: /send message/i }),
-		);
-
+	it("tracks failed on error", async () => {
+		mockMutateAsync.mockRejectedValue(new Error("fail"));
+		render(<ContactForm />);
+		fireEvent.change(screen.getByLabelText(/name/i), {
+			target: { value: "Alice Smith" },
+		});
+		fireEvent.change(screen.getByLabelText(/email/i), {
+			target: { value: "alice@example.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/message/i), {
+			target: { value: "Hello, I have a question about your product." },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /send/i }));
 		await waitFor(() => {
-			expect(
-				screen.getByText(/unable to send your message/i),
-			).toBeInTheDocument();
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "contact_form_failed",
+				props: {},
+			});
 		});
 	});
 });

@@ -1,8 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolOutputExporter } from "./ToolOutputExporter";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
@@ -27,6 +32,10 @@ Object.defineProperty(navigator, "clipboard", {
 
 describe("ToolOutputExporter", () => {
 	const data = { foo: "bar", count: 42 };
+
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
 
 	it("renders Export button", () => {
 		mockUseCreditsBalance.mockReturnValue({
@@ -94,5 +103,19 @@ describe("ToolOutputExporter", () => {
 		render(<ToolOutputExporter data={data} />);
 		await userEvent.click(screen.getByText("Export"));
 		expect(screen.queryByText("Download JSON")).not.toBeInTheDocument();
+	});
+
+	it("tracks tool_output_copied on copy", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isLoading: false,
+		});
+		render(<ToolOutputExporter data={data} label="test-label" />);
+		await userEvent.click(screen.getByText("Export"));
+		await userEvent.click(screen.getByText("Copy as JSON"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_output_copied",
+			props: { label: "test-label" },
+		});
 	});
 });

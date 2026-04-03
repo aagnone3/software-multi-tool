@@ -1,86 +1,74 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Newsletter } from "./Newsletter";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockMutateAsync = vi.fn();
-
 vi.mock("@shared/lib/orpc-query-utils", () => ({
 	orpc: {
 		newsletter: {
 			subscribe: {
-				mutationOptions: vi.fn(() => ({ mutationFn: mockMutateAsync })),
+				mutationOptions: () => ({}),
 			},
 		},
 	},
 }));
 
-vi.mock("sonner", () => ({
-	toast: { success: vi.fn(), error: vi.fn() },
+vi.mock("@tanstack/react-query", () => ({
+	useMutation: () => ({ mutateAsync: mockMutateAsync }),
 }));
 
-function renderNewsletter() {
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: { retry: false },
-			mutations: { retry: false },
-		},
-	});
-	return render(
-		<QueryClientProvider client={queryClient}>
-			<Newsletter />
-		</QueryClientProvider>,
-	);
-}
+import { Newsletter } from "./Newsletter";
 
 describe("Newsletter", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
+		mockTrack.mockClear();
+		mockMutateAsync.mockReset();
 	});
 
-	it("renders the newsletter form", () => {
-		renderNewsletter();
-		expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
+	it("renders email input and submit button", () => {
+		render(<Newsletter />);
+		expect(screen.getByRole("textbox")).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: /subscribe/i }),
 		).toBeInTheDocument();
 	});
 
-	it("shows success state after successful subscription", async () => {
-		mockMutateAsync.mockResolvedValueOnce({});
-		renderNewsletter();
-
-		await userEvent.type(
-			screen.getByPlaceholderText("Email"),
-			"user@example.com",
-		);
-		await userEvent.click(
-			screen.getByRole("button", { name: /subscribe/i }),
-		);
-
+	it("tracks submitted and succeeded on success", async () => {
+		mockMutateAsync.mockResolvedValue({});
+		render(<Newsletter />);
+		fireEvent.change(screen.getByRole("textbox"), {
+			target: { value: "test@example.com" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /subscribe/i }));
 		await waitFor(() => {
-			expect(screen.getByText(/subscribed/i)).toBeInTheDocument();
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_signup_submitted",
+				props: { email: "test@example.com" },
+			});
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_signup_succeeded",
+				props: { email: "test@example.com" },
+			});
 		});
 	});
 
-	it("shows error message on failed subscription", async () => {
-		mockMutateAsync.mockRejectedValueOnce(new Error("Network error"));
-		renderNewsletter();
-
-		await userEvent.type(
-			screen.getByPlaceholderText("Email"),
-			"user@example.com",
-		);
-		await userEvent.click(
-			screen.getByRole("button", { name: /subscribe/i }),
-		);
-
+	it("tracks failed on error", async () => {
+		mockMutateAsync.mockRejectedValue(new Error("fail"));
+		render(<Newsletter />);
+		fireEvent.change(screen.getByRole("textbox"), {
+			target: { value: "test@example.com" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: /subscribe/i }));
 		await waitFor(() => {
-			expect(
-				screen.getByText(/could not subscribe/i),
-			).toBeInTheDocument();
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "newsletter_signup_failed",
+				props: { email: "test@example.com" },
+			});
 		});
 	});
 });

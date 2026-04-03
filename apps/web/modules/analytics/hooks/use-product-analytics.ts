@@ -715,7 +715,19 @@ type ProductEvent =
 				total_runs: number;
 			};
 	  }
-	| { name: "activity_feed_view_all_clicked"; props: Record<string, never> };
+	| { name: "activity_feed_view_all_clicked"; props: Record<string, never> }
+	| { name: "newsletter_signup_submitted"; props: { email: string } }
+	| { name: "newsletter_signup_succeeded"; props: { email: string } }
+	| { name: "newsletter_signup_failed"; props: { email: string } }
+	| { name: "contact_form_submitted"; props: { has_message: boolean } }
+	| { name: "contact_form_succeeded"; props: Record<string, never> }
+	| { name: "contact_form_failed"; props: Record<string, never> }
+	| { name: "tool_output_copied"; props: { label: string } }
+	| {
+			name: "tool_output_downloaded";
+			props: { label: string; format: "json" | "txt" };
+	  }
+	| { name: "tool_output_upgrade_clicked"; props: Record<string, never> };
 
 export type { ProductEvent };
 
