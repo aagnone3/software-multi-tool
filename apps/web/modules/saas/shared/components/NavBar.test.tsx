@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockUseSession = vi.hoisted(() => vi.fn());
 const mockUseActiveOrganization = vi.hoisted(() => vi.fn());
@@ -143,6 +149,22 @@ describe("NavBar", () => {
 		render(<NavBar />);
 
 		expect(screen.queryByText("Admin")).not.toBeInTheDocument();
+	});
+
+	it("tracks nav_item_clicked when a nav link is clicked", async () => {
+		mockUseSession.mockReturnValue({ user: mockUser });
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		mockUsePathname.mockReturnValue("/app");
+
+		render(<NavBar />);
+
+		const toolsLink = screen.getByText("Tools").closest("a") as HTMLElement;
+		await userEvent.click(toolsLink);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "nav_item_clicked",
+			props: { label: "Tools", href: "/app/tools" },
+		});
 	});
 
 	it("uses org-scoped Files link when org is active", () => {

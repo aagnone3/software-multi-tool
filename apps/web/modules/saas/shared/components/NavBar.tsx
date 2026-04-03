@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { CreditBalanceIndicator } from "@saas/credits/components/CreditBalanceIndicator";
@@ -20,13 +21,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useCallback } from "react";
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 
 export function NavBar() {
 	const pathname = usePathname();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
+
+	const handleNavClick = useCallback(
+		(label: string, href: string) => {
+			track({ name: "nav_item_clicked", props: { label, href } });
+		},
+		[track],
+	);
 
 	const { useSidebarLayout } = config.ui.saas;
 
@@ -187,6 +196,12 @@ export function NavBar() {
 									},
 								)}
 								prefetch
+								onClick={() =>
+									handleNavClick(
+										menuItem.label,
+										menuItem.href,
+									)
+								}
 							>
 								<menuItem.icon
 									className={`size-4 shrink-0 ${

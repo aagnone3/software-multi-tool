@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	Dialog,
 	DialogContent,
@@ -34,6 +35,7 @@ function Kbd({ children }: { children: React.ReactNode }) {
 
 export function KeyboardShortcutsHelp() {
 	const [open, setOpen] = useState(false);
+	const { track } = useProductAnalytics();
 
 	useEffect(() => {
 		function handleKeyDown(e: KeyboardEvent) {
@@ -49,7 +51,12 @@ export function KeyboardShortcutsHelp() {
 			}
 			if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) {
 				e.preventDefault();
-				setOpen((prev) => !prev);
+				setOpen((prev) => {
+					if (!prev) {
+						track({ name: "keyboard_shortcuts_opened", props: {} });
+					}
+					return !prev;
+				});
 			}
 		}
 
