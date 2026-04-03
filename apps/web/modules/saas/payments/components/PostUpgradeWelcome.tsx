@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -12,7 +13,7 @@ import {
 	RocketIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 const PRO_EXCLUSIVE = [
 	{
@@ -71,10 +72,46 @@ const NEXT_STEPS = [
 
 export function PostUpgradeWelcome() {
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 	const firstTool = enabledTools[0];
 	const firstToolHref = firstTool
 		? `/app/tools/${firstTool.slug}`
 		: "/app/tools";
+
+	useEffect(() => {
+		track({ name: "post_upgrade_welcome_viewed", props: {} });
+	}, [track]);
+
+	const handleFeatureCta = useCallback(
+		(feature: string, href: string) => {
+			track({
+				name: "post_upgrade_feature_cta_clicked",
+				props: { feature, href },
+			});
+		},
+		[track],
+	);
+
+	const handleNextStep = useCallback(
+		(step: number, label: string) => {
+			track({
+				name: "post_upgrade_next_step_clicked",
+				props: { step, label },
+			});
+		},
+		[track],
+	);
+
+	const handlePrimaryCta = useCallback(() => {
+		track({
+			name: "post_upgrade_primary_cta_clicked",
+			props: { tool_slug: firstTool?.slug ?? "" },
+		});
+	}, [track, firstTool]);
+
+	const handleSecondaryCta = useCallback(() => {
+		track({ name: "post_upgrade_secondary_cta_clicked", props: {} });
+	}, [track]);
 
 	return (
 		<main className="container flex min-h-[80vh] flex-col items-center py-20 text-center">
@@ -135,6 +172,9 @@ export function PostUpgradeWelcome() {
 									size="sm"
 									variant="outline"
 									className="mt-auto w-full"
+									onClick={() =>
+										handleFeatureCta(title, cta.href)
+									}
 								>
 									<Link href={cta.href}>{cta.label}</Link>
 								</Button>
@@ -159,6 +199,7 @@ export function PostUpgradeWelcome() {
 								<Link
 									href={href}
 									className="font-semibold text-sm hover:underline"
+									onClick={() => handleNextStep(step, label)}
 								>
 									{label}
 								</Link>
@@ -173,13 +214,18 @@ export function PostUpgradeWelcome() {
 
 			{/* Primary CTA */}
 			<div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-				<Button asChild size="lg">
+				<Button asChild size="lg" onClick={handlePrimaryCta}>
 					<Link href={firstToolHref}>
 						<RocketIcon className="mr-2 size-4" />
 						Run your first Pro tool
 					</Link>
 				</Button>
-				<Button asChild size="lg" variant="outline">
+				<Button
+					asChild
+					size="lg"
+					variant="outline"
+					onClick={handleSecondaryCta}
+				>
 					<Link href="/app/tools">
 						Browse all tools
 						<ArrowRightIcon className="ml-2 size-4" />

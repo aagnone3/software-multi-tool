@@ -677,6 +677,20 @@ type ProductEvent =
 	| {
 			name: "tools_index_page_viewed";
 			props: Record<string, never>;
+	  }
+	| { name: "post_upgrade_welcome_viewed"; props: Record<string, never> }
+	| {
+			name: "post_upgrade_feature_cta_clicked";
+			props: { feature: string; href: string };
+	  }
+	| {
+			name: "post_upgrade_next_step_clicked";
+			props: { step: number; label: string };
+	  }
+	| { name: "post_upgrade_primary_cta_clicked"; props: { tool_slug: string } }
+	| {
+			name: "post_upgrade_secondary_cta_clicked";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };
