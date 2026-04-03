@@ -388,6 +388,10 @@ type ProductEvent =
 			};
 	  }
 	| {
+			name: "tool_page_viewed";
+			props: { tool_slug: string; tool_name: string };
+	  }
+	| {
 			name: "tool_card_open_clicked";
 			props: {
 				tool_slug: string;
