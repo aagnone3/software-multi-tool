@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCookieConsent } from "@shared/hooks/cookie-consent";
 import { Button } from "@ui/components/button";
 import { CookieIcon } from "lucide-react";
@@ -8,6 +9,7 @@ import React, { useEffect, useState } from "react";
 export function ConsentBanner() {
 	const { userHasConsented, allowCookies, declineCookies } =
 		useCookieConsent();
+	const { track } = useProductAnalytics();
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
 		setMounted(true);
@@ -33,13 +35,25 @@ export function ConsentBanner() {
 						<Button
 							variant="light"
 							className="flex-1"
-							onClick={() => declineCookies()}
+							onClick={() => {
+								declineCookies();
+								track({
+									name: "cookie_consent_declined",
+									props: {},
+								});
+							}}
 						>
 							Decline
 						</Button>
 						<Button
 							className="flex-1"
-							onClick={() => allowCookies()}
+							onClick={() => {
+								allowCookies();
+								track({
+									name: "cookie_consent_accepted",
+									props: {},
+								});
+							}}
 						>
 							Allow
 						</Button>
