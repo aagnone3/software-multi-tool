@@ -104,6 +104,9 @@ vi.mock("./components/OnboardingRewardChecklist", () => ({
 	),
 }));
 
+vi.mock("@saas/payments/components/PaymentIssueAlert", () => ({
+	PaymentIssueAlert: () => <div data-testid="payment-issue-alert" />,
+}));
 vi.mock("./components/ProTrialOfferCard", () => ({
 	ProTrialOfferCard: () => <div data-testid="pro-trial-offer-card" />,
 }));

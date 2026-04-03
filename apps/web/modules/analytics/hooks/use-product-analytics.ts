@@ -657,6 +657,10 @@ type ProductEvent =
 	| {
 			name: "credit_burn_rate_upgrade_clicked";
 			props: { plan_id: string; source: string };
+	  }
+	| {
+			name: "payment_issue_alert_cta_clicked";
+			props: { status: string; source: string };
 	  };
 
 export type { ProductEvent };
