@@ -213,6 +213,9 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 							<Button
 								variant="link"
 								onClick={() => setChatId(chat.id)}
+								aria-current={
+									chat.id === chatId ? "true" : undefined
+								}
 								className={cn(
 									"block h-auto w-full py-2 text-left text-foreground hover:no-underline",
 									chat.id === chatId &&
@@ -288,6 +291,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 						onChange={(e) => setInput(e.target.value)}
 						disabled={!hasChat}
 						placeholder="Chat with your AI..."
+						aria-label="Chat message input"
 						className="min-h-8 rounded-none border-none bg-transparent focus:outline-hidden focus-visible:ring-0 shadow-none p-6 pr-14"
 						onKeyDown={(e) => {
 							if (e.key === "Enter" && !e.shiftKey) {
