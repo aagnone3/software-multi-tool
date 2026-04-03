@@ -22,14 +22,14 @@ describe("use-cases layout metadata", () => {
 	it("has openGraph metadata", () => {
 		expect(metadata.openGraph).toBeDefined();
 		const og = metadata.openGraph as Record<string, unknown>;
-		expect(og["type"]).toBe("website");
-		expect(og["url"]).toBeDefined();
+		expect(og.type).toBe("website");
+		expect(og.url).toBeDefined();
 	});
 
 	it("has twitter card metadata", () => {
 		expect(metadata.twitter).toBeDefined();
 		const tw = metadata.twitter as Record<string, unknown>;
-		expect(tw["card"]).toBe("summary_large_image");
+		expect(tw.card).toBe("summary_large_image");
 	});
 });
 

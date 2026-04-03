@@ -261,7 +261,6 @@ export default function PricingPage() {
 										{Array.from({ length: 5 }).map(
 											(_, i) => (
 												<StarIcon
-													// biome-ignore lint/suspicious/noArrayIndexKey: static star list
 													key={i}
 													className="size-4 fill-amber-400 text-amber-400"
 												/>
