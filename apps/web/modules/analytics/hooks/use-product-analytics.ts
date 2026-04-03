@@ -784,7 +784,11 @@ type ProductEvent =
 	| { name: "share_nudge_dismissed"; props: { tool_slug: string } }
 	| { name: "share_nudge_link_copied"; props: { tool_slug: string } }
 	| { name: "cookie_consent_accepted"; props: Record<string, never> }
-	| { name: "cookie_consent_declined"; props: Record<string, never> };
+	| { name: "cookie_consent_declined"; props: Record<string, never> }
+	| {
+			name: "usage_trend_period_toggled";
+			props: { period: "week" | "month" };
+	  };
 
 export type { ProductEvent };
 

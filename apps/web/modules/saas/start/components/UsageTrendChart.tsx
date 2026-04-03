@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useUsageStats } from "@saas/credits/hooks/use-usage-stats";
 import { Button } from "@ui/components/button";
 import {
@@ -39,6 +40,7 @@ function formatDate(dateStr: string, period: Period): string {
 
 export function UsageTrendChart({ className }: UsageTrendChartProps) {
 	const [period, setPeriod] = useState<Period>("week");
+	const { track } = useProductAnalytics();
 
 	// Fetch usage stats for the selected period
 	const { byPeriod, isLoading } = useUsageStats({
@@ -128,7 +130,13 @@ export function UsageTrendChart({ className }: UsageTrendChartProps) {
 							variant={period === "week" ? "secondary" : "ghost"}
 							size="sm"
 							className="h-7 px-2 text-xs"
-							onClick={() => setPeriod("week")}
+							onClick={() => {
+								setPeriod("week");
+								track({
+									name: "usage_trend_period_toggled",
+									props: { period: "week" },
+								});
+							}}
 						>
 							7D
 						</Button>
@@ -136,7 +144,13 @@ export function UsageTrendChart({ className }: UsageTrendChartProps) {
 							variant={period === "month" ? "secondary" : "ghost"}
 							size="sm"
 							className="h-7 px-2 text-xs"
-							onClick={() => setPeriod("month")}
+							onClick={() => {
+								setPeriod("month");
+								track({
+									name: "usage_trend_period_toggled",
+									props: { period: "month" },
+								});
+							}}
 						>
 							30D
 						</Button>
