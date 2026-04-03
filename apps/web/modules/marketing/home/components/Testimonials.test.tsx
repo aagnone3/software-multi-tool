@@ -58,4 +58,11 @@ describe("Testimonials", () => {
 		const section = document.getElementById("testimonials");
 		expect(section).not.toBeNull();
 	});
+
+	it("shows correct free credit count (10, not 100) in the CTA disclaimer", () => {
+		render(<Testimonials />);
+		expect(
+			screen.getByText(/10 free credits to start/),
+		).toBeInTheDocument();
+	});
 });
