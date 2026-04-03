@@ -151,7 +151,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 					}}
 				/>
 			)}
-			<ToolViewTracker toolSlug={toolSlug} />
+			<ToolViewTracker toolSlug={toolSlug} toolName={tool.name} />
 			<ToolPageHeader tool={tool} />
 			<UpgradeGate
 				featureName="Tool Scheduler"
