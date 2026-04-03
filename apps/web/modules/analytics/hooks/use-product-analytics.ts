@@ -706,7 +706,16 @@ type ProductEvent =
 	| { name: "job_note_cleared"; props: { job_id: string } }
 	| { name: "job_tag_added"; props: { job_id: string; tag: string } }
 	| { name: "job_tag_removed"; props: { job_id: string; tag: string } }
-	| { name: "job_unpinned"; props: { job_id: string } };
+	| { name: "job_unpinned"; props: { job_id: string } }
+	| {
+			name: "tool_benchmark_tool_clicked";
+			props: {
+				tool_slug: string;
+				success_rate: number;
+				total_runs: number;
+			};
+	  }
+	| { name: "activity_feed_view_all_clicked"; props: Record<string, never> };
 
 export type { ProductEvent };
 

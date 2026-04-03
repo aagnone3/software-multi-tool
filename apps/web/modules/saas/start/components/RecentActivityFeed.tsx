@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -123,6 +124,7 @@ export function RecentActivityFeed({
 	const { transactions, isLoading, isError } = useCreditsHistory({
 		limit: maxItems,
 	});
+	const { track } = useProductAnalytics();
 
 	if (isError) {
 		return (
@@ -262,7 +264,15 @@ export function RecentActivityFeed({
 						className="w-full"
 						asChild
 					>
-						<Link href="/app/settings/usage">
+						<Link
+							href="/app/settings/usage"
+							onClick={() =>
+								track({
+									name: "activity_feed_view_all_clicked",
+									props: {},
+								})
+							}
+						>
 							View all activity
 							<ChevronRightIcon className="size-4 ml-1" />
 						</Link>
