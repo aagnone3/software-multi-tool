@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ToolFeedbackButton } from "./ToolFeedbackButton";
 
 const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }));
+const { mockTrack } = vi.hoisted(() => ({ mockTrack: vi.fn() }));
 vi.mock("@shared/lib/orpc-client", () => ({
 	orpcClient: {
 		feedback: {
@@ -13,6 +14,9 @@ vi.mock("@shared/lib/orpc-client", () => ({
 	},
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 describe("ToolFeedbackButton", () => {
 	it("renders Feedback button", () => {
@@ -56,6 +60,42 @@ describe("ToolFeedbackButton", () => {
 				rating: "POSITIVE",
 				jobId: "job-1",
 				chatTranscript: undefined,
+			}),
+		);
+	});
+
+	it("tracks dialog opened event", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(
+			<ToolFeedbackButton toolSlug="invoice-processor" jobId="job-1" />,
+		);
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_feedback_dialog_opened",
+			props: { tool_slug: "invoice-processor", job_id: "job-1" },
+		});
+	});
+
+	it("tracks feedback submitted event", async () => {
+		const user = userEvent.setup({ delay: null });
+		mockCreate.mockResolvedValueOnce({ feedback: { id: "f1" } });
+		render(
+			<ToolFeedbackButton toolSlug="invoice-processor" jobId="job-1" />,
+		);
+		await user.click(screen.getByRole("button", { name: /feedback/i }));
+		await user.click(screen.getByText("Helpful"));
+		await user.click(
+			screen.getByRole("button", { name: /submit feedback/i }),
+		);
+		await waitFor(() =>
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "tool_feedback_submitted",
+				props: {
+					tool_slug: "invoice-processor",
+					rating: "POSITIVE",
+					has_comment: false,
+					job_id: "job-1",
+				},
 			}),
 		);
 	});
