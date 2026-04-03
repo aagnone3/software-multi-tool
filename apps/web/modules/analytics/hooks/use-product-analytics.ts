@@ -755,6 +755,18 @@ type ProductEvent =
 	| {
 			name: "keyboard_shortcuts_opened";
 			props: Record<string, never>;
+	  }
+	| {
+			name: "credit_alert_toggled";
+			props: { enabled: boolean };
+	  }
+	| {
+			name: "credit_alert_threshold_saved";
+			props: { threshold: number };
+	  }
+	| {
+			name: "usage_report_exported";
+			props: { tool_count: number; period_count: number };
 	  };
 
 export type { ProductEvent };

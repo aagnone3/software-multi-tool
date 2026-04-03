@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { Label } from "@ui/components/label";
@@ -48,6 +49,7 @@ interface CreditAlertSettingsProps {
 }
 
 export function CreditAlertSettings({ className }: CreditAlertSettingsProps) {
+	const { track } = useProductAnalytics();
 	const [settings, setSettings] = useState<AlertSettings>(DEFAULT_SETTINGS);
 	const [inputValue, setInputValue] = useState(
 		String(DEFAULT_SETTINGS.threshold),
@@ -65,6 +67,7 @@ export function CreditAlertSettings({ className }: CreditAlertSettingsProps) {
 		const next = { ...settings, enabled };
 		setSettings(next);
 		saveSettings(next);
+		track({ name: "credit_alert_toggled", props: { enabled } });
 		toast.success(
 			enabled
 				? "Low credits alert enabled"
@@ -81,6 +84,10 @@ export function CreditAlertSettings({ className }: CreditAlertSettingsProps) {
 		const next = { ...settings, threshold: value };
 		setSettings(next);
 		saveSettings(next);
+		track({
+			name: "credit_alert_threshold_saved",
+			props: { threshold: value },
+		});
 		toast.success(`Alert threshold set to ${value} credits`);
 	};
 
