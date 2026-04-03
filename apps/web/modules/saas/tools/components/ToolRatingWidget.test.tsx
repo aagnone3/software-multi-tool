@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Mock the hook
 const mockGetRating = vi.fn();
 const mockRateTool = vi.fn();
+const mockTrack = vi.fn();
 
 vi.mock("../hooks/use-tool-ratings", () => ({
 	useToolRatings: () => ({
@@ -15,12 +16,17 @@ vi.mock("../hooks/use-tool-ratings", () => ({
 	}),
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { ToolRatingWidget } from "./ToolRatingWidget";
 
 describe("ToolRatingWidget", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockGetRating.mockReturnValue(null);
+		mockTrack.mockReset();
 	});
 
 	it("renders 5 star buttons", () => {
@@ -50,6 +56,16 @@ describe("ToolRatingWidget", () => {
 		render(<ToolRatingWidget toolSlug="my-tool" />);
 		await user.click(screen.getByRole("button", { name: /Rate 4 star/ }));
 		expect(mockRateTool).toHaveBeenCalledWith("my-tool", 4);
+	});
+
+	it("tracks tool_rated event when a star is clicked", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<ToolRatingWidget toolSlug="my-tool" />);
+		await user.click(screen.getByRole("button", { name: /Rate 3 star/ }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_rated",
+			props: { tool_slug: "my-tool", rating: 3 },
+		});
 	});
 
 	it("hides label when showLabel=false", () => {

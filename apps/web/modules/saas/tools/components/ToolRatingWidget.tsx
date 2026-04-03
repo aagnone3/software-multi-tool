@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { cn } from "@ui/lib";
 import { StarIcon } from "lucide-react";
 import React, { useState } from "react";
@@ -18,6 +19,7 @@ export function ToolRatingWidget({
 	showLabel = true,
 }: ToolRatingWidgetProps) {
 	const { getRating, rateTool } = useToolRatings();
+	const { track } = useProductAnalytics();
 	const [hovered, setHovered] = useState<number | null>(null);
 
 	const currentRating = getRating(toolSlug);
@@ -42,7 +44,13 @@ export function ToolRatingWidget({
 						aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
 						className="rounded p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						onMouseEnter={() => setHovered(star)}
-						onClick={() => rateTool(toolSlug, star)}
+						onClick={() => {
+							rateTool(toolSlug, star);
+							track({
+								name: "tool_rated",
+								props: { tool_slug: toolSlug, rating: star },
+							});
+						}}
 					>
 						<StarIcon
 							className={cn(

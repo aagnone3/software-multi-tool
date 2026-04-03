@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { config } from "@repo/config";
 import { Button } from "@ui/components/button";
@@ -15,6 +16,7 @@ export function SocialSigninButton({
 	className?: string;
 }) {
 	const [invitationId] = useQueryState("invitationId", parseAsString);
+	const { track } = useProductAnalytics();
 	const providerData = oAuthProviders[provider];
 
 	const redirectPath = invitationId
@@ -22,6 +24,10 @@ export function SocialSigninButton({
 		: config.auth.redirectAfterSignIn;
 
 	const onSignin = () => {
+		track({
+			name: "social_signin_clicked",
+			props: { provider, has_invitation: !!invitationId },
+		});
 		const callbackURL = new URL(redirectPath, window.location.origin);
 		authClient.signIn.social({
 			provider,

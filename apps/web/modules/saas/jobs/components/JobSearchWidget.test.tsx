@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { JobSearchWidget } from "./JobSearchWidget";
 
 const mockJobs = [
@@ -49,12 +55,14 @@ vi.mock("next/link", () => ({
 		href,
 		children,
 		className,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
 		className?: string;
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 	}) => (
-		<a href={href} className={className}>
+		<a href={href} className={className} onClick={onClick}>
 			{children}
 		</a>
 	),
@@ -133,5 +141,20 @@ describe("JobSearchWidget", () => {
 			l.getAttribute("href")?.startsWith("/app/jobs/job-"),
 		);
 		expect(jobLink).toBeTruthy();
+	});
+
+	it("tracks job_search_result_clicked when a result is clicked", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<JobSearchWidget />);
+		const links = screen.getAllByRole("link");
+		const jobLink = links.find(
+			(l) => l.getAttribute("href") === "/app/jobs/job-1",
+		);
+		expect(jobLink).toBeTruthy();
+		await user.click(jobLink!);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "job_search_result_clicked",
+			props: { tool_slug: "news-analyzer", status: "COMPLETED" },
+		});
 	});
 });

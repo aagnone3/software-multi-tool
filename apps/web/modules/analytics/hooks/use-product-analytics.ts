@@ -618,7 +618,17 @@ type ProductEvent =
 	| { name: "tool_collection_tool_added"; props: { tool_slug: string } }
 	| { name: "tool_collection_tool_removed"; props: { tool_slug: string } }
 	| { name: "ai_chat_created"; props: Record<string, never> }
-	| { name: "ai_chat_message_sent"; props: { message_length: number } };
+	| { name: "ai_chat_message_sent"; props: { message_length: number } }
+	| { name: "tool_rated"; props: { tool_slug: string; rating: number } }
+	| {
+			name: "social_signin_clicked";
+			props: { provider: string; has_invitation: boolean };
+	  }
+	| { name: "job_search_query_entered"; props: { query_length: number } }
+	| {
+			name: "job_search_result_clicked";
+			props: { tool_slug: string; status: string };
+	  };
 
 export type { ProductEvent };
 
