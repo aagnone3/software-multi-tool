@@ -95,7 +95,12 @@ function computeBurnRate(
 }
 
 export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
-	const { totalCredits, isLoading: balanceLoading } = useCreditsBalance();
+	const {
+		totalCredits,
+		isLoading: balanceLoading,
+		isStarterPlan,
+		isFreePlan,
+	} = useCreditsBalance();
 	const { jobs, isLoading: jobsLoading } = useJobsList(undefined, 50);
 
 	const isLoading = balanceLoading || jobsLoading;
@@ -231,17 +236,56 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 					</div>
 				)}
 
-				<Button
-					variant="ghost"
-					size="sm"
-					className="w-full gap-1"
-					asChild
-				>
-					<Link href="/app/settings/billing">
-						Buy more credits
-						<ArrowRightIcon className="size-3" />
-					</Link>
-				</Button>
+				{isStarterPlan ? (
+					<div className="space-y-2">
+						<Button
+							variant="primary"
+							size="sm"
+							className="w-full gap-1"
+							asChild
+						>
+							<Link href="/app/settings/billing?upgrade=pro">
+								Upgrade to Pro
+								<ArrowRightIcon className="size-3" />
+							</Link>
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="w-full gap-1 text-muted-foreground"
+							asChild
+						>
+							<Link href="/pricing#pricing-plan-pro">
+								Compare plans
+								<ArrowRightIcon className="size-3" />
+							</Link>
+						</Button>
+					</div>
+				) : isFreePlan ? (
+					<Button
+						variant="primary"
+						size="sm"
+						className="w-full gap-1"
+						asChild
+					>
+						<Link href="/app/settings/billing">
+							Upgrade for more credits
+							<ArrowRightIcon className="size-3" />
+						</Link>
+					</Button>
+				) : (
+					<Button
+						variant="ghost"
+						size="sm"
+						className="w-full gap-1"
+						asChild
+					>
+						<Link href="/app/settings/billing">
+							Buy more credits
+							<ArrowRightIcon className="size-3" />
+						</Link>
+					</Button>
+				)}
 			</CardContent>
 		</Card>
 	);

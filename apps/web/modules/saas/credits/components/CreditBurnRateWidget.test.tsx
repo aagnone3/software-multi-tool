@@ -118,10 +118,12 @@ describe("CreditBurnRateWidget", () => {
 		expect(screen.getByText(/will last approximately/)).toBeInTheDocument();
 	});
 
-	it("shows buy credits link", () => {
+	it("shows buy credits link for Pro users", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			totalCredits: 500,
 			isLoading: false,
+			isStarterPlan: false,
+			isFreePlan: false,
 		} as AnyObj);
 		mockUseJobsList.mockReturnValue({
 			jobs: [makeJob("COMPLETED", 0)],
@@ -130,6 +132,54 @@ describe("CreditBurnRateWidget", () => {
 
 		render(<CreditBurnRateWidget />);
 		const link = screen.getByRole("link", { name: /buy more credits/i });
+		expect(link).toHaveAttribute("href", "/app/settings/billing");
+	});
+
+	it("shows Upgrade to Pro CTA for Starter users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 100,
+			isLoading: false,
+			isStarterPlan: true,
+			isFreePlan: false,
+		} as AnyObj);
+		mockUseJobsList.mockReturnValue({
+			jobs: [makeJob("COMPLETED", 0)],
+			isLoading: false,
+		} as AnyObj);
+
+		render(<CreditBurnRateWidget />);
+		const upgradeLink = screen.getByRole("link", {
+			name: /upgrade to pro/i,
+		});
+		expect(upgradeLink).toHaveAttribute(
+			"href",
+			"/app/settings/billing?upgrade=pro",
+		);
+		const compareLink = screen.getByRole("link", {
+			name: /compare plans/i,
+		});
+		expect(compareLink).toHaveAttribute(
+			"href",
+			"/pricing#pricing-plan-pro",
+		);
+	});
+
+	it("shows upgrade for more credits CTA for Free users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 10,
+			isLoading: false,
+			isStarterPlan: false,
+			isFreePlan: true,
+		} as AnyObj);
+		mockUseJobsList.mockReturnValue({
+			jobs: [makeJob("COMPLETED", 0)],
+			isLoading: false,
+		} as AnyObj);
+
+		render(<CreditBurnRateWidget />);
+		const link = screen.getByRole("link", {
+			name: /upgrade for more credits/i,
+		});
 		expect(link).toHaveAttribute("href", "/app/settings/billing");
 	});
 
