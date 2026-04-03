@@ -489,4 +489,59 @@ describe("ActivePlan", () => {
 			props: { plan_id: "pro", savings_pct: expect.any(Number) },
 		});
 	});
+
+	it("shows win-back nudge for canceled subscription", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "pro", status: "canceled", purchaseId: "pur_123" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		const nudge = container.querySelector('[data-test="winback-nudge"]');
+		expect(nudge).not.toBeNull();
+		expect(nudge?.textContent).toContain("canceled");
+	});
+
+	it("shows win-back nudge for expired subscription", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", status: "expired" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		const nudge = container.querySelector('[data-test="winback-nudge"]');
+		expect(nudge).not.toBeNull();
+		expect(nudge?.textContent).toContain("expired");
+	});
+
+	it("does not show win-back nudge for active subscription", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "pro", status: "active" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		const nudge = container.querySelector('[data-test="winback-nudge"]');
+		expect(nudge).toBeNull();
+	});
+
+	it("tracks analytics when win-back CTA is clicked (no purchaseId)", async () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "pro", status: "canceled" },
+		});
+		mockTrack.mockClear();
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="winback-reactivate-cta"]',
+		) as HTMLElement;
+		expect(cta).not.toBeNull();
+		await userEvent.click(cta);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "billing_settings_winback_cta_clicked",
+			props: { plan_id: "pro", status: "canceled" },
+		});
+	});
 });

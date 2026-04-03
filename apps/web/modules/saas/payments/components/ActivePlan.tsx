@@ -9,6 +9,7 @@ import {
 	BadgeCheckIcon,
 	CalendarCheckIcon,
 	CheckIcon,
+	RefreshCwIcon,
 	ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,7 +30,7 @@ function getAnnualSavingsPct(planId: string): number | null {
 	const plan =
 		config.payments.plans[planId as keyof typeof config.payments.plans];
 	const prices = "prices" in plan ? (plan.prices as unknown[]) : [];
-	if (!Array.isArray(prices)) return null;
+	if (!Array.isArray(prices)) { return null; }
 
 	type PriceEntry = {
 		type?: string;
@@ -50,7 +51,7 @@ function getAnnualSavingsPct(planId: string): number | null {
 	const yearly = (prices as PriceEntry[]).find(
 		(p) => p.type === "recurring" && p.interval === "year" && !p.hidden,
 	);
-	if (!monthly || !yearly || monthly.amount === 0) return null;
+	if (!monthly || !yearly || monthly.amount === 0) { return null; }
 	const annualizedMonthly = monthly.amount * 12;
 	const savings = Math.round(
 		((annualizedMonthly - yearly.amount) / annualizedMonthly) * 100,
@@ -75,6 +76,8 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 
 	const price = "price" in activePlan ? activePlan.price : null;
 	const isStarterPlan = activePlan.id === "starter";
+	const isCanceledOrExpired =
+		activePlan.status === "canceled" || activePlan.status === "expired";
 	const isMonthlySubscription =
 		price !== null &&
 		price !== undefined &&
@@ -240,6 +243,60 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 							}
 						>
 							Compare plans
+						</Link>
+					</div>
+				</div>
+			)}
+			{/* Win-back nudge for canceled or expired subscriptions */}
+			{isCanceledOrExpired && (
+				<div
+					className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/40 dark:bg-amber-950/20"
+					data-test="winback-nudge"
+				>
+					<div className="mb-2 flex items-center gap-2">
+						<RefreshCwIcon className="size-4 text-amber-600 dark:text-amber-400" />
+						<p className="font-semibold text-amber-800 text-sm dark:text-amber-300">
+							{activePlan.status === "canceled"
+								? "Your subscription was canceled"
+								: "Your subscription has expired"}
+						</p>
+					</div>
+					<p className="mb-3 text-amber-700 text-sm dark:text-amber-400">
+						You still have access until your current period ends.
+						Reactivate now to keep your credits, history, and
+						features — no setup required.
+					</p>
+					<div className="flex flex-wrap gap-2">
+						{"purchaseId" in activePlan && activePlan.purchaseId ? (
+							<CustomerPortalButton
+								purchaseId={activePlan.purchaseId}
+							/>
+						) : (
+							<Link
+								href="/pricing"
+								className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600"
+								data-test="winback-reactivate-cta"
+								onClick={() =>
+									track({
+										name: "billing_settings_winback_cta_clicked",
+										props: {
+											plan_id: activePlan.id,
+											status:
+												activePlan.status ?? "unknown",
+										},
+									})
+								}
+							>
+								<RefreshCwIcon className="size-3.5" />
+								Reactivate subscription
+							</Link>
+						)}
+						<Link
+							href="/pricing"
+							className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
+							data-test="winback-pricing-cta"
+						>
+							View plans
 						</Link>
 					</div>
 				</div>

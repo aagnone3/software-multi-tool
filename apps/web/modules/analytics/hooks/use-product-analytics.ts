@@ -208,6 +208,10 @@ type ProductEvent =
 			props: { plan_id: string; savings_pct: number };
 	  }
 	| {
+			name: "billing_settings_winback_cta_clicked";
+			props: { plan_id: string; status: string };
+	  }
+	| {
 			name: "dashboard_recently_viewed_tool_clicked";
 			props: { tool_slug: string; tool_name: string };
 	  }
