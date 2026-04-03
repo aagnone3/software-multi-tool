@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	Card,
 	CardContent,
@@ -32,8 +33,12 @@ interface ToolStats {
 }
 
 function formatDuration(ms: number): string {
-	if (ms < 1000) return `${Math.round(ms)}ms`;
-	if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+	if (ms < 1000) {
+		return `${Math.round(ms)}ms`;
+	}
+	if (ms < 60_000) {
+		return `${(ms / 1000).toFixed(1)}s`;
+	}
 	const min = Math.floor(ms / 60_000);
 	const sec = Math.round((ms % 60_000) / 1000);
 	return `${min}m ${sec}s`;
@@ -51,9 +56,12 @@ export function ToolBenchmarkWidget({
 	maxTools = 5,
 }: ToolBenchmarkWidgetProps) {
 	const { jobs, isLoading } = useRecentJobs(100);
+	const { track } = useProductAnalytics();
 
 	const toolStats = useMemo<ToolStats[]>(() => {
-		if (!jobs.length) return [];
+		if (!jobs.length) {
+			return [];
+		}
 
 		const bySlug = new Map<string, Job[]>();
 		for (const job of jobs) {
@@ -82,7 +90,7 @@ export function ToolBenchmarkWidget({
 				.filter((j: Job) => j.completedAt)
 				.map(
 					(j: Job) =>
-						new Date(j.completedAt!).getTime() -
+						new Date(j.completedAt ?? j.createdAt).getTime() -
 						new Date(j.createdAt).getTime(),
 				)
 				.filter((d: number) => d > 0);
@@ -157,6 +165,16 @@ export function ToolBenchmarkWidget({
 								<Link
 									href={`/app/tools/${stat.slug}`}
 									className="font-medium hover:underline"
+									onClick={() =>
+										track({
+											name: "tool_benchmark_tool_clicked",
+											props: {
+												tool_slug: stat.slug,
+												success_rate: stat.successRate,
+												total_runs: stat.totalRuns,
+											},
+										})
+									}
 								>
 									{slugToName(stat.slug)}
 								</Link>

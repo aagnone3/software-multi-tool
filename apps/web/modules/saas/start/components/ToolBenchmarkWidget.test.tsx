@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolBenchmarkWidget } from "./ToolBenchmarkWidget";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
 	useRecentJobs: vi.fn(),
@@ -12,12 +18,14 @@ vi.mock("next/link", () => ({
 		href,
 		children,
 		className,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
 		className?: string;
+		onClick?: () => void;
 	}) => (
-		<a href={href} className={className}>
+		<a href={href} className={className} onClick={onClick}>
 			{children}
 		</a>
 	),
@@ -177,6 +185,34 @@ describe("ToolBenchmarkWidget", () => {
 
 		render(<ToolBenchmarkWidget />);
 		expect(screen.getByText(/avg \d+\.\ds/)).toBeDefined();
+	});
+
+	it("tracks tool_benchmark_tool_clicked when a tool link is clicked", async () => {
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [
+				makeJob(
+					"feedback-analyzer",
+					"COMPLETED",
+					"2024-01-01T10:00:00Z",
+					"2024-01-01T10:00:05Z",
+				),
+			],
+			recentToolSlugs: ["feedback-analyzer"],
+			recentToolsMap: new Map(),
+			isLoading: false,
+			isError: false,
+			error: null,
+			refetch: vi.fn(),
+		});
+
+		render(<ToolBenchmarkWidget />);
+		const link = screen.getByRole("link", { name: "Feedback Analyzer" });
+		await userEvent.click(link);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_benchmark_tool_clicked",
+			props: expect.objectContaining({ tool_slug: "feedback-analyzer" }),
+		});
 	});
 
 	it("limits display to maxTools", () => {

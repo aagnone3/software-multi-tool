@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockUseCreditsHistory = vi.fn();
 vi.mock("../../credits/hooks/use-credits-history", () => ({
@@ -15,10 +21,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 import { RecentActivityFeed } from "./RecentActivityFeed";
@@ -107,6 +119,23 @@ describe("RecentActivityFeed", () => {
 		expect(
 			screen.getByRole("link", { name: /view all activity/i }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks activity_feed_view_all_clicked when view all is clicked", async () => {
+		mockUseCreditsHistory.mockReturnValue({
+			isLoading: false,
+			transactions: [makeTransaction()],
+			pagination: { total: 1, limit: 10, offset: 0, hasMore: false },
+		});
+		render(<RecentActivityFeed />);
+		const viewAll = screen.getByRole("link", {
+			name: /view all activity/i,
+		});
+		await userEvent.click(viewAll);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "activity_feed_view_all_clicked",
+			props: {},
+		});
 	});
 
 	it("respects maxItems limit", () => {
