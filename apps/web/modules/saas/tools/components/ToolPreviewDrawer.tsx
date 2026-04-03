@@ -143,7 +143,12 @@ export function ToolPreviewDrawer({
 										Open Tool
 									</Link>
 								</Button>
-								<Button asChild variant="outline" size="icon">
+								<Button
+									asChild
+									variant="outline"
+									size="icon"
+									aria-label={`Open ${tool.name} in new tab`}
+								>
 									<Link
 										href={`/app/tools/${tool.slug}`}
 										target="_blank"

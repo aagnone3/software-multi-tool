@@ -132,7 +132,11 @@ export function OrganizationMembersList({
 								/>
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<Button size="icon" variant="ghost">
+										<Button
+											size="icon"
+											variant="ghost"
+											aria-label="Member actions"
+										>
 											<MoreVerticalIcon className="size-4" />
 										</Button>
 									</DropdownMenuTrigger>
