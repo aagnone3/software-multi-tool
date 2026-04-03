@@ -30,7 +30,9 @@ function getAnnualSavingsPct(planId: string): number | null {
 	const plan =
 		config.payments.plans[planId as keyof typeof config.payments.plans];
 	const prices = "prices" in plan ? (plan.prices as unknown[]) : [];
-	if (!Array.isArray(prices)) { return null; }
+	if (!Array.isArray(prices)) {
+		return null;
+	}
 
 	type PriceEntry = {
 		type?: string;
@@ -51,7 +53,9 @@ function getAnnualSavingsPct(planId: string): number | null {
 	const yearly = (prices as PriceEntry[]).find(
 		(p) => p.type === "recurring" && p.interval === "year" && !p.hidden,
 	);
-	if (!monthly || !yearly || monthly.amount === 0) { return null; }
+	if (!monthly || !yearly || monthly.amount === 0) {
+		return null;
+	}
 	const annualizedMonthly = monthly.amount * 12;
 	const savings = Math.round(
 		((annualizedMonthly - yearly.amount) / annualizedMonthly) * 100,
