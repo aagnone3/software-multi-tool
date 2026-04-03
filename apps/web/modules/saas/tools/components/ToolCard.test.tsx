@@ -51,7 +51,7 @@ describe("ToolCard", () => {
 
 	it("renders Open Tool button with correct link", () => {
 		render(<ToolCard tool={baseTool} />);
-		const link = screen.getByRole("link", { name: /open tool/i });
+		const link = screen.getByRole("link");
 		expect(link).toHaveAttribute("href", "/app/tools/test-tool");
 		// slug-based path: /app/tools/{slug}
 	});
@@ -105,7 +105,7 @@ describe("ToolCard", () => {
 	it("tracks tool_card_open_clicked when Open Tool link is clicked", async () => {
 		mockTrack.mockClear();
 		render(<ToolCard tool={baseTool} isRecentlyUsed isFavorite />);
-		await userEvent.click(screen.getByRole("link", { name: /open tool/i }));
+		await userEvent.click(screen.getByRole("link"));
 		expect(mockTrack).toHaveBeenCalledWith({
 			name: "tool_card_open_clicked",
 			props: {
@@ -151,6 +151,26 @@ describe("ToolCard", () => {
 			name: "tool_card_preview_clicked",
 			props: { tool_slug: "test-tool", tool_name: "Test Tool" },
 		});
+	});
+
+	it("has role=article and aria-label on card", () => {
+		render(<ToolCard tool={baseTool} />);
+		const card = screen.getByRole("article", { name: "Test Tool" });
+		expect(card).toBeInTheDocument();
+	});
+
+	it("has role=article and aria-label on coming soon card", () => {
+		render(<ToolCard tool={baseTool} isComingSoon />);
+		const card = screen.getByRole("article", {
+			name: "Test Tool — coming soon",
+		});
+		expect(card).toBeInTheDocument();
+	});
+
+	it("Open Tool button has descriptive aria-label", () => {
+		render(<ToolCard tool={baseTool} />);
+		const btn = screen.getByRole("button", { name: "Open Test Tool" });
+		expect(btn).toBeInTheDocument();
 	});
 
 	it("renders known icons for each supported icon name", () => {

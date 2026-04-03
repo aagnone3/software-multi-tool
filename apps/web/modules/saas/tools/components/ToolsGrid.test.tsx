@@ -229,6 +229,18 @@ describe("ToolsGrid", () => {
 		expect(screen.queryByText("invoice")).not.toBeInTheDocument();
 	});
 
+	it("renders tool grid with role=list and aria-label", () => {
+		render(<ToolsGrid />);
+		const list = screen.getByRole("list", { name: "Available tools" });
+		expect(list).toBeInTheDocument();
+	});
+
+	it("renders each tool card as a listitem", () => {
+		render(<ToolsGrid />);
+		const items = screen.getAllByRole("listitem");
+		expect(items.length).toBeGreaterThan(0);
+	});
+
 	it("tracks tools_grid_searched on search blur with query", async () => {
 		mockTrack.mockClear();
 		const user = userEvent.setup({ delay: null });

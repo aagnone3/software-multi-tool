@@ -113,6 +113,8 @@ export function ToolCard({
 					"group flex h-full flex-col transition-all",
 					"opacity-60 grayscale hover:opacity-70",
 				)}
+				role="article"
+				aria-label={`${tool.name} — coming soon`}
 			>
 				<CardHeader className="flex-1">
 					<div className="mb-2 flex items-center gap-2">
@@ -162,7 +164,11 @@ export function ToolCard({
 	}
 
 	return (
-		<Card className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-md">
+		<Card
+			className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-md"
+			role="article"
+			aria-label={tool.name}
+		>
 			<CardHeader className="flex-1">
 				<div className="mb-2 flex items-center justify-between gap-2">
 					<div className="flex items-center gap-2">
@@ -318,7 +324,11 @@ export function ToolCard({
 							});
 						}}
 					>
-						<Button className="w-full" variant="outline">
+						<Button
+							className="w-full"
+							variant="outline"
+							aria-label={`Open ${tool.name}`}
+						>
 							Open Tool
 						</Button>
 					</Link>
