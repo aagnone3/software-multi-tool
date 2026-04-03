@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -43,6 +44,7 @@ export function ToolCollectionsPanel({
 		getCollectionsForTool,
 	} = useToolCollections();
 
+	const { track } = useProductAnalytics();
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [newName, setNewName] = useState("");
 	const [newDesc, setNewDesc] = useState("");
@@ -58,6 +60,10 @@ export function ToolCollectionsPanel({
 			newDesc,
 			currentToolSlug ? [currentToolSlug] : [],
 		);
+		track({
+			name: "tool_collection_created",
+			props: { tool_slug: currentToolSlug ?? null },
+		});
 		toast.success(`Collection "${created.name}" created`);
 		setNewName("");
 		setNewDesc("");
@@ -66,6 +72,7 @@ export function ToolCollectionsPanel({
 
 	function handleDelete(id: string, name: string) {
 		deleteCollection(id);
+		track({ name: "tool_collection_deleted", props: {} });
 		toast.success(`Collection "${name}" deleted`);
 	}
 
@@ -73,8 +80,16 @@ export function ToolCollectionsPanel({
 		if (!currentToolSlug) return;
 		if (inCollection) {
 			removeToolFromCollection(collectionId, currentToolSlug);
+			track({
+				name: "tool_collection_tool_removed",
+				props: { tool_slug: currentToolSlug },
+			});
 		} else {
 			addToolToCollection(collectionId, currentToolSlug);
+			track({
+				name: "tool_collection_tool_added",
+				props: { tool_slug: currentToolSlug },
+			});
 		}
 	}
 

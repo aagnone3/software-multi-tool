@@ -34,6 +34,11 @@ vi.mock("../hooks/use-tool-collections", () => ({
 	useToolCollections: () => mockHook,
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 vi.mock("next/link", () => ({
 	default: ({
@@ -123,5 +128,45 @@ describe("ToolCollectionsPanel", () => {
 		const names = links.map((l) => l.textContent);
 		expect(names).toContain("My Workflows");
 		expect(names).toContain("Quick Access");
+	});
+
+	it("tracks tool_collection_created when collection is created", async () => {
+		const user = userEvent.setup();
+		render(<ToolCollectionsPanel currentToolSlug="invoice-processor" />);
+		await user.click(screen.getByRole("button", { name: /new/i }));
+		await user.type(
+			screen.getByPlaceholderText("Collection name"),
+			"Test Col",
+		);
+		await user.click(
+			screen.getByRole("button", { name: "Create Collection" }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "tool_collection_created" }),
+		);
+	});
+
+	it("tracks tool_collection_deleted when delete button clicked", async () => {
+		const user = userEvent.setup();
+		render(<ToolCollectionsPanel />);
+		const deleteButtons = screen.getAllByRole("button", {
+			name: /delete/i,
+		});
+		await user.click(deleteButtons[0]);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "tool_collection_deleted" }),
+		);
+	});
+
+	it("tracks tool_collection_tool_added when Add button clicked", async () => {
+		const user = userEvent.setup();
+		// col-2 does not contain news-analyzer → shows Add
+		mockHook.getCollectionsForTool.mockReturnValue([]);
+		render(<ToolCollectionsPanel currentToolSlug="news-analyzer" />);
+		const addButtons = screen.getAllByRole("button", { name: /add/i });
+		await user.click(addButtons[0]);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "tool_collection_tool_added" }),
+		);
 	});
 });

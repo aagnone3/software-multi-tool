@@ -1,6 +1,7 @@
 "use client";
 
 import { type UIMessage, useChat } from "@ai-sdk/react";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 // IMPORTANT: Use eventIteratorToUnproxiedDataStream (not eventIteratorToStream) for AI SDK.
 // AI SDK internally uses `structuredClone` which doesn't support proxied data from oRPC.
 // See: https://orpc.dev/docs/integrations/ai-sdk
@@ -35,6 +36,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en", {
 
 export function AiChat({ organizationId }: { organizationId?: string }) {
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 	const [input, setInput] = useState("");
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const { data, status: chatsStatus } = useQuery(
@@ -130,7 +132,8 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 		});
 
 		setChatId(newChat.chat.id);
-	}, [createChatMutation]);
+		track({ name: "ai_chat_created", props: {} });
+	}, [createChatMutation, track]);
 
 	useEffect(() => {
 		(async () => {
@@ -172,6 +175,10 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 		try {
 			await sendMessage({
 				text,
+			});
+			track({
+				name: "ai_chat_message_sent",
+				props: { message_length: text.length },
 			});
 		} catch {
 			toast.error("Failed to send message");

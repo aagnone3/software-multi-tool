@@ -612,7 +612,13 @@ type ProductEvent =
 	| {
 			name: "new_user_welcome_cta_clicked";
 			props: { cta: "try_tool" | "browse_all" };
-	  };
+	  }
+	| { name: "tool_collection_created"; props: { tool_slug: string | null } }
+	| { name: "tool_collection_deleted"; props: Record<string, never> }
+	| { name: "tool_collection_tool_added"; props: { tool_slug: string } }
+	| { name: "tool_collection_tool_removed"; props: { tool_slug: string } }
+	| { name: "ai_chat_created"; props: Record<string, never> }
+	| { name: "ai_chat_message_sent"; props: { message_length: number } };
 
 export type { ProductEvent };
 
