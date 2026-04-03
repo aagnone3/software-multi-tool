@@ -10,6 +10,11 @@ vi.mock("sonner", () => ({
 	}),
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { toast } from "sonner";
 import { ToolScheduler } from "./ToolScheduler";
 
@@ -111,5 +116,37 @@ describe("ToolScheduler", () => {
 		);
 		expect(stored).toHaveLength(1);
 		expect(stored[0].toolSlug).toBe("news-analyzer");
+	});
+
+	it("tracks tool_schedule_set event on success", async () => {
+		render(
+			<ToolScheduler toolSlug="news-analyzer" toolName="News Analyzer" />,
+		);
+		fireEvent.click(screen.getByRole("button", { name: /schedule/i }));
+		await screen.findByText("Schedule a reminder");
+
+		fireEvent.click(screen.getByRole("button", { name: /set reminder/i }));
+
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: "tool_schedule_set",
+					props: expect.objectContaining({
+						tool_slug: "news-analyzer",
+					}),
+				}),
+			);
+		});
+	});
+
+	it("time unit select trigger has aria-label", async () => {
+		render(
+			<ToolScheduler toolSlug="news-analyzer" toolName="News Analyzer" />,
+		);
+		fireEvent.click(screen.getByRole("button", { name: /schedule/i }));
+		await screen.findByText("Schedule a reminder");
+		expect(
+			screen.getByRole("combobox", { name: /time unit/i }),
+		).toBeInTheDocument();
 	});
 });

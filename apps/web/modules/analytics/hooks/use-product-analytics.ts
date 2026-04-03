@@ -636,7 +636,12 @@ type ProductEvent =
 	| {
 			name: "file_upload_failed";
 			props: { filename: string; mime_type: string; size_bytes: number };
-	  };
+	  }
+	| {
+			name: "tool_schedule_set";
+			props: { tool_slug: string; offset_value: number; unit: string };
+	  }
+	| { name: "tool_schedule_removed"; props: { tool_slug: string } };
 
 export type { ProductEvent };
 

@@ -33,8 +33,16 @@ vi.mock("@ui/components/select", () => ({
 			{children}
 		</button>
 	),
-	SelectTrigger: ({ children }: { children: React.ReactNode }) => (
-		<div data-testid="trigger">{children}</div>
+	SelectTrigger: ({
+		children,
+		"aria-label": ariaLabel,
+	}: {
+		children: React.ReactNode;
+		"aria-label"?: string;
+	}) => (
+		<button type="button" data-testid="trigger" aria-label={ariaLabel}>
+			{children}
+		</button>
 	),
 	SelectValue: () => <span data-testid="value" />,
 	SelectContent: ({ children }: { children: React.ReactNode }) => (
@@ -62,6 +70,14 @@ describe("OrganizationRoleSelect", () => {
 		render(<OrganizationRoleSelect value="member" onSelect={onSelect} />);
 		screen.getByTestId("select").click();
 		expect(onSelect).toHaveBeenCalledWith("admin");
+	});
+
+	it("has accessible aria-label on select trigger", () => {
+		render(<OrganizationRoleSelect value="member" onSelect={() => {}} />);
+		expect(screen.getByTestId("trigger")).toHaveAttribute(
+			"aria-label",
+			"Member role",
+		);
 	});
 
 	it("passes disabled to Select", () => {

@@ -29,7 +29,7 @@ export function OrganizationRoleSelect({
 
 	return (
 		<Select value={value} onValueChange={onSelect} disabled={disabled}>
-			<SelectTrigger>
+			<SelectTrigger aria-label="Member role">
 				<SelectValue />
 			</SelectTrigger>
 			<SelectContent>
