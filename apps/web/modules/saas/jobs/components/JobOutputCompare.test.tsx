@@ -3,6 +3,11 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock orpcClient
 vi.mock("@shared/lib/orpc-client", () => ({
 	orpcClient: {
@@ -52,6 +57,15 @@ function renderWithQuery(ui: React.ReactElement) {
 }
 
 describe("JobOutputCompare", () => {
+	it("fires job_compare_page_viewed on mount", async () => {
+		const { JobOutputCompare } = await import("./JobOutputCompare");
+		renderWithQuery(<JobOutputCompare />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "job_compare_page_viewed",
+			props: {},
+		});
+	});
+
 	it("renders the compare page header", async () => {
 		const { JobOutputCompare } = await import("./JobOutputCompare");
 		renderWithQuery(<JobOutputCompare />);
