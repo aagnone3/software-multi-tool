@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -35,7 +36,9 @@ interface ScheduledRun {
 }
 
 function loadScheduledRuns(): ScheduledRun[] {
-	if (typeof window === "undefined") return [];
+	if (typeof window === "undefined") {
+		return [];
+	}
 	try {
 		return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
 	} catch {
@@ -54,11 +57,17 @@ function saveScheduledRuns(runs: ScheduledRun[]) {
 function formatScheduleLabel(ms: number): string {
 	const now = Date.now();
 	const diff = ms - now;
-	if (diff <= 0) return "now";
+	if (diff <= 0) {
+		return "now";
+	}
 	const mins = Math.round(diff / 60000);
-	if (mins < 60) return `in ${mins}m`;
+	if (mins < 60) {
+		return `in ${mins}m`;
+	}
 	const hrs = Math.round(diff / 3600000);
-	if (hrs < 24) return `in ${hrs}h`;
+	if (hrs < 24) {
+		return `in ${hrs}h`;
+	}
 	return `in ${Math.round(diff / 86400000)}d`;
 }
 
@@ -75,6 +84,7 @@ export function ToolScheduler({
 	onRunTool,
 	className,
 }: ToolSchedulerProps) {
+	const { track } = useProductAnalytics();
 	const [open, setOpen] = useState(false);
 	const [offset, setOffset] = useState("15");
 	const [unit, setUnit] = useState<"minutes" | "hours">("minutes");
@@ -139,6 +149,10 @@ export function ToolScheduler({
 		setScheduled(updated);
 		setOpen(false);
 		setNote("");
+		track({
+			name: "tool_schedule_set",
+			props: { tool_slug: toolSlug, offset_value: offsetNum, unit },
+		});
 		toast.success(`Reminder set for ${toolName}`, {
 			description: `You'll be notified ${formatScheduleLabel(run.scheduledAt)}.`,
 		});
@@ -148,6 +162,10 @@ export function ToolScheduler({
 		const updated = loadScheduledRuns().filter((r) => r.id !== id);
 		saveScheduledRuns(updated);
 		setScheduled(updated);
+		track({
+			name: "tool_schedule_removed",
+			props: { tool_slug: toolSlug },
+		});
 	}
 
 	const toolScheduled = scheduled.filter(
@@ -191,7 +209,10 @@ export function ToolScheduler({
 								setUnit(v as "minutes" | "hours")
 							}
 						>
-							<SelectTrigger className="w-32">
+							<SelectTrigger
+								className="w-32"
+								aria-label="Time unit"
+							>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
