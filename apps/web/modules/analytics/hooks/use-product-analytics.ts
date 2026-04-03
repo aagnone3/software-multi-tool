@@ -628,6 +628,14 @@ type ProductEvent =
 	| {
 			name: "job_search_result_clicked";
 			props: { tool_slug: string; status: string };
+	  }
+	| {
+			name: "file_uploaded";
+			props: { filename: string; mime_type: string; size_bytes: number };
+	  }
+	| {
+			name: "file_upload_failed";
+			props: { filename: string; mime_type: string; size_bytes: number };
 	  };
 
 export type { ProductEvent };
