@@ -613,6 +613,10 @@ type ProductEvent =
 			};
 	  }
 	| {
+			name: "organization_switched";
+			props: { organization_slug: string };
+	  }
+	| {
 			name: "org_created";
 			props: Record<string, never>;
 	  }

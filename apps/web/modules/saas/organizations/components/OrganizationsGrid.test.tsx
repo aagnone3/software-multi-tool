@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+const mockTrack = vi.fn();
 const mockSetActiveOrganization = vi.fn();
 const mockOrganizations = [
 	{ id: "org1", name: "Acme Corp", slug: "acme", logo: null },
@@ -13,6 +14,10 @@ const mockOrganizations = [
 		logo: "https://example.com/logo.png",
 	},
 ];
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => ({
@@ -66,6 +71,16 @@ describe("OrganizationsGrid", () => {
 		render(<OrganizationsGrid />);
 		await user.click(screen.getByText("Acme Corp"));
 		expect(mockSetActiveOrganization).toHaveBeenCalledWith("acme");
+	});
+
+	it("tracks organization_switched event on card click", async () => {
+		const user = userEvent.setup();
+		render(<OrganizationsGrid />);
+		await user.click(screen.getByText("Acme Corp"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "organization_switched",
+			props: { organization_slug: "acme" },
+		});
 	});
 
 	it("shows create organization link when enabled", () => {
