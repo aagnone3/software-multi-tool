@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { CreditPack } from "@repo/config";
 import { Button } from "@ui/components/button";
 import {
@@ -11,7 +12,7 @@ import {
 	DialogTitle,
 } from "@ui/components/dialog";
 import { CoinsIcon, ShoppingCartIcon } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface CreditPurchaseConfirmDialogProps {
 	pack: CreditPack | null;
@@ -40,10 +41,31 @@ export function CreditPurchaseConfirmDialog({
 	onCancel,
 	isPurchasing = false,
 }: CreditPurchaseConfirmDialogProps) {
+	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		if (open && pack) {
+			track({
+				name: "credit_pack_purchase_dialog_shown",
+				props: { pack_id: pack.id, pack_name: pack.name },
+			});
+		}
+	}, [open, pack, track]);
+
+	const handleCancel = () => {
+		if (pack) {
+			track({
+				name: "credit_pack_purchase_dialog_cancelled",
+				props: { pack_id: pack.id, pack_name: pack.name },
+			});
+		}
+		onCancel();
+	};
+
 	if (!pack) return null;
 
 	return (
-		<Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
+		<Dialog open={open} onOpenChange={(v) => !v && handleCancel()}>
 			<DialogContent className="sm:max-w-sm">
 				<DialogHeader>
 					<div className="flex justify-center mb-3">
@@ -110,7 +132,7 @@ export function CreditPurchaseConfirmDialog({
 				<DialogFooter className="flex gap-2 sm:flex-row flex-col">
 					<Button
 						variant="outline"
-						onClick={onCancel}
+						onClick={handleCancel}
 						disabled={isPurchasing}
 						className="flex-1"
 					>
