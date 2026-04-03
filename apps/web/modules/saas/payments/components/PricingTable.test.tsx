@@ -304,3 +304,32 @@ describe("PricingTable", () => {
 		expect(failedCall).toBeDefined();
 	});
 });
+
+describe("PricingTable - a11y", () => {
+	it("renders plan cards with role=article and aria-labelledby", () => {
+		render(<PricingTable />);
+		const articles = document.querySelectorAll("article");
+		expect(articles.length).toBeGreaterThan(0);
+		for (const article of Array.from(articles)) {
+			expect(article.getAttribute("aria-labelledby")).toBeTruthy();
+		}
+	});
+
+	it("renders CTA buttons with descriptive aria-label for authenticated users", () => {
+		render(<PricingTable userId="user_123" activePlanId="free" />);
+		const ctaButtons = document.querySelectorAll("button[aria-label]");
+		const choosePlanButtons = Array.from(ctaButtons).filter((btn) =>
+			btn.getAttribute("aria-label")?.includes("Choose the"),
+		);
+		expect(choosePlanButtons.length).toBeGreaterThan(0);
+	});
+
+	it("renders CTA buttons with get-started aria-label for unauthenticated users", () => {
+		render(<PricingTable />);
+		const ctaButtons = document.querySelectorAll("button[aria-label]");
+		const getStartedButtons = Array.from(ctaButtons).filter((btn) =>
+			btn.getAttribute("aria-label")?.includes("Get started with"),
+		);
+		expect(getStartedButtons.length).toBeGreaterThan(0);
+	});
+});

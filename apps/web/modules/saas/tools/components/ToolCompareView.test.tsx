@@ -106,3 +106,23 @@ describe("ToolCompareView", () => {
 		expect(screen.getByText("Public (No Login)")).toBeInTheDocument();
 	});
 });
+
+describe("ToolCompareView - a11y", () => {
+	it("renders select triggers with aria-labels", () => {
+		render(<ToolCompareView />);
+		expect(
+			screen.getByRole("combobox", { name: /Select Tool A/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("combobox", { name: /Select Tool B/i }),
+		).toBeInTheDocument();
+	});
+
+	it("renders comparison container with aria-label", () => {
+		render(<ToolCompareView />);
+		const table = document.querySelector(
+			'[aria-label="Tool comparison table"]',
+		);
+		expect(table).toBeTruthy();
+	});
+});

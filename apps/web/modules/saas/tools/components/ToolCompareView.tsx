@@ -69,7 +69,7 @@ export function ToolCompareView() {
 						Tool A
 					</p>
 					<Select value={leftSlug} onValueChange={setLeftSlug}>
-						<SelectTrigger>
+						<SelectTrigger aria-label="Select Tool A for comparison">
 							<SelectValue placeholder="Select a tool" />
 						</SelectTrigger>
 						<SelectContent>
@@ -86,7 +86,7 @@ export function ToolCompareView() {
 						Tool B
 					</p>
 					<Select value={rightSlug} onValueChange={setRightSlug}>
-						<SelectTrigger>
+						<SelectTrigger aria-label="Select Tool B for comparison">
 							<SelectValue placeholder="Select a tool" />
 						</SelectTrigger>
 						<SelectContent>
@@ -114,7 +114,11 @@ export function ToolCompareView() {
 							Side-by-side feature comparison
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-1">
+					<CardContent
+						role="table"
+						aria-label="Tool comparison table"
+						className="space-y-1"
+					>
 						<CompareRow
 							label="Name"
 							leftValue={

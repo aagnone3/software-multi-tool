@@ -250,9 +250,10 @@ export function PricingTable({
 						}
 
 						return (
-							<div
+							<article
 								key={planId}
 								id={`pricing-plan-${planId}`}
+								aria-labelledby={`pricing-plan-title-${planId}`}
 								className={cn("rounded-3xl border p-6", {
 									"border-2 border-primary": recommended,
 								})}
@@ -269,6 +270,7 @@ export function PricingTable({
 											</div>
 										)}
 										<h3
+											id={`pricing-plan-title-${planId}`}
 											className={cn(
 												"my-0 font-semibold text-2xl",
 												{
@@ -441,6 +443,11 @@ export function PricingTable({
 														? "primary"
 														: "secondary"
 												}
+												aria-label={
+													userId || organizationId
+														? `Choose the ${title} plan`
+														: `Get started with the ${title} plan`
+												}
 												onClick={() =>
 													onSelectPlan(
 														planId as PlanId,
@@ -457,7 +464,7 @@ export function PricingTable({
 										)}
 									</div>
 								</div>
-							</div>
+							</article>
 						);
 					})}
 			</div>
