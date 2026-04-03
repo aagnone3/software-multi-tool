@@ -20,6 +20,13 @@ vi.mock("@repo/config", () => ({
 							currency: "usd",
 							hidden: false,
 						},
+						{
+							type: "recurring",
+							interval: "year",
+							amount: 9999,
+							currency: "usd",
+							hidden: false,
+						},
 					],
 				},
 				pro: {
@@ -352,10 +359,43 @@ describe("ActivePlan", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("does not show annual billing upsell for Starter plan", () => {
+	it("shows annual billing upsell for Starter monthly subscribers", () => {
 		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
 		mockUsePurchases.mockReturnValue({
-			activePlan: { id: "starter" },
+			activePlan: {
+				id: "starter",
+				price: {
+					amount: 999,
+					currency: "usd",
+					interval: "month",
+					intervalCount: 1,
+				},
+			},
+		});
+
+		const { container } = render(<ActivePlan />);
+		expect(
+			container.querySelector('[data-test="annual-billing-upsell"]'),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/save \d+% with annual billing/i),
+		).toBeInTheDocument();
+		// copy should reference "Starter" features, not "Pro"
+		expect(screen.getByText(/Starter features/)).toBeInTheDocument();
+	});
+
+	it("does not show annual billing upsell for Starter annual subscribers", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "starter",
+				price: {
+					amount: 9999,
+					currency: "usd",
+					interval: "year",
+					intervalCount: 1,
+				},
+			},
 		});
 
 		const { container } = render(<ActivePlan />);
