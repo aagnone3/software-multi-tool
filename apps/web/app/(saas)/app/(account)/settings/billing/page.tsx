@@ -5,6 +5,7 @@ import { CreditBalanceSection } from "@saas/credits/components/CreditBalanceSect
 import { ActivePlan } from "@saas/payments/components/ActivePlan";
 import { BillingTrustSection } from "@saas/payments/components/BillingTrustSection";
 import { ChangePlan } from "@saas/payments/components/ChangePlan";
+import { PaymentIssueAlert } from "@saas/payments/components/PaymentIssueAlert";
 import { UpgradePromptBanner } from "@saas/payments/components/UpgradePromptBanner";
 import { SettingsItem } from "@saas/shared/components/SettingsItem";
 import { SettingsList } from "@saas/shared/components/SettingsList";
@@ -45,6 +46,7 @@ export default async function BillingSettingsPage() {
 
 	return (
 		<SettingsList>
+			<PaymentIssueAlert className="mb-2" />
 			<UpgradePromptBanner className="mb-2" />
 			<CreditBalanceSection />
 			{activePlan && <ActivePlan />}

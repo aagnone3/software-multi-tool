@@ -3,6 +3,7 @@
 import { config } from "@repo/config";
 import { CreditBurnRateWidget } from "@saas/credits/components/CreditBurnRateWidget";
 import { OrganizationsGrid } from "@saas/organizations/components/OrganizationsGrid";
+import { PaymentIssueAlert } from "@saas/payments/components/PaymentIssueAlert";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { ReferralWidget } from "@saas/referrals/components/ReferralWidget";
 import React from "react";
@@ -40,6 +41,9 @@ export default function UserStart() {
 			<WelcomeModal />
 
 			{config.organizations.enable && <OrganizationsGrid />}
+
+			{/* Payment issue alert — shown when subscription is past_due/unpaid/incomplete/paused */}
+			<PaymentIssueAlert />
 
 			{/* Pro trial offer — shown once to free users, dismissible */}
 			<ProTrialOfferCard />

@@ -27,6 +27,10 @@ vi.mock("@shared/lib/orpc-query-utils", () => ({
 				queryKey: vi
 					.fn()
 					.mockReturnValue(["payments", "listPurchases"]),
+				queryOptions: vi.fn().mockReturnValue({
+					queryKey: ["payments", "listPurchases"],
+					queryFn: vi.fn(),
+				}),
 			},
 		},
 	},
@@ -62,6 +66,11 @@ vi.mock("@saas/payments/components/BillingTrustSection", () => ({
 }));
 vi.mock("@saas/payments/components/ChangePlan", () => ({
 	ChangePlan: () => <div data-testid="change-plan">ChangePlan</div>,
+}));
+vi.mock("@saas/payments/components/PaymentIssueAlert", () => ({
+	PaymentIssueAlert: () => (
+		<div data-testid="payment-issue-alert">PaymentIssueAlert</div>
+	),
 }));
 vi.mock("@saas/payments/components/UpgradePromptBanner", () => ({
 	UpgradePromptBanner: () => (
