@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
@@ -21,15 +22,19 @@ export function Newsletter() {
 	const newsletterSignupMutation = useMutation(
 		orpc.newsletter.subscribe.mutationOptions(),
 	);
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 	});
 
 	const onSubmit = form.handleSubmit(async ({ email }) => {
+		track({ name: "newsletter_signup_submitted", props: { email } });
 		try {
 			await newsletterSignupMutation.mutateAsync({ email });
+			track({ name: "newsletter_signup_succeeded", props: { email } });
 		} catch {
+			track({ name: "newsletter_signup_failed", props: { email } });
 			form.setError("email", {
 				message:
 					"Could not subscribe to newsletter. Please try again later.",

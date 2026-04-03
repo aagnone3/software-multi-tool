@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { Button } from "@ui/components/button";
 import {
@@ -60,6 +61,7 @@ export function ToolOutputExporter({
 }: ToolOutputExporterProps) {
 	const [copied, setCopied] = useState(false);
 	const { isFreePlan, isLoading } = useCreditsBalance();
+	const { track } = useProductAnalytics();
 
 	// Downloads are a Pro feature; copy-to-clipboard stays free
 	const downloadsLocked = !isLoading && isFreePlan;
@@ -70,6 +72,7 @@ export function ToolOutputExporter({
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 			toast.success("Copied to clipboard");
+			track({ name: "tool_output_copied", props: { label } });
 		} catch {
 			toast.error("Failed to copy");
 		}
@@ -84,6 +87,10 @@ export function ToolOutputExporter({
 				"application/json",
 			);
 			toast.success("Downloaded JSON");
+			track({
+				name: "tool_output_downloaded",
+				props: { label, format: "json" },
+			});
 		} catch {
 			toast.error("Download failed");
 		}
@@ -95,6 +102,10 @@ export function ToolOutputExporter({
 		try {
 			downloadBlob(content, toFilename(label, "txt"), "text/plain");
 			toast.success("Downloaded TXT");
+			track({
+				name: "tool_output_downloaded",
+				props: { label, format: "txt" },
+			});
 		} catch {
 			toast.error("Download failed");
 		}
@@ -134,6 +145,12 @@ export function ToolOutputExporter({
 							<Link
 								href="/pricing"
 								className="flex items-center gap-2 text-primary"
+								onClick={() =>
+									track({
+										name: "tool_output_upgrade_clicked",
+										props: {},
+									})
+								}
 							>
 								Upgrade to unlock downloads
 							</Link>
