@@ -1,0 +1,151 @@
+---
+title: "How to Separate Speakers in Audio with AI (Diarization Explained)"
+description: "Multi-speaker audio is one of the hardest transcription challenges. Learn how AI speaker separation (diarization) works, when to use it, and how to get clean per-speaker transcripts automatically."
+date: "2026-04-03"
+published: true
+authorName: "Gil Foil"
+authorImage: "/images/blog/aagnone-avatar.png"
+excerpt: "A transcript that says 'Speaker 1' and 'Speaker 2' throughout isn't a transcript — it's noise. AI speaker diarization solves this by identifying who spoke when, so you get clean, attributed meeting notes, interview transcripts, and call logs."
+tags: ["speaker-separation", "diarization", "audio-transcription", "ai-tools", "meetings"]
+---
+
+# How to Separate Speakers in Audio with AI (Diarization Explained)
+
+If you've ever transcribed a meeting, podcast, or interview, you've hit the same wall: the transcript comes back as one solid block of text with no indication of who said what.
+
+That's the speaker attribution problem. And it's not a minor formatting issue — it makes the transcript nearly useless for anything that requires knowing who said what: meeting notes, interview analysis, legal records, customer call reviews.
+
+AI speaker diarization solves this. It automatically identifies individual speakers in an audio file and assigns each segment of speech to the correct person — even when it has never heard those voices before.
+
+## What Is Speaker Diarization?
+
+Speaker diarization is the process of partitioning an audio stream into segments based on speaker identity. It answers the question: *"who spoke when?"*
+
+A diarized transcript looks like this:
+
+> **[Speaker A — 0:00:12]** I think the main issue is the handoff between sales and onboarding.
+>
+> **[Speaker B — 0:00:19]** Agreed. The timing is off. Customers expect follow-up within 24 hours.
+>
+> **[Speaker A — 0:00:27]** We need to look at the automation triggers in the CRM.
+
+Compare that to what you get without diarization:
+
+> I think the main issue is the handoff between sales and onboarding. Agreed. The timing is off. Customers expect follow-up within 24 hours. We need to look at the automation triggers in the CRM.
+
+Same words. Completely different utility.
+
+## How AI Speaker Separation Works
+
+Modern speaker diarization models use a combination of techniques:
+
+**1. Voice Activity Detection (VAD)**
+The first pass identifies segments of audio that contain speech versus silence, background noise, or music. This prevents the model from wasting time "assigning" non-speech sounds to speakers.
+
+**2. Speaker Embedding**
+Each speech segment is converted into a numerical representation (an embedding) that captures the acoustic characteristics of that voice — pitch, cadence, formants, spectral shape. Think of it as a voice fingerprint.
+
+**3. Clustering**
+The embeddings are grouped using clustering algorithms. Segments with similar embeddings are assigned to the same speaker cluster. The model figures out how many distinct speakers are present (or you can specify the expected count).
+
+**4. Re-segmentation**
+A final pass refines boundaries at speaker transitions, handling cases where one speaker's voice bleeds into another segment or where there's a brief overlap.
+
+The output is a labeled timeline: each time range tagged with a speaker ID.
+
+## When Diarization Makes a Difference
+
+### Sales Call Analysis
+
+Customer call recordings are high-signal business data — but only if you can separate the rep from the prospect. With speaker attribution, you can:
+
+- Measure talk-time ratio (are your reps listening enough?)
+- Extract prospect objections specifically
+- Score rep adherence to call scripts
+- Feed structured conversation data into CRM notes
+
+### Interview Transcription
+
+Academic researchers, journalists, UX researchers, and HR teams all conduct recorded interviews. Clean, speaker-attributed transcripts dramatically reduce post-processing time. Instead of playing back audio to fill in "[Interviewer]" and "[Respondent]" tags manually, you get the attribution automatically.
+
+### Podcast Production
+
+Podcast editors need speaker-separated transcripts for:
+
+- Generating show notes
+- Creating searchable episode archives
+- Clipping highlights (attributed quotes perform better on social)
+- Feeding transcripts to AI summarizers
+
+### Legal and Compliance
+
+Depositions, arbitration hearings, and compliance calls all require documented records of who said what. Diarized transcripts provide that attribution without manual timestamping.
+
+### Team Meetings
+
+Meeting notes that attribute action items to specific people are far more actionable than a generic summary. Diarized transcripts let you answer: "Who agreed to own this by Friday?"
+
+## Accuracy Factors: What Affects Quality
+
+Diarization accuracy varies based on several factors:
+
+**Number of speakers**
+Two-speaker audio (interview, podcast co-host, sales call) consistently produces higher accuracy than roundtables with 6+ participants. More speakers means more opportunities for misattribution.
+
+**Audio quality**
+Echo, background noise, and low-quality microphones degrade performance. Recordings made in a conference room with a single shared microphone are harder than recordings where each participant has their own mic channel.
+
+**Speaker similarity**
+If two speakers have very similar voice profiles — same gender, similar accent, similar pitch range — the model has less to work with. This is the hardest case for any diarization system.
+
+**Overlapping speech**
+Interruptions and crosstalk are genuinely difficult. Most models handle them imperfectly — they'll assign overlapping segments to one speaker or split them inconsistently. The fix is usually cleaner source audio.
+
+**Known vs. unknown speakers**
+If you can provide voice samples for named speakers, some systems support speaker identification (not just anonymous labeling). This lets the output say "Sarah" instead of "Speaker A."
+
+## Getting Useful Output: Practical Tips
+
+**Specify speaker count when you know it**
+If you're processing a two-person interview, tell the model. Constraining the expected number of speakers improves clustering accuracy.
+
+**Pre-process noisy audio**
+Background noise removal before diarization improves results. This is especially relevant for recordings made in open offices, coffee shops, or outdoor locations.
+
+**Use chunked processing for long files**
+Very long recordings (90+ minutes) can drift in accuracy as the model's clustering context grows. Processing in logical chunks (per-meeting or per-hour) and merging results can help.
+
+**Validate edge cases**
+Automated diarization is accurate on the main body of conversation but can struggle at the first and last few seconds of each speaker's turn. If precision at exact transition boundaries matters, plan for a light manual review pass.
+
+## From Diarized Transcript to Action
+
+A speaker-separated transcript is a starting point. The downstream steps that deliver real value:
+
+**Named speaker substitution**
+Replace "Speaker A" and "Speaker B" with actual names. This is often a simple search-and-replace once you've reviewed the first few speaker segments to identify who is who.
+
+**Action item extraction**
+Feed the attributed transcript to an AI summarizer with a prompt like: *"Extract action items from this transcript, noting who committed to each item."* Named speaker attribution makes this dramatically more accurate.
+
+**Sentiment analysis by speaker**
+For sales calls and customer interviews, per-speaker sentiment tracking gives you signal you can't get from aggregate analysis. Is the prospect's tone shifting toward skepticism at a particular point in the call?
+
+**Search and indexing**
+Attributed transcripts are searchable at the speaker level. You can query across hundreds of recorded calls for every instance where a specific prospect raised a specific concern.
+
+<MidPostCTA />
+
+## Speaker Separation vs. Full Transcription: Which First?
+
+Most workflows benefit from doing diarization and transcription together in a single pass rather than sequentially. The two tasks share low-level audio processing steps, and joint models avoid re-processing the same audio twice.
+
+If you're working with an existing transcript and need to add speaker attribution, that's a harder problem — you're essentially aligning text to audio after the fact. It's doable but less accurate than native joint diarization.
+
+## The Practical Takeaway
+
+Speaker diarization used to require specialized software, audio engineering knowledge, and manual cleanup. Modern AI handles it in a single upload.
+
+The result is transcripts you can actually use — for meeting notes, call analysis, interview review, or any workflow where knowing *who said what* matters more than just *what was said*.
+
+For teams processing regular audio (weekly all-hands, recurring customer calls, regular research interviews), automated speaker separation isn't a nice-to-have — it's the difference between a transcript archive and a usable knowledge base.
