@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { CheckIcon, Share2Icon, XIcon } from "lucide-react";
@@ -22,7 +22,7 @@ export function PostJobShareNudge({
 	toolSlug,
 	className,
 }: PostJobShareNudgeProps) {
-	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [show, setShow] = useState(false);
 	const [copied, setCopied] = useState(false);
 
@@ -32,13 +32,23 @@ export function PostJobShareNudge({
 		const dismissed = localStorage.getItem(storageKey);
 		if (dismissed === "true") return;
 		// Delay so it shows after the upgrade nudge
-		const timer = setTimeout(() => setShow(true), 1200);
+		const timer = setTimeout(() => {
+			setShow(true);
+			track({
+				name: "share_nudge_shown",
+				props: { tool_slug: toolSlug ?? "unknown" },
+			});
+		}, 1200);
 		return () => clearTimeout(timer);
-	}, [storageKey]);
+	}, [storageKey, track, toolSlug]);
 
 	const handleDismiss = () => {
 		localStorage.setItem(storageKey, "true");
 		setShow(false);
+		track({
+			name: "share_nudge_dismissed",
+			props: { tool_slug: toolSlug ?? "unknown" },
+		});
 	};
 
 	const handleCopyLink = async () => {
@@ -48,6 +58,10 @@ export function PostJobShareNudge({
 			await navigator.clipboard.writeText(url);
 			setCopied(true);
 			toast.success("Link copied! Share it with your team.");
+			track({
+				name: "share_nudge_link_copied",
+				props: { tool_slug: toolSlug ?? "unknown" },
+			});
 			setTimeout(() => setCopied(false), 2000);
 		} catch {
 			toast.error("Couldn't copy link — try manually.");
