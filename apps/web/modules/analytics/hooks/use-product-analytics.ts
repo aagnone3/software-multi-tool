@@ -691,7 +691,9 @@ type ProductEvent =
 	| {
 			name: "post_upgrade_secondary_cta_clicked";
 			props: Record<string, never>;
-	  };
+	  }
+	| { name: "template_copied"; props: { toolSlug: string } }
+	| { name: "template_deleted"; props: { toolSlug: string } };
 
 export type { ProductEvent };
 
