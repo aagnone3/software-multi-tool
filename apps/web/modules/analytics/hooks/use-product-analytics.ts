@@ -641,7 +641,23 @@ type ProductEvent =
 			name: "tool_schedule_set";
 			props: { tool_slug: string; offset_value: number; unit: string };
 	  }
-	| { name: "tool_schedule_removed"; props: { tool_slug: string } };
+	| { name: "tool_schedule_removed"; props: { tool_slug: string } }
+	| {
+			name: "credit_forecast_nudge_shown";
+			props: {
+				plan_id: string;
+				forecast_30: number;
+				remaining_credits: number;
+			};
+	  }
+	| {
+			name: "credit_forecast_upgrade_clicked";
+			props: { plan_id: string; source: string };
+	  }
+	| {
+			name: "credit_burn_rate_upgrade_clicked";
+			props: { plan_id: string; source: string };
+	  };
 
 export type { ProductEvent };
 

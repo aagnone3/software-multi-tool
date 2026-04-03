@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
 import {
@@ -27,9 +28,15 @@ interface CreditBurnRateWidgetProps {
 }
 
 function formatDays(days: number): string {
-	if (days >= 365) return `${Math.floor(days / 365)}y`;
-	if (days >= 30) return `${Math.floor(days / 30)}mo`;
-	if (days >= 7) return `${Math.floor(days / 7)}w`;
+	if (days >= 365) {
+		return `${Math.floor(days / 365)}y`;
+	}
+	if (days >= 30) {
+		return `${Math.floor(days / 30)}mo`;
+	}
+	if (days >= 7) {
+		return `${Math.floor(days / 7)}w`;
+	}
 	return `${Math.round(days)}d`;
 }
 
@@ -55,13 +62,17 @@ function computeBurnRate(
 	const completedJobs = jobs.filter((j) => j.status === "COMPLETED");
 
 	const thisWeekJobs = completedJobs.filter((j) => {
-		if (!j.createdAt) return false;
+		if (!j.createdAt) {
+			return false;
+		}
 		const d = new Date(j.createdAt);
 		return d >= oneWeekAgo;
 	});
 
 	const lastWeekJobs = completedJobs.filter((j) => {
-		if (!j.createdAt) return false;
+		if (!j.createdAt) {
+			return false;
+		}
 		const d = new Date(j.createdAt);
 		return d >= twoWeeksAgo && d < oneWeekAgo;
 	});
@@ -77,8 +88,11 @@ function computeBurnRate(
 	let trend: BurnTrend = "stable";
 	if (lastWeekCredits > 0) {
 		const change = (thisWeekCredits - lastWeekCredits) / lastWeekCredits;
-		if (change > 0.15) trend = "increasing";
-		else if (change < -0.15) trend = "decreasing";
+		if (change > 0.15) {
+			trend = "increasing";
+		} else if (change < -0.15) {
+			trend = "decreasing";
+		}
 	}
 
 	const estimatedDaysRemaining =
@@ -103,6 +117,7 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 	} = useCreditsBalance();
 	const { jobs, isLoading: jobsLoading } = useJobsList(undefined, 50);
 
+	const { track } = useProductAnalytics();
 	const isLoading = balanceLoading || jobsLoading;
 
 	const normalizedJobs = useMemo(
@@ -120,8 +135,9 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 	);
 
 	const burnData = useMemo((): BurnRateData | null => {
-		if (isLoading || totalCredits === undefined || totalCredits === null)
+		if (isLoading || totalCredits === undefined || totalCredits === null) {
 			return null;
+		}
 		return computeBurnRate(normalizedJobs, totalCredits);
 	}, [normalizedJobs, totalCredits, isLoading]);
 
@@ -244,7 +260,18 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 							className="w-full gap-1"
 							asChild
 						>
-							<Link href="/app/settings/billing?upgrade=pro">
+							<Link
+								href="/app/settings/billing?upgrade=pro"
+								onClick={() =>
+									track({
+										name: "credit_burn_rate_upgrade_clicked",
+										props: {
+											plan_id: "starter",
+											source: "credit_burn_rate_widget_upgrade_to_pro",
+										},
+									})
+								}
+							>
 								Upgrade to Pro
 								<ArrowRightIcon className="size-3" />
 							</Link>
@@ -255,7 +282,18 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 							className="w-full gap-1 text-muted-foreground"
 							asChild
 						>
-							<Link href="/pricing#pricing-plan-pro">
+							<Link
+								href="/pricing#pricing-plan-pro"
+								onClick={() =>
+									track({
+										name: "credit_burn_rate_upgrade_clicked",
+										props: {
+											plan_id: "starter",
+											source: "credit_burn_rate_widget_compare_plans",
+										},
+									})
+								}
+							>
 								Compare plans
 								<ArrowRightIcon className="size-3" />
 							</Link>
@@ -268,7 +306,18 @@ export function CreditBurnRateWidget({ className }: CreditBurnRateWidgetProps) {
 						className="w-full gap-1"
 						asChild
 					>
-						<Link href="/app/settings/billing">
+						<Link
+							href="/app/settings/billing"
+							onClick={() =>
+								track({
+									name: "credit_burn_rate_upgrade_clicked",
+									props: {
+										plan_id: "free",
+										source: "credit_burn_rate_widget_upgrade_credits",
+									},
+								})
+							}
+						>
 							Upgrade for more credits
 							<ArrowRightIcon className="size-3" />
 						</Link>

@@ -8,6 +8,10 @@ const mockUseRecentJobs = vi.fn();
 const mockUseTools = vi.fn();
 const mockUseCreditsBalance = vi.fn();
 const mockUseActiveOrganization = vi.fn();
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: (limit: number) => mockUseRecentJobs(limit),
 }));

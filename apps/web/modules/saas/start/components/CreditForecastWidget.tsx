@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useTools } from "@saas/tools/hooks/use-tools";
@@ -18,7 +19,7 @@ import {
 	ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
 interface CreditForecastWidgetProps {
@@ -36,6 +37,7 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 	const { enabledTools } = useTools();
 	const { balance, isFreePlan, isStarterPlan } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const forecast = useMemo(() => {
 		if (!jobs || jobs.length === 0) {
@@ -101,6 +103,29 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 		};
 	}, [jobs, enabledTools]);
 
+	// Determine if the user is on track to exceed their plan credits this month.
+	// Only show nudge for free and starter plan users (not Pro, not paying for extra).
+	const remainingCredits = balance?.totalAvailable ?? null;
+	const willExceedCredits =
+		remainingCredits !== null &&
+		(isFreePlan || isStarterPlan) &&
+		forecast !== null &&
+		forecast.forecast30 > remainingCredits;
+
+	useEffect(() => {
+		if (willExceedCredits && forecast) {
+			track({
+				name: "credit_forecast_nudge_shown",
+				props: {
+					plan_id: isStarterPlan ? "starter" : "free",
+					forecast_30: forecast.forecast30,
+					remaining_credits: remainingCredits ?? 0,
+				},
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [willExceedCredits]);
+
 	if (isLoading) {
 		return (
 			<Card className={className}>
@@ -124,14 +149,6 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 	const { dailyRate, forecast7, forecast30, trendPct } = forecast;
 	const trendUp = trendPct !== null && trendPct > 0;
 	const trendDown = trendPct !== null && trendPct < 0;
-
-	// Determine if the user is on track to exceed their plan credits this month.
-	// Only show nudge for free and starter plan users (not Pro, not paying for extra).
-	const remainingCredits = balance?.totalAvailable ?? null;
-	const willExceedCredits =
-		remainingCredits !== null &&
-		(isFreePlan || isStarterPlan) &&
-		forecast30 > remainingCredits;
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -217,6 +234,17 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 								href={upgradeHref}
 								className="mt-1 inline-block text-xs font-medium text-amber-700 underline underline-offset-2 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200"
 								data-testid="credit-forecast-nudge-cta"
+								onClick={() =>
+									track({
+										name: "credit_forecast_upgrade_clicked",
+										props: {
+											plan_id: isStarterPlan
+												? "starter"
+												: "free",
+											source: "credit_forecast_widget",
+										},
+									})
+								}
 							>
 								{upgradeLabel} →
 							</Link>
