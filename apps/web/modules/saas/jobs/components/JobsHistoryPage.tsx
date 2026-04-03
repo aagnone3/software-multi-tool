@@ -487,7 +487,10 @@ export function JobsHistoryPage() {
 					value={statusFilter}
 					onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}
 				>
-					<SelectTrigger className="w-[150px]">
+					<SelectTrigger
+						className="w-[150px]"
+						aria-label="Filter by status"
+					>
 						<SelectValue placeholder="All Statuses" />
 					</SelectTrigger>
 					<SelectContent>
@@ -507,7 +510,10 @@ export function JobsHistoryPage() {
 							setToolFilter(v === "all" ? "" : v)
 						}
 					>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger
+							className="w-[180px]"
+							aria-label="Filter by tool"
+						>
 							<SelectValue placeholder="All Tools" />
 						</SelectTrigger>
 						<SelectContent>
@@ -544,7 +550,10 @@ export function JobsHistoryPage() {
 							setTagFilter(v === "all" ? "" : v)
 						}
 					>
-						<SelectTrigger className="w-[140px]">
+						<SelectTrigger
+							className="w-[140px]"
+							aria-label="Filter by tag"
+						>
 							<SelectValue placeholder="All Tags" />
 						</SelectTrigger>
 						<SelectContent>

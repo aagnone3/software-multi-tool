@@ -155,6 +155,20 @@ describe("AiChat", () => {
 		expect(screen.getByRole("button", { name: /send/i })).toBeDefined();
 	});
 
+	it("textarea has accessible aria-label", () => {
+		render(<AiChat />);
+		const textarea = screen.getByRole("textbox", {
+			name: /chat message input/i,
+		});
+		expect(textarea).toBeDefined();
+	});
+
+	it("active chat button has aria-current set", () => {
+		render(<AiChat />);
+		const activeChat = screen.getByRole("button", { name: /test chat/i });
+		expect(activeChat.getAttribute("aria-current")).toBe("true");
+	});
+
 	it("renders New chat button in sidebar", () => {
 		render(<AiChat />);
 		expect(screen.getByRole("button", { name: /new chat/i })).toBeDefined();

@@ -303,7 +303,10 @@ export function AuditLogList() {
 						setActionFilter(value === "all" ? "" : value)
 					}
 				>
-					<SelectTrigger className="w-[180px]">
+					<SelectTrigger
+						className="w-[180px]"
+						aria-label="Filter by action"
+					>
 						<SelectValue placeholder="All Actions" />
 					</SelectTrigger>
 					<SelectContent>
@@ -322,7 +325,10 @@ export function AuditLogList() {
 						setResourceFilter(value === "all" ? "" : value)
 					}
 				>
-					<SelectTrigger className="w-[180px]">
+					<SelectTrigger
+						className="w-[180px]"
+						aria-label="Filter by resource"
+					>
 						<SelectValue placeholder="All Resources" />
 					</SelectTrigger>
 					<SelectContent>
@@ -341,7 +347,10 @@ export function AuditLogList() {
 						setStatusFilter(value === "all" ? "" : value)
 					}
 				>
-					<SelectTrigger className="w-[150px]">
+					<SelectTrigger
+						className="w-[150px]"
+						aria-label="Filter by status"
+					>
 						<SelectValue placeholder="All Statuses" />
 					</SelectTrigger>
 					<SelectContent>
