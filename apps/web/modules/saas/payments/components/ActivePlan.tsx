@@ -76,7 +76,6 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 	const price = "price" in activePlan ? activePlan.price : null;
 	const isStarterPlan = activePlan.id === "starter";
 	const isMonthlySubscription =
-		!isStarterPlan &&
 		price !== null &&
 		price !== undefined &&
 		"interval" in price &&
@@ -168,8 +167,8 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 					</div>
 					<p className="mb-3 text-green-700 text-sm dark:text-green-400">
 						Switch to annual and stop paying month-to-month. You get
-						the same Pro features at a lower effective rate — locked
-						in for the year.
+						the same {activePlanData.title} features at a lower
+						effective rate — locked in for the year.
 					</p>
 					<Link
 						href="/app/billing"
