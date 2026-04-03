@@ -45,9 +45,12 @@ describe("ToolViewTracker", () => {
 				toolName="Expense Categorizer"
 			/>,
 		);
-		expect(mockTrack).toHaveBeenCalledWith("tool_page_viewed", {
-			tool_slug: "expense-categorizer",
-			tool_name: "Expense Categorizer",
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_page_viewed",
+			props: {
+				tool_slug: "expense-categorizer",
+				tool_name: "Expense Categorizer",
+			},
 		});
 	});
 });

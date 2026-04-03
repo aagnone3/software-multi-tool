@@ -1,6 +1,6 @@
 "use client";
 
-import { useTrack } from "@analytics/hooks/use-product-analytics";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useRecentlyViewedTools } from "@saas/tools/hooks/use-recently-viewed-tools";
 import { useEffect } from "react";
 
@@ -19,7 +19,10 @@ export function ToolViewTracker({ toolSlug, toolName }: ToolViewTrackerProps) {
 
 	useEffect(() => {
 		recordView(toolSlug);
-		track("tool_page_viewed", { tool_slug: toolSlug, tool_name: toolName });
+		track({
+			name: "tool_page_viewed",
+			props: { tool_slug: toolSlug, tool_name: toolName },
+		});
 	}, [toolSlug, toolName, recordView, track]);
 
 	return null;
