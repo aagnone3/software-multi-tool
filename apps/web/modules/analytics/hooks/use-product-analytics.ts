@@ -747,7 +747,15 @@ type ProductEvent =
 			name: "tool_output_downloaded";
 			props: { label: string; format: "json" | "txt" };
 	  }
-	| { name: "tool_output_upgrade_clicked"; props: Record<string, never> };
+	| { name: "tool_output_upgrade_clicked"; props: Record<string, never> }
+	| {
+			name: "nav_item_clicked";
+			props: { label: string; href: string };
+	  }
+	| {
+			name: "keyboard_shortcuts_opened";
+			props: Record<string, never>;
+	  };
 
 export type { ProductEvent };
 
