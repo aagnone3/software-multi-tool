@@ -4,6 +4,7 @@ import { Button } from "@ui/components/button";
 import {
 	Sheet,
 	SheetContent,
+	SheetDescription,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -68,11 +69,11 @@ export function ToolNotesDrawer({
 			>
 				<SheetHeader>
 					<SheetTitle>Notes — {toolName}</SheetTitle>
+					<SheetDescription>
+						Jot down anything useful while working with this tool.
+						Notes are saved locally in your browser.
+					</SheetDescription>
 				</SheetHeader>
-				<p className="text-sm text-muted-foreground">
-					Jot down anything useful while working with this tool. Notes
-					are saved locally in your browser.
-				</p>
 				<Textarea
 					value={notes}
 					onChange={(e) => setNotes(e.target.value)}
