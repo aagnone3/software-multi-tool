@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -48,6 +49,7 @@ function CompareRow({
 }
 
 export function ToolCompareView() {
+	const { track } = useProductAnalytics();
 	const { enabledTools } = useTools();
 	const [leftSlug, setLeftSlug] = useState<string>(
 		enabledTools[0]?.slug ?? "",
@@ -55,6 +57,10 @@ export function ToolCompareView() {
 	const [rightSlug, setRightSlug] = useState<string>(
 		enabledTools[1]?.slug ?? "",
 	);
+
+	React.useEffect(() => {
+		track({ name: "tool_compare_page_viewed", props: {} });
+	}, [track]);
 
 	const leftTool = enabledTools.find((t) => t.slug === leftSlug);
 	const rightTool = enabledTools.find((t) => t.slug === rightSlug);
@@ -68,7 +74,16 @@ export function ToolCompareView() {
 					<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">
 						Tool A
 					</p>
-					<Select value={leftSlug} onValueChange={setLeftSlug}>
+					<Select
+						value={leftSlug}
+						onValueChange={(v) => {
+							setLeftSlug(v);
+							track({
+								name: "tool_compare_tool_selected",
+								props: { slot: "left", tool_slug: v },
+							});
+						}}
+					>
 						<SelectTrigger aria-label="Select Tool A for comparison">
 							<SelectValue placeholder="Select a tool" />
 						</SelectTrigger>
@@ -85,7 +100,16 @@ export function ToolCompareView() {
 					<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">
 						Tool B
 					</p>
-					<Select value={rightSlug} onValueChange={setRightSlug}>
+					<Select
+						value={rightSlug}
+						onValueChange={(v) => {
+							setRightSlug(v);
+							track({
+								name: "tool_compare_tool_selected",
+								props: { slot: "right", tool_slug: v },
+							});
+						}}
+					>
 						<SelectTrigger aria-label="Select Tool B for comparison">
 							<SelectValue placeholder="Select a tool" />
 						</SelectTrigger>

@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ToolWithStatus } from "../hooks/use-tools";
 import { ToolCompareView } from "./ToolCompareView";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockTools: ToolWithStatus[] = [
 	{
 		slug: "news-analyzer",
@@ -124,5 +129,19 @@ describe("ToolCompareView - a11y", () => {
 			'[aria-label="Tool comparison table"]',
 		);
 		expect(table).toBeTruthy();
+	});
+});
+
+describe("ToolCompareView – analytics", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
+
+	it("fires tool_compare_page_viewed on mount", () => {
+		render(<ToolCompareView />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_compare_page_viewed",
+			props: {},
+		});
 	});
 });
