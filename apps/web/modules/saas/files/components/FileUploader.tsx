@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
@@ -65,6 +66,7 @@ export function FileUploader({ isOpen, onClose }: FileUploaderProps) {
 	const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 
 	const uploadMutation = useMutation({
 		mutationFn: async (file: File) => {
@@ -149,6 +151,14 @@ export function FileUploader({ isOpen, onClose }: FileUploaderProps) {
 						: f,
 				),
 			);
+			track({
+				name: "file_uploaded",
+				props: {
+					filename: file.name,
+					mime_type: file.type || "application/octet-stream",
+					size_bytes: file.size,
+				},
+			});
 			queryClient.invalidateQueries({ queryKey: ["files"] });
 		},
 		onError: (error, file) => {
@@ -166,6 +176,14 @@ export function FileUploader({ isOpen, onClose }: FileUploaderProps) {
 						: f,
 				),
 			);
+			track({
+				name: "file_upload_failed",
+				props: {
+					filename: file.name,
+					mime_type: file.type || "application/octet-stream",
+					size_bytes: file.size,
+				},
+			});
 		},
 	});
 
