@@ -493,7 +493,11 @@ describe("ActivePlan", () => {
 	it("shows win-back nudge for canceled subscription", () => {
 		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
 		mockUsePurchases.mockReturnValue({
-			activePlan: { id: "pro", status: "canceled", purchaseId: "pur_123" },
+			activePlan: {
+				id: "pro",
+				status: "canceled",
+				purchaseId: "pur_123",
+			},
 		});
 
 		const { container } = render(<ActivePlan />);
