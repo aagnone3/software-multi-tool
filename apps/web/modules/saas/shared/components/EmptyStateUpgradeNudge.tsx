@@ -1,10 +1,11 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { usePurchases } from "@saas/payments/hooks/purchases";
 import { Button } from "@ui/components/button";
 import { ArrowRightIcon, RocketIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface EmptyStateUpgradeNudgeProps {
 	organizationId?: string;
@@ -73,9 +74,26 @@ export function EmptyStateUpgradeNudge({
 	className,
 }: EmptyStateUpgradeNudgeProps) {
 	const { activePlan } = usePurchases(organizationId);
+	const { track } = useProductAnalytics();
 
 	const isFree = activePlan?.id === "free";
 	const isStarter = activePlan?.id === "starter";
+
+	useEffect(() => {
+		if (!isFree && !isStarter) {
+			return;
+		}
+		track({
+			name: "upgrade_nudge_shown",
+			props: {
+				source: "empty_state",
+				plan_id: activePlan?.id ?? "free",
+				context,
+			},
+		});
+		// Only fire once on mount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	if (!isFree && !isStarter) {
 		return null;
@@ -108,11 +126,42 @@ export function EmptyStateUpgradeNudge({
 					</div>
 				</div>
 				<div className="flex shrink-0 gap-2">
-					<Button asChild size="sm" variant="outline">
+					<Button
+						asChild
+						size="sm"
+						variant="outline"
+						onClick={() =>
+							track({
+								name: "upgrade_nudge_cta_clicked",
+								props: {
+									source: "empty_state",
+									plan_id: activePlan?.id ?? "free",
+									context,
+
+									cta_label: "primary",
+								},
+							})
+						}
+					>
 						<Link href={billingHref}>{copy.cta}</Link>
 					</Button>
 					{isFree && (
-						<Button asChild size="sm">
+						<Button
+							asChild
+							size="sm"
+							onClick={() =>
+								track({
+									name: "upgrade_nudge_cta_clicked",
+									props: {
+										source: "empty_state",
+										plan_id: "free",
+										context,
+
+										cta_label: "free_trial",
+									},
+								})
+							}
+						>
 							<Link href={`${billingHref}#pricing`}>
 								Start free trial
 								<ArrowRightIcon className="ml-1.5 size-3.5" />
@@ -120,7 +169,22 @@ export function EmptyStateUpgradeNudge({
 						</Button>
 					)}
 					{isStarter && (
-						<Button asChild size="sm">
+						<Button
+							asChild
+							size="sm"
+							onClick={() =>
+								track({
+									name: "upgrade_nudge_cta_clicked",
+									props: {
+										source: "empty_state",
+										plan_id: "starter",
+										context,
+
+										cta_label: "compare_plans",
+									},
+								})
+							}
+						>
 							<Link href={`${billingHref}#pricing-plan-pro`}>
 								Compare plans
 								<ArrowRightIcon className="ml-1.5 size-3.5" />

@@ -1,7 +1,14 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { EmptyStateUpgradeNudge } from "./EmptyStateUpgradeNudge";
+
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/payments/hooks/purchases", () => ({
 	usePurchases: vi.fn(),
@@ -137,5 +144,62 @@ describe("EmptyStateUpgradeNudge", () => {
 		} as unknown as ReturnType<typeof usePurchases>);
 		render(<EmptyStateUpgradeNudge />);
 		expect(screen.queryByText("Start free trial")).toBeNull();
+	});
+
+	// ── Analytics ──────────────────────────────────────────────────────────────
+
+	it("fires upgrade_nudge_shown on mount for free users", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "free", name: "Free" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		mockTrack.mockClear();
+		render(<EmptyStateUpgradeNudge context="jobs" />);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_nudge_shown",
+				props: expect.objectContaining({
+					source: "empty_state",
+					plan_id: "free",
+					context: "jobs",
+				}),
+			}),
+		);
+	});
+
+	it("fires upgrade_nudge_shown on mount for starter users", () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		mockTrack.mockClear();
+		render(<EmptyStateUpgradeNudge context="credits" />);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_nudge_shown",
+				props: expect.objectContaining({
+					source: "empty_state",
+					plan_id: "starter",
+					context: "credits",
+				}),
+			}),
+		);
+	});
+
+	it("fires upgrade_nudge_cta_clicked when primary CTA is clicked", async () => {
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter", name: "Starter" },
+		} as unknown as ReturnType<typeof usePurchases>);
+		mockTrack.mockClear();
+		render(<EmptyStateUpgradeNudge context="tool" />);
+		await userEvent.click(screen.getByText("Upgrade to Pro"));
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "upgrade_nudge_cta_clicked",
+				props: expect.objectContaining({
+					source: "empty_state",
+					plan_id: "starter",
+					cta_label: "primary",
+				}),
+			}),
+		);
 	});
 });
