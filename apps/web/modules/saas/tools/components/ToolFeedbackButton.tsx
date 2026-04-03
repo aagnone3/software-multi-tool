@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { Button } from "@ui/components/button";
 import {
@@ -31,10 +32,21 @@ export function ToolFeedbackButton({
 	jobId,
 	className,
 }: ToolFeedbackButtonProps) {
+	const { track } = useProductAnalytics();
 	const [open, setOpen] = useState(false);
 	const [rating, setRating] = useState<Rating | null>(null);
 	const [comment, setComment] = useState("");
 	const [submitting, setSubmitting] = useState(false);
+
+	function handleOpenChange(value: boolean) {
+		setOpen(value);
+		if (value) {
+			track({
+				name: "tool_feedback_dialog_opened",
+				props: { tool_slug: toolSlug, job_id: jobId },
+			});
+		}
+	}
 
 	async function handleSubmit() {
 		if (!rating) {
@@ -49,6 +61,15 @@ export function ToolFeedbackButton({
 				jobId,
 				chatTranscript: comment.trim() || undefined,
 			});
+			track({
+				name: "tool_feedback_submitted",
+				props: {
+					tool_slug: toolSlug,
+					rating,
+					has_comment: comment.trim().length > 0,
+					job_id: jobId,
+				},
+			});
 			toast.success("Thanks for your feedback!");
 			setOpen(false);
 			setRating(null);
@@ -61,7 +82,7 @@ export function ToolFeedbackButton({
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				<Button
 					variant="outline"

@@ -10,9 +10,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NewUserWelcomeBanner } from "./NewUserWelcomeBanner";
 
 const mockUseRecentJobs = vi.fn();
+const { mockTrack } = vi.hoisted(() => ({ mockTrack: vi.fn() }));
 
 vi.mock("@saas/start/hooks/use-recent-jobs", () => ({
 	useRecentJobs: (...args: unknown[]) => mockUseRecentJobs(...args),
+}));
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 describe("NewUserWelcomeBanner", () => {
@@ -89,6 +93,26 @@ describe("NewUserWelcomeBanner", () => {
 		expect(localStorage.getItem("new-user-welcome-banner-dismissed")).toBe(
 			"true",
 		);
+	});
+
+	it("tracks shown event when rendered", async () => {
+		render(<NewUserWelcomeBanner />);
+		await waitFor(() => {
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "new_user_welcome_banner_shown",
+				props: {},
+			});
+		});
+	});
+
+	it("tracks dismiss event when X is clicked", async () => {
+		render(<NewUserWelcomeBanner />);
+		await waitFor(() => screen.getByLabelText("Dismiss welcome banner"));
+		fireEvent.click(screen.getByLabelText("Dismiss welcome banner"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "new_user_welcome_banner_dismissed",
+			props: {},
+		});
 	});
 
 	it("does not render if previously dismissed", async () => {

@@ -587,6 +587,31 @@ type ProductEvent =
 	| {
 			name: "org_member_invited";
 			props: { role: string };
+	  }
+	| {
+			name: "tool_feedback_dialog_opened";
+			props: { tool_slug: string; job_id?: string };
+	  }
+	| {
+			name: "tool_feedback_submitted";
+			props: {
+				tool_slug: string;
+				rating: string;
+				has_comment: boolean;
+				job_id?: string;
+			};
+	  }
+	| {
+			name: "new_user_welcome_banner_shown";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "new_user_welcome_banner_dismissed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "new_user_welcome_cta_clicked";
+			props: { cta: "try_tool" | "browse_all" };
 	  };
 
 export type { ProductEvent };

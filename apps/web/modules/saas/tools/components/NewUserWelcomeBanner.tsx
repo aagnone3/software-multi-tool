@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useRecentJobs } from "@saas/start/hooks/use-recent-jobs";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
@@ -43,6 +44,7 @@ const STEPS: Step[] = [
 
 export function NewUserWelcomeBanner({ className }: { className?: string }) {
 	const { jobs, isLoading } = useRecentJobs(1);
+	const { track } = useProductAnalytics();
 	const [dismissed, setDismissed] = useState(true); // Start dismissed to avoid flash
 
 	useEffect(() => {
@@ -52,9 +54,16 @@ export function NewUserWelcomeBanner({ className }: { className?: string }) {
 		}
 	}, []);
 
+	useEffect(() => {
+		if (!isLoading && !dismissed && jobs.length === 0) {
+			track({ name: "new_user_welcome_banner_shown", props: {} });
+		}
+	}, [isLoading, dismissed, jobs.length, track]);
+
 	const handleDismiss = () => {
 		localStorage.setItem(STORAGE_KEY, "true");
 		setDismissed(true);
+		track({ name: "new_user_welcome_banner_dismissed", props: {} });
 	};
 
 	// Don't show if loading, dismissed, or user has already run a job
@@ -108,14 +117,32 @@ export function NewUserWelcomeBanner({ className }: { className?: string }) {
 
 			<div className="flex flex-wrap gap-2">
 				<Button size="sm" asChild>
-					<Link href="/app/tools/meeting-summarizer">
+					<Link
+						href="/app/tools/meeting-summarizer"
+						onClick={() =>
+							track({
+								name: "new_user_welcome_cta_clicked",
+								props: { cta: "try_tool" },
+							})
+						}
+					>
 						<SparklesIcon className="size-3.5 mr-1.5" />
 						Try Meeting Summarizer
 						<ArrowRightIcon className="size-3.5 ml-1.5" />
 					</Link>
 				</Button>
 				<Button size="sm" variant="outline" asChild>
-					<Link href="/app/tools">Browse all tools</Link>
+					<Link
+						href="/app/tools"
+						onClick={() =>
+							track({
+								name: "new_user_welcome_cta_clicked",
+								props: { cta: "browse_all" },
+							})
+						}
+					>
+						Browse all tools
+					</Link>
 				</Button>
 			</div>
 		</div>
