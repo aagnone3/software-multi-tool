@@ -58,4 +58,16 @@ describe("PartnersPage", () => {
 		const { metadata } = await import("./page");
 		expect(String(metadata.title)).toContain("Partner");
 	});
+
+	it("renders JSON-LD structured data script tag", async () => {
+		const { default: PartnersPage } = await import("./page");
+		const { container } = render(<PartnersPage />);
+		const script = container.querySelector(
+			'script[type="application/ld+json"]',
+		);
+		expect(script).not.toBeNull();
+		const parsed = JSON.parse(script?.innerHTML ?? "{}");
+		expect(parsed["@type"]).toBe("Service");
+		expect(parsed.serviceType).toBe("Affiliate Program");
+	});
 });

@@ -26,22 +26,47 @@ export async function generateMetadata() {
 	};
 }
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ContactPage",
+	name: `Contact ${config.appName}`,
+	url: `${siteUrl}/contact`,
+	description: `Get in touch with the ${config.appName} team for help with AI tools, billing, or any other questions.`,
+	mainEntity: {
+		"@type": "Organization",
+		name: config.appName,
+		url: siteUrl,
+		contactPoint: {
+			"@type": "ContactPoint",
+			contactType: "customer support",
+			availableLanguage: "English",
+		},
+	},
+};
+
 export default async function ContactPage() {
 	if (!config.contactForm.enabled) {
 		redirect("/");
 	}
 
 	return (
-		<div className="container max-w-xl pt-32 pb-16">
-			<div className="mb-12 pt-8 text-center">
-				<h1 className="mb-2 font-bold text-5xl">Contact us</h1>
-				<p className="text-balance text-lg opacity-50">
-					We are here to help you. Please use the form below to get in
-					touch with us.
-				</p>
-			</div>
+		<>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<div className="container max-w-xl pt-32 pb-16">
+				<div className="mb-12 pt-8 text-center">
+					<h1 className="mb-2 font-bold text-5xl">Contact us</h1>
+					<p className="text-balance text-lg opacity-50">
+						We are here to help you. Please use the form below to
+						get in touch with us.
+					</p>
+				</div>
 
-			<ContactForm />
-		</div>
+				<ContactForm />
+			</div>
+		</>
 	);
 }

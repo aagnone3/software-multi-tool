@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NoCreditsModal } from "./NoCreditsModal";
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
@@ -24,7 +24,19 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+const mockUseCreditsBalance = vi.fn();
+vi.mock("../hooks/use-credits-balance", () => ({
+	useCreditsBalance: () => mockUseCreditsBalance(),
+}));
+
 describe("NoCreditsModal", () => {
+	beforeEach(() => {
+		mockUseCreditsBalance.mockReturnValue({
+			isStarterPlan: false,
+			isFreePlan: true,
+		});
+	});
+
 	it("renders when open", () => {
 		render(<NoCreditsModal open={true} onClose={vi.fn()} />);
 		expect(screen.getByText("Out of credits")).toBeInTheDocument();
@@ -63,31 +75,71 @@ describe("NoCreditsModal", () => {
 		expect(onClose).toHaveBeenCalled();
 	});
 
-	it("shows Buy Credits and Upgrade Plan links", () => {
-		render(<NoCreditsModal open={true} onClose={vi.fn()} />);
-		const buyLinks = screen.getAllByRole("link", { name: /buy credits/i });
-		expect(buyLinks.length).toBeGreaterThan(0);
-		expect(buyLinks[0].getAttribute("href")).toBe("/app/settings/billing");
-		const upgradeLinks = screen.getAllByRole("link", {
-			name: /upgrade plan/i,
+	describe("Free plan", () => {
+		it("shows Buy Credits and Upgrade Plan links", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			const buyLinks = screen.getAllByRole("link", {
+				name: /buy credits/i,
+			});
+			expect(buyLinks.length).toBeGreaterThan(0);
+			expect(buyLinks[0].getAttribute("href")).toBe(
+				"/app/settings/billing",
+			);
+			const upgradeLinks = screen.getAllByRole("link", {
+				name: /upgrade plan/i,
+			});
+			expect(upgradeLinks.length).toBeGreaterThan(0);
 		});
-		expect(upgradeLinks.length).toBeGreaterThan(0);
+
+		it("uses /app/settings/billing when no active organization", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			const links = screen.getAllByRole("link");
+			expect(
+				links.some((l) =>
+					l.getAttribute("href")?.includes("settings/billing"),
+				),
+			).toBe(true);
+		});
 	});
 
-	it("uses org billing path when activeOrganization exists", () => {
-		vi.doMock("@saas/organizations/hooks/use-active-organization", () => ({
-			useActiveOrganization: () => ({
-				activeOrganization: { slug: "my-org" },
-			}),
-		}));
-		// Default (no org) path used — mock overrides per-test in beforeEach pattern
-		render(<NoCreditsModal open={true} onClose={vi.fn()} />);
-		// The billing paths are correct for the mocked (no-org) case
-		const links = screen.getAllByRole("link");
-		expect(
-			links.some((l) =>
-				l.getAttribute("href")?.includes("settings/billing"),
-			),
-		).toBe(true);
+	describe("Starter plan", () => {
+		beforeEach(() => {
+			mockUseCreditsBalance.mockReturnValue({
+				isStarterPlan: true,
+				isFreePlan: false,
+			});
+		});
+
+		it("shows Upgrade to Pro CTA instead of generic upgrade plan", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			expect(
+				screen.getByRole("link", { name: /upgrade to pro/i }),
+			).toBeInTheDocument();
+		});
+
+		it("shows Compare plans link", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			expect(
+				screen.getByRole("link", { name: /compare plans/i }),
+			).toBeInTheDocument();
+		});
+
+		it("Upgrade to Pro link points to billing with upgrade=pro", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			const link = screen.getByRole("link", { name: /upgrade to pro/i });
+			expect(link.getAttribute("href")).toContain("upgrade=pro");
+		});
+
+		it("does not show Buy Credits option for Starter users", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			expect(
+				screen.queryByRole("link", { name: /buy credits/i }),
+			).not.toBeInTheDocument();
+		});
+
+		it("shows Pro feature highlights", () => {
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+			expect(screen.getByText(/5× more credits/i)).toBeInTheDocument();
+		});
 	});
 });

@@ -191,53 +191,78 @@ const typeLabel: Record<"feature" | "improvement" | "fix", string> = {
 	fix: "Fixed",
 };
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "SoftwareApplication",
+	name: config.appName,
+	url: siteUrl,
+	applicationCategory: "BusinessApplication",
+	operatingSystem: "Web",
+	description: `AI-powered productivity tools for small businesses — ${config.appName} changelog.`,
+	softwareVersion: releases[0]?.version,
+	releaseNotes: `${siteUrl}/changelog`,
+	provider: {
+		"@type": "Organization",
+		name: config.appName,
+		url: siteUrl,
+	},
+};
+
 export default function ChangelogPage() {
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-16">
-			<div className="mb-12">
-				<h1 className="mb-4 font-bold text-4xl">Changelog</h1>
-				<p className="text-lg text-muted-foreground">
-					All notable changes to {config.appName} are documented here.
-				</p>
-			</div>
+		<>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<div className="container mx-auto max-w-3xl px-4 py-16">
+				<div className="mb-12">
+					<h1 className="mb-4 font-bold text-4xl">Changelog</h1>
+					<p className="text-lg text-muted-foreground">
+						All notable changes to {config.appName} are documented
+						here.
+					</p>
+				</div>
 
-			<div className="space-y-16">
-				{releases.map((release) => (
-					<div key={release.version} className="relative">
-						<div className="mb-6 flex flex-wrap items-baseline gap-3">
-							<span className="rounded-full bg-primary px-3 py-1 font-mono font-semibold text-primary-foreground text-sm">
-								v{release.version}
-							</span>
-							<span className="text-muted-foreground text-sm">
-								{release.date}
-							</span>
-							<span className="font-medium text-foreground">
-								{release.highlights}
-							</span>
-						</div>
+				<div className="space-y-16">
+					{releases.map((release) => (
+						<div key={release.version} className="relative">
+							<div className="mb-6 flex flex-wrap items-baseline gap-3">
+								<span className="rounded-full bg-primary px-3 py-1 font-mono font-semibold text-primary-foreground text-sm">
+									v{release.version}
+								</span>
+								<span className="text-muted-foreground text-sm">
+									{release.date}
+								</span>
+								<span className="font-medium text-foreground">
+									{release.highlights}
+								</span>
+							</div>
 
-						<ul className="space-y-3">
-							{release.changes.map((change) => (
-								<li
-									key={change.text}
-									className="flex items-start gap-3 text-sm"
-								>
-									<span
-										className={`mt-0.5 inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-medium text-xs ${typeBadge[change.type]}`}
+							<ul className="space-y-3">
+								{release.changes.map((change) => (
+									<li
+										key={change.text}
+										className="flex items-start gap-3 text-sm"
 									>
-										{typeLabel[change.type]}
-									</span>
-									<span className="text-foreground/80">
-										{change.text}
-									</span>
-								</li>
-							))}
-						</ul>
+										<span
+											className={`mt-0.5 inline-flex shrink-0 items-center rounded px-1.5 py-0.5 font-medium text-xs ${typeBadge[change.type]}`}
+										>
+											{typeLabel[change.type]}
+										</span>
+										<span className="text-foreground/80">
+											{change.text}
+										</span>
+									</li>
+								))}
+							</ul>
 
-						<div className="mt-8 border-b" />
-					</div>
-				))}
+							<div className="mt-8 border-b" />
+						</div>
+					))}
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }
