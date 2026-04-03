@@ -18,7 +18,7 @@ interface TrustItem {
 const TRUST_ITEMS: TrustItem[] = [
 	{
 		icon: RefreshCcwIcon,
-		title: "14-day money-back guarantee",
+		title: "30-day money-back guarantee",
 		description: "Not satisfied? Get a full refund, no questions asked.",
 	},
 	{

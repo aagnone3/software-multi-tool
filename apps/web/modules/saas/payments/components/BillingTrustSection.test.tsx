@@ -12,7 +12,7 @@ describe("BillingTrustSection", () => {
 	it("renders money-back guarantee item", () => {
 		render(<BillingTrustSection />);
 		expect(
-			screen.getByText(/14-day money-back guarantee/i),
+			screen.getByText(/30-day money-back guarantee/i),
 		).toBeInTheDocument();
 	});
 

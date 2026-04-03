@@ -18,7 +18,7 @@ describe("PricingTrustBar", () => {
 
 	it("renders money-back guarantee", () => {
 		render(<PricingTrustBar />);
-		expect(screen.getByText("14-day")).toBeInTheDocument();
+		expect(screen.getByText("30-day")).toBeInTheDocument();
 		expect(screen.getByText(/money-back guarantee/i)).toBeInTheDocument();
 	});
 
