@@ -1,12 +1,42 @@
-"use client";
-
 import { UseCasesPageTracker } from "@marketing/shared/components/UseCasesPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
+import type { Metadata } from "next";
 import Link from "next/link";
 import React from "react";
 
 const siteUrl = getBaseUrl();
+
+export const metadata: Metadata = {
+	title: `Use Cases — ${config.appName}`,
+	description:
+		"See how small businesses use AI tools to automate contract review, invoice processing, expense categorization, meeting summaries, and more — saving 10+ hours per week.",
+	alternates: { canonical: `${siteUrl}/use-cases` },
+	openGraph: {
+		type: "website",
+		url: `${siteUrl}/use-cases`,
+		title: `AI Tool Use Cases for Small Business — ${config.appName}`,
+		description:
+			"Real workflows for real businesses. See how teams automate contracts, invoices, expenses, meetings, and customer feedback with AI.",
+		images: [
+			{
+				url: `${siteUrl}/api/og?title=${encodeURIComponent("AI Tool Use Cases — Software Multi-Tool")}&description=${encodeURIComponent("Real workflows for small businesses.")}`,
+				width: 1200,
+				height: 630,
+				alt: `Use Cases — ${config.appName}`,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: `AI Tool Use Cases for Small Business — ${config.appName}`,
+		description:
+			"Automate contracts, invoices, expenses, meetings, and customer feedback with AI. See real use cases.",
+		images: [
+			`${siteUrl}/api/og?title=${encodeURIComponent("AI Tool Use Cases — Software Multi-Tool")}`,
+		],
+	},
+};
 
 const useCases = [
 	{
@@ -123,9 +153,89 @@ const useCases = [
 	},
 ];
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ItemList",
+	name: `AI Tool Use Cases — ${config.appName}`,
+	description:
+		"Real workflows for small businesses — automating contracts, invoices, expenses, meetings, and customer feedback with AI.",
+	url: `${siteUrl}/use-cases`,
+	numberOfItems: 7,
+	itemListElement: [
+		{
+			"@type": "ListItem",
+			position: 1,
+			name: "Contract Review & Analysis",
+			url: `${siteUrl}/tools/contract-analyzer`,
+		},
+		{
+			"@type": "ListItem",
+			position: 2,
+			name: "Invoice & Receipt Processing",
+			url: `${siteUrl}/tools/invoice-processor`,
+		},
+		{
+			"@type": "ListItem",
+			position: 3,
+			name: "Expense Report Automation",
+			url: `${siteUrl}/tools/expense-categorizer`,
+		},
+		{
+			"@type": "ListItem",
+			position: 4,
+			name: "Meeting Summarization",
+			url: `${siteUrl}/tools/meeting-summarizer`,
+		},
+		{
+			"@type": "ListItem",
+			position: 5,
+			name: "Multi-Speaker Audio Transcription",
+			url: `${siteUrl}/tools/speaker-separation`,
+		},
+		{
+			"@type": "ListItem",
+			position: 6,
+			name: "News & Market Intelligence",
+			url: `${siteUrl}/tools/news-analyzer`,
+		},
+		{
+			"@type": "ListItem",
+			position: 7,
+			name: "Customer Feedback Analysis",
+			url: `${siteUrl}/tools/feedback-analyzer`,
+		},
+	],
+};
+
+const breadcrumbJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: [
+		{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+		{
+			"@type": "ListItem",
+			position: 2,
+			name: "Use Cases",
+			item: `${siteUrl}/use-cases`,
+		},
+	],
+};
+
 export default function UseCasesPage() {
 	return (
 		<div className="min-h-screen bg-background">
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(breadcrumbJsonLd),
+				}}
+			/>
 			<UseCasesPageTracker />
 			{/* Hero */}
 			<section className="border-b bg-gradient-to-b from-muted/30 to-background px-4 py-20 text-center">
