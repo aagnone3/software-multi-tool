@@ -241,7 +241,9 @@ export async function generateMetadata({
 		(t) => t.slug === toolSlug && t.enabled,
 	);
 
-	if (!tool) return { title: "Tool Not Found" };
+	if (!tool) {
+		return { title: "Tool Not Found" };
+	}
 
 	const siteUrl = getBaseUrl();
 	const title = `${tool.name} — AI-Powered | ${config.appName}`;
@@ -285,7 +287,9 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 		(t) => t.slug === toolSlug && t.enabled,
 	);
 
-	if (!tool) notFound();
+	if (!tool) {
+		notFound();
+	}
 
 	const Icon = TOOL_ICONS[tool.icon] ?? SparklesIcon;
 	const features = TOOL_FEATURES[toolSlug] ?? [];

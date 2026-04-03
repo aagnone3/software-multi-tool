@@ -59,9 +59,10 @@ vi.mock("@marketing/home/components/StickyCta", () => ({
 }));
 
 vi.mock("next/image", () => ({
-	default: ({ src, alt }: { src: string; alt: string }) => (
-		<img src={src} alt={alt} />
-	),
+	default: ({ src, alt }: { src: string; alt: string }) => {
+		// biome-ignore lint/performance/noImgElement: test mock only
+		return <img src={src} alt={alt} />;
+	},
 }));
 
 import ToolPage, { generateMetadata } from "./page";
