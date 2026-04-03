@@ -238,18 +238,16 @@ describe("LoginForm", () => {
 		) as HTMLInputElement;
 		expect(passwordInput).toHaveAttribute("type", "password");
 
-		// Find the eye toggle button (type=button with no text)
-		const toggleButtons = screen.getAllByRole("button");
-		const eyeButton = toggleButtons.find(
-			(b) =>
-				b.getAttribute("type") === "button" && !b.textContent?.trim(),
-		);
-		if (eyeButton) {
-			await user.click(eyeButton);
-			expect(
-				document.querySelector('input[type="text"]'),
-			).toBeInTheDocument();
-		}
+		const eyeButton = screen.getByRole("button", {
+			name: /show password/i,
+		});
+		await user.click(eyeButton);
+		expect(
+			document.querySelector('input[type="text"]'),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /hide password/i }),
+		).toBeInTheDocument();
 	});
 
 	it("tracks user_logged_in on successful password login", async () => {

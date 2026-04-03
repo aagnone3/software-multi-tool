@@ -192,14 +192,19 @@ describe("SignupForm", () => {
 		expect(passwordInput).toBeTruthy();
 		expect(passwordInput.type).toBe("password");
 
-		const toggleBtn = passwordInput
-			.closest("div")
-			?.querySelector("button") as HTMLButtonElement;
+		const toggleBtn = screen.getByRole("button", {
+			name: /show password/i,
+		});
 		expect(toggleBtn).toBeTruthy();
 		await user.click(toggleBtn);
 		expect(passwordInput.type).toBe("text");
+		expect(
+			screen.getByRole("button", { name: /hide password/i }),
+		).toBeInTheDocument();
 
-		await user.click(toggleBtn);
+		await user.click(
+			screen.getByRole("button", { name: /hide password/i }),
+		);
 		expect(passwordInput.type).toBe("password");
 	});
 
