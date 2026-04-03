@@ -64,7 +64,7 @@ vi.mock("@ui/components/button", () => ({
 		asChild?: boolean;
 	}) =>
 		asChild ? (
-			<>{children}</>
+			children
 		) : (
 			<button type="button" {...props}>
 				{children}
