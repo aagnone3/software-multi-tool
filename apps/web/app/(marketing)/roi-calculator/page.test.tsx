@@ -84,13 +84,13 @@ describe("RoiCalculatorPage", () => {
 			.getByText(/Expense categorization/i)
 			.closest("button");
 		expect(expenseBtn).toBeDefined();
-		fireEvent.click(expenseBtn!);
+		fireEvent.click(expenseBtn as HTMLElement);
 		const toggleCall = mockTrack.mock.calls.find(
 			([e]) => e.name === "roi_calculator_use_case_toggled",
 		);
 		expect(toggleCall).toBeDefined();
-		expect(toggleCall![0].props.use_case_id).toBe("expenses");
-		expect(toggleCall![0].props.selected).toBe(true);
+		expect(toggleCall?.[0].props.use_case_id).toBe("expenses");
+		expect(toggleCall?.[0].props.selected).toBe(true);
 	});
 
 	it("tracks CTA click with calculator state", () => {
@@ -99,15 +99,15 @@ describe("RoiCalculatorPage", () => {
 			l.textContent?.toLowerCase().includes("start saving"),
 		);
 		expect(ctaLink).toBeDefined();
-		fireEvent.click(ctaLink!);
+		fireEvent.click(ctaLink as HTMLElement);
 		const ctaCall = mockTrack.mock.calls.find(
 			([e]) => e.name === "roi_calculator_cta_clicked",
 		);
 		expect(ctaCall).toBeDefined();
-		expect(ctaCall![0].props).toMatchObject({
+		expect(ctaCall?.[0].props).toMatchObject({
 			team_size: 3,
 			hourly_rate: 75,
 		});
-		expect(Array.isArray(ctaCall![0].props.use_cases)).toBe(true);
+		expect(Array.isArray(ctaCall?.[0].props.use_cases)).toBe(true);
 	});
 });
