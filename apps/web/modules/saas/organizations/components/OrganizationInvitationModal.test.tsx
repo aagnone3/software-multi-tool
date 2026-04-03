@@ -46,6 +46,11 @@ vi.mock("@tanstack/react-query", () => ({
 
 vi.mock("sonner", () => ({ toast: { error: mockToastError } }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const defaultProps = {
 	invitationId: "inv-123",
 	organizationName: "Acme Corp",
@@ -81,6 +86,10 @@ describe("OrganizationInvitationModal", () => {
 				invitationId: "inv-123",
 			});
 			expect(mockRouterReplace).toHaveBeenCalledWith("/app/acme-corp");
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "org_invitation_accepted",
+				props: { organization_slug: "acme-corp" },
+			});
 		});
 	});
 
@@ -95,6 +104,10 @@ describe("OrganizationInvitationModal", () => {
 				invitationId: "inv-123",
 			});
 			expect(mockRouterReplace).toHaveBeenCalledWith("/app");
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "org_invitation_rejected",
+				props: { organization_slug: "acme-corp" },
+			});
 		});
 	});
 

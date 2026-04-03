@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
@@ -23,6 +24,7 @@ export function ChangeOrganizationNameForm() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
@@ -49,6 +51,7 @@ export function ChangeOrganizationNameForm() {
 			}
 
 			toast.success("Your organization name has been updated.");
+			track({ name: "org_name_updated", props: {} });
 
 			queryClient.invalidateQueries({
 				queryKey: organizationListQueryKey,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { OrganizationLogo } from "@saas/organizations/components/OrganizationLogo";
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
@@ -23,6 +24,7 @@ export function OrganizationInvitationModal({
 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 	const [submitting, setSubmitting] = useState<false | "accept" | "reject">(
 		false,
 	);
@@ -40,6 +42,10 @@ export function OrganizationInvitationModal({
 					throw error;
 				}
 
+				track({
+					name: "org_invitation_accepted",
+					props: { organization_slug: organizationSlug },
+				});
 				await queryClient.invalidateQueries({
 					queryKey: organizationListQueryKey,
 				});
@@ -55,6 +61,10 @@ export function OrganizationInvitationModal({
 					throw error;
 				}
 
+				track({
+					name: "org_invitation_rejected",
+					props: { organization_slug: organizationSlug },
+				});
 				router.replace("/app");
 			}
 		} catch {
