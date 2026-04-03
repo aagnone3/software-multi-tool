@@ -55,12 +55,19 @@ vi.mock("@ui/components/button", () => ({
 		children,
 		onClick,
 		disabled,
+		"aria-label": ariaLabel,
 	}: {
 		children: React.ReactNode;
 		onClick?: () => void;
 		disabled?: boolean;
+		"aria-label"?: string;
 	}) => (
-		<button type="button" onClick={onClick} disabled={disabled}>
+		<button
+			type="button"
+			onClick={onClick}
+			disabled={disabled}
+			aria-label={ariaLabel}
+		>
 			{children}
 		</button>
 	),
@@ -117,6 +124,24 @@ describe("TagInput", () => {
 		render(<TagInput {...defaultProps} />);
 		expect(screen.getByText("urgent")).toBeDefined();
 		expect(screen.getByText("review")).toBeDefined();
+	});
+
+	it("remove tag buttons have accessible aria-labels", () => {
+		render(<TagInput {...defaultProps} />);
+		expect(
+			screen.getByRole("button", { name: "Remove tag urgent" }),
+		).toBeDefined();
+		expect(
+			screen.getByRole("button", { name: "Remove tag review" }),
+		).toBeDefined();
+	});
+
+	it("confirm add tag button has accessible aria-label", () => {
+		render(<TagInput {...defaultProps} />);
+		fireEvent.click(screen.getByText("Create new tag..."));
+		expect(
+			screen.getByRole("button", { name: "Confirm add tag" }),
+		).toBeDefined();
 	});
 
 	it("shows only unused tags as suggestions", () => {

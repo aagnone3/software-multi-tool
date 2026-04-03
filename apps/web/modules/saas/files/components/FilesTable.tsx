@@ -173,6 +173,7 @@ export function FilesTable(_props: FilesTableProps) {
 							setPage(1);
 						}}
 						className="pl-9"
+						aria-label="Search files"
 					/>
 				</div>
 
@@ -183,7 +184,10 @@ export function FilesTable(_props: FilesTableProps) {
 						setPage(1);
 					}}
 				>
-					<SelectTrigger className="w-[180px]">
+					<SelectTrigger
+						className="w-[180px]"
+						aria-label="Filter by file type"
+					>
 						<SelectValue placeholder="File type" />
 					</SelectTrigger>
 					<SelectContent>
@@ -204,7 +208,10 @@ export function FilesTable(_props: FilesTableProps) {
 							setPage(1);
 						}}
 					>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger
+							className="w-[180px]"
+							aria-label="Filter by tag"
+						>
 							<TagIcon className="mr-2 size-4" />
 							<SelectValue placeholder="Filter by tag" />
 						</SelectTrigger>
@@ -309,6 +316,7 @@ export function FilesTable(_props: FilesTableProps) {
 															file.id,
 														)
 													}
+													aria-label={`Edit tags for ${file.filename}`}
 												>
 													{file.tags.length === 0 ? (
 														<span className="text-muted-foreground text-sm">
@@ -333,6 +341,7 @@ export function FilesTable(_props: FilesTableProps) {
 													<Button
 														variant="ghost"
 														size="icon"
+														aria-label={`File actions for ${file.filename}`}
 													>
 														<MoreHorizontalIcon className="size-4" />
 													</Button>
@@ -389,6 +398,7 @@ export function FilesTable(_props: FilesTableProps) {
 							size="sm"
 							onClick={() => setPage((p) => Math.max(1, p - 1))}
 							disabled={page === 1}
+							aria-label="Go to previous page"
 						>
 							Previous
 						</Button>
@@ -401,6 +411,7 @@ export function FilesTable(_props: FilesTableProps) {
 								)
 							}
 							disabled={page === pagination.totalPages}
+							aria-label="Go to next page"
 						>
 							Next
 						</Button>
