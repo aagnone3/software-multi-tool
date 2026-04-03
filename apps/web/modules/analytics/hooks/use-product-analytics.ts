@@ -665,6 +665,26 @@ type ProductEvent =
 	| {
 			name: "payment_issue_alert_cta_clicked";
 			props: { status: string; source: string };
+	  }
+	| {
+			name: "tool_template_saved";
+			props: { tool_slug: string; template_name: string };
+	  }
+	| {
+			name: "tool_template_applied";
+			props: { tool_slug: string; template_name: string };
+	  }
+	| {
+			name: "tool_template_deleted";
+			props: { tool_slug: string; template_name: string };
+	  }
+	| {
+			name: "upgrade_welcome_feature_cta_clicked";
+			props: { feature: string; href: string };
+	  }
+	| {
+			name: "upgrade_welcome_next_step_clicked";
+			props: { step: number; label: string; href: string };
 	  };
 
 export type { ProductEvent };

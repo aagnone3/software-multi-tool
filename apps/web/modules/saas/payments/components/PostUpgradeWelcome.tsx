@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -70,6 +71,7 @@ const NEXT_STEPS = [
 ];
 
 export function PostUpgradeWelcome() {
+	const { track } = useProductAnalytics();
 	const { enabledTools } = useTools();
 	const firstTool = enabledTools[0];
 	const firstToolHref = firstTool
@@ -135,6 +137,15 @@ export function PostUpgradeWelcome() {
 									size="sm"
 									variant="outline"
 									className="mt-auto w-full"
+									onClick={() =>
+										track({
+											name: "upgrade_welcome_feature_cta_clicked",
+											props: {
+												feature: title,
+												href: cta.href,
+											},
+										})
+									}
 								>
 									<Link href={cta.href}>{cta.label}</Link>
 								</Button>
@@ -159,6 +170,12 @@ export function PostUpgradeWelcome() {
 								<Link
 									href={href}
 									className="font-semibold text-sm hover:underline"
+									onClick={() =>
+										track({
+											name: "upgrade_welcome_next_step_clicked",
+											props: { step, label, href },
+										})
+									}
 								>
 									{label}
 								</Link>

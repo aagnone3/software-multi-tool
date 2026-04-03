@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -66,6 +67,7 @@ export function ToolInputTemplates({
 	toolSlug,
 	className,
 }: ToolInputTemplatesProps) {
+	const { track } = useProductAnalytics();
 	const [templateMap, setTemplateMap] = useState<TemplateMap>({});
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [newName, setNewName] = useState("");
@@ -100,10 +102,14 @@ export function ToolInputTemplates({
 		setNewContent("");
 		setDialogOpen(false);
 		toast.success(`Template "${name}" saved`);
-	}, [toolSlug, newName, newContent]);
+		track({
+			name: "tool_template_saved",
+			props: { tool_slug: toolSlug, template_name: name },
+		});
+	}, [toolSlug, newName, newContent, track]);
 
 	const deleteTemplate = useCallback(
-		(id: string) => {
+		(id: string, name: string) => {
 			setTemplateMap((prev) => {
 				const existing = prev[toolSlug] ?? [];
 				const next = {
@@ -114,20 +120,31 @@ export function ToolInputTemplates({
 				return next;
 			});
 			toast.success("Template deleted");
+			track({
+				name: "tool_template_deleted",
+				props: { tool_slug: toolSlug, template_name: name },
+			});
 		},
-		[toolSlug],
+		[toolSlug, track],
 	);
 
-	const copyTemplate = useCallback((content: string, name: string) => {
-		navigator.clipboard
-			.writeText(content)
-			.then(() => {
-				toast.success(`"${name}" copied to clipboard`);
-			})
-			.catch(() => {
-				toast.error("Failed to copy to clipboard");
+	const copyTemplate = useCallback(
+		(content: string, name: string) => {
+			track({
+				name: "tool_template_applied",
+				props: { tool_slug: toolSlug, template_name: name },
 			});
-	}, []);
+			navigator.clipboard
+				.writeText(content)
+				.then(() => {
+					toast.success(`"${name}" copied to clipboard`);
+				})
+				.catch(() => {
+					toast.error("Failed to copy to clipboard");
+				});
+		},
+		[toolSlug, track],
+	);
 
 	return (
 		<Card className={cn(className)}>
@@ -234,7 +251,9 @@ export function ToolInputTemplates({
 										variant="ghost"
 										size="icon"
 										className="size-7 text-destructive hover:text-destructive"
-										onClick={() => deleteTemplate(tpl.id)}
+										onClick={() =>
+											deleteTemplate(tpl.id, tpl.name)
+										}
 										title="Delete template"
 									>
 										<Trash2Icon className="size-3.5" />
