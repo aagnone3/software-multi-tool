@@ -178,7 +178,7 @@ export function Testimonials() {
 						<ArrowRightIcon className="size-4" />
 					</Link>
 					<p className="text-foreground/40 text-xs">
-						No credit card required · 100 free credits to start
+						No credit card required · 10 free credits to start
 					</p>
 				</div>
 			</div>
