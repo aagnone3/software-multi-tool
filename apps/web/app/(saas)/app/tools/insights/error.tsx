@@ -23,8 +23,8 @@ export default function ToolInsightsErrorBoundary({
 					Something went wrong
 				</h2>
 				<p className="max-w-md text-sm text-muted-foreground">
-					We ran into an unexpected error loading tool insights. Please
-					try again or go back to tools.
+					We ran into an unexpected error loading tool insights.
+					Please try again or go back to tools.
 				</p>
 			</div>
 			<div className="flex gap-3">
