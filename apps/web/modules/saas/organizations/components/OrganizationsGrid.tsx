@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { OrganizationLogo } from "@saas/organizations/components/OrganizationLogo";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
@@ -12,6 +13,7 @@ import React from "react";
 export function OrganizationsGrid() {
 	const { setActiveOrganization } = useActiveOrganization();
 	const { data: allOrganizations } = useOrganizationListQuery();
+	const { track } = useProductAnalytics();
 
 	return (
 		<div className="@container">
@@ -21,7 +23,13 @@ export function OrganizationsGrid() {
 					<Card
 						key={organization.id}
 						className="flex cursor-pointer items-center gap-4 overflow-hidden p-4"
-						onClick={() => setActiveOrganization(organization.slug)}
+						onClick={() => {
+							track({
+								name: "organization_switched",
+								props: { organization_slug: organization.slug },
+							});
+							setActiveOrganization(organization.slug);
+						}}
 					>
 						<OrganizationLogo
 							name={organization.name}
