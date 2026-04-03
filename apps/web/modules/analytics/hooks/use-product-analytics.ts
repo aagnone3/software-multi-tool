@@ -196,6 +196,14 @@ type ProductEvent =
 			props: { pack_id: string; error_message: string; plan_id: string };
 	  }
 	| {
+			name: "credit_pack_purchase_dialog_shown";
+			props: { pack_id: string; pack_name: string };
+	  }
+	| {
+			name: "credit_pack_purchase_dialog_cancelled";
+			props: { pack_id: string; pack_name: string };
+	  }
+	| {
 			name: "billing_settings_starter_upgrade_clicked";
 			props: { plan_id: string };
 	  }

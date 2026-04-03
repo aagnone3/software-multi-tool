@@ -1,8 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { CreditPurchaseConfirmDialog } from "./CreditPurchaseConfirmDialog";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const mockPack = {
 	id: "bundle",
@@ -14,6 +19,45 @@ const mockPack = {
 };
 
 describe("CreditPurchaseConfirmDialog", () => {
+	afterEach(() => {
+		mockTrack.mockClear();
+	});
+
+	it("tracks dialog shown event when opened with a pack", () => {
+		render(
+			<CreditPurchaseConfirmDialog
+				pack={mockPack}
+				open={true}
+				onConfirm={vi.fn()}
+				onCancel={vi.fn()}
+			/>,
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_pack_purchase_dialog_shown",
+			props: { pack_id: "bundle", pack_name: "Bundle Pack" },
+		});
+	});
+
+	it("tracks dialog cancelled event when Cancel is clicked", async () => {
+		const user = userEvent.setup({ delay: null });
+		const onCancel = vi.fn();
+		render(
+			<CreditPurchaseConfirmDialog
+				pack={mockPack}
+				open={true}
+				onConfirm={vi.fn()}
+				onCancel={onCancel}
+			/>,
+		);
+		mockTrack.mockClear();
+		await user.click(screen.getByRole("button", { name: /cancel/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_pack_purchase_dialog_cancelled",
+			props: { pack_id: "bundle", pack_name: "Bundle Pack" },
+		});
+		expect(onCancel).toHaveBeenCalled();
+	});
+
 	it("renders nothing when pack is null", () => {
 		const { container } = render(
 			<CreditPurchaseConfirmDialog
