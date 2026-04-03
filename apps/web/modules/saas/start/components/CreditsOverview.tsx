@@ -12,7 +12,12 @@ import {
 import { Progress } from "@ui/components/progress";
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
-import { ChevronRightIcon, CoinsIcon, TrendingUpIcon } from "lucide-react";
+import {
+	ChevronRightIcon,
+	CoinsIcon,
+	SparklesIcon,
+	TrendingUpIcon,
+} from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useCreditsBalance } from "../../credits/hooks/use-credits-balance";
@@ -28,6 +33,7 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 		isLoading: balanceLoading,
 		percentageUsed,
 		isLowCredits,
+		isStarterPlan,
 	} = useCreditsBalance();
 	const { totalUsed, isLoading: usageLoading } = useUsageStats();
 	const { activeOrganization } = useActiveOrganization();
@@ -176,30 +182,67 @@ export function CreditsOverview({ className }: CreditsOverviewProps) {
 				</div>
 
 				{/* Actions */}
-				<div className="flex gap-2 pt-1">
-					<Button
-						variant="outline"
-						size="sm"
-						className="flex-1"
-						asChild
-					>
-						<Link href={usagePath}>
-							View usage
-							<ChevronRightIcon className="size-4 ml-auto" />
-						</Link>
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						className="flex-1"
-						asChild
-					>
-						<Link href={billingPath}>
-							Buy credits
-							<ChevronRightIcon className="size-4 ml-auto" />
-						</Link>
-					</Button>
-				</div>
+				{isStarterPlan ? (
+					<div className="space-y-2 pt-1">
+						<div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
+							<p className="text-xs font-medium text-primary">
+								Pro gives you 500 credits/month with rollover
+							</p>
+							<p className="text-xs text-muted-foreground mt-0.5">
+								5× more than your current Starter plan
+							</p>
+						</div>
+						<div className="flex gap-2">
+							<Button
+								variant="primary"
+								size="sm"
+								className="flex-1"
+								asChild
+							>
+								<Link href={`${billingPath}?upgrade=pro`}>
+									<SparklesIcon className="size-3.5 mr-1" />
+									Upgrade to Pro
+								</Link>
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex-1"
+								asChild
+							>
+								<Link href={usagePath}>
+									View usage
+									<ChevronRightIcon className="size-4 ml-auto" />
+								</Link>
+							</Button>
+						</div>
+					</div>
+				) : (
+					<div className="flex gap-2 pt-1">
+						<Button
+							variant="outline"
+							size="sm"
+							className="flex-1"
+							asChild
+						>
+							<Link href={usagePath}>
+								View usage
+								<ChevronRightIcon className="size-4 ml-auto" />
+							</Link>
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							className="flex-1"
+							asChild
+						>
+							<Link href={billingPath}>
+								Buy credits
+								<ChevronRightIcon className="size-4 ml-auto" />
+							</Link>
+						</Button>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

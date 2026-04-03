@@ -49,6 +49,7 @@ describe("CreditsOverview", () => {
 			isLoading: false,
 			percentageUsed: 17,
 			isLowCredits: false,
+			isStarterPlan: false,
 		} as any);
 		mockUseUsageStats.mockReturnValue({
 			totalUsed: 100,
@@ -121,5 +122,38 @@ describe("CreditsOverview", () => {
 		render(<CreditsOverview />);
 		const usageLink = screen.getByText("View usage").closest("a");
 		expect(usageLink?.getAttribute("href")).toBe("/app/settings/usage");
+	});
+
+	describe("Starter plan", () => {
+		beforeEach(() => {
+			mockUseCreditsBalance.mockReturnValue({
+				balance: { ...mockBalance, plan: { name: "Starter" } },
+				isLoading: false,
+				percentageUsed: 40,
+				isLowCredits: false,
+				isStarterPlan: true,
+			} as any);
+		});
+
+		it("shows Upgrade to Pro CTA for Starter users", () => {
+			render(<CreditsOverview />);
+			expect(screen.getByText("Upgrade to Pro")).toBeDefined();
+		});
+
+		it("shows 5x value copy for Starter users", () => {
+			render(<CreditsOverview />);
+			expect(screen.getByText(/5× more/i)).toBeDefined();
+		});
+
+		it("does not show Buy credits for Starter users", () => {
+			render(<CreditsOverview />);
+			expect(screen.queryByText("Buy credits")).toBeNull();
+		});
+
+		it("Upgrade to Pro links to billing with upgrade param", () => {
+			render(<CreditsOverview />);
+			const upgradeLink = screen.getByText("Upgrade to Pro").closest("a");
+			expect(upgradeLink?.getAttribute("href")).toContain("upgrade=pro");
+		});
 	});
 });
