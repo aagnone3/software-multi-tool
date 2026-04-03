@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -75,6 +76,7 @@ export function JobSearchWidget({
 }: JobSearchWidgetProps) {
 	const [query, setQuery] = useState("");
 	const { jobs, isLoading } = useRecentJobs(50);
+	const { track } = useProductAnalytics();
 
 	const filtered = useMemo(() => {
 		if (!query.trim()) {
@@ -111,6 +113,16 @@ export function JobSearchWidget({
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						className="pl-8"
+						onBlur={() => {
+							if (query.trim()) {
+								track({
+									name: "job_search_query_entered",
+									props: {
+										query_length: query.trim().length,
+									},
+								});
+							}
+						}}
 					/>
 					{query && (
 						<button
@@ -146,6 +158,15 @@ export function JobSearchWidget({
 									<Link
 										href={`/app/jobs/${job.id}`}
 										className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-muted transition-colors"
+										onClick={() =>
+											track({
+												name: "job_search_result_clicked",
+												props: {
+													tool_slug: job.toolSlug,
+													status: job.status,
+												},
+											})
+										}
 									>
 										<div className="flex items-center gap-2 min-w-0">
 											<Icon
