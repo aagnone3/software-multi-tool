@@ -128,6 +128,7 @@ export function TagInput({
 						}}
 						className="ml-1 rounded-full hover:bg-muted"
 						disabled={removeTagMutation.isPending}
+						aria-label={`Remove tag ${tag.name}`}
 					>
 						<XIcon className="size-3" />
 					</button>
@@ -161,6 +162,7 @@ export function TagInput({
 						disabled={
 							!newTagName.trim() || addTagMutation.isPending
 						}
+						aria-label="Confirm add tag"
 					>
 						<PlusIcon className="size-3" />
 					</Button>
