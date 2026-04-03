@@ -360,24 +360,29 @@ export function ToolsGrid() {
 			)}
 
 			{filteredTools.length > 0 ? (
-				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				<ul
+					className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 list-none p-0 m-0"
+					aria-label="Available tools"
+				>
 					{filteredTools.map((tool) => (
-						<ToolCard
-							key={tool.slug}
-							tool={tool}
-							isComingSoon={tool.isComingSoon}
-							isRecentlyUsed={recentToolSet.has(tool.slug)}
-							lastUsedAt={
-								recentToolsMap.get(tool.slug)?.completedAt ??
-								recentToolsMap.get(tool.slug)?.createdAt ??
-								null
-							}
-							isFavorite={isFavorite(tool.slug)}
-							onToggleFavorite={toggleFavorite}
-							onPreview={setPreviewSlug}
-						/>
+						<li key={tool.slug} className="contents">
+							<ToolCard
+								tool={tool}
+								isComingSoon={tool.isComingSoon}
+								isRecentlyUsed={recentToolSet.has(tool.slug)}
+								lastUsedAt={
+									recentToolsMap.get(tool.slug)
+										?.completedAt ??
+									recentToolsMap.get(tool.slug)?.createdAt ??
+									null
+								}
+								isFavorite={isFavorite(tool.slug)}
+								onToggleFavorite={toggleFavorite}
+								onPreview={setPreviewSlug}
+							/>
+						</li>
 					))}
-				</div>
+				</ul>
 			) : (
 				<div className="flex flex-col items-center justify-center py-16 text-center">
 					<div className="flex size-16 items-center justify-center rounded-full bg-muted mb-4">
