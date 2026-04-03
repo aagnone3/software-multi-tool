@@ -4,9 +4,10 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolInputTemplates } from "./ToolInputTemplates";
 
-const { mockToastSuccess, mockToastError } = vi.hoisted(() => ({
+const { mockToastSuccess, mockToastError, mockTrack } = vi.hoisted(() => ({
 	mockToastSuccess: vi.fn(),
 	mockToastError: vi.fn(),
+	mockTrack: vi.fn(),
 }));
 
 // Mock sonner
@@ -17,11 +18,16 @@ vi.mock("sonner", () => ({
 	},
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 let mockWriteText: ReturnType<typeof vi.fn>;
 
 describe("ToolInputTemplates", () => {
 	beforeEach(() => {
 		localStorage.clear();
+		mockTrack.mockClear();
 		mockWriteText = vi.fn().mockResolvedValue(undefined);
 		// jsdom doesn't implement clipboard API; use defineProperty to override the getter
 		Object.defineProperty(navigator, "clipboard", {
@@ -68,7 +74,7 @@ describe("ToolInputTemplates", () => {
 		});
 	});
 
-	it("copies template content to clipboard", async () => {
+	it("copies template content to clipboard and tracks event", async () => {
 		// Pre-seed localStorage
 		localStorage.setItem(
 			"tool-input-templates",
@@ -88,12 +94,20 @@ describe("ToolInputTemplates", () => {
 		await waitFor(() =>
 			expect(screen.getByText("My template")).toBeTruthy(),
 		);
-		const copyBtn = screen.getByTitle("Copy to clipboard");
+		const copyBtn = screen.getByRole("button", {
+			name: /Copy template My template to clipboard/i,
+		});
 		await user.click(copyBtn);
 		await waitFor(() => expect(mockToastSuccess).toHaveBeenCalled());
+		await waitFor(() =>
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "template_copied",
+				props: { toolSlug: "invoice-processor" },
+			}),
+		);
 	});
 
-	it("deletes a template", async () => {
+	it("deletes a template and tracks event", async () => {
 		localStorage.setItem(
 			"tool-input-templates",
 			JSON.stringify({
@@ -110,10 +124,16 @@ describe("ToolInputTemplates", () => {
 		const user = userEvent.setup({ delay: null });
 		render(<ToolInputTemplates toolSlug="invoice-processor" />);
 		await waitFor(() => expect(screen.getByText("Delete me")).toBeTruthy());
-		const deleteBtn = screen.getByTitle("Delete template");
+		const deleteBtn = screen.getByRole("button", {
+			name: /Delete template Delete me/i,
+		});
 		await user.click(deleteBtn);
 		await waitFor(() => {
 			expect(screen.queryByText("Delete me")).toBeNull();
+		});
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "template_deleted",
+			props: { toolSlug: "invoice-processor" },
 		});
 	});
 
