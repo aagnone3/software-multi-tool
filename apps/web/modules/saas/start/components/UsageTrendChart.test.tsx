@@ -5,9 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UsageTrendChart } from "./UsageTrendChart";
 
 const useUsageStatsMock = vi.hoisted(() => vi.fn());
+const trackMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@saas/credits/hooks/use-usage-stats", () => ({
 	useUsageStats: useUsageStatsMock,
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: trackMock }),
 }));
 
 // Mock recharts to avoid rendering issues in tests
@@ -117,5 +122,32 @@ describe("UsageTrendChart", () => {
 		});
 		render(<UsageTrendChart />);
 		expect(screen.getByText("Usage Trend")).toBeInTheDocument();
+	});
+
+	it("tracks analytics event when switching to 30D period", async () => {
+		useUsageStatsMock.mockReturnValue({
+			byPeriod: sampleData,
+			isLoading: false,
+		});
+		render(<UsageTrendChart />);
+		await userEvent.click(screen.getByRole("button", { name: "30D" }));
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "usage_trend_period_toggled",
+			props: { period: "month" },
+		});
+	});
+
+	it("tracks analytics event when switching to 7D period", async () => {
+		useUsageStatsMock.mockReturnValue({
+			byPeriod: sampleData,
+			isLoading: false,
+		});
+		render(<UsageTrendChart />);
+		await userEvent.click(screen.getByRole("button", { name: "30D" }));
+		await userEvent.click(screen.getByRole("button", { name: "7D" }));
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "usage_trend_period_toggled",
+			props: { period: "week" },
+		});
 	});
 });
