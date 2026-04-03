@@ -6,6 +6,11 @@ import { JobNotesPanel } from "./JobNotesPanel";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const localStorageMock = (() => {
 	let store: Record<string, string> = {};
 	return {
@@ -82,5 +87,31 @@ describe("JobNotesPanel", () => {
 		expect(
 			screen.getByRole("button", { name: /edit/i }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks job_note_saved when saving non-empty draft", async () => {
+		mockTrack.mockClear();
+		render(<JobNotesPanel jobId="job-track-save" />);
+		await userEvent.click(
+			screen.getByRole("button", { name: /add note/i }),
+		);
+		await userEvent.type(screen.getByRole("textbox"), "My note");
+		await userEvent.click(screen.getByRole("button", { name: /save/i }));
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "job_note_saved" }),
+		);
+	});
+
+	it("tracks job_note_cleared when saving empty draft", async () => {
+		mockTrack.mockClear();
+		localStorageMock.setItem("job-note:job-track-clear", "Existing note");
+		render(<JobNotesPanel jobId="job-track-clear" />);
+		await userEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const textarea = screen.getByRole("textbox");
+		await userEvent.clear(textarea);
+		await userEvent.click(screen.getByRole("button", { name: /save/i }));
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "job_note_cleared" }),
+		);
 	});
 });

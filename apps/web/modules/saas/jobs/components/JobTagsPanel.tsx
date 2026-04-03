@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useJobTags } from "@tools/hooks/use-job-tags";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
@@ -13,6 +14,7 @@ interface JobTagsPanelProps {
 }
 
 export function JobTagsPanel({ jobId, className }: JobTagsPanelProps) {
+	const { track } = useProductAnalytics();
 	const { tags, addTag, removeTag } = useJobTags(jobId);
 	const [inputValue, setInputValue] = useState("");
 
@@ -22,6 +24,10 @@ export function JobTagsPanel({ jobId, className }: JobTagsPanelProps) {
 			return;
 		}
 		addTag(trimmed);
+		track({
+			name: "job_tag_added",
+			props: { job_id: jobId, tag: trimmed },
+		});
 		setInputValue("");
 	};
 
@@ -49,7 +55,13 @@ export function JobTagsPanel({ jobId, className }: JobTagsPanelProps) {
 						<button
 							type="button"
 							aria-label={`Remove tag ${tag}`}
-							onClick={() => removeTag(tag)}
+							onClick={() => {
+								removeTag(tag);
+								track({
+									name: "job_tag_removed",
+									props: { job_id: jobId, tag },
+								});
+							}}
 							className="ml-0.5 hover:text-destructive"
 						>
 							<XIcon className="h-3 w-3" />

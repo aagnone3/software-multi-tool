@@ -4,6 +4,11 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JobTagsPanel } from "./JobTagsPanel";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@tools/hooks/use-job-tags", () => ({
 	useJobTags: vi.fn(() => ({
 		tags: ["bug", "review"],
@@ -77,5 +82,45 @@ describe("JobTagsPanel", () => {
 		const input = screen.getByLabelText("New tag");
 		await user.type(input, "urgent{Enter}");
 		expect(addTag).toHaveBeenCalledWith("urgent");
+	});
+
+	it("tracks job_tag_added when a tag is added", async () => {
+		mockTrack.mockClear();
+		const addTag = vi.fn();
+		const { useJobTags } = await import("@tools/hooks/use-job-tags");
+		vi.mocked(useJobTags).mockReturnValue({
+			tags: [],
+			addTag,
+			removeTag: vi.fn(),
+			getAllTags: vi.fn().mockReturnValue([]),
+			hasTag: vi.fn().mockReturnValue(false),
+			getTagsForJob: vi.fn().mockReturnValue([]),
+		});
+		render(<JobTagsPanel jobId="job-analytics" />);
+		const user = userEvent.setup({ delay: null });
+		await user.type(screen.getByLabelText("New tag"), "urgent");
+		await user.click(screen.getByRole("button", { name: /add/i }));
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "job_tag_added" }),
+		);
+	});
+
+	it("tracks job_tag_removed when a tag is removed", async () => {
+		mockTrack.mockClear();
+		const { useJobTags } = await import("@tools/hooks/use-job-tags");
+		vi.mocked(useJobTags).mockReturnValue({
+			tags: ["bug", "review"],
+			addTag: vi.fn(),
+			removeTag: vi.fn(),
+			getAllTags: vi.fn().mockReturnValue([]),
+			hasTag: vi.fn().mockReturnValue(false),
+			getTagsForJob: vi.fn().mockReturnValue([]),
+		});
+		render(<JobTagsPanel jobId="job-analytics" />);
+		const removeBtn = screen.getByLabelText("Remove tag bug");
+		await userEvent.click(removeBtn);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "job_tag_removed" }),
+		);
 	});
 });

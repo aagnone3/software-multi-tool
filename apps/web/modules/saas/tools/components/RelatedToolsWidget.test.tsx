@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { RelatedToolsWidget } from "./RelatedToolsWidget";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@repo/config", () => ({
 	config: {
@@ -120,5 +126,35 @@ describe("RelatedToolsWidget", () => {
 		);
 		// All related slugs (diagram-editor) are not in registry, relatedTools is empty → null
 		expect(container.firstChild).toBeNull();
+	});
+
+	it("tracks click on related tool", async () => {
+		mockTrack.mockClear();
+		render(<RelatedToolsWidget currentToolSlug="news-analyzer" />);
+		const toolLinks = screen.getAllByRole("link");
+		const relatedLink = toolLinks.find(
+			(l) =>
+				l.getAttribute("href") === "/app/tools/contract-analyzer" ||
+				l.getAttribute("href") === "/app/tools/meeting-summarizer",
+		);
+		expect(relatedLink).toBeDefined();
+		await userEvent.click(relatedLink!);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "related_tool_widget_clicked" }),
+		);
+	});
+
+	it("tracks browse all tools click", async () => {
+		mockTrack.mockClear();
+		render(<RelatedToolsWidget currentToolSlug="news-analyzer" />);
+		const browseLink = screen.getByRole("link", {
+			name: /browse all tools/i,
+		});
+		await userEvent.click(browseLink);
+		expect(mockTrack).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "related_tool_browse_all_clicked",
+			}),
+		);
 	});
 });

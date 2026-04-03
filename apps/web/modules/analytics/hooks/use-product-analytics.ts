@@ -693,7 +693,20 @@ type ProductEvent =
 			props: Record<string, never>;
 	  }
 	| { name: "template_copied"; props: { toolSlug: string } }
-	| { name: "template_deleted"; props: { toolSlug: string } };
+	| { name: "template_deleted"; props: { toolSlug: string } }
+	| {
+			name: "related_tool_widget_clicked";
+			props: { tool_slug: string; source_tool_slug: string };
+	  }
+	| { name: "related_tool_browse_all_clicked"; props: Record<string, never> }
+	| {
+			name: "job_note_saved";
+			props: { job_id: string; note_length: number };
+	  }
+	| { name: "job_note_cleared"; props: { job_id: string } }
+	| { name: "job_tag_added"; props: { job_id: string; tag: string } }
+	| { name: "job_tag_removed"; props: { job_id: string; tag: string } }
+	| { name: "job_unpinned"; props: { job_id: string } };
 
 export type { ProductEvent };
 

@@ -81,7 +81,9 @@ describe("PinnedJobsWidget", () => {
 			},
 		]);
 		render(<PinnedJobsWidget />);
-		await userEvent.click(screen.getByTitle("Unpin"));
+		await userEvent.click(
+			screen.getByRole("button", { name: /unpin news analyzer/i }),
+		);
 		expect(mockUnpinJob).toHaveBeenCalledWith("job-1");
 	});
 
@@ -114,6 +116,26 @@ describe("PinnedJobsWidget", () => {
 		expect(mockTrack).toHaveBeenCalledWith({
 			name: "dashboard_pinned_job_clicked",
 			props: { job_id: "job-xyz", tool_name: "News Analyzer" },
+		});
+	});
+
+	it("tracks job_unpinned when unpin button is clicked", async () => {
+		mockTrack.mockClear();
+		mockPinnedJobs.mockReturnValue([
+			{
+				id: "job-unpin",
+				toolSlug: "news-analyzer",
+				toolName: "News Analyzer",
+				pinnedAt: new Date().toISOString(),
+			},
+		]);
+		render(<PinnedJobsWidget />);
+		await userEvent.click(
+			screen.getByRole("button", { name: /unpin news analyzer/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "job_unpinned",
+			props: { job_id: "job-unpin" },
 		});
 	});
 });
