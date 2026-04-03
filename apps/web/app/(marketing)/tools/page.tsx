@@ -1,3 +1,4 @@
+import { ToolsIndexPageTracker } from "@marketing/tools/components/ToolsIndexPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { Button } from "@ui/components/button";
@@ -149,6 +150,7 @@ export default function ToolsMarketingPage() {
 					__html: JSON.stringify(toolsListJsonLd),
 				}}
 			/>
+			<ToolsIndexPageTracker />
 			<div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
 				{/* Hero */}
 				<section className="container mx-auto px-4 py-20 text-center">
