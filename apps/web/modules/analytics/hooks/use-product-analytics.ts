@@ -601,6 +601,18 @@ type ProductEvent =
 			props: { job_id: string; tool_slug: string; pinned: boolean };
 	  }
 	| {
+			name: "job_compare_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "job_compare_job_selected";
+			props: {
+				panel: "left" | "right";
+				job_id: string;
+				tool_slug: string;
+			};
+	  }
+	| {
 			name: "org_created";
 			props: Record<string, never>;
 	  }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
 interface JobSummary {
@@ -170,6 +171,7 @@ function JobOutputPanel({
 export function JobOutputCompare() {
 	const [leftJobId, setLeftJobId] = useState<string | null>(null);
 	const [rightJobId, setRightJobId] = useState<string | null>(null);
+	const { track } = useProductAnalytics();
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["jobs-list-for-compare"],
@@ -177,6 +179,40 @@ export function JobOutputCompare() {
 	});
 
 	const jobs: JobSummary[] = (data?.jobs ?? []) as unknown as JobSummary[];
+
+	useEffect(() => {
+		track({ name: "job_compare_page_viewed", props: {} });
+	}, [track]);
+
+	const handleSelectLeft = (jobId: string) => {
+		setLeftJobId(jobId);
+		const job = jobs.find((j) => j.id === jobId);
+		if (job) {
+			track({
+				name: "job_compare_job_selected",
+				props: {
+					panel: "left",
+					job_id: jobId,
+					tool_slug: job.toolSlug,
+				},
+			});
+		}
+	};
+
+	const handleSelectRight = (jobId: string) => {
+		setRightJobId(jobId);
+		const job = jobs.find((j) => j.id === jobId);
+		if (job) {
+			track({
+				name: "job_compare_job_selected",
+				props: {
+					panel: "right",
+					job_id: jobId,
+					tool_slug: job.toolSlug,
+				},
+			});
+		}
+	};
 
 	return (
 		<div className="space-y-6">
@@ -211,13 +247,13 @@ export function JobOutputCompare() {
 						label="Left panel"
 						jobs={jobs}
 						selectedJobId={leftJobId}
-						onSelect={setLeftJobId}
+						onSelect={handleSelectLeft}
 					/>
 					<JobSelector
 						label="Right panel"
 						jobs={jobs}
 						selectedJobId={rightJobId}
-						onSelect={setRightJobId}
+						onSelect={handleSelectRight}
 					/>
 				</div>
 			)}
