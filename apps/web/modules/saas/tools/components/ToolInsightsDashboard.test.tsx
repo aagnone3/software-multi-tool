@@ -3,6 +3,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolInsightsDashboard } from "./ToolInsightsDashboard";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobsList: vi.fn(),
 }));
@@ -218,5 +223,25 @@ describe("ToolInsightsDashboard", () => {
 		render(<ToolInsightsDashboard />);
 		// 2 completed × 5 credits = 10
 		expect(screen.getByText("10")).toBeInTheDocument();
+	});
+});
+
+describe("ToolInsightsDashboard – analytics", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+		mockUseJobsList.mockReturnValue({
+			jobs: [],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		} as any);
+	});
+
+	it("fires tool_insights_page_viewed on mount", () => {
+		render(<ToolInsightsDashboard />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_insights_page_viewed",
+			props: {},
+		});
 	});
 });

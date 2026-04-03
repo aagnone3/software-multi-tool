@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
@@ -45,7 +46,12 @@ interface ToolInsightsDashboardProps {
 export function ToolInsightsDashboard({
 	className,
 }: ToolInsightsDashboardProps) {
+	const { track } = useProductAnalytics();
 	const { jobs: allJobs, isLoading } = useJobsList(undefined, 500);
+
+	React.useEffect(() => {
+		track({ name: "tool_insights_page_viewed", props: {} });
+	}, [track]);
 
 	const toolStats = useMemo<ToolStat[]>(() => {
 		const jobs = allJobs ?? [];

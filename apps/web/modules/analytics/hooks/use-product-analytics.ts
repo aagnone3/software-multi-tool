@@ -553,6 +553,18 @@ type ProductEvent =
 			props: { tool_slug: string; row_count: number };
 	  }
 	| {
+			name: "tool_insights_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "tool_compare_page_viewed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "tool_compare_tool_selected";
+			props: { slot: "left" | "right"; tool_slug: string };
+	  }
+	| {
 			name: "jobs_history_page_viewed";
 			props: Record<string, never>;
 	  }
