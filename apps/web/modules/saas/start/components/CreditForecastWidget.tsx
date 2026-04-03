@@ -1,5 +1,7 @@
 "use client";
 
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import {
 	Card,
@@ -9,7 +11,13 @@ import {
 	CardTitle,
 } from "@ui/components/card";
 import { Skeleton } from "@ui/components/skeleton";
-import { TrendingDownIcon, TrendingUpIcon, ZapIcon } from "lucide-react";
+import {
+	AlertTriangleIcon,
+	TrendingDownIcon,
+	TrendingUpIcon,
+	ZapIcon,
+} from "lucide-react";
+import Link from "next/link";
 import React, { useMemo } from "react";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 
@@ -26,6 +34,8 @@ function getDaysAgo(days: number): Date {
 export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 	const { jobs, isLoading } = useRecentJobs(200);
 	const { enabledTools } = useTools();
+	const { balance, isFreePlan, isStarterPlan } = useCreditsBalance();
+	const { activeOrganization } = useActiveOrganization();
 
 	const forecast = useMemo(() => {
 		if (!jobs || jobs.length === 0) {
@@ -115,6 +125,26 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 	const trendUp = trendPct !== null && trendPct > 0;
 	const trendDown = trendPct !== null && trendPct < 0;
 
+	// Determine if the user is on track to exceed their plan credits this month.
+	// Only show nudge for free and starter plan users (not Pro, not paying for extra).
+	const remainingCredits = balance?.totalAvailable ?? null;
+	const willExceedCredits =
+		remainingCredits !== null &&
+		(isFreePlan || isStarterPlan) &&
+		forecast30 > remainingCredits;
+
+	const billingPath = activeOrganization
+		? `/app/${activeOrganization.slug}/settings/billing`
+		: "/app/settings/billing";
+
+	const upgradeHref = isStarterPlan
+		? `${billingPath}#pricing-plan-pro`
+		: billingPath;
+	const upgradeLabel = isStarterPlan ? "Upgrade to Pro" : "Get more credits";
+	const nudgeCopy = isStarterPlan
+		? `At this rate you'll use ~${forecast30} credits/mo — more than your ${balance?.included ?? 100} Starter credits. Upgrade to Pro for 500/mo.`
+		: `At this rate you'll use ~${forecast30} credits/mo — more than your ${balance?.included ?? 10} free credits.`;
+
 	return (
 		<Card className={className}>
 			<CardHeader className="pb-3">
@@ -172,6 +202,27 @@ export function CreditForecastWidget({ className }: CreditForecastWidgetProps) {
 						</p>
 					</div>
 				</div>
+
+				{willExceedCredits && (
+					<div
+						className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/30"
+						data-testid="credit-forecast-nudge"
+					>
+						<AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+						<div className="flex-1 min-w-0">
+							<p className="text-xs text-amber-700 dark:text-amber-400 leading-snug">
+								{nudgeCopy}
+							</p>
+							<Link
+								href={upgradeHref}
+								className="mt-1 inline-block text-xs font-medium text-amber-700 underline underline-offset-2 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200"
+								data-testid="credit-forecast-nudge-cta"
+							>
+								{upgradeLabel} →
+							</Link>
+						</div>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);
