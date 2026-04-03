@@ -13,9 +13,13 @@ function formatPinnedAt(iso: string): string {
 	const now = new Date();
 	const diff = now.getTime() - date.getTime();
 	const minutes = Math.floor(diff / 60000);
-	if (minutes < 60) return minutes <= 1 ? "just now" : `${minutes}m ago`;
+	if (minutes < 60) {
+		return minutes <= 1 ? "just now" : `${minutes}m ago`;
+	}
 	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours}h ago`;
+	if (hours < 24) {
+		return `${hours}h ago`;
+	}
 	const days = Math.floor(hours / 24);
 	return `${days}d ago`;
 }
@@ -97,8 +101,14 @@ export function PinnedJobsWidget() {
 								variant="ghost"
 								size="icon"
 								className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-								onClick={() => unpinJob(job.id)}
-								title="Unpin"
+								onClick={() => {
+									unpinJob(job.id);
+									track({
+										name: "job_unpinned",
+										props: { job_id: job.id },
+									});
+								}}
+								aria-label={`Unpin ${job.toolName}`}
 							>
 								<PinIcon className="h-3.5 w-3.5" />
 							</Button>

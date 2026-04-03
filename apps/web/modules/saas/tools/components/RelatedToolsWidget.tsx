@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { Button } from "@ui/components/button";
 import {
@@ -91,6 +92,7 @@ export function RelatedToolsWidget({
 	currentToolSlug,
 	className,
 }: RelatedToolsWidgetProps) {
+	const { track } = useProductAnalytics();
 	const relatedSlugs = getRelatedSlugs(currentToolSlug);
 	const relatedTools = relatedSlugs
 		.map((slug) =>
@@ -113,13 +115,24 @@ export function RelatedToolsWidget({
 			<CardContent>
 				<div className="grid gap-3 sm:grid-cols-3">
 					{relatedTools.map((tool) => {
-						if (!tool) return null;
+						if (!tool) {
+							return null;
+						}
 						const Icon = getToolIcon(tool.icon);
 						return (
 							<Link
 								key={tool.slug}
 								href={`/app/tools/${tool.slug}`}
 								className="group flex flex-col gap-2 rounded-lg border p-3 transition-all hover:border-primary/50 hover:bg-muted/50"
+								onClick={() =>
+									track({
+										name: "related_tool_widget_clicked",
+										props: {
+											tool_slug: tool.slug,
+											source_tool_slug: currentToolSlug,
+										},
+									})
+								}
 							>
 								<div className="flex items-center gap-2">
 									<div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -148,7 +161,15 @@ export function RelatedToolsWidget({
 					})}
 				</div>
 				<div className="mt-4 text-center">
-					<Link href="/app/tools">
+					<Link
+						href="/app/tools"
+						onClick={() =>
+							track({
+								name: "related_tool_browse_all_clicked",
+								props: {},
+							})
+						}
+					>
 						<Button variant="ghost" size="sm">
 							Browse all tools
 						</Button>

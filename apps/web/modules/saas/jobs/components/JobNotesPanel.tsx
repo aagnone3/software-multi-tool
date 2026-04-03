@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Card,
@@ -25,6 +26,7 @@ interface JobNotesPanelProps {
 }
 
 export function JobNotesPanel({ jobId, className }: JobNotesPanelProps) {
+	const { track } = useProductAnalytics();
 	const [note, setNote] = useState("");
 	const [editing, setEditing] = useState(false);
 	const [draft, setDraft] = useState("");
@@ -55,9 +57,14 @@ export function JobNotesPanel({ jobId, className }: JobNotesPanelProps) {
 			if (draft.trim()) {
 				localStorage.setItem(getStorageKey(jobId), draft.trim());
 				setNote(draft.trim());
+				track({
+					name: "job_note_saved",
+					props: { job_id: jobId, note_length: draft.trim().length },
+				});
 			} else {
 				localStorage.removeItem(getStorageKey(jobId));
 				setNote("");
+				track({ name: "job_note_cleared", props: { job_id: jobId } });
 			}
 			setEditing(false);
 			toast.success("Note saved");
