@@ -52,4 +52,15 @@ describe("ContactPage", () => {
 		const meta = await generateMetadata();
 		expect(meta.title).toContain("Contact");
 	});
+
+	it("renders JSON-LD structured data script tag", async () => {
+		const { default: ContactPage } = await import("./page");
+		const { container } = render(await ContactPage());
+		const script = container.querySelector(
+			'script[type="application/ld+json"]',
+		);
+		expect(script).not.toBeNull();
+		const parsed = JSON.parse(script?.innerHTML ?? "{}");
+		expect(parsed["@type"]).toBe("ContactPage");
+	});
 });

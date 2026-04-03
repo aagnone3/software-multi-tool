@@ -139,6 +139,27 @@ const faq = [
 	},
 ];
 
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Service",
+	name: `${config.appName} Partner & Affiliate Program`,
+	url: `${siteUrl}/partners`,
+	description:
+		"Earn 30% recurring commissions by referring small businesses to AI-powered productivity tools. Join as an affiliate, reseller, or integration partner.",
+	provider: {
+		"@type": "Organization",
+		name: config.appName,
+		url: siteUrl,
+	},
+	serviceType: "Affiliate Program",
+	offers: {
+		"@type": "Offer",
+		description: "30% recurring commission on referred subscriptions",
+		price: "0",
+		priceCurrency: "USD",
+	},
+};
+
 export default function PartnersPage() {
 	const colorMap = {
 		blue: {
@@ -162,290 +183,305 @@ export default function PartnersPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-white">
-			{/* Hero */}
-			<section className="bg-gradient-to-br from-slate-900 to-slate-700 px-4 py-20 text-white">
-				<div className="mx-auto max-w-4xl text-center">
-					<div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium">
-						<HandshakeIcon className="h-4 w-4" />
-						Partner Program
-					</div>
-					<h1 className="mb-6 text-4xl font-bold md:text-5xl">
-						Earn recurring commissions.
-						<br />
-						<span className="text-blue-400">
-							Help small businesses thrive.
-						</span>
-					</h1>
-					<p className="mx-auto mb-8 max-w-2xl text-xl text-slate-300">
-						Join 400+ partners earning 30–40% recurring commissions
-						by introducing their audience to {config.appName}. No
-						monthly quota. Monthly payouts.
-					</p>
-					<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-						<Link
-							href="/auth/sign-up?ref=affiliate"
-							className="flex items-center gap-2 rounded-lg bg-blue-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-400"
-						>
-							Get your affiliate link{" "}
-							<ArrowRightIcon className="h-5 w-5" />
-						</Link>
-						<Link
-							href="/contact?subject=reseller"
-							className="rounded-lg border border-white/30 px-8 py-4 text-lg font-semibold text-white transition hover:bg-white/10"
-						>
-							Become a Reseller
-						</Link>
-					</div>
-				</div>
-			</section>
-
-			{/* Stats */}
-			<section className="border-b bg-slate-50 px-4 py-12">
-				<div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
-					{stats.map((stat) => (
-						<div key={stat.label} className="text-center">
-							<div className="text-3xl font-bold text-slate-900">
-								{stat.value}
-							</div>
-							<div className="mt-1 text-sm text-slate-500">
-								{stat.label}
-							</div>
+		<>
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+			/>
+			<div className="min-h-screen bg-white">
+				{/* Hero */}
+				<section className="bg-gradient-to-br from-slate-900 to-slate-700 px-4 py-20 text-white">
+					<div className="mx-auto max-w-4xl text-center">
+						<div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium">
+							<HandshakeIcon className="h-4 w-4" />
+							Partner Program
 						</div>
-					))}
-				</div>
-			</section>
-
-			{/* Tiers */}
-			<section className="px-4 py-20">
-				<div className="mx-auto max-w-6xl">
-					<div className="mb-12 text-center">
-						<h2 className="text-3xl font-bold text-slate-900">
-							Choose your partnership level
-						</h2>
-						<p className="mt-4 text-lg text-slate-600">
-							From solo affiliates to agency integrations — find
-							the right fit.
+						<h1 className="mb-6 text-4xl font-bold md:text-5xl">
+							Earn recurring commissions.
+							<br />
+							<span className="text-blue-400">
+								Help small businesses thrive.
+							</span>
+						</h1>
+						<p className="mx-auto mb-8 max-w-2xl text-xl text-slate-300">
+							Join 400+ partners earning 30–40% recurring
+							commissions by introducing their audience to{" "}
+							{config.appName}. No monthly quota. Monthly payouts.
 						</p>
-					</div>
-					<div className="grid gap-8 md:grid-cols-3">
-						{partnerTiers.map((tier) => {
-							const colors =
-								colorMap[tier.color as keyof typeof colorMap];
-							const Icon = tier.icon;
-							return (
-								<div
-									key={tier.name}
-									className={`relative rounded-2xl border-2 p-8 ${tier.featured ? "border-purple-400 shadow-xl" : "border-slate-200"}`}
-								>
-									{tier.featured && (
-										<div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-purple-600 px-4 py-1 text-sm font-semibold text-white">
-											Most Popular
-										</div>
-									)}
-									<div
-										className={`mb-4 inline-flex rounded-lg p-2 ${colors.bg}`}
-									>
-										<Icon
-											className={`h-6 w-6 ${colors.icon}`}
-										/>
-									</div>
-									<h3 className="text-xl font-bold text-slate-900">
-										{tier.name}
-									</h3>
-									<p className="mt-2 text-sm text-slate-600">
-										{tier.description}
-									</p>
-									<div className="mt-4">
-										<span className="text-4xl font-bold text-slate-900">
-											{tier.commission}
-										</span>
-										<span className="ml-1 text-slate-500">
-											{tier.period}
-										</span>
-									</div>
-									<div
-										className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-medium ${colors.badge}`}
-									>
-										{tier.requirements}
-									</div>
-									<ul className="mt-6 space-y-3">
-										{tier.benefits.map((b) => (
-											<li
-												key={b}
-												className="flex items-start gap-2 text-sm"
-											>
-												<CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-												<span className="text-slate-700">
-													{b}
-												</span>
-											</li>
-										))}
-									</ul>
-									<Link
-										href={tier.ctaHref}
-										className={`mt-8 block w-full rounded-lg py-3 text-center font-semibold transition ${
-											tier.featured
-												? "bg-purple-600 text-white hover:bg-purple-700"
-												: "border border-slate-200 text-slate-700 hover:bg-slate-50"
-										}`}
-									>
-										{tier.cta}
-									</Link>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			</section>
-
-			{/* How it works */}
-			<section className="bg-slate-50 px-4 py-20">
-				<div className="mx-auto max-w-4xl">
-					<h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
-						How it works
-					</h2>
-					<div className="grid gap-8 md:grid-cols-3">
-						{[
-							{
-								step: "1",
-								icon: HandshakeIcon,
-								title: "Sign up & get your link",
-								desc: "Create a free account, join the affiliate program, and get your unique tracking link within minutes.",
-							},
-							{
-								step: "2",
-								icon: MegaphoneIcon,
-								title: "Share with your audience",
-								desc: "Post on social, write a blog, send an email newsletter, or add a banner to your website. We provide ready-made assets.",
-							},
-							{
-								step: "3",
-								icon: DollarSignIcon,
-								title: "Earn recurring commissions",
-								desc: "Every time someone signs up for a paid plan through your link, you earn 30% — month after month for up to 12 months.",
-							},
-						].map((item) => {
-							const Icon = item.icon;
-							return (
-								<div key={item.step} className="text-center">
-									<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
-										{item.step}
-									</div>
-									<Icon className="mx-auto mb-3 h-8 w-8 text-blue-600" />
-									<h3 className="text-lg font-semibold text-slate-900">
-										{item.title}
-									</h3>
-									<p className="mt-2 text-sm text-slate-600">
-										{item.desc}
-									</p>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			</section>
-
-			{/* Ideal partners */}
-			<section className="px-4 py-20">
-				<div className="mx-auto max-w-4xl">
-					<h2 className="mb-4 text-center text-3xl font-bold text-slate-900">
-						Who partners with us?
-					</h2>
-					<p className="mb-12 text-center text-lg text-slate-600">
-						Our partners reach small businesses, freelancers, and
-						professional teams — our ideal customers.
-					</p>
-					<div className="grid gap-4 md:grid-cols-2">
-						{[
-							{
-								icon: GlobeIcon,
-								title: "Business bloggers & YouTubers",
-								desc: "Productivity, small business, and entrepreneurship content creators who review tools and recommend software.",
-							},
-							{
-								icon: UsersIcon,
-								title: "Accountants & bookkeepers",
-								desc: "CPAs and bookkeepers who help small business clients with financial workflows — perfect use case for our invoice and expense tools.",
-							},
-							{
-								icon: LineChartIcon,
-								title: "Business consultants & coaches",
-								desc: "Management consultants and business coaches who advise small teams on operations and efficiency.",
-							},
-							{
-								icon: StarIcon,
-								title: "Podcast hosts & newsletter writers",
-								desc: "Hosts and writers covering productivity, remote work, entrepreneurship, or small business topics.",
-							},
-						].map((item) => {
-							const Icon = item.icon;
-							return (
-								<div
-									key={item.title}
-									className="flex gap-4 rounded-xl border border-slate-200 p-5"
-								>
-									<Icon className="mt-1 h-6 w-6 shrink-0 text-blue-600" />
-									<div>
-										<h3 className="font-semibold text-slate-900">
-											{item.title}
-										</h3>
-										<p className="mt-1 text-sm text-slate-600">
-											{item.desc}
-										</p>
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			</section>
-
-			{/* FAQ */}
-			<section className="bg-slate-50 px-4 py-20">
-				<div className="mx-auto max-w-3xl">
-					<h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
-						Frequently asked questions
-					</h2>
-					<div className="space-y-6">
-						{faq.map((item) => (
-							<div
-								key={item.q}
-								className="rounded-xl border border-slate-200 bg-white p-6"
+						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+							<Link
+								href="/auth/sign-up?ref=affiliate"
+								className="flex items-center gap-2 rounded-lg bg-blue-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-400"
 							>
-								<h3 className="font-semibold text-slate-900">
-									{item.q}
-								</h3>
-								<p className="mt-2 text-slate-600">{item.a}</p>
+								Get your affiliate link{" "}
+								<ArrowRightIcon className="h-5 w-5" />
+							</Link>
+							<Link
+								href="/contact?subject=reseller"
+								className="rounded-lg border border-white/30 px-8 py-4 text-lg font-semibold text-white transition hover:bg-white/10"
+							>
+								Become a Reseller
+							</Link>
+						</div>
+					</div>
+				</section>
+
+				{/* Stats */}
+				<section className="border-b bg-slate-50 px-4 py-12">
+					<div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
+						{stats.map((stat) => (
+							<div key={stat.label} className="text-center">
+								<div className="text-3xl font-bold text-slate-900">
+									{stat.value}
+								</div>
+								<div className="mt-1 text-sm text-slate-500">
+									{stat.label}
+								</div>
 							</div>
 						))}
 					</div>
-				</div>
-			</section>
+				</section>
 
-			{/* CTA */}
-			<section className="bg-blue-600 px-4 py-20 text-white">
-				<div className="mx-auto max-w-3xl text-center">
-					<HandshakeIcon className="mx-auto mb-4 h-12 w-12 text-blue-200" />
-					<h2 className="text-3xl font-bold">
-						Ready to start earning?
-					</h2>
-					<p className="mt-4 text-xl text-blue-100">
-						Join 400+ partners and start earning 30% recurring
-						commissions. Takes less than 5 minutes to get your first
-						affiliate link.
-					</p>
-					<Link
-						href="/auth/sign-up?ref=affiliate"
-						className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-semibold text-blue-600 transition hover:bg-blue-50"
-					>
-						Get started free <ArrowRightIcon className="h-5 w-5" />
-					</Link>
-					<p className="mt-4 text-sm text-blue-200">
-						No credit card required. Free to join.
-					</p>
-				</div>
-			</section>
-		</div>
+				{/* Tiers */}
+				<section className="px-4 py-20">
+					<div className="mx-auto max-w-6xl">
+						<div className="mb-12 text-center">
+							<h2 className="text-3xl font-bold text-slate-900">
+								Choose your partnership level
+							</h2>
+							<p className="mt-4 text-lg text-slate-600">
+								From solo affiliates to agency integrations —
+								find the right fit.
+							</p>
+						</div>
+						<div className="grid gap-8 md:grid-cols-3">
+							{partnerTiers.map((tier) => {
+								const colors =
+									colorMap[
+										tier.color as keyof typeof colorMap
+									];
+								const Icon = tier.icon;
+								return (
+									<div
+										key={tier.name}
+										className={`relative rounded-2xl border-2 p-8 ${tier.featured ? "border-purple-400 shadow-xl" : "border-slate-200"}`}
+									>
+										{tier.featured && (
+											<div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-purple-600 px-4 py-1 text-sm font-semibold text-white">
+												Most Popular
+											</div>
+										)}
+										<div
+											className={`mb-4 inline-flex rounded-lg p-2 ${colors.bg}`}
+										>
+											<Icon
+												className={`h-6 w-6 ${colors.icon}`}
+											/>
+										</div>
+										<h3 className="text-xl font-bold text-slate-900">
+											{tier.name}
+										</h3>
+										<p className="mt-2 text-sm text-slate-600">
+											{tier.description}
+										</p>
+										<div className="mt-4">
+											<span className="text-4xl font-bold text-slate-900">
+												{tier.commission}
+											</span>
+											<span className="ml-1 text-slate-500">
+												{tier.period}
+											</span>
+										</div>
+										<div
+											className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-medium ${colors.badge}`}
+										>
+											{tier.requirements}
+										</div>
+										<ul className="mt-6 space-y-3">
+											{tier.benefits.map((b) => (
+												<li
+													key={b}
+													className="flex items-start gap-2 text-sm"
+												>
+													<CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+													<span className="text-slate-700">
+														{b}
+													</span>
+												</li>
+											))}
+										</ul>
+										<Link
+											href={tier.ctaHref}
+											className={`mt-8 block w-full rounded-lg py-3 text-center font-semibold transition ${
+												tier.featured
+													? "bg-purple-600 text-white hover:bg-purple-700"
+													: "border border-slate-200 text-slate-700 hover:bg-slate-50"
+											}`}
+										>
+											{tier.cta}
+										</Link>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</section>
+
+				{/* How it works */}
+				<section className="bg-slate-50 px-4 py-20">
+					<div className="mx-auto max-w-4xl">
+						<h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
+							How it works
+						</h2>
+						<div className="grid gap-8 md:grid-cols-3">
+							{[
+								{
+									step: "1",
+									icon: HandshakeIcon,
+									title: "Sign up & get your link",
+									desc: "Create a free account, join the affiliate program, and get your unique tracking link within minutes.",
+								},
+								{
+									step: "2",
+									icon: MegaphoneIcon,
+									title: "Share with your audience",
+									desc: "Post on social, write a blog, send an email newsletter, or add a banner to your website. We provide ready-made assets.",
+								},
+								{
+									step: "3",
+									icon: DollarSignIcon,
+									title: "Earn recurring commissions",
+									desc: "Every time someone signs up for a paid plan through your link, you earn 30% — month after month for up to 12 months.",
+								},
+							].map((item) => {
+								const Icon = item.icon;
+								return (
+									<div
+										key={item.step}
+										className="text-center"
+									>
+										<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+											{item.step}
+										</div>
+										<Icon className="mx-auto mb-3 h-8 w-8 text-blue-600" />
+										<h3 className="text-lg font-semibold text-slate-900">
+											{item.title}
+										</h3>
+										<p className="mt-2 text-sm text-slate-600">
+											{item.desc}
+										</p>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</section>
+
+				{/* Ideal partners */}
+				<section className="px-4 py-20">
+					<div className="mx-auto max-w-4xl">
+						<h2 className="mb-4 text-center text-3xl font-bold text-slate-900">
+							Who partners with us?
+						</h2>
+						<p className="mb-12 text-center text-lg text-slate-600">
+							Our partners reach small businesses, freelancers,
+							and professional teams — our ideal customers.
+						</p>
+						<div className="grid gap-4 md:grid-cols-2">
+							{[
+								{
+									icon: GlobeIcon,
+									title: "Business bloggers & YouTubers",
+									desc: "Productivity, small business, and entrepreneurship content creators who review tools and recommend software.",
+								},
+								{
+									icon: UsersIcon,
+									title: "Accountants & bookkeepers",
+									desc: "CPAs and bookkeepers who help small business clients with financial workflows — perfect use case for our invoice and expense tools.",
+								},
+								{
+									icon: LineChartIcon,
+									title: "Business consultants & coaches",
+									desc: "Management consultants and business coaches who advise small teams on operations and efficiency.",
+								},
+								{
+									icon: StarIcon,
+									title: "Podcast hosts & newsletter writers",
+									desc: "Hosts and writers covering productivity, remote work, entrepreneurship, or small business topics.",
+								},
+							].map((item) => {
+								const Icon = item.icon;
+								return (
+									<div
+										key={item.title}
+										className="flex gap-4 rounded-xl border border-slate-200 p-5"
+									>
+										<Icon className="mt-1 h-6 w-6 shrink-0 text-blue-600" />
+										<div>
+											<h3 className="font-semibold text-slate-900">
+												{item.title}
+											</h3>
+											<p className="mt-1 text-sm text-slate-600">
+												{item.desc}
+											</p>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</section>
+
+				{/* FAQ */}
+				<section className="bg-slate-50 px-4 py-20">
+					<div className="mx-auto max-w-3xl">
+						<h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
+							Frequently asked questions
+						</h2>
+						<div className="space-y-6">
+							{faq.map((item) => (
+								<div
+									key={item.q}
+									className="rounded-xl border border-slate-200 bg-white p-6"
+								>
+									<h3 className="font-semibold text-slate-900">
+										{item.q}
+									</h3>
+									<p className="mt-2 text-slate-600">
+										{item.a}
+									</p>
+								</div>
+							))}
+						</div>
+					</div>
+				</section>
+
+				{/* CTA */}
+				<section className="bg-blue-600 px-4 py-20 text-white">
+					<div className="mx-auto max-w-3xl text-center">
+						<HandshakeIcon className="mx-auto mb-4 h-12 w-12 text-blue-200" />
+						<h2 className="text-3xl font-bold">
+							Ready to start earning?
+						</h2>
+						<p className="mt-4 text-xl text-blue-100">
+							Join 400+ partners and start earning 30% recurring
+							commissions. Takes less than 5 minutes to get your
+							first affiliate link.
+						</p>
+						<Link
+							href="/auth/sign-up?ref=affiliate"
+							className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-semibold text-blue-600 transition hover:bg-blue-50"
+						>
+							Get started free{" "}
+							<ArrowRightIcon className="h-5 w-5" />
+						</Link>
+						<p className="mt-4 text-sm text-blue-200">
+							No credit card required. Free to join.
+						</p>
+					</div>
+				</section>
+			</div>
+		</>
 	);
 }

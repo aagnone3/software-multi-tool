@@ -38,4 +38,15 @@ describe("ChangelogPage", () => {
 		const headings = screen.getAllByRole("heading");
 		expect(headings.length).toBeGreaterThanOrEqual(1);
 	});
+
+	it("renders JSON-LD structured data script tag", () => {
+		const { container } = render(<ChangelogPage />);
+		const script = container.querySelector(
+			'script[type="application/ld+json"]',
+		);
+		expect(script).not.toBeNull();
+		const parsed = JSON.parse(script?.innerHTML ?? "{}");
+		expect(parsed["@type"]).toBe("SoftwareApplication");
+		expect(parsed.releaseNotes).toContain("/changelog");
+	});
 });
