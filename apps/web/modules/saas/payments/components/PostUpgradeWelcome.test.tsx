@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
 	useTools: () => ({
@@ -13,6 +19,71 @@ vi.mock("@saas/tools/hooks/use-tools", () => ({
 import { PostUpgradeWelcome } from "./PostUpgradeWelcome";
 
 describe("PostUpgradeWelcome", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
+
+	it("fires post_upgrade_welcome_viewed on mount", () => {
+		render(<PostUpgradeWelcome />);
+		expect(
+			mockTrack.mock.calls.some(
+				([e]) => e.name === "post_upgrade_welcome_viewed",
+			),
+		).toBe(true);
+	});
+
+	it("fires post_upgrade_feature_cta_clicked when a feature CTA is clicked", async () => {
+		render(<PostUpgradeWelcome />);
+		const btn = screen.getByRole("link", { name: /try scheduler/i });
+		await userEvent.click(btn);
+		expect(
+			mockTrack.mock.calls.some(
+				([e]) =>
+					e.name === "post_upgrade_feature_cta_clicked" &&
+					e.props.feature === "Scheduler",
+			),
+		).toBe(true);
+	});
+
+	it("fires post_upgrade_next_step_clicked when a next step link is clicked", async () => {
+		render(<PostUpgradeWelcome />);
+		const link = screen.getByRole("link", { name: /run a tool/i });
+		await userEvent.click(link);
+		expect(
+			mockTrack.mock.calls.some(
+				([e]) =>
+					e.name === "post_upgrade_next_step_clicked" &&
+					e.props.step === 1,
+			),
+		).toBe(true);
+	});
+
+	it("fires post_upgrade_primary_cta_clicked when primary CTA is clicked", async () => {
+		render(<PostUpgradeWelcome />);
+		const btn = screen.getByRole("link", {
+			name: /run your first pro tool/i,
+		});
+		await userEvent.click(btn);
+		expect(
+			mockTrack.mock.calls.some(
+				([e]) =>
+					e.name === "post_upgrade_primary_cta_clicked" &&
+					e.props.tool_slug === "invoice-processor",
+			),
+		).toBe(true);
+	});
+
+	it("fires post_upgrade_secondary_cta_clicked when browse all tools is clicked", async () => {
+		render(<PostUpgradeWelcome />);
+		const btn = screen.getByRole("link", { name: /browse all tools/i });
+		await userEvent.click(btn);
+		expect(
+			mockTrack.mock.calls.some(
+				([e]) => e.name === "post_upgrade_secondary_cta_clicked",
+			),
+		).toBe(true);
+	});
+
 	it("renders the congratulations heading", () => {
 		render(<PostUpgradeWelcome />);
 		expect(screen.getByRole("heading", { level: 1 })).toBeDefined();
