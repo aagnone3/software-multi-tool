@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
+import React, { useCallback, useEffect } from "react";
 
 export function TableOfContents({
 	items,
 }: {
 	items: { slug: string; content: string; lvl: number }[];
 }) {
-	const scrollToSection = (id: string) => {
+	const { track } = useProductAnalytics();
+
+	const scrollToSection = useCallback((id: string) => {
 		const scrollOffset = 80;
 		const element = document.getElementById(id);
 		if (element) {
@@ -18,13 +21,13 @@ export function TableOfContents({
 			window.scrollTo({ top: elementPositionY, behavior: "smooth" });
 			history.pushState({}, "", `#${id}`);
 		}
-	};
+	}, []);
 
 	useEffect(() => {
 		if (location.hash) {
 			scrollToSection(location.hash.substring(1));
 		}
-	}, []);
+	}, [scrollToSection]);
 
 	return (
 		<div className="w-full max-w-64 self-start rounded-lg border p-4">
@@ -37,6 +40,14 @@ export function TableOfContents({
 						className={`block text-sm ${`ml-${Math.max(0, item.lvl - 2) * 2}`}`}
 						onClick={(e) => {
 							e.preventDefault();
+							track({
+								name: "table_of_contents_item_clicked",
+								props: {
+									slug: item.slug,
+									content: item.content,
+									level: item.lvl,
+								},
+							});
 							scrollToSection(item.slug);
 						}}
 					>

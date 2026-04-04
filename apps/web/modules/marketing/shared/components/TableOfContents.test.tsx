@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TableOfContents } from "./TableOfContents";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 const items = [
 	{ slug: "intro", content: "Introduction", lvl: 1 },
@@ -42,5 +48,15 @@ describe("TableOfContents", () => {
 	it("renders empty items list without crashing", () => {
 		render(<TableOfContents items={[]} />);
 		expect(screen.getByText("On this page")).toBeInTheDocument();
+	});
+
+	it("tracks table_of_contents_item_clicked when a link is clicked", async () => {
+		const user = userEvent.setup();
+		render(<TableOfContents items={items} />);
+		await user.click(screen.getByRole("link", { name: "Usage" }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "table_of_contents_item_clicked",
+			props: { slug: "usage", content: "Usage", level: 2 },
+		});
 	});
 });

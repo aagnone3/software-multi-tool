@@ -10,6 +10,11 @@ vi.mock("../hooks/use-credits-history", () => ({
 	useCreditsHistory: () => mockUseCreditsHistory(),
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("../lib/format-tool-name", () => ({
 	formatToolName: (slug: string | null) => (slug ? slug.toUpperCase() : "—"),
 }));
@@ -104,7 +109,7 @@ describe("TransactionHistory", () => {
 			transactions: Array.from({ length: 20 }, (_, i) =>
 				makeTransaction({ id: `tx-${i}`, amount: -1 }),
 			),
-			pagination: { total: 25 },
+			pagination: { total: 25, hasMore: true },
 		});
 		render(<TransactionHistory />);
 		const nextBtn = screen.getByRole("button", { name: /next/i });
@@ -114,5 +119,22 @@ describe("TransactionHistory", () => {
 		expect(
 			screen.getByRole("button", { name: /prev/i }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks transaction_history_page_changed on next click", async () => {
+		const user = userEvent.setup();
+		mockUseCreditsHistory.mockReturnValue({
+			isLoading: false,
+			transactions: Array.from({ length: 20 }, (_, i) =>
+				makeTransaction({ id: `tx-${i}`, amount: -1 }),
+			),
+			pagination: { total: 25, hasMore: true },
+		});
+		render(<TransactionHistory />);
+		await user.click(screen.getByRole("button", { name: /next/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "transaction_history_page_changed",
+			props: { page: 1, direction: "next" },
+		});
 	});
 });
