@@ -890,6 +890,18 @@ type ProductEvent =
 	| {
 			name: "tool_tab_switched";
 			props: { tool_slug: string; tab: string };
+	  }
+	| {
+			name: "news_analyzer_results_tab_changed";
+			props: { tab: string };
+	  }
+	| {
+			name: "speaker_separation_transcript_copied";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "speaker_separation_transcript_downloaded";
+			props: { format: "json" | "txt" };
 	  };
 
 export type { ProductEvent };

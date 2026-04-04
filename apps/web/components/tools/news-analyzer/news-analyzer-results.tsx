@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { SemiCircleGauge } from "@shared/components/SemiCircleGauge";
 import {
 	Card,
@@ -32,7 +33,7 @@ import {
 	Users,
 	XCircle,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface BiasAnalysis {
 	politicalLean: string;
@@ -376,10 +377,25 @@ export function NewsAnalyzerResults({ output }: NewsAnalyzerResultsProps) {
 		output.entities.people.length +
 		output.entities.organizations.length +
 		output.entities.places.length;
+	const { track } = useProductAnalytics();
+
+	const handleTabChange = useCallback(
+		(tab: string) => {
+			track({
+				name: "news_analyzer_results_tab_changed",
+				props: { tab },
+			});
+		},
+		[track],
+	);
 
 	return (
 		<div className="space-y-6">
-			<Tabs defaultValue="summary" className="w-full">
+			<Tabs
+				defaultValue="summary"
+				className="w-full"
+				onValueChange={handleTabChange}
+			>
 				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="summary" className="gap-2">
 						<ListChecks className="size-4 hidden sm:inline" />
