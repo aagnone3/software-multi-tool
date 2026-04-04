@@ -886,6 +886,10 @@ type ProductEvent =
 	| {
 			name: "tool_job_completed";
 			props: { tool_slug: string; job_id: string };
+	  }
+	| {
+			name: "tool_tab_switched";
+			props: { tool_slug: string; tab: string };
 	  };
 
 export type { ProductEvent };

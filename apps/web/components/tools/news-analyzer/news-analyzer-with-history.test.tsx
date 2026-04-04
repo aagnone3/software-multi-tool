@@ -4,6 +4,12 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { NewsAnalyzerWithHistory } from "./news-analyzer-with-history";
 
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("./news-analyzer", () => ({
 	NewsAnalyzer: () => <div>NewsAnalyzer</div>,
 }));
@@ -53,5 +59,20 @@ describe("NewsAnalyzerWithHistory", () => {
 		render(<NewsAnalyzerWithHistory />);
 		await user.click(screen.getByRole("tab", { name: "History" }));
 		expect(setActiveTab).toHaveBeenCalledWith("history");
+	});
+
+	it("tracks tool_tab_switched when tab changes", async () => {
+		mockTrack.mockClear();
+		const setActiveTab = vi.fn();
+		const { useQueryState } = await import("nuqs");
+		vi.mocked(useQueryState).mockReturnValue(["analyze", setActiveTab]);
+
+		const user = userEvent.setup({ delay: null });
+		render(<NewsAnalyzerWithHistory />);
+		await user.click(screen.getByRole("tab", { name: "History" }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_tab_switched",
+			props: { tool_slug: "news-analyzer", tab: "history" },
+		});
 	});
 });

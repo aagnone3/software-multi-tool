@@ -4,6 +4,12 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { SpeakerSeparationWithHistory } from "./speaker-separation-with-history";
 
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@tools/components/SpeakerSeparationTool", () => ({
 	SpeakerSeparationTool: () => <div>SpeakerSeparationTool</div>,
 }));
@@ -53,5 +59,20 @@ describe("SpeakerSeparationWithHistory", () => {
 		render(<SpeakerSeparationWithHistory />);
 		await user.click(screen.getByRole("tab", { name: "History" }));
 		expect(setActiveTab).toHaveBeenCalledWith("history");
+	});
+
+	it("tracks tool_tab_switched when tab changes", async () => {
+		mockTrack.mockClear();
+		const setActiveTab = vi.fn();
+		const { useQueryState } = await import("nuqs");
+		vi.mocked(useQueryState).mockReturnValue(["analyze", setActiveTab]);
+
+		const user = userEvent.setup({ delay: null });
+		render(<SpeakerSeparationWithHistory />);
+		await user.click(screen.getByRole("tab", { name: "History" }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_tab_switched",
+			props: { tool_slug: "speaker-separation", tab: "history" },
+		});
 	});
 });
