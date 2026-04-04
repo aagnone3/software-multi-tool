@@ -25,6 +25,7 @@ const Pagination = ({
 				<Button
 					variant="ghost"
 					size="icon"
+					aria-label="Previous page"
 					disabled={currentPage === 1}
 					onClick={() => onChangeCurrentPage(currentPage - 1)}
 				>
@@ -40,6 +41,7 @@ const Pagination = ({
 				<Button
 					variant="ghost"
 					size="icon"
+					aria-label="Next page"
 					disabled={currentPage === numberOfPages}
 					onClick={() => onChangeCurrentPage(currentPage + 1)}
 				>

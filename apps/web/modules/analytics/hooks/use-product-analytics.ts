@@ -1057,7 +1057,9 @@ type ProductEvent =
 	| {
 			name: "speaker_separation_history_view_clicked";
 			props: { job_id: string };
-	  };
+	  }
+	| { name: "admin_org_created"; props: { org_id: string } }
+	| { name: "admin_org_updated"; props: { org_id: string } };
 
 export type { ProductEvent };
 
