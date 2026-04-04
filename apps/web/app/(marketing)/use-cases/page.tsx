@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { UseCasesPageTracker } from "@marketing/shared/components/UseCasesPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -359,6 +360,7 @@ export default function UseCasesPage() {
 					</Link>
 				</div>
 			</section>
+			<StickyCta />
 		</div>
 	);
 }
