@@ -55,7 +55,7 @@ export function JobCompletionNotifier() {
 						action: {
 							label: "View",
 							onClick: () => {
-								window.location.href = "/app/jobs";
+								window.location.href = `/app/jobs/${job.id}`;
 							},
 						},
 					});
