@@ -88,6 +88,26 @@ const faqs = [
 		q: "Is my data secure?",
 		a: "Yes. Files you upload are processed and then deleted. We don't train models on your data. See our privacy policy for details.",
 	},
+	{
+		q: "What's the difference between the Starter and Pro plans?",
+		a: "The Starter plan gives you 100 credits per month plus access to all tools, exports, and your usage dashboard. Pro gives you 500 credits per month, rollover credits, job scheduling (run tools automatically on a schedule), bulk actions, and saved input templates — making it the right choice for teams or anyone processing documents regularly.",
+	},
+	{
+		q: "Can I switch plans later?",
+		a: "Yes. You can upgrade or downgrade at any time from your billing settings. Upgrades take effect immediately; downgrades take effect at the start of your next billing cycle.",
+	},
+	{
+		q: "Do you offer team or organization pricing?",
+		a: "Yes. You can create an organization and invite team members. Each organization has its own credit pool and billing. Contact us if you need a custom plan for a larger team.",
+	},
+	{
+		q: "What file formats do the tools support?",
+		a: "It depends on the tool. Most document tools accept PDF, Word (.docx), and plain text. The invoice processor also accepts PNG and JPEG images. The meeting summarizer accepts audio and video files. You can see accepted formats on each tool's page.",
+	},
+	{
+		q: "Is there a money-back guarantee?",
+		a: "Yes. If you're not satisfied within the first 30 days of a paid plan, email us and we'll issue a full refund — no questions asked.",
+	},
 ];
 
 const faqJsonLd = {
