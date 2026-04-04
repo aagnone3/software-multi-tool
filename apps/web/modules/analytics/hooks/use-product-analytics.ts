@@ -849,7 +849,13 @@ type ProductEvent =
 	| {
 			name: "credits_by_tool_usage_link_clicked";
 			props: Record<string, never>;
-	  };
+	  }
+	| { name: "tool_notes_opened"; props: { tool_slug: string } }
+	| {
+			name: "tool_notes_saved";
+			props: { tool_slug: string; character_count: number };
+	  }
+	| { name: "tool_notes_cleared"; props: { tool_slug: string } };
 
 export type { ProductEvent };
 
