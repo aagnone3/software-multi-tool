@@ -1,9 +1,10 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { GitBranch } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { DiagramEditorInput } from "./diagram-editor-input";
 import { DiagramExport } from "./diagram-export";
@@ -24,6 +25,22 @@ export function DiagramEditor() {
 	);
 	const [debouncedCode] = useDebounceValue(code, DEBOUNCE_DELAY_MS);
 	const previewRef = useRef<HTMLDivElement>(null);
+	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		track({ name: "diagram_editor_viewed", props: {} });
+	}, [track]);
+
+	const handleTypeChange = useCallback(
+		(type: DiagramType) => {
+			setSelectedType(type);
+			track({
+				name: "diagram_editor_type_changed",
+				props: { diagram_type: type },
+			});
+		},
+		[track],
+	);
 
 	const hasValidCode = debouncedCode.trim().length > 0;
 
@@ -61,7 +78,7 @@ export function DiagramEditor() {
 								value={code}
 								onChange={setCode}
 								selectedType={selectedType}
-								onTypeChange={setSelectedType}
+								onTypeChange={handleTypeChange}
 							/>
 						</div>
 						<div>

@@ -2,7 +2,13 @@
 
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
 	useCreditsBalance: vi.fn(() => ({ isFreePlan: false, isLoading: false })),
@@ -69,6 +75,10 @@ vi.mock("usehooks-ts", () => ({
 import { DiagramEditor } from "./diagram-editor";
 
 describe("DiagramEditor", () => {
+	afterEach(() => {
+		mockTrack.mockClear();
+	});
+
 	it("renders the card title and description", () => {
 		render(<DiagramEditor />);
 		expect(screen.getByText("Diagram Editor")).toBeDefined();
@@ -93,5 +103,13 @@ describe("DiagramEditor", () => {
 	it("shows 'Preview' label", () => {
 		render(<DiagramEditor />);
 		expect(screen.getByText("Preview")).toBeDefined();
+	});
+
+	it("fires diagram_editor_viewed on mount", () => {
+		render(<DiagramEditor />);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "diagram_editor_viewed",
+			props: {},
+		});
 	});
 });

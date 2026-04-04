@@ -7,6 +7,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DiagramExport } from "./diagram-export";
 import * as exportUtils from "./lib/export-utils";
 
+const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next-themes", () => ({
 	useTheme: () => ({ resolvedTheme: "light" }),
 }));
@@ -100,5 +106,27 @@ describe("DiagramExport", () => {
 		await user.click(screen.getByText("Copy as PNG"));
 		// With null ref, handler returns early without calling export util
 		expect(exportUtils.copyPngToClipboard).not.toHaveBeenCalled();
+	});
+
+	it("fires diagram_editor_exported with format=png action=copy on Copy as PNG", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<DiagramExport containerRef={containerRef} />);
+		await user.click(screen.getByText("Copy"));
+		await user.click(screen.getByText("Copy as PNG"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "diagram_editor_exported",
+			props: { format: "png", action: "copy" },
+		});
+	});
+
+	it("fires diagram_editor_exported with format=svg action=download on Download SVG", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<DiagramExport containerRef={containerRef} />);
+		await user.click(screen.getByText("Download"));
+		await user.click(screen.getByText("Download SVG"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "diagram_editor_exported",
+			props: { format: "svg", action: "download" },
+		});
 	});
 });
