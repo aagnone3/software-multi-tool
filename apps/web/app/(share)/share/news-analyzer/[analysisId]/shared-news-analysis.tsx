@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { cleanArticleTitle } from "../../../../../components/tools/news-analyzer/lib/history-utils";
 import {
@@ -42,11 +43,22 @@ interface SharedNewsAnalysisProps {
 }
 
 export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
+	const { track } = useProductAnalytics();
+
 	const { data, isLoading, error } = useQuery({
 		...orpc.share.getNewsAnalysis.queryOptions({
 			input: { analysisId },
 		}),
 	});
+
+	useEffect(() => {
+		if (data?.analysis) {
+			track({
+				name: "shared_analysis_viewed",
+				props: { analysis_id: analysisId, tool: "news-analyzer" },
+			});
+		}
+	}, [data?.analysis, analysisId, track]);
 
 	if (isLoading) {
 		return (
@@ -300,6 +312,61 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 
 				{/* Analysis Results */}
 				<NewsAnalyzerResults output={analysisOutput} />
+
+				{/* Conversion CTA */}
+				<Card className="border-primary/20 bg-primary/5">
+					<CardContent className="flex flex-col items-center gap-4 py-8 text-center sm:flex-row sm:text-left">
+						<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+							<Sparkles className="size-6 text-primary" />
+						</div>
+						<div className="flex-1">
+							<h3 className="font-semibold text-lg">
+								Analyze your own articles
+							</h3>
+							<p className="mt-1 text-sm text-muted-foreground">
+								Get AI-powered bias detection, sentiment
+								analysis, and factual ratings for any news
+								source — free to try, no credit card required.
+							</p>
+						</div>
+						<div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+							<Button asChild>
+								<Link
+									href="/tools/news-analyzer"
+									onClick={() =>
+										track({
+											name: "shared_analysis_cta_clicked",
+											props: {
+												analysis_id: analysisId,
+												cta: "try_free",
+												tool: "news-analyzer",
+											},
+										})
+									}
+								>
+									Try it free
+								</Link>
+							</Button>
+							<Button asChild variant="outline">
+								<Link
+									href="/pricing"
+									onClick={() =>
+										track({
+											name: "shared_analysis_cta_clicked",
+											props: {
+												analysis_id: analysisId,
+												cta: "see_plans",
+												tool: "news-analyzer",
+											},
+										})
+									}
+								>
+									See plans
+								</Link>
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
 
 				{/* Footer Branding */}
 				<div className="border-t pt-6 text-center">
