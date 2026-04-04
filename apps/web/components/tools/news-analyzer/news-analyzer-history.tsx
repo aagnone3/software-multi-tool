@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Pagination } from "@saas/shared/components/Pagination";
 import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -83,6 +84,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
 }
 
 export function NewsAnalyzerHistory() {
+	const { track } = useProductAnalytics();
 	const [currentPage, setCurrentPage] = useQueryState(
 		"page",
 		parseAsInteger.withDefault(1),
@@ -260,6 +262,12 @@ export function NewsAnalyzerHistory() {
 								<Button variant="ghost" size="sm" asChild>
 									<Link
 										href={`/app/tools/news-analyzer/${job.id}`}
+										onClick={() =>
+											track({
+												name: "news_analyzer_history_view_clicked",
+												props: { job_id: job.id },
+											})
+										}
 									>
 										View
 									</Link>
@@ -281,6 +289,10 @@ export function NewsAnalyzerHistory() {
 	});
 
 	const handleRowClick = (job: NewsAnalyzerJob) => {
+		track({
+			name: "news_analyzer_history_job_clicked",
+			props: { job_id: job.id, status: job.status },
+		});
 		if (job.status === "COMPLETED" || job.status === "FAILED") {
 			window.location.href = `/app/tools/news-analyzer/${job.id}`;
 		}
@@ -301,14 +313,26 @@ export function NewsAnalyzerHistory() {
 					placeholder="Search by article title or URL..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
+					onBlur={(e) => {
+						if (e.target.value) {
+							track({
+								name: "news_analyzer_history_search_used",
+								props: { term: e.target.value },
+							});
+						}
+					}}
 					className="max-w-sm"
 				/>
 
 				<Select
 					value={statusFilter}
-					onValueChange={(value) =>
-						setStatusFilter(value === "all" ? "" : value)
-					}
+					onValueChange={(value) => {
+						setStatusFilter(value === "all" ? "" : value);
+						track({
+							name: "news_analyzer_history_status_filtered",
+							props: { status: value },
+						});
+					}}
 				>
 					<SelectTrigger className="w-[150px]">
 						<SelectValue placeholder="All Statuses" />
