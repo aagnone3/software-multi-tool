@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
 import { ChevronLeftIcon, ChevronRightIcon, LightbulbIcon } from "lucide-react";
@@ -139,6 +140,7 @@ export function ToolTipsBanner({ toolSlug, className }: ToolTipsBannerProps) {
 	const tips = TOOL_TIPS[toolSlug] ?? DEFAULT_TIPS;
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [isVisible, setIsVisible] = useState(true);
+	const { track } = useProductAnalytics();
 
 	const storageKey = `tips-dismissed-${toolSlug}`;
 
@@ -162,12 +164,34 @@ export function ToolTipsBanner({ toolSlug, className }: ToolTipsBannerProps) {
 	}, [isVisible, tips.length]);
 
 	const handlePrev = useCallback(() => {
-		setCurrentIndex((prev) => (prev - 1 + tips.length) % tips.length);
-	}, [tips.length]);
+		setCurrentIndex((prev) => {
+			const next = (prev - 1 + tips.length) % tips.length;
+			track({
+				name: "tool_tip_navigated",
+				props: {
+					tool_slug: toolSlug,
+					direction: "prev",
+					tip_index: next,
+				},
+			});
+			return next;
+		});
+	}, [tips.length, toolSlug, track]);
 
 	const handleNext = useCallback(() => {
-		setCurrentIndex((prev) => (prev + 1) % tips.length);
-	}, [tips.length]);
+		setCurrentIndex((prev) => {
+			const next = (prev + 1) % tips.length;
+			track({
+				name: "tool_tip_navigated",
+				props: {
+					tool_slug: toolSlug,
+					direction: "next",
+					tip_index: next,
+				},
+			});
+			return next;
+		});
+	}, [tips.length, toolSlug, track]);
 
 	if (!isVisible) return null;
 

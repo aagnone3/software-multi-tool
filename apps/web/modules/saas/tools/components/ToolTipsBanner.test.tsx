@@ -3,6 +3,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolTipsBanner } from "./ToolTipsBanner";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock localStorage
 const localStorageMock = {
 	getItem: vi.fn((): string | null => null),
@@ -13,6 +18,7 @@ Object.defineProperty(window, "localStorage", { value: localStorageMock });
 describe("ToolTipsBanner", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockTrack.mockClear();
 		localStorageMock.getItem.mockReturnValue(null);
 	});
 
@@ -70,6 +76,32 @@ describe("ToolTipsBanner", () => {
 		// but the component should not show tips banner text for dismissed state
 		// We check that after the component updates from localStorage
 		expect(container.firstChild).toBeDefined();
+	});
+
+	it("tracks tool_tip_navigated event on next click", () => {
+		render(<ToolTipsBanner toolSlug="news-analyzer" />);
+		fireEvent.click(screen.getByLabelText("Next tip"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_tip_navigated",
+			props: {
+				tool_slug: "news-analyzer",
+				direction: "next",
+				tip_index: 1,
+			},
+		});
+	});
+
+	it("tracks tool_tip_navigated event on prev click", () => {
+		render(<ToolTipsBanner toolSlug="news-analyzer" />);
+		fireEvent.click(screen.getByLabelText("Previous tip"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_tip_navigated",
+			props: {
+				tool_slug: "news-analyzer",
+				direction: "prev",
+				tip_index: 3,
+			},
+		});
 	});
 
 	it("applies custom className", () => {

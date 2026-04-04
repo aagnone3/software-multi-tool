@@ -832,6 +832,14 @@ type ProductEvent =
 	| {
 			name: "credit_balance_indicator_clicked";
 			props: { is_low_credits: boolean; balance: number };
+	  }
+	| {
+			name: "tool_tip_navigated";
+			props: {
+				tool_slug: string;
+				direction: "prev" | "next";
+				tip_index: number;
+			};
 	  };
 
 export type { ProductEvent };
