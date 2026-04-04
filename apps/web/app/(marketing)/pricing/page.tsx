@@ -1,4 +1,5 @@
 import { PricingSection } from "@marketing/home/components/PricingSection";
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { PricingPageTracker } from "@marketing/shared/components/PricingPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -378,6 +379,7 @@ export default function PricingPage() {
 					</div>
 				</section>
 			</main>
+			<StickyCta />
 		</>
 	);
 }

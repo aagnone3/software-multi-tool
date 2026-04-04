@@ -7,6 +7,10 @@ vi.mock("@marketing/home/components/PricingSection", () => ({
 	PricingSection: () => <section data-testid="pricing-section" />,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
@@ -43,5 +47,12 @@ describe("PricingPage", () => {
 		render(<PricingPage />);
 		const h2s = screen.getAllByRole("heading", { level: 2 });
 		expect(h2s.length).toBeGreaterThan(1);
+	});
+
+	it("renders the StickyCta component", () => {
+		render(<PricingPage />);
+		expect(
+			document.querySelector("[data-testid='sticky-cta']"),
+		).toBeInTheDocument();
 	});
 });
