@@ -17,6 +17,13 @@ describe("HowItWorks", () => {
 		expect(screen.getByText("Get results instantly")).toBeInTheDocument();
 	});
 
+	it("renders specific 10 free credits copy in sign up step", () => {
+		render(<HowItWorks />);
+		expect(
+			screen.getByText(/10 free credits are waiting/i),
+		).toBeInTheDocument();
+	});
+
 	it("renders step numbers 1–4", () => {
 		render(<HowItWorks />);
 		for (const n of ["1", "2", "3", "4"]) {

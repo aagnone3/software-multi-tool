@@ -22,6 +22,13 @@ describe("FinalCta", () => {
 		expect(screen.getByText(/Browse All Tools/i)).toBeInTheDocument();
 	});
 
+	it("shows specific 10 free credits benefit", () => {
+		render(<FinalCta />);
+		expect(
+			screen.getByText(/10 free credits on signup/i),
+		).toBeInTheDocument();
+	});
+
 	it("tracks start_free click", () => {
 		render(<FinalCta />);
 		fireEvent.click(screen.getByText(/Start Free — No Card Needed/i));

@@ -42,7 +42,7 @@ export function Hero() {
 
 				<p className="mt-5 flex items-center justify-center gap-1.5 text-foreground/50 text-sm">
 					<ClockIcon className="size-3.5" />
-					Set up in under 2 minutes · Free credits included
+					Set up in under 2 minutes · 10 free credits included
 				</p>
 			</div>
 		</section>
