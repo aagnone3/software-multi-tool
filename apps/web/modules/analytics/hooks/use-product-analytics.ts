@@ -800,7 +800,17 @@ type ProductEvent =
 	| { name: "org_invitation_accepted"; props: { organization_slug: string } }
 	| { name: "org_invitation_rejected"; props: { organization_slug: string } }
 	| { name: "org_name_updated"; props: Record<string, never> }
-	| { name: "org_logo_updated"; props: Record<string, never> };
+	| { name: "org_logo_updated"; props: Record<string, never> }
+	| {
+			name: "credit_pack_buy_now_clicked";
+			props: {
+				pack_id: string;
+				credits: number;
+				amount: number;
+				is_recommended: boolean;
+			};
+	  }
+	| { name: "file_delete_confirmed"; props: { file_id: string } };
 
 export type { ProductEvent };
 

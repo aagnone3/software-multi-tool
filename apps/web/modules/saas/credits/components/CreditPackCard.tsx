@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { CreditPack } from "@repo/config";
 import { Button } from "@ui/components/button";
 import { cn } from "@ui/lib";
@@ -40,6 +41,7 @@ export function CreditPackCard({
 	className,
 }: CreditPackCardProps) {
 	const Icon = PACK_ICONS[pack.id as keyof typeof PACK_ICONS] ?? CoinsIcon;
+	const { track } = useProductAnalytics();
 
 	return (
 		<div
@@ -98,7 +100,18 @@ export function CreditPackCard({
 				<Button
 					className="mt-4 w-full"
 					variant={isRecommended ? "primary" : "secondary"}
-					onClick={() => onPurchase(pack.id)}
+					onClick={() => {
+						track({
+							name: "credit_pack_buy_now_clicked",
+							props: {
+								pack_id: pack.id,
+								credits: pack.credits,
+								amount: pack.amount,
+								is_recommended: isRecommended,
+							},
+						});
+						onPurchase(pack.id);
+					}}
 					loading={isPurchasing}
 					data-testid={`purchase-${pack.id}`}
 				>

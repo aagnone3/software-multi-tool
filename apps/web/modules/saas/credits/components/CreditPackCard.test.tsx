@@ -4,6 +4,11 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreditPackCard } from "./CreditPackCard";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockPack = {
 	id: "boost",
 	name: "Boost Pack",
@@ -86,6 +91,27 @@ describe("CreditPackCard", () => {
 		);
 		await userEvent.click(screen.getByTestId("purchase-boost"));
 		expect(onPurchase).toHaveBeenCalledWith("boost");
+	});
+
+	it("fires credit_pack_buy_now_clicked analytics when Buy Now is clicked", async () => {
+		mockTrack.mockClear();
+		render(
+			<CreditPackCard
+				pack={mockPack}
+				onPurchase={vi.fn()}
+				isPurchasing={false}
+			/>,
+		);
+		await userEvent.click(screen.getByTestId("purchase-boost"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_pack_buy_now_clicked",
+			props: {
+				pack_id: "boost",
+				credits: 100,
+				amount: 5,
+				is_recommended: false,
+			},
+		});
 	});
 
 	it("shows loading state when isPurchasing=true", () => {

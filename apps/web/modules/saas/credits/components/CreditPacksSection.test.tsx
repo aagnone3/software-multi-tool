@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import React, { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 const mockGetCreditPacks = vi.fn();
 const mockUseCreditPackPurchase = vi.fn();
 
