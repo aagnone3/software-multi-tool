@@ -46,7 +46,7 @@ describe("AuthWrapper", () => {
 			screen.getByText("10 free credits — no card required"),
 		).toBeTruthy();
 		expect(screen.getByText("Save 10+ hours per month")).toBeTruthy();
-		expect(screen.getByText("8 tools in one platform")).toBeTruthy();
+		expect(screen.getByText("9 tools in one platform")).toBeTruthy();
 		expect(screen.getByText("Your data stays private")).toBeTruthy();
 	});
 

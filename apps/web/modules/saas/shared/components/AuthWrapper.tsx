@@ -26,7 +26,7 @@ const benefits = [
 	},
 	{
 		icon: CheckIcon,
-		title: "8 tools in one platform",
+		title: "9 tools in one platform",
 		description:
 			"Meetings, contracts, invoices, expenses, and more — all covered.",
 	},
