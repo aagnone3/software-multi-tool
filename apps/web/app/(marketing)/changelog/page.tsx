@@ -25,6 +25,73 @@ export const metadata: Metadata = {
 
 const releases = [
 	{
+		version: "1.5.0",
+		date: "April 2026",
+		highlights: "Monetization, analytics & accessibility pass",
+		changes: [
+			{
+				type: "improvement" as const,
+				text: "Starter→Pro upgrade nudges added to every high-traffic surface: dashboard, billing settings, empty states, post-job prompts, credit banners, and history pages",
+			},
+			{
+				type: "improvement" as const,
+				text: "Annual billing upsell card in billing settings for Pro monthly subscribers — shows computed savings and switch-to-annual CTA",
+			},
+			{
+				type: "feature" as const,
+				text: "PaymentIssueAlert surfaces subscription payment failures (past_due, unpaid, paused) on dashboard and billing settings to reduce involuntary churn",
+			},
+			{
+				type: "feature" as const,
+				text: "Win-back nudge in billing settings for canceled or expired subscriptions",
+			},
+			{
+				type: "feature" as const,
+				text: "Usage overage nudge in UsageSummaryCards: Starter/Free users with overage charges see a quantified Pro upgrade prompt",
+			},
+			{
+				type: "improvement" as const,
+				text: "Trust signals (30-day money-back, cancel anytime, secure payment) added to the choose-plan forced conversion gate",
+			},
+			{
+				type: "improvement" as const,
+				text: "Comprehensive analytics instrumentation across all conversion surfaces, auth flows, navigation, dashboard widgets, and tool pages — 100+ new tracked events",
+			},
+			{
+				type: "improvement" as const,
+				text: "WCAG 2.1 accessibility fixes: aria-labels for icon-only buttons, aria-current for active items, role/label for tables, and accessible password toggle in auth forms",
+			},
+			{
+				type: "improvement" as const,
+				text: "Error boundaries added to all major app routes; loading skeletons added to settings, admin, tool, and dashboard routes",
+			},
+			{
+				type: "improvement" as const,
+				text: "ToolHistoryPage now uses server-side pagination (20 per page) instead of bulk 100-job fetch",
+			},
+			{
+				type: "fix" as const,
+				text: "Fixed hardcoded tool-slug→detail URL maps in ToolRecentRuns and ActiveJobsWidget — all tools now link to the correct job detail page",
+			},
+			{
+				type: "fix" as const,
+				text: "Fixed money-back guarantee inconsistency across trust surfaces (standardized to 30-day everywhere)",
+			},
+			{
+				type: "fix" as const,
+				text: "Fixed StickyCta and BlogStickyCta showing free-trial copy to Starter plan users who are already paying",
+			},
+			{
+				type: "improvement" as const,
+				text: "Pricing FAQ expanded from 6 to 11 entries — covers Starter vs Pro, plan switching, team pricing, file formats, and guarantee",
+			},
+			{
+				type: "improvement" as const,
+				text: "SEO: added JSON-LD structured data to /for, /vs, /roi-calculator, and /use-cases pages",
+			},
+		],
+	},
+	{
 		version: "1.4.0",
 		date: "March 2026",
 		highlights: "AI-powered dashboard & UX overhaul",
