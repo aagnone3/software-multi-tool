@@ -855,7 +855,8 @@ type ProductEvent =
 			name: "tool_notes_saved";
 			props: { tool_slug: string; character_count: number };
 	  }
-	| { name: "tool_notes_cleared"; props: { tool_slug: string } };
+	| { name: "tool_notes_cleared"; props: { tool_slug: string } }
+	| { name: "pricing_page_viewed"; props: Record<string, never> };
 
 export type { ProductEvent };
 
