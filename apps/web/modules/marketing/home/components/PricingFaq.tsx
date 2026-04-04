@@ -10,7 +10,7 @@ const PRICING_FAQS = [
 	},
 	{
 		question: "Is there a free plan? Can I try before I buy?",
-		answer: "Every new account gets complimentary credits — no credit card required. Use them to process real files and see actual output before committing to anything.",
+		answer: "Every new account gets 10 complimentary credits — no credit card required. Use them to process real files and see actual output before committing to anything.",
 	},
 	{
 		question: "Can I switch plans or cancel anytime?",

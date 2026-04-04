@@ -37,4 +37,9 @@ describe("FaqSection", () => {
 		const { container } = render(<FaqSection className="custom-class" />);
 		expect(container.firstChild).toHaveClass("custom-class");
 	});
+
+	it("shows specific free credit count in free trial answer", () => {
+		render(<FaqSection />);
+		expect(screen.getByText(/10 free credits/i)).toBeInTheDocument();
+	});
 });

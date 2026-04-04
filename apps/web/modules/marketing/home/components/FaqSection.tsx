@@ -5,7 +5,7 @@ export function FaqSection({ className }: { className?: string }) {
 	const items = [
 		{
 			question: "Do you offer a free trial?",
-			answer: "Yes — every new account gets free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
+			answer: "Yes — every new account gets 10 free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
 		},
 		{
 			question: "How does credit-based pricing work?",

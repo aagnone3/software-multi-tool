@@ -64,6 +64,15 @@ describe("PricingFaq", () => {
 		});
 	});
 
+	it("shows specific free credit count in free plan FAQ answer", () => {
+		render(<PricingFaq />);
+		const freeTrialButton = screen.getByText(/Is there a free plan/i);
+		fireEvent.click(freeTrialButton);
+		expect(
+			screen.getByText(/10 complimentary credits/i),
+		).toBeInTheDocument();
+	});
+
 	it("tracks collapse event when FAQ item is closed", () => {
 		render(<PricingFaq />);
 		const firstButton = screen.getAllByRole("button")[0];
