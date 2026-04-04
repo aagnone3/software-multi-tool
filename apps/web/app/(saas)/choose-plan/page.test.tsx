@@ -41,6 +41,14 @@ vi.mock("@saas/payments/components/PricingTable", () => ({
 	),
 }));
 
+vi.mock("@saas/payments/components/BillingTrustSection", () => ({
+	BillingTrustSection: ({ className }: { className?: string }) => (
+		<div data-testid="billing-trust-section" className={className}>
+			Trust Section
+		</div>
+	),
+}));
+
 vi.mock("@saas/shared/components/AuthWrapper", () => ({
 	AuthWrapper: ({ children }: { children: React.ReactNode }) => (
 		<div data-testid="auth-wrapper">{children}</div>
@@ -56,6 +64,13 @@ describe("ChoosePlanPage", () => {
 
 		expect(screen.getByText("Choose your plan")).toBeInTheDocument();
 		expect(screen.getByTestId("pricing-table")).toBeInTheDocument();
+	});
+
+	it("renders BillingTrustSection to reinforce conversion confidence", async () => {
+		const Page = await ChoosePlanPage();
+		render(Page);
+
+		expect(screen.getByTestId("billing-trust-section")).toBeInTheDocument();
 	});
 
 	it("passes userId to PricingTable when orgs disabled", async () => {
