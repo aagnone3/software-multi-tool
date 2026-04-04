@@ -23,10 +23,12 @@ describe("Hero", () => {
 		expect(link).toHaveAttribute("href", "/tools");
 	});
 
-	it("renders setup time text", () => {
+	it("renders setup time text with specific free credit count", () => {
 		render(<Hero />);
 		expect(
-			screen.getByText(/set up in under 2 minutes/i),
+			screen.getByText(
+				/set up in under 2 minutes · 10 free credits included/i,
+			),
 		).toBeInTheDocument();
 	});
 

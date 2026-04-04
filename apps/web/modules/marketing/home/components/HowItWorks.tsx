@@ -18,7 +18,7 @@ const steps: Step[] = [
 		number: 1,
 		title: "Sign up for free",
 		description:
-			"Create your account in seconds. No credit card required — just your email and you're in. Free credits are waiting.",
+			"Create your account in seconds. No credit card required — just your email and you're in. 10 free credits are waiting.",
 		icon: UserPlusIcon,
 	},
 	{

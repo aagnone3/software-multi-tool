@@ -8,7 +8,7 @@ import React from "react";
 
 const benefits = [
 	"No credit card required",
-	"Free credits included on signup",
+	"10 free credits on signup",
 	"First result in under 2 minutes",
 ];
 

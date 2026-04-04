@@ -21,7 +21,7 @@ export function BlogCTA() {
 			<SparklesIcon className="mx-auto mb-3 size-6 text-primary" />
 			<h3 className="font-semibold text-lg">Try it yourself — free</h3>
 			<p className="mx-auto mt-2 max-w-md text-foreground/60 text-sm">
-				New accounts get free credits — no credit card required. Run
+				New accounts get 10 free credits — no credit card required. Run
 				your first AI tool in under a minute.
 			</p>
 			<div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
