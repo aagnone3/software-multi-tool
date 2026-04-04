@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreditBalanceCard } from "./CreditBalanceCard";
 
 const mockUseCreditsBalance = vi.fn();
 const mockUseActiveOrganization = vi.fn();
+const mockTrack = vi.fn();
 
 vi.mock("../hooks/use-credits-balance", () => ({
 	useCreditsBalance: () => mockUseCreditsBalance(),
@@ -14,14 +16,24 @@ vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => mockUseActiveOrganization(),
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: React.MouseEventHandler;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 const baseBalance = {
@@ -251,5 +263,78 @@ describe("CreditBalanceCard", () => {
 		render(<CreditBalanceCard />);
 		const link = screen.getByRole("link", { name: /View usage history/i });
 		expect(link.getAttribute("href")).toBe("/app/acme/settings/usage");
+	});
+
+	it("tracks upgrade click for Starter plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...baseBalance,
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			totalCredits: 100,
+			percentageUsed: 80,
+			isLowCredits: true,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		const user = userEvent.setup({ delay: null });
+		render(<CreditBalanceCard />);
+		const upgradeLink = screen.getByRole("link", {
+			name: /Upgrade to Pro/i,
+		});
+		await user.click(upgradeLink);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_balance_card_upgrade_clicked",
+			props: { plan: "starter" },
+		});
+	});
+
+	it("tracks compare plans click for Starter plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				...baseBalance,
+				plan: { id: "starter", name: "Starter" },
+			},
+			isLoading: false,
+			totalCredits: 100,
+			percentageUsed: 80,
+			isLowCredits: true,
+			isFreePlan: false,
+			isStarterPlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		const user = userEvent.setup({ delay: null });
+		render(<CreditBalanceCard />);
+		const compareLink = screen.getByRole("link", {
+			name: /Compare plans/i,
+		});
+		await user.click(compareLink);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_balance_card_compare_plans_clicked",
+			props: {},
+		});
+	});
+
+	it("tracks view usage history click", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: baseBalance,
+			isLoading: false,
+			totalCredits: 1000,
+			percentageUsed: 25,
+			isLowCredits: false,
+			isFreePlan: false,
+			isStarterPlan: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		const user = userEvent.setup({ delay: null });
+		render(<CreditBalanceCard />);
+		const link = screen.getByRole("link", { name: /View usage history/i });
+		await user.click(link);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_balance_card_view_usage_clicked",
+			props: {},
+		});
 	});
 });

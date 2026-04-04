@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mockUseCreditsBalance = vi.fn();
 const mockUseJobsList = vi.fn();
 const mockUseActiveOrganization = vi.fn();
+const mockTrack = vi.fn();
 
 vi.mock("../hooks/use-credits-balance", () => ({
 	useCreditsBalance: () => mockUseCreditsBalance(),
@@ -20,14 +21,24 @@ vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => mockUseActiveOrganization(),
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: React.MouseEventHandler;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 import { CreditRunwayBanner } from "./CreditRunwayBanner";
@@ -204,5 +215,81 @@ describe("CreditRunwayBanner", () => {
 		expect((link as HTMLAnchorElement).href).toContain(
 			"/app/my-org/settings/billing",
 		);
+	});
+
+	it("tracks upgrade click for Starter plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<CreditRunwayBanner />);
+		await user.click(screen.getByRole("link", { name: /Upgrade to Pro/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_runway_banner_upgrade_clicked",
+			props: { plan: "starter" },
+		});
+	});
+
+	it("tracks compare plans click for Starter plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<CreditRunwayBanner />);
+		await user.click(screen.getByRole("link", { name: /Compare plans/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_runway_banner_compare_plans_clicked",
+			props: {},
+		});
+	});
+
+	it("tracks buy credits click for free plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: false,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<CreditRunwayBanner />);
+		await user.click(screen.getByRole("link", { name: /Buy Credits/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_runway_banner_buy_credits_clicked",
+			props: {},
+		});
+	});
+
+	it("tracks dismiss click", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			totalCredits: 5,
+			isLoading: false,
+			isStarterPlan: false,
+		});
+		mockUseJobsList.mockReturnValue({
+			jobs: [0, 1, 2, 3, 4, 5, 6].map((d) => makeJob(d)),
+			isLoading: false,
+		});
+		const user = userEvent.setup({ delay: null });
+		render(<CreditRunwayBanner />);
+		await user.click(screen.getByRole("button", { name: /dismiss/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_runway_banner_dismissed",
+			props: {},
+		});
 	});
 });

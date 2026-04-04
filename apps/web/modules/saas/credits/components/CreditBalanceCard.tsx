@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
@@ -45,6 +46,7 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 		isStarterPlan,
 	} = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 
 	const usageHistoryPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/usage`
@@ -273,7 +275,19 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 												: "outline"
 										}
 									>
-										<Link href={billingPath}>
+										<Link
+											href={billingPath}
+											onClick={() =>
+												track({
+													name: "credit_balance_card_upgrade_clicked",
+													props: {
+														plan: isStarterPlan
+															? "starter"
+															: "free",
+													},
+												})
+											}
+										>
 											{isFreePlan
 												? "Upgrade to Starter"
 												: isStarterPlan
@@ -289,7 +303,15 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 											variant="outline"
 											className="flex-1"
 										>
-											<Link href="/pricing#pricing-plan-pro">
+											<Link
+												href="/pricing#pricing-plan-pro"
+												onClick={() =>
+													track({
+														name: "credit_balance_card_compare_plans_clicked",
+														props: {},
+													})
+												}
+											>
 												Compare plans
 											</Link>
 										</Button>
@@ -301,7 +323,15 @@ export function CreditBalanceCard({ className }: CreditBalanceCardProps) {
 				)}
 
 				<Button variant="outline" className="w-full" asChild>
-					<Link href={usageHistoryPath}>
+					<Link
+						href={usageHistoryPath}
+						onClick={() =>
+							track({
+								name: "credit_balance_card_view_usage_clicked",
+								props: {},
+							})
+						}
+					>
 						View usage history
 						<ChevronRightIcon className="size-4 ml-auto" />
 					</Link>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Alert, AlertDescription, AlertTitle } from "@ui/components/alert";
 import { Button } from "@ui/components/button";
@@ -47,6 +48,7 @@ export function LowCreditsWarning({
 }: LowCreditsWarningProps) {
 	const { balance, isLoading, isStarterPlan } = useCreditsBalance();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [alertSettings, setAlertSettings] = useState<{
 		enabled: boolean;
 		threshold: number | null;
@@ -109,21 +111,59 @@ export function LowCreditsWarning({
 					{isStarterPlan ? (
 						<>
 							<Button asChild variant="secondary" size="sm">
-								<Link href="/pricing#pricing-plan-pro">
+								<Link
+									href="/pricing#pricing-plan-pro"
+									onClick={() =>
+										track({
+											name: "low_credits_warning_compare_plans_clicked",
+											props: {},
+										})
+									}
+								>
 									Compare plans
 								</Link>
 							</Button>
 							<Button asChild variant="primary" size="sm">
-								<Link href={billingPath}>Upgrade to Pro</Link>
+								<Link
+									href={billingPath}
+									onClick={() =>
+										track({
+											name: "low_credits_warning_upgrade_clicked",
+											props: { plan: "starter" },
+										})
+									}
+								>
+									Upgrade to Pro
+								</Link>
 							</Button>
 						</>
 					) : (
 						<>
 							<Button asChild variant="secondary" size="sm">
-								<Link href={billingPath}>Buy Credits</Link>
+								<Link
+									href={billingPath}
+									onClick={() =>
+										track({
+											name: "low_credits_warning_buy_credits_clicked",
+											props: {},
+										})
+									}
+								>
+									Buy Credits
+								</Link>
 							</Button>
 							<Button asChild variant="primary" size="sm">
-								<Link href={billingPath}>Upgrade Plan</Link>
+								<Link
+									href={billingPath}
+									onClick={() =>
+										track({
+											name: "low_credits_warning_upgrade_clicked",
+											props: { plan: "free" },
+										})
+									}
+								>
+									Upgrade Plan
+								</Link>
 							</Button>
 						</>
 					)}
