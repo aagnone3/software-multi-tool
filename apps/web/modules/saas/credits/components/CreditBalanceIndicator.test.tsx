@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React, { type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,11 +10,13 @@ vi.mock("next/link", () => ({
 		children,
 		href,
 		className,
+		onClick,
 	}: {
 		children: ReactNode;
 		href: string;
 		className?: string;
-	}) => React.createElement("a", { href, className }, children),
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+	}) => React.createElement("a", { href, className, onClick }, children),
 }));
 
 // Mock Radix Tooltip components
@@ -49,6 +52,11 @@ vi.mock("@ui/components/tooltip", () => ({
 const mockUseCreditsBalance = vi.fn();
 vi.mock("../hooks/use-credits-balance", () => ({
 	useCreditsBalance: () => mockUseCreditsBalance(),
+}));
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 import { CreditBalanceIndicator } from "./CreditBalanceIndicator";
@@ -179,5 +187,33 @@ describe("CreditBalanceIndicator", () => {
 
 		const link = screen.getByRole("link");
 		expect(link).toHaveAttribute("href", "/app/settings/billing");
+	});
+
+	it("tracks credit_balance_indicator_clicked event on click", async () => {
+		const user = userEvent.setup();
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 42,
+				remaining: 30,
+				purchasedCredits: 12,
+			},
+			isLoading: false,
+			isLowCredits: false,
+			hasActiveOrganization: true,
+			isApiInitializing: false,
+		});
+
+		render(<CreditBalanceIndicator />, { wrapper });
+
+		const link = screen.getByRole("link");
+		await user.click(link);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credit_balance_indicator_clicked",
+			props: {
+				is_low_credits: false,
+				balance: 42,
+			},
+		});
 	});
 });

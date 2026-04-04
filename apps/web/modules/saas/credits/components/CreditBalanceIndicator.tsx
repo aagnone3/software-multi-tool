@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	Tooltip,
 	TooltipContent,
@@ -19,6 +20,7 @@ interface CreditBalanceIndicatorProps {
 export function CreditBalanceIndicator({
 	className,
 }: CreditBalanceIndicatorProps) {
+	const { track } = useProductAnalytics();
 	const {
 		balance,
 		isLoading,
@@ -94,6 +96,15 @@ export function CreditBalanceIndicator({
 				<TooltipTrigger asChild>
 					<Link
 						href="/app/settings/billing"
+						onClick={() =>
+							track({
+								name: "credit_balance_indicator_clicked",
+								props: {
+									is_low_credits: isLowCredits,
+									balance: balance.totalAvailable,
+								},
+							})
+						}
 						className={cn(
 							"flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm transition-colors hover:bg-muted/80",
 							isLowCredits
