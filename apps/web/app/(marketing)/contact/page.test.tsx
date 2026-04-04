@@ -6,6 +6,10 @@ vi.mock("@marketing/home/components/ContactForm", () => ({
 	ContactForm: () => <form data-testid="contact-form" />,
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 vi.mock("@repo/config", () => ({
 	config: {
 		appName: "TestApp",
@@ -51,6 +55,12 @@ describe("ContactPage", () => {
 		const { generateMetadata } = await import("./page");
 		const meta = await generateMetadata();
 		expect(meta.title).toContain("Contact");
+	});
+
+	it("renders sticky CTA", async () => {
+		const { default: ContactPage } = await import("./page");
+		render(await ContactPage());
+		expect(screen.getByTestId("sticky-cta")).toBeTruthy();
 	});
 
 	it("renders JSON-LD structured data script tag", async () => {
