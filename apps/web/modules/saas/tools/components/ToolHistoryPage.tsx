@@ -16,6 +16,8 @@ import { Input } from "@ui/components/input";
 import { Skeleton } from "@ui/components/skeleton";
 import {
 	CheckCircle2Icon,
+	ChevronLeftIcon,
+	ChevronRightIcon,
 	ClockIcon,
 	DownloadIcon,
 	ExternalLinkIcon,
@@ -27,6 +29,8 @@ import {
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+
+const ITEMS_PER_PAGE = 20;
 
 type JobStatus =
 	| "PENDING"
@@ -89,6 +93,7 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 	const [statusFilter, setStatusFilter] = useState<JobStatus | "ALL">("ALL");
 	const [fromDate, setFromDate] = useState("");
 	const [toDate, setToDate] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
 	const debouncedSearch = useDebounce(search, 300);
 	const queryClient = useQueryClient();
 
@@ -100,7 +105,17 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [toolSlug]);
 
-	const { jobs, isLoading } = useJobsListPaginated({ toolSlug, limit: 100 });
+	// Reset to page 1 when filters change
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [debouncedSearch, statusFilter, fromDate, toDate]);
+
+	const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+	const { jobs, isLoading, hasMore } = useJobsListPaginated({
+		toolSlug,
+		limit: ITEMS_PER_PAGE,
+		offset,
+	});
 
 	const filtered = useMemo(() => {
 		if (!jobs) {
@@ -344,8 +359,7 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 
 					{isLoading ? (
 						<div className="space-y-2">
-							{Array.from({ length: 5 }).map((_, i) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: skeleton
+							{Array.from({ length: 5 }, (_, i) => (
 								<Skeleton key={i} className="h-10 w-full" />
 							))}
 						</div>
@@ -363,108 +377,153 @@ export function ToolHistoryPage({ toolSlug, toolName }: ToolHistoryPageProps) {
 							)}
 						</div>
 					) : (
-						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead>
-									<tr className="border-b text-left text-muted-foreground">
-										<th className="pb-2 pr-4 font-medium">
-											Job ID
-										</th>
-										<th className="pb-2 pr-4 font-medium">
-											Status
-										</th>
-										<th className="pb-2 pr-4 font-medium">
-											Created
-										</th>
-										<th className="pb-2 pr-4 font-medium">
-											Duration
-										</th>
-										<th className="pb-2 font-medium">
-											Actions
-										</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y">
-									{filtered.map((job) => {
-										const status = (job.status ??
-											"PENDING") as JobStatus;
-										const cfg =
-											STATUS_CONFIG[status] ??
-											STATUS_CONFIG.PENDING;
-										const Icon =
-											STATUS_ICONS[status] ?? ClockIcon;
-										return (
-											<tr key={job.id} className="group">
-												<td className="py-2 pr-4 font-mono text-xs">
-													<Link
-														href={`/app/jobs/${job.id}`}
-														className="hover:underline"
-													>
-														{job.id.slice(0, 8)}…
-													</Link>
-												</td>
-												<td className="py-2 pr-4">
-													<Badge
-														status={cfg.status}
-														className="flex w-fit items-center gap-1"
-													>
-														<Icon className="h-3 w-3" />
-														{cfg.label}
-													</Badge>
-												</td>
-												<td className="py-2 pr-4 text-muted-foreground">
-													{formatDate(job.createdAt)}
-												</td>
-												<td className="py-2 pr-4 text-muted-foreground">
-													{formatDuration(
-														job.createdAt,
-														job.completedAt,
-													)}
-												</td>
-												<td className="py-2">
-													<div className="flex items-center gap-1">
-														<Button
-															size="sm"
-															variant="ghost"
-															asChild
+						<div className="space-y-4">
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b text-left text-muted-foreground">
+											<th className="pb-2 pr-4 font-medium">
+												Job ID
+											</th>
+											<th className="pb-2 pr-4 font-medium">
+												Status
+											</th>
+											<th className="pb-2 pr-4 font-medium">
+												Created
+											</th>
+											<th className="pb-2 pr-4 font-medium">
+												Duration
+											</th>
+											<th className="pb-2 font-medium">
+												Actions
+											</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y">
+										{filtered.map((job) => {
+											const status = (job.status ??
+												"PENDING") as JobStatus;
+											const cfg =
+												STATUS_CONFIG[status] ??
+												STATUS_CONFIG.PENDING;
+											const Icon =
+												STATUS_ICONS[status] ??
+												ClockIcon;
+											return (
+												<tr
+													key={job.id}
+													className="group"
+												>
+													<td className="py-2 pr-4 font-mono text-xs">
+														<Link
+															href={`/app/jobs/${job.id}`}
+															className="hover:underline"
 														>
-															<Link
-																href={`/app/jobs/${job.id}`}
+															{job.id.slice(0, 8)}
+															…
+														</Link>
+													</td>
+													<td className="py-2 pr-4">
+														<Badge
+															status={cfg.status}
+															className="flex w-fit items-center gap-1"
+														>
+															<Icon className="h-3 w-3" />
+															{cfg.label}
+														</Badge>
+													</td>
+													<td className="py-2 pr-4 text-muted-foreground">
+														{formatDate(
+															job.createdAt,
+														)}
+													</td>
+													<td className="py-2 pr-4 text-muted-foreground">
+														{formatDuration(
+															job.createdAt,
+															job.completedAt,
+														)}
+													</td>
+													<td className="py-2">
+														<div className="flex items-center gap-1">
+															<Button
+																size="sm"
+																variant="ghost"
+																asChild
 															>
-																View
-															</Link>
-														</Button>
-														<Button
-															size="sm"
-															variant="ghost"
-															asChild
-															className="text-muted-foreground"
-														>
-															<Link
-																href={`/app/tools/${toolSlug}`}
+																<Link
+																	href={`/app/jobs/${job.id}`}
+																>
+																	View
+																</Link>
+															</Button>
+															<Button
+																size="sm"
+																variant="ghost"
+																asChild
+																className="text-muted-foreground"
 															>
-																<RefreshCwIcon className="h-3 w-3" />
-															</Link>
-														</Button>
-														<Button
-															size="sm"
-															variant="ghost"
-															className="text-destructive opacity-0 group-hover:opacity-100"
-															onClick={() =>
-																deleteJob(
-																	job.id,
-																)
-															}
-														>
-															<Trash2Icon className="h-3 w-3" />
-														</Button>
-													</div>
-												</td>
-											</tr>
-										);
-									})}
-								</tbody>
-							</table>
+																<Link
+																	href={`/app/tools/${toolSlug}`}
+																>
+																	<RefreshCwIcon className="h-3 w-3" />
+																</Link>
+															</Button>
+															<Button
+																size="sm"
+																variant="ghost"
+																className="text-destructive opacity-0 group-hover:opacity-100"
+																onClick={() =>
+																	deleteJob(
+																		job.id,
+																	)
+																}
+															>
+																<Trash2Icon className="h-3 w-3" />
+															</Button>
+														</div>
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
+							{/* Pagination controls */}
+							{(currentPage > 1 || hasMore) && (
+								<div className="flex items-center justify-between border-t pt-3">
+									<p className="text-muted-foreground text-sm">
+										Page {currentPage}
+									</p>
+									<div className="flex gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() =>
+												setCurrentPage((p) =>
+													Math.max(1, p - 1),
+												)
+											}
+											disabled={currentPage === 1}
+											aria-label="Previous page"
+										>
+											<ChevronLeftIcon className="h-4 w-4" />
+											Previous
+										</Button>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() =>
+												setCurrentPage((p) => p + 1)
+											}
+											disabled={!hasMore}
+											aria-label="Next page"
+										>
+											Next
+											<ChevronRightIcon className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							)}
 						</div>
 					)}
 				</CardContent>

@@ -188,4 +188,45 @@ describe("ToolHistoryPage", () => {
 			props: { tool_slug: "news-analyzer" },
 		});
 	});
+
+	it("does not show pagination when on page 1 with no more results", () => {
+		render(
+			<ToolHistoryPage
+				toolSlug="news-analyzer"
+				toolName="News Analyzer"
+			/>,
+		);
+		expect(
+			screen.queryByRole("button", { name: /Previous page/i }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Next page/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows Next page button when hasMore is true", async () => {
+		const { useJobsListPaginated } = await import(
+			"@tools/hooks/use-job-polling"
+		);
+		vi.mocked(useJobsListPaginated).mockReturnValueOnce({
+			// biome-ignore lint/suspicious/noExplicitAny: test stub
+			jobs: mockJobs as any,
+			isLoading: false,
+			hasMore: true,
+			refetch: vi.fn(),
+			error: null,
+		});
+		render(
+			<ToolHistoryPage
+				toolSlug="news-analyzer"
+				toolName="News Analyzer"
+			/>,
+		);
+		expect(
+			screen.getByRole("button", { name: /Next page/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Previous page/i }),
+		).toBeDisabled();
+	});
 });
