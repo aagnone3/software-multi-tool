@@ -222,12 +222,12 @@ Input to process:
 ### Step 3: Call executePrompt
 
 ```typescript
-import { executePrompt, CLAUDE_MODELS } from "@repo/agent-sdk";
+import { executePrompt } from "@repo/agent-sdk";
 
 const result = await executePrompt(
   `${EXTRACTION_PROMPT}\n\n${inputText}`,
   {
-    model: CLAUDE_MODELS.HAIKU_3_5, // claude-haiku-4-5-20251001
+    model: "claude-haiku-4-5-20251001", // Haiku tier — fast, low cost
     maxTokens: 4096,
     temperature: 0.1,
     system: "You are a precise extraction assistant. Output only valid JSON.",
@@ -297,7 +297,7 @@ Your API key tier may not have access to the requested model. Use a model availa
 
 ```typescript
 // Instead of Sonnet/Opus, try:
-model: CLAUDE_MODELS.HAIKU_3_5
+model: "claude-haiku-4-5-20251001"
 ```
 
 ### JSON parsing errors
