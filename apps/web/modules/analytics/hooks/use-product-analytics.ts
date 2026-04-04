@@ -910,6 +910,46 @@ type ProductEvent =
 	| {
 			name: "speaker_separation_transcript_downloaded";
 			props: { format: "json" | "txt" };
+	  }
+	| {
+			name: "credit_runway_banner_upgrade_clicked";
+			props: { plan: "starter" | "free" };
+	  }
+	| {
+			name: "credit_runway_banner_compare_plans_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "credit_runway_banner_buy_credits_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "credit_runway_banner_dismissed";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "low_credits_warning_upgrade_clicked";
+			props: { plan: "starter" | "free" };
+	  }
+	| {
+			name: "low_credits_warning_compare_plans_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "low_credits_warning_buy_credits_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "credit_balance_card_upgrade_clicked";
+			props: { plan: "starter" | "free" };
+	  }
+	| {
+			name: "credit_balance_card_compare_plans_clicked";
+			props: Record<string, never>;
+	  }
+	| {
+			name: "credit_balance_card_view_usage_clicked";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };

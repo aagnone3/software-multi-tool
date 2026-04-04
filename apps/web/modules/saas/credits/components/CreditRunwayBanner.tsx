@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
@@ -43,6 +44,7 @@ export function CreditRunwayBanner() {
 	} = useCreditsBalance();
 	const { jobs, isLoading: jobsLoading } = useJobsList(undefined, 50);
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const [dismissed, setDismissed] = useState(true); // start dismissed until hydrated
 
 	useEffect(() => {
@@ -103,6 +105,7 @@ export function CreditRunwayBanner() {
 	const handleDismiss = () => {
 		dismissFor24Hours();
 		setDismissed(true);
+		track({ name: "credit_runway_banner_dismissed", props: {} });
 	};
 
 	return (
@@ -135,7 +138,17 @@ export function CreditRunwayBanner() {
 							variant="outline"
 							className="border-orange-400 text-orange-800 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-900 h-7 px-3"
 						>
-							<Link href={billingHref}>Upgrade to Pro</Link>
+							<Link
+								href={billingHref}
+								onClick={() =>
+									track({
+										name: "credit_runway_banner_upgrade_clicked",
+										props: { plan: "starter" },
+									})
+								}
+							>
+								Upgrade to Pro
+							</Link>
 						</Button>
 						<Button
 							asChild
@@ -143,7 +156,15 @@ export function CreditRunwayBanner() {
 							variant="ghost"
 							className="text-orange-700 dark:text-orange-300 h-7 px-2"
 						>
-							<Link href="/pricing#pricing-plan-pro">
+							<Link
+								href="/pricing#pricing-plan-pro"
+								onClick={() =>
+									track({
+										name: "credit_runway_banner_compare_plans_clicked",
+										props: {},
+									})
+								}
+							>
 								Compare plans
 							</Link>
 						</Button>
@@ -155,7 +176,17 @@ export function CreditRunwayBanner() {
 						variant="outline"
 						className="border-orange-400 text-orange-800 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-900 h-7 px-3"
 					>
-						<Link href={billingHref}>Buy Credits</Link>
+						<Link
+							href={billingHref}
+							onClick={() =>
+								track({
+									name: "credit_runway_banner_buy_credits_clicked",
+									props: {},
+								})
+							}
+						>
+							Buy Credits
+						</Link>
 					</Button>
 				)}
 				<button

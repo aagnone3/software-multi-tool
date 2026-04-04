@@ -1,10 +1,23 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React, { type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("next/link", () => ({
-	default: ({ children, href }: { children: ReactNode; href: string }) =>
-		React.createElement("a", { href }, children),
+	default: ({
+		children,
+		href,
+		onClick,
+	}: {
+		children: ReactNode;
+		href: string;
+		onClick?: React.MouseEventHandler;
+	}) => React.createElement("a", { href, onClick }, children),
 }));
 
 const mockUseCreditsBalance = vi.fn();
@@ -50,8 +63,13 @@ vi.mock("@ui/components/alert", () => {
 vi.mock("@ui/components/button", () => {
 	const React = require("react");
 	return {
-		Button: ({ children }: { children: ReactNode; asChild?: boolean }) =>
-			React.createElement("div", { "data-testid": "button" }, children),
+		Button: ({
+			children,
+			asChild: _asChild,
+		}: {
+			children: ReactNode;
+			asChild?: boolean;
+		}) => React.createElement("div", { "data-testid": "button" }, children),
 	};
 });
 
@@ -188,5 +206,39 @@ describe("LowCreditsWarning", () => {
 		const linkTexts = links.map((l) => l.textContent);
 		expect(linkTexts).toContain("Buy Credits");
 		expect(linkTexts).toContain("Upgrade Plan");
+	});
+
+	it("tracks upgrade click for Starter plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance(10, 100, "Starter"),
+			isLoading: false,
+			isStarterPlan: true,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		const user = userEvent.setup({ delay: null });
+		render(<LowCreditsWarning />);
+		const link = screen.getByRole("link", { name: /Upgrade to Pro/i });
+		await user.click(link);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "low_credits_warning_upgrade_clicked",
+			props: { plan: "starter" },
+		});
+	});
+
+	it("tracks buy credits click for free plan", async () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: makeBalance(10, 100),
+			isLoading: false,
+			isStarterPlan: false,
+		});
+		mockUseActiveOrganization.mockReturnValue({ activeOrganization: null });
+		const user = userEvent.setup({ delay: null });
+		render(<LowCreditsWarning />);
+		const link = screen.getByRole("link", { name: /Buy Credits/i });
+		await user.click(link);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "low_credits_warning_buy_credits_clicked",
+			props: {},
+		});
 	});
 });
