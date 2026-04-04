@@ -839,6 +839,8 @@ type ProductEvent =
 			};
 	  }
 	| { name: "file_delete_confirmed"; props: { file_id: string } }
+	| { name: "file_downloaded"; props: { file_id: string } }
+	| { name: "file_delete_initiated"; props: { file_id: string } }
 	| { name: "page_not_found"; props: { path: string } }
 	| {
 			name: "tool_recent_runs_view_all_clicked";
