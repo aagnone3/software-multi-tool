@@ -990,6 +990,14 @@ type ProductEvent =
 				cta: "try_free" | "see_plans";
 				tool: string;
 			};
+	  }
+	| {
+			name: "pricing_faq_item_toggled";
+			props: { question: string; open: boolean };
+	  }
+	| {
+			name: "news_analyzer_input_mode_switched";
+			props: { mode: "url" | "text" };
 	  };
 
 export type { ProductEvent };

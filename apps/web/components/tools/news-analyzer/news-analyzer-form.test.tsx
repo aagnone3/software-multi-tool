@@ -4,6 +4,11 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { NewsAnalyzerForm } from "./news-analyzer-form";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 describe("NewsAnalyzerForm", () => {
 	it("renders in URL mode by default", () => {
 		render(<NewsAnalyzerForm onSubmit={vi.fn()} isLoading={false} />);
@@ -85,5 +90,30 @@ describe("NewsAnalyzerForm", () => {
 		await user.type(screen.getByLabelText("Article Text"), "Hello");
 
 		expect(screen.getByText(/5 characters/i)).toBeInTheDocument();
+	});
+
+	it("tracks mode switch to text", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<NewsAnalyzerForm onSubmit={vi.fn()} isLoading={false} />);
+
+		await user.click(screen.getByRole("button", { name: /Paste Text/i }));
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "news_analyzer_input_mode_switched",
+			props: { mode: "text" },
+		});
+	});
+
+	it("tracks mode switch back to url", async () => {
+		const user = userEvent.setup({ delay: null });
+		render(<NewsAnalyzerForm onSubmit={vi.fn()} isLoading={false} />);
+
+		await user.click(screen.getByRole("button", { name: /Paste Text/i }));
+		await user.click(screen.getByRole("button", { name: /URL/i }));
+
+		expect(mockTrack).toHaveBeenLastCalledWith({
+			name: "news_analyzer_input_mode_switched",
+			props: { mode: "url" },
+		});
 	});
 });
