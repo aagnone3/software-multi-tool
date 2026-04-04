@@ -811,7 +811,15 @@ type ProductEvent =
 			};
 	  }
 	| { name: "file_delete_confirmed"; props: { file_id: string } }
-	| { name: "page_not_found"; props: { path: string } };
+	| { name: "page_not_found"; props: { path: string } }
+	| {
+			name: "tool_recent_runs_view_all_clicked";
+			props: { tool_slug: string };
+	  }
+	| {
+			name: "tool_recent_runs_job_clicked";
+			props: { tool_slug: string; job_id: string; job_status: string };
+	  };
 
 export type { ProductEvent };
 
