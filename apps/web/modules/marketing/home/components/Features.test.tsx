@@ -58,4 +58,17 @@ describe("Features", () => {
 			props: expect.objectContaining({ tool_id: expect.any(String) }),
 		});
 	});
+
+	it("all tool links point to marketing pages (/tools/...), not authenticated routes (/app/tools/...)", () => {
+		render(<Features />);
+		const links = screen.getAllByText("Try it →");
+		for (const link of links) {
+			const href =
+				link.getAttribute("href") ??
+				link.closest("a")?.getAttribute("href") ??
+				"";
+			expect(href).toMatch(/^\/tools\//);
+			expect(href).not.toMatch(/^\/app\/tools\//);
+		}
+	});
 });

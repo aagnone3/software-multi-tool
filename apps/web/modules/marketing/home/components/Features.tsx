@@ -31,7 +31,7 @@ const tools: Tool[] = [
 		description:
 			"Analyze news articles for bias, sentiment, and key themes. Understand what's really being said beneath the headlines.",
 		icon: NewspaperIcon,
-		href: "/app/tools/news-analyzer",
+		href: "/tools/news-analyzer",
 	},
 	{
 		id: "contract-analyzer",
@@ -39,7 +39,7 @@ const tools: Tool[] = [
 		description:
 			"Upload any contract and instantly surface key terms, risk clauses, and obligations. No legal degree required.",
 		icon: FileTextIcon,
-		href: "/app/tools/contract-analyzer",
+		href: "/tools/contract-analyzer",
 	},
 	{
 		id: "invoice-processor",
@@ -47,7 +47,7 @@ const tools: Tool[] = [
 		description:
 			"Extract vendor, amount, line items, and dates from invoices automatically. Export clean data for your accounting workflow.",
 		icon: ReceiptIcon,
-		href: "/app/tools/invoice-processor",
+		href: "/tools/invoice-processor",
 	},
 	{
 		id: "meeting-summarizer",
@@ -55,7 +55,7 @@ const tools: Tool[] = [
 		description:
 			"Paste meeting notes or upload a transcript and get a structured summary with action items and key decisions.",
 		icon: ClipboardListIcon,
-		href: "/app/tools/meeting-summarizer",
+		href: "/tools/meeting-summarizer",
 	},
 	{
 		id: "feedback-analyzer",
@@ -63,7 +63,7 @@ const tools: Tool[] = [
 		description:
 			"Analyze reviews and survey responses at scale. Surface sentiment trends, top complaints, and praise patterns.",
 		icon: MessageSquareTextIcon,
-		href: "/app/tools/feedback-analyzer",
+		href: "/tools/feedback-analyzer",
 	},
 	{
 		id: "expense-categorizer",
@@ -71,7 +71,7 @@ const tools: Tool[] = [
 		description:
 			"Upload a CSV or spreadsheet of expenses and get them automatically categorized for tax or accounting purposes.",
 		icon: WalletIcon,
-		href: "/app/tools/expense-categorizer",
+		href: "/tools/expense-categorizer",
 	},
 	{
 		id: "speaker-separation",
@@ -79,7 +79,7 @@ const tools: Tool[] = [
 		description:
 			"Upload an audio file and identify who said what, with timestamps and a full diarized transcript.",
 		icon: SeparatorHorizontalIcon,
-		href: "/app/tools/speaker-separation",
+		href: "/tools/speaker-separation",
 	},
 	{
 		id: "bg-remover",
@@ -87,7 +87,7 @@ const tools: Tool[] = [
 		description:
 			"Remove image backgrounds instantly with AI. Perfect for product photos, headshots, and marketing assets.",
 		icon: ImageMinusIcon,
-		href: "/app/tools/bg-remover",
+		href: "/tools/bg-remover",
 		comingSoon: true,
 	},
 ];
