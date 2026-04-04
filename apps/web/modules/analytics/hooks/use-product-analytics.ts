@@ -840,6 +840,15 @@ type ProductEvent =
 				direction: "prev" | "next";
 				tip_index: number;
 			};
+	  }
+	| { name: "credits_by_tool_browse_clicked"; props: Record<string, never> }
+	| {
+			name: "credits_by_tool_tool_clicked";
+			props: { tool_slug: string; credits: number; pct: number };
+	  }
+	| {
+			name: "credits_by_tool_usage_link_clicked";
+			props: Record<string, never>;
 	  };
 
 export type { ProductEvent };

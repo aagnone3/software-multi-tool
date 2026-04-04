@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useTools } from "@saas/tools/hooks/use-tools";
 import { Button } from "@ui/components/button";
 import {
@@ -38,6 +39,7 @@ export function CreditsByToolChart({
 }: CreditsByToolChartProps) {
 	const { byTool, totalUsed, isLoading } = useUsageStats();
 	const { enabledTools } = useTools();
+	const { track } = useProductAnalytics();
 
 	const toolEntries = useMemo(() => {
 		if (!byTool.length) {
@@ -128,7 +130,15 @@ export function CreditsByToolChart({
 							className="mt-3"
 							asChild
 						>
-							<Link href="/app/tools">
+							<Link
+								href="/app/tools"
+								onClick={() =>
+									track({
+										name: "credits_by_tool_browse_clicked",
+										props: {},
+									})
+								}
+							>
 								Browse tools
 								<ChevronRightIcon className="size-4 ml-1" />
 							</Link>
@@ -181,6 +191,16 @@ export function CreditsByToolChart({
 									<Link
 										href={`/app/tools/${entry.slug}`}
 										className="text-sm truncate hover:text-primary transition-colors"
+										onClick={() =>
+											track({
+												name: "credits_by_tool_tool_clicked",
+												props: {
+													tool_slug: entry.slug,
+													credits: entry.credits,
+													pct: entry.pct,
+												},
+											})
+										}
 									>
 										{entry.name}
 									</Link>
@@ -209,7 +229,15 @@ export function CreditsByToolChart({
 						className="w-full text-muted-foreground hover:text-foreground"
 						asChild
 					>
-						<Link href="/app/settings/usage">
+						<Link
+							href="/app/settings/usage"
+							onClick={() =>
+								track({
+									name: "credits_by_tool_usage_link_clicked",
+									props: {},
+								})
+							}
+						>
 							View detailed usage
 							<ChevronRightIcon className="size-4 ml-auto" />
 						</Link>

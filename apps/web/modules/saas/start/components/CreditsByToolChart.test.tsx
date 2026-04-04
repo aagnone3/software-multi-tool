@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreditsByToolChart } from "./CreditsByToolChart";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 vi.mock("@saas/tools/hooks/use-tools", () => ({
 	useTools: () => ({
@@ -21,10 +27,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		children,
 		href,
+		onClick,
 	}: {
 		children: React.ReactNode;
 		href: string;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 describe("CreditsByToolChart", () => {
@@ -112,5 +124,53 @@ describe("CreditsByToolChart", () => {
 		render(<CreditsByToolChart />);
 		const link = screen.getByRole("link", { name: "News Analyzer" });
 		expect(link).toHaveAttribute("href", "/app/tools/news-analyzer");
+	});
+
+	it("tracks browse tools click in empty state", async () => {
+		mockUseUsageStats.mockReturnValue({
+			byTool: [],
+			totalUsed: 0,
+			isLoading: false,
+		});
+		render(<CreditsByToolChart />);
+		await userEvent.click(
+			screen.getByRole("link", { name: /browse tools/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credits_by_tool_browse_clicked",
+			props: {},
+		});
+	});
+
+	it("tracks tool link click", async () => {
+		mockUseUsageStats.mockReturnValue({
+			byTool: [{ toolSlug: "news-analyzer", credits: 75, count: 5 }],
+			totalUsed: 100,
+			isLoading: false,
+		});
+		render(<CreditsByToolChart />);
+		await userEvent.click(
+			screen.getByRole("link", { name: "News Analyzer" }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credits_by_tool_tool_clicked",
+			props: { tool_slug: "news-analyzer", credits: 75, pct: 75 },
+		});
+	});
+
+	it("tracks view detailed usage click", async () => {
+		mockUseUsageStats.mockReturnValue({
+			byTool: [{ toolSlug: "news-analyzer", credits: 100, count: 5 }],
+			totalUsed: 100,
+			isLoading: false,
+		});
+		render(<CreditsByToolChart />);
+		await userEvent.click(
+			screen.getByRole("link", { name: /view detailed usage/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "credits_by_tool_usage_link_clicked",
+			props: {},
+		});
 	});
 });
