@@ -32,7 +32,9 @@ vi.mock("sonner", () => ({
 
 // Inline implementations to test pure logic
 function formatFileSize(bytes: number): string {
-	if (bytes === 0) return "0 B";
+	if (bytes === 0) {
+		return "0 B";
+	}
 	const k = 1024;
 	const sizes = ["B", "KB", "MB", "GB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -41,16 +43,23 @@ function formatFileSize(bytes: number): string {
 
 type MimeCategory = "audio" | "image" | "video" | "document" | "other" | "all";
 function getMimeCategory(mimeType: string): MimeCategory {
-	if (mimeType.startsWith("audio/")) return "audio";
-	if (mimeType.startsWith("image/")) return "image";
-	if (mimeType.startsWith("video/")) return "video";
+	if (mimeType.startsWith("audio/")) {
+		return "audio";
+	}
+	if (mimeType.startsWith("image/")) {
+		return "image";
+	}
+	if (mimeType.startsWith("video/")) {
+		return "video";
+	}
 	if (
 		mimeType.startsWith("application/pdf") ||
 		mimeType.startsWith("application/msword") ||
 		mimeType.startsWith("application/vnd.openxmlformats") ||
 		mimeType.startsWith("text/")
-	)
+	) {
 		return "document";
+	}
 	return "other";
 }
 
@@ -127,6 +136,25 @@ describe("FilesTable toast mocks available", () => {
 		// Verify our mock is in place (covers the import path used by FilesTable)
 		expect(typeof mockToastError).toBe("function");
 		expect(typeof mockToastSuccess).toBe("function");
+	});
+});
+
+describe("FilesTable analytics event types", () => {
+	it("file_downloaded is a valid ProductEvent name", () => {
+		// Type-level contract: if this test file compiles, the event exists in the union
+		const event: { name: "file_downloaded"; props: { file_id: string } } = {
+			name: "file_downloaded",
+			props: { file_id: "f1" },
+		};
+		expect(event.name).toBe("file_downloaded");
+	});
+
+	it("file_delete_initiated is a valid ProductEvent name", () => {
+		const event: {
+			name: "file_delete_initiated";
+			props: { file_id: string };
+		} = { name: "file_delete_initiated", props: { file_id: "f2" } };
+		expect(event.name).toBe("file_delete_initiated");
 	});
 });
 

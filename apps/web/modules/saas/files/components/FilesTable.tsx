@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -99,6 +100,7 @@ function getFileIcon(mimeType: string) {
 }
 
 export function FilesTable(_props: FilesTableProps) {
+	const { track } = useProductAnalytics();
 	const [search, setSearch] = useState("");
 	const [mimeCategory, setMimeCategory] = useState<MimeCategory>("all");
 	const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -150,6 +152,7 @@ export function FilesTable(_props: FilesTableProps) {
 				fileId,
 			});
 			window.open(downloadUrl, "_blank");
+			track({ name: "file_downloaded", props: { file_id: fileId } });
 		} catch {
 			toast.error("Failed to download file. Please try again.");
 		}
@@ -358,13 +361,20 @@ export function FilesTable(_props: FilesTableProps) {
 														Download
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() =>
+														onClick={() => {
 															setFileToDelete({
 																id: file.id,
 																filename:
 																	file.filename,
-															})
-														}
+															});
+															track({
+																name: "file_delete_initiated",
+																props: {
+																	file_id:
+																		file.id,
+																},
+															});
+														}}
 														className="text-destructive"
 													>
 														<TrashIcon className="mr-2 size-4" />
