@@ -950,6 +950,14 @@ type ProductEvent =
 	| {
 			name: "credit_balance_card_view_usage_clicked";
 			props: Record<string, never>;
+	  }
+	| {
+			name: "table_of_contents_item_clicked";
+			props: { slug: string; content: string; level: number };
+	  }
+	| {
+			name: "transaction_history_page_changed";
+			props: { page: number; direction: "next" | "previous" };
 	  };
 
 export type { ProductEvent };

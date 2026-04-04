@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -82,6 +83,7 @@ function getTransactionBadgeStatus(
 
 export function TransactionHistory({ className }: TransactionHistoryProps) {
 	const [page, setPage] = useState(0);
+	const { track } = useProductAnalytics();
 
 	const { transactions, pagination, isLoading } = useCreditsHistory({
 		limit: PAGE_SIZE,
@@ -178,7 +180,16 @@ export function TransactionHistory({ className }: TransactionHistoryProps) {
 									variant="outline"
 									size="sm"
 									disabled={page === 0}
-									onClick={() => setPage((p) => p - 1)}
+									onClick={() => {
+										track({
+											name: "transaction_history_page_changed",
+											props: {
+												page: page - 1,
+												direction: "previous",
+											},
+										});
+										setPage((p) => p - 1);
+									}}
 								>
 									<ChevronLeftIcon className="size-4 mr-1" />
 									Previous
@@ -187,7 +198,16 @@ export function TransactionHistory({ className }: TransactionHistoryProps) {
 									variant="outline"
 									size="sm"
 									disabled={!pagination?.hasMore}
-									onClick={() => setPage((p) => p + 1)}
+									onClick={() => {
+										track({
+											name: "transaction_history_page_changed",
+											props: {
+												page: page + 1,
+												direction: "next",
+											},
+										});
+										setPage((p) => p + 1);
+									}}
 								>
 									Next
 									<ChevronRightIcon className="size-4 ml-1" />
