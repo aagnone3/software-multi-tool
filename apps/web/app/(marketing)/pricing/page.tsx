@@ -68,7 +68,7 @@ const breadcrumbJsonLd = {
 const faqs = [
 	{
 		q: "Can I try it for free?",
-		a: "Yes. Every new account gets free credits to try any tool. No credit card required to sign up.",
+		a: "Yes. Every new account gets 10 free credits to try any tool. No credit card required to sign up.",
 	},
 	{
 		q: "What is a credit?",
@@ -156,7 +156,7 @@ export default function PricingPage() {
 						{[
 							{
 								icon: ZapIcon,
-								text: "Free credits on signup",
+								text: "10 free credits on signup",
 							},
 							{
 								icon: ShieldCheckIcon,

@@ -22,10 +22,14 @@ export function ExitIntentModal() {
 
 	useEffect(() => {
 		const suppressed = localStorage.getItem(STORAGE_KEY);
-		if (suppressed && Date.now() < Number(suppressed)) return;
+		if (suppressed && Date.now() < Number(suppressed)) {
+			return;
+		}
 
 		const handleMouseLeave = (e: MouseEvent) => {
-			if (triggered.current) return;
+			if (triggered.current) {
+				return;
+			}
 			if (e.clientY <= 10) {
 				triggered.current = true;
 				setVisible(true);
@@ -38,7 +42,9 @@ export function ExitIntentModal() {
 			document.removeEventListener("mouseleave", handleMouseLeave);
 	}, [track]);
 
-	if (!visible) return null;
+	if (!visible) {
+		return null;
+	}
 
 	return (
 		<div
@@ -47,10 +53,14 @@ export function ExitIntentModal() {
 			aria-label="Special offer"
 			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
 			onClick={(e) => {
-				if (e.target === e.currentTarget) dismiss();
+				if (e.target === e.currentTarget) {
+					dismiss();
+				}
 			}}
 			onKeyDown={(e) => {
-				if (e.key === "Escape") dismiss();
+				if (e.key === "Escape") {
+					dismiss();
+				}
 			}}
 		>
 			<div className="relative w-full max-w-md rounded-2xl bg-background p-8 shadow-2xl">
@@ -90,14 +100,14 @@ export function ExitIntentModal() {
 						}}
 						className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm shadow hover:bg-primary/90 transition-colors"
 					>
-						Claim my free credits →
+						Claim my 10 free credits →
 					</Link>
 					<button
 						type="button"
 						onClick={dismiss}
 						className="mt-3 w-full text-muted-foreground text-xs hover:text-foreground transition-colors"
 					>
-						No thanks, I don&apos;t want free credits
+						No thanks, I don&apos;t want 10 free credits
 					</button>
 				</div>
 			</div>

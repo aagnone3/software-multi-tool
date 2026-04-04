@@ -72,7 +72,7 @@ describe("ExitIntentModal", () => {
 				new MouseEvent("mouseleave", { bubbles: true, clientY: 5 }),
 			);
 		});
-		fireEvent.click(screen.getByText(/Claim my free credits/i));
+		fireEvent.click(screen.getByText(/Claim my 10 free credits/i));
 		expect(mockTrack).toHaveBeenCalledWith({
 			name: "marketing_exit_intent_cta_clicked",
 			props: {},

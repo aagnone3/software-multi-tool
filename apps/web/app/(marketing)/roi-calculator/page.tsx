@@ -417,8 +417,8 @@ export default function RoiCalculatorPage() {
 											Start saving time today
 										</Link>
 										<p className="mt-3 text-foreground/40 text-xs">
-											Includes free credits to try every
-											tool
+											Includes 10 free credits to try
+											every tool
 										</p>
 									</div>
 
