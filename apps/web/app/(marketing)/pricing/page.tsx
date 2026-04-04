@@ -1,4 +1,5 @@
 import { PricingSection } from "@marketing/home/components/PricingSection";
+import { PricingPageTracker } from "@marketing/shared/components/PricingPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { Button } from "@ui/components/button";
@@ -135,6 +136,7 @@ export default function PricingPage() {
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
 			/>
+			<PricingPageTracker />
 			<main>
 				{/* Hero */}
 				<section className="container pt-32 pb-8 text-center md:pt-40">
