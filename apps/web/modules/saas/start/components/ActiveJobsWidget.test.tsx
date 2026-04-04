@@ -188,3 +188,21 @@ describe("ActiveJobsWidget analytics", () => {
 		});
 	});
 });
+
+describe("ActiveJobsWidget view link URL", () => {
+	it("shows View link for any completed tool using universal job route", () => {
+		const completedJob = makeJob({
+			id: "job-abc",
+			toolSlug: "expense-categorizer",
+			status: "COMPLETED",
+			completedAt: new Date().toISOString(),
+		});
+		mockUseRecentJobs.mockReturnValue({
+			jobs: [completedJob],
+			isLoading: false,
+		});
+		render(<ActiveJobsWidget />);
+		const viewLink = screen.getByRole("link", { name: /view/i });
+		expect(viewLink).toHaveAttribute("href", "/app/jobs/job-abc");
+	});
+});
