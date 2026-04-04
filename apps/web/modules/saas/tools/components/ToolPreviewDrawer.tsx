@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Button } from "@ui/components/button";
@@ -30,6 +31,7 @@ interface ToolPreviewDrawerProps {
 
 function RecentRunsPreview({ toolSlug }: { toolSlug: string }) {
 	const { jobs, isLoading } = useJobsList(toolSlug, 3);
+	const { track } = useProductAnalytics();
 
 	if (isLoading) {
 		return (
@@ -67,6 +69,12 @@ function RecentRunsPreview({ toolSlug }: { toolSlug: string }) {
 					<Link
 						href={`/app/jobs/${job.id}`}
 						className="text-xs text-primary hover:underline"
+						onClick={() =>
+							track({
+								name: "tool_preview_drawer_recent_run_view_clicked",
+								props: { tool_slug: toolSlug, job_id: job.id },
+							})
+						}
 					>
 						View
 					</Link>
@@ -83,6 +91,7 @@ export function ToolPreviewDrawer({
 	const tool = toolSlug
 		? config.tools.registry.find((t) => t.slug === toolSlug)
 		: null;
+	const { track } = useProductAnalytics();
 
 	return (
 		<Sheet open={!!toolSlug} onOpenChange={(open) => !open && onClose()}>
@@ -139,7 +148,18 @@ export function ToolPreviewDrawer({
 							{/* Actions */}
 							<div className="flex gap-2">
 								<Button asChild className="flex-1">
-									<Link href={`/app/tools/${tool.slug}`}>
+									<Link
+										href={`/app/tools/${tool.slug}`}
+										onClick={() =>
+											track({
+												name: "tool_preview_drawer_open_tool_clicked",
+												props: {
+													tool_slug: tool.slug,
+													new_tab: false,
+												},
+											})
+										}
+									>
 										Open Tool
 									</Link>
 								</Button>
@@ -152,6 +172,15 @@ export function ToolPreviewDrawer({
 									<Link
 										href={`/app/tools/${tool.slug}`}
 										target="_blank"
+										onClick={() =>
+											track({
+												name: "tool_preview_drawer_open_tool_clicked",
+												props: {
+													tool_slug: tool.slug,
+													new_tab: true,
+												},
+											})
+										}
 									>
 										<ExternalLinkIcon className="size-4" />
 									</Link>

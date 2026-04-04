@@ -4,6 +4,11 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolPreviewDrawer } from "./ToolPreviewDrawer";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobsList: () => ({ jobs: [], isLoading: false }),
 }));
@@ -12,10 +17,16 @@ vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: () => void;
+	}) => (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	),
 }));
 
 const mockTool = config.tools.registry[0] ?? {
@@ -90,5 +101,26 @@ describe("ToolPreviewDrawer", () => {
 		}
 		// onClose is wired to onOpenChange — just verifying the component renders without error
 		expect(screen.getByText(mockTool.name)).toBeInTheDocument();
+	});
+
+	it("tracks open tool click", () => {
+		render(
+			<ToolPreviewDrawer toolSlug={mockTool.slug} onClose={() => {}} />,
+		);
+		const link = screen
+			.getAllByRole("link")
+			.find(
+				(a) =>
+					a.getAttribute("href") === `/app/tools/${mockTool.slug}` &&
+					a.textContent === "Open Tool",
+			);
+		expect(link).toBeDefined();
+		if (link) {
+			fireEvent.click(link);
+		}
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_preview_drawer_open_tool_clicked",
+			props: { tool_slug: mockTool.slug, new_tab: false },
+		});
 	});
 });

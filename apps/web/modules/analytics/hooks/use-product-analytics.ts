@@ -425,6 +425,14 @@ type ProductEvent =
 			props: { tool_slug: string; tool_name: string };
 	  }
 	| {
+			name: "tool_preview_drawer_open_tool_clicked";
+			props: { tool_slug: string; new_tab: boolean };
+	  }
+	| {
+			name: "tool_preview_drawer_recent_run_view_clicked";
+			props: { tool_slug: string; job_id: string };
+	  }
+	| {
 			name: "tools_grid_searched";
 			props: { query: string };
 	  }
