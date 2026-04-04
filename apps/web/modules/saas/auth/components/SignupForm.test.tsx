@@ -38,6 +38,12 @@ vi.mock("@repo/config", () => ({
 		},
 		payments: { plans: {} },
 	},
+	getPlanCredits: (planId: string) => {
+		if (planId === "free") {
+			return { included: 10 };
+		}
+		return undefined;
+	},
 }));
 
 // Mock analytics feature flags
@@ -88,6 +94,13 @@ describe("SignupForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: /create free account/i }),
+		).toBeInTheDocument();
+	});
+
+	it("shows specific free credit count in subheadline", () => {
+		render(<SignupForm />);
+		expect(
+			screen.getByText(/10 free credits included/i),
 		).toBeInTheDocument();
 	});
 

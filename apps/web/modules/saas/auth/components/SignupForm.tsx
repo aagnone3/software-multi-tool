@@ -4,7 +4,7 @@ import { useIsFeatureEnabled } from "@analytics";
 import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@repo/auth/client";
-import { config } from "@repo/config";
+import { config, getPlanCredits } from "@repo/config";
 import { useAuthErrorMessages } from "@saas/auth/hooks/errors-messages";
 import { OrganizationInvitationAlert } from "@saas/organizations/components/OrganizationInvitationAlert";
 import { Alert, AlertDescription, AlertTitle } from "@ui/components/alert";
@@ -44,6 +44,8 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const freeCredits = getPlanCredits("free")?.included ?? 10;
 
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const router = useRouter();
@@ -150,7 +152,8 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				Start saving hours every week
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
-				Free credits included — no card required. Cancel anytime.
+				{freeCredits} free credits included — no card required. Cancel
+				anytime.
 			</p>
 
 			{form.formState.isSubmitSuccessful && !invitationOnlyMode ? (
