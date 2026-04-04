@@ -998,6 +998,14 @@ type ProductEvent =
 	| {
 			name: "news_analyzer_input_mode_switched";
 			props: { mode: "url" | "text" };
+	  }
+	| {
+			name: "smart_output_view_switched";
+			props: { mode: "smart" | "raw"; tool_slug: string };
+	  }
+	| {
+			name: "smart_output_raw_copied";
+			props: { tool_slug: string };
 	  };
 
 export type { ProductEvent };

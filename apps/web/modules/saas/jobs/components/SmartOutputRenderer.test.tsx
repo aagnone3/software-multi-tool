@@ -3,6 +3,11 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { SmartOutputRenderer } from "./SmartOutputRenderer";
 
+const mockTrack = vi.hoisted(() => vi.fn());
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 // Mock clipboard
 Object.defineProperty(navigator, "clipboard", {
 	value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -88,5 +93,23 @@ describe("SmartOutputRenderer", () => {
 		expect(
 			screen.getByRole("button", { name: /show less/i }),
 		).toBeInTheDocument();
+	});
+
+	it("fires smart_output_raw_copied when Copy is clicked on raw output", async () => {
+		mockTrack.mockClear();
+		render(
+			<SmartOutputRenderer
+				output="plain text"
+				toolSlug="invoice-processor"
+			/>,
+		);
+		const copyBtn = screen.getByRole("button", { name: /copy/i });
+		fireEvent.click(copyBtn);
+		// Wait for async clipboard write
+		await Promise.resolve();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "smart_output_raw_copied",
+			props: { tool_slug: "invoice-processor" },
+		});
 	});
 });

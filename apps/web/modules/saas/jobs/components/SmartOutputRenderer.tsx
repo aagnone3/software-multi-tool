@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
@@ -223,9 +224,10 @@ type ViewMode = "smart" | "raw";
 
 export function SmartOutputRenderer({
 	output,
-	toolSlug: _toolSlug,
+	toolSlug,
 }: SmartOutputRendererProps) {
 	const [view, setView] = useState<ViewMode>("smart");
+	const { track } = useProductAnalytics();
 
 	const rawText = (() => {
 		try {
@@ -248,7 +250,14 @@ export function SmartOutputRenderer({
 			{canShowSmart ? (
 				<Tabs
 					value={view}
-					onValueChange={(v) => setView(v as ViewMode)}
+					onValueChange={(v) => {
+						const mode = v as ViewMode;
+						setView(mode);
+						track({
+							name: "smart_output_view_switched",
+							props: { mode, tool_slug: toolSlug ?? "unknown" },
+						});
+					}}
 				>
 					<TabsList className="h-8">
 						<TabsTrigger value="smart" className="text-xs gap-1.5">
@@ -281,18 +290,19 @@ export function SmartOutputRenderer({
 						) : null}
 					</TabsContent>
 					<TabsContent value="raw" className="mt-2">
-						<RawOutput text={rawText} />
+						<RawOutput text={rawText} toolSlug={toolSlug} />
 					</TabsContent>
 				</Tabs>
 			) : (
-				<RawOutput text={rawText} />
+				<RawOutput text={rawText} toolSlug={toolSlug} />
 			)}
 		</div>
 	);
 }
 
-function RawOutput({ text }: { text: string }) {
+function RawOutput({ text, toolSlug }: { text: string; toolSlug?: string }) {
 	const [copied, setCopied] = useState(false);
+	const { track } = useProductAnalytics();
 	return (
 		<div className="relative">
 			<Button
@@ -303,6 +313,10 @@ function RawOutput({ text }: { text: string }) {
 					await navigator.clipboard.writeText(text);
 					setCopied(true);
 					setTimeout(() => setCopied(false), 2000);
+					track({
+						name: "smart_output_raw_copied",
+						props: { tool_slug: toolSlug ?? "unknown" },
+					});
 				}}
 			>
 				{copied ? "Copied!" : "Copy"}
