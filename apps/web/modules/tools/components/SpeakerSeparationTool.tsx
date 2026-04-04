@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
 	SpeakerSegment,
@@ -474,6 +475,7 @@ export function SpeakerSeparationTool() {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [_jobError, setJobError] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -497,6 +499,10 @@ export function SpeakerSeparationTool() {
 
 			setJobId(response.job.id);
 			setAudioFile(values.audioFile);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "speaker-separation" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			const message =
@@ -509,6 +515,10 @@ export function SpeakerSeparationTool() {
 	const handleComplete = (_output: Record<string, unknown>) => {
 		// Navigate to the detail page when analysis completes
 		if (jobId) {
+			track({
+				name: "tool_job_completed",
+				props: { tool_slug: "speaker-separation", job_id: jobId },
+			});
 			router.push(`/app/tools/speaker-separation/${jobId}`);
 		}
 	};

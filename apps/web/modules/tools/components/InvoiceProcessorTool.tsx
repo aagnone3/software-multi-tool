@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { useMutation } from "@tanstack/react-query";
@@ -189,6 +190,7 @@ export function InvoiceProcessorTool() {
 	const [isProcessingFile, setIsProcessingFile] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
+	const { track } = useProductAnalytics();
 	const getUploadUrlMutation = useMutation(
 		orpc.invoiceProcessor.uploadUrl.mutationOptions(),
 	);
@@ -311,6 +313,10 @@ export function InvoiceProcessorTool() {
 			});
 
 			setJobId(response.job.id);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "invoice-processor" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			const message =
@@ -327,6 +333,12 @@ export function InvoiceProcessorTool() {
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as InvoiceOutput);
+		if (jobId) {
+			track({
+				name: "tool_job_completed",
+				props: { tool_slug: "invoice-processor", job_id: jobId },
+			});
+		}
 	};
 
 	const handleError = (error: string) => {

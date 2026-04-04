@@ -7,6 +7,7 @@ import { ContractAnalyzerTool } from "./ContractAnalyzerTool";
 import {
 	createQueryWrapper,
 	mockMutateAsync,
+	mockTrack,
 } from "./tool-components-test-support";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -37,6 +38,25 @@ describe("ContractAnalyzerTool", () => {
 		expect(
 			screen.getByRole("tab", { name: /paste text/i }),
 		).toBeInTheDocument();
+	});
+
+	it("tracks tool_job_submitted on successful submission", async () => {
+		mockMutateAsync.mockResolvedValueOnce({ job: { id: "job-123" } });
+		render(<ContractAnalyzerTool />, { wrapper });
+
+		const pasteTab = screen.getByRole("tab", { name: /paste text/i });
+		await userEvent.click(pasteTab);
+
+		const textarea = screen.getByRole("textbox");
+		await userEvent.type(textarea, "Contract text for testing analytics");
+
+		const submitBtn = screen.getByRole("button", { name: /analyze/i });
+		await userEvent.click(submitBtn);
+
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_job_submitted",
+			props: { tool_slug: "contract-analyzer" },
+		});
 	});
 
 	it("shows toast error when job submission fails", async () => {

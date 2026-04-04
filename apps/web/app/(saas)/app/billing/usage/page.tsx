@@ -2,6 +2,7 @@ import { TransactionHistory } from "@saas/credits/components/TransactionHistory"
 import { UsageByToolChart } from "@saas/credits/components/UsageByToolChart";
 import { UsageChart } from "@saas/credits/components/UsageChart";
 import { UsageExportButton } from "@saas/credits/components/UsageExportButton";
+import { UsageHistoryTracker } from "@saas/credits/components/UsageHistoryTracker";
 import { UsageSummaryCards } from "@saas/credits/components/UsageSummaryCards";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Button } from "@ui/components/button";
@@ -38,6 +39,7 @@ export default async function UsageHistoryPage() {
 				</UpgradeGate>
 			</div>
 
+			<UsageHistoryTracker />
 			<UsageSummaryCards />
 
 			<div className="grid gap-6 lg:grid-cols-2">
