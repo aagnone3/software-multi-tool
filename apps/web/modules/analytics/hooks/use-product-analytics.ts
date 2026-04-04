@@ -828,7 +828,11 @@ type ProductEvent =
 			name: "org_member_removed";
 			props: { member_id: string; self: boolean };
 	  }
-	| { name: "org_invitation_revoked"; props: { invitation_id: string } };
+	| { name: "org_invitation_revoked"; props: { invitation_id: string } }
+	| {
+			name: "credit_balance_indicator_clicked";
+			props: { is_low_credits: boolean; balance: number };
+	  };
 
 export type { ProductEvent };
 
