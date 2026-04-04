@@ -878,6 +878,14 @@ type ProductEvent =
 	| {
 			name: "usage_overage_nudge_compare_clicked";
 			props: { overage_credits: number; overage_cost: number };
+	  }
+	| {
+			name: "tool_job_submitted";
+			props: { tool_slug: string };
+	  }
+	| {
+			name: "tool_job_completed";
+			props: { tool_slug: string; job_id: string };
 	  };
 
 export type { ProductEvent };

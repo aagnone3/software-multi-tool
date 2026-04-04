@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Button } from "@ui/components/button";
@@ -266,6 +267,7 @@ export function MeetingSummarizerTool() {
 	const [inputMode, setInputMode] = useState<"text" | "file">("text");
 	const [filePreviewText, setFilePreviewText] = useState<string | null>(null);
 	const createJobMutation = useCreateJob();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -306,6 +308,10 @@ export function MeetingSummarizerTool() {
 				input,
 			});
 			setJobId(response.job.id);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "meeting-summarizer" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			toast.error("Failed to submit job. Please try again.");
@@ -314,6 +320,12 @@ export function MeetingSummarizerTool() {
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as MeetingOutput);
+		if (jobId) {
+			track({
+				name: "tool_job_completed",
+				props: { tool_slug: "meeting-summarizer", job_id: jobId },
+			});
+		}
 	};
 
 	const handleNewMeeting = () => {

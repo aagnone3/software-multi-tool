@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Badge } from "@ui/components/badge";
@@ -572,6 +573,7 @@ export function ExpenseCategorizerTool() {
 	const [inputMode, setInputMode] = useState<InputMode>("form");
 	const [bulkText, setBulkText] = useState("");
 	const createJobMutation = useCreateJob();
+	const { track } = useProductAnalytics();
 
 	// File upload state
 	const [fileStep, setFileStep] = useState<FileStep>("upload");
@@ -682,6 +684,10 @@ export function ExpenseCategorizerTool() {
 				},
 			});
 			setJobId(response.job.id);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "expense-categorizer" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			toast.error("Failed to submit job. Please try again.");
@@ -716,6 +722,10 @@ export function ExpenseCategorizerTool() {
 				input: values,
 			});
 			setJobId(response.job.id);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "expense-categorizer" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			toast.error("Failed to submit job. Please try again.");
@@ -724,6 +734,12 @@ export function ExpenseCategorizerTool() {
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as ExpenseOutput);
+		if (jobId) {
+			track({
+				name: "tool_job_completed",
+				props: { tool_slug: "expense-categorizer", job_id: jobId },
+			});
+		}
 	};
 
 	const handleNewAnalysis = () => {

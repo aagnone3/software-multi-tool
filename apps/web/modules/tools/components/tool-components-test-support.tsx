@@ -60,3 +60,9 @@ export const createQueryWrapper = () => {
 		</QueryClientProvider>
 	);
 };
+
+export const mockTrack = vi.fn();
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));

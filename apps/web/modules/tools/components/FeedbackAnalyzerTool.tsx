@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpgradeGate } from "@saas/payments/components/UpgradeGate";
 import { Badge } from "@ui/components/badge";
@@ -359,6 +360,7 @@ export function FeedbackAnalyzerTool() {
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [result, setResult] = useState<FeedbackOutput | null>(null);
 	const createJobMutation = useCreateJob();
+	const { track } = useProductAnalytics();
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -376,6 +378,10 @@ export function FeedbackAnalyzerTool() {
 				input: values,
 			});
 			setJobId(response.job.id);
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "feedback-analyzer" },
+			});
 		} catch (error) {
 			console.error("Failed to create job:", error);
 			toast.error("Failed to submit job. Please try again.");
@@ -384,6 +390,12 @@ export function FeedbackAnalyzerTool() {
 
 	const handleComplete = (output: Record<string, unknown>) => {
 		setResult(output as unknown as FeedbackOutput);
+		if (jobId) {
+			track({
+				name: "tool_job_completed",
+				props: { tool_slug: "feedback-analyzer", job_id: jobId },
+			});
+		}
 	};
 
 	const handleNewAnalysis = () => {
