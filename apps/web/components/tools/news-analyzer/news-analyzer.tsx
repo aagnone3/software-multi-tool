@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
@@ -172,6 +173,7 @@ function LoadingStages({ startTime }: { startTime: number }) {
 
 export function NewsAnalyzer() {
 	const router = useRouter();
+	const { track } = useProductAnalytics();
 	const [jobId, setJobId] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loadingStartTime, setLoadingStartTime] = useState<number | null>(
@@ -216,9 +218,17 @@ export function NewsAnalyzer() {
 		},
 		onSuccess: (data) => {
 			const job = data.job;
+			track({
+				name: "tool_job_submitted",
+				props: { tool_slug: "news-analyzer" },
+			});
 
 			// If job is already completed (from cache), navigate to detail page
 			if (job.status === "COMPLETED" && job.output) {
+				track({
+					name: "tool_job_completed",
+					props: { tool_slug: "news-analyzer", job_id: job.id },
+				});
 				// Navigate to detail page (only if still mounted)
 				if (isMountedRef.current) {
 					router.push(`/app/tools/news-analyzer/${job.id}`);
@@ -263,6 +273,10 @@ export function NewsAnalyzer() {
 
 			if (job.status === "COMPLETED" && job.output) {
 				stopPolling();
+				track({
+					name: "tool_job_completed",
+					props: { tool_slug: "news-analyzer", job_id: id },
+				});
 
 				// Navigate to detail page (only if still mounted)
 				if (isMountedRef.current) {

@@ -15,6 +15,7 @@ const orpcClientMock = vi.hoisted(() => ({
 		get: vi.fn(),
 	},
 }));
+const trackMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@tanstack/react-query", () => ({
 	useMutation: useMutationMock,
@@ -26,6 +27,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@shared/lib/orpc-client", () => ({
 	orpcClient: orpcClientMock,
+}));
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: trackMock }),
 }));
 
 // Mock child components
@@ -230,5 +235,64 @@ describe("NewsAnalyzer", () => {
 		}
 
 		expect(localStorageSetMock).toHaveBeenCalled();
+	});
+
+	it("tracks tool_job_submitted when job is created successfully", async () => {
+		const user = userEvent.setup({ delay: null });
+		let capturedOnSuccess: ((data: unknown) => void) | undefined;
+		useMutationMock.mockImplementation(
+			({ onSuccess }: { onSuccess: (data: unknown) => void }) => {
+				capturedOnSuccess = onSuccess;
+				return { mutate: vi.fn(), isPending: false };
+			},
+		);
+
+		render(<NewsAnalyzer />);
+		await user.click(screen.getByText("Submit"));
+
+		if (capturedOnSuccess) {
+			capturedOnSuccess({
+				job: { id: "j1", status: "PENDING", output: null, error: null },
+			});
+		}
+
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "tool_job_submitted",
+			props: { tool_slug: "news-analyzer" },
+		});
+	});
+
+	it("tracks tool_job_completed when already-completed job is returned", async () => {
+		const user = userEvent.setup({ delay: null });
+		let capturedOnSuccess: ((data: unknown) => void) | undefined;
+		useMutationMock.mockImplementation(
+			({ onSuccess }: { onSuccess: (data: unknown) => void }) => {
+				capturedOnSuccess = onSuccess;
+				return { mutate: vi.fn(), isPending: false };
+			},
+		);
+
+		render(<NewsAnalyzer />);
+		await user.click(screen.getByText("Submit"));
+
+		if (capturedOnSuccess) {
+			capturedOnSuccess({
+				job: {
+					id: "j2",
+					status: "COMPLETED",
+					output: { title: "Test" },
+					error: null,
+				},
+			});
+		}
+
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "tool_job_submitted",
+			props: { tool_slug: "news-analyzer" },
+		});
+		expect(trackMock).toHaveBeenCalledWith({
+			name: "tool_job_completed",
+			props: { tool_slug: "news-analyzer", job_id: "j2" },
+		});
 	});
 });
