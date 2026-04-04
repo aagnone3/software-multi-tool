@@ -3,6 +3,10 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import ToolsMarketingPage from "./page";
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 vi.mock("@repo/config", () => ({
 	config: {
 		appName: "TestApp",

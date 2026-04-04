@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { ToolsIndexPageTracker } from "@marketing/tools/components/ToolsIndexPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -270,6 +271,7 @@ export default function ToolsMarketingPage() {
 					</div>
 				</section>
 			</div>
+			<StickyCta />
 		</>
 	);
 }

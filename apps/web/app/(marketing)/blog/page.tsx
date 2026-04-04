@@ -1,3 +1,4 @@
+import { BlogStickyCta } from "@marketing/blog/components/BlogStickyCta";
 import { PostListItem } from "@marketing/blog/components/PostListItem";
 import { getAllPosts } from "@marketing/blog/utils/lib/posts";
 import { config } from "@repo/config";
@@ -117,6 +118,7 @@ export default async function BlogListPage() {
 						))}
 				</div>
 			</div>
+			<BlogStickyCta />
 		</>
 	);
 }
