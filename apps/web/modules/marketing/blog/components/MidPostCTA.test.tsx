@@ -22,6 +22,11 @@ describe("MidPostCTA", () => {
 		expect(screen.getByText(/Get started free/i)).toBeInTheDocument();
 	});
 
+	it("shows specific free credit count in subtext", () => {
+		render(<MidPostCTA />);
+		expect(screen.getByText(/10 credits included/i)).toBeInTheDocument();
+	});
+
 	it("tracks mid post cta click with post slug", () => {
 		render(<MidPostCTA />);
 		fireEvent.click(screen.getByText(/Get started free/i));

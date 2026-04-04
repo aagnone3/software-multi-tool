@@ -104,7 +104,7 @@ const softwareAppJsonLd = {
 		price: "0",
 		priceCurrency: "USD",
 		description:
-			"Free credits included on signup. No credit card required.",
+			"10 free credits included on signup. No credit card required.",
 	},
 	description:
 		config.appDescription ??
@@ -129,7 +129,7 @@ const faqJsonLd = {
 			name: "Do you offer a free trial?",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text: "Yes — every new account gets free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
+				text: "Yes — every new account gets 10 free credits to try the tools with no credit card required. You can analyze documents, process audio, and run AI workflows before spending a cent.",
 			},
 		},
 		{
