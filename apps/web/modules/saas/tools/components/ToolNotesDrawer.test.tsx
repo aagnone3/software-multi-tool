@@ -3,6 +3,11 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const mockStorage: Record<string, string> = {};
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -13,6 +18,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 beforeEach(() => {
+	mockTrack.mockClear();
 	for (const k of Object.keys(mockStorage)) {
 		delete mockStorage[k];
 	}
@@ -90,5 +96,38 @@ describe("ToolNotesDrawer", () => {
 			screen.getByRole("button", { name: /clear notes/i }),
 		);
 		expect(mockStorage["tool-notes:news-analyzer"]).toBeUndefined();
+	});
+
+	it("tracks tool_notes_opened when drawer opens", async () => {
+		await openDrawer();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_notes_opened",
+			props: { tool_slug: "news-analyzer" },
+		});
+	});
+
+	it("tracks tool_notes_saved with character count on save", async () => {
+		await openDrawer();
+		const textarea = screen.getByRole("textbox", { name: /tool notes/i });
+		await userEvent.type(textarea, "my note");
+		await userEvent.click(
+			screen.getByRole("button", { name: /save changes/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_notes_saved",
+			props: { tool_slug: "news-analyzer", character_count: 7 },
+		});
+	});
+
+	it("tracks tool_notes_cleared on clear", async () => {
+		mockStorage["tool-notes:news-analyzer"] = "existing note";
+		await openDrawer();
+		await userEvent.click(
+			screen.getByRole("button", { name: /clear notes/i }),
+		);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_notes_cleared",
+			props: { tool_slug: "news-analyzer" },
+		});
 	});
 });

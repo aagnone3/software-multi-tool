@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	Sheet,
@@ -27,6 +28,7 @@ export function ToolNotesDrawer({
 	toolName,
 	className,
 }: ToolNotesDrawerProps) {
+	const { track } = useProductAnalytics();
 	const [open, setOpen] = useState(false);
 	const [notes, setNotes] = useState("");
 	const [savedNotes, setSavedNotes] = useState("");
@@ -37,8 +39,12 @@ export function ToolNotesDrawer({
 			const stored = localStorage.getItem(storageKey) ?? "";
 			setNotes(stored);
 			setSavedNotes(stored);
+			track({
+				name: "tool_notes_opened",
+				props: { tool_slug: toolSlug },
+			});
 		}
-	}, [open, storageKey]);
+	}, [open, storageKey, toolSlug, track]);
 
 	const isDirty = notes !== savedNotes;
 
@@ -46,6 +52,10 @@ export function ToolNotesDrawer({
 		localStorage.setItem(storageKey, notes);
 		setSavedNotes(notes);
 		toast.success("Notes saved");
+		track({
+			name: "tool_notes_saved",
+			props: { tool_slug: toolSlug, character_count: notes.length },
+		});
 	}
 
 	function handleClear() {
@@ -53,6 +63,7 @@ export function ToolNotesDrawer({
 		setNotes("");
 		setSavedNotes("");
 		toast.success("Notes cleared");
+		track({ name: "tool_notes_cleared", props: { tool_slug: toolSlug } });
 	}
 
 	return (
