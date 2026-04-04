@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ const NAV_SEQUENCES: Record<string, string> = {
 export function KeyboardNavigationShortcuts() {
 	const router = useRouter();
 	const { activeOrganization } = useActiveOrganization();
+	const { track } = useProductAnalytics();
 	const pendingKey = useRef<string | null>(null);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -59,6 +61,10 @@ export function KeyboardNavigationShortcuts() {
 				const destination = NAV_SEQUENCES[sequence];
 				if (destination) {
 					e.preventDefault();
+					track({
+						name: "keyboard_nav_shortcut_used",
+						props: { sequence, destination },
+					});
 					router.push(buildPath(destination));
 				}
 				return;
@@ -72,7 +78,7 @@ export function KeyboardNavigationShortcuts() {
 				}, SEQUENCE_TIMEOUT_MS);
 			}
 		},
-		[router, buildPath],
+		[router, buildPath, track],
 	);
 
 	useEffect(() => {

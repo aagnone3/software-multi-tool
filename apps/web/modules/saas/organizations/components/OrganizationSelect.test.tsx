@@ -10,6 +10,7 @@ const useActiveOrganizationMock = vi.hoisted(() => vi.fn());
 const useOrganizationListQueryMock = vi.hoisted(() => vi.fn());
 const useRouterMock = vi.hoisted(() => vi.fn(() => ({ replace: vi.fn() })));
 const clearCacheMock = vi.hoisted(() => vi.fn());
+const mockTrack = vi.hoisted(() => vi.fn());
 
 vi.mock("@saas/auth/hooks/use-session", () => ({
 	useSession: useSessionMock,
@@ -38,6 +39,9 @@ vi.mock("./OrganizationLogo", () => ({
 	OrganizationLogo: ({ name }: { name: string }) => (
 		<span data-testid="org-logo">{name}</span>
 	),
+}));
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 vi.mock("@repo/config", () => ({
 	config: {
@@ -116,6 +120,32 @@ describe("OrganzationSelect", () => {
 		await user.click(screen.getByRole("button"));
 		expect(screen.getAllByText("Acme Corp").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Beta Co").length).toBeGreaterThan(0);
+	});
+
+	it("fires organization_select_switched analytics event when switching org", async () => {
+		const user = userEvent.setup({ delay: null });
+		const setActiveOrganization = vi.fn();
+		useSessionMock.mockReturnValue({
+			user: { id: "user-1", name: "Jane Doe", image: null },
+		});
+		useActiveOrganizationMock.mockReturnValue({
+			activeOrganization: null,
+			setActiveOrganization,
+		});
+		useOrganizationListQueryMock.mockReturnValue({
+			data: [
+				{ id: "org-1", name: "Acme Corp", slug: "acme", logo: null },
+			],
+		});
+		clearCacheMock.mockResolvedValue(undefined);
+		render(<OrganzationSelect />);
+		await user.click(screen.getByRole("button"));
+		const orgOption = screen.getAllByText("Acme Corp");
+		await user.click(orgOption[orgOption.length - 1]);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "organization_select_switched",
+			props: { to_slug: "acme" },
+		});
 	});
 
 	it("renders 'Create new organization' link after opening dropdown", async () => {

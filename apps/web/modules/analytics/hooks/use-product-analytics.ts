@@ -1025,6 +1025,14 @@ type ProductEvent =
 	| {
 			name: "who_is_it_for_tool_clicked";
 			props: { persona_id: string; tool_slug: string };
+	  }
+	| {
+			name: "keyboard_nav_shortcut_used";
+			props: { sequence: string; destination: string };
+	  }
+	| {
+			name: "organization_select_switched";
+			props: { to_slug: string };
 	  };
 
 export type { ProductEvent };
