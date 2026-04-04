@@ -4,6 +4,7 @@ import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	ClipboardListIcon,
 	FileTextIcon,
+	GitBranchIcon,
 	ImageMinusIcon,
 	type LucideIcon,
 	MessageSquareTextIcon,
@@ -90,6 +91,14 @@ const tools: Tool[] = [
 		href: "/tools/bg-remover",
 		comingSoon: true,
 	},
+	{
+		id: "diagram-editor",
+		title: "Diagram Editor",
+		description:
+			"Create flowcharts, sequence diagrams, ERDs, and more with live Mermaid preview. No install needed.",
+		icon: GitBranchIcon,
+		href: "/tools/diagram-editor",
+	},
 ];
 
 export function Features() {
@@ -113,7 +122,7 @@ export function Features() {
 			<div className="container max-w-6xl">
 				<div className="mx-auto max-w-3xl text-center">
 					<h2 className="font-bold text-3xl md:text-4xl lg:text-5xl">
-						8 AI tools, ready to use today
+						9 AI tools, ready to use today
 					</h2>
 					<p className="mt-4 text-balance text-foreground/70 text-lg">
 						No prompts to engineer. No APIs to wire up. Just upload,
