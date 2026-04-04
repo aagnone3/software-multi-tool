@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@marketing/blog/components/BlogStickyCta", () => ({
+	BlogStickyCta: () => <div data-testid="blog-sticky-cta" />,
+}));
+
 vi.mock("@marketing/blog/utils/lib/posts", () => ({
 	getAllPosts: vi.fn().mockResolvedValue([
 		{
