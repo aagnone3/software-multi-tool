@@ -857,7 +857,19 @@ type ProductEvent =
 	  }
 	| { name: "tool_notes_cleared"; props: { tool_slug: string } }
 	| { name: "pricing_page_viewed"; props: Record<string, never> }
-	| { name: "choose_plan_page_viewed"; props: Record<string, never> };
+	| { name: "choose_plan_page_viewed"; props: Record<string, never> }
+	| { name: "diagram_editor_viewed"; props: Record<string, never> }
+	| {
+			name: "diagram_editor_type_changed";
+			props: { diagram_type: string };
+	  }
+	| {
+			name: "diagram_editor_exported";
+			props: {
+				format: "png" | "svg";
+				action: "copy" | "download";
+			};
+	  };
 
 export type { ProductEvent };
 

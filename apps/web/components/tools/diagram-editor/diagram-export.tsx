@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import {
 	DropdownMenu,
@@ -26,6 +27,7 @@ interface DiagramExportProps {
 
 export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 	const { resolvedTheme } = useTheme();
+	const { track } = useProductAnalytics();
 
 	const getBackgroundColor = () => {
 		return resolvedTheme === "dark" ? "#1a1a1a" : "#ffffff";
@@ -53,6 +55,10 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		if (!container) {
 			return;
 		}
+		track({
+			name: "diagram_editor_exported",
+			props: { format: "png", action: "copy" },
+		});
 		handleAction(
 			() =>
 				copyPngToClipboard(container, {
@@ -67,6 +73,10 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		if (!container) {
 			return;
 		}
+		track({
+			name: "diagram_editor_exported",
+			props: { format: "svg", action: "copy" },
+		});
 		handleAction(
 			() => copySvgToClipboard(container),
 			"SVG copied to clipboard",
@@ -78,6 +88,10 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		if (!container) {
 			return;
 		}
+		track({
+			name: "diagram_editor_exported",
+			props: { format: "png", action: "download" },
+		});
 		handleAction(
 			() =>
 				downloadPng(container, {
@@ -92,6 +106,10 @@ export function DiagramExport({ containerRef, disabled }: DiagramExportProps) {
 		if (!container) {
 			return;
 		}
+		track({
+			name: "diagram_editor_exported",
+			props: { format: "svg", action: "download" },
+		});
 		handleAction(() => downloadSvg(container), "SVG downloaded");
 	};
 
