@@ -37,12 +37,8 @@ function getToolName(toolSlug: string): string {
 	return tool?.name ?? toolSlug;
 }
 
-function getJobDetailUrl(toolSlug: string, jobId: string): string | null {
-	const detailRouteTools: Record<string, string> = {
-		"news-analyzer": `/app/tools/news-analyzer/${jobId}`,
-		"speaker-separation": `/app/tools/speaker-separation/${jobId}`,
-	};
-	return detailRouteTools[toolSlug] ?? null;
+function getJobDetailUrl(jobId: string): string {
+	return `/app/jobs/${jobId}`;
 }
 
 function isRecentlyCompleted(job: Job): boolean {
@@ -112,7 +108,7 @@ function ActiveJobRow({
 	onViewClick?: (job: Job) => void;
 }) {
 	const toolName = getToolName(job.toolSlug);
-	const detailUrl = getJobDetailUrl(job.toolSlug, job.id);
+	const detailUrl = getJobDetailUrl(job.id);
 	const isActive = ACTIVE_STATUSES.has(job.status);
 	const isCompleted = job.status === "COMPLETED";
 
@@ -134,7 +130,7 @@ function ActiveJobRow({
 					</p>
 				)}
 			</div>
-			{isCompleted && detailUrl && (
+			{isCompleted && (
 				<Button
 					variant="ghost"
 					size="sm"
