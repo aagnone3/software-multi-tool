@@ -14,6 +14,9 @@ vi.mock("@saas/auth/hooks/use-session", () => ({
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: vi.fn(),
 }));
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: vi.fn(),
+}));
 vi.mock("../hooks/use-recent-jobs", () => ({
 	useRecentJobs: vi.fn(),
 }));
@@ -29,12 +32,14 @@ vi.mock("@ui/lib", () => ({
 }));
 
 import { useSession } from "@saas/auth/hooks/use-session";
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useRecentJobs } from "../hooks/use-recent-jobs";
 import { GettingStartedChecklist } from "./GettingStartedChecklist";
 
 const mockUseSession = vi.mocked(useSession);
 const mockUseActiveOrganization = vi.mocked(useActiveOrganization);
+const mockUseCreditsBalance = vi.mocked(useCreditsBalance);
 const mockUseRecentJobs = vi.mocked(useRecentJobs);
 
 const localStorageMock = (() => {
@@ -61,6 +66,9 @@ describe("GettingStartedChecklist", () => {
 		} as any);
 		mockUseActiveOrganization.mockReturnValue({
 			activeOrganization: null,
+		} as any);
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: true,
 		} as any);
 		mockUseRecentJobs.mockReturnValue({
 			jobs: [],
@@ -94,6 +102,9 @@ describe("GettingStartedChecklist", () => {
 		mockUseActiveOrganization.mockReturnValue({
 			activeOrganization: { name: "Org", slug: "org" },
 		} as any);
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+		} as any);
 		mockUseRecentJobs.mockReturnValue({
 			jobs: [{}],
 			isLoading: false,
@@ -101,6 +112,27 @@ describe("GettingStartedChecklist", () => {
 		const { container } = render(<GettingStartedChecklist />);
 		// all 4 complete (profile, organization, first-tool, billing) → renders null
 		expect(container.firstChild).toBeNull();
+	});
+
+	it("shows upgrade step as incomplete for free plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({ isFreePlan: true } as any);
+		render(<GettingStartedChecklist />);
+		expect(screen.getByText("Upgrade your plan")).toBeDefined();
+	});
+
+	it("marks upgrade step as complete for paid plan users", () => {
+		mockUseSession.mockReturnValue({
+			user: { name: "Alice" },
+			loaded: true,
+		} as any);
+		mockUseActiveOrganization.mockReturnValue({
+			activeOrganization: { name: "Org", slug: "org" },
+		} as any);
+		mockUseCreditsBalance.mockReturnValue({ isFreePlan: false } as any);
+		render(<GettingStartedChecklist />);
+		// 3 of 4 complete (missing first-tool) — still shown but upgrade step is checked
+		const upgradeLink = screen.getByText("Upgrade your plan").closest("a");
+		expect(upgradeLink?.closest("li")).toBeDefined();
 	});
 
 	it("shows progress bar with percentage", () => {
