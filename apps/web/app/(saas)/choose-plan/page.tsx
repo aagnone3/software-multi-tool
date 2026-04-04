@@ -7,6 +7,7 @@ import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
 import { attemptAsync } from "es-toolkit";
 import { redirect } from "next/navigation";
 import React from "react";
+import { ChoosePlanTracker } from "./ChoosePlanTracker";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -51,6 +52,7 @@ export default async function ChoosePlanPage() {
 
 	return (
 		<AuthWrapper contentClass="max-w-5xl">
+			<ChoosePlanTracker />
 			<div className="mb-4 text-center">
 				<h1 className="text-center font-bold text-2xl lg:text-3xl">
 					Choose your plan
