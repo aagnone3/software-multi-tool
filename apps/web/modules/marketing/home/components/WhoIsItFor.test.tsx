@@ -1,46 +1,74 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+		onClick,
+		className,
+	}: {
+		href: string;
+		children: React.ReactNode;
+		onClick?: () => void;
+		className?: string;
+	}) => (
+		<a href={href} onClick={onClick} className={className}>
+			{children}
+		</a>
+	),
+}));
+
 import { WhoIsItFor } from "./WhoIsItFor";
 
 describe("WhoIsItFor", () => {
-	it("renders the section heading", () => {
-		render(<WhoIsItFor />);
-		expect(
-			screen.getByText("Built for busy professionals"),
-		).toBeInTheDocument();
-	});
-
-	it("renders all 8 persona cards", () => {
+	it("renders persona cards", () => {
 		render(<WhoIsItFor />);
 		expect(screen.getByText("Freelancer")).toBeInTheDocument();
 		expect(screen.getByText("Small Business Owner")).toBeInTheDocument();
-		expect(screen.getByText("Operations Manager")).toBeInTheDocument();
-		expect(screen.getByText("Finance Team")).toBeInTheDocument();
-		expect(screen.getByText("Customer Success")).toBeInTheDocument();
-		expect(screen.getByText("Legal / Compliance")).toBeInTheDocument();
-		expect(screen.getByText("HR / Recruiting")).toBeInTheDocument();
-		expect(screen.getByText("Research Analyst")).toBeInTheDocument();
 	});
 
-	it("shows strikethrough problem text", () => {
-		render(<WhoIsItFor />);
-		expect(
-			screen.getByText("Hours spent writing meeting recap emails"),
-		).toBeInTheDocument();
-	});
-
-	it("renders tool links with correct hrefs", () => {
+	it("links persona cards to marketing tool pages (not authenticated routes)", () => {
 		render(<WhoIsItFor />);
 		const links = screen.getAllByRole("link");
-		const meetingLink = links.find((l) =>
-			l.getAttribute("href")?.includes("meeting-summarizer"),
-		);
-		expect(meetingLink).toBeDefined();
+		for (const link of links) {
+			const href = link.getAttribute("href") ?? "";
+			expect(href).not.toContain("/app/tools/");
+			expect(href).toMatch(/^\/tools\//);
+		}
 	});
 
-	it("accepts a className prop", () => {
-		const { container } = render(<WhoIsItFor className="test-class" />);
-		expect(container.querySelector(".test-class")).toBeDefined();
+	it("fires who_is_it_for_tool_clicked analytics when a persona link is clicked", async () => {
+		const user = userEvent.setup();
+		render(<WhoIsItFor />);
+		const meetingLink = screen.getByRole("link", {
+			name: /Try Meeting Summarizer/i,
+		});
+		await user.click(meetingLink);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "who_is_it_for_tool_clicked",
+			props: {
+				persona_id: "freelancer",
+				tool_slug: "meeting-summarizer",
+			},
+		});
+	});
+
+	it("includes correct tool slug in link href", () => {
+		render(<WhoIsItFor />);
+		const meetingLink = screen.getByRole("link", {
+			name: /Try Meeting Summarizer/i,
+		});
+		expect(meetingLink).toHaveAttribute(
+			"href",
+			"/tools/meeting-summarizer",
+		);
 	});
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { cn } from "@ui/lib";
 import {
 	BarChart3Icon,
@@ -12,7 +13,7 @@ import {
 	UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useCallback } from "react";
 
 interface Persona {
 	id: string;
@@ -20,7 +21,7 @@ interface Persona {
 	role: string;
 	problem: string;
 	solution: string;
-	toolHref: string;
+	toolSlug: string;
 	toolName: string;
 }
 
@@ -31,7 +32,7 @@ const personas: Persona[] = [
 		role: "Freelancer",
 		problem: "Hours spent writing meeting recap emails",
 		solution: "Summarize client calls in 30 seconds",
-		toolHref: "/app/tools/meeting-summarizer",
+		toolSlug: "meeting-summarizer",
 		toolName: "Meeting Summarizer",
 	},
 	{
@@ -40,7 +41,7 @@ const personas: Persona[] = [
 		role: "Small Business Owner",
 		problem: "Manual invoice data entry eating into your day",
 		solution: "Extract invoice data automatically",
-		toolHref: "/app/tools/invoice-processor",
+		toolSlug: "invoice-processor",
 		toolName: "Invoice Processor",
 	},
 	{
@@ -49,7 +50,7 @@ const personas: Persona[] = [
 		role: "Operations Manager",
 		problem: "Reviewing vendor contracts without a legal team",
 		solution: "Surface risk clauses and key terms instantly",
-		toolHref: "/app/tools/contract-analyzer",
+		toolSlug: "contract-analyzer",
 		toolName: "Contract Analyzer",
 	},
 	{
@@ -58,7 +59,7 @@ const personas: Persona[] = [
 		role: "Finance Team",
 		problem: "Categorizing hundreds of expenses each month",
 		solution: "Bulk-categorize expenses from any spreadsheet",
-		toolHref: "/app/tools/expense-categorizer",
+		toolSlug: "expense-categorizer",
 		toolName: "Expense Categorizer",
 	},
 	{
@@ -67,7 +68,7 @@ const personas: Persona[] = [
 		role: "Customer Success",
 		problem: "Drowning in NPS surveys and support tickets",
 		solution: "Spot trends across hundreds of responses",
-		toolHref: "/app/tools/feedback-analyzer",
+		toolSlug: "feedback-analyzer",
 		toolName: "Feedback Analyzer",
 	},
 	{
@@ -76,7 +77,7 @@ const personas: Persona[] = [
 		role: "Legal / Compliance",
 		problem: "Manually reviewing every incoming contract",
 		solution: "Flag unusual clauses before they become problems",
-		toolHref: "/app/tools/contract-analyzer",
+		toolSlug: "contract-analyzer",
 		toolName: "Contract Analyzer",
 	},
 	{
@@ -85,7 +86,7 @@ const personas: Persona[] = [
 		role: "HR / Recruiting",
 		problem: "Transcribing interview recordings by hand",
 		solution: "Diarized transcripts with speaker labels",
-		toolHref: "/app/tools/speaker-separation",
+		toolSlug: "speaker-separation",
 		toolName: "Speaker Separation",
 	},
 	{
@@ -94,10 +95,48 @@ const personas: Persona[] = [
 		role: "Research Analyst",
 		problem: "Keeping up with hundreds of news sources daily",
 		solution: "Analyze bias, sentiment, and key themes",
-		toolHref: "/app/tools/news-analyzer",
+		toolSlug: "news-analyzer",
 		toolName: "News Analyzer",
 	},
 ];
+
+function PersonaCard({ persona }: { persona: Persona }) {
+	const { track } = useProductAnalytics();
+
+	const handleClick = useCallback(() => {
+		track({
+			name: "who_is_it_for_tool_clicked",
+			props: {
+				persona_id: persona.id,
+				tool_slug: persona.toolSlug,
+			},
+		});
+	}, [track, persona.id, persona.toolSlug]);
+
+	return (
+		<div className="group rounded-2xl border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-md">
+			<div className="mb-3 inline-flex rounded-xl bg-primary/10 p-2.5 text-primary">
+				<persona.icon className="size-5" />
+			</div>
+			<p className="font-semibold text-sm text-foreground">
+				{persona.role}
+			</p>
+			<p className="mt-1 text-foreground/50 text-xs line-through">
+				{persona.problem}
+			</p>
+			<p className="mt-1 font-medium text-primary text-xs">
+				→ {persona.solution}
+			</p>
+			<Link
+				href={`/tools/${persona.toolSlug}`}
+				className="mt-3 inline-block text-foreground/50 text-xs hover:text-primary hover:underline"
+				onClick={handleClick}
+			>
+				Try {persona.toolName} →
+			</Link>
+		</div>
+	);
+}
 
 export function WhoIsItFor({ className }: { className?: string }) {
 	return (
@@ -118,29 +157,7 @@ export function WhoIsItFor({ className }: { className?: string }) {
 
 				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
 					{personas.map((persona) => (
-						<div
-							key={persona.id}
-							className="group rounded-2xl border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-md"
-						>
-							<div className="mb-3 inline-flex rounded-xl bg-primary/10 p-2.5 text-primary">
-								<persona.icon className="size-5" />
-							</div>
-							<p className="font-semibold text-sm text-foreground">
-								{persona.role}
-							</p>
-							<p className="mt-1 text-foreground/50 text-xs line-through">
-								{persona.problem}
-							</p>
-							<p className="mt-1 font-medium text-primary text-xs">
-								→ {persona.solution}
-							</p>
-							<Link
-								href={persona.toolHref}
-								className="mt-3 inline-block text-foreground/50 text-xs hover:text-primary hover:underline"
-							>
-								Try {persona.toolName} →
-							</Link>
-						</div>
+						<PersonaCard key={persona.id} persona={persona} />
 					))}
 				</div>
 			</div>

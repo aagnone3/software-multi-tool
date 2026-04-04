@@ -1021,7 +1021,11 @@ type ProductEvent =
 	  }
 	| { name: "admin_user_deleted"; props: { user_id: string } }
 	| { name: "admin_org_viewed"; props: { org_id: string } }
-	| { name: "admin_org_deleted"; props: { org_id: string } };
+	| { name: "admin_org_deleted"; props: { org_id: string } }
+	| {
+			name: "who_is_it_for_tool_clicked";
+			props: { persona_id: string; tool_slug: string };
+	  };
 
 export type { ProductEvent };
 
