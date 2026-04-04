@@ -1,6 +1,7 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { cn } from "@ui/lib";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 const PRICING_FAQS = [
 	{
@@ -29,14 +30,29 @@ const PRICING_FAQS = [
 	},
 ];
 
-function FaqItem({ question, answer }: { question: string; answer: string }) {
+function FaqItem({
+	question,
+	answer,
+	onToggle,
+}: {
+	question: string;
+	answer: string;
+	onToggle: (q: string, open: boolean) => void;
+}) {
 	const [open, setOpen] = useState(false);
+
+	const handleToggle = useCallback(() => {
+		const next = !open;
+		setOpen(next);
+		onToggle(question, next);
+	}, [open, question, onToggle]);
+
 	return (
 		<div className="border-b last:border-b-0">
 			<button
 				type="button"
 				className="flex w-full items-center justify-between py-4 text-left font-medium text-base hover:text-primary transition-colors"
-				onClick={() => setOpen((v) => !v)}
+				onClick={handleToggle}
 				aria-expanded={open}
 			>
 				<span>{question}</span>
@@ -60,6 +76,18 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export function PricingFaq({ className }: { className?: string }) {
+	const { track } = useProductAnalytics();
+
+	const handleToggle = useCallback(
+		(question: string, open: boolean) => {
+			track({
+				name: "pricing_faq_item_toggled",
+				props: { question, open },
+			});
+		},
+		[track],
+	);
+
 	return (
 		<div className={cn("mt-12", className)}>
 			<h3 className="mb-6 text-center font-semibold text-xl">
@@ -67,7 +95,11 @@ export function PricingFaq({ className }: { className?: string }) {
 			</h3>
 			<div className="mx-auto max-w-2xl rounded-xl border bg-card px-6 py-2">
 				{PRICING_FAQS.map((item) => (
-					<FaqItem key={item.question} {...item} />
+					<FaqItem
+						key={item.question}
+						{...item}
+						onToggle={handleToggle}
+					/>
 				))}
 			</div>
 		</div>

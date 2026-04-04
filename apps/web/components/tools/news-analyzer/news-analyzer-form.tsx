@@ -1,12 +1,13 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
 import { Label } from "@ui/components/label";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
 import { FileText, Link2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 export interface NewsAnalyzerFormProps {
 	onSubmit: (data: { articleUrl?: string; articleText?: string }) => void;
@@ -17,9 +18,21 @@ export function NewsAnalyzerForm({
 	onSubmit,
 	isLoading,
 }: NewsAnalyzerFormProps) {
+	const { track } = useProductAnalytics();
 	const [inputMode, setInputMode] = useState<"url" | "text">("url");
 	const [articleUrl, setArticleUrl] = useState("");
 	const [articleText, setArticleText] = useState("");
+
+	const handleModeSwitch = useCallback(
+		(mode: "url" | "text") => {
+			setInputMode(mode);
+			track({
+				name: "news_analyzer_input_mode_switched",
+				props: { mode },
+			});
+		},
+		[track],
+	);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -37,7 +50,7 @@ export function NewsAnalyzerForm({
 			<div className="rounded-lg bg-muted p-1 inline-flex">
 				<button
 					type="button"
-					onClick={() => setInputMode("url")}
+					onClick={() => handleModeSwitch("url")}
 					className={cn(
 						"inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200",
 						inputMode === "url"
@@ -50,7 +63,7 @@ export function NewsAnalyzerForm({
 				</button>
 				<button
 					type="button"
-					onClick={() => setInputMode("text")}
+					onClick={() => handleModeSwitch("text")}
 					className={cn(
 						"inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200",
 						inputMode === "text"

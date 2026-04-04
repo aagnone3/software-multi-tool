@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { PricingFaq } from "./PricingFaq";
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 
 describe("PricingFaq", () => {
 	it("renders the section heading", () => {
@@ -47,5 +52,26 @@ describe("PricingFaq", () => {
 		expect(firstButton).toHaveAttribute("aria-expanded", "false");
 		fireEvent.click(firstButton);
 		expect(firstButton).toHaveAttribute("aria-expanded", "true");
+	});
+
+	it("tracks expand event when FAQ item is opened", () => {
+		render(<PricingFaq />);
+		const firstButton = screen.getAllByRole("button")[0];
+		fireEvent.click(firstButton);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "pricing_faq_item_toggled",
+			props: expect.objectContaining({ open: true }),
+		});
+	});
+
+	it("tracks collapse event when FAQ item is closed", () => {
+		render(<PricingFaq />);
+		const firstButton = screen.getAllByRole("button")[0];
+		fireEvent.click(firstButton); // open
+		fireEvent.click(firstButton); // close
+		expect(mockTrack).toHaveBeenLastCalledWith({
+			name: "pricing_faq_item_toggled",
+			props: expect.objectContaining({ open: false }),
+		});
 	});
 });
