@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAdminPath } from "@saas/admin/lib/links";
 import { InviteMemberForm } from "@saas/organizations/components/InviteMemberForm";
@@ -48,6 +49,8 @@ export function OrganizationForm({
 	const createOrganizationMutation = useCreateOrganizationMutation();
 	const queryClient = useQueryClient();
 
+	const { track } = useProductAnalytics();
+
 	const form = useForm<OrganizationFormValues>({
 		resolver: zodResolver(organizationFormSchema),
 		defaultValues: {
@@ -78,6 +81,11 @@ export function OrganizationForm({
 
 			queryClient.invalidateQueries({
 				queryKey: orpc.admin.organizations.list.key(),
+			});
+
+			track({
+				name: organization ? "admin_org_updated" : "admin_org_created",
+				props: { org_id: newOrganization.id },
 			});
 
 			toast.success("Organization saved successfully.");
