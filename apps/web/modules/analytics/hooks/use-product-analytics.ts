@@ -958,6 +958,18 @@ type ProductEvent =
 	| {
 			name: "transaction_history_page_changed";
 			props: { page: number; direction: "next" | "previous" };
+	  }
+	| {
+			name: "shared_analysis_viewed";
+			props: { analysis_id: string; tool: string };
+	  }
+	| {
+			name: "shared_analysis_cta_clicked";
+			props: {
+				analysis_id: string;
+				cta: "try_free" | "see_plans";
+				tool: string;
+			};
 	  };
 
 export type { ProductEvent };
