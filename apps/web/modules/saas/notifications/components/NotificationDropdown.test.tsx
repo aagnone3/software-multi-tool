@@ -1,10 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationDropdown } from "./NotificationDropdown";
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: vi.fn() }),
+}));
+
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 const mockMarkAsRead = vi.fn();
@@ -131,5 +136,42 @@ describe("NotificationDropdown", () => {
 		const onClose = vi.fn();
 		render(<NotificationDropdown onClose={onClose} />);
 		expect(screen.getByText(/no notifications yet/i)).toBeInTheDocument();
+	});
+
+	it("tracks notification_all_marked_as_read when mark all is clicked", () => {
+		mockTrack.mockClear();
+		mockUseNotificationsQuery.mockReturnValueOnce({
+			data: {
+				notifications: [
+					{
+						id: "n1",
+						type: "info",
+						title: "Hello",
+						body: "World",
+						actionUrl: null,
+						read: false,
+						createdAt: new Date(),
+					},
+				],
+				unreadCount: 3,
+			},
+			isLoading: false,
+			isError: false,
+		} as ReturnType<typeof useNotificationsQuery>);
+		mockUseMarkAll.mockReturnValueOnce({
+			mutate: mockMarkAllAsRead,
+			isPending: false,
+		} as unknown as ReturnType<
+			typeof useMarkAllNotificationsAsReadMutation
+		>);
+		render(<NotificationDropdown />);
+		fireEvent.click(
+			screen.getByRole("button", { name: /mark all as read/i }),
+		);
+		expect(mockMarkAllAsRead).toHaveBeenCalled();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "notification_all_marked_as_read",
+			props: { unread_count: 3 },
+		});
 	});
 });
