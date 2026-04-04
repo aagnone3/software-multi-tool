@@ -1,0 +1,391 @@
+---
+title: Adding a New Tool
+description: Step-by-step guide for adding a custom AI tool to Software Multitool — from config to UI.
+---
+
+Software Multitool is designed to make adding new AI tools straightforward. Each tool follows the same pattern: define it in config, write a processor that does the AI work, wire it to Inngest for async execution, and build the UI component.
+
+This guide walks through every step using a hypothetical **Sentiment Analyzer** tool as the example.
+
+## Overview
+
+Adding a tool requires changes in three places:
+
+| Layer | What you touch |
+|---|---|
+| Config | Register the tool slug, credit cost, and rate limits |
+| API (`packages/api`) | Types, processor logic, registration |
+| Web app (`apps/web`) | Inngest function, UI component, tool page |
+
+---
+
+## Step 1: Register the tool in config
+
+Open `config/index.ts` and add an entry to `tools.registry`:
+
+```ts
+{
+  slug: "sentiment-analyzer",
+  name: "Sentiment Analyzer",
+  description: "Analyze the sentiment and tone of any text in seconds.",
+  icon: "smile",              // lucide-react icon name
+  public: true,               // allow anonymous access
+  enabled: true,
+  creditCost: 1,              // credits deducted per run
+  rateLimits: {
+    anonymous: { requests: 5, window: "1d" },
+    authenticated: { requests: 50, window: "1h" },
+  },
+}
+```
+
+**Key fields:**
+
+- `slug` — unique identifier used in URLs, event names, and API routes
+- `creditCost` — credits deducted per job; use `creditUnit: "minute"` or `creditUnit: "page"` for variable-cost tools
+- `public: true` — allows unauthenticated access (with the `anonymous` rate limit)
+- `enabled: false` — hides the tool without removing code; useful for WIP tools
+
+---
+
+## Step 2: Define types
+
+Create `packages/api/modules/sentiment-analyzer/types.ts`:
+
+```ts
+import { z } from "zod";
+
+export const SentimentAnalyzerInputSchema = z.object({
+  text: z.string().min(10).max(10_000),
+  language: z.enum(["en", "es", "fr", "de"]).optional().default("en"),
+});
+
+export type SentimentAnalyzerInput = z.infer<typeof SentimentAnalyzerInputSchema>;
+
+export const SentimentAnalyzerOutputSchema = z.object({
+  overall: z.enum(["positive", "neutral", "negative"]),
+  score: z.number().min(-1).max(1),   // -1 = very negative, 1 = very positive
+  emotions: z.array(z.object({
+    label: z.string(),
+    confidence: z.number(),
+  })),
+  summary: z.string(),
+});
+
+export type SentimentAnalyzerOutput = z.infer<typeof SentimentAnalyzerOutputSchema>;
+```
+
+Keep input and output schemas in `types.ts`. Use `z.infer<>` so TypeScript infers the types from the schema — never duplicate hand-written types.
+
+---
+
+## Step 3: Write the processor
+
+Create `packages/api/modules/sentiment-analyzer/lib/processor.ts`:
+
+```ts
+import { executePrompt } from "@repo/agent-sdk";
+import type { ToolJob } from "@repo/database";
+import { logger } from "@repo/logs";
+import type { JobResult } from "../../jobs/lib/processor-registry";
+import type { SentimentAnalyzerInput, SentimentAnalyzerOutput } from "../types";
+import { SentimentAnalyzerInputSchema, SentimentAnalyzerOutputSchema } from "../types";
+
+const SENTIMENT_PROMPT = `You are a sentiment analysis system. Analyze the provided text and return a JSON object with this exact structure:
+{
+  "overall": "positive" | "neutral" | "negative",
+  "score": <number between -1 and 1>,
+  "emotions": [{ "label": "<emotion>", "confidence": <0-1> }],
+  "summary": "<one sentence summary of the tone>"
+}
+
+Return ONLY valid JSON. No explanation.`;
+
+export async function processSentimentJob(job: ToolJob): Promise<JobResult> {
+  const parseResult = SentimentAnalyzerInputSchema.safeParse(job.input);
+  if (!parseResult.success) {
+    return { success: false, error: "Invalid input" };
+  }
+
+  const { text, language } = parseResult.data;
+
+  try {
+    logger.info("[SentimentAnalyzer] Processing job", { jobId: job.id });
+
+    const response = await executePrompt({
+      system: SENTIMENT_PROMPT,
+      user: `Language: ${language}\n\nText to analyze:\n${text}`,
+      model: "claude-3-5-haiku-20241022",
+      maxTokens: 512,
+    });
+
+    const parsed = SentimentAnalyzerOutputSchema.safeParse(
+      JSON.parse(response),
+    );
+    if (!parsed.success) {
+      return { success: false, error: "AI returned unexpected output format" };
+    }
+
+    return { success: true, output: parsed.data };
+  } catch (error) {
+    logger.error("[SentimentAnalyzer] Job failed", { jobId: job.id, error });
+    return { success: false, error: "Failed to analyze sentiment" };
+  }
+}
+```
+
+**Tips:**
+
+- Always validate input with `safeParse` at the top of the processor
+- Always validate AI output before returning `success: true` — LLMs sometimes deviate from requested formats
+- Use `claude-3-5-haiku-20241022` for fast/cheap tasks; `claude-3-5-sonnet-20241022` for complex analysis
+- Return `{ success: false, error: "..." }` for all failure modes — the Inngest function handles job status updates
+
+---
+
+## Step 4: Register the processor
+
+Create `packages/api/modules/sentiment-analyzer/lib/register.ts`:
+
+```ts
+import { registerProcessor } from "../../jobs/lib/processor-registry";
+import { processSentimentJob } from "./processor";
+
+export function registerSentimentAnalyzerProcessor() {
+  registerProcessor("sentiment-analyzer", processSentimentJob);
+}
+```
+
+Then export from `packages/api/modules/sentiment-analyzer/index.ts`:
+
+```ts
+export { processSentimentJob } from "./lib/processor";
+export { registerSentimentAnalyzerProcessor } from "./lib/register";
+export * from "./types";
+```
+
+Finally, call the registration function in `packages/api/modules/jobs/lib/processor-registry.ts` (or wherever the other processors are registered at startup).
+
+---
+
+## Step 5: Add the Inngest event type
+
+In `apps/web/inngest/client.ts`, add an event type to the `EventSchemas`:
+
+```ts
+"jobs/sentiment-analyzer.requested": {
+  data: {
+    toolJobId: string;
+    input: {
+      text: string;
+      language?: string;
+    };
+  };
+};
+```
+
+---
+
+## Step 6: Create the Inngest function
+
+Create `apps/web/inngest/functions/sentiment-analyzer.ts`:
+
+```ts
+import { processSentimentJob } from "@repo/api/modules/sentiment-analyzer";
+import type { Prisma } from "@repo/database";
+import { getToolJobById, markJobCompleted, markJobFailed } from "@repo/database";
+import { logger } from "@repo/logs";
+import { inngest } from "../client";
+
+export const sentimentAnalyzer = inngest.createFunction(
+  {
+    id: "sentiment-analyzer",
+    name: "Sentiment Analyzer",
+    retries: 3,
+  },
+  { event: "jobs/sentiment-analyzer.requested" },
+  async ({ event, step }) => {
+    const { toolJobId } = event.data;
+
+    await step.run("validate-job", async () => {
+      const job = await getToolJobById(toolJobId);
+      if (!job) throw new Error(`Tool job not found: ${toolJobId}`);
+      return { exists: true };
+    });
+
+    const result = await step.run("process-sentiment", async () => {
+      const job = await getToolJobById(toolJobId);
+      if (!job) throw new Error(`Tool job not found: ${toolJobId}`);
+      return await processSentimentJob(job);
+    });
+
+    await step.run("update-job-status", async () => {
+      if (result.success && result.output !== undefined) {
+        await markJobCompleted(toolJobId, result.output as Prisma.InputJsonValue);
+        logger.info("[Inngest:SentimentAnalyzer] Completed", { toolJobId });
+      } else {
+        await markJobFailed(toolJobId, result.error ?? "Unknown error");
+        logger.error("[Inngest:SentimentAnalyzer] Failed", { toolJobId, error: result.error });
+      }
+    });
+
+    return { success: result.success, toolJobId };
+  },
+);
+```
+
+Then register it in `apps/web/inngest/client.ts` alongside the other functions:
+
+```ts
+import { sentimentAnalyzer } from "./functions/sentiment-analyzer";
+
+// Add to the serve() call in apps/web/app/api/inngest/route.ts:
+serve({ client: inngest, functions: [ ..., sentimentAnalyzer ] });
+```
+
+---
+
+## Step 7: Build the UI component
+
+Create a directory `apps/web/modules/tools/sentiment-analyzer/` with these files:
+
+### `SentimentAnalyzerTool.tsx` — the input form
+
+```tsx
+"use client";
+
+import { Button } from "@ui/components/button";
+import { Textarea } from "@ui/components/textarea";
+import { toast } from "sonner";
+import { useJobSubmit } from "@tools/hooks/use-job-submit";
+
+export function SentimentAnalyzerTool() {
+  const { submit, isSubmitting } = useJobSubmit("sentiment-analyzer");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    try {
+      await submit({ text: form.get("text") as string });
+    } catch {
+      toast.error("Failed to submit — please try again");
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Textarea
+        name="text"
+        placeholder="Paste any text to analyze its sentiment…"
+        rows={6}
+        required
+        minLength={10}
+        maxLength={10_000}
+      />
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Analyzing…" : "Analyze Sentiment"}
+      </Button>
+    </form>
+  );
+}
+```
+
+### `SentimentAnalyzerResult.tsx` — the output display
+
+```tsx
+import type { SentimentAnalyzerOutput } from "@repo/api/modules/sentiment-analyzer";
+
+export function SentimentAnalyzerResult({ output }: { output: SentimentAnalyzerOutput }) {
+  const colorMap = {
+    positive: "text-green-600",
+    neutral: "text-yellow-600",
+    negative: "text-red-600",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="text-center">
+        <span className={`text-2xl font-bold capitalize ${colorMap[output.overall]}`}>
+          {output.overall}
+        </span>
+        <p className="mt-1 text-sm text-foreground/60">
+          Score: {output.score.toFixed(2)}
+        </p>
+      </div>
+      <p className="text-foreground/80">{output.summary}</p>
+      <div className="flex flex-wrap gap-2">
+        {output.emotions.map((e) => (
+          <span key={e.label} className="rounded-full bg-muted px-3 py-1 text-sm">
+            {e.label} ({Math.round(e.confidence * 100)}%)
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+### `history-utils.ts` — past result rendering
+
+```ts
+import type { ToolJob } from "@repo/database";
+import type { SentimentAnalyzerOutput } from "@repo/api/modules/sentiment-analyzer";
+
+export function getSentimentHistorySummary(job: ToolJob): string {
+  const output = job.output as SentimentAnalyzerOutput | null;
+  if (!output) return "No result";
+  return `${output.overall} (score: ${output.score.toFixed(2)})`;
+}
+```
+
+---
+
+## Step 8: Add the tool page route
+
+Create `apps/web/app/(saas)/app/tools/sentiment-analyzer/page.tsx`:
+
+```tsx
+import { SentimentAnalyzerTool } from "@tools/sentiment-analyzer/SentimentAnalyzerTool";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sentiment Analyzer",
+};
+
+export default function SentimentAnalyzerPage() {
+  return <SentimentAnalyzerTool />;
+}
+```
+
+---
+
+## Step 9: Add a marketing landing page (optional)
+
+For SEO and tool discoverability, add a marketing page at `apps/web/app/(marketing)/tools/sentiment-analyzer/page.tsx`. See the existing `news-analyzer` marketing page for a template — it includes metadata, JSON-LD structured data, feature highlights, and a signup CTA.
+
+---
+
+## Step 10: Test end-to-end
+
+1. **Unit test the processor** — write `processor.test.ts` in the `lib/` directory, mock `executePrompt`, and test valid input, invalid input, malformed AI output, and network errors.
+2. **Unit test the UI component** — render `SentimentAnalyzerTool`, submit the form, and verify the correct `useJobSubmit` payload is passed.
+3. **Run the full test suite** — `cd tooling/scripts && pnpm repo:feedback` will surface any regressions.
+4. **Test with Inngest Dev Server** — run `npx inngest-cli@latest dev` locally to trigger test events and inspect the function execution steps.
+
+---
+
+## Checklist
+
+- [ ] Tool registered in `config/index.ts`
+- [ ] Input/output types defined with Zod schemas
+- [ ] Processor implemented with validated input and output
+- [ ] Processor registered in the registry
+- [ ] Inngest event type added to `client.ts`
+- [ ] Inngest function created and registered in `route.ts`
+- [ ] UI input form and result display components created
+- [ ] `history-utils.ts` added for past result rendering
+- [ ] Tool page route created under `/app/tools/<slug>`
+- [ ] (Optional) Marketing landing page created under `/tools/<slug>`
+- [ ] Processor unit tests written
+- [ ] UI component tests written
+- [ ] `pnpm repo:feedback` passes
