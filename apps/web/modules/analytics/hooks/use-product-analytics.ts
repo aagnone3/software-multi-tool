@@ -58,6 +58,10 @@ type ProductEvent =
 			props: { source: string; current_plan: string };
 	  }
 	| {
+			name: "pricing_interval_switched";
+			props: { interval: "month" | "year" };
+	  }
+	| {
 			name: "exit_intent_modal_shown";
 			props: { plan_id: string; source: string };
 	  }
