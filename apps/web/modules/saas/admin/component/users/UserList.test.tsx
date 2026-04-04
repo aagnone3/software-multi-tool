@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@shared/lib/orpc-client", () => ({ orpcClient: {} }));
 vi.mock("@shared/lib/orpc-query-utils", () => ({
@@ -83,9 +83,18 @@ vi.mock("../EmailVerified", () => ({
 	EmailVerified: () => <span>verified</span>,
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { UserList } from "./UserList";
 
 describe("UserList", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
+
 	it("renders the heading", () => {
 		render(<UserList />);
 		expect(screen.getByText("Users")).toBeTruthy();

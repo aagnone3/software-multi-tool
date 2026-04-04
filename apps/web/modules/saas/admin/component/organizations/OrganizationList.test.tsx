@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@shared/lib/orpc-client", () => ({ orpcClient: {} }));
 vi.mock("@shared/lib/orpc-query-utils", () => ({
@@ -82,9 +82,18 @@ vi.mock("ufo", () => ({
 	withQuery: (path: string, q: any) => `${path}?${new URLSearchParams(q)}`,
 }));
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { OrganizationList } from "./OrganizationList";
 
 describe("OrganizationList", () => {
+	beforeEach(() => {
+		mockTrack.mockClear();
+	});
+
 	it("renders the heading", () => {
 		render(<OrganizationList />);
 		expect(screen.getByText("Organizations")).toBeTruthy();
