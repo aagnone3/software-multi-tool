@@ -4,6 +4,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockPush = vi.fn();
+const mockTrack = vi.fn();
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
@@ -19,11 +20,16 @@ vi.mock("@repo/config", () => ({
 	config: { organizations: { enable: false } },
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 import { KeyboardNavigationShortcuts } from "./KeyboardNavigationShortcuts";
 
 describe("KeyboardNavigationShortcuts", () => {
 	beforeEach(() => {
 		mockPush.mockClear();
+		mockTrack.mockClear();
 	});
 
 	it("renders nothing", () => {
@@ -64,6 +70,16 @@ describe("KeyboardNavigationShortcuts", () => {
 		await userEvent.keyboard("g");
 		await userEvent.keyboard("z");
 		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("fires keyboard_nav_shortcut_used analytics event on valid sequence", async () => {
+		render(<KeyboardNavigationShortcuts />);
+		await userEvent.keyboard("g");
+		await userEvent.keyboard("t");
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "keyboard_nav_shortcut_used",
+			props: { sequence: "g t", destination: "/app/tools" },
+		});
 	});
 
 	it("does not trigger when typing in an input", async () => {

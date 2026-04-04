@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { config } from "@repo/config";
 import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
@@ -29,6 +30,7 @@ export function OrganzationSelect({ className }: { className?: string }) {
 	const { activeOrganization, setActiveOrganization } =
 		useActiveOrganization();
 	const { data: allOrganizations } = useOrganizationListQuery();
+	const { track } = useProductAnalytics();
 
 	if (!user) {
 		return null;
@@ -109,6 +111,10 @@ export function OrganzationSelect({ className }: { className?: string }) {
 					<DropdownMenuRadioGroup
 						value={activeOrganization?.slug}
 						onValueChange={async (organizationSlug: string) => {
+							track({
+								name: "organization_select_switched",
+								props: { to_slug: organizationSlug },
+							});
 							await clearCache();
 							setActiveOrganization(organizationSlug);
 						}}
