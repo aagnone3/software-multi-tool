@@ -14,11 +14,11 @@ describe("Features", () => {
 	it("renders the section heading", () => {
 		render(<Features />);
 		expect(
-			screen.getByText("8 AI tools, ready to use today"),
+			screen.getByText("9 AI tools, ready to use today"),
 		).toBeInTheDocument();
 	});
 
-	it("renders all 8 tool cards", () => {
+	it("renders all 9 tool cards", () => {
 		render(<Features />);
 		expect(screen.getByText("News Analyzer")).toBeInTheDocument();
 		expect(screen.getByText("Contract Analyzer")).toBeInTheDocument();
@@ -30,6 +30,7 @@ describe("Features", () => {
 		expect(screen.getByText("Expense Categorizer")).toBeInTheDocument();
 		expect(screen.getByText("Speaker Separation")).toBeInTheDocument();
 		expect(screen.getByText("Background Remover")).toBeInTheDocument();
+		expect(screen.getByText("Diagram Editor")).toBeInTheDocument();
 	});
 
 	it("marks background remover as coming soon", () => {
@@ -40,7 +41,7 @@ describe("Features", () => {
 	it("renders Try it links for non-coming-soon tools", () => {
 		render(<Features />);
 		const links = screen.getAllByText("Try it →");
-		expect(links.length).toBe(7);
+		expect(links.length).toBe(8);
 	});
 
 	it("renders a section element", () => {

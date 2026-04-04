@@ -23,7 +23,7 @@ export function Hero() {
 				</h1>
 
 				<p className="mx-auto mt-6 max-w-2xl text-balance text-foreground/70 text-lg md:text-xl">
-					Eight powerful AI tools in one platform — built for small
+					Nine powerful AI tools in one platform — built for small
 					business owners who need results fast, without a technical
 					team.
 				</p>
