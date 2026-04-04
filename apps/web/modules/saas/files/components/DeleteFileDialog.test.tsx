@@ -3,6 +3,11 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DeleteFileDialog } from "./DeleteFileDialog";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 describe("DeleteFileDialog", () => {
 	const baseProps = {
 		file: { id: "file-1", filename: "report.pdf" },
@@ -43,5 +48,15 @@ describe("DeleteFileDialog", () => {
 	it("does not render content when not open", () => {
 		render(<DeleteFileDialog {...baseProps} isOpen={false} />);
 		expect(screen.queryByText("Delete file?")).toBeNull();
+	});
+
+	it("fires file_delete_confirmed analytics when Delete is clicked", () => {
+		mockTrack.mockClear();
+		render(<DeleteFileDialog {...baseProps} />);
+		fireEvent.click(screen.getByText("Delete"));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "file_delete_confirmed",
+			props: { file_id: "file-1" },
+		});
 	});
 });

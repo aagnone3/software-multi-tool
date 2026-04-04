@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -27,6 +28,8 @@ export function DeleteFileDialog({
 	onConfirm,
 	isDeleting,
 }: DeleteFileDialogProps) {
+	const { track } = useProductAnalytics();
+
 	return (
 		<AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
 			<AlertDialogContent>
@@ -44,7 +47,13 @@ export function DeleteFileDialog({
 						Cancel
 					</AlertDialogCancel>
 					<AlertDialogAction
-						onClick={onConfirm}
+						onClick={() => {
+							track({
+								name: "file_delete_confirmed",
+								props: { file_id: file?.id ?? "" },
+							});
+							onConfirm();
+						}}
 						disabled={isDeleting}
 						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 					>
