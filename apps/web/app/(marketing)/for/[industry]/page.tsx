@@ -1101,7 +1101,7 @@ export default async function IndustryPage({
 							Ready to get started?
 						</h2>
 						<p className="mb-8 text-muted-foreground text-lg">
-							Free credits on signup. No credit card required.
+							10 free credits on signup. No credit card required.
 						</p>
 						<Link
 							href="/auth/signup"

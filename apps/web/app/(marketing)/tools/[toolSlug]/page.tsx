@@ -345,7 +345,7 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 			"@type": "Offer",
 			price: "0",
 			priceCurrency: "USD",
-			description: `Free credits included on signup. ${tool.creditCost} credit${tool.creditCost === 1 ? "" : "s"} per use.`,
+			description: `10 free credits on signup. ${tool.creditCost} credit${tool.creditCost === 1 ? "" : "s"} per use.`,
 		},
 	};
 
