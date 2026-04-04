@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Pagination } from "@saas/shared/components/Pagination";
 import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -83,6 +84,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
 }
 
 export function SpeakerSeparationHistory() {
+	const { track } = useProductAnalytics();
 	const [currentPage, setCurrentPage] = useQueryState(
 		"page",
 		parseAsInteger.withDefault(1),
@@ -231,6 +233,12 @@ export function SpeakerSeparationHistory() {
 								<Button variant="ghost" size="sm" asChild>
 									<Link
 										href={`/app/tools/speaker-separation/${job.id}`}
+										onClick={() =>
+											track({
+												name: "speaker_separation_history_view_clicked",
+												props: { job_id: job.id },
+											})
+										}
 									>
 										View
 									</Link>
@@ -252,6 +260,10 @@ export function SpeakerSeparationHistory() {
 	});
 
 	const handleRowClick = (job: SpeakerSeparationJob) => {
+		track({
+			name: "speaker_separation_history_job_clicked",
+			props: { job_id: job.id, status: job.status },
+		});
 		if (job.status === "COMPLETED" || job.status === "FAILED") {
 			window.location.href = `/app/tools/speaker-separation/${job.id}`;
 		}

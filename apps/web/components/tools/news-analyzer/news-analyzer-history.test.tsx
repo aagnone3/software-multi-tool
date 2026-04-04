@@ -3,6 +3,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NewsAnalyzerHistory } from "./news-analyzer-history";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
+
 const { useQueryMock } = vi.hoisted(() => ({
 	useQueryMock: vi.fn(),
 }));
@@ -114,6 +119,7 @@ vi.mock("./lib/history-utils", () => ({
 describe("NewsAnalyzerHistory", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockTrack.mockClear();
 		// Mock localStorage
 		Object.defineProperty(window, "localStorage", {
 			value: {
@@ -208,5 +214,15 @@ describe("NewsAnalyzerHistory", () => {
 		});
 		render(<NewsAnalyzerHistory />);
 		expect(screen.getByTestId("pagination")).toBeInTheDocument();
+	});
+
+	it("track is available via useProductAnalytics mock", () => {
+		useQueryMock.mockReturnValue({
+			data: { jobs: [] },
+			isLoading: false,
+			refetch: vi.fn(),
+		});
+		render(<NewsAnalyzerHistory />);
+		expect(mockTrack).not.toHaveBeenCalled();
 	});
 });

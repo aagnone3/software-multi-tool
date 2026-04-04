@@ -1033,6 +1033,30 @@ type ProductEvent =
 	| {
 			name: "organization_select_switched";
 			props: { to_slug: string };
+	  }
+	| {
+			name: "news_analyzer_history_job_clicked";
+			props: { job_id: string; status: string };
+	  }
+	| {
+			name: "news_analyzer_history_view_clicked";
+			props: { job_id: string };
+	  }
+	| {
+			name: "news_analyzer_history_search_used";
+			props: { term: string };
+	  }
+	| {
+			name: "news_analyzer_history_status_filtered";
+			props: { status: string };
+	  }
+	| {
+			name: "speaker_separation_history_job_clicked";
+			props: { job_id: string; status: string };
+	  }
+	| {
+			name: "speaker_separation_history_view_clicked";
+			props: { job_id: string };
 	  };
 
 export type { ProductEvent };
