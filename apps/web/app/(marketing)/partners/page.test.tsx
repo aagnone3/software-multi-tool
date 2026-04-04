@@ -8,6 +8,10 @@ vi.mock("@repo/config", () => ({
 	},
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => null,
+}));
+
 vi.mock("@repo/utils", () => ({
 	getBaseUrl: () => "https://example.com",
 }));

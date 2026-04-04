@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import {
@@ -482,6 +483,7 @@ export default function PartnersPage() {
 					</div>
 				</section>
 			</div>
+			<StickyCta />
 		</>
 	);
 }

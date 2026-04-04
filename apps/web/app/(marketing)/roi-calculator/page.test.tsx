@@ -8,6 +8,10 @@ vi.mock("@analytics/hooks/use-product-analytics", () => ({
 	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => null,
+}));
+
 vi.mock("@repo/utils", () => ({
 	getBaseUrl: () => "https://softwaremultitool.com",
 }));
