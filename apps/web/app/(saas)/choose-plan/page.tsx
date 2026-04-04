@@ -1,6 +1,7 @@
 import { config } from "@repo/config";
 import { createPurchasesHelper } from "@repo/payments/lib/helper";
 import { getOrganizationList, getSession } from "@saas/auth/lib/server";
+import { BillingTrustSection } from "@saas/payments/components/BillingTrustSection";
 import { PricingTable } from "@saas/payments/components/PricingTable";
 import { getPurchases } from "@saas/payments/lib/server";
 import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
@@ -73,6 +74,8 @@ export default async function ChoosePlanPage() {
 							})}
 				/>
 			</div>
+
+			<BillingTrustSection className="mt-6" />
 		</AuthWrapper>
 	);
 }
