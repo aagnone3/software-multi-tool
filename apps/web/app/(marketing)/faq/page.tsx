@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import type { Metadata } from "next";
@@ -225,6 +226,7 @@ export default function FaqPage() {
 					</Link>
 				</div>
 			</div>
+			<StickyCta />
 		</>
 	);
 }

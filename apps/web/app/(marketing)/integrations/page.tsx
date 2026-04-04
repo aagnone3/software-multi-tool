@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { IntegrationsPageTracker } from "@marketing/shared/components/IntegrationsPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
@@ -333,6 +334,7 @@ export default function IntegrationsPage() {
 					</div>
 				</section>
 			</main>
+			<StickyCta />
 		</>
 	);
 }

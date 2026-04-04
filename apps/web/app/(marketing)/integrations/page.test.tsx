@@ -13,6 +13,10 @@ vi.mock("@repo/utils", () => ({
 	getBaseUrl: () => "https://test.example.com",
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => null,
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		href,
