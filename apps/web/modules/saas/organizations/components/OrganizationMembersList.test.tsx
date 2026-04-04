@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@shared/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 vi.mock("@repo/auth/client", () => ({
 	authClient: {
 		organization: {

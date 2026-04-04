@@ -819,7 +819,16 @@ type ProductEvent =
 	| {
 			name: "tool_recent_runs_job_clicked";
 			props: { tool_slug: string; job_id: string; job_status: string };
-	  };
+	  }
+	| {
+			name: "org_member_role_updated";
+			props: { member_id: string; new_role: string };
+	  }
+	| {
+			name: "org_member_removed";
+			props: { member_id: string; self: boolean };
+	  }
+	| { name: "org_invitation_revoked"; props: { invitation_id: string } };
 
 export type { ProductEvent };
 
