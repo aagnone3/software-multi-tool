@@ -1008,7 +1008,16 @@ type ProductEvent =
 	| {
 			name: "smart_output_raw_copied";
 			props: { tool_slug: string };
-	  };
+	  }
+	| { name: "admin_user_impersonated"; props: { user_id: string } }
+	| { name: "admin_user_verification_resent"; props: { email: string } }
+	| {
+			name: "admin_user_role_changed";
+			props: { user_id: string; action: "assign_admin" | "remove_admin" };
+	  }
+	| { name: "admin_user_deleted"; props: { user_id: string } }
+	| { name: "admin_org_viewed"; props: { org_id: string } }
+	| { name: "admin_org_deleted"; props: { org_id: string } };
 
 export type { ProductEvent };
 

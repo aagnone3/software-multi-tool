@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { useConfirmationAlert } from "@saas/shared/components/ConfirmationAlertProvider";
 import { Pagination } from "@saas/shared/components/Pagination";
@@ -37,6 +38,7 @@ const ITEMS_PER_PAGE = 10;
 export function UserList() {
 	const queryClient = useQueryClient();
 	const { confirm } = useConfirmationAlert();
+	const { track } = useProductAnalytics();
 	const [currentPage, setCurrentPage] = useQueryState(
 		"currentPage",
 		parseAsInteger.withDefault(1),
@@ -208,11 +210,17 @@ export function UserList() {
 								</DropdownMenuTrigger>
 								<DropdownMenuContent>
 									<DropdownMenuItem
-										onClick={() =>
+										onClick={() => {
+											track({
+												name: "admin_user_impersonated",
+												props: {
+													user_id: row.original.id,
+												},
+											});
 											impersonateUser(row.original.id, {
 												name: row.original.name ?? "",
-											})
-										}
+											});
+										}}
 									>
 										<SquareUserRoundIcon className="mr-2 size-4" />
 										Impersonate
@@ -220,11 +228,18 @@ export function UserList() {
 
 									{!row.original.emailVerified && (
 										<DropdownMenuItem
-											onClick={() =>
+											onClick={() => {
+												track({
+													name: "admin_user_verification_resent",
+													props: {
+														email: row.original
+															.email,
+													},
+												});
 												resendVerificationMail(
 													row.original.email,
-												)
-											}
+												);
+											}}
 										>
 											<Repeat1Icon className="mr-2 size-4" />
 											Resend verification email
@@ -233,18 +248,38 @@ export function UserList() {
 
 									{row.original.role !== "admin" ? (
 										<DropdownMenuItem
-											onClick={() =>
-												assignAdminRole(row.original.id)
-											}
+											onClick={() => {
+												track({
+													name: "admin_user_role_changed",
+													props: {
+														user_id:
+															row.original.id,
+														action: "assign_admin",
+													},
+												});
+												assignAdminRole(
+													row.original.id,
+												);
+											}}
 										>
 											<ShieldCheckIcon className="mr-2 size-4" />
 											Assign admin role
 										</DropdownMenuItem>
 									) : (
 										<DropdownMenuItem
-											onClick={() =>
-												removeAdminRole(row.original.id)
-											}
+											onClick={() => {
+												track({
+													name: "admin_user_role_changed",
+													props: {
+														user_id:
+															row.original.id,
+														action: "remove_admin",
+													},
+												});
+												removeAdminRole(
+													row.original.id,
+												);
+											}}
 										>
 											<ShieldXIcon className="mr-2 size-4" />
 											Remove admin role
@@ -259,8 +294,16 @@ export function UserList() {
 													"Are you sure you want to delete this user?",
 												confirmLabel: "Delete",
 												destructive: true,
-												onConfirm: () =>
-													deleteUser(row.original.id),
+												onConfirm: () => {
+													track({
+														name: "admin_user_deleted",
+														props: {
+															user_id:
+																row.original.id,
+														},
+													});
+													deleteUser(row.original.id);
+												},
 											})
 										}
 									>

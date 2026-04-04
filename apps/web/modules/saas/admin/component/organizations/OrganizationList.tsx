@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { authClient } from "@repo/auth/client";
 import { getAdminPath } from "@saas/admin/lib/links";
 import { OrganizationLogo } from "@saas/organizations/components/OrganizationLogo";
@@ -32,6 +33,7 @@ const ITEMS_PER_PAGE = 10;
 export function OrganizationList() {
 	const { confirm } = useConfirmationAlert();
 	const queryClient = useQueryClient();
+	const { track } = useProductAnalytics();
 	const [currentPage, setCurrentPage] = useQueryState(
 		"currentPage",
 		parseAsInteger.withDefault(1),
@@ -158,6 +160,12 @@ export function OrganizationList() {
 										<Link
 											href={getOrganizationEditPath(id)}
 											className="flex items-center"
+											onClick={() =>
+												track({
+													name: "admin_org_viewed",
+													props: { org_id: id },
+												})
+											}
 										>
 											<EditIcon className="mr-2 size-4" />
 											Edit
@@ -171,8 +179,13 @@ export function OrganizationList() {
 													"Are you sure you want to delete this organization?",
 												confirmLabel: "Delete",
 												destructive: true,
-												onConfirm: () =>
-													deleteOrganization(id),
+												onConfirm: () => {
+													track({
+														name: "admin_org_deleted",
+														props: { org_id: id },
+													});
+													deleteOrganization(id);
+												},
 											})
 										}
 									>
