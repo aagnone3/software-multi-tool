@@ -2,6 +2,7 @@
 
 import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useSession } from "@saas/auth/hooks/use-session";
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
@@ -37,6 +38,7 @@ export function GettingStartedChecklist({
 }: GettingStartedChecklistProps) {
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
+	const { isFreePlan } = useCreditsBalance();
 	const { jobs, isLoading: jobsLoading } = useRecentJobs(1);
 	const [isDismissed, setIsDismissed] = useState(false);
 	const { track } = useProductAnalytics();
@@ -81,12 +83,12 @@ export function GettingStartedChecklist({
 		},
 		{
 			id: "billing",
-			label: "Review your plan",
-			description: "Check credits and billing options",
+			label: "Upgrade your plan",
+			description: "Unlock more credits and Pro features",
 			href: activeOrganization
 				? `/app/${activeOrganization.slug}/settings/billing`
 				: "/app/settings/billing",
-			isComplete: Boolean(activeOrganization),
+			isComplete: !isFreePlan,
 		},
 	];
 
