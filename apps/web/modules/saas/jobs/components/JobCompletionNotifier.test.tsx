@@ -61,4 +61,47 @@ describe("JobCompletionNotifier", () => {
 		// No previous status → no transition detected
 		expect(toast.success).not.toHaveBeenCalled();
 	});
+
+	it("fires success toast with direct job link when job transitions to COMPLETED", () => {
+		const { rerender } = render(<JobCompletionNotifier />);
+
+		// First render: job is PROCESSING (seeds the prevStatusRef)
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-abc",
+					toolSlug: "contract-analyzer",
+					status: "PROCESSING",
+				},
+			],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		} as unknown as ReturnType<typeof useJobsList>);
+		rerender(<JobCompletionNotifier />);
+
+		// Second render: job transitions to COMPLETED
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job-abc",
+					toolSlug: "contract-analyzer",
+					status: "COMPLETED",
+				},
+			],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		} as unknown as ReturnType<typeof useJobsList>);
+		rerender(<JobCompletionNotifier />);
+
+		expect(toast.success).toHaveBeenCalledOnce();
+		const call = vi.mocked(toast.success).mock.calls[0];
+		// action.onClick should navigate to the specific job, not the list
+		const action = (call[1] as { action?: { onClick: () => void } })
+			?.action;
+		expect(action).toBeDefined();
+		action?.onClick();
+		expect(window.location.href).toContain("/app/jobs/job-abc");
+	});
 });
