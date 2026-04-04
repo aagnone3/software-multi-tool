@@ -869,6 +869,15 @@ type ProductEvent =
 				format: "png" | "svg";
 				action: "copy" | "download";
 			};
+	  }
+	| { name: "usage_history_page_viewed"; props: Record<string, never> }
+	| {
+			name: "usage_overage_nudge_upgrade_clicked";
+			props: { overage_credits: number; overage_cost: number };
+	  }
+	| {
+			name: "usage_overage_nudge_compare_clicked";
+			props: { overage_credits: number; overage_cost: number };
 	  };
 
 export type { ProductEvent };
