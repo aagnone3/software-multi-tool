@@ -1,8 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolRecentRuns } from "./ToolRecentRuns";
 
+const mockTrack = vi.fn();
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
+}));
 vi.mock("@tools/hooks/use-job-polling", () => ({
 	useJobsList: vi.fn(),
 }));
@@ -10,10 +15,18 @@ vi.mock("next/link", () => ({
 	default: ({
 		href,
 		children,
+		onClick,
+		className,
 	}: {
 		href: string;
 		children: React.ReactNode;
-	}) => <a href={href}>{children}</a>,
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+		className?: string;
+	}) => (
+		<a href={href} onClick={onClick} className={className}>
+			{children}
+		</a>
+	),
 }));
 
 import { useJobsList } from "@tools/hooks/use-job-polling";
@@ -165,5 +178,40 @@ describe("ToolRecentRuns", () => {
 		});
 		render(<ToolRecentRuns toolSlug="invoice-processor" />);
 		expect(mockUseJobsList).toHaveBeenCalledWith("invoice-processor", 3);
+	});
+
+	it("tracks view all click", async () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [makeJob()],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		});
+		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
+		await userEvent.click(screen.getByRole("link", { name: /view all/i }));
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_recent_runs_view_all_clicked",
+			props: { tool_slug: "contract-analyzer" },
+		});
+	});
+
+	it("tracks job view click", async () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [makeJob({ id: "job-xyz", status: "COMPLETED" })],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
+		});
+		render(<ToolRecentRuns toolSlug="contract-analyzer" />);
+		const viewLinks = screen.getAllByRole("link", { name: /^view$/i });
+		await userEvent.click(viewLinks[0]);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "tool_recent_runs_job_clicked",
+			props: {
+				tool_slug: "contract-analyzer",
+				job_id: "job-xyz",
+				job_status: "COMPLETED",
+			},
+		});
 	});
 });

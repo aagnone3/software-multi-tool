@@ -1,8 +1,8 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { useJobsList } from "@tools/hooks/use-job-polling";
 import { Badge } from "@ui/components/badge";
-import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { Skeleton } from "@ui/components/skeleton";
 import { cn } from "@ui/lib";
@@ -82,6 +82,7 @@ function formatRelativeTime(dateStr: string | Date): string {
 
 export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 	const { jobs, isLoading } = useJobsList(toolSlug, 3);
+	const { track } = useProductAnalytics();
 
 	if (isLoading) {
 		return (
@@ -113,16 +114,18 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 						<HistoryIcon className="size-4" />
 						Recent Runs
 					</CardTitle>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="h-7 text-xs"
-						asChild
+					<Link
+						href={`/app/tools/${toolSlug}/history`}
+						className="inline-flex h-7 items-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+						onClick={() =>
+							track({
+								name: "tool_recent_runs_view_all_clicked",
+								props: { tool_slug: toolSlug },
+							})
+						}
 					>
-						<Link href={`/app/tools/${toolSlug}/history`}>
-							View all
-						</Link>
-					</Button>
+						View all
+					</Link>
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-2">
@@ -148,14 +151,22 @@ export function ToolRecentRuns({ toolSlug, className }: ToolRecentRunsProps) {
 								</div>
 							</div>
 							{detailUrl && (
-								<Button
-									variant="outline"
-									size="sm"
-									className="h-7 text-xs shrink-0"
-									asChild
+								<Link
+									href={detailUrl}
+									className="inline-flex h-7 shrink-0 items-center rounded-md border border-input px-3 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+									onClick={() =>
+										track({
+											name: "tool_recent_runs_job_clicked",
+											props: {
+												tool_slug: toolSlug,
+												job_id: job.id,
+												job_status: status,
+											},
+										})
+									}
 								>
-									<Link href={detailUrl}>View</Link>
-								</Button>
+									View
+								</Link>
 							)}
 						</div>
 					);
