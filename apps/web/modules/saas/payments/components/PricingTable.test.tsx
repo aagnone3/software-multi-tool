@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -166,6 +167,19 @@ describe("PricingTable", () => {
 		fireEvent.click(yearlyTab);
 		// Still renders plans after switching
 		expect(screen.getByText("Starter")).toBeDefined();
+	});
+
+	it("tracks pricing_interval_switched when toggling billing interval", async () => {
+		mockTrack.mockClear();
+		const user = userEvent.setup({ delay: null });
+		render(<PricingTable />);
+		const yearlyTab = screen.getByText("Yearly");
+		await user.click(yearlyTab);
+		const call = mockTrack.mock.calls.find(
+			([e]) => e.name === "pricing_interval_switched",
+		);
+		expect(call).toBeDefined();
+		expect(call?.[0].props.interval).toBe("year");
 	});
 
 	it("shows free plan with $0 price", () => {

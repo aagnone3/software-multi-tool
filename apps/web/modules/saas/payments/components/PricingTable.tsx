@@ -180,9 +180,16 @@ export function PricingTable({
 				<div className="mb-6 flex @xl:justify-center">
 					<Tabs
 						value={interval}
-						onValueChange={(value) =>
-							setInterval(value as typeof interval)
-						}
+						onValueChange={(value) => {
+							const newInterval = value as typeof interval;
+							setInterval(newInterval);
+							track({
+								name: "pricing_interval_switched",
+								props: {
+									interval: newInterval,
+								},
+							});
+						}}
 						data-test="price-table-interval-tabs"
 					>
 						<TabsList className="border-foreground/10">
