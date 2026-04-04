@@ -1,4 +1,5 @@
 "use client";
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { OrganizationMemberRole } from "@repo/auth";
 import { authClient } from "@repo/auth/client";
 import { isOrganizationAdmin } from "@repo/auth/lib/helper";
@@ -35,6 +36,7 @@ export function OrganizationMembersList({
 	const memberRoles = useOrganizationMemberRoles();
 
 	const userIsOrganizationAdmin = isOrganizationAdmin(organization, user);
+	const { track } = useProductAnalytics();
 
 	const updateMemberRole = async (
 		memberId: string,
@@ -54,7 +56,10 @@ export function OrganizationMembersList({
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
 					});
-
+					track({
+						name: "org_member_role_updated",
+						props: { member_id: memberId, new_role: role },
+					});
 					return "Membership was updated successfully";
 				},
 				error: "Could not update organization membership. Please try again.",
@@ -76,7 +81,13 @@ export function OrganizationMembersList({
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
 					});
-
+					track({
+						name: "org_member_removed",
+						props: {
+							member_id: memberId,
+							self: memberId === user?.id,
+						},
+					});
 					return "The member has been successfully removed from your organization.";
 				},
 				error: "Could not remove the member from your organization. Please try again.",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type { ActiveOrganization } from "@repo/auth";
 import { authClient } from "@repo/auth/client";
 import { isOrganizationAdmin } from "@repo/auth/lib/helper";
@@ -52,6 +53,7 @@ export function OrganizationInvitationsList({
 	const { data: organization } = useFullOrganizationQuery(organizationId);
 
 	const canUserEditInvitations = isOrganizationAdmin(organization, user);
+	const { track } = useProductAnalytics();
 
 	const invitations = useMemo(
 		() =>
@@ -82,6 +84,10 @@ export function OrganizationInvitationsList({
 				success: () => {
 					queryClient.invalidateQueries({
 						queryKey: fullOrganizationQueryKey(organizationId),
+					});
+					track({
+						name: "org_invitation_revoked",
+						props: { invitation_id: invitationId },
 					});
 					return "The invitation has been revoked.";
 				},

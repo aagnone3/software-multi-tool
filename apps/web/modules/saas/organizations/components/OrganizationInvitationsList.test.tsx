@@ -3,6 +3,10 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OrganizationInvitationsList } from "./OrganizationInvitationsList";
 
+vi.mock("@shared/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 const mockCancelInvitation = vi.hoisted(() => vi.fn());
 const mockUseSession = vi.hoisted(() => vi.fn());
 const mockUseFullOrganizationQuery = vi.hoisted(() => vi.fn());
