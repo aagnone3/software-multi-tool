@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { cn } from "@ui/lib";
 import {
 	AlertCircleIcon,
@@ -72,6 +73,7 @@ export function NotificationItem({
 	onDelete,
 }: NotificationItemProps) {
 	const router = useRouter();
+	const { track } = useProductAnalytics();
 
 	const IconComponent = typeIcons[type as keyof typeof typeIcons] ?? InfoIcon;
 	const iconColor =
@@ -80,6 +82,10 @@ export function NotificationItem({
 	const handleClick = () => {
 		if (!read && onMarkAsRead) {
 			onMarkAsRead(id);
+			track({
+				name: "notification_marked_as_read",
+				props: { notification_id: id, notification_type: type },
+			});
 		}
 		if (actionUrl) {
 			router.push(actionUrl);
@@ -90,6 +96,10 @@ export function NotificationItem({
 		e.stopPropagation();
 		if (onDelete) {
 			onDelete(id);
+			track({
+				name: "notification_deleted",
+				props: { notification_id: id, notification_type: type },
+			});
 		}
 	};
 

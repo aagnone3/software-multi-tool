@@ -232,6 +232,26 @@ type ProductEvent =
 			};
 	  }
 	| {
+			name: "notification_marked_as_read";
+			props: {
+				notification_id: string;
+				notification_type: string;
+			};
+	  }
+	| {
+			name: "notification_deleted";
+			props: {
+				notification_id: string;
+				notification_type: string;
+			};
+	  }
+	| {
+			name: "notification_all_marked_as_read";
+			props: {
+				unread_count: number;
+			};
+	  }
+	| {
 			name: "tool_feedback_submitted";
 			props: {
 				tool_slug: string;

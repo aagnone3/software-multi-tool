@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import { Spinner } from "@shared/components/Spinner";
 import { Button } from "@ui/components/button";
 import { CheckCheckIcon, InboxIcon } from "lucide-react";
@@ -24,6 +25,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
 	const markAsReadMutation = useMarkNotificationAsReadMutation();
 	const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation();
 	const deleteMutation = useDeleteNotificationMutation();
+	const { track } = useProductAnalytics();
 
 	const notifications = data?.notifications ?? [];
 	const unreadCount = data?.unreadCount ?? 0;
@@ -34,6 +36,10 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
 
 	const handleMarkAllAsRead = () => {
 		markAllAsReadMutation.mutate();
+		track({
+			name: "notification_all_marked_as_read",
+			props: { unread_count: unreadCount },
+		});
 	};
 
 	const handleDelete = (id: string) => {

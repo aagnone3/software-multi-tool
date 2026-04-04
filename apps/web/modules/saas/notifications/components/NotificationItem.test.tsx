@@ -4,8 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 import { NotificationItem } from "./NotificationItem";
 
 const mockPush = vi.fn();
+const mockTrack = vi.fn();
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
+}));
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: mockTrack }),
 }));
 
 const baseProps = {
@@ -32,7 +36,9 @@ describe("NotificationItem", () => {
 		const btn = screen
 			.getByText("Test notification")
 			.closest("[role=button]");
-		if (btn) fireEvent.click(btn);
+		if (btn) {
+			fireEvent.click(btn);
+		}
 		expect(onMarkAsRead).toHaveBeenCalledWith("notif-1");
 	});
 
@@ -47,7 +53,9 @@ describe("NotificationItem", () => {
 		const btn = screen
 			.getByText("Test notification")
 			.closest("[role=button]");
-		if (btn) fireEvent.click(btn);
+		if (btn) {
+			fireEvent.click(btn);
+		}
 		expect(mockPush).toHaveBeenCalledWith("/app/jobs");
 	});
 
@@ -77,5 +85,39 @@ describe("NotificationItem", () => {
 	it("renders error type", () => {
 		render(<NotificationItem {...baseProps} type="error" />);
 		expect(screen.getByText("Test notification")).toBeInTheDocument();
+	});
+
+	it("tracks notification_marked_as_read when unread item is clicked", () => {
+		mockTrack.mockClear();
+		render(
+			<NotificationItem
+				{...baseProps}
+				read={false}
+				onMarkAsRead={vi.fn()}
+			/>,
+		);
+		const btn = screen
+			.getByText("Test notification")
+			.closest("[role=button]");
+		if (btn) {
+			fireEvent.click(btn);
+		}
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "notification_marked_as_read",
+			props: { notification_id: "notif-1", notification_type: "info" },
+		});
+	});
+
+	it("tracks notification_deleted when delete button clicked", () => {
+		mockTrack.mockClear();
+		render(<NotificationItem {...baseProps} onDelete={vi.fn()} />);
+		const deleteBtn = screen.getByRole("button", {
+			name: /delete notification/i,
+		});
+		fireEvent.click(deleteBtn);
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "notification_deleted",
+			props: { notification_id: "notif-1", notification_type: "info" },
+		});
 	});
 });
