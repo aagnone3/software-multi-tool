@@ -1,4 +1,5 @@
 import { ContactForm } from "@marketing/home/components/ContactForm";
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import { redirect } from "next/navigation";
@@ -67,6 +68,7 @@ export default async function ContactPage() {
 
 				<ContactForm />
 			</div>
+			<StickyCta />
 		</>
 	);
 }

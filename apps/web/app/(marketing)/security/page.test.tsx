@@ -12,6 +12,10 @@ vi.mock("@repo/utils", () => ({
 	getBaseUrl: () => "https://example.com",
 }));
 
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
+
 vi.mock("next/link", () => ({
 	default: ({
 		children,
@@ -43,6 +47,12 @@ describe("SecurityPage", () => {
 		expect(
 			screen.getByText(/files deleted after processing/i),
 		).toBeTruthy();
+	});
+
+	it("renders sticky CTA", async () => {
+		const { default: SecurityPage } = await import("./page");
+		render(<SecurityPage />);
+		expect(screen.getByTestId("sticky-cta")).toBeTruthy();
 	});
 
 	it("has metadata with security title", async () => {

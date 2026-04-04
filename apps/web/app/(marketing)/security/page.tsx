@@ -1,3 +1,4 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
 import type { Metadata } from "next";
@@ -127,120 +128,129 @@ const faqs = [
 
 export default function SecurityPage() {
 	return (
-		<div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-			<script
-				type="application/ld+json"
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
-				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(breadcrumbJsonLd),
-				}}
-			/>
+		<>
+			<div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
+				<script
+					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data JSON-LD
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(breadcrumbJsonLd),
+					}}
+				/>
 
-			{/* Header */}
-			<div className="mb-16 text-center">
-				<div className="mb-4 text-5xl">🔒</div>
-				<h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight sm:text-5xl">
-					Security & Privacy
-				</h1>
-				<p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-					Your business data is sensitive. We treat it that way.
-					Here's exactly how {config.appName} protects your files,
-					results, and organization data.
-				</p>
-			</div>
-
-			{/* Security pillars */}
-			<div className="mb-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-				{securityPillars.map((pillar) => (
-					<div
-						key={pillar.title}
-						className="rounded-xl border bg-card p-6 shadow-sm"
-					>
-						<div className="mb-3 text-3xl">{pillar.icon}</div>
-						<h2 className="mb-2 font-semibold text-card-foreground text-lg">
-							{pillar.title}
-						</h2>
-						<p className="text-muted-foreground text-sm">
-							{pillar.description}
-						</p>
-					</div>
-				))}
-			</div>
-
-			{/* Trust badge strip */}
-			<div className="mb-20 rounded-2xl border bg-muted/30 px-8 py-10">
-				<h2 className="mb-8 text-center font-bold text-2xl text-foreground">
-					Built on enterprise-grade infrastructure
-				</h2>
-				<div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-					{[
-						{
-							label: "Vercel",
-							detail: "Edge network & deployment",
-						},
-						{ label: "Supabase", detail: "SOC 2 Type II database" },
-						{ label: "TLS 1.2+", detail: "Encrypted in transit" },
-						{ label: "AES-256", detail: "Encrypted at rest" },
-					].map((item) => (
-						<div key={item.label} className="text-center">
-							<div className="font-bold text-foreground text-xl">
-								{item.label}
-							</div>
-							<div className="mt-1 text-muted-foreground text-sm">
-								{item.detail}
-							</div>
-						</div>
-					))}
+				{/* Header */}
+				<div className="mb-16 text-center">
+					<div className="mb-4 text-5xl">🔒</div>
+					<h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight sm:text-5xl">
+						Security & Privacy
+					</h1>
+					<p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+						Your business data is sensitive. We treat it that way.
+						Here's exactly how {config.appName} protects your files,
+						results, and organization data.
+					</p>
 				</div>
-			</div>
 
-			{/* FAQ */}
-			<div className="mb-16">
-				<h2 className="mb-8 text-center font-bold text-2xl text-foreground">
-					Security FAQ
-				</h2>
-				<div className="space-y-4">
-					{faqs.map((faq) => (
+				{/* Security pillars */}
+				<div className="mb-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+					{securityPillars.map((pillar) => (
 						<div
-							key={faq.q}
-							className="rounded-xl border bg-card px-6 py-5 shadow-sm"
+							key={pillar.title}
+							className="rounded-xl border bg-card p-6 shadow-sm"
 						>
-							<h3 className="mb-2 font-semibold text-card-foreground">
-								{faq.q}
-							</h3>
+							<div className="mb-3 text-3xl">{pillar.icon}</div>
+							<h2 className="mb-2 font-semibold text-card-foreground text-lg">
+								{pillar.title}
+							</h2>
 							<p className="text-muted-foreground text-sm">
-								{faq.a}
+								{pillar.description}
 							</p>
 						</div>
 					))}
 				</div>
-			</div>
 
-			{/* CTA */}
-			<div className="rounded-2xl bg-primary/5 px-8 py-10 text-center">
-				<h2 className="mb-3 font-bold text-2xl text-foreground">
-					Questions about security or compliance?
-				</h2>
-				<p className="mb-6 text-muted-foreground">
-					We're happy to provide a data processing agreement, answer
-					specific compliance questions, or discuss your
-					organization's requirements.
-				</p>
-				<div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-					<Link
-						href="/contact"
-						className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm hover:bg-primary/90"
-					>
-						Contact Us
-					</Link>
-					<Link
-						href="/docs"
-						className="inline-flex items-center justify-center rounded-lg border px-6 py-3 font-semibold text-sm hover:bg-muted"
-					>
-						Read the Docs
-					</Link>
+				{/* Trust badge strip */}
+				<div className="mb-20 rounded-2xl border bg-muted/30 px-8 py-10">
+					<h2 className="mb-8 text-center font-bold text-2xl text-foreground">
+						Built on enterprise-grade infrastructure
+					</h2>
+					<div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+						{[
+							{
+								label: "Vercel",
+								detail: "Edge network & deployment",
+							},
+							{
+								label: "Supabase",
+								detail: "SOC 2 Type II database",
+							},
+							{
+								label: "TLS 1.2+",
+								detail: "Encrypted in transit",
+							},
+							{ label: "AES-256", detail: "Encrypted at rest" },
+						].map((item) => (
+							<div key={item.label} className="text-center">
+								<div className="font-bold text-foreground text-xl">
+									{item.label}
+								</div>
+								<div className="mt-1 text-muted-foreground text-sm">
+									{item.detail}
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* FAQ */}
+				<div className="mb-16">
+					<h2 className="mb-8 text-center font-bold text-2xl text-foreground">
+						Security FAQ
+					</h2>
+					<div className="space-y-4">
+						{faqs.map((faq) => (
+							<div
+								key={faq.q}
+								className="rounded-xl border bg-card px-6 py-5 shadow-sm"
+							>
+								<h3 className="mb-2 font-semibold text-card-foreground">
+									{faq.q}
+								</h3>
+								<p className="text-muted-foreground text-sm">
+									{faq.a}
+								</p>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* CTA */}
+				<div className="rounded-2xl bg-primary/5 px-8 py-10 text-center">
+					<h2 className="mb-3 font-bold text-2xl text-foreground">
+						Questions about security or compliance?
+					</h2>
+					<p className="mb-6 text-muted-foreground">
+						We're happy to provide a data processing agreement,
+						answer specific compliance questions, or discuss your
+						organization's requirements.
+					</p>
+					<div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+						<Link
+							href="/contact"
+							className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm hover:bg-primary/90"
+						>
+							Contact Us
+						</Link>
+						<Link
+							href="/docs"
+							className="inline-flex items-center justify-center rounded-lg border px-6 py-3 font-semibold text-sm hover:bg-muted"
+						>
+							Read the Docs
+						</Link>
+					</div>
 				</div>
 			</div>
-		</div>
+			<StickyCta />
+		</>
 	);
 }
