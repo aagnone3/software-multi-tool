@@ -21,6 +21,14 @@ vi.mock("@repo/logs", () => ({
 
 vi.mock("@repo/mail", () => mockMailModule());
 
+vi.mock("@repo/utils", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@repo/utils")>();
+	return {
+		...actual,
+		getBaseUrl: vi.fn(() => "https://app.example.com"),
+	};
+});
+
 describe("Newsletter Router", () => {
 	beforeEach(() => {
 		resetExternalServicesMocks();
@@ -50,7 +58,7 @@ describe("Newsletter Router", () => {
 				to: input.email,
 				locale: "en",
 				templateId: "newsletterSignup",
-				context: {},
+				context: { appUrl: "https://app.example.com" },
 			});
 		});
 

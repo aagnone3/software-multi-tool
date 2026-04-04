@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { logger } from "@repo/logs";
 import { sendEmail } from "@repo/mail";
+import { getBaseUrl } from "@repo/utils";
 import { z } from "zod";
 import { localeMiddleware } from "../../../orpc/middleware/locale-middleware";
 import { publicProcedure } from "../../../orpc/procedures";
@@ -28,7 +29,9 @@ export const subscribeToNewsletter = publicProcedure
 				to: email,
 				locale,
 				templateId: "newsletterSignup",
-				context: {},
+				context: {
+					appUrl: getBaseUrl(),
+				},
 			});
 		} catch (error) {
 			logger.error(error);
