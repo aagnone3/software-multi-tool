@@ -368,6 +368,7 @@ export const auth = betterAuth({
 					context: {
 						organizationName: organization.name,
 						url: url.toString(),
+						appUrl: getBaseUrl(),
 					},
 				});
 			},
