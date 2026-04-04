@@ -54,7 +54,7 @@ export function WelcomeEmail({
 					href={toolsUrl}
 					className="inline-block rounded-lg bg-primary px-6 py-3 font-semibold text-white text-sm no-underline"
 				>
-					Browse all 8 tools →
+					Browse all 9 tools →
 				</Button>
 			</Section>
 

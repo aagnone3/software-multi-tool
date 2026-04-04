@@ -39,7 +39,7 @@ const comparisons = [
 		slug: "otter-ai",
 		name: "Otter.ai",
 		tagline: "Meeting transcription focused",
-		diff: "We offer 8 tools beyond meeting notes",
+		diff: "We offer 9 tools beyond meeting notes",
 	},
 	{
 		slug: "fireflies-ai",

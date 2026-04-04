@@ -55,7 +55,7 @@ const competitors: CompetitorPage[] = [
 			{ feature: "API access", us: "yes", them: "partial" },
 		],
 		advantages: [
-			"8 AI tools in one platform — not just meeting notes",
+			"9 AI tools in one platform — not just meeting notes",
 			"Process contracts, invoices, expenses, and feedback in minutes",
 			"Credit-based pricing means you only pay for what you use",
 			"No seat fees — great for small teams that share access",
@@ -122,7 +122,7 @@ const competitors: CompetitorPage[] = [
 		advantages: [
 			"No templates or rules to configure — AI understands any invoice format",
 			"Extract structured data from invoices in seconds with no setup",
-			"8 AI tools beyond document parsing for complete business automation",
+			"9 AI tools beyond document parsing for complete business automation",
 			"Credit-based pricing — no annual contracts or minimums",
 		],
 		switchReasons: [
@@ -221,7 +221,7 @@ const competitors: CompetitorPage[] = [
 		advantages: [
 			"No $30+/month Adobe subscription required",
 			"Process audio files, CSV exports, and invoices — not just PDFs",
-			"8 specialized AI tools, not a general-purpose PDF Q&A assistant",
+			"9 specialized AI tools, not a general-purpose PDF Q&A assistant",
 			"Structured output for easy copy-paste to spreadsheets or accounting tools",
 		],
 		switchReasons: [
@@ -254,7 +254,7 @@ const competitors: CompetitorPage[] = [
 			"No Microsoft 365 Business subscription required ($22+/user/month)",
 			"Structured output designed for downstream use — spreadsheets, accounting tools, APIs",
 			"Speaker separation for audio files — Copilot focuses on Teams transcription",
-			"8 specialized tools for consistent, repeatable document processing",
+			"9 specialized tools for consistent, repeatable document processing",
 		],
 		switchReasons: [
 			"You want document AI without paying for a full Microsoft 365 seat",
@@ -283,7 +283,7 @@ const competitors: CompetitorPage[] = [
 		],
 		advantages: [
 			"Deterministic structured output — same document format every time",
-			"8 purpose-built tools optimized for business document workflows",
+			"9 purpose-built tools optimized for business document workflows",
 			"Full job history so you can re-run any past document without re-uploading",
 			"No prompt engineering required — just upload and go",
 		],
@@ -317,7 +317,7 @@ const competitors: CompetitorPage[] = [
 			},
 		],
 		advantages: [
-			"8 AI tools beyond audio — invoices, contracts, expenses, feedback",
+			"9 AI tools beyond audio — invoices, contracts, expenses, feedback",
 			"No video editing interface to navigate — built for document workflows",
 			"Structured output for meeting summaries ready to paste into your CRM or notes",
 			"Process audio files as part of a larger business automation workflow",
@@ -724,7 +724,7 @@ const competitors: CompetitorPage[] = [
 		],
 		advantages: [
 			"No code required — business users can use tools directly",
-			"8 AI tools beyond transcription in one platform",
+			"9 AI tools beyond transcription in one platform",
 			"Credit-based pricing — pay only for what you use",
 			"Purpose-built for business workflows, not developers",
 		],
@@ -773,7 +773,7 @@ const competitors: CompetitorPage[] = [
 		name: "Hyper AI",
 		headline: `${config.appName} vs Hyper — Purpose-Built Business AI`,
 		description: `${config.appName} vs Hyper AI: AI business tools with broader document coverage — invoices, contracts, feedback, expenses, and meetings — with no per-seat pricing.`,
-		ourPitch: "Specialized AI tools for 8 core business workflows",
+		ourPitch: "Specialized AI tools for 9 core business workflows",
 		theirPitch: "General-purpose AI assistant for workplace tasks",
 		comparison: [
 			{ feature: "Meeting summarization", us: "yes", them: "yes" },
@@ -788,7 +788,7 @@ const competitors: CompetitorPage[] = [
 			{ feature: "API access", us: "yes", them: "partial" },
 		],
 		advantages: [
-			"8 specialized tools built for specific business workflows",
+			"9 specialized tools built for specific business workflows",
 			"Full job history and output review",
 			"Credit-based pricing — pay per use, not per seat",
 			"Deeper accuracy on specialized tasks (invoices, contracts, expenses)",
@@ -820,7 +820,7 @@ const competitors: CompetitorPage[] = [
 			{ feature: "Document AI tools", us: "yes", them: "no" },
 		],
 		advantages: [
-			"8 AI tools for the full business workflow, not just meetings",
+			"9 AI tools for the full business workflow, not just meetings",
 			"Process contracts, invoices, and expenses alongside meeting notes",
 			"Credit-based pricing — no seat fees for occasional users",
 			"One platform instead of meeting-notes + document AI separately",
