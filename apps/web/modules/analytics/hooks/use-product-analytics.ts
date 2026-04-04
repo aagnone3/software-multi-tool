@@ -810,7 +810,8 @@ type ProductEvent =
 				is_recommended: boolean;
 			};
 	  }
-	| { name: "file_delete_confirmed"; props: { file_id: string } };
+	| { name: "file_delete_confirmed"; props: { file_id: string } }
+	| { name: "page_not_found"; props: { path: string } };
 
 export type { ProductEvent };
 
