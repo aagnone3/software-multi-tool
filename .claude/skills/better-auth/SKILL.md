@@ -365,7 +365,7 @@ const isValid = await verifyPassword({ hash, password: "TestPassword123" });
 **Check**:
 
 1. `BETTER_AUTH_SECRET` is set in `.env.local`
-2. `NEXT_PUBLIC_SITE_URL` matches the actual URL (including port)
+2. `BETTER_AUTH_URL` matches the actual URL (including port)
 3. Cookies are not blocked by browser
 
 ### Organization Not Set on Login
