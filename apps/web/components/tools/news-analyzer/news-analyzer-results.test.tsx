@@ -1,8 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 import {
 	FactualRatingBadge,
+	NewsAnalyzerResults,
 	PoliticalLeanSpectrum,
 	SensationalismRadial,
 	SentimentIndicator,
@@ -124,5 +130,42 @@ describe("SensationalismRadial", () => {
 	it("renders value number for high sensationalism", () => {
 		render(<SensationalismRadial value={8} />);
 		expect(screen.getByText("8")).toBeInTheDocument();
+	});
+});
+
+describe("NewsAnalyzerResults", () => {
+	const mockOutput = {
+		summary: ["Point 1", "Point 2"],
+		bias: {
+			politicalLean: "Center",
+			sensationalism: 3,
+			factualRating: "High",
+		},
+		entities: {
+			people: ["Alice"],
+			organizations: ["Acme"],
+			places: ["NYC"],
+		},
+		sentiment: "positive",
+		credibilityScore: 8,
+		keyTopics: ["AI"],
+		readingLevel: "medium",
+		articleMetadata: null,
+	};
+
+	it("renders tabs for Summary, Bias, Entities, Details", () => {
+		render(
+			<NewsAnalyzerResults
+				output={
+					mockOutput as unknown as Parameters<
+						typeof NewsAnalyzerResults
+					>[0]["output"]
+				}
+			/>,
+		);
+		expect(screen.getByText("Summary")).toBeInTheDocument();
+		expect(screen.getByText("Bias")).toBeInTheDocument();
+		expect(screen.getByText("Entities")).toBeInTheDocument();
+		expect(screen.getByText("Details")).toBeInTheDocument();
 	});
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductAnalytics } from "@analytics/hooks/use-product-analytics";
 import type {
 	SpeakerSegment,
 	SpeakerSeparationOutput,
@@ -493,6 +494,7 @@ function ExportActions({
 	filename: string;
 }) {
 	const [copied, setCopied] = useState(false);
+	const { track } = useProductAnalytics();
 
 	const handleCopyTranscript = useCallback(async () => {
 		try {
@@ -500,10 +502,11 @@ function ExportActions({
 			setCopied(true);
 			toast.success("Transcript copied to clipboard");
 			setTimeout(() => setCopied(false), 2000);
+			track({ name: "speaker_separation_transcript_copied", props: {} });
 		} catch {
 			toast.error("Failed to copy transcript");
 		}
-	}, [result.transcript]);
+	}, [result.transcript, track]);
 
 	const handleDownloadJSON = useCallback(() => {
 		const data = JSON.stringify(result, null, 2);
@@ -515,7 +518,11 @@ function ExportActions({
 		a.click();
 		URL.revokeObjectURL(url);
 		toast.success("JSON downloaded");
-	}, [result, filename]);
+		track({
+			name: "speaker_separation_transcript_downloaded",
+			props: { format: "json" },
+		});
+	}, [result, filename, track]);
 
 	const handleDownloadText = useCallback(() => {
 		const blob = new Blob([result.transcript], { type: "text/plain" });
@@ -526,7 +533,11 @@ function ExportActions({
 		a.click();
 		URL.revokeObjectURL(url);
 		toast.success("Transcript downloaded");
-	}, [result.transcript, filename]);
+		track({
+			name: "speaker_separation_transcript_downloaded",
+			props: { format: "txt" },
+		});
+	}, [result.transcript, filename, track]);
 
 	return (
 		<div className="flex items-center gap-2">

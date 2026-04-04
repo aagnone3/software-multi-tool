@@ -70,6 +70,10 @@ vi.mock("next-themes", () => ({
 	useTheme: vi.fn(() => ({ resolvedTheme: "light" })),
 }));
 
+vi.mock("@analytics/hooks/use-product-analytics", () => ({
+	useProductAnalytics: () => ({ track: vi.fn() }),
+}));
+
 vi.mock("@shared/components/ToolFeedback", () => ({
 	ToolFeedback: () => <div>ToolFeedback</div>,
 }));
