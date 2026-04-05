@@ -1,13 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	JobProgressIndicator,
 	JobProgressInline,
 } from "./JobProgressIndicator";
 
 const mockCancelMutate = vi.fn();
+
+const mockUseCreditsBalance = vi.fn(() => ({ isStarterPlan: false }));
+
+vi.mock("@saas/credits/hooks/use-credits-balance", () => ({
+	useCreditsBalance: () => mockUseCreditsBalance(),
+}));
 
 vi.mock("@saas/organizations/hooks/use-active-organization", () => ({
 	useActiveOrganization: () => ({ activeOrganization: null }),
@@ -36,6 +42,10 @@ vi.mock("./PostJobUpgradeNudge", () => ({
 }));
 
 describe("JobProgressIndicator", () => {
+	beforeEach(() => {
+		mockUseCreditsBalance.mockReturnValue({ isStarterPlan: false });
+	});
+
 	it("shows loading/pending state", () => {
 		mockUseJobUpdates.mockReturnValue({
 			job: { status: "PENDING" },
@@ -99,7 +109,8 @@ describe("JobProgressIndicator", () => {
 		expect(screen.getByText("Something went wrong")).toBeInTheDocument();
 	});
 
-	it("shows insufficient credits UI for credits error", () => {
+	it("shows insufficient credits UI for free-plan credits error", () => {
+		mockUseCreditsBalance.mockReturnValue({ isStarterPlan: false });
 		mockUseJobUpdates.mockReturnValue({
 			job: {
 				status: "FAILED",
@@ -110,6 +121,22 @@ describe("JobProgressIndicator", () => {
 		render(<JobProgressIndicator jobId="job-1" />);
 		expect(screen.getByText("Insufficient Credits")).toBeInTheDocument();
 		expect(screen.getByText("Buy Credits")).toBeInTheDocument();
+		expect(screen.getByText("Upgrade Plan")).toBeInTheDocument();
+	});
+
+	it("shows Starter-specific upgrade CTAs for insufficient credits", () => {
+		mockUseCreditsBalance.mockReturnValue({ isStarterPlan: true });
+		mockUseJobUpdates.mockReturnValue({
+			job: {
+				status: "FAILED",
+				error: "insufficient credits to complete job",
+			},
+			error: null,
+		});
+		render(<JobProgressIndicator jobId="job-1" />);
+		expect(screen.getByText("Upgrade to Pro")).toBeInTheDocument();
+		expect(screen.getByText("Compare plans")).toBeInTheDocument();
+		expect(screen.queryByText("Buy Credits")).toBeNull();
 	});
 
 	it("shows fetch error state", () => {

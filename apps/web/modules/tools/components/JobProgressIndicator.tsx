@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreditsBalance } from "@saas/credits/hooks/use-credits-balance";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { Button } from "@ui/components/button";
 import {
@@ -105,6 +106,7 @@ export function JobProgressIndicator({
 	const { job, error } = useJobUpdates(jobId);
 	const cancelMutation = useCancelJob();
 	const { activeOrganization } = useActiveOrganization();
+	const { isStarterPlan } = useCreditsBalance();
 
 	const billingPath = activeOrganization
 		? `/app/${activeOrganization.slug}/settings/billing`
@@ -204,29 +206,60 @@ export function JobProgressIndicator({
 											Insufficient Credits
 										</p>
 										<p className="text-sm text-amber-800 dark:text-amber-300">
-											You've run out of credits for this
-											billing period. Buy more credits or
-											upgrade your plan to continue.
+											{isStarterPlan
+												? "You've used your included credits. Upgrade to Pro for 500 monthly credits, scheduler runs, and bulk actions."
+												: "You've run out of credits for this billing period. Buy more credits or upgrade your plan to continue."}
 										</p>
 										<div className="flex flex-wrap gap-2 pt-1">
-											<Button
-												size="sm"
-												variant="primary"
-												asChild
-											>
-												<Link href={billingPath}>
-													Buy Credits
-												</Link>
-											</Button>
-											<Button
-												size="sm"
-												variant="outline"
-												asChild
-											>
-												<Link href={billingPath}>
-													Upgrade Plan
-												</Link>
-											</Button>
+											{isStarterPlan ? (
+												<>
+													<Button
+														size="sm"
+														variant="primary"
+														asChild
+													>
+														<Link
+															href={billingPath}
+														>
+															Upgrade to Pro
+														</Link>
+													</Button>
+													<Button
+														size="sm"
+														variant="outline"
+														asChild
+													>
+														<Link href="/pricing#pricing-plan-pro">
+															Compare plans
+														</Link>
+													</Button>
+												</>
+											) : (
+												<>
+													<Button
+														size="sm"
+														variant="primary"
+														asChild
+													>
+														<Link
+															href={billingPath}
+														>
+															Buy Credits
+														</Link>
+													</Button>
+													<Button
+														size="sm"
+														variant="outline"
+														asChild
+													>
+														<Link
+															href={billingPath}
+														>
+															Upgrade Plan
+														</Link>
+													</Button>
+												</>
+											)}
 										</div>
 									</div>
 								</div>
