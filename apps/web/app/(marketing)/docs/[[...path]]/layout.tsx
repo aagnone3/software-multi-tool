@@ -1,5 +1,6 @@
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import type { PropsWithChildren } from "react";
+import React, { type PropsWithChildren } from "react";
 import { docsSource } from "../../../docs-source";
 
 /** Default locale (English only - i18n removed) */
@@ -11,19 +12,22 @@ export default async function DocumentationLayout({
 	const locale = DEFAULT_LOCALE;
 
 	return (
-		<div className="pt-[4.5rem]">
-			<DocsLayout
-				tree={docsSource.pageTree[locale]}
-				nav={{
-					title: <strong>Documentation</strong>,
-					url: "/docs",
-				}}
-				sidebar={{
-					defaultOpenLevel: 1,
-				}}
-			>
-				{children}
-			</DocsLayout>
-		</div>
+		<>
+			<div className="pt-[4.5rem]">
+				<DocsLayout
+					tree={docsSource.pageTree[locale]}
+					nav={{
+						title: <strong>Documentation</strong>,
+						url: "/docs",
+					}}
+					sidebar={{
+						defaultOpenLevel: 1,
+					}}
+				>
+					{children}
+				</DocsLayout>
+			</div>
+			<StickyCta />
+		</>
 	);
 }
