@@ -45,7 +45,7 @@ export function ZeroCreditsModal() {
 	}, [isOpen, balance, track]);
 
 	const description = isStarterPlan
-		? "You've hit your Starter credit limit. Upgrade to Pro to get 500 credits/month, scheduled runs, and bulk actions — or buy a one-time pack."
+		? "You've hit your Starter credit limit. Upgrade to Pro for 500 credits/month, scheduled runs, and bulk actions."
 		: "Get more credits to continue using AI tools. Upgrade to Pro for 500 credits/month, or buy a one-time pack.";
 
 	const proFeatureText = isStarterPlan
@@ -89,17 +89,19 @@ export function ZeroCreditsModal() {
 						</div>
 					</div>
 
-					<div className="flex items-start gap-3 rounded-lg border p-3">
-						<ZapIcon className="mt-0.5 size-5 shrink-0 text-amber-500" />
-						<div>
-							<p className="text-sm font-semibold">
-								Buy a Credit Pack
-							</p>
-							<p className="text-xs text-muted-foreground">
-								One-time purchase · no subscription required
-							</p>
+					{!isStarterPlan && (
+						<div className="flex items-start gap-3 rounded-lg border p-3">
+							<ZapIcon className="mt-0.5 size-5 shrink-0 text-amber-500" />
+							<div>
+								<p className="text-sm font-semibold">
+									Buy a Credit Pack
+								</p>
+								<p className="text-xs text-muted-foreground">
+									One-time purchase · no subscription required
+								</p>
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 
 				<DialogFooter className="flex-col gap-2 sm:flex-col">
@@ -117,9 +119,11 @@ export function ZeroCreditsModal() {
 							</Link>
 						</Button>
 					)}
-					<Button asChild variant="outline" className="w-full">
-						<Link href={billingPath}>Buy Credits</Link>
-					</Button>
+					{!isStarterPlan && (
+						<Button asChild variant="outline" className="w-full">
+							<Link href={billingPath}>Buy Credits</Link>
+						</Button>
+					)}
 					<Button
 						variant="ghost"
 						className="w-full text-muted-foreground"

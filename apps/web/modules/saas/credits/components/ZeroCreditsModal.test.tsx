@@ -163,6 +163,9 @@ describe("ZeroCreditsModal - Starter plan", () => {
 		expect(
 			screen.getByText(/you've hit your starter credit limit/i),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/buy a one-time pack/i),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows 'Compare plans' link for Starter plan users", () => {
@@ -219,5 +222,25 @@ describe("ZeroCreditsModal - Starter plan", () => {
 		// The pro feature row shows "scheduled runs · bulk actions · priority processing"
 		const featureEls = screen.getAllByText(/scheduled runs/i);
 		expect(featureEls.length).toBeGreaterThan(0);
+	});
+
+	it("does not show Buy Credits option for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "starter" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+
+		render(<ZeroCreditsModal />);
+		expect(
+			screen.queryByRole("link", { name: /buy credits/i }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/buy a credit pack/i),
+		).not.toBeInTheDocument();
 	});
 });
