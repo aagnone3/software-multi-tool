@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import ChangelogPage from "./page";
+
+vi.mock("@marketing/home/components/StickyCta", () => ({
+	StickyCta: () => <div data-testid="sticky-cta" />,
+}));
 
 describe("ChangelogPage", () => {
 	it("renders the Changelog heading", () => {
@@ -48,5 +52,10 @@ describe("ChangelogPage", () => {
 		const parsed = JSON.parse(script?.innerHTML ?? "{}");
 		expect(parsed["@type"]).toBe("SoftwareApplication");
 		expect(parsed.releaseNotes).toContain("/changelog");
+	});
+
+	it("renders StickyCta", () => {
+		render(<ChangelogPage />);
+		expect(screen.getByTestId("sticky-cta")).toBeInTheDocument();
 	});
 });
