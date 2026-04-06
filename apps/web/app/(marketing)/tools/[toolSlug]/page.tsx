@@ -387,7 +387,9 @@ export default async function ToolMarketingPage({ params }: ToolPageProps) {
 					</p>
 					<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 						<Button size="lg" variant="primary" asChild>
-							<Link href={`/app/tools/${toolSlug}`}>
+							<Link
+								href={`/auth/signup?redirect=/app/tools/${toolSlug}`}
+							>
 								Try {tool.name}
 								<ArrowRightIcon className="ml-2 size-4" />
 							</Link>
