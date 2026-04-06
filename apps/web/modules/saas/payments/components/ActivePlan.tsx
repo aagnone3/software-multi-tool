@@ -92,6 +92,9 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 		? getAnnualSavingsPct(activePlan.id)
 		: null;
 	const showAnnualUpsell = isMonthlySubscription && annualSavingsPct !== null;
+	const billingPath = organizationId
+		? `/app/${organizationId}/settings/billing`
+		: "/app/settings/billing";
 
 	const formatMonth = (count: number) =>
 		count === 1 ? "month" : `${count} months`;
@@ -178,7 +181,7 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 						effective rate — locked in for the year.
 					</p>
 					<Link
-						href="/app/billing"
+						href={billingPath}
 						className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
 						data-test="annual-billing-upsell-cta"
 						onClick={() =>
@@ -222,7 +225,7 @@ export function ActivePlan({ organizationId }: { organizationId?: string }) {
 					</ul>
 					<div className="flex flex-wrap gap-2">
 						<Link
-							href="/app/billing?upgrade=pro"
+							href={`${billingPath}?upgrade=pro`}
 							className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
 							data-test="starter-upgrade-to-pro-cta"
 							onClick={() =>

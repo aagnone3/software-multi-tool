@@ -404,7 +404,7 @@ describe("ActivePlan", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("annual billing upsell links to billing page", () => {
+	it("annual billing upsell links to account settings billing page", () => {
 		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
 		mockUsePurchases.mockReturnValue({
 			activePlan: {
@@ -422,7 +422,60 @@ describe("ActivePlan", () => {
 		const cta = container.querySelector(
 			'[data-test="annual-billing-upsell-cta"]',
 		);
-		expect(cta).toHaveAttribute("href", "/app/billing");
+		expect(cta).toHaveAttribute("href", "/app/settings/billing");
+	});
+
+	it("annual billing upsell links to org settings billing page when organizationId is provided", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: {
+				id: "pro",
+				price: {
+					amount: 2900,
+					currency: "USD",
+					interval: "month",
+					intervalCount: 1,
+				},
+			},
+		});
+
+		const { container } = render(<ActivePlan organizationId="acme" />);
+		const cta = container.querySelector(
+			'[data-test="annual-billing-upsell-cta"]',
+		);
+		expect(cta).toHaveAttribute("href", "/app/acme/settings/billing");
+	});
+
+	it("Starter upgrade CTA links to account settings billing with upgrade=pro", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+
+		const { container } = render(<ActivePlan />);
+		const cta = container.querySelector(
+			'[data-test="starter-upgrade-to-pro-cta"]',
+		);
+		expect(cta).toHaveAttribute(
+			"href",
+			"/app/settings/billing?upgrade=pro",
+		);
+	});
+
+	it("Starter upgrade CTA links to org settings billing with upgrade=pro when organizationId is provided", () => {
+		mockUsePlanData.mockReturnValue({ planData: mockPlanData });
+		mockUsePurchases.mockReturnValue({
+			activePlan: { id: "starter" },
+		});
+
+		const { container } = render(<ActivePlan organizationId="acme" />);
+		const cta = container.querySelector(
+			'[data-test="starter-upgrade-to-pro-cta"]',
+		);
+		expect(cta).toHaveAttribute(
+			"href",
+			"/app/acme/settings/billing?upgrade=pro",
+		);
 	});
 
 	it("tracks analytics when Starter upgrade CTA is clicked", async () => {
