@@ -99,7 +99,7 @@ describe("StickyCta", () => {
 		const link = screen.getByRole("link", { name: /upgrade to pro/i });
 		expect(link).toBeTruthy();
 		expect((link as HTMLAnchorElement).href).toContain(
-			"/app/settings/billing",
+			"/app/settings/billing?upgrade=pro",
 		);
 	});
 

@@ -64,7 +64,7 @@ export function StickyCta() {
 						</p>
 						<Button size="sm" variant="primary" asChild>
 							<Link
-								href="/app/settings/billing"
+								href="/app/settings/billing?upgrade=pro"
 								onClick={handleCtaClick}
 							>
 								Upgrade to Pro
