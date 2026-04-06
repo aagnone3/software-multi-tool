@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { executePrompt } from "./prompt";
 import { CLAUDE_MODELS } from "./src/models";
 
+const describeWithApiKey = process.env.ANTHROPIC_API_KEY
+	? describe.concurrent
+	: describe.skip;
+
 /**
  * Integration test for Claude Agent SDK.
  *
@@ -18,23 +22,11 @@ import { CLAUDE_MODELS } from "./src/models";
  * - Max tokens: 50 (minimal response)
  * - Prompt: Simple greeting (minimal input tokens)
  */
-describe.concurrent("Claude Agent SDK Integration", () => {
-	const requireApiKey = () => {
-		if (!process.env.ANTHROPIC_API_KEY) {
-			throw new Error(
-				"ANTHROPIC_API_KEY is required for integration tests. " +
-					"Set it in apps/web/.env.local. " +
-					"Environment variables are loaded automatically from this file via tests/setup/environment.ts.",
-			);
-		}
-	};
-
+describeWithApiKey("Claude Agent SDK Integration", () => {
 	it(
 		"should execute a prompt and return a response",
 		{ timeout: 30000 },
 		async () => {
-			requireApiKey();
-
 			const result = await executePrompt("Say hello in one word", {
 				model: CLAUDE_MODELS.HAIKU_3_5,
 				maxTokens: 50,
@@ -65,8 +57,6 @@ describe.concurrent("Claude Agent SDK Integration", () => {
 		"should handle system prompts correctly",
 		{ timeout: 30000 },
 		async () => {
-			requireApiKey();
-
 			const result = await executePrompt("What color is the sky?", {
 				model: CLAUDE_MODELS.HAIKU_3_5,
 				maxTokens: 50,
