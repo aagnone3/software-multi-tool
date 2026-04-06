@@ -22,11 +22,16 @@ import Link from "next/link";
 import React from "react";
 
 const siteUrl = getBaseUrl();
+const liveToolCount = config.tools.registry.filter(
+	(tool) => tool.enabled,
+).length;
+const upcomingToolCount = config.tools.registry.filter(
+	(tool) => !tool.enabled,
+).length;
 
 export const metadata: Metadata = {
 	title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
-	description:
-		"Simple, transparent AI tools pricing. Start free, upgrade when you need more. No hidden fees, no long-term contracts. Pay-per-use credits for 10+ AI business tools.",
+	description: `Simple, transparent AI tools pricing. Start free, upgrade when you need more. No hidden fees, no long-term contracts. Pay-per-use credits for ${liveToolCount} live AI business tools.`,
 	alternates: { canonical: `${siteUrl}/pricing` },
 	openGraph: {
 		type: "website",
@@ -181,8 +186,8 @@ export default function PricingPage() {
 						{[
 							{
 								icon: SparklesIcon,
-								label: "10+ AI tools included",
-								desc: "Invoices, contracts, meetings, expenses, and more — all in one platform.",
+								label: `${liveToolCount} live AI tools${upcomingToolCount > 0 ? ` + ${upcomingToolCount} in rollout` : ""}`,
+								desc: "Use live tools now and get new workflows as they launch — on the same credit model.",
 							},
 							{
 								icon: RocketIcon,
