@@ -262,7 +262,7 @@ Use this skill when:
 - Applying semantic colors to icons
 - Creating consistent icon usage across the application
 
-**Activation keywords**: icon, icons, iconography, lucide, icon size, icon color
+**Activation keywords**: icon, icons, iconography, lucide, lucide-react, Icon component, button icon, status icon, navigation icon, empty state icon, icon accessibility, aria-hidden, icon size, icon color, icon sizing, icon variant
 
 ## Related Skills
 

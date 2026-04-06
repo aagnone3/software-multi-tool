@@ -389,7 +389,7 @@ Invoke this skill when:
 - Managing environment variables
 - Troubleshooting deployment issues
 
-**Activation keywords**: architecture, codebase structure, monorepo, how does X work, request flow, module organization, package, where is X, navigate codebase, TanStack Query, data fetching, oRPC, hono, Inngest
+**Activation keywords**: architecture, codebase structure, monorepo, how does X work, request flow, module organization, package, where is X, navigate codebase, TanStack Query, data fetching, oRPC, hono, Inngest, Supabase Realtime, realtime, background jobs, serverless, Next.js App Router
 
 ## Related Skills
 

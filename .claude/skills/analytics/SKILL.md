@@ -249,7 +249,7 @@ Invoke this skill when:
 - Configuring PostHog options (EU hosting, person profiles)
 - Adding analytics to new tools (see `tool-analytics.md`)
 
-**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, user identification, analytics provider, usage tracking, tool analytics, server analytics
+**Activation keywords**: analytics, PostHog, tracking, event tracking, trackEvent, user identification, analytics provider, usage tracking, tool analytics, server analytics, posthog-js, useAnalytics, AnalyticsScript, NEXT_PUBLIC_POSTHOG_KEY
 
 ## Related Skills
 
