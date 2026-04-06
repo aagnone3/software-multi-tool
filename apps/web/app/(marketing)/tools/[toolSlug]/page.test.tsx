@@ -76,6 +76,20 @@ describe("ToolPage (marketing)", () => {
 		expect(screen.getByRole("heading", { level: 1 })).toBeDefined();
 	});
 
+	it("routes primary CTA through signup with tool redirect", async () => {
+		const Page = await ToolPage({
+			params: Promise.resolve({ toolSlug: "invoice-processor" }),
+		});
+		render(Page);
+
+		expect(
+			screen.getByRole("link", { name: /try invoice processor/i }),
+		).toHaveAttribute(
+			"href",
+			"/auth/signup?redirect=/app/tools/invoice-processor",
+		);
+	});
+
 	it("throws notFound for unknown tool slug", async () => {
 		await expect(
 			ToolPage({
