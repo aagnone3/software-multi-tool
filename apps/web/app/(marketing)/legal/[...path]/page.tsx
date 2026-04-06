@@ -1,10 +1,12 @@
 import { PostContent } from "@marketing/blog/components/PostContent";
+import { StickyCta } from "@marketing/home/components/StickyCta";
 import {
 	getActivePathFromUrlParam,
 	getLocalizedDocumentWithFallback,
 } from "@shared/lib/content";
 import { allLegalPages } from "content-collections";
 import { redirect } from "next/navigation";
+import React from "react";
 
 /** Default locale (English only - i18n removed) */
 const DEFAULT_LOCALE = "en";
@@ -54,12 +56,15 @@ export default async function LegalPage(props: { params: Promise<Params> }) {
 	const { title, body } = page as any;
 
 	return (
-		<div className="container max-w-6xl pt-32 pb-24">
-			<div className="mx-auto mb-12 max-w-2xl">
-				<h1 className="text-center font-bold text-4xl">{title}</h1>
-			</div>
+		<div>
+			<div className="container max-w-6xl pt-32 pb-24">
+				<div className="mx-auto mb-12 max-w-2xl">
+					<h1 className="text-center font-bold text-4xl">{title}</h1>
+				</div>
 
-			<PostContent content={body} />
+				<PostContent content={body} />
+			</div>
+			<StickyCta />
 		</div>
 	);
 }
