@@ -71,4 +71,25 @@ describe("Home page", () => {
 			).toBeInTheDocument();
 		}
 	});
+
+	it("uses public tools search route in SearchAction JSON-LD", async () => {
+		const { default: Home } = await import("./page");
+		const jsx = await Home();
+		render(jsx);
+
+		const jsonLdScripts = Array.from(
+			document.querySelectorAll('script[type="application/ld+json"]'),
+		)
+			.map((script) => script.textContent)
+			.filter((content): content is string => Boolean(content))
+			.map((content) => JSON.parse(content));
+
+		const websiteSchema = jsonLdScripts.find(
+			(schema) => schema["@type"] === "WebSite",
+		);
+
+		expect(websiteSchema?.potentialAction?.target?.urlTemplate).toContain(
+			"/tools?q={search_term_string}",
+		);
+	});
 });
