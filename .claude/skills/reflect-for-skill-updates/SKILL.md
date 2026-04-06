@@ -186,7 +186,7 @@ Invoke this skill when:
 - You discovered a **gotcha** that others will likely hit too
 - The user explicitly asks: "Any skills need updating?"
 
-**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, post-mortem
+**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, post-mortem, post-implementation review, knowledge capture, what did we learn, update SKILL.md, missing documentation
 
 ## Related Skills
 
