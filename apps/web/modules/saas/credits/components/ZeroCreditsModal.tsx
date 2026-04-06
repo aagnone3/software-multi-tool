@@ -46,13 +46,16 @@ export function ZeroCreditsModal() {
 
 	const description = isStarterPlan
 		? "You've hit your Starter credit limit. Upgrade to Pro for 500 credits/month, scheduled runs, and bulk actions."
-		: "Get more credits to continue using AI tools. Upgrade to Pro for 500 credits/month, or buy a one-time pack.";
+		: "Get more credits to continue using AI tools. Upgrade your plan for more monthly credits, or buy a one-time pack.";
 
 	const proFeatureText = isStarterPlan
 		? "500 credits/month · scheduled runs · bulk actions · priority processing"
 		: "500 credits/month · all tools · priority processing";
 
-	const upgradeCTAText = isStarterPlan ? "Upgrade to Pro" : "Upgrade to Pro";
+	const upgradePath = isStarterPlan
+		? `${billingPath}?upgrade=pro`
+		: billingPath;
+	const upgradeCTAText = isStarterPlan ? "Upgrade to Pro" : "Upgrade Plan";
 
 	return (
 		<Dialog
@@ -110,7 +113,7 @@ export function ZeroCreditsModal() {
 						variant="primary"
 						className="w-full bg-indigo-600 hover:bg-indigo-700"
 					>
-						<Link href={billingPath}>{upgradeCTAText}</Link>
+						<Link href={upgradePath}>{upgradeCTAText}</Link>
 					</Button>
 					{isStarterPlan && (
 						<Button asChild variant="outline" className="w-full">
