@@ -65,7 +65,7 @@ describe("ZeroCreditsModal", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows upgrade to pro and buy credits buttons", () => {
+	it("shows upgrade plan and buy credits buttons for free users", () => {
 		mockUseCreditsBalance.mockReturnValue({
 			balance: {
 				totalAvailable: 0,
@@ -77,7 +77,7 @@ describe("ZeroCreditsModal", () => {
 
 		render(<ZeroCreditsModal />);
 		expect(
-			screen.getByRole("link", { name: /upgrade to pro/i }),
+			screen.getByRole("link", { name: /upgrade plan/i }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /buy credits/i }),
@@ -99,7 +99,7 @@ describe("ZeroCreditsModal", () => {
 
 		render(<ZeroCreditsModal />);
 		const upgradeLink = screen.getByRole("link", {
-			name: /upgrade to pro/i,
+			name: /upgrade plan/i,
 		});
 		expect(upgradeLink).toHaveAttribute(
 			"href",
@@ -187,6 +187,27 @@ describe("ZeroCreditsModal - Starter plan", () => {
 		expect(compareLink).toHaveAttribute(
 			"href",
 			"/pricing#pricing-plan-pro",
+		);
+	});
+
+	it("uses Pro-targeted upgrade path for Starter plan users", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			balance: {
+				totalAvailable: 0,
+				plan: { id: "starter" },
+				purchasedCredits: 0,
+			},
+			isLoading: false,
+			isStarterPlan: true,
+		});
+
+		render(<ZeroCreditsModal />);
+		const upgradeLink = screen.getByRole("link", {
+			name: /upgrade to pro/i,
+		});
+		expect(upgradeLink).toHaveAttribute(
+			"href",
+			"/app/settings/billing?upgrade=pro",
 		);
 	});
 
