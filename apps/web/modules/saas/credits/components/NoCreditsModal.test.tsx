@@ -88,12 +88,20 @@ describe("NoCreditsModal", () => {
 		expect(screen.getByText("5 credits")).toBeInTheDocument();
 	});
 
-	it("calls onClose when Maybe later is clicked", async () => {
+	it("calls onClose and tracks dismissal when Maybe later is clicked", async () => {
 		const user = userEvent.setup({ delay: null });
 		const onClose = vi.fn();
 		render(<NoCreditsModal open={true} onClose={onClose} />);
 		await user.click(screen.getByRole("button", { name: /maybe later/i }));
 		expect(onClose).toHaveBeenCalled();
+		expect(mockTrack).toHaveBeenCalledWith({
+			name: "no_credits_modal_dismissed",
+			props: {
+				plan_id: "free",
+				tool_name: undefined,
+				credit_cost: undefined,
+			},
+		});
 	});
 
 	describe("Free plan", () => {
@@ -120,6 +128,24 @@ describe("NoCreditsModal", () => {
 					l.getAttribute("href")?.includes("settings/billing"),
 				),
 			).toBe(true);
+		});
+
+		it("tracks free-plan CTA clicks", async () => {
+			const user = userEvent.setup({ delay: null });
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+
+			await user.click(
+				screen.getAllByRole("link", { name: /buy credits/i })[0],
+			);
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "no_credits_modal_cta_clicked",
+				props: {
+					cta_label: "buy_credits",
+					plan_id: "free",
+					tool_name: undefined,
+					credit_cost: undefined,
+				},
+			});
 		});
 	});
 
@@ -161,6 +187,24 @@ describe("NoCreditsModal", () => {
 		it("shows Pro feature highlights", () => {
 			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
 			expect(screen.getByText(/5× more credits/i)).toBeInTheDocument();
+		});
+
+		it("tracks starter-plan CTA clicks", async () => {
+			const user = userEvent.setup({ delay: null });
+			render(<NoCreditsModal open={true} onClose={vi.fn()} />);
+
+			await user.click(
+				screen.getByRole("link", { name: /upgrade to pro/i }),
+			);
+			expect(mockTrack).toHaveBeenCalledWith({
+				name: "no_credits_modal_cta_clicked",
+				props: {
+					cta_label: "upgrade_to_pro",
+					plan_id: "starter",
+					tool_name: undefined,
+					credit_cost: undefined,
+				},
+			});
 		});
 	});
 });
