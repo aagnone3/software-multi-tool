@@ -44,4 +44,27 @@ describe("UseCasesPage", () => {
 		);
 		expect(signupLink).toBeDefined();
 	});
+
+	it("uses public tool landing links on use-case cards", () => {
+		render(<UseCasesPage />);
+		const links = screen.getAllByRole("link");
+		const publicToolLinks = links.filter((l) =>
+			l.getAttribute("href")?.startsWith("/tools/"),
+		);
+		const appToolLinks = links.filter((l) =>
+			l.getAttribute("href")?.startsWith("/app/tools/"),
+		);
+
+		expect(publicToolLinks.length).toBeGreaterThan(0);
+		expect(appToolLinks.length).toBe(0);
+	});
+
+	it("shows specific 10-credit CTA copy", () => {
+		render(<UseCasesPage />);
+		expect(
+			screen.getByText(
+				/Get started free — 10 credits, no card required/i,
+			),
+		).toBeInTheDocument();
+	});
 });
