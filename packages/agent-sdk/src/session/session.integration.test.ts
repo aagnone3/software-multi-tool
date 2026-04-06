@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createFeedbackCollectorConfig } from "./examples/feedback-collector";
+
+const describeWithApiKey = process.env.ANTHROPIC_API_KEY
+	? describe.concurrent
+	: describe.skip;
+
 import { InMemorySessionPersistence } from "./persistence/memory";
 import { AgentSession } from "./session";
 import type { AgentSessionConfig, SessionContext } from "./types";
@@ -15,17 +20,7 @@ import type { AgentSessionConfig, SessionContext } from "./types";
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-describe.concurrent("Agent Session Integration", () => {
-	const requireApiKey = () => {
-		if (!process.env.ANTHROPIC_API_KEY) {
-			throw new Error(
-				"ANTHROPIC_API_KEY is required for integration tests. " +
-					"Set it in apps/web/.env.local. " +
-					"Environment variables are loaded automatically from this file via tests/setup/environment.ts.",
-			);
-		}
-	};
-
+describeWithApiKey("Agent Session Integration", () => {
 	const testContext: SessionContext = {
 		sessionId: `integration-test-${Date.now()}`,
 		userId: "integration-test-user",
@@ -55,8 +50,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 		"should execute a multi-turn conversation",
 		{ timeout: 60000 },
 		async () => {
-			requireApiKey();
-
 			const persistence = new InMemorySessionPersistence();
 			const session = await AgentSession.create({
 				config: simpleSessionConfig,
@@ -92,8 +85,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 		"should detect completion signal from Claude",
 		{ timeout: 60000 },
 		async () => {
-			requireApiKey();
-
 			const session = await AgentSession.create({
 				config: simpleSessionConfig,
 				context: {
@@ -118,8 +109,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 		"should work with FeedbackCollector config",
 		{ timeout: 60000 },
 		async () => {
-			requireApiKey();
-
 			const feedbackConfig = createFeedbackCollectorConfig({
 				toolName: "Test Tool",
 				toolSlug: "test-tool",
@@ -158,8 +147,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 		"should persist and restore session state",
 		{ timeout: 60000 },
 		async () => {
-			requireApiKey();
-
 			const persistence = new InMemorySessionPersistence();
 			const sessionId = `persist-test-${Date.now()}`;
 
@@ -210,8 +197,6 @@ Otherwise, just respond with a brief acknowledgment.`,
 	);
 
 	it("should track token usage correctly", { timeout: 60000 }, async () => {
-		requireApiKey();
-
 		const session = await AgentSession.create({
 			config: simpleSessionConfig,
 			context: {
