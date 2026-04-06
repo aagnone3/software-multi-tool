@@ -829,6 +829,27 @@ type ProductEvent =
 			name: "no_credits_modal_shown";
 			props: { tool_name?: string; credit_cost?: number };
 	  }
+	| {
+			name: "no_credits_modal_cta_clicked";
+			props: {
+				cta_label:
+					| "buy_credits"
+					| "upgrade_plan"
+					| "compare_plans"
+					| "upgrade_to_pro";
+				plan_id: "free" | "starter" | "unknown";
+				tool_name?: string;
+				credit_cost?: number;
+			};
+	  }
+	| {
+			name: "no_credits_modal_dismissed";
+			props: {
+				plan_id: "free" | "starter" | "unknown";
+				tool_name?: string;
+				credit_cost?: number;
+			};
+	  }
 	| { name: "org_invitation_accepted"; props: { organization_slug: string } }
 	| { name: "org_invitation_rejected"; props: { organization_slug: string } }
 	| { name: "org_name_updated"; props: Record<string, never> }

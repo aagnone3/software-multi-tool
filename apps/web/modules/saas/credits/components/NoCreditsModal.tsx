@@ -55,8 +55,46 @@ export function NoCreditsModal({
 
 	const upgradeProPath = `${billingPath}?upgrade=pro`;
 
+	const trackCtaClick = (
+		ctaLabel:
+			| "buy_credits"
+			| "upgrade_plan"
+			| "compare_plans"
+			| "upgrade_to_pro",
+	) => {
+		track({
+			name: "no_credits_modal_cta_clicked",
+			props: {
+				cta_label: ctaLabel,
+				plan_id: isStarterPlan
+					? "starter"
+					: isFreePlan
+						? "free"
+						: "unknown",
+				tool_name: toolName,
+				credit_cost: creditCost,
+			},
+		});
+	};
+
+	const handleClose = () => {
+		track({
+			name: "no_credits_modal_dismissed",
+			props: {
+				plan_id: isStarterPlan
+					? "starter"
+					: isFreePlan
+						? "free"
+						: "unknown",
+				tool_name: toolName,
+				credit_cost: creditCost,
+			},
+		});
+		onClose();
+	};
+
 	return (
-		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+		<Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
 					<div className="flex justify-center mb-4">
@@ -121,7 +159,7 @@ export function NoCreditsModal({
 				<DialogFooter className="flex-col sm:flex-row gap-2">
 					<Button
 						variant="ghost"
-						onClick={onClose}
+						onClick={handleClose}
 						className="sm:mr-auto"
 					>
 						Maybe later
@@ -131,13 +169,22 @@ export function NoCreditsModal({
 							<Button asChild variant="outline">
 								<Link
 									href="/pricing#pricing-plan-pro"
-									onClick={onClose}
+									onClick={() => {
+										trackCtaClick("compare_plans");
+										handleClose();
+									}}
 								>
 									Compare plans
 								</Link>
 							</Button>
 							<Button asChild variant="primary">
-								<Link href={upgradeProPath} onClick={onClose}>
+								<Link
+									href={upgradeProPath}
+									onClick={() => {
+										trackCtaClick("upgrade_to_pro");
+										handleClose();
+									}}
+								>
 									<ZapIcon className="size-4 mr-1" />
 									Upgrade to Pro
 									<ArrowRightIcon className="size-3 ml-1" />
@@ -148,14 +195,26 @@ export function NoCreditsModal({
 						<>
 							{isFreePlan && (
 								<Button asChild variant="outline">
-									<Link href={billingPath} onClick={onClose}>
+									<Link
+										href={billingPath}
+										onClick={() => {
+											trackCtaClick("buy_credits");
+											handleClose();
+										}}
+									>
 										<CoinsIcon className="size-4 mr-1" />
 										Buy Credits
 									</Link>
 								</Button>
 							)}
 							<Button asChild>
-								<Link href={billingPath} onClick={onClose}>
+								<Link
+									href={billingPath}
+									onClick={() => {
+										trackCtaClick("upgrade_plan");
+										handleClose();
+									}}
+								>
 									<CreditCardIcon className="size-4 mr-1" />
 									Upgrade Plan
 								</Link>
