@@ -105,6 +105,10 @@ describe("SharedNewsAnalysis", () => {
 		});
 		render(<SharedNewsAnalysis analysisId="test-id" />);
 		expect(screen.getByText("Not found")).toBeInTheDocument();
+		expect(screen.getByText("Get Started Free")).toHaveAttribute(
+			"href",
+			"/auth/signup?redirect=/app/tools/news-analyzer",
+		);
 	});
 
 	it("renders default error message when no analysis data", () => {
@@ -150,5 +154,12 @@ describe("SharedNewsAnalysis", () => {
 		});
 		render(<SharedNewsAnalysis analysisId="test-id" />);
 		expect(screen.getByTestId("news-results")).toBeInTheDocument();
+		expect(
+			screen.getByText("Analyze your own articles with 10 free credits."),
+		).toBeInTheDocument();
+		expect(screen.getByText("Get Started")).toHaveAttribute(
+			"href",
+			"/auth/signup?redirect=/app/tools/news-analyzer",
+		);
 	});
 });

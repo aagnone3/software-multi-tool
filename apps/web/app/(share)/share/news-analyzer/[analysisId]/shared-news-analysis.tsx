@@ -90,7 +90,7 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 							Want to analyze your own news articles?
 						</p>
 						<Button asChild>
-							<Link href="/auth/login?redirect=/app/tools/news-analyzer">
+							<Link href="/auth/signup?redirect=/app/tools/news-analyzer">
 								Get Started Free
 							</Link>
 						</Button>
@@ -134,10 +134,10 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 				<div className="flex items-center justify-center gap-4 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10">
 					<Sparkles className="size-4 text-primary" />
 					<p className="text-sm font-medium">
-						Analyze your own articles for free!
+						Analyze your own articles with 10 free credits.
 					</p>
 					<Button size="sm" asChild>
-						<Link href="/auth/login?redirect=/app/tools/news-analyzer">
+						<Link href="/auth/signup?redirect=/app/tools/news-analyzer">
 							Get Started
 						</Link>
 					</Button>
