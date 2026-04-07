@@ -47,6 +47,9 @@ describe("RelatedToolCta", () => {
 		expect(
 			screen.getByRole("link", { name: /analyze a contract free/i }),
 		).toBeTruthy();
+		expect(
+			screen.getByText(/start with 10 free credits — no card required/i),
+		).toBeTruthy();
 	});
 
 	it("renders Contract Analyzer for 'legal' tag", () => {
