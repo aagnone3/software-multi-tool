@@ -322,7 +322,7 @@ export default function PricingPage() {
 						</p>
 						<Button asChild size="sm" className="mt-5">
 							<Link href="/auth/signup">
-								Get started free
+								Start with 10 free credits
 								<ArrowRightIcon className="ml-1.5 size-3.5" />
 							</Link>
 						</Button>

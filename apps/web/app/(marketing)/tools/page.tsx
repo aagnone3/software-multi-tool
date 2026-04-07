@@ -170,7 +170,7 @@ export default function ToolsMarketingPage() {
 					<div className="flex flex-wrap justify-center gap-3">
 						<Button asChild size="lg">
 							<Link href="/auth/signup">
-								Get started free{" "}
+								Start with 10 free credits{" "}
 								<ArrowRightIcon className="ml-2 h-4 w-4" />
 							</Link>
 						</Button>

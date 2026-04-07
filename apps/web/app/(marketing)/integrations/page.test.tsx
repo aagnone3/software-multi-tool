@@ -63,6 +63,14 @@ describe("IntegrationsPage", () => {
 		expect(screen.getByText("Request an integration")).toBeDefined();
 	});
 
+	it("uses explicit 10 free credits copy in the signup CTA", () => {
+		render(<IntegrationsPage />);
+		const signupLink = screen.getByRole("link", {
+			name: /start with 10 free credits/i,
+		});
+		expect(signupLink).toHaveAttribute("href", "/auth/signup");
+	});
+
 	it("links to contact page from CTA", () => {
 		render(<IntegrationsPage />);
 		const links = screen.getAllByRole("link");

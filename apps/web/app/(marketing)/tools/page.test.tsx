@@ -115,12 +115,12 @@ describe("ToolsMarketingPage", () => {
 		expect(screen.getByText("1 credit per run")).toBeInTheDocument();
 	});
 
-	it("renders a CTA to sign up with explicit 10 free credits copy", () => {
+	it("renders explicit 10 free credits CTAs on the hero and bottom signup surfaces", () => {
 		render(<ToolsMarketingPage />);
 		const links = screen.getAllByRole("link", {
 			name: /start with 10 free credits/i,
 		});
-		expect(links.length).toBeGreaterThan(0);
+		expect(links.length).toBeGreaterThanOrEqual(2);
 		expect(
 			screen.getByText(
 				/Start with 10 free credits\. No credit card required\./i,
