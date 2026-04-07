@@ -176,7 +176,7 @@ export function NavBar() {
 											className="block px-3 py-2 text-base font-semibold text-primary"
 											prefetch
 										>
-											Start free →
+											Get 10 free credits →
 										</Link>
 									)}
 								</div>
@@ -212,7 +212,7 @@ export function NavBar() {
 										variant="primary"
 									>
 										<Link href="/auth/signup" prefetch>
-											Start free
+											Get 10 free credits
 										</Link>
 									</Button>
 								</>
