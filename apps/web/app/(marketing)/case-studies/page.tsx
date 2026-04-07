@@ -426,14 +426,15 @@ export default function CaseStudiesPage() {
 						</h2>
 						<p className="mb-8 text-primary-foreground/80">
 							Join teams that have already reclaimed hours every
-							week. Start free — no credit card required.
+							week. Start with 10 free credits — no credit card
+							required.
 						</p>
 						<div className="flex flex-wrap justify-center gap-4">
 							<Link
 								href="/auth/signup"
 								className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-primary shadow-sm hover:bg-white/90 transition-colors"
 							>
-								Start for free
+								Start with 10 free credits
 								<ArrowRightIcon className="size-4" />
 							</Link>
 							<Link

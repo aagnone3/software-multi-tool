@@ -65,14 +65,15 @@ describe("RoiCalculatorPage", () => {
 		expect(screen.getByText(/per month/i)).toBeDefined();
 	});
 
-	it("renders a Get Started CTA", () => {
-		const ctaLinks = screen.getAllByRole("link");
-		const getStartedLink = ctaLinks.find(
-			(l) =>
-				l.textContent?.toLowerCase().includes("start") ||
-				l.textContent?.toLowerCase().includes("free"),
-		);
-		expect(getStartedLink).toBeDefined();
+	it("renders explicit free-credit ROI CTA copy", () => {
+		expect(
+			screen.getByText(
+				/start with 10 free credits — no credit card required/i,
+			),
+		).toBeDefined();
+		expect(
+			screen.getByText(/use those 10 free credits to try any tool/i),
+		).toBeDefined();
 	});
 
 	it("renders JSON-LD structured data", () => {

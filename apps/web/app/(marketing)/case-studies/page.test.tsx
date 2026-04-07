@@ -41,10 +41,17 @@ describe("CaseStudiesPage", () => {
 		expect(screen.getByText("10–22 hrs")).toBeInTheDocument();
 	});
 
-	it("renders a CTA to sign up", () => {
+	it("renders explicit free-credit CTA copy", () => {
 		render(<CaseStudiesPage />);
-		const links = screen.getAllByRole("link", { name: /start for free/i });
+		const links = screen.getAllByRole("link", {
+			name: /start with 10 free credits/i,
+		});
 		expect(links.length).toBeGreaterThan(0);
+		expect(
+			screen.getByText(
+				/start with 10 free credits — no credit card required/i,
+			),
+		).toBeInTheDocument();
 	});
 
 	it("renders quotes from customers", () => {

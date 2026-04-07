@@ -388,8 +388,8 @@ export default function RoiCalculatorPage() {
 											Ready to reclaim those hours?
 										</p>
 										<p className="mb-4 text-foreground/60 text-sm">
-											Start free — no credit card
-											required.
+											Start with 10 free credits — no
+											credit card required.
 										</p>
 										<Link
 											href="/auth/signup"
@@ -417,8 +417,8 @@ export default function RoiCalculatorPage() {
 											Start saving time today
 										</Link>
 										<p className="mt-3 text-foreground/40 text-xs">
-											Includes 10 free credits to try
-											every tool
+											Use those 10 free credits to try any
+											tool.
 										</p>
 									</div>
 
