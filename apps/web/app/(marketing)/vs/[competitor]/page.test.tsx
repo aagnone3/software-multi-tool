@@ -104,4 +104,28 @@ describe("CompetitorPage", () => {
 		// CompetitorPageTracker returns null but should not throw
 		expect(screen.getAllByText(/Notion AI/i).length).toBeGreaterThan(0);
 	});
+
+	it("uses explicit free-credit framing on the footer CTA", async () => {
+		const Page = await CompetitorPage({
+			params: Promise.resolve({ competitor: "chatgpt" }),
+		});
+		render(Page);
+
+		expect(
+			screen.getByText(
+				"Start with 10 free credits. No credit card required.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /start with 10 free credits/i }),
+		).toHaveAttribute("href", "/auth/signup");
+	});
+
+	it("uses explicit free-credit framing in nanonets metadata", async () => {
+		const meta = await generateMetadata({
+			params: Promise.resolve({ competitor: "nanonets" }),
+		});
+
+		expect(meta.description).toContain("Start with 10 free credits");
+	});
 });

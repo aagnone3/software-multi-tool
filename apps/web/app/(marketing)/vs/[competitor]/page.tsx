@@ -575,7 +575,7 @@ const competitors: CompetitorPage[] = [
 		slug: "nanonets",
 		name: "Nanonets",
 		headline: `${config.appName} vs Nanonets — Document AI vs All-in-One Business AI`,
-		description: `${config.appName} vs Nanonets: AI invoice extraction without enterprise pricing or custom model training. Start free, get structured data from any invoice PDF in seconds.`,
+		description: `${config.appName} vs Nanonets: AI invoice extraction without enterprise pricing or custom model training. Start with 10 free credits and get structured data from any invoice PDF in seconds.`,
 		ourPitch:
 			"All-in-one AI: meetings, documents, expenses, news, and more",
 		theirPitch: "AI document processing and OCR extraction platform",
@@ -1414,7 +1414,7 @@ export default async function CompetitorPage({
 						Ready to switch from {page.name}?
 					</h2>
 					<p className="mx-auto mt-4 max-w-xl text-foreground/60 text-lg">
-						Try {config.appName} free. No credit card required.
+						Start with 10 free credits. No credit card required.
 					</p>
 					<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 						<CompetitorCtaTracker
@@ -1426,7 +1426,7 @@ export default async function CompetitorPage({
 								href="/auth/signup"
 								className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
 							>
-								Start Free — No Credit Card
+								Start with 10 Free Credits
 								<ArrowRightIcon className="size-4" />
 							</Link>
 						</CompetitorCtaTracker>
