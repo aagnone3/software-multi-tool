@@ -147,8 +147,11 @@ export function RelatedToolCta({ tags = [] }: Props) {
 						Try it yourself
 					</p>
 					<h3 className="mb-2 font-bold text-xl">{tool.name}</h3>
-					<p className="mb-4 text-muted-foreground text-sm leading-relaxed">
+					<p className="mb-2 text-muted-foreground text-sm leading-relaxed">
 						{tool.description}
+					</p>
+					<p className="mb-4 font-medium text-foreground text-sm">
+						Start with 10 free credits — no card required.
 					</p>
 					<div className="flex flex-wrap gap-3">
 						<Button asChild size="sm">
