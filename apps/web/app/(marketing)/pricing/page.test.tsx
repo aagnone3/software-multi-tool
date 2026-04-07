@@ -61,4 +61,11 @@ describe("PricingPage", () => {
 		expect(metadata.openGraph?.description).toContain("10 free credits");
 		expect(metadata.twitter?.description).toContain("10 free credits");
 	});
+
+	it("uses explicit 10 free credits value framing in the hero copy", () => {
+		render(<PricingPage />);
+		expect(
+			screen.getByText(/Start with 10 free credits\./i),
+		).toBeInTheDocument();
+	});
 });

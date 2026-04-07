@@ -150,8 +150,8 @@ export default function PricingPage() {
 						AI tools for your business — simple, transparent pricing
 					</h1>
 					<p className="mx-auto mt-4 max-w-2xl text-foreground/70 text-lg">
-						Start free. Run your first tool in under a minute.
-						Upgrade only when you need more.
+						Start with 10 free credits. Run your first tool in under
+						a minute. Upgrade only when you need more.
 					</p>
 				</section>
 

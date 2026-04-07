@@ -115,10 +115,17 @@ describe("ToolsMarketingPage", () => {
 		expect(screen.getByText("1 credit per run")).toBeInTheDocument();
 	});
 
-	it("renders a CTA to sign up", () => {
+	it("renders a CTA to sign up with explicit 10 free credits copy", () => {
 		render(<ToolsMarketingPage />);
-		const links = screen.getAllByRole("link", { name: /start for free/i });
+		const links = screen.getAllByRole("link", {
+			name: /start with 10 free credits/i,
+		});
 		expect(links.length).toBeGreaterThan(0);
+		expect(
+			screen.getByText(
+				/Start with 10 free credits\. No credit card required\./i,
+			),
+		).toBeInTheDocument();
 	});
 
 	it("renders ItemList JSON-LD structured data for tools", () => {
