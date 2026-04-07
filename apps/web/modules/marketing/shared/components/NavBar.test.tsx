@@ -56,22 +56,22 @@ describe("NavBar", () => {
 		expect(loginLinks.length).toBeGreaterThan(0);
 	});
 
-	it("shows Start free CTA when no user", () => {
+	it("shows explicit free-credit CTA when no user", () => {
 		render(<NavBar />);
 		const signupLinks = screen.getAllByRole("link", {
-			name: /start free/i,
+			name: /get 10 free credits/i,
 		});
 		expect(signupLinks.length).toBeGreaterThan(0);
 		expect(signupLinks[0]).toHaveAttribute("href", "/auth/signup");
 	});
 
-	it("does not show Start free CTA when user is logged in", () => {
+	it("does not show free-credit CTA when user is logged in", () => {
 		useSessionMock.mockReturnValue({
 			user: { id: "u1", name: "Alice" },
 		});
 		render(<NavBar />);
 		const signupLinks = screen.queryAllByRole("link", {
-			name: /start free/i,
+			name: /get 10 free credits/i,
 		});
 		expect(signupLinks.length).toBe(0);
 	});
