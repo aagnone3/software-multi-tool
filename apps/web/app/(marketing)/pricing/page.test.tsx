@@ -34,13 +34,12 @@ describe("PricingPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders a sign-up CTA link", () => {
+	it("renders explicit 10 free credits CTA copy on the sign-up surface", () => {
 		render(<PricingPage />);
-		const links = screen.getAllByRole("link");
-		const signupLink = links.find((a) =>
-			a.getAttribute("href")?.includes("signup"),
-		);
-		expect(signupLink).toBeDefined();
+		const signupLink = screen.getByRole("link", {
+			name: /start with 10 free credits/i,
+		});
+		expect(signupLink).toHaveAttribute("href", "/auth/signup");
 	});
 
 	it("renders a FAQ or questions section heading", () => {

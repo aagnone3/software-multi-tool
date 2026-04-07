@@ -329,7 +329,7 @@ export default function IntegrationsPage() {
 							href="/auth/signup"
 							className="inline-flex h-10 items-center justify-center rounded-lg border px-6 font-medium text-sm transition-colors hover:bg-muted"
 						>
-							Get started free →
+							Start with 10 free credits →
 						</Link>
 					</div>
 				</section>
