@@ -25,10 +25,12 @@ describe("PricingSection", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the pricing descriptor", () => {
+	it("renders the pricing descriptor with the explicit free-credit offer", () => {
 		render(<PricingSection />);
 		expect(
-			screen.getByText(/Start free\. Add credits as you grow\./),
+			screen.getByText(
+				/Start with 10 free credits\. Add credits as you grow\./,
+			),
 		).toBeInTheDocument();
 	});
 

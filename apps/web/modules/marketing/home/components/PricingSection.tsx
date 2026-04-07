@@ -16,8 +16,8 @@ export function PricingSection() {
 						Pay only for what you use
 					</h2>
 					<p className="mx-auto mt-3 max-w-xl text-foreground/60 text-lg">
-						Start free. Add credits as you grow. No subscriptions
-						required — credits never expire.
+						Start with 10 free credits. Add credits as you grow. No
+						subscriptions required — credits never expire.
 					</p>
 				</div>
 
