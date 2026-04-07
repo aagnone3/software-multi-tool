@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import PricingPage from "./page";
+import PricingPage, { metadata } from "./page";
 
 vi.mock("@marketing/home/components/PricingSection", () => ({
 	PricingSection: () => <section data-testid="pricing-section" />,
@@ -54,5 +54,11 @@ describe("PricingPage", () => {
 		expect(
 			document.querySelector("[data-testid='sticky-cta']"),
 		).toBeInTheDocument();
+	});
+
+	it("uses explicit 10 free credits value framing in metadata", () => {
+		expect(metadata.description).toContain("10 free credits");
+		expect(metadata.openGraph?.description).toContain("10 free credits");
+		expect(metadata.twitter?.description).toContain("10 free credits");
 	});
 });

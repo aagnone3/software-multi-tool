@@ -31,17 +31,17 @@ const upcomingToolCount = config.tools.registry.filter(
 
 export const metadata: Metadata = {
 	title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
-	description: `Simple, transparent AI tools pricing. Start free, upgrade when you need more. No hidden fees, no long-term contracts. Pay-per-use credits for ${liveToolCount} live AI business tools.`,
+	description: `Simple, transparent AI tools pricing. Start with 10 free credits, then upgrade when you need more. No hidden fees, no long-term contracts. Pay-per-use credits for ${liveToolCount} live AI business tools.`,
 	alternates: { canonical: `${siteUrl}/pricing` },
 	openGraph: {
 		type: "website",
 		url: `${siteUrl}/pricing`,
 		title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
 		description:
-			"Simple, transparent AI tools pricing. Start free, upgrade when you need more.",
+			"Simple, transparent AI tools pricing. Start with 10 free credits, then upgrade when you need more.",
 		images: [
 			{
-				url: `${siteUrl}/api/og?title=${encodeURIComponent(`AI Tools Pricing — ${config.appName}`)}&description=${encodeURIComponent("Start free, upgrade when you need more. No hidden fees.")}`,
+				url: `${siteUrl}/api/og?title=${encodeURIComponent(`AI Tools Pricing — ${config.appName}`)}&description=${encodeURIComponent("Start with 10 free credits, then upgrade when you need more. No hidden fees.")}`,
 				width: 1200,
 				height: 630,
 				alt: `AI Tools Pricing — ${config.appName}`,
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: `AI Tools Pricing — Plans & Credits | ${config.appName}`,
 		description:
-			"Simple, transparent AI tools pricing. Start free, upgrade when you need more.",
+			"Simple, transparent AI tools pricing. Start with 10 free credits, then upgrade when you need more.",
 	},
 };
 
