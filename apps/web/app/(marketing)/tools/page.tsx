@@ -260,11 +260,11 @@ export default function ToolsMarketingPage() {
 							Ready to automate your workflow?
 						</h2>
 						<p className="mb-8 text-muted-foreground text-lg">
-							Start with a free account. No credit card required.
+							Start with 10 free credits. No credit card required.
 						</p>
 						<Button asChild size="lg">
 							<Link href="/auth/signup">
-								Start for free{" "}
+								Start with 10 free credits{" "}
 								<ArrowRightIcon className="ml-2 h-4 w-4" />
 							</Link>
 						</Button>
