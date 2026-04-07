@@ -11,9 +11,11 @@ describe("Hero", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders Try Free CTA link to signup", () => {
+	it("renders explicit free-credit CTA link to signup", () => {
 		render(<Hero />);
-		const link = screen.getByRole("link", { name: /try free/i });
+		const link = screen.getByRole("link", {
+			name: /get 10 free credits/i,
+		});
 		expect(link).toHaveAttribute("href", "/auth/signup");
 	});
 

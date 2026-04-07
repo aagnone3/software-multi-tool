@@ -14,10 +14,15 @@ describe("FinalCta", () => {
 		mockTrack.mockClear();
 	});
 
-	it("renders start free and browse tools links", () => {
+	it("renders explicit free-credit headline and browse tools links", () => {
 		render(<FinalCta />);
 		expect(
-			screen.getByText(/Start Free — No Card Needed/i),
+			screen.getByRole("heading", {
+				name: /Start with 10 free credits\. First results in under 2 minutes\./i,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /Start with 10 Free Credits/i }),
 		).toBeInTheDocument();
 		expect(screen.getByText(/Browse All Tools/i)).toBeInTheDocument();
 	});
@@ -31,7 +36,9 @@ describe("FinalCta", () => {
 
 	it("tracks start_free click", () => {
 		render(<FinalCta />);
-		fireEvent.click(screen.getByText(/Start Free — No Card Needed/i));
+		fireEvent.click(
+			screen.getByRole("link", { name: /Start with 10 Free Credits/i }),
+		);
 		expect(mockTrack).toHaveBeenCalledWith({
 			name: "marketing_final_cta_clicked",
 			props: { cta: "start_free" },

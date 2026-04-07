@@ -27,7 +27,7 @@ export function HeroCta() {
 		<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<Button size="lg" variant="primary" asChild>
 				<Link href="/auth/signup" onClick={handleSignupClick}>
-					Try Free — No Card Required
+					Get 10 Free Credits — No Card Required
 					<ArrowRightIcon className="ml-2 size-4" />
 				</Link>
 			</Button>
