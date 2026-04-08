@@ -949,8 +949,7 @@ export default async function IndustryPage({
 			"@type": "Offer",
 			price: "0",
 			priceCurrency: "USD",
-			description:
-				"Start free with credits included. No credit card required.",
+			description: "Start with 10 free credits. No credit card required.",
 		},
 	};
 

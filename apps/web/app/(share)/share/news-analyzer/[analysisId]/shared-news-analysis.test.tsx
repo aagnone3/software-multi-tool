@@ -105,7 +105,9 @@ describe("SharedNewsAnalysis", () => {
 		});
 		render(<SharedNewsAnalysis analysisId="test-id" />);
 		expect(screen.getByText("Not found")).toBeInTheDocument();
-		expect(screen.getByText("Get Started Free")).toHaveAttribute(
+		expect(
+			screen.getByRole("link", { name: "Start with 10 free credits" }),
+		).toHaveAttribute(
 			"href",
 			"/auth/signup?redirect=/app/tools/news-analyzer",
 		);
@@ -157,9 +159,14 @@ describe("SharedNewsAnalysis", () => {
 		expect(
 			screen.getByText("Analyze your own articles with 10 free credits."),
 		).toBeInTheDocument();
-		expect(screen.getByText("Get Started")).toHaveAttribute(
+		const ctaLinks = screen.getAllByRole("link", {
+			name: "Start with 10 free credits",
+		});
+		expect(ctaLinks).toHaveLength(2);
+		expect(ctaLinks[0]).toHaveAttribute(
 			"href",
 			"/auth/signup?redirect=/app/tools/news-analyzer",
 		);
+		expect(ctaLinks[1]).toHaveAttribute("href", "/tools/news-analyzer");
 	});
 });

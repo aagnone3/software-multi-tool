@@ -474,7 +474,7 @@ export default function PartnersPage() {
 							href="/auth/sign-up?ref=affiliate"
 							className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-semibold text-blue-600 transition hover:bg-blue-50"
 						>
-							Get started free{" "}
+							Start with 10 free credits{" "}
 							<ArrowRightIcon className="h-5 w-5" />
 						</Link>
 						<p className="mt-4 text-sm text-blue-200">
