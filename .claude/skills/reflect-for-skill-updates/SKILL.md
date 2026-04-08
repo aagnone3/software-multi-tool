@@ -1,5 +1,5 @@
 ---
-name: reflecting-for-improvements
+name: reflecting-for-skill-updates
 description: Skill and documentation improvement through gap analysis when bugs reveal missing docs, debugging exposes skill gaps, workflows have missing steps, or learnings need capturing. Use after debugging sessions, workflow gaps, or when discovering gotchas.
 allowed-tools:
   - Read
