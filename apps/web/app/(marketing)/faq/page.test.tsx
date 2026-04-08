@@ -36,6 +36,13 @@ describe("FaqPage", () => {
 		expect(screen.getByText(/still have questions/i)).toBeInTheDocument();
 	});
 
+	it("mentions the explicit 10 free credits offer", () => {
+		render(<FaqPage />);
+		expect(screen.getAllByText(/10 free credits/i).length).toBeGreaterThan(
+			0,
+		);
+	});
+
 	it("renders a link to the contact page", () => {
 		render(<FaqPage />);
 		const contactLink = screen

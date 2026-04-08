@@ -81,6 +81,13 @@ describe("CompetitorPage", () => {
 		expect(String(meta.title)).toContain("Otter.ai");
 	});
 
+	it("uses the explicit 10 free credits offer in competitor metadata", async () => {
+		const meta = await generateMetadata({
+			params: Promise.resolve({ competitor: "nanonets" }),
+		});
+		expect(meta.description).toContain("10 free credits");
+	});
+
 	it("generateMetadata returns empty object for unknown competitor", async () => {
 		const meta = await generateMetadata({
 			params: Promise.resolve({ competitor: "nope" }),
@@ -105,12 +112,11 @@ describe("CompetitorPage", () => {
 		expect(screen.getAllByText(/Notion AI/i).length).toBeGreaterThan(0);
 	});
 
-	it("uses explicit free-credit framing on the footer CTA", async () => {
+	it("renders the explicit 10 free credits offer in the final CTA", async () => {
 		const Page = await CompetitorPage({
 			params: Promise.resolve({ competitor: "chatgpt" }),
 		});
 		render(Page);
-
 		expect(
 			screen.getByText(
 				"Start with 10 free credits. No credit card required.",

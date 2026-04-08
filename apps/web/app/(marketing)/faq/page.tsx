@@ -56,11 +56,11 @@ const faqSections = [
 			},
 			{
 				q: "Do I need an account to try it?",
-				a: "You can explore the marketing pages and tool descriptions without signing in. To actually run a tool, you'll need a free account. No credit card required.",
+				a: "You can explore the marketing pages and tool descriptions without signing in. To actually run a tool, you'll need a free account with 10 free credits included. No credit card required.",
 			},
 			{
 				q: "How do I get started?",
-				a: "Sign up for a free account, navigate to the Tools section, pick a tool that fits your task, upload your document or paste your text, and click Run. Your results appear in seconds.",
+				a: "Sign up for a free account with 10 free credits, navigate to the Tools section, pick a tool that fits your task, upload your document or paste your text, and click Run. Your results appear in seconds.",
 			},
 		],
 	},

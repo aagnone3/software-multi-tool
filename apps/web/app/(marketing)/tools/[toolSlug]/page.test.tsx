@@ -104,4 +104,11 @@ describe("ToolPage (marketing)", () => {
 		});
 		expect(metadata.title).toContain("Invoice Processor");
 	});
+
+	it("uses the explicit 10 free credits offer in metadata fallback copy", async () => {
+		const metadata = await generateMetadata({
+			params: Promise.resolve({ toolSlug: "invoice-processor" }),
+		});
+		expect(metadata.description).toContain("10 free credits");
+	});
 });
