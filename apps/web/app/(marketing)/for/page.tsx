@@ -181,14 +181,14 @@ export default function ForIndexPage() {
 				</h2>
 				<p className="mb-6 text-muted-foreground">
 					Our AI tools work for any professional who handles
-					documents, meetings, or data. Try them free — no credit card
-					required.
+					documents, meetings, or data. Start with 10 free credits, no
+					credit card required.
 				</p>
 				<Link
 					href="/auth/signup"
 					className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground text-sm hover:bg-primary/90"
 				>
-					Start for free
+					Start with 10 free credits
 				</Link>
 			</div>
 			<StickyCta />

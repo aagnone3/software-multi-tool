@@ -62,9 +62,21 @@ describe("UseCasesPage", () => {
 	it("shows specific 10-credit CTA copy", () => {
 		render(<UseCasesPage />);
 		expect(
+			screen.getByText(/Start with 10 free credits/i),
+		).toBeInTheDocument();
+		expect(
 			screen.getByText(
 				/Get started free — 10 credits, no card required/i,
 			),
 		).toBeInTheDocument();
+	});
+
+	it("uses explicit 10-credit copy on use-case card CTAs", () => {
+		render(<UseCasesPage />);
+		expect(
+			screen.getAllByRole("link", {
+				name: /with 10 free credits →/i,
+			}).length,
+		).toBeGreaterThan(0);
 	});
 });

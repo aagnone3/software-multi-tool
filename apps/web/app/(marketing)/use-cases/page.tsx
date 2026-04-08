@@ -258,7 +258,7 @@ export default function UseCasesPage() {
 							href="/auth/signup"
 							className="inline-flex items-center rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 						>
-							Start for free
+							Start with 10 free credits
 						</Link>
 						<Link
 							href="/tools"
@@ -333,7 +333,8 @@ export default function UseCasesPage() {
 										href={`/tools/${useCase.toolSlug}`}
 										className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 									>
-										Try {useCase.tool} free →
+										Try {useCase.tool} with 10 free credits
+										→
 									</Link>
 								</div>
 							</div>
