@@ -74,4 +74,14 @@ describe("PartnersPage", () => {
 		expect(parsed["@type"]).toBe("Service");
 		expect(parsed.serviceType).toBe("Affiliate Program");
 	});
+
+	it("uses explicit free-credit CTA copy in the footer conversion section", async () => {
+		const { default: PartnersPage } = await import("./page");
+		render(<PartnersPage />);
+		expect(
+			screen.getByRole("link", {
+				name: /start with 10 free credits/i,
+			}),
+		).toHaveAttribute("href", "/auth/sign-up?ref=affiliate");
+	});
 });

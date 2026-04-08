@@ -91,7 +91,7 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 						</p>
 						<Button asChild>
 							<Link href="/auth/signup?redirect=/app/tools/news-analyzer">
-								Get Started Free
+								Start with 10 free credits
 							</Link>
 						</Button>
 					</div>
@@ -138,7 +138,7 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 					</p>
 					<Button size="sm" asChild>
 						<Link href="/auth/signup?redirect=/app/tools/news-analyzer">
-							Get Started
+							Start with 10 free credits
 						</Link>
 					</Button>
 				</div>
@@ -344,7 +344,7 @@ export function SharedNewsAnalysis({ analysisId }: SharedNewsAnalysisProps) {
 										})
 									}
 								>
-									Try it free
+									Start with 10 free credits
 								</Link>
 							</Button>
 							<Button asChild variant="outline">

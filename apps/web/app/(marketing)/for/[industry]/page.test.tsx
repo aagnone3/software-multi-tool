@@ -107,6 +107,9 @@ describe("IndustryPage", () => {
 		expect(service?.name).toContain("Accountants");
 		expect(service?.provider?.name).toBe("TestApp");
 		expect(service?.audience?.audienceType).toContain("Accountants");
+		expect(service?.offers?.description).toBe(
+			"Start with 10 free credits. No credit card required.",
+		);
 	});
 
 	it("renders BreadcrumbList JSON-LD structured data", async () => {
