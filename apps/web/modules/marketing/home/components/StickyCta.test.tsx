@@ -21,6 +21,7 @@ type CreditsBalanceMock = {
 	isFreePlan: boolean;
 	isStarterPlan: boolean;
 	isLoading: boolean;
+	isError: boolean;
 	balance: { plan: { id: string; name: string } } | undefined;
 };
 
@@ -49,6 +50,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: undefined,
 		});
 	});
@@ -67,6 +69,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: undefined,
 		});
 		render(<StickyCta />);
@@ -79,6 +82,7 @@ describe("StickyCta", () => {
 			isFreePlan: true,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});
 		render(<StickyCta />);
@@ -91,6 +95,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: true,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "starter", name: "Starter" } },
 		});
 		render(<StickyCta />);
@@ -108,6 +113,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: true,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "starter", name: "Starter" } },
 		});
 		render(<StickyCta />);
@@ -120,6 +126,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "pro", name: "Pro" } },
 		});
 		render(<StickyCta />);
@@ -134,6 +141,7 @@ describe("StickyCta", () => {
 			isFreePlan: false,
 			isStarterPlan: false,
 			isLoading: true,
+			isError: false,
 			balance: undefined,
 		});
 		render(<StickyCta />);
@@ -146,6 +154,7 @@ describe("StickyCta", () => {
 			isFreePlan: true,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});
 		render(<StickyCta />);
@@ -160,6 +169,7 @@ describe("StickyCta", () => {
 			isFreePlan: true,
 			isStarterPlan: false,
 			isLoading: false,
+			isError: false,
 			balance: { plan: { id: "free", name: "Free" } },
 		});
 		render(<StickyCta />);
@@ -167,5 +177,20 @@ describe("StickyCta", () => {
 		const dismissBtn = screen.getByRole("button", { name: /dismiss/i });
 		fireEvent.click(dismissBtn);
 		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
+	});
+
+	it("hides when credits balance fetch fails", () => {
+		mockUseCreditsBalance.mockReturnValue({
+			isFreePlan: false,
+			isStarterPlan: false,
+			isLoading: false,
+			isError: true,
+			balance: undefined,
+		});
+		render(<StickyCta />);
+		// Should not show CTA at all, regardless of scroll
+		scrollPast400();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
+		expect(screen.queryByText(/upgrade to pro/i)).toBeNull();
 	});
 });
