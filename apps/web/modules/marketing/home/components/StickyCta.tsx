@@ -75,7 +75,7 @@ export function StickyCta() {
 				) : (
 					<>
 						<p className="text-foreground text-sm font-medium whitespace-nowrap">
-							Start free — 10 credits, no card needed
+							Get 10 free credits — no credit card required
 						</p>
 						<Button size="sm" variant="primary" asChild>
 							<Link href="/auth/signup" onClick={handleCtaClick}>

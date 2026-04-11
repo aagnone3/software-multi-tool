@@ -453,7 +453,7 @@ export function PricingTable({
 												aria-label={
 													userId || organizationId
 														? `Choose the ${title} plan`
-														: `Get started with the ${title} plan`
+														: isFree ? `Start free with the ${title} plan` : `Start 7-day free trial with the ${title} plan`
 												}
 												onClick={() =>
 													onSelectPlan(
@@ -465,7 +465,7 @@ export function PricingTable({
 											>
 												{userId || organizationId
 													? "Choose plan"
-													: "Get started"}
+													: isFree ? "Start free" : "Start 7-day free trial"}
 												<ArrowRightIcon className="ml-2 size-4" />
 											</Button>
 										)}
