@@ -263,6 +263,7 @@ export function PricingTable({
 								aria-labelledby={`pricing-plan-title-${planId}`}
 								className={cn("rounded-3xl border p-6", {
 									"border-2 border-primary": recommended,
+									"shadow-lg": recommended,
 								})}
 								data-test="price-table-plan"
 							>
