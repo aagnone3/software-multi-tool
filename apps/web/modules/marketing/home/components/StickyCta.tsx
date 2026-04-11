@@ -10,9 +10,30 @@ import React, { useEffect, useState } from "react";
 export function StickyCta() {
 	const [visible, setVisible] = useState(false);
 	const [dismissed, setDismissed] = useState(false);
-	const { isFreePlan, isStarterPlan, isLoading, balance } =
+	const { isFreePlan, isStarterPlan, isLoading, isError, balance } =
 		useCreditsBalance();
 	const { track } = useProductAnalytics();
+
+	useEffect(() => {
+		if (isError) {
+			// If we can't determine the user's plan, skip setting up scroll listener.
+			return;
+		}
+		// Show after user scrolls past ~400px (past the hero fold)
+		const handleScroll = () => {
+			if (!dismissed) {
+				setVisible(window.scrollY > 400);
+			}
+		};
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [dismissed, isError]);
+
+	if (isError) {
+		// If we can't determine the user's plan, hide the CTA to avoid misleading messaging.
+		return null;
+	}
 
 	const handleCtaClick = () => {
 		track({
@@ -23,18 +44,6 @@ export function StickyCta() {
 			},
 		});
 	};
-
-	useEffect(() => {
-		// Show after user scrolls past ~400px (past the hero fold)
-		const handleScroll = () => {
-			if (!dismissed) {
-				setVisible(window.scrollY > 400);
-			}
-		};
-
-		window.addEventListener("scroll", handleScroll, { passive: true });
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [dismissed]);
 
 	const handleDismiss = () => {
 		setDismissed(true);
