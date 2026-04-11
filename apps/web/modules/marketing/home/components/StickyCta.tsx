@@ -15,7 +15,7 @@ export function StickyCta() {
 	const { track } = useProductAnalytics();
 
 	useEffect(() => {
-		if (isError) {
+		if (isError || isLoading) {
 			// If we can't determine the user's plan, skip setting up scroll listener.
 			return;
 		}
@@ -28,9 +28,9 @@ export function StickyCta() {
 
 		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => window.removeEventListener("scroll", handleScroll);
-	}, [dismissed, isError]);
+	}, [dismissed, isError, isLoading]);
 
-	if (isError) {
+	if (isError || isLoading) {
 		// If we can't determine the user's plan, hide the CTA to avoid misleading messaging.
 		return null;
 	}
