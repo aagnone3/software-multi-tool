@@ -135,8 +135,8 @@ describe("StickyCta", () => {
 		expect(screen.queryByText(/upgrade to pro/i)).toBeNull();
 	});
 
-	it("is not suppressed while plan is still loading", () => {
-		// While loading we can't confirm Pro status — show the CTA
+	it("is suppressed while plan is still loading", () => {
+		// While loading we hide the CTA to avoid misleading messaging
 		mockUseCreditsBalance.mockReturnValue({
 			isFreePlan: false,
 			isStarterPlan: false,
@@ -146,7 +146,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.getByText(/Get 10 free credits/i)).toBeTruthy();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
 	});
 
 	it("contains a signup link for anonymous/free users", () => {
