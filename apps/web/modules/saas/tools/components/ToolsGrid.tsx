@@ -112,7 +112,8 @@ export function ToolsGrid() {
 	const searchRef = useRef<HTMLDivElement>(null);
 	const { recentSearches, addSearch, removeSearch } = useRecentSearches();
 	const allTools = useMemo(() => getVisibleTools(), []);
-	const { recentToolSlugs, recentToolsMap } = useRecentJobs(20);
+	const { recentToolSlugs, recentToolsMap, isLoading, isError } =
+		useRecentJobs(20);
 	const recentToolSet = useMemo(
 		() => new Set(recentToolSlugs),
 		[recentToolSlugs],
@@ -369,12 +370,19 @@ export function ToolsGrid() {
 							<ToolCard
 								tool={tool}
 								isComingSoon={tool.isComingSoon}
-								isRecentlyUsed={recentToolSet.has(tool.slug)}
+								isRecentlyUsed={
+									!isLoading &&
+									!isError &&
+									recentToolSet.has(tool.slug)
+								}
 								lastUsedAt={
-									recentToolsMap.get(tool.slug)
-										?.completedAt ??
-									recentToolsMap.get(tool.slug)?.createdAt ??
-									null
+									!isLoading && !isError
+										? (recentToolsMap.get(tool.slug)
+												?.completedAt ??
+											recentToolsMap.get(tool.slug)
+												?.createdAt ??
+											null)
+										: null
 								}
 								isFavorite={isFavorite(tool.slug)}
 								onToggleFavorite={toggleFavorite}

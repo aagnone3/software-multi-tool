@@ -59,7 +59,7 @@ describe("StickyCta", () => {
 
 	it("is not visible initially (scrollY = 0)", () => {
 		render(<StickyCta />);
-		expect(screen.queryByText(/start free/i)).toBeNull();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
 	});
 
 	it("becomes visible for anonymous user (no balance) when scrollY > 400", () => {
@@ -71,7 +71,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.getByText(/start free/i)).toBeTruthy();
+		expect(screen.getByText(/Get 10 free credits/i)).toBeTruthy();
 	});
 
 	it("becomes visible for free-plan user when scrollY > 400", () => {
@@ -83,7 +83,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.getByText(/start free/i)).toBeTruthy();
+		expect(screen.getByText(/Get 10 free credits/i)).toBeTruthy();
 	});
 
 	it("shows Starter→Pro upsell CTA for Starter plan users", () => {
@@ -112,7 +112,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.queryByText(/start free/i)).toBeNull();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
 	});
 
 	it("is hidden for Pro (paid) user even when scrollY > 400", () => {
@@ -124,7 +124,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.queryByText(/start free/i)).toBeNull();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
 		expect(screen.queryByText(/upgrade to pro/i)).toBeNull();
 	});
 
@@ -138,7 +138,7 @@ describe("StickyCta", () => {
 		});
 		render(<StickyCta />);
 		scrollPast400();
-		expect(screen.getByText(/start free/i)).toBeTruthy();
+		expect(screen.getByText(/Get 10 free credits/i)).toBeTruthy();
 	});
 
 	it("contains a signup link for anonymous/free users", () => {
@@ -166,6 +166,6 @@ describe("StickyCta", () => {
 		scrollPast400();
 		const dismissBtn = screen.getByRole("button", { name: /dismiss/i });
 		fireEvent.click(dismissBtn);
-		expect(screen.queryByText(/start free/i)).toBeNull();
+		expect(screen.queryByText(/Get 10 free credits/i)).toBeNull();
 	});
 });

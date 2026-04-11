@@ -342,7 +342,7 @@ describe("PricingTable - a11y", () => {
 		render(<PricingTable />);
 		const ctaButtons = document.querySelectorAll("button[aria-label]");
 		const getStartedButtons = Array.from(ctaButtons).filter((btn) =>
-			btn.getAttribute("aria-label")?.includes("Get started with"),
+			btn.getAttribute("aria-label")?.includes("Start"),
 		);
 		expect(getStartedButtons.length).toBeGreaterThan(0);
 	});
