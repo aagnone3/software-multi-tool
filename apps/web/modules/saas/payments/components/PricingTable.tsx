@@ -273,7 +273,7 @@ export function PricingTable({
 											<div className="-mt-9 flex justify-center">
 												<div className="mb-2 flex h-6 w-auto items-center gap-1.5 rounded-full bg-primary px-2 py-1 font-semibold text-primary-foreground text-xs">
 													<StarIcon className="size-3" />
-													Recommended
+													Most popular
 												</div>
 											</div>
 										)}
