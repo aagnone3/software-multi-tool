@@ -23,19 +23,36 @@ test.describe("News Analyzer", () => {
 		await expect(urlInput).toBeVisible({ timeout: 15000 });
 	});
 
-	test.skip("can submit article URL and see loading state", async ({
-		page,
-	}) => {
+	test("can submit article URL and see loading state", async ({ page }) => {
 		const newsAnalyzer = new NewsAnalyzerPage(page);
 		await newsAnalyzer.goto();
 
 		await expect(newsAnalyzer.urlInput).toBeVisible({ timeout: 10000 });
+		// Mock successful job creation
+		await page.route("**/api/rpc/**", (route) => {
+			if (route.request().method() === "POST") {
+				route.fulfill({
+					status: 200,
+					contentType: "application/json",
+					body: JSON.stringify({
+						job: {
+							id: "test-job-id",
+							status: "PENDING",
+							toolSlug: "news-analyzer",
+							createdAt: new Date().toISOString(),
+						},
+					}),
+				});
+			} else {
+				route.continue();
+			}
+		});
 		await newsAnalyzer.analyzeUrl("https://www.bbc.com/news/technology");
 
 		await newsAnalyzer.waitForLoading();
 	});
 
-	test.skip("shows error when analysis fails to start", async ({ page }) => {
+	test("shows error when analysis fails to start", async ({ page }) => {
 		// Mock the oRPC endpoint to fail - this intercepts the jobs.create call
 		await page.route("**/api/rpc/**", (route) => {
 			// Only mock the jobs.create request (POST requests that create jobs)
@@ -59,7 +76,7 @@ test.describe("News Analyzer", () => {
 		await newsAnalyzer.waitForError();
 	});
 
-	test.skip("form validates URL input", async ({ page }) => {
+	test("form validates URL input", async ({ page }) => {
 		const newsAnalyzer = new NewsAnalyzerPage(page);
 		await newsAnalyzer.goto();
 
