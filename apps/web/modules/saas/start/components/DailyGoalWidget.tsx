@@ -58,7 +58,9 @@ export function DailyGoalWidget({ className }: DailyGoalWidgetProps) {
 	// Count today's completed jobs
 	const todayKey = getTodayKey();
 	const todayCompletedCount = jobs.filter((job) => {
-		if (job.status !== "COMPLETED") { return false; }
+		if (job.status !== "COMPLETED") {
+			return false;
+		}
 		const jobDate = new Date(job.createdAt).toISOString().split("T")[0];
 		return jobDate === todayKey;
 	}).length;

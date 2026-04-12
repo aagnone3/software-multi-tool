@@ -87,7 +87,7 @@ describe("PostUpgradeWelcome", () => {
 	it("renders the congratulations heading", () => {
 		render(<PostUpgradeWelcome />);
 		expect(screen.getByRole("heading", { level: 1 })).toBeDefined();
-		expect(screen.getByText(/now on Pro/i)).toBeDefined();
+		expect(screen.getByText(/now on Enterprise/i)).toBeDefined();
 	});
 
 	it("renders the included benefits list", () => {
@@ -146,6 +146,6 @@ describe("PostUpgradeWelcome", () => {
 			useTools: () => ({ enabledTools: [] }),
 		}));
 		render(<PostUpgradeWelcome />);
-		expect(screen.getByText(/now on Pro/i)).toBeDefined();
+		expect(screen.getByText(/now on Enterprise/i)).toBeDefined();
 	});
 });

@@ -14,7 +14,9 @@ export interface ToolCollection {
 const STORAGE_KEY = "tool-collections";
 
 function loadCollections(): ToolCollection[] {
-	if (typeof window === "undefined") { return []; }
+	if (typeof window === "undefined") {
+		return [];
+	}
 	try {
 		return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
 	} catch {

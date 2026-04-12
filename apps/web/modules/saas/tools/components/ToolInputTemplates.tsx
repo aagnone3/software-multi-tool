@@ -42,7 +42,9 @@ interface InputTemplate {
 type TemplateMap = Record<string, InputTemplate[]>; // toolSlug → templates
 
 function loadTemplates(): TemplateMap {
-	if (typeof window === "undefined") { return {}; }
+	if (typeof window === "undefined") {
+		return {};
+	}
 	try {
 		return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
 	} catch {
@@ -82,7 +84,9 @@ export function ToolInputTemplates({
 	const addTemplate = useCallback(() => {
 		const name = newName.trim();
 		const content = newContent.trim();
-		if (!name || !content) { return; }
+		if (!name || !content) {
+			return;
+		}
 
 		const template: InputTemplate = {
 			id: generateId(),

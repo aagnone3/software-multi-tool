@@ -30,7 +30,9 @@ export function PostJobShareNudge({
 
 	useEffect(() => {
 		const dismissed = localStorage.getItem(storageKey);
-		if (dismissed === "true") { return; }
+		if (dismissed === "true") {
+			return;
+		}
 		// Delay so it shows after the upgrade nudge
 		const timer = setTimeout(() => {
 			setShow(true);
@@ -68,7 +70,9 @@ export function PostJobShareNudge({
 		}
 	};
 
-	if (!show) { return null; }
+	if (!show) {
+		return null;
+	}
 
 	return (
 		<aside

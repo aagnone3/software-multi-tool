@@ -62,7 +62,9 @@ export function CreditPurchaseConfirmDialog({
 		onCancel();
 	};
 
-	if (!pack) { return null; }
+	if (!pack) {
+		return null;
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={(v) => !v && handleCancel()}>

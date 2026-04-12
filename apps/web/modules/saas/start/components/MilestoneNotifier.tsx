@@ -41,7 +41,9 @@ const STORAGE_KEY = "smt:milestone-notified";
 function getNotifiedMilestones(): Set<number> {
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) { return new Set(); }
+		if (!raw) {
+			return new Set();
+		}
 		return new Set(JSON.parse(raw) as number[]);
 	} catch {
 		return new Set();
@@ -64,14 +66,18 @@ export function MilestoneNotifier() {
 	const { track } = useProductAnalytics();
 
 	useEffect(() => {
-		if (result.isLoading || checkedRef.current) { return; }
+		if (result.isLoading || checkedRef.current) {
+			return;
+		}
 		checkedRef.current = true;
 
 		const jobs = result.jobs ?? [];
 		const completedCount = jobs.filter(
 			(j: { status: string }) => j.status === "COMPLETED",
 		).length;
-		if (completedCount === 0) { return; }
+		if (completedCount === 0) {
+			return;
+		}
 
 		const notified = getNotifiedMilestones();
 		const milestoneNumbers = Object.keys(MILESTONES)

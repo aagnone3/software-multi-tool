@@ -11,7 +11,9 @@ export interface RecentlyViewedTool {
 }
 
 function loadFromStorage(): RecentlyViewedTool[] {
-	if (typeof window === "undefined") { return []; }
+	if (typeof window === "undefined") {
+		return [];
+	}
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
 		return raw ? (JSON.parse(raw) as RecentlyViewedTool[]) : [];
@@ -21,7 +23,9 @@ function loadFromStorage(): RecentlyViewedTool[] {
 }
 
 function saveToStorage(items: RecentlyViewedTool[]): void {
-	if (typeof window === "undefined") { return; }
+	if (typeof window === "undefined") {
+		return;
+	}
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 	} catch {

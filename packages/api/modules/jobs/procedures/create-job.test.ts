@@ -115,7 +115,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		const result = await handler({
 			input: {
@@ -149,7 +151,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await handler({
 			input: {
@@ -177,7 +181,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await expect(
 			handler({
@@ -207,7 +213,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await expect(
 			handler({
@@ -236,7 +244,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await expect(
 			handler({
@@ -272,7 +282,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await expect(
 			handler({
@@ -308,7 +320,9 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) { return; }
+		if (!handler) {
+			return;
+		}
 
 		await handler({
 			input: {

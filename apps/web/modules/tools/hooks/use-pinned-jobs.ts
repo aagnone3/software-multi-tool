@@ -16,7 +16,9 @@ interface PinnedJob {
 function loadPinnedJobs(): PinnedJob[] {
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) { return []; }
+		if (!raw) {
+			return [];
+		}
 		return JSON.parse(raw) as PinnedJob[];
 	} catch {
 		return [];
@@ -40,7 +42,9 @@ export function usePinnedJobs() {
 
 	const pinJob = useCallback((job: Omit<PinnedJob, "pinnedAt">) => {
 		setPinnedJobs((prev) => {
-			if (prev.some((p) => p.id === job.id)) { return prev; }
+			if (prev.some((p) => p.id === job.id)) {
+				return prev;
+			}
 			const updated = [
 				{ ...job, pinnedAt: new Date().toISOString() },
 				...prev,

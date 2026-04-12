@@ -156,7 +156,9 @@ export function ToolSampleOutput({
 	const [expanded, setExpanded] = useState(false);
 	const sample = SAMPLES[toolSlug];
 
-	if (!sample) { return null; }
+	if (!sample) {
+		return null;
+	}
 
 	const outputStr =
 		typeof sample.output === "string"
