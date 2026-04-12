@@ -13,8 +13,9 @@ export function usePlanData() {
 		}
 	> = {
 		free: {
-			title: "Free",
-			description: "Try all the tools — no credit card required",
+			title: "Free Starter",
+			description:
+				"Full source code, local evaluation, community support",
 			features: [
 				"10 credits/month",
 				"All tools included",
@@ -23,9 +24,9 @@ export function usePlanData() {
 			],
 		},
 		starter: {
-			title: "Starter",
+			title: "Pro License",
 			description:
-				"For freelancers and professionals who run AI workflows weekly",
+				"Priority updates, verified compatibility, direct support",
 			features: [
 				"100 credits/month",
 				"All tools included",
@@ -43,9 +44,9 @@ export function usePlanData() {
 			],
 		},
 		pro: {
-			title: "Pro",
+			title: "Enterprise",
 			description:
-				"For teams that rely on AI tools as part of their daily workflow",
+				"Premium modules, dedicated setup, customization guidance",
 			features: [
 				"500 credits/month",
 				"All tools included",

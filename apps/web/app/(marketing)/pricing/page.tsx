@@ -96,8 +96,8 @@ const faqs = [
 		a: "Yes. Files you upload are processed and then deleted. We don't train models on your data. See our privacy policy for details.",
 	},
 	{
-		q: "What's the difference between the Starter and Pro plans?",
-		a: "The Starter plan gives you 100 credits per month plus access to all tools, exports, and your usage dashboard. Pro gives you 500 credits per month, rollover credits, job scheduling (run tools automatically on a schedule), bulk actions, and saved input templates — making it the right choice for teams or anyone processing documents regularly.",
+		q: "What's the difference between the Pro License and Enterprise plans?",
+		a: "The Pro License plan gives you 100 credits per month plus access to all tools, exports, and your usage dashboard. Enterprise gives you 500 credits per month, rollover credits, job scheduling (run tools automatically on a schedule), bulk actions, and saved input templates — making it the right choice for teams or anyone processing documents regularly.",
 	},
 	{
 		q: "Can I switch plans later?",
