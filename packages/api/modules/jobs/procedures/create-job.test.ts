@@ -73,7 +73,9 @@ describe("createJob procedure", () => {
 		// Instead, verify that findCachedJob is invoked by checking its call signature
 		// through a minimal integration point
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 
 		if (!handler) {
@@ -113,7 +115,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -149,7 +153,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -179,7 +185,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -211,7 +219,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -242,7 +252,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -280,7 +292,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;
@@ -318,7 +332,9 @@ describe("createJob procedure", () => {
 
 		const { createJob } = await import("./create-job");
 		const handler = (
-			createJob as unknown as { "~orpc": { handler: Function } }
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
 		)["~orpc"]?.handler;
 		if (!handler) {
 			return;

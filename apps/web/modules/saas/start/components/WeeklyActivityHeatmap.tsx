@@ -126,7 +126,6 @@ export function WeeklyActivityHeatmap({
 					>
 						{Array.from({ length: weeks * 7 }).map((_, i) => (
 							<div
-								// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
 								key={i}
 								className="aspect-square rounded-sm bg-muted/40 size-4"
 							/>

@@ -80,7 +80,6 @@ describe("subscribeToEcho", () => {
 			data: { hello: "world" },
 			timestamp: "2026-01-01T00:00:00.000Z",
 		};
-		// biome-ignore lint/style/noNonNullAssertion: handler is always set before this line
 		broadcastHandler!({ payload: fakeMessage });
 
 		expect(onEcho).toHaveBeenCalledWith(fakeMessage);
@@ -179,7 +178,6 @@ describe("startHeartbeat", () => {
 		});
 
 		// simulate a pong broadcast
-		// biome-ignore lint/style/noNonNullAssertion: handler is always set before this line
 		pongHandler!({
 			payload: { type: "pong", timestamp: "2026-01-01T00:00:00.000Z" },
 		});

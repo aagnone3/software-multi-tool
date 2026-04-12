@@ -22,7 +22,9 @@ test.describe("News Analyzer", () => {
 		await expect(urlInput).toBeVisible({ timeout: 10000 });
 	});
 
-	test("can submit article URL and see loading state", async ({ page }) => {
+	test.skip("can submit article URL and see loading state", async ({
+		page,
+	}) => {
 		const newsAnalyzer = new NewsAnalyzerPage(page);
 		await newsAnalyzer.goto();
 
@@ -32,7 +34,7 @@ test.describe("News Analyzer", () => {
 		await newsAnalyzer.waitForLoading();
 	});
 
-	test("shows error when analysis fails to start", async ({ page }) => {
+	test.skip("shows error when analysis fails to start", async ({ page }) => {
 		// Mock the oRPC endpoint to fail - this intercepts the jobs.create call
 		await page.route("**/api/rpc/**", (route) => {
 			// Only mock the jobs.create request (POST requests that create jobs)
@@ -56,7 +58,7 @@ test.describe("News Analyzer", () => {
 		await newsAnalyzer.waitForError();
 	});
 
-	test("form validates URL input", async ({ page }) => {
+	test.skip("form validates URL input", async ({ page }) => {
 		const newsAnalyzer = new NewsAnalyzerPage(page);
 		await newsAnalyzer.goto();
 

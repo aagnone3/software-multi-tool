@@ -209,7 +209,6 @@ describe("ToolHistoryPage", () => {
 			"@tools/hooks/use-job-polling"
 		);
 		vi.mocked(useJobsListPaginated).mockReturnValueOnce({
-			// biome-ignore lint/suspicious/noExplicitAny: test stub
 			jobs: mockJobs as any,
 			isLoading: false,
 			hasMore: true,

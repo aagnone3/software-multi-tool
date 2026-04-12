@@ -9,6 +9,7 @@ import {
 	BadgeCheckIcon,
 	BlocksIcon,
 	CheckCircleIcon,
+	ChevronDownIcon,
 	HelpCircleIcon,
 	RocketIcon,
 	ShieldCheckIcon,
@@ -160,6 +161,15 @@ export default function PricingPage() {
 								<ArrowRightIcon className="ml-1.5 size-4" />
 							</Link>
 						</Button>
+					</div>
+					<div className="mt-4">
+						<Link
+							href="#pricing"
+							className="inline-flex items-center gap-1 text-foreground/60 hover:text-foreground transition-colors text-sm"
+						>
+							See pricing details
+							<ChevronDownIcon className="size-4" />
+						</Link>
 					</div>
 				</section>
 

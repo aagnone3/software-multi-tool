@@ -6,7 +6,6 @@ import { PostListItem } from "./PostListItem";
 
 vi.mock("next/image", () => ({
 	default: ({ src, alt }: { src: string; alt: string }) => (
-		// biome-ignore lint/performance/noImgElement: test mock
 		<img src={src} alt={alt} />
 	),
 }));

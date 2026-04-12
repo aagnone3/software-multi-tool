@@ -27,7 +27,6 @@ vi.mock("@analytics/hooks/use-product-analytics", () => ({
 }));
 
 vi.mock("nuqs", async (importOriginal) => {
-	// biome-ignore lint/suspicious/noExplicitAny: test mock
 	const actual = (await importOriginal()) as any;
 	return {
 		...actual,

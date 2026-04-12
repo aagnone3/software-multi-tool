@@ -77,7 +77,6 @@ vi.mock("@shared/components/ToolFeedback", () => ({
 
 vi.mock("next/image", () => ({
 	default: ({ src, alt }: { src: string; alt: string }) => (
-		// biome-ignore lint/performance/noImgElement: mock for next/image
 		<img src={src} alt={alt} />
 	),
 }));

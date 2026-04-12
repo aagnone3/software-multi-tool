@@ -12,10 +12,7 @@ vi.mock("next/image", () => ({
 		src: string;
 		alt: string;
 		[key: string]: unknown;
-	}) => (
-		// biome-ignore lint/a11y/useAltText: test mock
-		<img src={src} alt={alt} {...props} />
-	),
+	}) => <img src={src} alt={alt} {...props} />,
 }));
 
 describe("Logo", () => {

@@ -121,7 +121,6 @@ function TableView({ rows }: { rows: Record<string, unknown>[] }) {
 				</thead>
 				<tbody>
 					{rows.map((row, i) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: table rows
 						<tr key={i} className="border-b hover:bg-muted/25">
 							{keys.map((k) => (
 								<td key={k} className="px-3 py-2 align-top">
@@ -190,7 +189,6 @@ function NestedSection({ label, value }: { label: string; value: unknown }) {
 					) : (
 						<ul className="space-y-1 text-sm">
 							{arr.map((item, i) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: list items
 								<li
 									key={i}
 									className="flex items-start gap-2 px-2 py-1 rounded hover:bg-muted/30"
