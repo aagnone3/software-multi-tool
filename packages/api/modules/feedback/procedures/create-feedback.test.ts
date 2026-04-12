@@ -32,7 +32,7 @@ async function getHandler(): Promise<Handler> {
 	const handler = (
 		createFeedbackProcedure as unknown as { "~orpc": { handler: Handler } }
 	)["~orpc"]?.handler;
-	if (!handler) throw new Error("handler not found");
+	if (!handler) { throw new Error("handler not found"); }
 	return handler;
 }
 

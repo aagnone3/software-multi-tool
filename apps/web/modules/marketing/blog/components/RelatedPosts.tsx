@@ -34,7 +34,7 @@ export async function RelatedPosts({
 		.slice(0, limit)
 		.map((s) => s.post);
 
-	if (scored.length === 0) return null;
+	if (scored.length === 0) { return null; }
 
 	return (
 		<div className="mx-auto mt-12 max-w-2xl border-t pt-10">

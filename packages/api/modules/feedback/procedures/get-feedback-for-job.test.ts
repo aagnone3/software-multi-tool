@@ -24,7 +24,7 @@ async function getHandler(): Promise<Handler> {
 			"~orpc": { handler: Handler };
 		}
 	)["~orpc"]?.handler;
-	if (!handler) throw new Error("handler not found");
+	if (!handler) { throw new Error("handler not found"); }
 	return handler;
 }
 

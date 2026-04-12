@@ -15,7 +15,7 @@ export function BlogNewsletterCta() {
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		if (!email) return;
+		if (!email) { return; }
 		setStatus("submitting");
 		track({
 			name: "newsletter_subscribe_submitted",

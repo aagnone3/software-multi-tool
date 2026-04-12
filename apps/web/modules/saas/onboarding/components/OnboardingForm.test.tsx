@@ -96,7 +96,7 @@ describe("OnboardingForm", () => {
 	it("calls updateUser and redirects to /app on step 2 completion", async () => {
 		// Start on step 2
 		mockSearchParams.get.mockImplementation((key: string) => {
-			if (key === "step") return "2";
+			if (key === "step") { return "2"; }
 			return null;
 		});
 
@@ -118,8 +118,8 @@ describe("OnboardingForm", () => {
 	it("redirects to redirectTo param if set", async () => {
 		// Start on step 2 with redirectTo
 		mockSearchParams.get.mockImplementation((key: string) => {
-			if (key === "step") return "2";
-			if (key === "redirectTo") return "/custom-redirect";
+			if (key === "step") { return "2"; }
+			if (key === "redirectTo") { return "/custom-redirect"; }
 			return null;
 		});
 
@@ -136,7 +136,7 @@ describe("OnboardingForm", () => {
 
 	it("shows error toast when updateUser fails during onboarding completion", async () => {
 		mockSearchParams.get.mockImplementation((key: string) => {
-			if (key === "step") return "2";
+			if (key === "step") { return "2"; }
 			return null;
 		});
 

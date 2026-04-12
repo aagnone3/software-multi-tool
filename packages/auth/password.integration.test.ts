@@ -130,7 +130,7 @@ describeWithContainerRuntime("Password hashing integration tests", () => {
 
 				// Verify the password can be validated
 				const isValid = await verifyPassword({
-					hash: account!.password!,
+					hash: account?.password!,
 					password,
 				});
 

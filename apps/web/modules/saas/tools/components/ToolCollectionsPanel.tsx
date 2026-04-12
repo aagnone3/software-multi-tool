@@ -49,12 +49,12 @@ export function ToolCollectionsPanel({
 	const [newName, setNewName] = useState("");
 	const [newDesc, setNewDesc] = useState("");
 
-	const currentToolCollections = currentToolSlug
+	const _currentToolCollections = currentToolSlug
 		? getCollectionsForTool(currentToolSlug)
 		: [];
 
 	function handleCreate() {
-		if (!newName.trim()) return;
+		if (!newName.trim()) { return; }
 		const created = createCollection(
 			newName,
 			newDesc,
@@ -77,7 +77,7 @@ export function ToolCollectionsPanel({
 	}
 
 	function handleToggleTool(collectionId: string, inCollection: boolean) {
-		if (!currentToolSlug) return;
+		if (!currentToolSlug) { return; }
 		if (inCollection) {
 			removeToolFromCollection(collectionId, currentToolSlug);
 			track({

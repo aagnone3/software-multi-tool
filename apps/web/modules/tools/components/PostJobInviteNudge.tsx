@@ -37,9 +37,9 @@ export function PostJobInviteNudge({ className }: PostJobInviteNudgeProps) {
 		: "/app/settings";
 
 	useEffect(() => {
-		if (completedJobCount < JOB_COUNT_THRESHOLD) return;
+		if (completedJobCount < JOB_COUNT_THRESHOLD) { return; }
 		const dismissed = localStorage.getItem(STORAGE_KEY);
-		if (dismissed === "true") return;
+		if (dismissed === "true") { return; }
 		// Show with a slight delay so it doesn't compete with other nudges
 		const timer = setTimeout(() => {
 			setShow(true);
@@ -59,7 +59,7 @@ export function PostJobInviteNudge({ className }: PostJobInviteNudgeProps) {
 		setShow(false);
 	};
 
-	if (!show) return null;
+	if (!show) { return null; }
 
 	return (
 		<aside

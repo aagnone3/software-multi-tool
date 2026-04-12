@@ -23,7 +23,7 @@ function getStreakFromJobs(jobs: { completedAt: string | null }[]): {
 		}
 	}
 
-	if (completedDays.size === 0) return { current: 0, best: 0 };
+	if (completedDays.size === 0) { return { current: 0, best: 0 }; }
 
 	const sortedDays = Array.from(completedDays).sort().reverse();
 	const today = new Date().toISOString().slice(0, 10);
@@ -58,7 +58,7 @@ function getStreakFromJobs(jobs: { completedAt: string | null }[]): {
 		const curDay = new Date(asc[i]).getTime();
 		if (curDay - prevDay === 86_400_000) {
 			run++;
-			if (run > best) best = run;
+			if (run > best) { best = run; }
 		} else {
 			run = 1;
 		}
@@ -77,7 +77,7 @@ export function StreakWidget({ className }: StreakWidgetProps) {
 	const { current, best } = useMemo(() => getStreakFromJobs(jobs), [jobs]);
 
 	useEffect(() => {
-		if (isLoading || current === 0) return;
+		if (isLoading || current === 0) { return; }
 		const milestone = STREAK_MILESTONES.filter((m) => current >= m).at(-1);
 		if (milestone && trackedMilestone.current !== milestone) {
 			trackedMilestone.current = milestone;
@@ -88,7 +88,7 @@ export function StreakWidget({ className }: StreakWidgetProps) {
 		}
 	}, [current, best, isLoading, track]);
 
-	if (isLoading) return null;
+	if (isLoading) { return null; }
 
 	return (
 		<Card className={cn("flex flex-col", className)}>

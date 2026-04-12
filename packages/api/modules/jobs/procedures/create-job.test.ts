@@ -34,7 +34,7 @@ const mockAuth = {
 vi.mock("@repo/auth", () => ({ auth: mockAuth }));
 
 // Helper to get handler from procedure
-async function getHandler() {
+async function _getHandler() {
 	const { createJob } = await import("./create-job");
 	// Access the handler directly via the internal `~orpc` symbol or test via exec
 	return createJob;
@@ -115,7 +115,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		const result = await handler({
 			input: {
@@ -149,7 +149,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await handler({
 			input: {
@@ -177,7 +177,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await expect(
 			handler({
@@ -207,7 +207,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await expect(
 			handler({
@@ -236,7 +236,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await expect(
 			handler({
@@ -272,7 +272,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await expect(
 			handler({
@@ -308,7 +308,7 @@ describe("createJob procedure", () => {
 		const handler = (
 			createJob as unknown as { "~orpc": { handler: Function } }
 		)["~orpc"]?.handler;
-		if (!handler) return;
+		if (!handler) { return; }
 
 		await handler({
 			input: {

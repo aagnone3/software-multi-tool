@@ -42,7 +42,7 @@ describe("defaultTranslations", () => {
 			{ subject?: string }
 		>;
 		for (const [key, section] of Object.entries(mail)) {
-			if (key === "common") continue;
+			if (key === "common") { continue; }
 			if (section.subject !== undefined) {
 				expect(
 					typeof section.subject,

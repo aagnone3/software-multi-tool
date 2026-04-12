@@ -44,8 +44,9 @@ vi.stubGlobal("localStorage", {
 		delete mockLocalStorage[key];
 	},
 	clear: () => {
-		for (const key of Object.keys(mockLocalStorage))
+		for (const key of Object.keys(mockLocalStorage)) {
 			delete mockLocalStorage[key];
+		}
 	},
 });
 
@@ -53,8 +54,9 @@ import { WelcomeModal } from "./WelcomeModal";
 
 describe("WelcomeModal", () => {
 	beforeEach(() => {
-		for (const key of Object.keys(mockLocalStorage))
+		for (const key of Object.keys(mockLocalStorage)) {
 			delete mockLocalStorage[key];
+		}
 		vi.useFakeTimers();
 	});
 

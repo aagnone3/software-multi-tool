@@ -77,7 +77,7 @@ export function CreditAlertSettings({ className }: CreditAlertSettingsProps) {
 
 	const handleSaveThreshold = () => {
 		const value = Number.parseInt(inputValue, 10);
-		if (isNaN(value) || value <= 0) {
+		if (Number.isNaN(value) || value <= 0) {
 			toast.error("Please enter a valid threshold (positive number)");
 			return;
 		}

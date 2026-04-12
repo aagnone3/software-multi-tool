@@ -49,7 +49,7 @@ vi.mock("../../../orpc/middleware/locale-middleware", () => ({
 	localeMiddleware: {
 		middleware: vi.fn(
 			(
-				input: unknown,
+				_input: unknown,
 				context: unknown,
 				next: (ctx: { context: unknown }) => Promise<unknown>,
 			) => next({ context }),
