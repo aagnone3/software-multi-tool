@@ -3,6 +3,7 @@ import { StickyCta } from "@marketing/home/components/StickyCta";
 import { PricingPageTracker } from "@marketing/shared/components/PricingPageTracker";
 import { config } from "@repo/config";
 import { getBaseUrl } from "@repo/utils";
+import { FeatureComparisonTable } from "@saas/payments/components/FeatureComparisonTable";
 import { Button } from "@ui/components/button";
 import {
 	ArrowRightIcon,
@@ -234,6 +235,11 @@ export default function PricingPage() {
 
 				{/* Pricing table */}
 				<PricingSection />
+
+				{/* Feature comparison table */}
+				<section className="container py-12">
+					<FeatureComparisonTable />
+				</section>
 
 				{/* Money-back guarantee / risk-reversal */}
 				<section className="container py-12">
