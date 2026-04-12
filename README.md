@@ -74,11 +74,13 @@ Expected local success state:
 
 Use `apps/web/.env.local.example` as the starting point, then separate variables by what they unlock:
 
-- **Boot-critical:** `PORT`, `NEXT_PUBLIC_SITE_URL`, `BETTER_AUTH_SECRET`, `POSTGRES_PRISMA_URL`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, plus the local runtime setup used by `pnpm setup` (Supabase + seeded local Postgres)
-- **Auth-required:** GitHub/Google OAuth credentials and related auth provider config
-- **Email-required:** SMTP, Plunk, Resend, Postmark, or Mailgun credentials for transactional/auth email flows
-- **Storage / AI / analytics / payments:** optional integrations that should be configured when validating those product areas
-- **Deploy-only or hosted-environment config:** Vercel-managed values such as `VERCEL_TOKEN`, `VERCEL_PROJECT`, and `VERCEL_SCOPE`, plus other production-sensitive credentials that are not required for a first local read-through
+| Category | Variables | Required for local evaluation? | Notes |
+|----------|-----------|--------------------------------|-------|
+| Boot‑critical | `PORT`, `NEXT_PUBLIC_SITE_URL`, `BETTER_AUTH_SECRET`, `POSTGRES_PRISMA_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` plus local runtime setup (Supabase + seeded Postgres) | Yes | These are the minimum variables needed to boot the app locally. The `pnpm setup` script auto‑populates them. |
+| Auth‑required | GitHub/Google OAuth credentials and related provider config | No | Required for social sign‑in, passkeys, magic links, and onboarding flows. |
+| Email‑required | SMTP, Plunk, Resend, Postmark, or Mailgun credentials | No | Required for transactional/auth email flows. |
+| Storage / AI / analytics / payments | Optional integrations | No | Configure when validating those product areas. |
+| Deploy‑only / hosted‑environment config | Vercel‑managed values (`VERCEL_TOKEN`, `VERCEL_PROJECT`, `VERCEL_SCOPE`) plus other production‑sensitive credentials | No | Not required for first local read‑through. |
 
 ## Pre-commit Hooks
 
