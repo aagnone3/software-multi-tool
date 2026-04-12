@@ -29,7 +29,7 @@ export class NewsAnalyzerPage {
 	 */
 	async goto() {
 		await this.page.goto("/app/tools/news-analyzer");
-		await this.page.waitForLoadState("networkidle");
+		await this.page.waitForLoadState("load");
 	}
 
 	/**

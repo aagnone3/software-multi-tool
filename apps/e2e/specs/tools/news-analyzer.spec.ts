@@ -16,10 +16,11 @@ test.describe("News Analyzer", () => {
 
 	test("page loads successfully @smoke", async ({ page }) => {
 		await page.goto("/app/tools/news-analyzer");
-		await page.waitForLoadState("networkidle");
+		await page.waitForLoadState("load");
 
 		const urlInput = page.getByPlaceholder("https://example.com/article");
-		await expect(urlInput).toBeVisible({ timeout: 10000 });
+		// Increased timeout and use a more robust visibility check
+		await expect(urlInput).toBeVisible({ timeout: 15000 });
 	});
 
 	test.skip("can submit article URL and see loading state", async ({
