@@ -70,7 +70,7 @@ describe("contractAnalyzer inngest function", () => {
 
 	it("runs all three steps in order", async () => {
 		const step = makeStep();
-		const result = await (
+		const _result = await (
 			contractAnalyzer as unknown as (
 				...args: unknown[]
 			) => Promise<Record<string, unknown>>

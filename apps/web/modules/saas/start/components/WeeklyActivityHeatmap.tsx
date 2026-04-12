@@ -24,12 +24,22 @@ interface DayData {
 }
 
 function getIntensity(count: number, max: number): 0 | 1 | 2 | 3 | 4 {
-	if (count === 0) return 0;
-	if (max === 0) return 0;
+	if (count === 0) {
+		return 0;
+	}
+	if (max === 0) {
+		return 0;
+	}
 	const ratio = count / max;
-	if (ratio <= 0.25) return 1;
-	if (ratio <= 0.5) return 2;
-	if (ratio <= 0.75) return 3;
+	if (ratio <= 0.25) {
+		return 1;
+	}
+	if (ratio <= 0.5) {
+		return 2;
+	}
+	if (ratio <= 0.75) {
+		return 3;
+	}
 	return 4;
 }
 
@@ -63,7 +73,9 @@ export function WeeklyActivityHeatmap({
 		// Count jobs per day
 		const countByDate = new Map<string, number>();
 		for (const job of jobs) {
-			if (job.status !== "COMPLETED") continue;
+			if (job.status !== "COMPLETED") {
+				continue;
+			}
 			const d = new Date(job.createdAt);
 			const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
 			countByDate.set(key, (countByDate.get(key) ?? 0) + 1);

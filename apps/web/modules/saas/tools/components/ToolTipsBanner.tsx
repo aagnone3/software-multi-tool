@@ -156,7 +156,9 @@ export function ToolTipsBanner({ toolSlug, className }: ToolTipsBannerProps) {
 
 	// Auto-rotate tips every 8 seconds
 	useEffect(() => {
-		if (!isVisible || tips.length <= 1) return;
+		if (!isVisible || tips.length <= 1) {
+			return;
+		}
 		const interval = setInterval(() => {
 			setCurrentIndex((prev) => (prev + 1) % tips.length);
 		}, 8000);
@@ -193,7 +195,9 @@ export function ToolTipsBanner({ toolSlug, className }: ToolTipsBannerProps) {
 		});
 	}, [tips.length, toolSlug, track]);
 
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	const tip = tips[currentIndex];
 

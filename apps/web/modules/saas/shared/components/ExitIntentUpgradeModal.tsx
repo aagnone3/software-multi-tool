@@ -32,17 +32,25 @@ const STARTER_TO_PRO_BENEFITS = [
 ];
 
 function hasBeenShownRecently(key: string): boolean {
-	if (typeof window === "undefined") return true;
+	if (typeof window === "undefined") {
+		return true;
+	}
 	const raw = localStorage.getItem(key);
-	if (!raw) return false;
+	if (!raw) {
+		return false;
+	}
 	const ts = Number.parseInt(raw, 10);
-	if (Number.isNaN(ts)) return false;
+	if (Number.isNaN(ts)) {
+		return false;
+	}
 	const daysSince = (Date.now() - ts) / (1000 * 60 * 60 * 24);
 	return daysSince < COOLDOWN_DAYS;
 }
 
 function markShown(key: string): void {
-	if (typeof window === "undefined") return;
+	if (typeof window === "undefined") {
+		return;
+	}
 	localStorage.setItem(key, String(Date.now()));
 }
 
@@ -58,10 +66,18 @@ export function ExitIntentUpgradeModal() {
 	const handleMouseLeave = useCallback(
 		(e: MouseEvent) => {
 			// Only trigger when cursor moves toward the top of the viewport (exiting via address bar / tab)
-			if (e.clientY > 50) return;
-			if (triggeredRef.current) return;
-			if (!isEligible || isLoading) return;
-			if (hasBeenShownRecently(storageKey)) return;
+			if (e.clientY > 50) {
+				return;
+			}
+			if (triggeredRef.current) {
+				return;
+			}
+			if (!isEligible || isLoading) {
+				return;
+			}
+			if (hasBeenShownRecently(storageKey)) {
+				return;
+			}
 
 			triggeredRef.current = true;
 			markShown(storageKey);
@@ -78,7 +94,9 @@ export function ExitIntentUpgradeModal() {
 	);
 
 	useEffect(() => {
-		if (isLoading || !isEligible) return;
+		if (isLoading || !isEligible) {
+			return;
+		}
 		document.addEventListener("mouseleave", handleMouseLeave);
 		return () => {
 			document.removeEventListener("mouseleave", handleMouseLeave);
@@ -114,7 +132,9 @@ export function ExitIntentUpgradeModal() {
 		handleClose();
 	}, [track, isStarterPlan, handleClose]);
 
-	if (isLoading || !isEligible) return null;
+	if (isLoading || !isEligible) {
+		return null;
+	}
 
 	const benefits = isStarterPlan
 		? STARTER_TO_PRO_BENEFITS

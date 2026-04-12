@@ -79,7 +79,9 @@ export function ToolOutputExporter({
 	};
 
 	const handleDownloadJson = () => {
-		if (downloadsLocked) return;
+		if (downloadsLocked) {
+			return;
+		}
 		try {
 			downloadBlob(
 				JSON.stringify(data, null, 2),
@@ -97,7 +99,9 @@ export function ToolOutputExporter({
 	};
 
 	const handleDownloadTxt = () => {
-		if (downloadsLocked) return;
+		if (downloadsLocked) {
+			return;
+		}
 		const content = plainText ?? JSON.stringify(data, null, 2);
 		try {
 			downloadBlob(content, toFilename(label, "txt"), "text/plain");

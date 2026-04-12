@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRemoveChannel = vi.fn();
 const mockRemoveAllChannels = vi.fn();
-// biome-ignore lint/suspicious/noExplicitAny: test-only stub
 const mockGetChannels = vi.fn((): any[] => []);
 const mockTrack = vi.fn().mockResolvedValue(undefined);
 const mockUntrack = vi.fn().mockResolvedValue(undefined);

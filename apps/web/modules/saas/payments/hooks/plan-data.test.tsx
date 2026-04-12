@@ -16,7 +16,7 @@ describe("usePlanData", () => {
 		const { result } = renderHook(() => usePlanData());
 		const { planData } = result.current;
 
-		expect(planData.free.title).toBe("Free");
+		expect(planData.free.title).toBe("Free Starter");
 		expect(Array.isArray(planData.free.features)).toBe(true);
 		expect(planData.free.features.length).toBeGreaterThan(0);
 	});
@@ -25,7 +25,7 @@ describe("usePlanData", () => {
 		const { result } = renderHook(() => usePlanData());
 		const { planData } = result.current;
 
-		expect(planData.starter.title).toBe("Starter");
+		expect(planData.starter.title).toBe("Pro License");
 		expect(Array.isArray(planData.starter.features)).toBe(true);
 		expect(planData.starter.features.length).toBeGreaterThan(0);
 	});
@@ -34,7 +34,7 @@ describe("usePlanData", () => {
 		const { result } = renderHook(() => usePlanData());
 		const { planData } = result.current;
 
-		expect(planData.pro.title).toBe("Pro");
+		expect(planData.pro.title).toBe("Enterprise");
 		expect(Array.isArray(planData.pro.features)).toBe(true);
 		expect(planData.pro.features.length).toBeGreaterThan(0);
 	});

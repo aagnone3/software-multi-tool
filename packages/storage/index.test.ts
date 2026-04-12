@@ -31,7 +31,7 @@ vi.mock("./provider/local", () => ({
 
 describe("createStorageProvider", () => {
 	it("creates an S3 provider", () => {
-		const result = createStorageProvider({
+		const _result = createStorageProvider({
 			type: "s3",
 			endpoint: "https://s3.example.com",
 			region: "us-east-1",
@@ -47,7 +47,7 @@ describe("createStorageProvider", () => {
 	});
 
 	it("creates a local provider", () => {
-		const result = createStorageProvider({
+		const _result = createStorageProvider({
 			type: "local",
 			baseDir: "/tmp/uploads",
 			baseUrl: "http://localhost:3500",

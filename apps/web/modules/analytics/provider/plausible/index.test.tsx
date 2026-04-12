@@ -15,7 +15,7 @@ describe("plausible analytics provider", () => {
 
 	it("AnalyticsScript renders a Script element when plausibleUrl is set", async () => {
 		vi.stubEnv("NEXT_PUBLIC_PLAUSIBLE_URL", "example.com");
-		const React = await import("react");
+		const _React = await import("react");
 		const { render } = await import("@testing-library/react");
 		const { AnalyticsScript } = await import("./index");
 		// next/script renders as a <script> tag in test env
@@ -51,7 +51,7 @@ describe("plausible analytics provider", () => {
 	it("trackEvent does nothing in SSR context (window undefined)", async () => {
 		const { useAnalytics } = await import("./index");
 		const { result } = renderHook(() => useAnalytics());
-		const originalWindow = global.window;
+		const _originalWindow = global.window;
 		// Simulate SSR by temporarily making window undefined check fail
 		// The branch checks typeof window === "undefined"
 		expect(() => result.current.trackEvent("ssr-event")).not.toThrow();

@@ -7,7 +7,7 @@ import { SpeakerSeparationHistory } from "./speaker-separation-history";
 
 const useQueryMock = vi.hoisted(() => vi.fn());
 const useQueryStateMock = vi.hoisted(() =>
-	vi.fn((key: string, parser?: { withDefault: (v: unknown) => unknown }) => {
+	vi.fn((key: string, _parser?: { withDefault: (v: unknown) => unknown }) => {
 		const defaults: Record<string, unknown> = {
 			page: 1,
 			search: "",

@@ -203,7 +203,9 @@ describe("PricingTable", () => {
 		expect(proCard).toHaveAttribute("id", "pricing-plan-pro");
 
 		const scoped = within(proCard as HTMLElement);
-		expect(scoped.getByText("Pro-exclusive workflows")).toBeDefined();
+		expect(
+			scoped.getByText("Enterprise-exclusive workflows"),
+		).toBeDefined();
 		expect(
 			scoped.getByText("Tool scheduler — automate recurring runs"),
 		).toBeDefined();

@@ -46,7 +46,7 @@ const INCLUDED = [
 	"500 credits/month with rollover",
 	"Priority processing — faster queues",
 	"All tools unlocked",
-	"Pro-only exports and dashboard widgets",
+	"Enterprise-only exports and dashboard widgets",
 ];
 
 const NEXT_STEPS = [
@@ -121,7 +121,7 @@ export function PostUpgradeWelcome() {
 			</div>
 
 			<h1 className="font-bold text-3xl md:text-4xl">
-				You're now on Pro 🎉
+				You're now on Enterprise 🎉
 			</h1>
 			<p className="mx-auto mt-3 max-w-md text-foreground/70 text-lg">
 				Everything is ready. Here's what you unlocked and how to get the
@@ -131,7 +131,7 @@ export function PostUpgradeWelcome() {
 			{/* What's included */}
 			<div className="mt-10 w-full max-w-lg rounded-xl border bg-background p-6 text-left">
 				<h2 className="mb-4 font-semibold text-base">
-					What's included with Pro
+					What's included with Enterprise
 				</h2>
 				<ul className="space-y-2">
 					{INCLUDED.map((item) => (
@@ -149,7 +149,7 @@ export function PostUpgradeWelcome() {
 			{/* Pro-exclusive features */}
 			<div className="mt-10 w-full max-w-3xl">
 				<h2 className="mb-6 font-semibold text-base">
-					Pro-exclusive features — try them now
+					Enterprise-exclusive features — try them now
 				</h2>
 				<div className="grid gap-4 sm:grid-cols-3">
 					{PRO_EXCLUSIVE.map(

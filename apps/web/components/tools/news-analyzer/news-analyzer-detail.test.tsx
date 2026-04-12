@@ -60,7 +60,7 @@ vi.mock("./news-analyzer-results", () => ({
 	FactualRatingBadge: ({ rating }: { rating: string }) => (
 		<span data-testid="factual-rating">{rating}</span>
 	),
-	NewsAnalyzerResults: ({ analysis }: { analysis: unknown }) => (
+	NewsAnalyzerResults: ({ analysis: _analysis }: { analysis: unknown }) => (
 		<div data-testid="news-analyzer-results">results</div>
 	),
 	PoliticalLeanSpectrum: ({ lean }: { lean: string }) => (
@@ -77,6 +77,7 @@ vi.mock("@shared/components/ToolFeedback", () => ({
 
 vi.mock("next/image", () => ({
 	default: ({ src, alt }: { src: string; alt: string }) => (
+		// biome-ignore lint/performance/noImgElement: mock for next/image
 		<img src={src} alt={alt} />
 	),
 }));

@@ -310,7 +310,8 @@ export function PricingTable({
 											<>
 												{isProPlan && (
 													<div className="mt-4 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 font-medium text-primary text-xs uppercase tracking-wide">
-														Pro-exclusive workflows
+														Enterprise-exclusive
+														workflows
 													</div>
 												)}
 												<ul className="mt-3 grid list-none gap-2 text-sm">

@@ -137,8 +137,7 @@ describe("ToolPage gate coverage", () => {
 		const Page = await ToolPage({
 			params: Promise.resolve({ toolSlug: "invoice-processor" }),
 		});
-		// biome-ignore lint/suspicious/noExplicitAny: cast needed for async server component in test renderer
-		render(Page as any);
+		render(Page as React.ReactElement);
 	}
 
 	it("wraps ToolPersonalStats in UpgradeGate", async () => {
