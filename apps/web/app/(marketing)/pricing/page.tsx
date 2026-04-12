@@ -153,6 +153,14 @@ export default function PricingPage() {
 						Start with 10 free credits. Run your first tool in under
 						a minute. Upgrade only when you need more.
 					</p>
+					<div className="mt-8">
+						<Button asChild size="lg" variant="primary">
+							<Link href="/auth/signup">
+								Get 10 free credits
+								<ArrowRightIcon className="ml-1.5 size-4" />
+							</Link>
+						</Button>
+					</div>
 				</section>
 
 				{/* Trust badges */}
