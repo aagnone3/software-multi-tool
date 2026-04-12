@@ -10,16 +10,6 @@ interface Testimonial {
 	content: string;
 	rating: number;
 	avatar: string;
-}
-
-interface Testimonial {
-	id: string;
-	name: string;
-	role: string;
-	company: string;
-	content: string;
-	rating: number;
-	avatar: string;
 	highlight: string;
 }
 

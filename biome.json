@@ -69,5 +69,24 @@
 		"clientKind": "git",
 		"defaultBranch": "main",
 		"useIgnoreFile": true
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.test.{ts,tsx}"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noNonNullAssertion": "off"
+					},
+					"performance": {
+						"noImgElement": "off"
+					},
+					"correctness": {
+						"noUnusedFunctionParameters": "off",
+						"noUnusedVariables": "off"
+					}
+				}
+			}
+		}
+	]
 }
