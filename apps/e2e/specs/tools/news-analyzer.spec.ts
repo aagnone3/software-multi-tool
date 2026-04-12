@@ -19,7 +19,7 @@ test.describe("News Analyzer", () => {
 		await page.waitForLoadState("load");
 
 		const urlInput = page.getByPlaceholder("https://example.com/article");
-		// Increased timeout and use a more robust visibility check
+		// Increased timeout and use a more robust visibility check (flakiness fix)
 		await expect(urlInput).toBeVisible({ timeout: 15000 });
 	});
 
