@@ -18,9 +18,7 @@ vi.mock("@ui/components/avatar", () => ({
 			{children}
 		</div>
 	),
-	// biome-ignore lint/performance/noImgElement: test-only stub
 	AvatarImage: ({ src }: any) => (
-		// biome-ignore lint/performance/noImgElement: test-only stub
 		<img data-testid="avatar-image" src={src} alt="" />
 	),
 	AvatarFallback: ({ children }: any) => (

@@ -60,7 +60,6 @@ vi.mock("@marketing/home/components/StickyCta", () => ({
 
 vi.mock("next/image", () => ({
 	default: ({ src, alt }: { src: string; alt: string }) => (
-		// biome-ignore lint/performance/noImgElement: test mock doesn't need next/image optimization
 		<img src={src} alt={alt} />
 	),
 }));

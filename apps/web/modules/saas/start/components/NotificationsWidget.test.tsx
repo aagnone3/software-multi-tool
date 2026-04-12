@@ -124,7 +124,6 @@ describe("NotificationsWidget", () => {
 	it("marks unread notification as read on click", async () => {
 		setupMocks();
 		render(<NotificationsWidget />);
-		// biome-ignore lint/style/noNonNullAssertion: test expects button
 		const btn = screen.getByText("Info notification").closest("button")!;
 		await userEvent.click(btn);
 		expect(mockMarkAsRead).toHaveBeenCalledWith("n1");
@@ -133,7 +132,6 @@ describe("NotificationsWidget", () => {
 	it("does not call markAsRead for already read notification", async () => {
 		setupMocks();
 		render(<NotificationsWidget />);
-		// biome-ignore lint/style/noNonNullAssertion: test expects button
 		const btn = screen.getByText("Success notification").closest("button")!;
 		await userEvent.click(btn);
 		expect(mockMarkAsRead).not.toHaveBeenCalled();
@@ -142,7 +140,6 @@ describe("NotificationsWidget", () => {
 	it("navigates to actionUrl on click", async () => {
 		setupMocks();
 		render(<NotificationsWidget />);
-		// biome-ignore lint/style/noNonNullAssertion: test expects button
 		const btn = screen.getByText("Info notification").closest("button")!;
 		await userEvent.click(btn);
 		expect(mockRouterPush).toHaveBeenCalledWith("/app/settings");
@@ -151,7 +148,6 @@ describe("NotificationsWidget", () => {
 	it("tracks analytics when a notification is clicked", async () => {
 		setupMocks();
 		render(<NotificationsWidget />);
-		// biome-ignore lint/style/noNonNullAssertion: test expects button
 		const btn = screen.getByText("Info notification").closest("button")!;
 		await userEvent.click(btn);
 		expect(mockTrack).toHaveBeenCalledWith({

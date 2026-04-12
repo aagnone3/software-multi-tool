@@ -56,7 +56,6 @@ const makeJob = (overrides = {}) =>
 		audioMetadata: null,
 		newsAnalysis: null,
 		...overrides,
-		// biome-ignore lint/suspicious/noExplicitAny: test mock
 	}) as any;
 
 describe("ToolRecentRuns", () => {

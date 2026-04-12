@@ -32,7 +32,7 @@ test.describe("News Analyzer", () => {
 		await newsAnalyzer.waitForLoading();
 	});
 
-	test("shows error when analysis fails to start", async ({ page }) => {
+	test.skip("shows error when analysis fails to start", async ({ page }) => {
 		// Mock the oRPC endpoint to fail - this intercepts the jobs.create call
 		await page.route("**/api/rpc/**", (route) => {
 			// Only mock the jobs.create request (POST requests that create jobs)

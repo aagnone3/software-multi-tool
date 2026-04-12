@@ -112,11 +112,7 @@ export function TopToolsWidget({
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{Array.from({ length: 3 }).map((_, i) => (
-						<Skeleton
-							// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-							key={i}
-							className="h-8 w-full"
-						/>
+						<Skeleton key={i} className="h-8 w-full" />
 					))}
 				</CardContent>
 			</Card>
