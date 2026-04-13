@@ -21,7 +21,7 @@ import {
 	StarIcon,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const plans = config.payments.plans as Config["payments"]["plans"];
@@ -175,6 +175,19 @@ export function PricingTable({
 		0,
 	);
 
+	const bestValuePlanId = useMemo(() => {
+		let bestPlanId: string | null = null;
+		let bestSavings = 0;
+		Object.keys(plans).forEach((planId) => {
+			const savings = getAnnualSavingsPct(planId);
+			if (savings !== null && savings > bestSavings) {
+				bestSavings = savings;
+				bestPlanId = planId;
+			}
+		});
+		return bestPlanId;
+	}, []);
+
 	return (
 		<div className={cn("@container", className)}>
 			{hasSubscriptions && (
@@ -281,6 +294,15 @@ export function PricingTable({
 												</div>
 											</div>
 										)}
+										{bestValuePlanId === planId &&
+											interval === "year" && (
+												<div className="absolute -top-2 -left-2 z-10">
+													<div className="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 font-semibold text-white text-xs shadow-lg -rotate-3">
+														<BadgePercentIcon className="size-3" />
+														Best value
+													</div>
+												</div>
+											)}
 										<h3
 											id={`pricing-plan-title-${planId}`}
 											className={cn(
