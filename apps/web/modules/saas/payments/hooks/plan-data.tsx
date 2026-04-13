@@ -15,7 +15,7 @@ export function usePlanData() {
 		free: {
 			title: "Free Starter",
 			description:
-				"Full source code, local evaluation, community support",
+				"Evaluate locally with full source code and community support. Perfect for trying before you buy.",
 			features: [
 				"10 credits/month",
 				"All tools included",
@@ -26,7 +26,7 @@ export function usePlanData() {
 		starter: {
 			title: "Pro License",
 			description:
-				"Priority updates, verified compatibility, direct support",
+				"Priority updates, verified compatibility, and direct support. Ready for production use.",
 			features: [
 				"100 credits/month",
 				"All tools included",
@@ -46,7 +46,7 @@ export function usePlanData() {
 		pro: {
 			title: "Enterprise",
 			description:
-				"Premium modules, dedicated setup, customization guidance",
+				"Premium modules, dedicated setup, and customization guidance. Built for teams.",
 			features: [
 				"500 credits/month",
 				"All tools included",
