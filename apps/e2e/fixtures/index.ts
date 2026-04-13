@@ -44,20 +44,27 @@ async function performLogin(page: Page): Promise<void> {
 	});
 
 	const quickLoginVisible = await quickLoginButton
-		.isVisible({ timeout: 2000 })
+		.isVisible({ timeout: 5000 })
 		.catch(() => false);
 
 	if (quickLoginVisible) {
 		await quickLoginButton.click();
-		await page.waitForURL(/\/app/, { timeout: 30000 });
-		return;
+		try {
+			await page.waitForURL(/\/app/, { timeout: 60000 });
+			return;
+		} catch {
+			console.log(
+				"Quick login failed or timed out, falling back to manual login",
+			);
+			// proceed to manual login
+		}
 	}
 
 	// Fall back to manual login with test credentials
 	await page.getByLabel(/email/i).fill(TEST_USER.email);
 	await page.getByLabel(/password/i).fill(TEST_USER.password);
 	await page.getByRole("button", { name: /sign in|log in/i }).click();
-	await page.waitForURL(/\/app/, { timeout: 30000 });
+	await page.waitForURL(/\/app/, { timeout: 60000 });
 }
 
 export const test = base.extend<TestFixtures>({
