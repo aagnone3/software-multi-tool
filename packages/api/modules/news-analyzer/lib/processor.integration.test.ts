@@ -20,11 +20,12 @@ function logIntegrationFailure(...args: unknown[]) {
  * Integration tests for the news analyzer processor with real Claude API calls
  *
  * IMPORTANT: These tests REQUIRE ANTHROPIC_API_KEY to be set.
- * Tests will FAIL if the key is missing (not skip).
+ * Tests will be skipped if the key is missing.
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-describe("News Analyzer Processor (integration)", () => {
+const runIntegrationTests = process.env.ANTHROPIC_API_KEY ? describe : describe.skip;
+runIntegrationTests("News Analyzer Processor (integration)", () => {
 	const TIMEOUT = 60000; // 60 seconds for Claude API calls
 
 	const requireApiKey = () => {
