@@ -262,17 +262,20 @@ export function PricingTable({
 								key={planId}
 								id={`pricing-plan-${planId}`}
 								aria-labelledby={`pricing-plan-title-${planId}`}
-								className={cn("rounded-3xl border p-6", {
-									"border-2 border-primary": recommended,
-									"shadow-lg": recommended,
-								})}
+								className={cn(
+									"rounded-3xl border p-6 relative",
+									{
+										"border-2 border-primary": recommended,
+										"shadow-lg": recommended,
+									},
+								)}
 								data-test="price-table-plan"
 							>
 								<div className="flex h-full flex-col justify-between gap-4">
 									<div>
 										{recommended && (
-											<div className="-mt-9 flex justify-center">
-												<div className="mb-2 flex h-6 w-auto items-center gap-1.5 rounded-full bg-primary px-2 py-1 font-semibold text-primary-foreground text-xs">
+											<div className="absolute -top-2 -right-2 z-10">
+												<div className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 font-semibold text-primary-foreground text-xs shadow-lg rotate-3">
 													<StarIcon className="size-3" />
 													Most popular
 												</div>
