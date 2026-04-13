@@ -17,6 +17,7 @@ import {
 	CheckIcon,
 	CoinsIcon,
 	PhoneIcon,
+	ShieldCheckIcon,
 	StarIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -419,6 +420,13 @@ export function PricingTable({
 													</p>
 												);
 											})()}
+
+										{isProPlan && (
+											<div className="mt-3 flex items-center justify-start font-medium text-primary text-sm opacity-80">
+												<ShieldCheckIcon className="mr-2 size-4" />
+												30‑day money‑back guarantee
+											</div>
+										)}
 
 										{isEnterprise ? (
 											<Button
