@@ -127,7 +127,7 @@
 		"start-server-and-test": "2.1.5",
 		"storybook": "8.6.18",
 		"tailwindcss": "4.1.18",
-		"vite": "6.4.1",
+		"vite": "6.4.2",
 		"vite-tsconfig-paths": "5.1.4",
 		"vitest": "4.0.18"
 	},
