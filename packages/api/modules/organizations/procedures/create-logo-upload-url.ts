@@ -1,9 +1,9 @@
 import { config } from "@repo/config";
 import {
 	buildOrgPath,
-	getDefaultSupabaseProvider,
+	getDefaultS3Provider,
 	getSignedUploadUrl,
-	shouldUseSupabaseStorage,
+	isStorageConfigured,
 } from "@repo/storage";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -34,9 +34,8 @@ export const createLogoUploadUrl = protectedProcedure
 		const bucket = config.storage.bucketNames.avatars;
 
 		// Delete existing file first to avoid "resource already exists" error
-		// This is a fallback in case upsert isn't working as expected
-		if (shouldUseSupabaseStorage()) {
-			const provider = getDefaultSupabaseProvider();
+		if (isStorageConfigured()) {
+			const provider = getDefaultS3Provider();
 			try {
 				const exists = await provider.exists(path, bucket);
 				if (exists) {
@@ -47,7 +46,6 @@ export const createLogoUploadUrl = protectedProcedure
 			}
 		}
 
-		// Uses auto-detection to choose Supabase or S3 based on environment
 		const signedUploadUrl = await getSignedUploadUrl(path, {
 			bucket,
 		});

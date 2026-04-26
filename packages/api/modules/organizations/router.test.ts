@@ -5,8 +5,8 @@ import { organizationsRouter } from "./router";
 // Mock dependencies
 const getOrganizationBySlugMock = vi.hoisted(() => vi.fn());
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
-const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn());
+const getDefaultS3ProviderMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/database", () => ({
@@ -18,8 +18,8 @@ vi.mock("@repo/storage", async (importOriginal) => {
 	return {
 		...actual,
 		getSignedUploadUrl: getSignedUploadUrlMock,
-		shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-		getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+		isStorageConfigured: isStorageConfiguredMock,
+		getDefaultS3Provider: getDefaultS3ProviderMock,
 	};
 });
 
@@ -33,8 +33,8 @@ describe("Organizations Router", () => {
 		getSignedUploadUrlMock.mockResolvedValue(
 			"https://storage.test/signed-upload-url",
 		);
-		// Default to S3 provider (no Supabase)
-		shouldUseSupabaseStorageMock.mockReturnValue(false);
+		// Default to S3 provider (not configured)
+		isStorageConfiguredMock.mockReturnValue(false);
 	});
 
 	describe("organizations.generateSlug", () => {

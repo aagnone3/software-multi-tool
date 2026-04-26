@@ -1,10 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { config } from "@repo/config";
-import {
-	getDefaultSupabaseProvider,
-	getSignedUploadUrl,
-	shouldUseSupabaseStorage,
-} from "@repo/storage";
+import { getDefaultS3Provider } from "@repo/storage";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -39,19 +35,13 @@ export const getUploadUrl = protectedProcedure
 		const path = `organizations/${organizationId}/files/${timestamp}-${sanitizedFilename}`;
 		const bucket = config.storage.bucketNames.files;
 
-		// Get signed upload URL
-		let signedUploadUrl: string;
-
-		if (shouldUseSupabaseStorage()) {
-			const provider = getDefaultSupabaseProvider();
-			signedUploadUrl = await provider.getSignedUploadUrl(path, {
-				bucket,
-				contentType,
-				expiresIn: 300, // 5 minutes
-			});
-		} else {
-			signedUploadUrl = await getSignedUploadUrl(path, { bucket });
-		}
+		// Get signed upload URL via S3 provider
+		const provider = getDefaultS3Provider();
+		const signedUploadUrl = await provider.getSignedUploadUrl(path, {
+			bucket,
+			contentType,
+			expiresIn: 300, // 5 minutes
+		});
 
 		return {
 			signedUploadUrl,

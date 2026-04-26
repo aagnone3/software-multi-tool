@@ -23,8 +23,8 @@ const dbFileTagFindUniqueMock = vi.hoisted(() => vi.fn());
 const dbFileTagUpsertMock = vi.hoisted(() => vi.fn());
 const dbFileToTagUpsertMock = vi.hoisted(() => vi.fn());
 const dbFileToTagDeleteManyMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseMock = vi.hoisted(() => vi.fn());
-const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn());
+const getDefaultS3ProviderMock = vi.hoisted(() => vi.fn());
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
 const getSignedUrlMock = vi.hoisted(() => vi.fn());
 
@@ -56,8 +56,8 @@ vi.mock("@repo/database", () => ({
 }));
 
 vi.mock("@repo/storage", () => ({
-	shouldUseSupabaseStorage: shouldUseSupabaseMock,
-	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	isStorageConfigured: isStorageConfiguredMock,
+	getDefaultS3Provider: getDefaultS3ProviderMock,
 	getSignedUploadUrl: getSignedUploadUrlMock,
 	getSignedUrl: getSignedUrlMock,
 }));
@@ -93,7 +93,7 @@ function makeNoOrgContext() {
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	shouldUseSupabaseMock.mockReturnValue(false);
+	isStorageConfiguredMock.mockReturnValue(false);
 });
 
 // ── listFiles ───────────────────────────────────────────────────────────────
@@ -266,10 +266,10 @@ describe("deleteFile", () => {
 		);
 	});
 
-	it("deletes from Supabase storage when enabled", async () => {
-		shouldUseSupabaseMock.mockReturnValue(true);
+	it("deletes from S3 storage when enabled", async () => {
+		isStorageConfiguredMock.mockReturnValue(true);
 		const providerDeleteMock = vi.fn().mockResolvedValue(undefined);
-		getDefaultSupabaseProviderMock.mockReturnValue({
+		getDefaultS3ProviderMock.mockReturnValue({
 			delete: providerDeleteMock,
 		});
 		dbFileFindUniqueMock.mockResolvedValue(mockFile);
@@ -289,10 +289,13 @@ describe("deleteFile", () => {
 
 // ── getUploadUrl ────────────────────────────────────────────────────────────
 describe("getUploadUrl", () => {
-	it("returns signed upload URL (non-Supabase)", async () => {
-		getSignedUploadUrlMock.mockResolvedValue(
-			"https://storage.example.com/upload",
-		);
+	it("returns signed upload URL (S3)", async () => {
+		const getSignedUploadUrlProviderMock = vi
+			.fn()
+			.mockResolvedValue("https://storage.example.com/upload");
+		getDefaultS3ProviderMock.mockReturnValue({
+			getSignedUploadUrl: getSignedUploadUrlProviderMock,
+		});
 
 		const client = createProcedureClient(getUploadUrl, {
 			context: makeContext(),
@@ -309,12 +312,12 @@ describe("getUploadUrl", () => {
 		expect(result.path).toMatch(/organizations\/org-123\/files\//);
 	});
 
-	it("uses Supabase provider when enabled", async () => {
-		shouldUseSupabaseMock.mockReturnValue(true);
+	it("uses S3 provider when enabled", async () => {
+		isStorageConfiguredMock.mockReturnValue(true);
 		const getSignedUploadUrlProviderMock = vi
 			.fn()
-			.mockResolvedValue("https://supabase.example.com/upload");
-		getDefaultSupabaseProviderMock.mockReturnValue({
+			.mockResolvedValue("https://s3.example.com/upload");
+		getDefaultS3ProviderMock.mockReturnValue({
 			getSignedUploadUrl: getSignedUploadUrlProviderMock,
 		});
 
@@ -326,9 +329,7 @@ describe("getUploadUrl", () => {
 			contentType: "application/pdf",
 		});
 
-		expect(result.signedUploadUrl).toBe(
-			"https://supabase.example.com/upload",
-		);
+		expect(result.signedUploadUrl).toBe("https://s3.example.com/upload");
 	});
 
 	it("throws BAD_REQUEST when no active organization", async () => {

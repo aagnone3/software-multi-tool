@@ -5,13 +5,9 @@ export {
 	shouldUseLocalStorage,
 } from "./local";
 
-// S3 storage provider (class only - legacy functions exported from main index.ts with auto-detection)
-export { S3StorageProvider } from "./s3";
-
-// Supabase storage provider
+// S3 storage provider
 export {
-	createSupabaseStorageProvider,
-	getDefaultSupabaseProvider,
-	SupabaseStorageProvider,
-	shouldUseSupabaseStorage,
-} from "./supabase";
+	getDefaultS3Provider,
+	isStorageConfigured,
+	S3StorageProvider,
+} from "./s3";

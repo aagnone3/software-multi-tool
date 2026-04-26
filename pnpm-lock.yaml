@@ -948,9 +948,6 @@ importers:
       '@repo/logs':
         specifier: workspace:*
         version: link:../logs
-      '@supabase/supabase-js':
-        specifier: 2.91.1
-        version: 2.91.1
       file-type:
         specifier: 21.3.4
         version: 21.3.4

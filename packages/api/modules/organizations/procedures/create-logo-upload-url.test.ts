@@ -8,8 +8,8 @@ import {
 
 const buildOrgPathMock = vi.hoisted(() => vi.fn());
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
-const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn());
+const getDefaultS3ProviderMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/mail", () => mockMailModule());
@@ -18,8 +18,8 @@ vi.mock("@repo/payments", () => mockPaymentsModule());
 vi.mock("@repo/storage", () => ({
 	buildOrgPath: buildOrgPathMock,
 	getSignedUploadUrl: getSignedUploadUrlMock,
-	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	isStorageConfigured: isStorageConfiguredMock,
+	getDefaultS3Provider: getDefaultS3ProviderMock,
 }));
 
 vi.mock("@repo/config", () => ({
@@ -62,10 +62,10 @@ describe("createLogoUploadUrl", () => {
 		getSignedUploadUrlMock.mockResolvedValue(
 			"https://example.com/signed-url",
 		);
-		shouldUseSupabaseStorageMock.mockReturnValue(false);
+		isStorageConfiguredMock.mockReturnValue(false);
 	});
 
-	it("returns signed URL and path for non-supabase storage", async () => {
+	it("returns signed URL and path for S3 storage", async () => {
 		const client = createClient();
 		const result = await client({ organizationId: "org123" });
 
@@ -83,11 +83,11 @@ describe("createLogoUploadUrl", () => {
 		);
 	});
 
-	it("deletes existing file before upload when using supabase and file exists", async () => {
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
+	it("deletes existing file before upload when using S3 storage and file exists", async () => {
+		isStorageConfiguredMock.mockReturnValue(true);
 		const existsMock = vi.fn().mockResolvedValue(true);
 		const deleteMock = vi.fn().mockResolvedValue(undefined);
-		getDefaultSupabaseProviderMock.mockReturnValue({
+		getDefaultS3ProviderMock.mockReturnValue({
 			exists: existsMock,
 			delete: deleteMock,
 		});
@@ -106,10 +106,10 @@ describe("createLogoUploadUrl", () => {
 	});
 
 	it("skips delete when file does not exist", async () => {
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		isStorageConfiguredMock.mockReturnValue(true);
 		const existsMock = vi.fn().mockResolvedValue(false);
 		const deleteMock = vi.fn();
-		getDefaultSupabaseProviderMock.mockReturnValue({
+		getDefaultS3ProviderMock.mockReturnValue({
 			exists: existsMock,
 			delete: deleteMock,
 		});
@@ -122,11 +122,11 @@ describe("createLogoUploadUrl", () => {
 	});
 
 	it("ignores errors during delete attempt", async () => {
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		isStorageConfiguredMock.mockReturnValue(true);
 		const existsMock = vi
 			.fn()
 			.mockRejectedValue(new Error("storage error"));
-		getDefaultSupabaseProviderMock.mockReturnValue({ exists: existsMock });
+		getDefaultS3ProviderMock.mockReturnValue({ exists: existsMock });
 
 		const client = createClient();
 		// Should not throw

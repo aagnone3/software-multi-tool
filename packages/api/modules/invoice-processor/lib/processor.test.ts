@@ -6,14 +6,14 @@ const {
 	mockExecutePrompt,
 	mockExtractText,
 	mockGetSignedUrl,
-	mockShouldUseSupabase,
-	mockGetDefaultSupabase,
+	mockIsStorageConfigured,
+	mockGetDefaultS3Provider,
 } = vi.hoisted(() => ({
 	mockExecutePrompt: vi.fn(),
 	mockExtractText: vi.fn(),
 	mockGetSignedUrl: vi.fn(),
-	mockShouldUseSupabase: vi.fn().mockReturnValue(false),
-	mockGetDefaultSupabase: vi.fn(),
+	mockIsStorageConfigured: vi.fn().mockReturnValue(false),
+	mockGetDefaultS3Provider: vi.fn(),
 }));
 
 vi.mock("@repo/agent-sdk", () => ({
@@ -26,8 +26,8 @@ vi.mock("./document-extractor", () => ({
 
 vi.mock("@repo/storage", () => ({
 	getSignedUrl: mockGetSignedUrl,
-	shouldUseSupabaseStorage: mockShouldUseSupabase,
-	getDefaultSupabaseProvider: mockGetDefaultSupabase,
+	isStorageConfigured: mockIsStorageConfigured,
+	getDefaultS3Provider: mockGetDefaultS3Provider,
 }));
 
 vi.mock("@repo/logs", () => ({

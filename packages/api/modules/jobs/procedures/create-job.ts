@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { createToolJob, db, findCachedJob, type Prisma } from "@repo/database";
 import { logger } from "@repo/logs";
-import { shouldUseSupabaseStorage } from "@repo/storage";
+import { isStorageConfigured } from "@repo/storage";
 import { publicProcedure } from "../../../orpc/procedures";
 import { uploadAudioToStorage } from "../../speaker-separation/lib/audio-storage";
 import type { AudioMetadata } from "../../speaker-separation/types";
@@ -99,7 +99,7 @@ export const createJob = publicProcedure
 				});
 			}
 
-			if (!shouldUseSupabaseStorage()) {
+			if (!isStorageConfigured()) {
 				throw new ORPCError("INTERNAL_SERVER_ERROR", {
 					message: "Storage is not configured",
 				});

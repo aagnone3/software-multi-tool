@@ -11,7 +11,7 @@ const TEST_TAG_ID = "d4e5f6a7-b8c9-4dae-bf2a-3b4c5d6e7f8a";
 // Mock dependencies
 const getSessionMock = vi.hoisted(() => vi.fn());
 const getSignedUrlMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn(() => false));
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn(() => false));
 const deleteStorageMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 
 // Database mocks
@@ -33,8 +33,8 @@ vi.mock("@repo/storage", async (importOriginal) => {
 	return {
 		...actual,
 		getSignedUrl: getSignedUrlMock,
-		shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-		getDefaultSupabaseProvider: vi.fn(() => ({
+		isStorageConfigured: isStorageConfiguredMock,
+		getDefaultS3Provider: vi.fn(() => ({
 			delete: deleteStorageMock,
 		})),
 	};

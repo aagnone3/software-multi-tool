@@ -2,9 +2,9 @@ import { ORPCError } from "@orpc/server";
 import { config } from "@repo/config";
 import {
 	buildUserPath,
-	getDefaultSupabaseProvider,
+	getDefaultS3Provider,
 	getSignedUploadUrl,
-	shouldUseSupabaseStorage,
+	isStorageConfigured,
 } from "@repo/storage";
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -37,11 +37,9 @@ export const createAvatarUploadUrl = protectedProcedure
 		const bucket = config.storage.bucketNames.avatars;
 
 		// Delete existing file first to avoid "resource already exists" error
-		// This is a fallback in case upsert isn't working as expected
-		if (shouldUseSupabaseStorage()) {
-			const provider = getDefaultSupabaseProvider();
+		if (isStorageConfigured()) {
+			const provider = getDefaultS3Provider();
 			try {
-				// Check if file exists and delete it
 				const exists = await provider.exists(path, bucket);
 				if (exists) {
 					await provider.delete(path, bucket);
@@ -52,7 +50,6 @@ export const createAvatarUploadUrl = protectedProcedure
 			}
 		}
 
-		// Uses auto-detection to choose Supabase or S3 based on environment
 		const signedUploadUrl = await getSignedUploadUrl(path, {
 			bucket,
 		});
