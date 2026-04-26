@@ -252,7 +252,7 @@ See `.claude/skills/architecture/` for detailed documentation including:
 - Frontend architecture (React 19, TanStack Query, nuqs)
 - Data layer (Prisma, Zod schemas)
 - All integrations (payments, email, storage, AI)
-- Background jobs (Inngest) and real-time updates (Supabase Realtime)
+- Background jobs (Inngest)
 - Deployment infrastructure (Vercel, GitHub Actions CI/CD)
 - How-to guides for adding modules and packages
 
@@ -266,15 +266,6 @@ Background job processing is powered by **Inngest**, a durable execution platfor
 - Jobs use Inngest steps for long-running processes (up to 2 hours per step)
 - Automatic retries with configurable backoff
 - Local dev: `npx inngest-cli@latest dev` starts dashboard at http://localhost:8288
-
-### Real-time Updates (Supabase Realtime)
-
-Real-time functionality uses **Supabase Realtime** instead of WebSockets:
-
-- **Module**: `apps/web/modules/realtime/` - Typed channel helpers
-- **Import**: `@realtime` path alias for clean imports
-- Supports broadcast messages and presence tracking
-- No separate backend required—uses existing Supabase connection
 
 ### Analytics
 
