@@ -24,7 +24,7 @@ Enables parallel development with isolated git worktrees for concurrent features
 | **Remove worktree** | `pnpm worktree:remove <worktree-name>` |
 | **List worktrees** | `pnpm worktree:list` |
 | Prune stale refs | `git worktree prune` |
-| **⚠ New migrations** | `pnpm supabase:reset` (all worktrees share one DB) |
+| **⚠ New migrations** | `pnpm db:reset` (all worktrees share one DB) |
 
 ## Why Worktrees Are Mandatory
 
@@ -94,7 +94,7 @@ pnpm worktree:remove feat-pra-163-improve-auth-flow
 
 ```bash
 # After switching to worktree with new migrations
-pnpm supabase:reset
+pnpm db:reset
 ```
 
 This re-applies all migrations from `supabase/migrations/` and re-seeds test data. Without this step, you'll get "table not found" errors when testing new features.

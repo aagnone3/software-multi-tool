@@ -2,13 +2,13 @@
 
 Detailed environment configuration for git worktrees.
 
-> **🚨 CRITICAL: Only use Supabase databases 🚨**
+> **🚨 CRITICAL: Only use Docker Compose PostgreSQL 🚨**
 >
-> Worktrees must use **Supabase Local** (port 54322) or **Supabase Preview**.
+> Worktrees must use **Docker Compose PostgreSQL** (port 54322).
 >
-> **NEVER use Homebrew PostgreSQL** (port 5432). It lacks storage, proper seeding, and will cause auth failures.
+> **NEVER use Homebrew PostgreSQL** (port 5432). It lacks proper seeding and will cause auth failures.
 >
-> The `worktree-setup.sh` script automatically enforces Supabase Local.
+> The `worktree-setup.sh` script automatically enforces Docker Compose PostgreSQL.
 
 ## Environment Variable Isolation
 
@@ -107,9 +107,9 @@ fi
 - Configures `DATABASE_URL` in test environment
 - Cleans up after tests
 
-### Local Development (Supabase Local)
+### Local Development (Docker Compose PostgreSQL)
 
-**All worktrees share Supabase local** for development consistency.
+**All worktrees share Docker Compose PostgreSQL** for development consistency.
 
 **Connection string**:
 
@@ -117,39 +117,25 @@ fi
 postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
-**Start Supabase** (from any worktree):
+**Start database** (from any worktree):
 
 ```bash
-supabase start
-supabase db reset  # Apply migrations + seed
+pnpm db:start     # Start PostgreSQL via Docker Compose
+pnpm db:reset     # Reset database, apply migrations + seed
 ```
 
-**Why Supabase local?**
+**Why Docker Compose PostgreSQL?**
 
-- Same seed.sql runs automatically
-- Storage buckets created
+- Same seed.sql runs automatically (`packages/database/seed.sql`)
 - Test user works immediately (`test@preview.local` / `TestPassword123`)
 
-### Supabase Storage Configuration
+### Storage Configuration
 
-The worktree setup script automatically configures Supabase local storage by adding these environment variables:
-
-```bash
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-These are **required** for features that use Supabase storage (file uploads, speaker separation audio files, etc.). The `SUPABASE_SERVICE_ROLE_KEY` is the standard local development key used by Supabase CLI.
+Storage is handled by S3-compatible providers. See the `storage` skill for provider configuration details.
 
 **If storage features fail with "Storage is not configured"**:
 
-```bash
-# Add to apps/web/.env.local
-echo 'SUPABASE_URL=http://127.0.0.1:54321' >> apps/web/.env.local
-echo 'SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU' >> apps/web/.env.local
-
-# Then restart dev servers
-```
+Verify S3 environment variables are set in `apps/web/.env.local`. See `apps/web/.env.local.example` for required variables.
 
 ## Git Configuration
 

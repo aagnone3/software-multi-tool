@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 
-- `pnpm setup` - **Run this first!** Sets up local development environment (Supabase, database seeding, env files)
+- `pnpm setup` - **Run this first!** Sets up local development environment (Docker Compose, database seeding, env files)
 - `pnpm dev` - Start the hot-reloading development server (concurrency limited to 15)
 - `pnpm build` - Compile all apps and packages for production
 - `pnpm start` - Serve the production build locally
@@ -70,12 +70,12 @@ The pre-commit hook runs `biome ci --staged` to catch issues before they reach C
 
 #### Local Development Database
 
-**Use Supabase local** for development to match preview/production environments exactly.
+**Use Docker Compose** for local development to run PostgreSQL consistently.
 
 **Quick Start:**
 
 ```bash
-pnpm setup    # Starts Supabase, seeds database, creates .env.local
+pnpm setup    # Starts Docker Compose, runs migrations, seeds database, creates .env.local
 pnpm dev
 ```
 
@@ -85,6 +85,13 @@ pnpm dev
 postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
+**Docker Compose commands:**
+
+- `pnpm db:start` - Start the local PostgreSQL container
+- `pnpm db:stop` - Stop the local PostgreSQL container
+- `pnpm db:status` - Check container status
+- `pnpm db:reset` - Reset database (destroy volume, re-run migrations and seed)
+
 **Test user credentials (Quick Login button):**
 
 | Field    | Value                 |
@@ -92,7 +99,7 @@ postgresql://postgres:postgres@127.0.0.1:54322/postgres
 | Email    | test@preview.local    |
 | Password | TestPassword123       |
 
-The test user is created by `supabase/seed.sql` which runs during `pnpm setup` and on preview branch creation.
+The test user is created by `packages/database/seed.sql` which runs during `pnpm setup` and on preview branch creation.
 
 ### Stripe Webhooks
 

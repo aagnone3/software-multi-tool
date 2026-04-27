@@ -12,7 +12,12 @@ const REPO_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
 	"../../..",
 );
-const DEFAULT_SEED_FILE = path.join(REPO_ROOT, "supabase", "seed.sql");
+const DEFAULT_SEED_FILE = path.join(
+	REPO_ROOT,
+	"packages",
+	"database",
+	"seed.sql",
+);
 const DEFAULT_DATABASE_URL =
 	process.env.DATABASE_URL ||
 	`postgresql://${process.env.POSTGRES_USER || "postgres"}:${process.env.POSTGRES_PASSWORD || "postgres"}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || process.env.SUPABASE_DB_PORT || "54322"}/${process.env.POSTGRES_DATABASE || "postgres"}`;

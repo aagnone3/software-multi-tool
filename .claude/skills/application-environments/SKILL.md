@@ -52,17 +52,17 @@ Setup is complete when the dev server is running and accessible.
 
 ### Working on Feature Branches with New Migrations
 
-**IMPORTANT**: When switching to a feature branch (or worktree) that introduces new database migrations, the local Supabase database won't have those migrations applied yet. This causes "table not found" or "column not found" errors.
+**IMPORTANT**: When switching to a feature branch (or worktree) that introduces new database migrations, the local database won't have those migrations applied yet. This causes "table not found" or "column not found" errors.
 
 **Symptom**: API errors like "Failed to create X" when testing new features that added database tables.
 
 **Solution**: Reset the database to apply all migrations from the current branch:
 
 ```bash
-pnpm supabase:reset
+pnpm db:reset
 ```
 
-This re-applies all migrations from `supabase/migrations/` (which are synced from Prisma migrations) and re-seeds the database with test data.
+This destroys the database volume, restarts PostgreSQL, re-applies all Prisma migrations, and re-seeds with test data.
 
 **When to reset:**
 
@@ -93,6 +93,7 @@ pnpm dev   # Start Next.js without Supabase (API calls will fail)
 ```
 
 Suitable for:
+
 - Component development and styling
 - TypeScript checking and linting
 - Storybook (`pnpm --filter web storybook`)
@@ -102,12 +103,12 @@ Suitable for:
 For authentication, database, and API testing, `pnpm setup` handles everything automatically. For manual control:
 
 ```bash
-pnpm supabase:start   # Start PostgreSQL + Storage + Auth
-pnpm supabase:reset   # Apply migrations and seed data (REQUIRED for test user!)
+pnpm db:start   # Start PostgreSQL via Docker Compose
+pnpm db:reset   # Apply migrations and seed data (REQUIRED for test user!)
 pnpm dev              # Start Next.js dev server
 ```
 
-> **Note:** Running only `supabase start` does NOT seed the database. Use `pnpm setup` or `pnpm supabase:reset` to ensure the test user exists.
+> **Note:** Running only `pnpm db:start` does NOT seed the database. Use `pnpm setup` or `pnpm db:reset` to ensure the test user exists.
 
 **Service URLs (Local)**:
 
@@ -226,13 +227,13 @@ PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c \
   "SELECT email FROM \"user\" WHERE email = 'test@preview.local';"
 ```
 
-If missing, reset the database: `pnpm supabase:reset`
+If missing, reset the database: `pnpm db:reset`
 
 ### Database Connection Refused
 
 ```bash
-pnpm supabase:status  # Check if running
-pnpm supabase:start   # Start if not
+pnpm db:status  # Check if running
+pnpm db:start   # Start if not
 ```
 
 ### API Errors: "Failed to create X" or "Table not found"
@@ -241,7 +242,7 @@ This typically means you're on a feature branch with new database migrations tha
 
 ```bash
 # Reset database to apply all migrations from current branch
-pnpm supabase:reset
+pnpm db:reset
 ```
 
 **Common scenario**: You created a worktree for a feature branch that adds new database tables. The shared Supabase local instance still has the schema from `main`.

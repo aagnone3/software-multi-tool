@@ -31,6 +31,8 @@ describe("packages/database/scripts/seed-local.sh", () => {
 		expect(stdout).toContain(
 			"pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs",
 		);
-		expect(stdout).toContain('SEED_FILE="$REPO_ROOT/supabase/seed.sql"');
+		expect(stdout).toContain(
+			'SEED_FILE="$REPO_ROOT/packages/database/seed.sql"',
+		);
 	});
 });

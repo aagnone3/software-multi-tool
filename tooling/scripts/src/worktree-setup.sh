@@ -30,9 +30,8 @@ NC='\033[0m' # No Color
 # Configuration
 WORKTREE_BASE_DIR=".worktrees"
 PORT_ALLOCATOR="$SCRIPT_DIR/worktree-port.sh"
-SUPABASE_CLI_RUNNER="$SCRIPT_DIR/supabase/run-supabase-cli.sh"
 REQUIRED_NODE_MAJOR="22"
-SUPABASE_DB_PORT="54322"
+DB_PORT="54322"
 TEST_USER_ID="preview_user_001"
 EXPECTED_PASSWORD_PREFIX="46eb4f9cb6d62a4d8e23"
 
@@ -57,14 +56,10 @@ log_step() {
   echo -e "\n${BOLD}=== $1 ===${NC}"
 }
 
-run_supabase_cli() {
-  "$SUPABASE_CLI_RUNNER" "$@"
-}
-
 check_preview_user() {
   local mode="$1"
 
-  SUPABASE_DB_PORT="$SUPABASE_DB_PORT" \
+  DB_PORT="$DB_PORT" \
     PREVIEW_USER_ID="$TEST_USER_ID" \
     PREVIEW_USER_PASSWORD_PREFIX="$EXPECTED_PASSWORD_PREFIX" \
     pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs "$mode" >/dev/null 2>&1
@@ -177,7 +172,7 @@ ${BOLD}What this script automates:${NC}
   3. Allocates unique ports for web app (3501-3999)
   4. Installs/links dependencies (pnpm install)
   5. Generates Prisma client
-  6. Uses the repo-owned Supabase CLI runner (global install optional)
+  6. Starts Docker Compose PostgreSQL and seeds database
   7. Runs baseline verification tests
   8. Reports success/failure status
 
@@ -186,10 +181,6 @@ ${BOLD}Hard prerequisites:${NC}
   - git
   - pnpm
   - Docker Desktop / Docker Engine running
-
-${BOLD}Optional tools:${NC}
-  - Supabase CLI installed globally for faster startup
-    If it is missing, the script falls back to a pinned repo-owned pnpm dlx invocation.
 
 ${BOLD}Fail-fast behavior:${NC}
   The script stops on the first error and reports what went wrong.
@@ -388,10 +379,10 @@ setup_worktree_environment() {
     log_warning "No apps/web/.env.local found in parent repository"
   fi
 
-  # Enforce Supabase Local database (NEVER use Homebrew Postgres)
-  log_info "Enforcing Supabase Local database..."
+  # Enforce Docker Compose PostgreSQL (NEVER use Homebrew Postgres)
+  log_info "Enforcing Docker Compose PostgreSQL..."
   local web_env_tmp="$worktree_path/apps/web/.env.local"
-  local supabase_url="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+  local docker_db_url="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
   # Check and fix web app database URL
   if [ -f "$web_env_tmp" ]; then
@@ -399,13 +390,13 @@ setup_worktree_environment() {
     current_web_db=$(grep "^DATABASE_URL=" "$web_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
     if echo "$current_web_db" | grep -q ":5432[^2]"; then
       log_warning "Homebrew Postgres detected in web app (port 5432)"
-      log_info "Switching to Supabase Local (port 54322)..."
-      sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=\"$supabase_url\"|" "$web_env_tmp"
-      sed -i.bak "s|^DATABASE_URL_UNPOOLED=.*|DATABASE_URL_UNPOOLED=\"$supabase_url\"|" "$web_env_tmp"
+      log_info "Switching to Docker Compose PostgreSQL (port 54322)..."
+      sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=\"$docker_db_url\"|" "$web_env_tmp"
+      sed -i.bak "s|^DATABASE_URL_UNPOOLED=.*|DATABASE_URL_UNPOOLED=\"$docker_db_url\"|" "$web_env_tmp"
       rm -f "$web_env_tmp.bak"
-      log_success "Web app database URL updated to Supabase Local"
+      log_success "Web app database URL updated to Docker Compose PostgreSQL"
     elif echo "$current_web_db" | grep -q ":54322"; then
-      log_success "Web app already using Supabase Local"
+      log_success "Web app already using Docker Compose PostgreSQL"
     fi
   fi
 
@@ -496,88 +487,76 @@ setup_worktree_environment() {
     fi
   fi
 
-  # Step 6: Verify Supabase Local is running and database is seeded
-  # Note: We enforce Supabase Local in Step 2, so we know we're using port 54322
-  log_step "Step 6: Checking Supabase Local status"
-  log_info "Supabase commands use the repo-owned CLI runner. A global supabase install is optional."
+  # Step 6: Verify Docker Compose PostgreSQL is running and database is seeded
+  log_step "Step 6: Checking Docker Compose PostgreSQL status"
 
-  # Ensure Supabase local is running
-  if run_supabase_cli status &>/dev/null; then
-    log_success "Supabase local is running"
+  # Ensure Docker Compose PostgreSQL is running
+  if docker compose -f "$REPO_ROOT/docker-compose.yml" ps --status running 2>/dev/null | grep -q postgres; then
+    log_success "Docker Compose PostgreSQL is running"
   else
-    log_warning "Supabase local is not running yet"
-    log_info "Starting Supabase local via the repo-owned CLI runner..."
-    log_info "This prefers a global supabase binary when available and falls back to pnpm dlx when it is not."
-    log_info "Docker must be running for either path to work."
-    if run_supabase_cli start; then
-      log_success "Supabase local started"
+    log_warning "Docker Compose PostgreSQL is not running yet"
+    log_info "Starting PostgreSQL via Docker Compose..."
+    log_info "Docker must be running."
+    if docker compose -f "$REPO_ROOT/docker-compose.yml" up -d 2>&1; then
+      log_success "Docker Compose PostgreSQL started"
+      # Wait for PostgreSQL to be ready
+      log_info "Waiting for PostgreSQL to accept connections..."
+      for i in $(seq 1 30); do
+        if docker compose -f "$REPO_ROOT/docker-compose.yml" exec -T postgres pg_isready -U postgres &>/dev/null; then
+          break
+        fi
+        sleep 1
+      done
     else
-      log_error "Failed to start Supabase local"
-      log_info "A global Supabase CLI install is optional; the fallback still needs pnpm plus a working Docker daemon."
-      log_info "Retry after confirming: pnpm --version && docker info"
-      log_info "Then: pnpm supabase:start"
-      log_info "If the local stack needs a clean rebuild: pnpm supabase:reset"
+      log_error "Failed to start Docker Compose PostgreSQL"
+      log_info "Retry after confirming: docker info"
+      log_info "Then: pnpm db:start"
+      log_info "If the local stack needs a clean rebuild: pnpm db:reset"
       exit 1
     fi
   fi
 
+  # Run migrations
+  log_info "Running Prisma migrations..."
+  local web_db_url_for_migrate
+  web_db_url_for_migrate=$(grep "^DATABASE_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+  if [ -n "$web_db_url_for_migrate" ]; then
+    if DATABASE_URL="$web_db_url_for_migrate" DATABASE_URL_UNPOOLED="$web_db_url_for_migrate" \
+      pnpm --filter @repo/database exec prisma migrate deploy 2>&1; then
+      log_success "Prisma migrations applied"
+    else
+      log_warning "Prisma migrate deploy had issues (non-blocking)"
+    fi
+  fi
+
   # Verify test user exists with correct password hash
-  log_info "Checking for test user in Supabase Local..."
+  log_info "Checking for test user..."
 
   if check_preview_user exists; then
     if check_preview_user password; then
       log_success "Database seeded correctly (preview_user_001 exists with valid password)"
     else
       log_warning "Test user exists but password hash is incorrect"
-      log_info "Resetting database with correct seed..."
-      if run_supabase_cli db reset --no-confirm 2>&1; then
-        log_success "Database reset and seeded successfully"
+      log_info "Re-seeding database..."
+      if DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:$DB_PORT/postgres" SEED_FILE="$REPO_ROOT/packages/database/seed.sql" pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs 2>&1; then
+        log_success "Database seeded successfully"
       else
-        log_warning "Database reset had issues (non-blocking)"
-        log_info "Run manually: pnpm supabase:reset"
+        log_warning "Database seeding had issues (non-blocking)"
+        log_info "Run manually: pnpm db:reset"
       fi
     fi
   else
-    log_info "Test user not found, resetting database with seed..."
-    if run_supabase_cli db reset --no-confirm 2>&1; then
-      log_success "Database reset and seeded successfully"
+    log_info "Test user not found, seeding database..."
+    if DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:$DB_PORT/postgres" SEED_FILE="$REPO_ROOT/packages/database/seed.sql" pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs 2>&1; then
+      log_success "Database seeded successfully"
     else
-      log_warning "Database reset had issues (non-blocking)"
-      log_info "Run manually: pnpm supabase:reset"
+      log_warning "Database seeding had issues (non-blocking)"
+      log_info "Run manually: pnpm db:reset"
     fi
   fi
 
-  # Step 7: Configure Supabase Local Storage
-  log_step "Step 7: Configuring Supabase Local Storage"
-
-  # Supabase local storage requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
-  # These are standard local development values for Supabase
-  local supabase_local_url="http://127.0.0.1:54321"
-  local supabase_service_role_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
-
-  # Configure web app storage
-  if [ -f "$web_env_file" ]; then
-    if ! grep -q "^SUPABASE_URL=" "$web_env_file" 2>/dev/null; then
-      {
-        echo ""
-        echo "# Supabase Local Storage Configuration (auto-configured by worktree-setup.sh)"
-        echo "SUPABASE_URL=$supabase_local_url"
-        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key"
-      } >> "$web_env_file"
-      log_success "Web app Supabase storage configured"
-    else
-      # Update existing values to use local
-      sed -i.bak "s|^SUPABASE_URL=.*|SUPABASE_URL=$supabase_local_url|" "$web_env_file"
-      rm -f "$web_env_file.bak"
-      if ! grep -q "^SUPABASE_SERVICE_ROLE_KEY=" "$web_env_file" 2>/dev/null; then
-        echo "SUPABASE_SERVICE_ROLE_KEY=$supabase_service_role_key" >> "$web_env_file"
-      fi
-      log_success "Web app Supabase storage updated for local"
-    fi
-  fi
-
-  # Step 8: Run baseline verification
-  log_step "Step 8: Running baseline verification"
+  # Step 7: Run baseline verification
+  log_step "Step 7: Running baseline verification"
 
   log_info "Running type check..."
   if pnpm --filter web run type-check 2>/dev/null; then

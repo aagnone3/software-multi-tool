@@ -12,33 +12,18 @@ git rebase origin/main
 pnpm --filter @repo/database migrate
 ```
 
-### Schema Drift Between Prisma and Supabase
-
-```bash
-SUPABASE_ACCESS_TOKEN="..." supabase db pull
-git add supabase/migrations/
-git commit -m "chore: sync supabase migrations"
-```
-
 ### Missing Seed Data
 
 ```bash
-psql $DATABASE_URL -f supabase/seed.sql
+psql $DATABASE_URL -f packages/database/seed.sql
 ```
 
 ## Preview Environment Issues
 
 ### Vercel Preview Not Connecting to Database
 
-1. Verify Supabase integration enabled in Vercel project settings
-2. Check GitHub check shows Supabase branch created
-3. Ensure `DATABASE_URL` and `DATABASE_URL_UNPOOLED` populated
-
-### Supabase Branch Database Not Created
-
-1. Verify GitHub integration authorized
-2. Check Supabase project settings → Integrations
-3. Look for errors in GitHub check details
+1. Verify database integration enabled in Vercel project settings
+2. Ensure `DATABASE_URL` and `DATABASE_URL_UNPOOLED` populated
 
 ### Preview Env Vars Not Taking Effect
 
@@ -58,36 +43,23 @@ vercel env ls preview | grep <VAR_NAME>
 
 1. Check browser DevTools Network - requests should go to `/api/proxy/*`
 2. Verify `NEXT_PUBLIC_VERCEL_ENV` is `preview` in Vercel
-3. Verify DATABASE_URL points to correct Supabase branch
+3. Verify DATABASE_URL points to correct database
 4. See **api-proxy** skill for detailed debugging
 
 ## Storage Issues
 
 ### Storage Uploads Fail in Preview
 
-**Root cause**: Supabase Storage buckets NOT copied to preview branches.
+**Root cause**: Storage buckets are managed by S3 configuration, not the database.
 
-**Solution**: Add bucket to `supabase/seed.sql`:
-
-```sql
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('your-bucket', 'your-bucket', true, 5242880, ARRAY['image/jpeg', 'image/png'])
-ON CONFLICT (id) DO NOTHING;
-```
-
-**For existing preview branches**:
-
-```sql
--- Run via Supabase Dashboard SQL Editor
-INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
-```
+**Solution**: Verify S3/storage environment variables are set correctly in the preview environment. See the `storage` skill for provider configuration details.
 
 ## Seed Validation Failures
 
 ### Database Not Seeded
 
 ```bash
-psql $DATABASE_URL -f supabase/seed.sql
+psql $DATABASE_URL -f packages/database/seed.sql
 ```
 
 ### Wrong Database URL
@@ -99,8 +71,7 @@ echo $DATABASE_URL  # Should point to branch database, not production
 ### Seed File Syntax Error
 
 ```bash
-supabase start
-supabase db reset  # Applies migrations + seed
+pnpm db:reset  # Resets database, applies migrations + seed
 ```
 
 ## E2E Tests Blocked by Vercel Login
@@ -123,10 +94,9 @@ pnpm --filter web exec playwright test --config=tests/playwright.external.config
 ## Local Development Database
 
 ```bash
-# Use local PostgreSQL
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/local_softwaremultitool"
+# Start local PostgreSQL via Docker Compose
+pnpm db:start
 
-# Or use Supabase local
-supabase start
-# Use DATABASE_URL from supabase status output
+# Connection string
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 ```

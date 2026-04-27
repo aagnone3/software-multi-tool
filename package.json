@@ -30,11 +30,10 @@
 		"worktree:remove": "./tooling/scripts/src/worktree-setup.sh remove",
 		"worktree:list": "./tooling/scripts/src/worktree-setup.sh list",
 		"worktree:resume": "./tooling/scripts/src/worktree-setup.sh resume",
-		"supabase:check": "./tooling/scripts/src/supabase/supabase-local.sh check",
-		"supabase:start": "./tooling/scripts/src/supabase/supabase-local.sh start",
-		"supabase:stop": "./tooling/scripts/src/supabase/supabase-local.sh stop",
-		"supabase:status": "./tooling/scripts/src/supabase/supabase-local.sh status",
-		"supabase:reset": "./tooling/scripts/src/supabase/supabase-local.sh reset",
+		"db:start": "docker compose up -d",
+		"db:stop": "docker compose down",
+		"db:reset": "docker compose down -v && docker compose up -d",
+		"db:status": "docker compose ps",
 		"mt": "pnpm --filter @repo/cli mt"
 	},
 	"engines": {
