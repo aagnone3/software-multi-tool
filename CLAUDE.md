@@ -68,25 +68,6 @@ The pre-commit hook runs `biome ci --staged` to catch issues before they reach C
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
 
-#### Prisma to Supabase Migration Sync
-
-Supabase preview branches require migrations in Supabase format. A sync script automatically copies Prisma migrations to Supabase format:
-
-- **Script**: `tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
-- **CI Integration**: Runs automatically on PRs with Prisma migration changes
-- **Manual sync**: `./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
-
-| System   | Format                                    |
-| -------- | ----------------------------------------- |
-| Prisma   | `migrations/TIMESTAMP_name/migration.sql` |
-| Supabase | `migrations/TIMESTAMP_name.sql`           |
-
-The sync script:
-
-1. Copies new Prisma migrations to Supabase format
-2. Skips migrations already synced
-3. CI automatically commits synced migrations to the PR branch
-
 #### Local Development Database
 
 **Use Supabase local** for development to match preview/production environments exactly.

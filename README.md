@@ -38,7 +38,7 @@ Optional but faster on a cold machine:
    - starts local Supabase if needed
    - resets/seeds the local database when the preview test user is missing or invalid
    - creates `apps/web/.env.local` from `apps/web/.env.local.example` when missing
-   - auto-populates the local boot-critical defaults in `apps/web/.env.local` (`PORT`, `NEXT_PUBLIC_SITE_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `BETTER_AUTH_SECRET`)
+   - auto-populates the local boot-critical defaults in `apps/web/.env.local` (`PORT`, `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `BETTER_AUTH_SECRET`)
 2. Review `apps/web/.env.local` after setup only if you want to add optional provider credentials (OAuth, email, storage, analytics, payments, AI, etc.).
 3. Launch the app: `pnpm dev`
 4. Visit `http://localhost:3500`
@@ -76,7 +76,7 @@ Use `apps/web/.env.local.example` as the starting point, then separate variables
 
 | Category | Variables | Required for local evaluation? | Notes |
 |----------|-----------|--------------------------------|-------|
-| Boot‑critical | `PORT`, `NEXT_PUBLIC_SITE_URL`, `BETTER_AUTH_SECRET`, `POSTGRES_PRISMA_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` plus local runtime setup (Supabase + seeded Postgres) | Yes | These are the minimum variables needed to boot the app locally. The `pnpm setup` script auto‑populates them. |
+| Boot‑critical | `PORT`, `NEXT_PUBLIC_SITE_URL`, `BETTER_AUTH_SECRET`, `DATABASE_URL` plus local runtime setup (Docker Compose PostgreSQL) | Yes | These are the minimum variables needed to boot the app locally. The `pnpm setup` script auto‑populates them. |
 | Auth‑required | GitHub/Google OAuth credentials and related provider config | No | Required for social sign‑in, passkeys, magic links, and onboarding flows. |
 | Email‑required | SMTP, Plunk, Resend, Postmark, or Mailgun credentials | No | Required for transactional/auth email flows. |
 | Storage / AI / analytics / payments | Optional integrations | No | Configure when validating those product areas. |

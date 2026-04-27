@@ -63,12 +63,12 @@ const TABLES_TO_TRUNCATE = [
 export async function createPostgresTestHarness(): Promise<PostgresTestHarness> {
 	const container = await startContainer();
 	const connectionString = container.getConnectionUri();
-	const previousPrismaUrl = process.env.POSTGRES_PRISMA_URL;
-	const previousNonPoolingUrl = process.env.POSTGRES_URL_NON_POOLING;
+	const previousPrismaUrl = process.env.DATABASE_URL;
+	const previousNonPoolingUrl = process.env.DATABASE_URL_UNPOOLED;
 
 	try {
-		process.env.POSTGRES_PRISMA_URL = connectionString;
-		process.env.POSTGRES_URL_NON_POOLING = connectionString;
+		process.env.DATABASE_URL = connectionString;
+		process.env.DATABASE_URL_UNPOOLED = connectionString;
 
 		await preparePrismaClient(connectionString);
 		const prisma = new PrismaClient({
@@ -85,18 +85,15 @@ export async function createPostgresTestHarness(): Promise<PostgresTestHarness> 
 			connectionString,
 			resetDatabase: () => truncateAllTables(prisma),
 			cleanup: async () => {
-				restoreEnvVar("POSTGRES_PRISMA_URL", previousPrismaUrl);
-				restoreEnvVar(
-					"POSTGRES_URL_NON_POOLING",
-					previousNonPoolingUrl,
-				);
+				restoreEnvVar("DATABASE_URL", previousPrismaUrl);
+				restoreEnvVar("DATABASE_URL_UNPOOLED", previousNonPoolingUrl);
 				await prisma.$disconnect();
 				await container.stop();
 			},
 		};
 	} catch (error) {
-		restoreEnvVar("POSTGRES_PRISMA_URL", previousPrismaUrl);
-		restoreEnvVar("POSTGRES_URL_NON_POOLING", previousNonPoolingUrl);
+		restoreEnvVar("DATABASE_URL", previousPrismaUrl);
+		restoreEnvVar("DATABASE_URL_UNPOOLED", previousNonPoolingUrl);
 		await container.stop().catch(() => {});
 		throw error;
 	}
@@ -142,8 +139,8 @@ async function preparePrismaClient(connectionString: string) {
 			cwd: workspaceRoot,
 			env: {
 				...process.env,
-				POSTGRES_PRISMA_URL: connectionString,
-				POSTGRES_URL_NON_POOLING: connectionString,
+				DATABASE_URL: connectionString,
+				DATABASE_URL_UNPOOLED: connectionString,
 			},
 		},
 	);

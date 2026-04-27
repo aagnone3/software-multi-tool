@@ -32,7 +32,7 @@ psql $DATABASE_URL -f supabase/seed.sql
 
 1. Verify Supabase integration enabled in Vercel project settings
 2. Check GitHub check shows Supabase branch created
-3. Ensure `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` populated
+3. Ensure `DATABASE_URL` and `DATABASE_URL_UNPOOLED` populated
 
 ### Supabase Branch Database Not Created
 

@@ -1,6 +1,6 @@
 ---
 name: managing-cicd
-description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Supabase database branching, Prisma-to-Supabase migration sync, preview environment creation, environment variable syncing, and API proxy patterns. Use when debugging CI failures, understanding preview environments, syncing migrations, or configuring deployment variables.
+description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Neon database branching, preview environment creation, environment variable syncing, and API proxy patterns. Use when debugging CI failures, understanding preview environments, or configuring deployment variables.
 allowed-tools:
   - Read
   - Grep
@@ -14,15 +14,14 @@ CI/CD pipeline, preview environments, and database branching workflow.
 
 ## Quick Reference
 
-| Component           | Location                                              |
-| ------------------- | ----------------------------------------------------- |
-| GitHub Actions      | `.github/workflows/`                                  |
-| PR Validation       | `.github/workflows/validate-prs.yml`                  |
-| Supabase Config     | `supabase/config.toml`                                |
-| Supabase Migrations | `supabase/migrations/`                                |
-| Prisma Schema       | `packages/database/prisma/schema.prisma`              |
-| Prisma Migrations   | `packages/database/prisma/migrations/`                |
-| Seed Script         | `pnpm --filter @repo/scripts supabase:validate-seed`  |
+| Component         | Location                                 |
+| ----------------- | ---------------------------------------- |
+| GitHub Actions    | `.github/workflows/`                     |
+| PR Validation     | `.github/workflows/validate-prs.yml`     |
+| Preview Env Sync  | `.github/workflows/preview-env-sync.yml` |
+| Neon API Client   | `tooling/scripts/src/neon/api-client.mjs` |
+| Prisma Schema     | `packages/database/prisma/schema.prisma` |
+| Prisma Migrations | `packages/database/prisma/migrations/`   |
 
 ## Architecture Overview
 
@@ -30,69 +29,38 @@ CI/CD pipeline, preview environments, and database branching workflow.
 PR Created → CI Checks → Preview Environments
                               ↓
               ┌──────────┬──────────┐
-              │ Vercel   │ Supabase │
-              │ Preview  │ Branch   │
+              │ Vercel   │   Neon   │
+              │ Preview  │  Branch  │
               └──────────┴──────────┘
                               ↓
               PR Merge → Production Deploy
 ```
 
-## Supabase Branching
+## Neon Database Branching
 
-Each PR gets an isolated database branch automatically.
+Each PR gets an isolated database branch via Neon's Vercel Previews Integration.
 
 ### How It Works
 
-1. **PR Opens** → Supabase GitHub integration detects PR
-2. **Branch Created** → Database with schema + seed data
-3. **PR Merged** → Branch database deleted
+1. **PR Opens** → Neon creates a `preview/{branch}` database branch (copy-on-write from main)
+2. **Branch Inherits** → Schema + seed data from parent branch automatically
+3. **Vercel Builds** → `prisma migrate deploy` applies any new migrations
+4. **PR Merged** → Neon branch auto-deleted when git branch is deleted
 
-### Key Files
+### Key Differences from Previous Setup
 
-| File                        | Purpose               |
-| --------------------------- | --------------------- |
-| `supabase/config.toml`      | Project configuration |
-| `supabase/migrations/*.sql` | Schema migrations     |
-| `supabase/seed.sql`         | Preview seed data     |
-
-### Storage Buckets
-
-Buckets are NOT copied to preview branches. Add to `supabase/seed.sql`:
-
-```sql
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('avatars', 'avatars', true, 5242880,
-        ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
-ON CONFLICT (id) DO NOTHING;
-```
-
-### Validating Seed Data
-
-```bash
-export DATABASE_URL="postgresql://postgres:...@db.xxx.supabase.co:5432/postgres"
-pnpm --filter @repo/scripts supabase:validate-seed
-```
-
-## Prisma vs Supabase Migrations
-
-**Prisma** = Source of truth for development.
-**Supabase** = Derived format for preview branches.
+- No dual migration system — Prisma migrations are the sole source of truth
+- Seed data is inherited via copy-on-write (no re-seeding needed)
+- `DATABASE_URL` and `DATABASE_URL_UNPOOLED` are auto-injected by the Neon Vercel integration
 
 ### Migration Workflow
 
 1. Modify Prisma schema
 2. `pnpm --filter @repo/database migrate`
 3. Commit & create PR
-4. CI auto-syncs Supabase format
-5. Supabase preview branch applies migrations
+4. Neon preview branch inherits schema from parent
+5. Vercel build step runs `prisma migrate deploy` to apply new migrations
 6. PR merge → Prisma migration applies to production
-
-### Sync Migrations Manually
-
-```bash
-./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh --dry-run
-./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh
-```
 
 ## Vercel Preview Deployments
 
@@ -110,7 +78,7 @@ if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
 }
 ```
 
-3. Run tests:
+1. Run tests:
 
 ```bash
 VERCEL_AUTOMATION_BYPASS_SECRET=prj_xxx \
@@ -127,23 +95,22 @@ pnpm web:env:set VARIABLE_NAME "value" --target preview
 
 ## Preview Environment Sync
 
-GitHub Actions automatically syncs env vars between Supabase and Vercel when PR opens.
+GitHub Actions syncs env vars between Neon and Vercel when PR has the `preview` label.
 
 ### Sync Flow
 
-1. Wait for Supabase branch and Vercel preview to be ready (parallel polling)
-2. Sync: Vercel ← Supabase DB credentials (DATABASE_URL, DIRECT_URL)
-3. Sync: Vercel ← Supabase API credentials (SUPABASE_URL, keys)
+1. Wait for Neon branch and Vercel preview to be ready (parallel polling)
+2. Sync: Vercel ← Neon DB credentials (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`)
 
 ### Required GitHub Secrets
 
-| Secret                  | Purpose                 |
-| ----------------------- | ----------------------- |
-| `SUPABASE_ACCESS_TOKEN` | Supabase Management API |
-| `SUPABASE_PROJECT_REF`  | Project identifier      |
-| `VERCEL_TOKEN`          | Vercel API              |
-| `VERCEL_PROJECT`        | Vercel project ID       |
-| `VERCEL_SCOPE`          | Vercel team ID          |
+| Secret           | Purpose            |
+| ---------------- | ------------------ |
+| `NEON_API_KEY`   | Neon Management API |
+| `NEON_PROJECT_ID`| Neon project ID    |
+| `VERCEL_TOKEN`   | Vercel API         |
+| `VERCEL_PROJECT` | Vercel project ID  |
+| `VERCEL_SCOPE`   | Vercel team ID     |
 
 ### Trigger Sync Manually
 
@@ -164,10 +131,10 @@ For details, see the **architecture** skill's deployment section.
 
 ## Best Practices
 
-1. **Use Prisma for schema changes** - Never edit `supabase/migrations/` directly
-2. **Keep Supabase in sync** - `supabase db pull` after production deploys
-3. **Test seed data in PRs** - Run `supabase:validate-seed` against preview DB
-4. **Wait for all CI checks** - `validate-prs`, Supabase, Vercel
+1. **Use Prisma for schema changes** — single source of truth for all environments
+2. **Seed the main Neon branch** — preview branches inherit data via copy-on-write
+3. **Wait for all CI checks** — `validate-prs`, Neon branch, Vercel preview
+4. **Run `prisma migrate deploy` in build step** — ensures preview branches have latest schema
 
 ## Troubleshooting
 
@@ -175,8 +142,6 @@ See [troubleshooting.md](troubleshooting.md) for:
 
 - Migration check failures
 - Preview environment issues
-- Storage upload failures
-- Seed validation failures
 - E2E test blocking
 
 ## When to Use This Skill
@@ -186,19 +151,17 @@ Invoke this skill when:
 - Understanding CI/CD pipeline flow
 - Debugging preview environment issues
 - Working with database branching
-- Syncing Prisma and Supabase migrations
 - Configuring environment variables for deployments
 - Troubleshooting GitHub Actions workflows
-- Understanding Vercel/Supabase integration
+- Understanding Vercel/Neon integration
 
-**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Supabase branch, migration sync, PR checks, pipeline
+**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Neon branch, PR checks, pipeline
 
 ## Related Skills
 
 - **architecture**: API proxy implementation details and deployment infrastructure
-- **prisma-migrate**: Database migration workflows and Prisma-to-Supabase sync
+- **prisma-migrate**: Database migration workflows
 - **application-environments**: Environment overview and configuration
 - **git-worktrees**: Worktree-based development and branch workflows
 - **debugging**: Troubleshooting preview environment and deployment issues
 - **github-cli**: GitHub operations and PR management
-- **storage**: Storage bucket configuration in seed.sql for preview branches

@@ -126,7 +126,7 @@ The application uses **Next.js with Hono + oRPC** for a unified serverless backe
                       │
                       ▼
            ┌──────────────────────┐
-           │  PostgreSQL (Supabase)│
+           │   PostgreSQL (Neon)   │
            │     - Better Auth     │
            │     - Job records     │
            │     - App data        │
@@ -139,7 +139,7 @@ The application uses **Next.js with Hono + oRPC** for a unified serverless backe
 | --------- | -------- | ------- |
 | Next.js | Vercel | Serverless frontend + API |
 | Inngest | Vercel Marketplace | Background job processing |
-| PostgreSQL | Supabase | Database |
+| PostgreSQL | Neon | Database (with preview branching) |
 
 ## API Architecture (Hono + oRPC)
 

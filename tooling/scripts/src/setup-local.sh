@@ -222,8 +222,8 @@ populate_local_env_defaults() {
 
     set_env_var "$env_file" "PORT" "3500"
     set_env_var "$env_file" "NEXT_PUBLIC_SITE_URL" "http://localhost:3500"
-    set_env_var "$env_file" "POSTGRES_PRISMA_URL" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
-    set_env_var "$env_file" "POSTGRES_URL_NON_POOLING" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
+    set_env_var "$env_file" "DATABASE_URL" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
+    set_env_var "$env_file" "DATABASE_URL_UNPOOLED" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
     set_env_var "$env_file" "NEXT_PUBLIC_SUPABASE_URL" "http://127.0.0.1:54321"
     set_env_var "$env_file" "NEXT_PUBLIC_SUPABASE_ANON_KEY" "$local_anon_key"
     set_env_var "$env_file" "BETTER_AUTH_SECRET" "$better_auth_secret"

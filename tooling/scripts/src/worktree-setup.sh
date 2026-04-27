@@ -396,12 +396,12 @@ setup_worktree_environment() {
   # Check and fix web app database URL
   if [ -f "$web_env_tmp" ]; then
     local current_web_db
-    current_web_db=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+    current_web_db=$(grep "^DATABASE_URL=" "$web_env_tmp" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
     if echo "$current_web_db" | grep -q ":5432[^2]"; then
       log_warning "Homebrew Postgres detected in web app (port 5432)"
       log_info "Switching to Supabase Local (port 54322)..."
-      sed -i.bak "s|^POSTGRES_PRISMA_URL=.*|POSTGRES_PRISMA_URL=\"$supabase_url\"|" "$web_env_tmp"
-      sed -i.bak "s|^POSTGRES_URL_NON_POOLING=.*|POSTGRES_URL_NON_POOLING=\"$supabase_url\"|" "$web_env_tmp"
+      sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=\"$supabase_url\"|" "$web_env_tmp"
+      sed -i.bak "s|^DATABASE_URL_UNPOOLED=.*|DATABASE_URL_UNPOOLED=\"$supabase_url\"|" "$web_env_tmp"
       rm -f "$web_env_tmp.bak"
       log_success "Web app database URL updated to Supabase Local"
     elif echo "$current_web_db" | grep -q ":54322"; then
@@ -481,15 +481,15 @@ setup_worktree_environment() {
   # Check for pending migrations (informational only)
   log_info "Checking for pending database migrations..."
   local web_db_url
-  web_db_url=$(grep "^POSTGRES_PRISMA_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
+  web_db_url=$(grep "^DATABASE_URL=" "$web_env_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"')
   if [ -n "$web_db_url" ]; then
     local migrate_status
-    if migrate_status=$(POSTGRES_PRISMA_URL="$web_db_url" POSTGRES_URL_NON_POOLING="$web_db_url" \
+    if migrate_status=$(DATABASE_URL="$web_db_url" DATABASE_URL_UNPOOLED="$web_db_url" \
       pnpm --filter @repo/database exec prisma migrate status 2>&1); then
       if echo "$migrate_status" | grep -q "Following migration have not yet been applied"; then
         log_warning "Pending database migrations detected!"
         echo "$migrate_status" | grep -A1 "Following migration" | tail -1 | sed 's/^/  /'
-        log_info "Run: POSTGRES_PRISMA_URL=\"$web_db_url\" POSTGRES_URL_NON_POOLING=\"$web_db_url\" pnpm --filter @repo/database exec prisma migrate deploy"
+        log_info "Run: DATABASE_URL=\"$web_db_url\" DATABASE_URL_UNPOOLED=\"$web_db_url\" pnpm --filter @repo/database exec prisma migrate deploy"
       else
         log_success "Database migrations are up to date"
       fi

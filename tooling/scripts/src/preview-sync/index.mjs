@@ -4,7 +4,7 @@
  * Preview Environment Sync
  *
  * Orchestrates environment variable synchronization between
- * Supabase and Vercel preview environments.
+ * Neon and Vercel preview environments.
  *
  * Usage:
  *   pnpm --filter @repo/scripts preview-sync wait --pr <number> [--branch <name>]
@@ -12,14 +12,14 @@
  *   pnpm --filter @repo/scripts preview-sync run --pr <number> [--branch <name>] [--sha <commit>]
  *
  * Required environment variables:
- *   SUPABASE_ACCESS_TOKEN - Supabase Management API token
- *   SUPABASE_PROJECT_REF  - Supabase project reference
- *   VERCEL_TOKEN          - Vercel API token
- *   VERCEL_PROJECT        - Vercel project ID
- *   VERCEL_SCOPE          - Vercel team/scope ID
+ *   NEON_API_KEY     - Neon Management API key
+ *   NEON_PROJECT_ID  - Neon project ID
+ *   VERCEL_TOKEN     - Vercel API token
+ *   VERCEL_PROJECT   - Vercel project ID
+ *   VERCEL_SCOPE     - Vercel team/scope ID
  */
 
-import { createSupabaseClientFromEnv } from "../supabase/api-client.mjs";
+import { createNeonClientFromEnv } from "../neon/api-client.mjs";
 
 // ============================================================================
 // Configuration
@@ -42,7 +42,7 @@ function parseArgs(argv) {
 		branch: null,
 		sha: null,
 		timeout: 600, // 10 minutes default for Vercel
-		supabaseTimeout: 900, // 15 minutes for Supabase (takes longer to provision)
+		neonTimeout: 900, // 15 minutes for Neon (branch provisioning)
 	};
 
 	for (let i = 1; i < argv.length; i++) {
@@ -60,8 +60,12 @@ function parseArgs(argv) {
 			case "--timeout":
 				args.timeout = Number.parseInt(argv[++i], 10);
 				break;
+			case "--neon-timeout":
+				args.neonTimeout = Number.parseInt(argv[++i], 10);
+				break;
+			// Legacy flag support during migration
 			case "--supabase-timeout":
-				args.supabaseTimeout = Number.parseInt(argv[++i], 10);
+				args.neonTimeout = Number.parseInt(argv[++i], 10);
 				break;
 		}
 	}
@@ -71,9 +75,6 @@ function parseArgs(argv) {
 
 /**
  * Retry a function with exponential backoff for transient errors
- * @param {Function} fn - Async function to retry
- * @param {Object} options - Retry options
- * @returns {Promise<any>}
  */
 async function withRetry(fn, options = {}) {
 	const { maxRetries = 3, initialDelay = 1000, maxDelay = 10000 } = options;
@@ -87,7 +88,6 @@ async function withRetry(fn, options = {}) {
 		} catch (error) {
 			lastError = error;
 
-			// Check if error is retryable (network errors, 429, 5xx)
 			const isRetryable =
 				error.message?.includes("fetch failed") ||
 				error.message?.includes("network") ||
@@ -168,7 +168,6 @@ async function findVercelPreviewDeployment(prNumber, branch = null) {
 		throw new Error("VERCEL_PROJECT environment variable is required");
 	}
 
-	// List recent deployments and find one for this PR
 	const response = await vercelRequest(
 		"/v6/deployments",
 		{},
@@ -179,19 +178,15 @@ async function findVercelPreviewDeployment(prNumber, branch = null) {
 		},
 	);
 
-	// Find deployment with PR metadata or matching branch pattern
 	for (const deployment of response.deployments || []) {
-		// Check if deployment has PR number in meta
 		if (deployment.meta?.githubPrId === String(prNumber)) {
 			return deployment;
 		}
 
-		// Check if deployment URL contains PR reference
 		if (deployment.url?.includes(`-pr-${prNumber}-`)) {
 			return deployment;
 		}
 
-		// Check if deployment matches the branch name (most reliable for GitHub-triggered deployments)
 		if (branch && deployment.meta?.githubCommitRef === branch) {
 			return deployment;
 		}
@@ -202,7 +197,7 @@ async function findVercelPreviewDeployment(prNumber, branch = null) {
 
 async function waitForVercelPreview(prNumber, options = {}) {
 	const {
-		timeoutMs = 600000, // 10 minutes default
+		timeoutMs = 600000,
 		initialDelay = 5000,
 		maxDelay = 30000,
 		backoffFactor = 1.5,
@@ -252,11 +247,8 @@ async function setVercelEnvVar(
 		throw new Error("VERCEL_PROJECT environment variable is required");
 	}
 
-	// First, check if the env var exists and its current value
 	const envVars = await vercelRequest(`/v10/projects/${projectId}/env`);
 
-	// When gitBranch is specified, look for a branch-specific env var
-	// Otherwise look for a global env var (no gitBranch)
 	const existing = envVars.envs?.find((e) => {
 		if (e.key !== key) {
 			return false;
@@ -265,24 +257,20 @@ async function setVercelEnvVar(
 			return false;
 		}
 		if (gitBranch) {
-			// Looking for branch-specific: must match the branch
 			return e.gitBranch === gitBranch;
 		}
-		// Looking for global: must not have a gitBranch
 		return !e.gitBranch;
 	});
 
 	const branchLabel = gitBranch ? ` (branch: ${gitBranch})` : "";
 
 	if (existing) {
-		// Check if value is unchanged (Vercel returns decrypted values for comparison)
 		if (existing.value === value) {
 			console.log(
 				`[Vercel] ${target} env var unchanged: ${key}${branchLabel}`,
 			);
 			return false;
 		}
-		// Update existing
 		await vercelRequest(`/v10/projects/${projectId}/env/${existing.id}`, {
 			method: "PATCH",
 			body: JSON.stringify({ value }),
@@ -291,7 +279,6 @@ async function setVercelEnvVar(
 		return true;
 	}
 
-	// Create new - include gitBranch if specified
 	const envVarPayload = {
 		key,
 		value,
@@ -322,57 +309,40 @@ async function waitCommand(args) {
 	console.log(`PR Number: ${args.prNumber}`);
 	console.log(`Git Branch: ${args.branch || "(will be determined from PR)"}`);
 	console.log(`Timeout (Vercel): ${args.timeout} seconds`);
-	console.log(`Timeout (Supabase): ${args.supabaseTimeout} seconds\n`);
+	console.log(`Timeout (Neon): ${args.neonTimeout} seconds\n`);
 
 	const waitOptions = {
-		timeoutMs: args.timeout * 1000, // Convert seconds to milliseconds
+		timeoutMs: args.timeout * 1000,
 		initialDelay: 5000,
 		maxDelay: 30000,
 		backoffFactor: 1.5,
 	};
 
-	// Supabase gets a longer timeout since branch provisioning takes longer
-	const supabaseWaitOptions = {
+	const neonWaitOptions = {
 		...waitOptions,
-		timeoutMs: args.supabaseTimeout * 1000,
+		timeoutMs: args.neonTimeout * 1000,
 	};
 
-	// Vercel needs branch for matching (GitHub-triggered deployments use branch, not PR number)
 	const vercelWaitOptions = {
 		...waitOptions,
 		branch: args.branch,
 	};
 
-	// Wait for both services in parallel
 	console.log("Starting parallel wait for all services...\n");
 
 	const results = await Promise.allSettled([
 		(async () => {
 			if (!args.branch) {
-				console.log("[Supabase] Skipping - no branch name provided");
+				console.log("[Neon] Skipping - no branch name provided");
 				return { skipped: true };
 			}
-			const supabase = createSupabaseClientFromEnv();
-			const branch = await supabase.waitForBranch(
+			const neon = createNeonClientFromEnv();
+			const branch = await neon.waitForBranch(
 				args.branch,
-				supabaseWaitOptions,
+				neonWaitOptions,
 			);
-			const credentials = await supabase.getBranchCredentials(branch);
-
-			// Also fetch API credentials (URL, anon key, service role key) for storage
-			let apiCredentials = null;
-			try {
-				apiCredentials = await supabase.getBranchApiCredentials(branch);
-				console.log(
-					`[Supabase] API credentials retrieved for branch ${branch.ref || branch.project_ref}`,
-				);
-			} catch (error) {
-				console.log(
-					`[Supabase] Warning: Could not get API credentials: ${error.message}`,
-				);
-			}
-
-			return { branch, credentials, apiCredentials };
+			const credentials = await neon.getBranchCredentials(branch);
+			return { branch, credentials };
 		})(),
 		waitForVercelPreview(args.prNumber, vercelWaitOptions),
 	]);
@@ -381,13 +351,13 @@ async function waitCommand(args) {
 	console.log("WAIT RESULTS");
 	console.log(`${"=".repeat(60)}\n`);
 
-	const [supabaseResult, vercelResult] = results;
+	const [neonResult, vercelResult] = results;
 
 	const output = {
-		supabase:
-			supabaseResult.status === "fulfilled"
-				? supabaseResult.value
-				: { error: supabaseResult.reason?.message },
+		neon:
+			neonResult.status === "fulfilled"
+				? neonResult.value
+				: { error: neonResult.reason?.message },
 		vercel:
 			vercelResult.status === "fulfilled"
 				? vercelResult.value
@@ -395,11 +365,11 @@ async function waitCommand(args) {
 	};
 
 	console.log(
-		"Supabase:",
-		output.supabase.skipped
+		"Neon:",
+		output.neon.skipped
 			? "SKIPPED"
-			: output.supabase.error
-				? `ERROR: ${output.supabase.error}`
+			: output.neon.error
+				? `ERROR: ${output.neon.error}`
 				: "READY",
 	);
 	console.log(
@@ -409,18 +379,16 @@ async function waitCommand(args) {
 			: `READY - ${output.vercel.url}`,
 	);
 
-	// Supabase failure is non-fatal - we can still wait for Vercel
-	const supabaseFailed = supabaseResult.status === "rejected";
-	if (supabaseFailed) {
+	const neonFailed = neonResult.status === "rejected";
+	if (neonFailed) {
 		console.log(
-			"\n[WARNING] Supabase branch not ready - database credentials will NOT be synced",
+			"\n[WARNING] Neon branch not ready - database credentials will NOT be synced",
 		);
 		console.log(
-			"[WARNING] Re-run this workflow manually once Supabase branch is ready",
+			"[WARNING] Re-run this workflow manually once Neon branch is ready",
 		);
 	}
 
-	// Vercel must be ready
 	if (vercelResult.status === "rejected") {
 		throw new Error("Vercel preview deployment failed to become ready");
 	}
@@ -433,28 +401,26 @@ async function syncCommand(args) {
 	console.log("SYNCING ENVIRONMENT VARIABLES");
 	console.log(`${"=".repeat(60)}\n`);
 
-	// First wait for all services
 	const services = await waitCommand(args);
 
 	console.log(`\n${"=".repeat(60)}`);
 	console.log("UPDATING ENVIRONMENT VARIABLES");
 	console.log(`${"=".repeat(60)}\n`);
 
-	const supabaseCredentials = services.supabase?.credentials;
-	const supabaseApiCredentials = services.supabase?.apiCredentials;
+	const neonCredentials = services.neon?.credentials;
 
 	let vercelEnvChanged = false;
 
-	// Sync Supabase database credentials to Vercel (branch-specific)
-	if (supabaseCredentials && args.branch) {
+	// Sync Neon database credentials to Vercel (branch-specific)
+	if (neonCredentials && args.branch) {
 		console.log(
-			"[Vercel] Updating Supabase database credentials (branch-specific)...",
+			"[Vercel] Updating Neon database credentials (branch-specific)...",
 		);
 
-		// DATABASE_URL (pooler connection)
+		// DATABASE_URL (pooled connection for runtime)
 		const databaseUrlChanged = await setVercelEnvVar(
 			"DATABASE_URL",
-			supabaseCredentials.poolerUrl,
+			neonCredentials.poolerUrl,
 			"preview",
 			args.branch,
 		);
@@ -462,68 +428,15 @@ async function syncCommand(args) {
 			vercelEnvChanged = true;
 		}
 
-		// DIRECT_URL (direct connection for migrations)
+		// DATABASE_URL_UNPOOLED (direct connection for migrations)
 		const directUrlChanged = await setVercelEnvVar(
-			"DIRECT_URL",
-			supabaseCredentials.directUrl,
+			"DATABASE_URL_UNPOOLED",
+			neonCredentials.directUrl,
 			"preview",
 			args.branch,
 		);
 		if (directUrlChanged) {
 			vercelEnvChanged = true;
-		}
-	}
-
-	// Sync Supabase storage credentials to Vercel (for image-proxy route)
-	if (supabaseApiCredentials && args.branch) {
-		console.log(
-			"\n[Vercel] Updating Supabase storage credentials (branch-specific)...",
-		);
-
-		// Server-side SUPABASE_URL for storage provider
-		const supabaseUrlChanged = await setVercelEnvVar(
-			"SUPABASE_URL",
-			supabaseApiCredentials.supabaseUrl,
-			"preview",
-			args.branch,
-		);
-		if (supabaseUrlChanged) {
-			vercelEnvChanged = true;
-		}
-
-		// Server-side SUPABASE_SERVICE_ROLE_KEY for storage provider
-		const serviceRoleKeyChanged = await setVercelEnvVar(
-			"SUPABASE_SERVICE_ROLE_KEY",
-			supabaseApiCredentials.serviceRoleKey,
-			"preview",
-			args.branch,
-		);
-		if (serviceRoleKeyChanged) {
-			vercelEnvChanged = true;
-		}
-
-		// Public NEXT_PUBLIC_SUPABASE_URL for client-side usage
-		const publicSupabaseUrlChanged = await setVercelEnvVar(
-			"NEXT_PUBLIC_SUPABASE_URL",
-			supabaseApiCredentials.supabaseUrl,
-			"preview",
-			args.branch,
-		);
-		if (publicSupabaseUrlChanged) {
-			vercelEnvChanged = true;
-		}
-
-		// Public NEXT_PUBLIC_SUPABASE_ANON_KEY for client-side usage
-		if (supabaseApiCredentials.anonKey) {
-			const anonKeyChanged = await setVercelEnvVar(
-				"NEXT_PUBLIC_SUPABASE_ANON_KEY",
-				supabaseApiCredentials.anonKey,
-				"preview",
-				args.branch,
-			);
-			if (anonKeyChanged) {
-				vercelEnvChanged = true;
-			}
 		}
 	}
 
@@ -543,7 +456,6 @@ async function syncCommand(args) {
 }
 
 async function runCommand(args) {
-	// Run the sync command (no GitHub Check integration needed without Render)
 	await syncCommand(args);
 }
 

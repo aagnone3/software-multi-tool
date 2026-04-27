@@ -17,7 +17,7 @@ Software Multitool is designed to deploy to Vercel with a Supabase PostgreSQL da
 2. After the project initializes, go to **Settings → API** and copy:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
    - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. Go to **Settings → Database** and copy the **connection string (URI)** → `POSTGRES_PRISMA_URL`
+3. Go to **Settings → Database** and copy the **connection string (URI)** → `DATABASE_URL`
 
 ## Step 2: Deploy to Vercel
 
@@ -36,8 +36,8 @@ Add these to Vercel under **Settings → Environment Variables**:
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-POSTGRES_PRISMA_URL=postgresql://...?pgbouncer=true&connection_limit=1
-POSTGRES_URL_NON_POOLING=postgresql://...
+DATABASE_URL=postgresql://...?pgbouncer=true&connection_limit=1
+DATABASE_URL_UNPOOLED=postgresql://...
 BETTER_AUTH_SECRET=your-random-secret-min-32-chars
 NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ```

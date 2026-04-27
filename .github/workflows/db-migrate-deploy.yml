@@ -16,8 +16,8 @@ jobs:
     environment:
       name: production
     env:
-      POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
-      POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
