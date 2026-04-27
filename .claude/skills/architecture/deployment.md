@@ -8,11 +8,11 @@ This document provides comprehensive deployment infrastructure details for the s
 ┌─────────────────────────────────────────────────────────────┐
 │                        Production                            │
 ├─────────────────┬─────────────────┬─────────────────────────┤
-│     Vercel      │     Inngest     │       Supabase          │
-│  (Next.js App)  │  (Job Queue)    │  (Postgres + Realtime)  │
+│     Vercel      │     Inngest     │       Neon              │
+│  (Next.js App)  │  (Job Queue)    │  (Postgres)             │
 │  - SSR/SSG      │  - 8 functions  │  - Database             │
-│  - API routes   │  - Retries      │  - Storage              │
-│  - Edge funcs   │  - Observability│  - Realtime channels    │
+│  - API routes   │  - Retries      │  - Connection pooling   │
+│  - Edge funcs   │  - Observability│  - Auto-scaling         │
 └─────────────────┴─────────────────┴─────────────────────────┘
 ```
 
@@ -50,21 +50,6 @@ npx inngest-cli@latest dev
 
 Note: In production, Inngest auto-detects Vercel environment via Marketplace integration.
 
-## Real-time: Supabase
-
-Real-time messaging via **Supabase Realtime**:
-
-- Broadcast channels for pub/sub
-- Presence for who's online
-- No separate WebSocket server needed
-
-### Supabase Environment Variables
-
-| Variable | Purpose |
-| -------- | ------- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key (client-safe) |
-
 ## CI/CD: GitHub Actions
 
 Located in `.github/workflows/`:
@@ -87,33 +72,37 @@ Located in `.github/workflows/`:
 - Applies Prisma migrations via `pnpm db:migrate:deploy`
 - Uses concurrency control (no cancel in progress)
 
-## Database: Supabase (Production)
+## Database: Neon (Production)
 
-PostgreSQL hosted on **Supabase** with connection pooling (pgbouncer).
+PostgreSQL hosted on **Neon** via the Vercel Marketplace integration.
+
+| Variable | Purpose |
+| -------- | ------- |
+| `DATABASE_URL` | Pooled connection string (auto-injected by Vercel/Neon integration) |
+| `DATABASE_URL_UNPOOLED` | Direct connection string for migrations (auto-injected) |
 
 ## Database: Local Development
 
-Local PostgreSQL for development runs on the default Homebrew installation:
+Local PostgreSQL runs via **Docker Compose** (postgres:17 on port 54322):
 
-| Setting  | Value                   |
-| -------- | ----------------------- |
-| Host     | localhost               |
-| Port     | 5432                    |
-| Database | local_softwaremultitool |
-| User     | postgres                |
-| Password | postgres                |
+| Setting  | Value     |
+| -------- | --------- |
+| Host     | 127.0.0.1 |
+| Port     | 54322     |
+| Database | postgres  |
+| User     | postgres  |
+| Password | postgres  |
 
 **Connection string:**
 
 ```text
-postgresql://postgres:postgres@localhost:5432/local_softwaremultitool
+postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
-**Setup (if needed):**
+**Setup:**
 
 ```bash
-# Create the database (using template1 since default postgres db may not exist)
-PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE DATABASE local_softwaremultitool;"
+pnpm setup    # Starts Docker Compose, runs migrations, seeds database
 ```
 
 ## Environment Management

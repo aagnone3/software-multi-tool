@@ -28,17 +28,12 @@ Before you run `pnpm run setup`, make sure these are installed and available in 
 - Docker (with the daemon running)
 - pnpm
 
-Optional but faster on a cold machine:
-
-- Supabase CLI (the local-evaluation path does **not** require a global install; if missing, the repo will fall back to a pinned `pnpm dlx supabase` invocation)
-
 1. Prepare the local database/runtime dependencies with `pnpm run setup`.
    - preflights the local prerequisites up front and stops with a short recovery path if Docker or pnpm is missing/unavailable
-   - uses a globally installed Supabase CLI when present, otherwise falls back to a repo-owned pinned `pnpm dlx supabase` invocation
-   - starts local Supabase if needed
+   - starts Docker Compose PostgreSQL if needed
    - resets/seeds the local database when the preview test user is missing or invalid
    - creates `apps/web/.env.local` from `apps/web/.env.local.example` when missing
-   - auto-populates the local boot-critical defaults in `apps/web/.env.local` (`PORT`, `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `BETTER_AUTH_SECRET`)
+   - auto-populates the local boot-critical defaults in `apps/web/.env.local` (`PORT`, `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and `BETTER_AUTH_SECRET`)
 2. Review `apps/web/.env.local` after setup only if you want to add optional provider credentials (OAuth, email, storage, analytics, payments, AI, etc.).
 3. Launch the app: `pnpm dev`
 4. Visit `http://localhost:3500`
@@ -53,7 +48,7 @@ Optional but faster on a cold machine:
 Expected local success state:
 
 - the marketing site loads at `/`
-- local auth-backed flows can be exercised with the seeded preview user without hunting for hidden local Supabase/env values
+- local auth-backed flows can be exercised with the seeded preview user without hunting for hidden env values
 - email, analytics, storage, AI, and payment integrations may still remain provider-gated until you wire real credentials
 
 ### Path B: Full integrated setup
@@ -68,7 +63,7 @@ Expected local success state:
 
 - Install git hooks: `pre-commit install` (after installing [`pre-commit`](https://pre-commit.com/#install))
 - Run lint, type-check, and tests before opening changes
-- For parallel feature work, use `pnpm worktree:create`, `pnpm worktree:resume`, `pnpm worktree:list`, and `pnpm worktree:remove` for the repo-managed worktree flow. In practice that helper needs `pnpm` plus Docker (daemon running); a global Supabase CLI install is optional because the helper falls back to the repo-owned pinned CLI path when `supabase` is not already installed.
+- For parallel feature work, use `pnpm worktree:create`, `pnpm worktree:resume`, `pnpm worktree:list`, and `pnpm worktree:remove` for the repo-managed worktree flow. In practice that helper needs `pnpm` plus Docker (daemon running).
 
 ### Environment guide
 

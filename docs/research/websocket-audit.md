@@ -1,5 +1,7 @@
 # WebSocket Audit: api-server
 
+> **Historical document.** The Supabase Realtime module referenced in this audit has been fully removed from the codebase. This document is preserved for historical context only.
+
 This document audits all WebSocket functionality in `apps/api-server/` and recommends a migration approach to Supabase Realtime.
 
 ## Executive Summary
