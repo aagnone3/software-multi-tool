@@ -132,33 +132,17 @@ const processInvoice = async (file: File) => {
 
 ```typescript
 // packages/api/modules/{tool}/lib/processor.ts
-import {
-  getDefaultSupabaseProvider,
-  shouldUseSupabaseStorage,
-  getSignedUrl,
-} from "@repo/storage";
+import { getSignedUrl } from "@repo/storage";
 
 async function fetchFileFromStorage(
   filePath: string,
   bucket: string,
 ): Promise<Buffer> {
-  if (shouldUseSupabaseStorage()) {
-    const provider = getDefaultSupabaseProvider();
-    // Use download() method if available, or fetch via signed URL
-    const signedUrl = await provider.getSignedDownloadUrl(filePath, {
-      bucket,
-      expiresIn: 300, // 5 minutes
-    });
-    const response = await fetch(signedUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    }
-    return Buffer.from(await response.arrayBuffer());
-  }
-
-  // Fallback to legacy signed URL function
   const signedUrl = await getSignedUrl(filePath, { bucket });
   const response = await fetch(signedUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch file: ${response.statusText}`);
+  }
   return Buffer.from(await response.arrayBuffer());
 }
 

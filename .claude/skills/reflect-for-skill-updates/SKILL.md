@@ -117,7 +117,7 @@ Use this template to structure your reflection:
 ### Configuration Consistency
 
 **Pattern**: Different components using different values for the same thing
-**Example**: Web app on Supabase DB, API server on Homebrew Postgres
+**Example**: Web app pointing at the Compose-managed Postgres on port 54322 while another tool points at a Homebrew Postgres on port 5432
 **Fix**: Add consistency checks in setup scripts
 
 ### Missing Prerequisites

@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique ports, Supabase Local (port 54322), automated setup, environment configuration, and cleanup. Use when starting features, reviewing PRs locally, creating hotfixes, or running parallel development sessions.
+description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique web-app ports backed by a shared local Postgres container (Docker Compose, port 54322), automated setup, environment configuration, and cleanup. Use when starting features, reviewing PRs locally, creating hotfixes, or running parallel development sessions.
 allowed-tools:
   - Bash
   - Read
@@ -14,7 +14,7 @@ allowed-tools:
 
 Enables parallel development with isolated git worktrees for concurrent features, testing, and code review. This repository requires worktrees for all feature work to support multiple Claude Code instances working simultaneously.
 
-**Database Requirement**: Worktrees must use Supabase Local (port 54322) or Supabase Preview. Homebrew PostgreSQL (port 5432) lacks required storage and seeding functionality. The automated setup script enforces correct database configuration.
+**Database Requirement**: Worktrees share the local Postgres container managed by Docker Compose (port 54322). Don't point worktrees at a separately installed Postgres (e.g. Homebrew on port 5432) — the seed and migration tooling assumes the Compose-managed container. The automated setup script enforces this.
 
 ## Quick Reference
 
@@ -53,12 +53,11 @@ This single command:
 
 1. ✅ Creates the git worktree with proper branch naming
 2. ✅ Copies environment files from parent repository
-3. ✅ **Enforces Supabase Local database** (port 54322)
-4. ✅ Allocates unique port for web app
-5. ✅ Installs dependencies and generates Prisma client
-6. ✅ Verifies database seeding with correct test user
-7. ✅ **Configures Supabase Local storage** (SUPABASE_URL + service role key)
-8. ✅ Runs baseline type-check verification
+3. ✅ **Points DATABASE_URL at the shared local Postgres container** (port 54322)
+4. ✅ Allocates a unique port for the web app
+5. ✅ Installs dependencies and generates the Prisma client
+6. ✅ Verifies database seeding with the correct test user
+7. ✅ Runs baseline type-check verification
 
 ### Branch Types
 
@@ -90,21 +89,20 @@ pnpm worktree:remove feat-pra-163-improve-auth-flow
 
 ### Working on Branches with New Migrations
 
-**IMPORTANT**: All worktrees share the same local Supabase database. If your feature branch introduces new database migrations, you must apply them:
+**IMPORTANT**: All worktrees share the same local Postgres container. If your feature branch introduces new database migrations, you must apply them:
 
 ```bash
-# After switching to worktree with new migrations
+# After switching to a worktree with new migrations
 pnpm db:reset
 ```
 
-This re-applies all migrations from `supabase/migrations/` and re-seeds test data. Without this step, you'll get "table not found" errors when testing new features.
+This destroys the database volume, re-applies all Prisma migrations from `packages/database/prisma/migrations/`, and re-seeds test data. Without this step, you'll get "table not found" errors when testing new features.
 
 ## Prerequisites
 
 - **Git 2.5+**: Worktree support (check: `git --version`)
-- **Docker**: Required for Testcontainers-based integration tests
+- **Docker**: Required for the local Postgres container and for Testcontainers-based integration tests
 - **pnpm**: Monorepo package manager (worktrees share parent `node_modules`)
-- **Supabase CLI**: For local database (`supabase start`)
 
 ## Cleanup Workflow
 
@@ -145,7 +143,7 @@ git worktree list
 1. **Use descriptive branch names**: Follow `<type>/pra-<issue>-<description>` convention
 2. **Clean up regularly**: Remove worktrees after PR merge
 3. **Prune stale references**: Run `git worktree prune` periodically
-4. **Always use Supabase Local**: Never use Homebrew Postgres (port 5432)
+4. **Always use the Compose-managed Postgres on port 54322**: Don't point worktrees at a separately installed Postgres (e.g. Homebrew on 5432)
 5. **Leverage Testcontainers**: Don't manually configure DATABASE_URL for tests
 6. **Monitor disk usage**: Each worktree uses ~500MB+
 7. **Follow Linear workflow**: Include PRA-XX in branch names, close issues after merge
@@ -174,7 +172,7 @@ Use git worktrees when you need to:
 
 ## Related Skills
 
-- **application-environments**: Local Supabase setup and environment configuration
+- **application-environments**: Local Docker-Compose Postgres setup and environment configuration
 - **linear**: Issue lookup, status updates, and closure workflow
 - **linear-workflow**: Complete Linear-based development workflow
 - **github-cli**: Create pull requests from worktree branches

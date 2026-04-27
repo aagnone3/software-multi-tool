@@ -1,6 +1,6 @@
 ---
 name: debugging-applications
-description: Debugs applications across platforms (Vercel, Supabase) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring. Use when the app is broken, database queries fail, auth issues arise, preview environments are misconfigured, or investigating performance problems.
+description: Debugs applications across platforms (Vercel, Neon) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring. Use when the app is broken, database queries fail, auth issues arise, preview environments are misconfigured, or investigating performance problems.
 allowed-tools:
   - Read
   - Grep
@@ -11,7 +11,7 @@ allowed-tools:
 
 # Debugging Skill
 
-Debug applications across Vercel and Supabase in local, preview, and production environments.
+Debug applications across Vercel and the database (local Postgres container, Neon preview branches, Neon production) in local, preview, and production environments.
 
 ## Quick Fixes
 
@@ -20,7 +20,7 @@ Debug applications across Vercel and Supabase in local, preview, and production 
 | Symptom | Fix |
 | ------- | --- |
 | App not loading | `vercel logs <url>` to check for errors |
-| Database connection refused | Resume Supabase project or check `DATABASE_URL` |
+| Database connection refused | Run `pnpm db:start` (local) or check `DATABASE_URL` (preview/prod) |
 | Session not persisting (preview) | Verify requests go through `/api/proxy/*` |
 | Prisma client errors | `pnpm --filter @repo/database generate` |
 | Port already in use | `lsof -i :<port>` then `kill -9 <PID>` |
@@ -40,9 +40,7 @@ PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "YOUR 
 
 | MCP Tool | Purpose |
 | -------- | ------- |
-| `mcp__postgres-ro-local-dev__execute_sql` | Run read-only SQL against local Supabase |
-| `mcp__plugin_supabase_supabase__get_logs` | Fetch logs from Supabase cloud projects |
-| `mcp__plugin_supabase_supabase__execute_sql` | Run SQL against Supabase cloud project |
+| `mcp__postgres-ro-local-dev__execute_sql` | Run read-only SQL against the local Postgres container |
 
 ---
 
@@ -104,10 +102,9 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 | Platform | Command |
 | -------- | ------- |
 | **Vercel** | `vercel logs <url>` or `vercel logs <url> --follow` |
-| **Supabase** | `mcp__plugin_supabase_supabase__get_logs --project_id <id> --service "postgres"` |
-| **Local** | Check terminal output, or `pnpm dev` logs |
-
-**Supabase log services**: `postgres`, `auth`, `api`, `edge-function`, `storage`, `realtime`
+| **Neon (preview/prod DB)** | Neon Console → Project → Logs |
+| **Local DB** | `docker compose logs db` (or `pnpm db:status`) |
+| **Local app** | Check terminal output, or `pnpm dev` logs |
 
 ---
 
@@ -122,15 +119,14 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 | `MODULE_NOT_FOUND` | Missing dep | Check `package.json` |
 | `504 Gateway Timeout` | Upstream timeout | Check external service health |
 
-### Supabase Errors
+### Postgres / Neon Errors
 
 | Error | Cause | Fix |
 | ----- | ----- | --- |
-| `connection refused` | DB paused/wrong URL | Resume project, check URL |
-| `password authentication failed` | Wrong credentials | Check Dashboard |
-| `too many connections` | Pool exhausted | Use pooled URL, check leaks |
-| `relation does not exist` | Missing migration | Run migrations |
-| `permission denied` | RLS blocking | Check RLS policies |
+| `connection refused` | Container stopped (local) or wrong URL | `pnpm db:start` locally; verify `DATABASE_URL` for preview/prod |
+| `password authentication failed` | Wrong credentials | Check `DATABASE_URL` in `.env.local` or Vercel env |
+| `too many connections` | Pool exhausted | Use pooled `DATABASE_URL`, keep `DATABASE_URL_UNPOOLED` for migrations only |
+| `relation does not exist` | Missing migration | `pnpm --filter @repo/database exec prisma migrate deploy` (or `pnpm db:reset` locally) |
 
 ---
 
@@ -140,17 +136,17 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 
 | Environment | Frontend | Database |
 | ----------- | -------- | -------- |
-| Local | `localhost:3500` | Supabase local (port 54322) |
-| Preview | `<branch>.vercel.app` | Supabase branch DB |
-| Production | `your-domain.com` | Supabase prod DB |
+| Local | `localhost:3500` | Postgres via Docker Compose (port 54322) |
+| Preview | `<branch>.vercel.app` | Neon database branch |
+| Production | `your-domain.com` | Neon (main) |
 
 ### Connection Strings
 
 | Use Case | Variable |
 | -------- | -------- |
 | App runtime | `DATABASE_URL` (pooled) |
-| Migrations | `DIRECT_URL` (direct) |
-| Local dev | `DATABASE_URL` (Supabase local) |
+| Migrations | `DATABASE_URL_UNPOOLED` (direct) |
+| Local dev | `DATABASE_URL` → `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
 
 ---
 
@@ -159,14 +155,14 @@ git commit --allow-empty -m "chore: trigger redeploy" && git push
 For detailed platform-specific debugging guides, see:
 
 - [Vercel debugging](platform-vercel.md) - Logs, environment variables, API proxy
-- [Supabase debugging](platform-supabase.md) - Database logs, health checks, branch databases
 
 ### Quick Platform Reference
 
 | Platform | Logs | Health Check |
 | -------- | ---- | ------------ |
 | Vercel | `vercel logs <url>` | Dashboard → Deployments |
-| Supabase | MCP supabase__get_logs | MCP supabase__get_advisors |
+| Neon (preview/prod DB) | Neon Console → Logs | Neon Console → Monitoring |
+| Local Postgres | `docker compose logs db` | `pnpm db:status` |
 
 ---
 
@@ -177,7 +173,7 @@ For detailed platform-specific debugging guides, see:
 ```bash
 # Check services running
 lsof -i :3500  # Frontend
-lsof -i :54322 # Supabase local database
+lsof -i :54322 # Local Postgres container
 
 # Test database
 PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "SELECT 1;"
@@ -190,11 +186,11 @@ PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres -c "SELEC
 lsof -i :<port>
 kill -9 <PID>
 
-# Supabase local not running
-supabase start
+# Local Postgres container not running
+pnpm db:start
 
-# Reset local database
-supabase db reset
+# Reset local database (destroys volume, re-applies migrations, re-seeds)
+pnpm db:reset
 
 # Missing env vars
 cp apps/web/.env.local.example apps/web/.env.local
@@ -381,10 +377,9 @@ try {
 ### Checklist: Database Error
 
 - [ ] `DATABASE_URL` correct?
-- [ ] Database running? (Supabase status)
+- [ ] Database running? (`pnpm db:status` for local, Neon Console for preview/prod)
 - [ ] Migrations applied? (`prisma migrate status`)
 - [ ] Connection pool healthy? (Check active connections)
-- [ ] RLS blocking? (Check policies)
 
 ### Checklist: Preview Environment Issues
 

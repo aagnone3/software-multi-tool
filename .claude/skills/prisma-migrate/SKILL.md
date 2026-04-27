@@ -17,7 +17,6 @@ allowed-tools:
 | -------- | -------- |
 | Prisma schema | `packages/database/prisma/schema.prisma` |
 | Prisma migrations | `packages/database/prisma/migrations/` |
-| Supabase migrations | `supabase/migrations/` |
 | Validate script | `pnpm --filter @repo/scripts prisma:validate` |
 | Stage script | `pnpm --filter @repo/scripts prisma:stage --name <name>` |
 | Execute migration | `pnpm --filter @repo/database migrate:execute` *(run after staging)* |
@@ -70,17 +69,15 @@ pnpm test
 
 ### Local Database Setup
 
-**CRITICAL: Use Supabase Local (port 54322)** - This matches preview and production environments.
+**Use the local Postgres container (Docker Compose, port 54322).** See the **application-environments** skill for complete setup via `pnpm setup`.
 
-See **application-environments** skill for complete Supabase Local setup via `pnpm setup`.
-
-| Setting  | Value                   |
-| -------- | ----------------------- |
-| Host     | localhost               |
-| Port     | 54322 (Supabase Local)  |
-| Database | postgres                |
-| User     | postgres                |
-| Password | postgres                |
+| Setting  | Value                              |
+| -------- | ---------------------------------- |
+| Host     | localhost                          |
+| Port     | 54322 (Docker Compose Postgres)    |
+| Database | postgres                           |
+| User     | postgres                           |
+| Password | postgres                           |
 
 **Connection string for `.env.local`:**
 
@@ -88,10 +85,10 @@ See **application-environments** skill for complete Supabase Local setup via `pn
 DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 ```
 
-**Setup (runs Supabase Local):**
+**Setup (starts the Postgres container):**
 
 ```bash
-pnpm setup    # Starts Supabase, seeds database, creates .env.local
+pnpm setup    # Starts Postgres via Docker Compose, applies migrations, seeds database, creates .env.local
 ```
 
 ## Core Command Patterns
@@ -422,6 +419,6 @@ Invoke this skill when:
 - **git-worktrees**: Database configuration in isolated worktree environments
 - **sub-app**: Creating database models for new tools
 - **dev:migrate-database**: Skill for executing migrations in workflow context
-- **cicd**: Prisma-to-Supabase migration sync in CI
+- **cicd**: Prisma migration deploy step in CI (preview branches on Neon, production on main)
 - **debugging**: Troubleshooting migration and database issues
 - **better-auth**: Auth schema management and migrations

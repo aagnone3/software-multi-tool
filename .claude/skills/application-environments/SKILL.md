@@ -1,6 +1,6 @@
 ---
 name: configuring-environments
-description: Configures development environments using Supabase Local (port 54322), Vercel preview, and production with local setup, preview branch creation, environment variables, and database connection troubleshooting. Use when setting up local dev, fixing connection errors, configuring previews, or resolving "table not found" errors.
+description: Configures development environments using a local PostgreSQL container (Docker Compose, port 54322), Vercel preview deployments backed by Neon database branches, and production. Covers local setup, preview branch creation, environment variables, and database connection troubleshooting. Use when setting up local dev, fixing connection errors, configuring previews, or resolving "table not found" errors.
 allowed-tools:
   - Bash
   - Read
@@ -16,35 +16,29 @@ This project uses a **preview-first development model**: local development for f
 
 ## Database Requirements
 
-This project requires **Supabase Local** (port 54322) or **Supabase Preview** for development. Homebrew PostgreSQL (port 5432) or standalone Postgres installations are not supported because they lack:
-
-- Storage (S3-compatible file storage for uploads)
-- Proper seeding (test user won't work)
-- Schema compatibility (missing `storage` schema)
-
-If your `.env.local` points to port `5432`, the database configuration is incorrect.
+This project uses a **local PostgreSQL container** (Docker Compose, port 54322) for development. `pnpm setup` starts the container, applies Prisma migrations, and seeds the preview test user. Don't point `DATABASE_URL` at a separately installed Postgres (e.g. Homebrew on port 5432) — the seed and migration tooling assumes the Compose-managed container on port 54322.
 
 ## Quick Reference
 
-| Environment    | Purpose               | Database       | URL             |
-| -------------- | --------------------- | -------------- | --------------- |
-| **Local**      | Full-stack development| Supabase local | `localhost:3500`|
-| **Preview**    | Full-stack PR testing | Supabase branch| `*.vercel.app`  |
-| **Production** | Live application      | Supabase main  | Custom domain   |
+| Environment    | Purpose               | Database                      | URL             |
+| -------------- | --------------------- | ----------------------------- | --------------- |
+| **Local**      | Full-stack development| Postgres (Docker Compose)     | `localhost:3500`|
+| **Preview**    | Full-stack PR testing | Neon database branch          | `*.vercel.app`  |
+| **Production** | Live application      | Neon (main)                   | Custom domain   |
 
 **Supported databases:**
 
-| Database              | Port     | Use Case                    |
-| --------------------- | -------- | --------------------------- |
-| Supabase Local        | 54322    | Local development (default) |
-| Supabase Preview      | Remote   | PR testing, integration     |
-| ~~Homebrew Postgres~~ | ~~5432~~ | ❌ **Never use**            |
+| Database                       | Port     | Use Case                    |
+| ------------------------------ | -------- | --------------------------- |
+| Postgres via Docker Compose    | 54322    | Local development (default) |
+| Neon database branch           | Remote   | PR testing, integration     |
+| ~~Homebrew Postgres~~          | ~~5432~~ | ❌ **Don't use** — seed/migrate tooling assumes port 54322 |
 
 ### Complete Local Setup Workflow
 
 When setting up local development for the first time:
 
-1. Run `pnpm setup` to ensure environment is ready (starts Supabase, seeds database, creates env files)
+1. Run `pnpm setup` to ensure environment is ready (starts the Postgres container, applies migrations, seeds the database, creates env files)
 2. Start the dev server: `pnpm dev`
 3. Verify the application is accessible at the reported URL
 
@@ -76,7 +70,7 @@ This destroys the database volume, restarts PostgreSQL, re-applies all Prisma mi
 
 ```bash
 pnpm install
-pnpm setup    # Starts Supabase, seeds database, creates .env.local files
+pnpm setup    # Starts Postgres (Docker Compose), seeds database, creates .env.local files
 pnpm dev      # Start Next.js dev server
 ```
 
@@ -89,7 +83,7 @@ pnpm dev      # Start Next.js dev server
 For fast iteration on UI without a running database:
 
 ```bash
-pnpm dev   # Start Next.js without Supabase (API calls will fail)
+pnpm dev   # Start Next.js without the database (API calls will fail)
 ```
 
 Suitable for:
@@ -98,25 +92,23 @@ Suitable for:
 - TypeScript checking and linting
 - Storybook (`pnpm --filter web storybook`)
 
-### Full-Stack Local (Supabase)
+### Full-Stack Local (Postgres via Docker Compose)
 
 For authentication, database, and API testing, `pnpm setup` handles everything automatically. For manual control:
 
 ```bash
 pnpm db:start   # Start PostgreSQL via Docker Compose
-pnpm db:reset   # Apply migrations and seed data (REQUIRED for test user!)
-pnpm dev              # Start Next.js dev server
+pnpm db:reset   # Destroy volume, re-apply migrations, and re-seed (REQUIRED for test user!)
+pnpm dev        # Start Next.js dev server
 ```
 
 > **Note:** Running only `pnpm db:start` does NOT seed the database. Use `pnpm setup` or `pnpm db:reset` to ensure the test user exists.
 
 **Service URLs (Local)**:
 
-| Service         | URL                       |
-| --------------- | ------------------------- |
-| Supabase Studio | http://127.0.0.1:54323    |
-| PostgreSQL      | localhost:54322           |
-| Mailpit (Email) | http://127.0.0.1:54324    |
+| Service     | URL                |
+| ----------- | ------------------ |
+| PostgreSQL  | localhost:54322    |
 
 ### Background Jobs Local (Inngest)
 
@@ -154,7 +146,7 @@ Every PR gets a complete, isolated environment automatically.
 ### What Happens on PR
 
 1. GitHub Action triggers
-2. Supabase creates database branch + applies migrations + seeds data
+2. Neon creates a database branch and the workflow applies migrations + seeds data
 3. Vercel deploys preview
 4. Ready to test at preview URL
 
@@ -172,7 +164,7 @@ Production deploys automatically when PRs merge to `main`.
 | --------------- | ---------------------------- |
 | Web App         | Vercel                       |
 | Background Jobs | Inngest (Vercel Marketplace) |
-| Database        | Supabase                     |
+| Database        | Neon (Postgres)              |
 
 ## Environment Variables
 
@@ -238,14 +230,14 @@ pnpm db:start   # Start if not
 
 ### API Errors: "Failed to create X" or "Table not found"
 
-This typically means you're on a feature branch with new database migrations that haven't been applied to your local Supabase.
+This typically means you're on a feature branch with new database migrations that haven't been applied to your local Postgres container.
 
 ```bash
 # Reset database to apply all migrations from current branch
 pnpm db:reset
 ```
 
-**Common scenario**: You created a worktree for a feature branch that adds new database tables. The shared Supabase local instance still has the schema from `main`.
+**Common scenario**: You created a worktree for a feature branch that adds new database tables. The shared Postgres container still has the schema from `main`.
 
 ## When to Use This Skill
 
@@ -255,9 +247,9 @@ Invoke this skill when:
 - Understanding preview vs production deployments
 - Configuring environment variables
 - Troubleshooting environment-specific issues
-- Starting Supabase local for full-stack development
+- Starting the local Postgres container for full-stack development
 
-**Activation keywords**: local dev, preview environment, environment setup, Supabase local, env variables, supabase start, pnpm setup, database connection
+**Activation keywords**: local dev, preview environment, environment setup, env variables, docker compose, pnpm setup, pnpm db:start, database connection
 
 ## Related Skills
 
@@ -267,4 +259,4 @@ Invoke this skill when:
 - **prisma-migrate**: Database migrations and schema management
 - **better-auth**: Authentication configuration requiring proper database setup
 - **architecture**: Overall deployment infrastructure
-- **storage**: Supabase storage configuration for file uploads
+- **storage**: S3 (or any S3-compatible service) configuration for file uploads

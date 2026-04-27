@@ -50,6 +50,9 @@ dist/
 .content-collections/
 .vercel
 
+# stale Supabase CLI cache (Supabase has been replaced by Docker Compose + Neon)
+supabase/
+
 # worktrees
 .worktrees/
 

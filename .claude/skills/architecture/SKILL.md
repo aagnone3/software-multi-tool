@@ -43,7 +43,7 @@ This is a **pnpm + Turbo monorepo** with workspace dependencies. All commands us
 │   ├── database/               # Prisma ORM + Zod schemas
 │   ├── payments/               # Payment providers
 │   ├── mail/                   # Email providers + templates
-│   ├── storage/                # File storage (Supabase)
+│   ├── storage/                # File storage (S3 or any S3-compatible service)
 │   ├── ai/                     # AI SDK integration
 │   ├── i18n/                   # Internationalization
 │   ├── logs/                   # Logging
@@ -73,7 +73,7 @@ All backend logic lives in `packages/`:
 | `@repo/database`   | Prisma schema, generated types, Zod schemas           | `prisma/schema.prisma`                   |
 | `@repo/payments`   | Multi-provider payment integration                    | `index.ts`, `providers/`                 |
 | `@repo/mail`       | React Email templates + Nodemailer                    | `index.ts`, `templates/`                 |
-| `@repo/storage`    | Supabase file/image storage                           | `index.ts`                               |
+| `@repo/storage`    | S3-backed file/image storage                          | `index.ts`                               |
 | `@repo/agent-sdk`  | Anthropic/Claude SDK with `executePrompt` and AI processors | `src/`                           |
 | `@repo/ai`         | Vercel AI SDK (OpenAI chat, image, audio streaming)         | `index.ts`                       |
 | `@repo/logs`       | Centralized logging (consola)                         | `index.ts`                               |
@@ -318,7 +318,7 @@ See the **tools skill** for detailed credit system documentation.
 
 ### Storage
 
-- **Supabase Storage** for file uploads
+- **S3 (or any S3-compatible service)** for file uploads
 - Supports public and private buckets
 - Configuration: `packages/storage/`
 
@@ -338,9 +338,9 @@ For complete deployment infrastructure details including Vercel, GitHub Actions,
 
 | Environment | Web | Database | Jobs |
 | ----------- | --- | -------- | ---- |
-| Local | localhost:3500 | Supabase local | Inngest Dev Server |
-| Preview | vercel.app | Supabase branch | Inngest Cloud |
-| Production | vercel | Supabase prod | Inngest Cloud |
+| Local | localhost:3500 | Postgres (Docker Compose, port 54322) | Inngest Dev Server |
+| Preview | vercel.app | Neon database branch | Inngest Cloud |
+| Production | vercel | Neon (main) | Inngest Cloud |
 
 ## Workspace References
 
