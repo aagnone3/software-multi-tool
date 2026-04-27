@@ -24,7 +24,9 @@ function logIntegrationFailure(...args: unknown[]) {
  *
  * Environment variables are loaded from apps/web/.env.local via tests/setup/environment.ts.
  */
-const runIntegrationTests = process.env.ANTHROPIC_API_KEY ? describe : describe.skip;
+const runIntegrationTests = process.env.ANTHROPIC_API_KEY
+	? describe
+	: describe.skip;
 runIntegrationTests("News Analyzer Processor (integration)", () => {
 	const TIMEOUT = 60000; // 60 seconds for Claude API calls
 
