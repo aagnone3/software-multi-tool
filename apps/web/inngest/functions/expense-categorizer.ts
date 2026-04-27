@@ -67,7 +67,10 @@ export const expenseCategorizer = inngest.createFunction(
 					},
 				);
 			} else {
-				await markJobFailed(toolJobId, result.error ?? "Unknown error");
+				await markJobFailed(
+					toolJobId,
+					String(result.error ?? "Unknown error"),
+				);
 				logger.error("[Inngest:ExpenseCategorizer] Job failed", {
 					toolJobId,
 					error: result.error,
