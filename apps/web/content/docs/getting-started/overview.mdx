@@ -9,8 +9,7 @@ Before you begin, make sure you have:
 
 - **Node.js 22+** (or use [nvm](https://github.com/nvm-sh/nvm) with the repo's `.nvmrc`)
 - **pnpm** (`npm install -g pnpm`)
-- **Docker** (with the daemon running) — required for the local Supabase instance
-- A Supabase CLI install is **optional** — the repo will fall back to a pinned `pnpm dlx supabase` invocation if one is not found globally
+- **Docker** (with the daemon running) — required for the local PostgreSQL container managed by Docker Compose
 
 ## Install dependencies
 
@@ -20,7 +19,7 @@ pnpm install
 
 ## Local evaluation (fastest path)
 
-This path boots the app locally without connecting any external providers. Authentication, the dashboard shell, and the AI tools all work via local Supabase and seeded test credentials.
+This path boots the app locally without connecting any external providers. Authentication, the dashboard shell, and the AI tools all work via the local PostgreSQL container and seeded test credentials.
 
 ### 1. Run setup
 
@@ -30,8 +29,8 @@ pnpm run setup
 
 This command will:
 - Check prerequisites (Docker, pnpm) and give guided recovery output if anything is missing
-- Start a local Supabase instance (or use your globally installed CLI)
-- Reset and seed the local database with a preview user
+- Start the local PostgreSQL container via Docker Compose (port 54322)
+- Apply Prisma migrations and seed the database with a preview user
 - Create `apps/web/.env.local` from the example file if it does not exist
 - Auto-populate the boot-critical environment variables so you do not need to hunt for values
 
@@ -100,8 +99,7 @@ Set one of these to enable billing, subscriptions, and credit purchases:
 
 | Provider | Variables |
 |---|---|
-| AWS S3 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET_NAME` |
-| Supabase Storage | Uses the existing Supabase variables |
+| AWS S3 (or any S3-compatible service) | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_ENDPOINT`, `S3_REGION` |
 
 ### AI tools
 
@@ -134,10 +132,10 @@ Set one of these to enable billing, subscriptions, and credit purchases:
 For a fully wired environment with real auth, email, payments, and storage:
 
 1. Create a [Vercel](https://vercel.com) project and link it to your repository.
-2. Create a [Supabase](https://supabase.com) project and copy the project URL and anon key into your Vercel environment variables.
+2. Provision a [Neon](https://neon.tech) Postgres database (or any managed Postgres provider) and add `DATABASE_URL` and `DATABASE_URL_UNPOOLED` to your Vercel environment variables.
 3. Add the provider variables listed above to Vercel (Settings → Environment Variables).
 4. Push to your branch — Vercel will build and deploy automatically.
-5. Run `pnpm db:migrate` after each schema change to keep Supabase in sync.
+5. Run `pnpm --filter @repo/database migrate` after each schema change to keep the database in sync.
 
 ---
 
@@ -159,4 +157,4 @@ pnpm worktree:list
 pnpm worktree:remove
 ```
 
-Each worktree gets its own `.env.local` and Supabase instance so branches do not interfere with each other. A global Supabase CLI install is optional here too — the same repo-owned fallback applies.
+Each worktree gets its own `.env.local` and a unique dev-server port so branches do not interfere with each other. The PostgreSQL container is shared across worktrees on port `54322`.
