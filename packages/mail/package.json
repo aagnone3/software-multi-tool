@@ -5,8 +5,8 @@
 		"@repo/config": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"nodemailer": "7.0.13",
-		"react": "19.2.3",
-		"react-dom": "19.2.3",
+		"react": "19.2.5",
+		"react-dom": "19.2.5",
 		"react-email": "4.3.2",
 		"use-intl": "4.7.0"
 	},
@@ -21,7 +21,7 @@
 		"@types/jsdom": "27.0.0",
 		"@types/node": "25.0.10",
 		"@types/nodemailer": "7.0.11",
-		"@types/react": "19.2.9",
+		"@types/react": "19.2.14",
 		"@vitest/coverage-v8": "4.0.18",
 		"jsdom": "27.4.0",
 		"vitest": "4.0.18"
