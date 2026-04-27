@@ -3,13 +3,13 @@ import { getAudioStorageKey } from "./audio-storage";
 
 // Mock the storage provider
 vi.mock("@repo/storage", () => ({
-	getDefaultSupabaseProvider: vi.fn(() => ({
+	getDefaultS3Provider: vi.fn(() => ({
 		upload: vi.fn(),
 		delete: vi.fn(),
 		exists: vi.fn(),
 		getSignedDownloadUrl: vi.fn(),
 	})),
-	shouldUseSupabaseStorage: vi.fn(() => false),
+	isStorageConfigured: vi.fn(() => false),
 }));
 
 describe("audio-storage", () => {

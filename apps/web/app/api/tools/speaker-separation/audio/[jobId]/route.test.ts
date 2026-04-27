@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 
 const getToolJobByIdMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
-const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn());
+const getDefaultS3ProviderMock = vi.hoisted(() => vi.fn());
 const configMock = vi.hoisted(() => ({
 	storage: { bucketNames: { files: "test-files-bucket" } },
 }));
@@ -13,8 +13,8 @@ vi.mock("@repo/database", () => ({
 }));
 
 vi.mock("@repo/storage", () => ({
-	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	isStorageConfigured: isStorageConfiguredMock,
+	getDefaultS3Provider: getDefaultS3ProviderMock,
 }));
 
 vi.mock("@repo/config", () => ({
@@ -36,7 +36,7 @@ describe("GET /api/tools/speaker-separation/audio/[jobId]", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		getDefaultSupabaseProviderMock.mockReturnValue({
+		getDefaultS3ProviderMock.mockReturnValue({
 			getSignedDownloadUrl: mockGetSignedDownloadUrl,
 		});
 	});
@@ -64,12 +64,12 @@ describe("GET /api/tools/speaker-separation/audio/[jobId]", () => {
 		expect(body.error).toBe("No audio file associated with this job");
 	});
 
-	it("returns 500 when Supabase storage is not configured", async () => {
+	it("returns 500 when storage is not configured", async () => {
 		getToolJobByIdMock.mockResolvedValue({
 			id: "job-1",
 			audioFileUrl: "storage/path/audio.mp3",
 		});
-		shouldUseSupabaseStorageMock.mockReturnValue(false);
+		isStorageConfiguredMock.mockReturnValue(false);
 
 		const res = await GET(makeRequest(), makeParams("job-1"));
 		const body = await res.json();
@@ -83,7 +83,7 @@ describe("GET /api/tools/speaker-separation/audio/[jobId]", () => {
 			id: "job-1",
 			audioFileUrl: "storage/path/audio.mp3",
 		});
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		isStorageConfiguredMock.mockReturnValue(true);
 		mockGetSignedDownloadUrl.mockResolvedValue(
 			"https://signed.url/audio.mp3",
 		);
@@ -104,7 +104,7 @@ describe("GET /api/tools/speaker-separation/audio/[jobId]", () => {
 			id: "job-1",
 			audioFileUrl: "storage/path/audio.mp3",
 		});
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
+		isStorageConfiguredMock.mockReturnValue(true);
 		mockGetSignedDownloadUrl.mockRejectedValue(new Error("Storage error"));
 
 		const res = await GET(makeRequest(), makeParams("job-1"));

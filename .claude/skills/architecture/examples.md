@@ -12,8 +12,7 @@ This document provides practical examples for navigating and extending the codeb
 6. [Extending Existing Modules](#6-extending-existing-modules)
 7. [Working with Deployment](#7-working-with-deployment)
 8. [Adding Background Jobs (Inngest)](#8-adding-background-jobs-inngest)
-9. [Adding Real-time Features (Supabase)](#9-adding-real-time-features-supabase)
-10. [Tips and Common Questions](#10-tips-and-common-questions)
+9. [Tips and Common Questions](#9-tips-and-common-questions)
 
 ---
 
@@ -633,118 +632,7 @@ await inngest.send({
 
 ---
 
-## 9. Adding Real-time Features (Supabase)
-
-### Adding broadcast messaging
-
-**Example**: Adding real-time notifications
-
-#### Step 1: Create notification subscription hook
-
-Create `apps/web/modules/notifications/hooks.ts`:
-
-```typescript
-"use client";
-
-import { useEffect, useState } from "react";
-import { subscribeToBroadcast } from "@realtime";
-
-interface Notification {
-  id: string;
-  message: string;
-  type: "info" | "success" | "error";
-}
-
-export function useNotifications(channelName: string) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useEffect(() => {
-    const { unsubscribe } = subscribeToBroadcast<Notification>({
-      channelName,
-      event: "notification",
-      onMessage: (notification) => {
-        setNotifications((prev) => [...prev, notification]);
-      },
-    });
-
-    return () => unsubscribe();
-  }, [channelName]);
-
-  return notifications;
-}
-```
-
-#### Step 2: Send notifications from server
-
-```typescript
-import { broadcastMessage } from "@realtime";
-
-await broadcastMessage({
-  channelName: `user-${userId}`,
-  event: "notification",
-  payload: {
-    id: crypto.randomUUID(),
-    message: "Your job completed!",
-    type: "success",
-  },
-});
-```
-
-### Adding presence tracking
-
-**Example**: Who's viewing a document
-
-```typescript
-"use client";
-
-import { useEffect, useState } from "react";
-import { subscribeToPresence } from "@realtime";
-
-interface ViewerState {
-  name: string;
-  cursor?: { x: number; y: number };
-}
-
-export function useDocumentViewers(documentId: string, currentUser: string) {
-  const [viewers, setViewers] = useState<Record<string, ViewerState[]>>({});
-
-  useEffect(() => {
-    const { track, untrack, unsubscribe } = subscribeToPresence<ViewerState>({
-      channelName: `doc-${documentId}`,
-      presenceKey: currentUser,
-      onSync: (state) => setViewers(state),
-      onJoin: (key, current, newPresences) => {
-        console.log(`${key} started viewing`);
-      },
-      onLeave: (key, current, leftPresences) => {
-        console.log(`${key} stopped viewing`);
-      },
-    });
-
-    // Track this user
-    track({ name: currentUser });
-
-    return () => {
-      untrack();
-      unsubscribe();
-    };
-  }, [documentId, currentUser]);
-
-  return viewers;
-}
-```
-
-### Checklist for realtime features
-
-- [ ] Import from `@realtime` alias
-- [ ] Use `subscribeToBroadcast` for pub/sub messaging
-- [ ] Use `subscribeToPresence` for who's online
-- [ ] Clean up subscriptions in useEffect return
-- [ ] Mark components as `"use client"` (realtime is client-only)
-
----
-
-## 10. Tips and Common Questions
+## 9. Tips and Common Questions
 
 ### Where do I put...?
 

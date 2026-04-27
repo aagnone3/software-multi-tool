@@ -1,6 +1,6 @@
 ---
 name: navigating-architecture
-description: Reference for codebase architecture including pnpm+Turbo monorepo, Next.js 15 App Router, Hono+oRPC API, React 19+TanStack Query frontend, Inngest background jobs, and Supabase Realtime. Use when navigating the codebase, understanding request flow, adding modules, or learning integration patterns.
+description: Reference for codebase architecture including pnpm+Turbo monorepo, Next.js 15 App Router, Hono+oRPC API, React 19+TanStack Query frontend, and Inngest background jobs. Use when navigating the codebase, understanding request flow, adding modules, or learning integration patterns.
 allowed-tools:
   - Read
   - Grep
@@ -79,7 +79,6 @@ All backend logic lives in `packages/`:
 | `@repo/logs`       | Centralized logging (consola)                         | `index.ts`                               |
 | `@repo/utils`      | Shared utility functions                              | `index.ts`                               |
 
-
 ### Configuration
 
 **`config/`** - Central application configuration
@@ -111,49 +110,28 @@ The application uses **Next.js with Hono + oRPC** for a unified serverless backe
                     │     (Vercel)         │
                     │  - SSR/SSG pages     │
                     │  - TanStack Query    │
-                    │  - Supabase Realtime │
                     └──────────┬───────────┘
                                │
-               ┌───────────────┼───────────────┐
-               │               │               │
-               ▼               ▼               ▼
-    ┌──────────────────┐ ┌──────────────┐ ┌──────────────┐
-    │   Hono + oRPC    │ │   Inngest    │ │   Supabase   │
-    │  (Serverless)    │ │ (Background) │ │  (Realtime)  │
-    │  - /api/rpc/*    │ │ - Job queue  │ │ - Broadcast  │
-    │  - /api/* (REST) │ │ - Retries    │ │ - Presence   │
-    └────────┬─────────┘ └──────┬───────┘ └──────────────┘
-             │                  │
-             └────────┬─────────┘
+               ┌───────────────┴───────────────┐
+               │                               │
+               ▼                               ▼
+    ┌──────────────────┐             ┌──────────────┐
+    │   Hono + oRPC    │             │   Inngest    │
+    │  (Serverless)    │             │ (Background) │
+    │  - /api/rpc/*    │             │ - Job queue  │
+    │  - /api/* (REST) │             │ - Retries    │
+    └────────┬─────────┘             └──────┬───────┘
+             │                              │
+             └──────────────┬───────────────┘
                       │
                       ▼
            ┌──────────────────────┐
-           │  PostgreSQL (Supabase)│
+           │   PostgreSQL (Neon)   │
            │     - Better Auth     │
            │     - Job records     │
            │     - App data        │
            └──────────────────────┘
 ```
-
-### Real-time Updates (Supabase Realtime)
-
-Real-time functionality is powered by **Supabase Realtime** at `apps/web/modules/realtime/`:
-
-- **Broadcast**: Pub/sub between clients (chat, cursors)
-- **Presence**: Who's online tracking
-- **postgres_changes**: Database row changes
-
-```typescript
-import { subscribeToBroadcast, broadcastMessage } from "@realtime";
-
-const { unsubscribe } = subscribeToBroadcast({
-  channelName: "room-1",
-  event: "message",
-  onMessage: (payload) => console.log(payload),
-});
-```
-
-Import via `@realtime` alias for clean imports.
 
 ### Deployment
 
@@ -161,7 +139,7 @@ Import via `@realtime` alias for clean imports.
 | --------- | -------- | ------- |
 | Next.js | Vercel | Serverless frontend + API |
 | Inngest | Vercel Marketplace | Background job processing |
-| PostgreSQL | Supabase | Database + Realtime |
+| PostgreSQL | Neon | Database (with preview branching) |
 
 ## API Architecture (Hono + oRPC)
 
@@ -389,7 +367,7 @@ Invoke this skill when:
 - Managing environment variables
 - Troubleshooting deployment issues
 
-**Activation keywords**: architecture, codebase structure, monorepo, how does X work, request flow, module organization, package, where is X, navigate codebase, TanStack Query, data fetching, oRPC, hono, Inngest, Supabase Realtime, realtime, background jobs, serverless, Next.js App Router
+**Activation keywords**: architecture, codebase structure, monorepo, how does X work, request flow, module organization, package, where is X, navigate codebase, TanStack Query, data fetching, oRPC, hono, Inngest, background jobs, serverless, Next.js App Router
 
 ## Related Skills
 

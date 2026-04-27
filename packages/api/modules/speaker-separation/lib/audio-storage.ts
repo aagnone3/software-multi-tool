@@ -1,9 +1,6 @@
 import { config } from "@repo/config";
 import { logger } from "@repo/logs";
-import {
-	getDefaultSupabaseProvider,
-	shouldUseSupabaseStorage,
-} from "@repo/storage";
+import { getDefaultS3Provider, isStorageConfigured } from "@repo/storage";
 import type { AudioMetadata } from "../types";
 
 /**
@@ -44,15 +41,12 @@ export async function uploadAudioToStorage(
 	base64Content: string,
 	metadata: AudioMetadata,
 ): Promise<AudioUploadResult> {
-	// Only use Supabase storage if configured
-	if (!shouldUseSupabaseStorage()) {
-		logger.warn(
-			"[AudioStorage] Supabase storage not configured, skipping upload",
-		);
+	if (!isStorageConfigured()) {
+		logger.warn("[AudioStorage] Storage not configured, skipping upload");
 		throw new Error("Storage not configured");
 	}
 
-	const provider = getDefaultSupabaseProvider();
+	const provider = getDefaultS3Provider();
 	const bucket = config.storage.bucketNames.files;
 	const storagePath = getAudioStorageKey(organizationId, metadata.filename);
 
@@ -96,11 +90,11 @@ export async function getAudioDownloadUrl(
 	storageKey: string,
 	expiresIn = 3600,
 ): Promise<string> {
-	if (!shouldUseSupabaseStorage()) {
+	if (!isStorageConfigured()) {
 		throw new Error("Storage not configured");
 	}
 
-	const provider = getDefaultSupabaseProvider();
+	const provider = getDefaultS3Provider();
 	const bucket = config.storage.bucketNames.files;
 	return provider.getSignedDownloadUrl(storageKey, {
 		bucket,
@@ -117,7 +111,7 @@ export async function getAudioDownloadUrl(
 export async function downloadAudioFromStorage(
 	storageKey: string,
 ): Promise<Buffer> {
-	if (!shouldUseSupabaseStorage()) {
+	if (!isStorageConfigured()) {
 		throw new Error("Storage not configured");
 	}
 
@@ -143,14 +137,12 @@ export async function downloadAudioFromStorage(
 export async function deleteAudioFromStorage(
 	storageKey: string,
 ): Promise<void> {
-	if (!shouldUseSupabaseStorage()) {
-		logger.warn(
-			"[AudioStorage] Supabase storage not configured, skipping delete",
-		);
+	if (!isStorageConfigured()) {
+		logger.warn("[AudioStorage] Storage not configured, skipping delete");
 		return;
 	}
 
-	const provider = getDefaultSupabaseProvider();
+	const provider = getDefaultS3Provider();
 	const bucket = config.storage.bucketNames.files;
 
 	logger.info(`[AudioStorage] Deleting audio file: ${storageKey}`);
@@ -167,11 +159,11 @@ export async function deleteAudioFromStorage(
 export async function audioExistsInStorage(
 	storageKey: string,
 ): Promise<boolean> {
-	if (!shouldUseSupabaseStorage()) {
+	if (!isStorageConfigured()) {
 		return false;
 	}
 
-	const provider = getDefaultSupabaseProvider();
+	const provider = getDefaultS3Provider();
 	const bucket = config.storage.bucketNames.files;
 	return provider.exists(storageKey, bucket);
 }

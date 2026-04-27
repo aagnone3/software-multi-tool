@@ -1,6 +1,6 @@
 import { ORPCError } from "@orpc/client";
 import { createToolJob, findCachedJob } from "@repo/database";
-import { shouldUseSupabaseStorage } from "@repo/storage";
+import { isStorageConfigured } from "@repo/storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@repo/database", () => ({
@@ -18,7 +18,7 @@ vi.mock("@repo/logs", () => ({
 }));
 
 vi.mock("@repo/storage", () => ({
-	shouldUseSupabaseStorage: vi.fn(),
+	isStorageConfigured: vi.fn(),
 }));
 
 vi.mock("../../speaker-separation/lib/audio-storage", () => ({
@@ -280,7 +280,7 @@ describe("createJob procedure", () => {
 	});
 
 	it("throws INTERNAL_SERVER_ERROR for speaker-separation without storage configured", async () => {
-		vi.mocked(shouldUseSupabaseStorage).mockReturnValue(false);
+		vi.mocked(isStorageConfigured).mockReturnValue(false);
 
 		const authMod = await import("@repo/auth");
 		(

@@ -1,23 +1,20 @@
 ---
 title: Deploy to Vercel
-description: Deploy Software Multitool to Vercel with a Supabase database.
+description: Deploy Software Multitool to Vercel with a Neon PostgreSQL database.
 ---
 
-Software Multitool is designed to deploy to Vercel with a Supabase PostgreSQL database. This guide covers the full production deployment.
+Software Multitool is designed to deploy to Vercel with a Neon PostgreSQL database. This guide covers the full production deployment.
 
 ## Prerequisites
 
 - A [Vercel](https://vercel.com) account
-- A [Supabase](https://supabase.com) project (free tier works)
 - At minimum one email provider (Resend is the easiest)
 
-## Step 1: Create a Supabase project
+## Step 1: Install Neon from the Vercel Marketplace
 
-1. Go to [supabase.com](https://supabase.com) and create a new project.
-2. After the project initializes, go to **Settings → API** and copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. Go to **Settings → Database** and copy the **connection string (URI)** → `POSTGRES_PRISMA_URL`
+1. Go to **Vercel Dashboard → Integrations → Browse Marketplace** and install [Neon](https://vercel.com/marketplace/neon).
+2. During setup, create a new Neon project (or link an existing one).
+3. Vercel automatically injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED` into your project environment variables -- no manual configuration needed.
 
 ## Step 2: Deploy to Vercel
 
@@ -34,13 +31,11 @@ Add these to Vercel under **Settings → Environment Variables**:
 ### Required
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-POSTGRES_PRISMA_URL=postgresql://...?pgbouncer=true&connection_limit=1
-POSTGRES_URL_NON_POOLING=postgresql://...
 BETTER_AUTH_SECRET=your-random-secret-min-32-chars
 NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ```
+
+`DATABASE_URL` and `DATABASE_URL_UNPOOLED` are auto-injected by the Neon Marketplace integration.
 
 Generate `BETTER_AUTH_SECRET` with:
 ```bash
@@ -75,7 +70,7 @@ REPLICATE_API_TOKEN=...
 
 ## Step 4: Run database migrations
 
-After your first deploy, run the Prisma migrations against your Supabase database:
+After your first deploy, run the Prisma migrations against your Neon database:
 
 ```bash
 # From your local machine with the production DATABASE_URL set

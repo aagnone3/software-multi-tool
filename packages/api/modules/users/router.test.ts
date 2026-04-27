@@ -2,15 +2,15 @@ import { createProcedureClient } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getSignedUploadUrlMock = vi.hoisted(() => vi.fn());
-const shouldUseSupabaseStorageMock = vi.hoisted(() => vi.fn());
-const getDefaultSupabaseProviderMock = vi.hoisted(() => vi.fn());
+const isStorageConfiguredMock = vi.hoisted(() => vi.fn());
+const getDefaultS3ProviderMock = vi.hoisted(() => vi.fn());
 const buildUserPathMock = vi.hoisted(() => vi.fn());
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@repo/storage", () => ({
 	getSignedUploadUrl: getSignedUploadUrlMock,
-	shouldUseSupabaseStorage: shouldUseSupabaseStorageMock,
-	getDefaultSupabaseProvider: getDefaultSupabaseProviderMock,
+	isStorageConfigured: isStorageConfiguredMock,
+	getDefaultS3Provider: getDefaultS3ProviderMock,
 	buildUserPath: buildUserPathMock,
 }));
 
@@ -52,7 +52,7 @@ describe("Users Router - avatarUploadUrl", () => {
 	});
 
 	it("returns signed upload url and path", async () => {
-		shouldUseSupabaseStorageMock.mockReturnValue(false);
+		isStorageConfiguredMock.mockReturnValue(false);
 		getSignedUploadUrlMock.mockResolvedValue(
 			"https://example.com/signed-url",
 		);
@@ -69,13 +69,13 @@ describe("Users Router - avatarUploadUrl", () => {
 		});
 	});
 
-	it("deletes existing avatar when supabase storage is in use", async () => {
+	it("deletes existing avatar when S3 storage is in use", async () => {
 		const mockProvider = {
 			exists: vi.fn().mockResolvedValue(true),
 			delete: vi.fn().mockResolvedValue(undefined),
 		};
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
-		getDefaultSupabaseProviderMock.mockReturnValue(mockProvider);
+		isStorageConfiguredMock.mockReturnValue(true);
+		getDefaultS3ProviderMock.mockReturnValue(mockProvider);
 		getSignedUploadUrlMock.mockResolvedValue("https://example.com/url");
 
 		await createClient()({});
@@ -84,13 +84,13 @@ describe("Users Router - avatarUploadUrl", () => {
 		expect(mockProvider.delete).toHaveBeenCalled();
 	});
 
-	it("skips delete when file does not exist in supabase", async () => {
+	it("skips delete when file does not exist in storage", async () => {
 		const mockProvider = {
 			exists: vi.fn().mockResolvedValue(false),
 			delete: vi.fn(),
 		};
-		shouldUseSupabaseStorageMock.mockReturnValue(true);
-		getDefaultSupabaseProviderMock.mockReturnValue(mockProvider);
+		isStorageConfiguredMock.mockReturnValue(true);
+		getDefaultS3ProviderMock.mockReturnValue(mockProvider);
 		getSignedUploadUrlMock.mockResolvedValue("https://example.com/url");
 
 		await createClient()({});

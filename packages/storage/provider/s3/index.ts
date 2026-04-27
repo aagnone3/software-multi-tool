@@ -198,10 +198,20 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
 let defaultProvider: S3StorageProvider | null = null;
 
 /**
- * Get or create the default S3 provider using environment variables.
- * This is used internally for backwards-compatible function exports.
+ * Check if S3 storage is configured via environment variables.
  */
-function getDefaultProvider(): S3StorageProvider {
+export function isStorageConfigured(): boolean {
+	return !!(
+		process.env.S3_ENDPOINT &&
+		process.env.S3_ACCESS_KEY_ID &&
+		process.env.S3_SECRET_ACCESS_KEY
+	);
+}
+
+/**
+ * Get or create the default S3 provider using environment variables.
+ */
+export function getDefaultS3Provider(): S3StorageProvider {
 	if (defaultProvider) {
 		return defaultProvider;
 	}
@@ -249,7 +259,7 @@ export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (
 	path,
 	{ bucket },
 ) => {
-	const provider = getDefaultProvider();
+	const provider = getDefaultS3Provider();
 	const contentType = inferMimeType(path);
 	return provider.getSignedUploadUrl(path, {
 		bucket,
@@ -266,7 +276,7 @@ export const getSignedUrl: GetSignedUrlHander = async (
 	path,
 	{ bucket, expiresIn },
 ) => {
-	const provider = getDefaultProvider();
+	const provider = getDefaultS3Provider();
 	return provider.getSignedDownloadUrl(path, {
 		bucket,
 		expiresIn,

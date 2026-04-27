@@ -2,9 +2,10 @@
 # setup-local.sh - Unified local development environment setup
 #
 # This script ensures all prerequisites are in place for local development:
-# 1. Supabase is running
-# 2. Database is seeded with test data (test user exists)
-# 3. Environment files are configured
+# 1. PostgreSQL is running (via Docker Compose)
+# 2. Prisma migrations are applied
+# 3. Database is seeded with test data
+# 4. Environment files are configured
 #
 # Usage:
 #   ./setup-local.sh [--force-reset]
@@ -30,11 +31,11 @@ NC='\033[0m' # No Color
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 
 # Configuration
-SUPABASE_DB_PORT=54322
+DB_PORT=54322
 TEST_USER_ID="preview_user_001"
-SUPABASE_CLI_RUNNER="$REPO_ROOT/tooling/scripts/src/supabase/run-supabase-cli.sh"
 # Expected password hash prefix from seed.sql (first 20 chars is enough to verify)
 EXPECTED_PASSWORD_PREFIX="46eb4f9cb6d62a4d8e23"
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:${DB_PORT}/postgres"
 
 # Parse arguments
 FORCE_RESET=false
@@ -83,7 +84,6 @@ header() {
     echo ""
 }
 
-# Check if a command exists
 command_exists() {
     command -v "$1" &> /dev/null
 }
@@ -92,29 +92,20 @@ os_name() {
     uname -s 2>/dev/null || echo "Unknown"
 }
 
-print_command_install_help() {
+fail_missing_command() {
     local command_name="$1"
+    local why="$2"
 
+    error "$command_name is required ($why)"
+    echo ""
     case "$command_name" in
-        supabase)
-            echo "Optional: install globally for faster cold starts, or let the repo bootstrap a pinned CLI via pnpm dlx."
-            if [[ "$(os_name)" == "Darwin" ]]; then
-                echo "  brew install supabase/tap/supabase"
-            else
-                echo "  brew install supabase/tap/supabase"
-                echo "  npm install -g supabase"
-            fi
-            echo "  Repo-owned fallback: pnpm run setup (will use pnpm dlx supabase@\$SUPABASE_CLI_VERSION when needed)"
-            echo "  Docs: https://supabase.com/docs/guides/local-development/cli/getting-started"
-            ;;
         docker)
-            echo "Install Docker Desktop or Docker Engine, then make sure the daemon is running:"
+            echo "Install Docker Desktop or Docker Engine:"
             if [[ "$(os_name)" == "Darwin" ]]; then
                 echo "  brew install --cask docker"
                 echo "  open -a Docker"
             else
                 echo "  https://docs.docker.com/engine/install/"
-                echo "  After install, start Docker Desktop or your system docker service"
             fi
             ;;
         pnpm)
@@ -122,15 +113,6 @@ print_command_install_help() {
             echo "  npm install -g pnpm"
             ;;
     esac
-}
-
-fail_missing_command() {
-    local command_name="$1"
-    local why="$2"
-
-    error "$command_name is required ($why)"
-    echo ""
-    print_command_install_help "$command_name"
     exit 1
 }
 
@@ -147,7 +129,7 @@ ensure_command() {
 
 ensure_docker_ready() {
     if ! command_exists docker; then
-        fail_missing_command docker "Supabase local services run in Docker"
+        fail_missing_command docker "local PostgreSQL runs in Docker"
     fi
 
     if docker info >/dev/null 2>&1; then
@@ -163,7 +145,7 @@ ensure_docker_ready() {
         echo "  2. Wait until 'docker info' succeeds"
         echo "  3. Re-run: pnpm setup"
     else
-        echo "  1. Start Docker Desktop or the docker service on this machine"
+        echo "  1. Start Docker Desktop or the docker service"
         echo "  2. Verify with: docker info"
         echo "  3. Re-run: pnpm setup"
     fi
@@ -179,7 +161,6 @@ sed_in_place() {
     fi
 }
 
-# Generate a random secret for local auth when one is still unset
 random_secret() {
     if command_exists openssl; then
         openssl rand -base64 32 | tr -d '\n'
@@ -191,7 +172,6 @@ PY
     fi
 }
 
-# Upsert or replace a quoted env var inside an env file
 set_env_var() {
     local file="$1"
     local key="$2"
@@ -206,14 +186,8 @@ set_env_var() {
     fi
 }
 
-# Populate the minimum local boot env so pnpm dev works without guesswork
 populate_local_env_defaults() {
     local env_file="$1"
-    local local_anon_key="${SUPABASE_LOCAL_ANON_KEY:-${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}}"
-
-    if [[ -z "$local_anon_key" ]]; then
-        local_anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-    fi
 
     local better_auth_secret="${BETTER_AUTH_SECRET:-}"
     if [[ -z "$better_auth_secret" || "$better_auth_secret" == "A_RANDOM_SECRET_STRING" ]]; then
@@ -222,35 +196,34 @@ populate_local_env_defaults() {
 
     set_env_var "$env_file" "PORT" "3500"
     set_env_var "$env_file" "NEXT_PUBLIC_SITE_URL" "http://localhost:3500"
-    set_env_var "$env_file" "POSTGRES_PRISMA_URL" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
-    set_env_var "$env_file" "POSTGRES_URL_NON_POOLING" "postgresql://postgres:postgres@127.0.0.1:${SUPABASE_DB_PORT}/postgres"
-    set_env_var "$env_file" "NEXT_PUBLIC_SUPABASE_URL" "http://127.0.0.1:54321"
-    set_env_var "$env_file" "NEXT_PUBLIC_SUPABASE_ANON_KEY" "$local_anon_key"
+    set_env_var "$env_file" "DATABASE_URL" "$DATABASE_URL"
+    set_env_var "$env_file" "DATABASE_URL_UNPOOLED" "$DATABASE_URL"
     set_env_var "$env_file" "BETTER_AUTH_SECRET" "$better_auth_secret"
 }
 
-run_supabase_cli() {
-    "$SUPABASE_CLI_RUNNER" "$@"
+# Check if PostgreSQL is accepting connections
+is_postgres_running() {
+    docker compose -f "$REPO_ROOT/docker-compose.yml" ps --status running 2>/dev/null | grep -q postgres
 }
 
-# Check if Supabase is running
-is_supabase_running() {
-    local status_output
-    status_output=$(run_supabase_cli status 2>&1) || true
-
-    # Check if the output indicates services are running
-    if echo "$status_output" | grep -qi "API URL"; then
-        return 0
-    else
-        return 1
-    fi
+wait_for_postgres() {
+    local max_attempts=30
+    local attempt=0
+    while [[ $attempt -lt $max_attempts ]]; do
+        if docker compose -f "$REPO_ROOT/docker-compose.yml" exec -T postgres pg_isready -U postgres >/dev/null 2>&1; then
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        sleep 1
+    done
+    return 1
 }
 
 # Check if test user exists in database
 check_preview_user() {
     local mode="$1"
 
-    SUPABASE_DB_PORT="$SUPABASE_DB_PORT" \
+    SUPABASE_DB_PORT="$DB_PORT" \
         PREVIEW_USER_ID="$TEST_USER_ID" \
         PREVIEW_USER_PASSWORD_PREFIX="$EXPECTED_PASSWORD_PREFIX" \
         pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs "$mode" >/dev/null 2>&1
@@ -260,9 +233,16 @@ test_user_exists() {
     check_preview_user exists
 }
 
-# Check if test user has correct password hash
 test_user_has_valid_password() {
     check_preview_user password
+}
+
+# Seed the database using the seed script
+seed_database() {
+    info "Seeding database..."
+    DATABASE_URL="$DATABASE_URL" \
+        SEED_FILE="$REPO_ROOT/packages/database/seed.sql" \
+        pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs
 }
 
 # Main setup flow
@@ -274,45 +254,52 @@ main() {
     # Step 1: Check prerequisites
     header "Step 1: Checking Prerequisites"
 
-    ensure_command pnpm "used to run the repo-owned preview-user validation checks and Supabase CLI fallback"
+    ensure_command pnpm "package manager"
     ensure_docker_ready
 
-    if command_exists supabase; then
-        success "supabase is installed"
-    else
-        warn "supabase is not installed; setup will use the repo-owned pnpm dlx fallback"
-    fi
+    # Step 2: Ensure PostgreSQL is running
+    header "Step 2: Starting PostgreSQL"
 
-    # Step 2: Ensure Supabase is running
-    header "Step 2: Checking Supabase Status"
-
-    if is_supabase_running; then
-        success "Supabase is already running"
+    if is_postgres_running; then
+        success "PostgreSQL is already running"
     else
-        info "Starting Supabase..."
-        if run_supabase_cli start; then
-            success "Supabase started successfully"
+        info "Starting PostgreSQL via Docker Compose..."
+        if docker compose -f "$REPO_ROOT/docker-compose.yml" up -d; then
+            info "Waiting for PostgreSQL to be ready..."
+            if wait_for_postgres; then
+                success "PostgreSQL started successfully"
+            else
+                error "PostgreSQL failed to become ready"
+                exit 1
+            fi
         else
-            error "Failed to start Supabase"
+            error "Failed to start PostgreSQL"
             echo ""
             echo "Common issues:"
             echo "  - Docker is not running"
-            echo "  - Port conflicts (check ports 54321-54327)"
+            echo "  - Port $DB_PORT is already in use"
             exit 1
         fi
     fi
 
-    # Step 3: Check database seeding
-    header "Step 3: Checking Database Seeding"
+    # Step 3: Apply migrations
+    header "Step 3: Applying Migrations"
+
+    info "Running Prisma migrations..."
+    if DATABASE_URL="$DATABASE_URL" pnpm --filter @repo/database exec prisma migrate deploy; then
+        success "Migrations applied successfully"
+    else
+        error "Failed to apply migrations"
+        exit 1
+    fi
+
+    # Step 4: Check database seeding
+    header "Step 4: Checking Database Seeding"
 
     if [[ "$FORCE_RESET" == "true" ]]; then
-        info "Force reset requested, resetting database..."
-        if run_supabase_cli db reset; then
-            success "Database reset and seeded successfully"
-        else
-            error "Failed to reset database"
-            exit 1
-        fi
+        info "Force reset requested, seeding database..."
+        seed_database
+        success "Database seeded successfully"
     elif test_user_exists; then
         if test_user_has_valid_password; then
             success "Test user exists with valid credentials"
@@ -320,34 +307,24 @@ main() {
             echo "  Password: TestPassword123"
         else
             warn "Test user exists but password hash is incorrect"
-            info "Resetting database to fix credentials..."
-            if run_supabase_cli db reset; then
-                success "Database reset and seeded successfully"
-            else
-                error "Failed to reset database"
-                exit 1
-            fi
+            info "Re-seeding database..."
+            seed_database
+            success "Database re-seeded successfully"
         fi
     else
         warn "Test user not found in database"
-        info "Database needs seeding. Running 'supabase db reset'..."
-        echo ""
-        if run_supabase_cli db reset; then
-            success "Database seeded successfully"
-            echo "  Test user: test@preview.local"
-            echo "  Password: TestPassword123"
-        else
-            error "Failed to seed database"
-            exit 1
-        fi
+        info "Seeding database..."
+        seed_database
+        success "Database seeded successfully"
+        echo "  Test user: test@preview.local"
+        echo "  Password: TestPassword123"
     fi
 
-    # Step 4: Check environment files
-    header "Step 4: Checking Environment Files"
+    # Step 5: Check environment files
+    header "Step 5: Checking Environment Files"
 
     local env_created=false
 
-    # Check apps/web/.env.local
     if [[ -f "$REPO_ROOT/apps/web/.env.local" ]]; then
         success "apps/web/.env.local exists"
     elif [[ -f "$REPO_ROOT/apps/web/.env.local.example" ]]; then
@@ -386,9 +363,9 @@ main() {
     echo "     Password: TestPassword123"
     echo ""
     echo "Useful commands:"
-    echo "  pnpm supabase:status   - Check Supabase status"
-    echo "  pnpm supabase:reset    - Reset database with fresh seed data"
-    echo "  pnpm supabase:stop     - Stop Supabase services"
+    echo "  docker compose ps         - Check database status"
+    echo "  docker compose down        - Stop database"
+    echo "  docker compose down -v     - Stop and reset database"
     echo ""
 }
 

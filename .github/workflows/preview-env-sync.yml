@@ -1,6 +1,6 @@
 name: Preview Environment Sync
 
-# Synchronize environment variables between Supabase and Vercel
+# Synchronize environment variables between Neon and Vercel
 # preview environments when a PR has the 'preview' label.
 #
 # This workflow only runs when:
@@ -86,11 +86,11 @@ jobs:
             --branch "${{ steps.pr-info.outputs.branch_name }}" \
             --sha "${{ steps.pr-info.outputs.head_sha }}" \
             --timeout 600 \
-            --supabase-timeout 900
+            --neon-timeout 900
         env:
-          # Supabase Management API
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          # Neon Management API
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
           # Vercel API
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
@@ -111,8 +111,7 @@ jobs:
               ? `## Preview Environment Sync Complete
 
             Environment variables have been synchronized across preview services:
-            - **Supabase** branch database credentials synced to Vercel
-            - **Supabase** storage credentials synced to Vercel
+            - **Neon** branch database credentials synced to Vercel
 
             Preview environments should be fully functional within a few minutes.`
               : `## Preview Environment Sync Failed

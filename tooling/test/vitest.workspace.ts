@@ -59,6 +59,7 @@ type WorkspaceTestConfig = {
 	passWithNoTests?: boolean;
 	reporters: (string | [string, Record<string, unknown>])[];
 	coverage: CoverageConfig;
+	testTimeout?: number;
 	name?: string;
 };
 
@@ -72,6 +73,7 @@ type WorkspaceConfig = {
 const projectTestDefaults: WorkspaceTestConfig = {
 	globals: true,
 	setupFiles,
+	testTimeout: 15000,
 	environment: "jsdom",
 	include: [
 		"**/*.test.{ts,tsx}",

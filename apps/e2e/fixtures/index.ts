@@ -3,7 +3,7 @@ import { test as base } from "@playwright/test";
 
 /**
  * Test credentials for preview/local environments.
- * These are seeded via supabase/seed.sql in preview branches and local dev.
+ * These are seeded via packages/database/seed.sql in preview branches and local dev.
  */
 export const TEST_USER = {
 	email: "test@preview.local",

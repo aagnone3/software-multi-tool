@@ -190,7 +190,7 @@ grep "POSTHOG" ../../apps/web/.env.local >> apps/web/.env.local
 
 ```bash
 # Check database URL (should be port 54322 for Supabase local)
-grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+grep "DATABASE_URL" apps/web/.env.local
 # If showing port 5432, update to use Supabase local
 # Then restart
 pnpm dev
@@ -222,10 +222,10 @@ pnpm --filter @repo/database exec prisma migrate deploy
 cd .worktrees/<worktree-name>
 
 # Check which database the app is using (should be port 54322)
-grep "POSTGRES_PRISMA_URL" apps/web/.env.local
+grep "DATABASE_URL" apps/web/.env.local
 
 # Check if test user has correct password hash
-psql "$(grep POSTGRES_PRISMA_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
+psql "$(grep DATABASE_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
   -c "SELECT LEFT(password, 25) FROM account WHERE \"userId\" = 'preview_user_001';"
 
 # Correct hash should start with: 46eb4f9cb6d62a4d8e23

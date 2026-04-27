@@ -1,9 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { db } from "@repo/database";
-import {
-	getDefaultSupabaseProvider,
-	shouldUseSupabaseStorage,
-} from "@repo/storage";
+import { getDefaultS3Provider, isStorageConfigured } from "@repo/storage";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -50,8 +47,8 @@ export const deleteFile = protectedProcedure
 		}
 
 		// Delete from storage
-		if (shouldUseSupabaseStorage()) {
-			const provider = getDefaultSupabaseProvider();
+		if (isStorageConfigured()) {
+			const provider = getDefaultS3Provider();
 			try {
 				await provider.delete(file.storagePath, file.bucket);
 			} catch (error) {

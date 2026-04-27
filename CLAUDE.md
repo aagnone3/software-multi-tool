@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 
-- `pnpm setup` - **Run this first!** Sets up local development environment (Supabase, database seeding, env files)
+- `pnpm setup` - **Run this first!** Sets up local development environment (Docker Compose, database seeding, env files)
 - `pnpm dev` - Start the hot-reloading development server (concurrency limited to 15)
 - `pnpm build` - Compile all apps and packages for production
 - `pnpm start` - Serve the production build locally
@@ -68,33 +68,14 @@ The pre-commit hook runs `biome ci --staged` to catch issues before they reach C
 - Prisma schema is in `packages/database/prisma/schema.prisma`
 - Generated types are in `packages/database/prisma/generated/`
 
-#### Prisma to Supabase Migration Sync
-
-Supabase preview branches require migrations in Supabase format. A sync script automatically copies Prisma migrations to Supabase format:
-
-- **Script**: `tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
-- **CI Integration**: Runs automatically on PRs with Prisma migration changes
-- **Manual sync**: `./tooling/scripts/src/supabase/sync-prisma-to-supabase.sh`
-
-| System   | Format                                    |
-| -------- | ----------------------------------------- |
-| Prisma   | `migrations/TIMESTAMP_name/migration.sql` |
-| Supabase | `migrations/TIMESTAMP_name.sql`           |
-
-The sync script:
-
-1. Copies new Prisma migrations to Supabase format
-2. Skips migrations already synced
-3. CI automatically commits synced migrations to the PR branch
-
 #### Local Development Database
 
-**Use Supabase local** for development to match preview/production environments exactly.
+**Use Docker Compose** for local development to run PostgreSQL consistently.
 
 **Quick Start:**
 
 ```bash
-pnpm setup    # Starts Supabase, seeds database, creates .env.local
+pnpm setup    # Starts Docker Compose, runs migrations, seeds database, creates .env.local
 pnpm dev
 ```
 
@@ -104,6 +85,13 @@ pnpm dev
 postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
+**Docker Compose commands:**
+
+- `pnpm db:start` - Start the local PostgreSQL container
+- `pnpm db:stop` - Stop the local PostgreSQL container
+- `pnpm db:status` - Check container status
+- `pnpm db:reset` - Reset database (destroy volume, re-run migrations and seed)
+
 **Test user credentials (Quick Login button):**
 
 | Field    | Value                 |
@@ -111,7 +99,7 @@ postgresql://postgres:postgres@127.0.0.1:54322/postgres
 | Email    | test@preview.local    |
 | Password | TestPassword123       |
 
-The test user is created by `supabase/seed.sql` which runs during `pnpm setup` and on preview branch creation.
+The test user is created by `packages/database/seed.sql` which runs during `pnpm setup` and on preview branch creation.
 
 ### Stripe Webhooks
 
@@ -252,7 +240,7 @@ See `.claude/skills/architecture/` for detailed documentation including:
 - Frontend architecture (React 19, TanStack Query, nuqs)
 - Data layer (Prisma, Zod schemas)
 - All integrations (payments, email, storage, AI)
-- Background jobs (Inngest) and real-time updates (Supabase Realtime)
+- Background jobs (Inngest)
 - Deployment infrastructure (Vercel, GitHub Actions CI/CD)
 - How-to guides for adding modules and packages
 
@@ -266,15 +254,6 @@ Background job processing is powered by **Inngest**, a durable execution platfor
 - Jobs use Inngest steps for long-running processes (up to 2 hours per step)
 - Automatic retries with configurable backoff
 - Local dev: `npx inngest-cli@latest dev` starts dashboard at http://localhost:8288
-
-### Real-time Updates (Supabase Realtime)
-
-Real-time functionality uses **Supabase Realtime** instead of WebSockets:
-
-- **Module**: `apps/web/modules/realtime/` - Typed channel helpers
-- **Import**: `@realtime` path alias for clean imports
-- Supports broadcast messages and presence tracking
-- No separate backend required—uses existing Supabase connection
 
 ### Analytics
 

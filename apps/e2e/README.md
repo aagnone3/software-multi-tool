@@ -134,12 +134,12 @@ Tests can be tagged for selective execution:
 ### Local Development
 
 1. **Dev server running**: `pnpm --filter web dev`
-2. **Database seeded**: `supabase db reset`
+2. **Database seeded**: `pnpm db:reset`
 3. **Inngest running** (for background jobs): `npx inngest-cli@latest dev -u http://localhost:3500/api/inngest`
 
 ### Preview/Production
 
-1. **Test user exists**: Seeded via `supabase/seed.sql`
+1. **Test user exists**: Seeded via `packages/database/seed.sql`
 2. **Valid BASE_URL**: Set environment variable
 
 ## Debugging

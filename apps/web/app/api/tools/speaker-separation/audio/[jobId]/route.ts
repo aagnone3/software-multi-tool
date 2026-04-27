@@ -1,9 +1,6 @@
 import { config } from "@repo/config";
 import { getToolJobById } from "@repo/database";
-import {
-	getDefaultSupabaseProvider,
-	shouldUseSupabaseStorage,
-} from "@repo/storage";
+import { getDefaultS3Provider, isStorageConfigured } from "@repo/storage";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -26,7 +23,7 @@ export async function GET(
 		);
 	}
 
-	if (!shouldUseSupabaseStorage()) {
+	if (!isStorageConfigured()) {
 		return NextResponse.json(
 			{ error: "Storage not configured" },
 			{ status: 500 },
@@ -34,7 +31,7 @@ export async function GET(
 	}
 
 	try {
-		const provider = getDefaultSupabaseProvider();
+		const provider = getDefaultS3Provider();
 		const signedUrl = await provider.getSignedDownloadUrl(
 			job.audioFileUrl,
 			{

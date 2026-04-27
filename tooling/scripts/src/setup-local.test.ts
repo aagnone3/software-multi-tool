@@ -67,30 +67,23 @@ describe("setup-local.sh", () => {
 
 	describe("script structure", () => {
 		it("should define required helper functions", async () => {
-			// Read script content and verify key functions exist
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
 
-			// Check for key function definitions
-			expect(stdout).toContain("is_supabase_running()");
+			expect(stdout).toContain("is_postgres_running()");
 			expect(stdout).toContain("test_user_exists()");
 			expect(stdout).toContain("test_user_has_valid_password()");
 			expect(stdout).toContain("main()");
 		});
 
-		it("should use the repo-owned Supabase CLI runner", async () => {
+		it("should use Docker Compose for local database", async () => {
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
-			expect(stdout).toContain(
-				'SUPABASE_CLI_RUNNER="$REPO_ROOT/tooling/scripts/src/supabase/run-supabase-cli.sh"',
-			);
-			expect(stdout).toContain("run_supabase_cli start");
-			expect(stdout).toContain("run_supabase_cli db reset");
+			expect(stdout).toContain("docker compose");
+			expect(stdout).toContain("prisma migrate deploy");
 		});
 
-		it("should check for pnpm because setup uses repo-owned validation and Supabase fallback", async () => {
+		it("should check for pnpm", async () => {
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
-			expect(stdout).toContain(
-				'ensure_command pnpm "used to run the repo-owned preview-user validation checks and Supabase CLI fallback"',
-			);
+			expect(stdout).toContain("ensure_command pnpm");
 			expect(stdout).toContain(
 				"pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs",
 			);
@@ -101,9 +94,9 @@ describe("setup-local.sh", () => {
 			expect(stdout).toContain('TEST_USER_ID="preview_user_001"');
 		});
 
-		it("should use correct Supabase DB port", async () => {
+		it("should use correct DB port", async () => {
 			const { stdout } = await execAsync(`cat "${SCRIPT_PATH}"`);
-			expect(stdout).toContain("SUPABASE_DB_PORT=54322");
+			expect(stdout).toContain("DB_PORT=54322");
 		});
 
 		it("should check for env.local.example files", async () => {

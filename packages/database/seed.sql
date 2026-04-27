@@ -1,33 +1,9 @@
--- Supabase Preview Branch Seed Data
--- This seed file runs automatically on preview branch creation
--- Creates a test tenant (organization) and user for preview environment testing
+-- Database Seed Data
+-- Creates test data for local development and preview environments.
+-- Run via: pnpm --filter @repo/scripts exec node ./src/run-local-seed.mjs
 --
--- Note: Uses better-auth for authentication, not Supabase Auth
+-- Note: Uses better-auth for authentication
 -- See .claude/skills/better-auth/ for auth implementation details
-
--- =====================================================
--- Storage Buckets
--- =====================================================
--- Create storage buckets needed for the application
--- These are not automatically created on preview branches
-
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-    'avatars',
-    'avatars',
-    true,
-    5242880, -- 5MB
-    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-    'files',
-    'files',
-    false,
-    52428800, -- 50MB
-    NULL -- Allow all MIME types
-) ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
 -- Test User

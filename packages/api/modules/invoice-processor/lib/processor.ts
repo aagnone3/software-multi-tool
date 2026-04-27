@@ -1,11 +1,7 @@
 import { executePrompt } from "@repo/agent-sdk";
 import type { Prisma, ToolJob } from "@repo/database";
 import { logger } from "@repo/logs";
-import {
-	getDefaultSupabaseProvider,
-	getSignedUrl,
-	shouldUseSupabaseStorage,
-} from "@repo/storage";
+import { getSignedUrl } from "@repo/storage";
 import type { JobResult } from "../../jobs/lib/processor-registry";
 import type { InvoiceProcessorInput, InvoiceProcessorOutput } from "../types";
 import { extractTextFromInvoiceDocument } from "./document-extractor";
@@ -17,22 +13,6 @@ async function fetchFileFromStorage(
 	filePath: string,
 	bucket: string,
 ): Promise<Buffer> {
-	if (shouldUseSupabaseStorage()) {
-		const provider = getDefaultSupabaseProvider();
-		const signedUrl = await provider.getSignedDownloadUrl(filePath, {
-			bucket,
-			expiresIn: 300, // 5 minutes
-		});
-		const response = await fetch(signedUrl);
-		if (!response.ok) {
-			throw new Error(
-				`Failed to fetch file from storage: ${response.statusText}`,
-			);
-		}
-		return Buffer.from(await response.arrayBuffer());
-	}
-
-	// Fallback to legacy signed URL function
 	const signedUrl = await getSignedUrl(filePath, { bucket });
 	const response = await fetch(signedUrl);
 	if (!response.ok) {

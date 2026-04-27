@@ -29,29 +29,14 @@ describe("worktree-setup.sh", () => {
 			expect(SCRIPT_SOURCE).not.toContain("psql -h 127.0.0.1");
 		});
 
-		it("should route Supabase commands through the repo-owned CLI runner", () => {
-			expect(SCRIPT_SOURCE).toContain(
-				'SUPABASE_CLI_RUNNER="$SCRIPT_DIR/supabase/run-supabase-cli.sh"',
-			);
-			expect(SCRIPT_SOURCE).toContain("run_supabase_cli()");
-			expect(SCRIPT_SOURCE).toContain(
-				"if run_supabase_cli status &>/dev/null; then",
-			);
-			expect(SCRIPT_SOURCE).toContain(
-				"if run_supabase_cli db reset --no-confirm 2>&1; then",
-			);
+		it("should use Docker Compose for local database", () => {
+			expect(SCRIPT_SOURCE).toContain("docker compose");
+			expect(SCRIPT_SOURCE).toContain("prisma migrate deploy");
 		});
 
-		it("should describe the global Supabase CLI as optional in usage and recovery messaging", () => {
-			expect(SCRIPT_SOURCE).toContain(
-				"Uses the repo-owned Supabase CLI runner (global install optional)",
-			);
-			expect(SCRIPT_SOURCE).toContain(
-				"A global supabase install is optional",
-			);
-			expect(SCRIPT_SOURCE).toContain(
-				"This prefers a global supabase binary when available and falls back to pnpm dlx when it is not.",
-			);
+		it("should use Docker Compose for database setup", () => {
+			expect(SCRIPT_SOURCE).toContain("docker compose");
+			expect(SCRIPT_SOURCE).toContain("packages/database/seed.sql");
 		});
 	});
 

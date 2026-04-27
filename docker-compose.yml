@@ -1,0 +1,32 @@
+# Local development database
+# Replaces `supabase start` with a lightweight PostgreSQL container.
+#
+# Usage:
+#   docker compose up -d      # Start database
+#   docker compose down        # Stop database
+#   docker compose down -v     # Stop and destroy data
+#
+# Connection string:
+#   postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: smt-postgres
+    restart: unless-stopped
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

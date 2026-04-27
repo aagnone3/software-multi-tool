@@ -331,7 +331,7 @@ For local development, a test user enables Quick Login on the login page:
 **Seeding the test user:**
 
 ```bash
-PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f supabase/seed.sql
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f packages/database/seed.sql
 ```
 
 ## Troubleshooting
@@ -340,7 +340,7 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d local_softwaremultitool -f 
 
 **Symptom**: "Invalid password" error in server logs when using Quick Login
 
-**Cause**: The password hash in `supabase/seed.sql` must be generated using Better Auth's `hashPassword` function. Hashes from other tools (even using scrypt) won't work due to different parameters.
+**Cause**: The password hash in `packages/database/seed.sql` must be generated using Better Auth's `hashPassword` function. Hashes from other tools (even using scrypt) won't work due to different parameters.
 
 **Solution**: Generate a valid hash using Better Auth's crypto:
 

@@ -1,6 +1,6 @@
 ---
 name: managing-storage
-description: File storage with Supabase Storage or S3 providing multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and validation via @repo/storage package. Use when implementing file uploads, working with storage providers, or managing multi-tenant file access.
+description: File storage with S3 providing multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and validation via @repo/storage package. Use when implementing file uploads, working with storage providers, or managing multi-tenant file access.
 allowed-tools:
   - Read
   - Edit
@@ -20,7 +20,6 @@ Multi-tenant file storage patterns and path conventions for the `@repo/storage` 
 | --------- | -------- |
 | Path builders | `packages/storage/paths.ts` |
 | Storage provider interface | `packages/storage/types.ts` |
-| Supabase provider | `packages/storage/provider/supabase/` |
 | S3 provider | `packages/storage/provider/s3/` |
 | Package import | `@repo/storage` |
 | Image proxy route | `apps/web/app/image-proxy/[...path]/route.ts` |
@@ -134,22 +133,15 @@ try {
 │  - upload()         - getSignedUploadUrl()                  │
 │  - delete()         - getSignedDownloadUrl()                │
 │  - exists()                                                 │
-├─────────────────┬─────────────────┬─────────────────────────┤
-│  Supabase       │  S3/R2          │  Local (dev)            │
-│  Provider       │  Provider       │  Provider               │
-└─────────────────┴─────────────────┴─────────────────────────┘
+├─────────────────┬─────────────────────────────────────────────┤
+│  S3/R2          │  Local (dev)                                │
+│  Provider       │  Provider                                   │
+└─────────────────┴─────────────────────────────────────────────┘
 ```
 
-### Provider Auto-Detection
+### Provider Selection
 
-The system auto-detects which provider to use:
-
-1. If `SUPABASE_STORAGE_PROVIDER=true` → Use Supabase
-2. If `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set → Use Supabase
-3. If S3 credentials are configured → Use S3
-4. Otherwise → Fail with error
-
-Supabase is preferred when available because it has native CORS support for browser uploads.
+S3 is the storage provider. Configure S3 credentials (`S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, `S3_REGION`, and optionally `S3_ENDPOINT` for R2/MinIO) to enable storage.
 
 ## Implementation Patterns
 
@@ -161,9 +153,7 @@ import { ORPCError } from "@orpc/server";
 import { config } from "@repo/config";
 import {
   buildUserPath,
-  getDefaultSupabaseProvider,
   getSignedUploadUrl,
-  shouldUseSupabaseStorage,
 } from "@repo/storage";
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -192,23 +182,10 @@ export const createUploadUrl = protectedProcedure
 
     const bucket = config.storage.bucketNames.avatars;
 
-    // 3. Delete existing file if needed
-    if (shouldUseSupabaseStorage()) {
-      const provider = getDefaultSupabaseProvider();
-      try {
-        const exists = await provider.exists(path, bucket);
-        if (exists) {
-          await provider.delete(path, bucket);
-        }
-      } catch {
-        // Ignore - file may not exist
-      }
-    }
-
-    // 4. Generate signed upload URL
+    // 3. Generate signed upload URL
     const signedUploadUrl = await getSignedUploadUrl(path, { bucket });
 
-    // 5. Return URL and path
+    // 4. Return URL and path
     return { signedUploadUrl, path };
   });
 ```
@@ -317,5 +294,5 @@ Use this skill when:
 - **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)
 - **better-auth**: User authentication for multi-tenant path isolation
 - **application-environments**: Supabase storage configuration
-- **cicd**: Configuring storage buckets in seed.sql for preview branch environments
+- **cicd**: Configuring storage in preview branch environments
 - **debugging**: Troubleshooting file upload and storage issues

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Seed the local development database with realistic test data
-# Uses the same seed.sql that Supabase preview branches use
+# Uses the seed.sql from packages/database/
 #
 # Usage: pnpm --filter @repo/database seed
 
@@ -8,7 +8,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-SEED_FILE="$REPO_ROOT/supabase/seed.sql"
+SEED_FILE="$REPO_ROOT/packages/database/seed.sql"
 
 # Default local database settings (can be overridden via env vars)
 DB_HOST="${POSTGRES_HOST:-127.0.0.1}"

@@ -11,10 +11,19 @@ const workspaceRoot = path.resolve(
 	"..",
 	"..",
 );
-const envLocalPath = path.join(workspaceRoot, "apps", "web", ".env.local");
 
-if (existsSync(envLocalPath)) {
-	config({ path: envLocalPath, quiet: true });
+// Try multiple paths to find .env.local — supports both normal runs and
+// pre-commit hook contexts where cwd may differ from the file's location.
+const envCandidates = [
+	path.join(workspaceRoot, "apps", "web", ".env.local"),
+	path.join(process.cwd(), "apps", "web", ".env.local"),
+];
+
+for (const envPath of envCandidates) {
+	if (existsSync(envPath)) {
+		config({ path: envPath, quiet: true });
+		break;
+	}
 }
 
 process.env.TZ = process.env.TZ ?? "UTC";
