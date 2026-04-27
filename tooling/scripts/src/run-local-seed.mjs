@@ -20,7 +20,7 @@ const DEFAULT_SEED_FILE = path.join(
 );
 const DEFAULT_DATABASE_URL =
 	process.env.DATABASE_URL ||
-	`postgresql://${process.env.POSTGRES_USER || "postgres"}:${process.env.POSTGRES_PASSWORD || "postgres"}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || process.env.SUPABASE_DB_PORT || "54322"}/${process.env.POSTGRES_DATABASE || "postgres"}`;
+	`postgresql://${process.env.POSTGRES_USER || "postgres"}:${process.env.POSTGRES_PASSWORD || "postgres"}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || "54322"}/${process.env.POSTGRES_DATABASE || "postgres"}`;
 
 async function main() {
 	const seedFile = process.env.SEED_FILE || DEFAULT_SEED_FILE;

@@ -63,10 +63,6 @@ function parseArgs(argv) {
 			case "--neon-timeout":
 				args.neonTimeout = Number.parseInt(argv[++i], 10);
 				break;
-			// Legacy flag support during migration
-			case "--supabase-timeout":
-				args.neonTimeout = Number.parseInt(argv[++i], 10);
-				break;
 		}
 	}
 

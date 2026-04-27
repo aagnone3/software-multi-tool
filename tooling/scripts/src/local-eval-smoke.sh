@@ -20,7 +20,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-SUPABASE_DB_PORT="${SUPABASE_DB_PORT:-54322}"
+POSTGRES_PORT="${POSTGRES_PORT:-54322}"
 APP_URL="${APP_URL:-http://127.0.0.1:3500}"
 TEST_USER_ID="preview_user_001"
 SERVER_LOG="${TMPDIR:-/tmp}/software-multi-tool-local-eval-smoke.log"
@@ -103,7 +103,7 @@ wait_for_http() {
 
 assert_seeded_user() {
     local seeded_user
-    if ! seeded_user=$(SUPABASE_DB_PORT="$SUPABASE_DB_PORT" \
+    if ! seeded_user=$(POSTGRES_PORT="$POSTGRES_PORT" \
         PREVIEW_USER_ID="$TEST_USER_ID" \
         pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs exists 2>&1); then
         error "Expected preview user test@preview.local for $TEST_USER_ID"
