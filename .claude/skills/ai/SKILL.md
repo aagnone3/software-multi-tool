@@ -108,17 +108,7 @@ interface PromptResult {
 
 > **Model IDs change as new versions release.** Always verify current IDs in `packages/agent-sdk/src/` or at [docs.anthropic.com](https://docs.anthropic.com/en/docs/about-claude/models) before adding a new processor.
 
-**Codebase constants** (from `packages/agent-sdk/src/`):
-
-> **Note**: `CLAUDE_MODELS` constant names use older Claude generation naming (e.g., `HAIKU_3_5` currently maps to Haiku 4.5). Prefer explicit model ID strings for new processors.
-
-```typescript
-const CLAUDE_MODELS = {
-  HAIKU_3_5: "claude-haiku-4-5-20251001",      // Currently Haiku 4.5 (name is legacy)
-  SONNET_3_5_V2: "claude-3-5-sonnet-20241022", // Legacy — use claude-sonnet-4-6 for new work
-  OPUS_3: "claude-3-opus-20240229",            // Legacy — use claude-opus-4-6 for new work
-};
-```
+> **Codebase constants warning**: `CLAUDE_MODELS` in `packages/agent-sdk/src/` has legacy names — `HAIKU_3_5` currently maps to Haiku 4.5, but `SONNET_3_5_V2` and `OPUS_3` point to outdated model IDs. Always use the explicit model IDs from the table above for new processors.
 
 ## @repo/ai Package
 
