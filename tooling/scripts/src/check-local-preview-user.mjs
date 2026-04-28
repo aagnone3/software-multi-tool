@@ -11,7 +11,7 @@ const EXPECTED_PASSWORD_PREFIX =
 	process.env.PREVIEW_USER_PASSWORD_PREFIX || "46eb4f9cb6d62a4d8e23";
 const DATABASE_URL =
 	process.env.DATABASE_URL ||
-	`postgresql://postgres:postgres@127.0.0.1:${process.env.SUPABASE_DB_PORT || "54322"}/postgres`;
+	`postgresql://postgres:postgres@127.0.0.1:${process.env.POSTGRES_PORT || "54322"}/postgres`;
 
 const mode = process.argv[2] || "exists";
 

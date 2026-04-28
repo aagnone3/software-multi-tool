@@ -4,7 +4,7 @@ This file provides Claude-specific guidance for using the dev-lifecycle plugin.
 
 ## Plugin Overview
 
-The dev-lifecycle plugin provides complete development lifecycle orchestration for Linear-based workflows with git-worktrees, Prisma, and Supabase.
+The dev-lifecycle plugin provides complete development lifecycle orchestration for Linear-based workflows with git-worktrees, Prisma, and Neon (with a Postgres container for local dev).
 
 ## Key Behaviors
 

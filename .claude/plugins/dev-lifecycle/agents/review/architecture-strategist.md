@@ -60,7 +60,7 @@ packages/              # Backend packages
   database/            # Prisma + Zod schemas
   payments/            # Stripe integration
   mail/                # Email (Resend)
-  storage/             # File storage (Supabase)
+  storage/             # File storage (S3 or any S3-compatible service)
   ai/                  # AI integrations
 ```
 

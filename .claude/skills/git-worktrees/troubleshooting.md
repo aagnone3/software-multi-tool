@@ -186,12 +186,12 @@ grep "POSTHOG" ../../apps/web/.env.local >> apps/web/.env.local
 
 **Problem**: Jobs created but never picked up by workers.
 
-**Root cause**: Using wrong database (Homebrew Postgres instead of Supabase local).
+**Root cause**: Using wrong database (e.g. Homebrew Postgres on port 5432 instead of the Compose-managed container on 54322).
 
 ```bash
-# Check database URL (should be port 54322 for Supabase local)
+# Check database URL (should be port 54322 for the local Postgres container)
 grep "DATABASE_URL" apps/web/.env.local
-# If showing port 5432, update to use Supabase local
+# If showing port 5432, update to use the Compose container on 54322
 # Then restart
 pnpm dev
 ```
@@ -234,15 +234,15 @@ psql "$(grep DATABASE_URL apps/web/.env.local | cut -d= -f2 | tr -d '"')" \
 **Solution**:
 
 ```bash
-# Ensure using Supabase Local (port 54322)
+# Ensure using the local Postgres container (port 54322)
 # The automated setup script enforces this
 
 # If still seeing issues, reset the database
-supabase db reset
+pnpm db:reset
 ```
 
 **Prevention**: The `worktree-setup.sh` script now:
 
-1. Enforces Supabase Local (port 54322) for all worktrees
-2. Verifies the password hash is correct (not just that user exists)
+1. Enforces the local Postgres container (port 54322) for all worktrees
+2. Verifies the password hash is correct (not just that the user exists)
 3. Automatically resets the database if seeding is incorrect

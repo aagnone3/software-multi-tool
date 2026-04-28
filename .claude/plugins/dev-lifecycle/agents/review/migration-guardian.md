@@ -181,13 +181,13 @@ ALTER TABLE old_users RENAME TO old_users_backup;
 DROP TABLE old_users_backup;
 ```
 
-## Supabase-Specific Considerations
+## Preview Branch Considerations
 
-This codebase syncs Prisma migrations to Supabase format:
+This codebase deploys Prisma migrations to Neon database branches for previews:
 
-- Migrations copied to `supabase/migrations/`
-- Preview branches use Supabase migrations
-- RLS policies need separate consideration
+- Preview branch creation runs `prisma migrate deploy` against the new branch
+- Production deploys run the same migration step against the main Neon database
+- Long-running data migrations should use Inngest steps rather than the migration itself
 
 ## Tools Used
 

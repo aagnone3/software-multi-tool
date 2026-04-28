@@ -31,7 +31,7 @@ Practical prerequisites for that helper:
 - `pnpm`
 - Docker with the daemon running
 
-A global Supabase CLI install is optional. When `supabase` is not already installed, the helper falls back to the repo-owned pinned CLI path instead of requiring contributors to install the tool globally first.
+The local PostgreSQL database is started by Docker Compose during `pnpm setup`; no extra CLI tooling is required.
 
 ## Pre-commit Hooks
 

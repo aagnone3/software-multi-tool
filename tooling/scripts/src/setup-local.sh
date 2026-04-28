@@ -223,7 +223,7 @@ wait_for_postgres() {
 check_preview_user() {
     local mode="$1"
 
-    SUPABASE_DB_PORT="$DB_PORT" \
+    POSTGRES_PORT="$DB_PORT" \
         PREVIEW_USER_ID="$TEST_USER_ID" \
         PREVIEW_USER_PASSWORD_PREFIX="$EXPECTED_PASSWORD_PREFIX" \
         pnpm --filter @repo/scripts exec node ./src/check-local-preview-user.mjs "$mode" >/dev/null 2>&1

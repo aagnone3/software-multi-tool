@@ -271,8 +271,7 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 | `packages/storage/paths.ts` | Path builder utilities and validation |
 | `packages/storage/paths.test.ts` | Unit tests for path builders |
 | `packages/storage/types.ts` | StorageProvider interface and types |
-| `packages/storage/provider/supabase/` | Supabase storage implementation |
-| `packages/storage/provider/s3/` | S3-compatible storage implementation |
+| `packages/storage/provider/s3/` | S3 (and any S3-compatible service) storage implementation |
 | `config/index.ts` | Bucket name configuration |
 | `apps/web/app/image-proxy/[...path]/route.ts` | Image serving proxy |
 
@@ -282,17 +281,17 @@ Use this skill when:
 
 - Implementing file upload features (avatars, logos, documents)
 - Adding new upload types to the application
-- Working with storage providers (Supabase, S3, local)
+- Working with the S3 storage provider (or any S3-compatible service)
 - Migrating existing files to new path conventions
 - Debugging file access issues
 
-**Activation keywords**: file upload, storage, avatar, logo, s3, supabase, bucket, signed url, multi-tenant paths
+**Activation keywords**: file upload, storage, avatar, logo, s3, bucket, signed url, multi-tenant paths
 
 ## Related Skills
 
 - **sub-app**: Implementing file uploads in new tools
 - **architecture**: Understanding the storage layer in the overall architecture (includes Inngest job patterns)
 - **better-auth**: User authentication for multi-tenant path isolation
-- **application-environments**: Supabase storage configuration
+- **application-environments**: Local development environment setup (the storage layer points at S3 / an S3-compatible endpoint regardless of environment)
 - **cicd**: Configuring storage in preview branch environments
 - **debugging**: Troubleshooting file upload and storage issues

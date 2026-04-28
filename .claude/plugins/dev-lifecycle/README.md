@@ -1,6 +1,6 @@
 # Dev Lifecycle Plugin
 
-Complete development lifecycle orchestration for Linear-based workflows with git-worktrees, Prisma, and Supabase.
+Complete development lifecycle orchestration for Linear-based workflows with git-worktrees, Prisma, and Neon (with a Postgres container for local dev).
 
 ## Overview
 
