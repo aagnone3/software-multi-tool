@@ -298,15 +298,6 @@ See [examples.md](examples.md) for detailed examples of:
 - Implementing protected routes
 - Testing auth flows
 
-## Key Principles
-
-1. **Framework-agnostic**: Better Auth works with any TypeScript framework
-2. **Type-safe**: Full TypeScript support with inferred types
-3. **Plugin-based**: Extend functionality without core modifications
-4. **Self-hosted**: All data stays in your database
-5. **Email integration**: Localized emails via `@repo/mail`
-6. **Organization-first**: Built-in multi-tenancy support
-
 ## Testing
 
 Auth integration tests: `packages/auth/auth.integration.test.ts`
