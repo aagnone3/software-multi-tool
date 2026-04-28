@@ -265,16 +265,7 @@ export default function PdfConverterPage() {
 
 ## Credit System
 
-Tools consume credits when used. The credit system uses a **credit pack model** (no overage billing).
-
-### Design Decision: Credit Packs Only
-
-We chose credit packs over overage billing because:
-
-- **Predictable costs**: Users never get surprise bills
-- **Clear value proposition**: Credit packs have tangible value
-- **Industry standard**: Common pattern in AI tools (Midjourney, stock photos, etc.)
-- **Simpler UX**: No complex billing explanations needed
+Tools consume credits when used. The credit system uses a **credit pack model** (no overage billing) — users purchase credit packs when their plan's included credits run out, with no automatic overage charges.
 
 ### How It Works
 
