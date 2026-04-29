@@ -89,7 +89,7 @@ The PostHog provider is configured in `provider/posthog/index.tsx`:
 
 ```typescript
 posthog.init(posthogKey, {
-  api_host: "https://i.posthog.com",
+  api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
   person_profiles: "identified_only",
 });
 ```
