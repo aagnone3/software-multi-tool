@@ -104,7 +104,7 @@ interface PromptResult {
 | ---- | -------- | -------- |
 | Haiku | `claude-haiku-4-5-20251001` | Fast structured extraction |
 | Sonnet | `claude-sonnet-4-6` | Balanced analysis |
-| Opus | `claude-opus-4-6` | Complex/creative tasks |
+| Opus | `claude-opus-4-7` | Complex/creative tasks |
 
 > **Model IDs change as new versions release.** Always verify current IDs in `packages/agent-sdk/src/` or at [docs.anthropic.com](https://docs.anthropic.com/en/docs/about-claude/models) before adding a new processor.
 
@@ -185,7 +185,7 @@ const model = "claude-haiku-4-5-20251001";
 const model = "claude-sonnet-4-6";
 
 // For creative tasks — Opus tier
-const model = "claude-opus-4-6";
+const model = "claude-opus-4-7";
 ```
 
 ### Step 2: Define Your Prompt
