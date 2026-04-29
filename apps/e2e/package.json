@@ -17,7 +17,7 @@
 		"codegen": "playwright codegen http://localhost:3500"
 	},
 	"devDependencies": {
-		"@playwright/test": "1.57.0",
+		"@playwright/test": "1.59.1",
 		"dotenv": "16.6.1"
 	}
 }

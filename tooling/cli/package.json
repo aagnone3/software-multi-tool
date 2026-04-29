@@ -7,14 +7,14 @@
 		"mt": "dotenv -c -e ../../apps/web/.env.local -e ../../apps/web/.env -- tsx ./src/index.ts"
 	},
 	"dependencies": {
-		"chalk": "5.4.1",
+		"chalk": "5.6.2",
 		"cli-table3": "0.6.5",
 		"commander": "13.1.0",
-		"posthog-node": "5.24.17"
+		"posthog-node": "5.31.0"
 	},
 	"devDependencies": {
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "25.0.10",
+		"@types/node": "25.6.0",
 		"tsx": "4.21.0"
 	}
 }
