@@ -47,9 +47,9 @@ Each PR gets an isolated database branch via Neon's Vercel Previews Integration.
 3. **Vercel Builds** → `prisma migrate deploy` applies any new migrations
 4. **PR Merged** → Neon branch auto-deleted when git branch is deleted
 
-### Key Differences from Previous Setup
+### Key Facts
 
-- No dual migration system — Prisma migrations are the sole source of truth
+- Prisma migrations are the sole source of truth (no dual migration system)
 - Seed data is inherited via copy-on-write (no re-seeding needed)
 - `DATABASE_URL` and `DATABASE_URL_UNPOOLED` are auto-injected by the Neon Vercel integration
 

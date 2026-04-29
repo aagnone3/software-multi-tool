@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: MANDATORY for all feature work. Creates isolated git worktrees for parallel development with unique web-app ports backed by a shared local Postgres container (Docker Compose, port 54322), automated setup, environment configuration, and cleanup. Use when starting features, reviewing PRs locally, creating hotfixes, or running parallel development sessions.
+description: Creates isolated git worktrees for parallel development with unique web-app ports backed by a shared local Postgres container (Docker Compose, port 54322), automated setup, environment configuration, and cleanup. Required for all feature work in this repository. Use when starting features, reviewing PRs locally, creating hotfixes, or running parallel development sessions.
 allowed-tools:
   - Bash
   - Read
