@@ -18,7 +18,7 @@ on:
         required: true
         type: number
       branch_name:
-        description: "Git branch name (for Supabase branch lookup)"
+        description: "Git branch name (for Neon branch lookup)"
         required: false
         type: string
 

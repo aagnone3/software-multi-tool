@@ -159,7 +159,7 @@ jobs:
 
             **To enable preview deployments**, add the \`preview\` label to this PR.
 
-            > **Note**: CI checks (lint, type-check, tests) and Supabase preview branch (for E2E tests) are still running.`;
+            > **Note**: CI checks (lint, type-check, tests) and Neon preview branch (for E2E tests) are still running.`;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,

@@ -21,7 +21,7 @@ flowchart TB
     end
 
     subgraph Data["Data Layer"]
-        Postgres[(PostgreSQL<br/>Supabase)]
+        Postgres[(PostgreSQL<br/>Neon)]
         S3[(S3 Storage)]
         Redis[(Redis Cache)]
     end
@@ -495,10 +495,9 @@ flowchart TB
         Worker[Background<br/>Workers]
     end
 
-    subgraph Supabase["Supabase"]
+    subgraph Neon["Neon"]
         DB[(PostgreSQL)]
         Branch[Preview<br/>Branches]
-        Auth2[Auth<br/>Extensions]
     end
 
     subgraph AWS["AWS"]
@@ -535,6 +534,7 @@ flowchart TB
 ## Usage
 
 To render these diagrams:
+
 1. **GitHub/GitLab**: Markdown preview renders Mermaid automatically
 2. **VS Code**: Install "Markdown Preview Mermaid Support" extension
 3. **Online**: Paste into [mermaid.live](https://mermaid.live)

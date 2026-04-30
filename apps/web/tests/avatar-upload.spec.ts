@@ -8,7 +8,7 @@ import { expect, test } from "./fixtures";
  *
  * Prerequisites for preview deployments:
  * - The test user (test@preview.local / TestPassword123) must exist
- * - This is seeded automatically in Supabase preview branches via seed.sql
+ * - This is seeded automatically in Neon preview branches via seed.sql
  */
 test.describe("avatar upload @avatar", () => {
 	// Use BASE_URL env var if provided, otherwise use the default from playwright.config.ts
