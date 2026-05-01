@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - Read
   - Grep
+  - Glob
 ---
 
 # GitHub CLI

@@ -1,6 +1,6 @@
 ---
 name: managing-linear
-description: Linear integration with CLI helpers (tooling/scripts/src/linear/) for managing projects, milestones, and issues through state workflow (Inbox→Ready→In Progress→Done), dependencies, and operations. Use when working with Linear tickets, starting issues, or managing project dependencies.
+description: Linear integration with CLI helpers (tooling/scripts/src/linear/) for managing projects, milestones, issues, and custom views through state workflow (Inbox→Ready→In Progress→Done), dependencies, and operations. Use when working with Linear tickets, starting issues, listing ready-for-work views, or managing project dependencies.
 allowed-tools:
   - Bash
   - Read

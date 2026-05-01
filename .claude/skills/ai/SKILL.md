@@ -8,6 +8,7 @@ allowed-tools:
   - Write
   - Grep
   - Glob
+  - WebFetch
 ---
 
 # AI Integration Skill
