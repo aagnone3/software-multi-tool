@@ -1,6 +1,6 @@
 ---
 name: debugging-applications
-description: Debugs applications across platforms (Vercel, Neon) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring. Use when the app is broken, database queries fail, auth issues arise, preview environments are misconfigured, or investigating performance problems.
+description: Debugs applications across platforms (Vercel, Neon) and environments (local, preview, production) with log access, error patterns, connection troubleshooting, and performance monitoring. Use when the app is broken, database queries fail, auth issues arise, preview environments are misconfigured, investigating performance problems, or diagnosing TypeScript and build failures.
 allowed-tools:
   - Read
   - Grep
