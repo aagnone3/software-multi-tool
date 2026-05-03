@@ -277,7 +277,7 @@ isMultiTenantPath("organizations/abc/logo.png"); // true
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Implementing file upload features (avatars, logos, documents)
 - Adding new upload types to the application
