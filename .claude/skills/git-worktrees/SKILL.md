@@ -161,14 +161,15 @@ For comprehensive details, see these supporting files:
 
 ## When to Use This Skill
 
-Use git worktrees when you need to:
+Invoke this skill when:
 
-- **Parallel development**: Work on multiple features simultaneously (PRA-123 and PRA-456)
-- **PR review**: Check out and test pull requests locally while preserving your current work
-- **Hotfix workflow**: Create urgent fixes from main while continuing feature development
-- **Isolated testing**: Run integration tests in parallel across different branches
+- Starting a new feature, fix, or chore (required for all feature work in this repository)
+- **Parallel development**: Working on multiple features simultaneously (PRA-123 and PRA-456)
+- **PR review**: Checking out and testing pull requests locally while preserving current work
+- **Hotfix workflow**: Creating urgent fixes from main while continuing feature development
+- **Isolated testing**: Running integration tests in parallel across different branches
 
-**Activation keywords**: worktree, worktrees, git worktree, parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work
+**Activation keywords**: worktree, worktrees, git worktree, parallel development, multiple branches, review PR locally, hotfix, isolated environment, concurrent work, start feature, create branch
 
 ## Related Skills
 
