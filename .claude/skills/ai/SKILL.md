@@ -325,7 +325,7 @@ Invoke this skill when:
 - Working with the chat system
 - Troubleshooting AI integration issues
 
-**Activation keywords**: AI, LLM, Claude, Anthropic, OpenAI, processor, model selection, streaming, executePrompt, agent-sdk, @anthropic-ai/sdk, @repo/agent-sdk, @repo/ai, anthropic import, streamText, generateText, useChat, claude_agent_sdk
+**Activation keywords**: AI, LLM, Claude, Anthropic, OpenAI, processor, model selection, streaming, executePrompt, agent-sdk, @anthropic-ai/sdk, @repo/agent-sdk, @repo/ai, anthropic import, streamText, generateText, useChat
 
 ## Related Skills
 
