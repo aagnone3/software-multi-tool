@@ -213,7 +213,7 @@ See [examples.md](examples.md) for detailed CLI usage examples and common comman
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Querying or updating Linear issues, projects, milestones, or dependencies via CLI
 - Looking up issue details or state (e.g., "what's in PRA-21?")
