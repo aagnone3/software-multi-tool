@@ -255,7 +255,7 @@ The icon color system integrates with the brand color palette defined in `toolin
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
 - Adding icons to UI components
 - Choosing appropriate icon sizes for different contexts
