@@ -1,6 +1,6 @@
 ---
 name: managing-cicd
-description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Neon database branching, preview environment creation, environment variable syncing, and API proxy patterns. Use when debugging CI failures, understanding preview environments, or configuring deployment variables.
+description: Manages CI/CD with GitHub Actions, Vercel preview deployments, Neon database branching, preview environment creation, and environment variable syncing. Use when debugging CI failures, understanding preview environments, or configuring deployment variables.
 allowed-tools:
   - Read
   - Grep
