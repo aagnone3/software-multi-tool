@@ -317,15 +317,15 @@ See [examples.md](examples.md) for complete landing page examples with annotated
 
 ## When to Use This Skill
 
-Use this skill when:
+Invoke this skill when:
 
-- Designing landing page backgrounds
-- Creating animated hero sections
-- Implementing decorative visual patterns
+- Designing or updating landing page backgrounds and hero sections
+- Creating animated backgrounds with gradient orbs, geometric shapes, or dot grids
+- Implementing decorative visual patterns and CSS keyframe animations
 - Adding depth and visual interest to marketing pages
-- Enhancing page aesthetics without compromising performance
+- Working with the `AnimatedBackground` component or animated layout patterns
 
-**Activation keywords**: landing page, background, animated background, hero section, gradient orbs, floating shapes, visual design, marketing page
+**Activation keywords**: landing page, background, animated background, hero section, gradient orbs, floating shapes, visual design, marketing page, CSS animations, AnimatedBackground, decorative patterns, drift animation, geometric shapes
 
 ## Related Skills
 
