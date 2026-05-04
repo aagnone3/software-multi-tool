@@ -1,6 +1,6 @@
 ---
 name: managing-storage
-description: File storage with S3 providing multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and validation via @repo/storage package. Use when implementing file uploads, working with storage providers, or managing multi-tenant file access.
+description: File storage with S3 or S3-compatible services (R2, MinIO) providing multi-tenant path isolation (organizations/{orgId}/...), upload patterns, signed URLs, and path validation via @repo/storage package. Use when implementing file uploads, configuring S3 credentials, working with storage providers, or managing multi-tenant file access.
 allowed-tools:
   - Read
   - Edit
@@ -285,7 +285,7 @@ Use this skill when:
 - Migrating existing files to new path conventions
 - Debugging file access issues
 
-**Activation keywords**: file upload, storage, avatar, logo, s3, bucket, signed url, multi-tenant paths
+**Activation keywords**: file upload, storage, avatar, logo, s3, bucket, signed url, multi-tenant paths, R2, MinIO, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_ENDPOINT, image proxy
 
 ## Related Skills
 
