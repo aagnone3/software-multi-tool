@@ -249,7 +249,7 @@ Invoke this skill when:
 - Troubleshooting environment-specific issues
 - Starting the local Postgres container for full-stack development
 
-**Activation keywords**: local dev, preview environment, environment setup, env variables, docker compose, pnpm setup, pnpm db:start, database connection
+**Activation keywords**: local dev, preview environment, environment setup, env variables, docker compose, pnpm setup, pnpm db:start, database connection, EMFILE, too many open files, ulimit, port 54322, port conflict, pnpm dev
 
 ## Related Skills
 
