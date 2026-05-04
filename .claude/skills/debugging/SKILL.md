@@ -402,7 +402,7 @@ Invoke this skill when:
 - Performance investigation
 - Tracing requests across services
 
-**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout, migration error, database query, prisma error, database failing, TypeScript error, type error, build error, build failure, runtime error, deployment failed
+**Activation keywords**: broken, error, not loading, connection refused, auth failing, preview broken, slow, 404, 500, timeout, migration error, database query, prisma error, database failing, TypeScript error, type error, build error, build failure, runtime error, deployment failed, EMFILE, too many open files, inngest timeout
 
 ## Related Skills
 
