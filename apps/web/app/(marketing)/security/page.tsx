@@ -89,7 +89,7 @@ const securityPillars = [
 		icon: "🌐",
 		title: "Trusted Infrastructure",
 		description:
-			"Hosted on Vercel and Supabase — enterprise-grade cloud providers with SOC 2 Type II certifications, 99.9% uptime SLAs, and global CDN delivery.",
+			"Hosted on Vercel and Neon — enterprise-grade cloud providers with SOC 2 Type II certifications, 99.9% uptime SLAs, and global CDN delivery.",
 	},
 	{
 		icon: "🛡️",
@@ -110,7 +110,7 @@ const faqs = [
 	},
 	{
 		q: "Where is my data stored?",
-		a: "Data is stored in secure cloud infrastructure (Supabase / AWS), encrypted at rest and in transit. You can request deletion of your account and all associated data at any time.",
+		a: "Data is stored in secure cloud infrastructure (Neon / AWS), encrypted at rest and in transit. You can request deletion of your account and all associated data at any time.",
 	},
 	{
 		q: "How long are files kept?",
@@ -181,7 +181,7 @@ export default function SecurityPage() {
 								detail: "Edge network & deployment",
 							},
 							{
-								label: "Supabase",
+								label: "Neon",
 								detail: "SOC 2 Type II database",
 							},
 							{

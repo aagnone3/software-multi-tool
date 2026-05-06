@@ -1,5 +1,5 @@
 # Local development database
-# Replaces `supabase start` with a lightweight PostgreSQL container.
+# Lightweight PostgreSQL container for local dev (mirrors the Neon-hosted prod schema).
 #
 # Usage:
 #   docker compose up -d      # Start database

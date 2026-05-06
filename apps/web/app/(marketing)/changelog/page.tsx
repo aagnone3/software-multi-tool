@@ -196,10 +196,6 @@ const releases = [
 			},
 			{
 				type: "improvement" as const,
-				text: "Repo-owned Supabase CLI fallback so global install is optional",
-			},
-			{
-				type: "improvement" as const,
 				text: "Added pnpm worktree:create / resume / list / remove for parallel feature development",
 			},
 		],
