@@ -4,6 +4,8 @@ description: Complete Linear development workflow including issue selection from
 allowed-tools:
   - Bash
   - Read
+  - Edit
+  - Write
   - Grep
   - Glob
 ---
