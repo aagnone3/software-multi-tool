@@ -1,6 +1,6 @@
 ---
 name: reflecting-for-skill-updates
-description: Skill and documentation improvement through gap analysis when bugs reveal missing docs, debugging exposes skill gaps, workflows have missing steps, or learnings need capturing. Use after debugging sessions, workflow gaps, or when discovering gotchas.
+description: Updates skills and documentation when bugs expose missing knowledge, debugging reveals undocumented behavior, workflows have missing steps, or implementation learnings need capturing. Use after debugging sessions, post-implementation reviews, or when discovering undocumented edge cases.
 allowed-tools:
   - Read
   - Edit
@@ -183,10 +183,10 @@ Invoke this skill when:
 - You had to **debug something that a skill should have prevented**
 - Configuration was **inconsistent** between components (e.g., different database URLs)
 - A workflow step was **missing** from documented procedures
-- You discovered a **gotcha** that others will likely hit too
+- You discovered an **undocumented edge case** that others will likely encounter
 - The user explicitly asks: "Any skills need updating?"
 
-**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, gotcha, post-mortem, post-implementation review, knowledge capture, what did we learn, update SKILL.md, missing documentation
+**Activation keywords**: reflect, skill update, documentation gap, prevent this mistake, improve skills, lessons learned, skill improvement, documentation update, update skill, improve documentation, skill gap, undocumented behavior, post-mortem, post-implementation review, knowledge capture, what did we learn, update SKILL.md, missing documentation
 
 ## Related Skills
 
