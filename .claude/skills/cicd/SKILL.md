@@ -155,7 +155,7 @@ Invoke this skill when:
 - Troubleshooting GitHub Actions workflows
 - Understanding Vercel/Neon integration
 
-**Activation keywords**: CI, CD, GitHub Actions, preview environment, deployment, Vercel deploy, Neon branch, PR checks, pipeline
+**Activation keywords**: CI, CD, continuous integration, continuous deployment, GitHub Actions, GitHub workflow, preview environment, deployment, Vercel deploy, Neon branch, PR checks, pipeline, CI failure, workflow failure, check failure, deploy preview
 
 ## Related Skills
 
