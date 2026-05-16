@@ -1,6 +1,6 @@
 ---
 name: managing-prisma-migrations
-description: Prisma migration workflows with safety validation, advisory locking, staging automation, and review processes. Use when modifying schema.prisma, creating migrations, or debugging migration issues.
+description: Prisma migration workflows with safety validation, advisory locking, staging automation, and review processes. Use when modifying schema.prisma, creating or staging migrations, debugging migration issues, resolving schema drift, or diagnosing "relation does not exist" / "column does not exist" errors.
 allowed-tools:
   - Bash
   - Read
@@ -422,3 +422,5 @@ Invoke this skill when:
 - **cicd**: Prisma migration deploy step in CI (preview branches on Neon, production on main)
 - **debugging**: Troubleshooting migration and database issues
 - **better-auth**: Auth schema management and migrations
+
+See [examples.md](examples.md) for real-world migration examples.
