@@ -275,6 +275,8 @@ function SafeComponent() {
 
 ## Common Patterns
 
+See [patterns.md](patterns.md) for complete usage patterns and examples.
+
 ### Progressive Rollout
 
 ```typescript
