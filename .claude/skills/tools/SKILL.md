@@ -345,3 +345,4 @@ See [examples.md](examples.md) for additional tool registry configuration exampl
 - **feature-flags**: Feature gating for tools
 - **storage**: File upload patterns for tools
 - **debugging**: Troubleshooting tool issues
+- **linear-workflow**: Development workflow for registering and shipping new tools via Linear tickets
