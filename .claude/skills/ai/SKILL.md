@@ -334,6 +334,7 @@ Invoke this skill when:
 - **tools**: Registering AI-powered tools in the tool registry
 - **feature-flags**: A/B testing AI features and gradual rollouts
 - **storage**: Storing AI-generated content and uploaded files for processing
+- **claude-api**: General Claude API / Anthropic SDK usage outside this project's packages (caching, model migration, prompt tuning)
 
 ## Additional Resources
 
