@@ -332,3 +332,5 @@ Use this skill when:
 - **iconography**: Icon sizing and color system
 - **typography**: Font system and text styling
 - **architecture**: Component organization patterns and marketing layout structure
+- **analytics**: Event tracking for marketing page interactions and conversion funnels
+- **sub-app**: Building new tools that may include landing/marketing pages
