@@ -387,6 +387,8 @@ Invoke this skill when:
 - **analytics**: Event tracking for tool usage
 - **feature-flags**: A/B testing tool features
 - **debugging**: Troubleshooting tool implementation issues
+- **ai**: AI processor integration for tools using Claude or OpenAI models
+- **linear-workflow**: Development workflow for implementing tool features via Linear tickets
 
 ## Additional Resources
 
