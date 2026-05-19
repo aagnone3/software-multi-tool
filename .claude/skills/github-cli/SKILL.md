@@ -1,6 +1,6 @@
 ---
 name: managing-github-cli
-description: GitHub CLI workflows for PRs, issues, and repository operations with account switching (aagnone3), authentication troubleshooting, and API access. Requires aagnone3 account for all operations (gh auth switch -u aagnone3). Use when creating pull requests, managing issues, or switching GitHub accounts.
+description: GitHub CLI workflows for PRs, issues, and repository operations with aagnone3 account management, authentication troubleshooting, and GitHub API access. Use when creating pull requests, managing issues, switching GitHub accounts, or troubleshooting repository access.
 allowed-tools:
   - Bash
   - Read
