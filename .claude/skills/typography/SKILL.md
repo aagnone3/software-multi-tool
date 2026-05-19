@@ -340,7 +340,7 @@ Invoke this skill when:
 - Updating email typography
 - Working with Tailwind typography utilities
 
-**Activation keywords**: font, typography, typeface, font loading, text style, web font, Montserrat, Google Fonts, next/font, email font
+**Activation keywords**: font, typography, typeface, font loading, text style, web font, Montserrat, Google Fonts, next/font, email font, change font, switching fonts, font weight, Tailwind font, font configuration, font optimization
 
 ## Related Skills
 
