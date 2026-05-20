@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@aagnone3/hubspot-forms": "0.1.0",
+		"@aagnone3/hubspot-forms": "0.2.0",
 		"@mozilla/readability": "0.5.0",
 		"@orpc/client": "1.8.6",
 		"@orpc/json-schema": "1.8.6",

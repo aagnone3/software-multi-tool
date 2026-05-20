@@ -203,7 +203,7 @@ importers:
         version: 4.22.1
       better-auth:
         specifier: 1.4.18
-        version: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       boring-avatars:
         specifier: 2.0.4
         version: 2.0.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -550,8 +550,8 @@ importers:
   packages/api:
     dependencies:
       '@aagnone3/hubspot-forms':
-        specifier: 0.1.0
-        version: 0.1.0(zod@4.3.6)
+        specifier: 0.2.0
+        version: 0.2.0(zod@4.3.6)
       '@mozilla/readability':
         specifier: 0.5.0
         version: 0.5.0
@@ -699,7 +699,7 @@ importers:
         version: link:../utils
       better-auth:
         specifier: 1.4.18
-        version: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       cookie:
         specifier: 1.1.1
         version: 1.1.1
@@ -1092,8 +1092,8 @@ importers:
 
 packages:
 
-  '@aagnone3/hubspot-forms@0.1.0':
-    resolution: {integrity: sha512-Wj9Kk91nC62NrRi7klDDMMPaapXpRYQp66SRU8XMumCT8ODnxxcnkFMY68ehk+IftQKTQp1+YNerlZqq29KmRw==, tarball: https://npm.pkg.github.com/download/@aagnone3/hubspot-forms/0.1.0/8abc545b10f7bc7c8f8d1173a72651394c0f81bc}
+  '@aagnone3/hubspot-forms@0.2.0':
+    resolution: {integrity: sha512-aJdOTrYNes4ELZGsFNcR9dDoPS7ETuyj+cRuEEpGNCrxgeksf9QEIB83p64x47G/6SFpRo6Ul1TFH2eXi0N/4A==, tarball: https://npm.pkg.github.com/download/@aagnone3/hubspot-forms/0.2.0/009c521785f66e2d25c4f3d4907644da4fe3011b}
     peerDependencies:
       zod: ^3
 
@@ -10283,7 +10283,7 @@ packages:
 
 snapshots:
 
-  '@aagnone3/hubspot-forms@0.1.0(zod@4.3.6)':
+  '@aagnone3/hubspot-forms@0.2.0(zod@4.3.6)':
     dependencies:
       zod: 4.3.6
 
@@ -10972,7 +10972,7 @@ snapshots:
       '@better-fetch/fetch': 1.1.21
       '@simplewebauthn/browser': 13.3.0
       '@simplewebauthn/server': 13.3.0
-      better-auth: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      better-auth: 1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       better-call: 1.1.8(zod@4.3.6)
       nanostores: 1.2.0
       zod: 4.3.6
@@ -15933,7 +15933,7 @@ snapshots:
     dependencies:
       tweetnacl: 0.14.5
 
-  better-auth@1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
+  better-auth@1.4.18(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@opentelemetry/api@1.9.0)(@prisma/client@6.19.2(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.15.6)(kysely@0.28.12)(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3)))(next@15.5.15(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(pg@8.16.3)(prisma@6.19.0(typescript@5.9.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@better-auth/core': 1.4.18(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.8(zod@4.3.6))(jose@6.2.1)(kysely@0.28.12)(nanostores@1.2.0)
       '@better-auth/telemetry': 1.4.18(@better-auth/core@1.4.18(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.8(zod@4.3.6))(jose@6.2.1)(kysely@0.28.12)(nanostores@1.2.0))
