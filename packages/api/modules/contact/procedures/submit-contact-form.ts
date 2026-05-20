@@ -107,7 +107,14 @@ export const submitContactForm = publicProcedure
 				hubspotSucceeded = result.ok;
 				if (!result.ok) {
 					logger.error(
-						{ status: result.status },
+						{
+							status: result.status,
+							errorType: result.errorType,
+							message: result.message,
+							correlationId: result.correlationId,
+							errors: result.errors,
+							rawBody: result.rawBody,
+						},
 						"hubspot_submission_failed",
 					);
 				}

@@ -6,6 +6,10 @@ on:
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  # Suppresses pnpm's "Failed to replace env in config" warning that .npmrc
+  # references for GitHub Packages installs. Safe to set workflow-wide: the
+  # name is unique to this repo, so nothing else reads it.
+  GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   contents: read
@@ -60,13 +64,13 @@ jobs:
             --to-schema-datamodel prisma/schema.prisma \
             --script 2>&1) || true
 
-          # Filter out Prisma upgrade notifications (they appear as box-drawing characters)
-          # Only keep lines that look like SQL or the empty migration message
-          DRIFT_CLEAN=$(echo "$DRIFT" | grep -v "^┌\|^│\|^└\|Update available\|pris.ly\|npm i" || true)
+          # Strip Prisma upgrade banners (box-drawing chars), pnpm/Node warnings,
+          # and other stderr noise so only candidate SQL lines remain.
+          DRIFT_CLEAN=$(echo "$DRIFT" | grep -Ev "^(┌|│|└)|Update available|pris\.ly|npm i|^[[:space:]]*(WARN|ELIFECYCLE|Warning:)" || true)
 
-          # Check if there's any drift (look for actual SQL statements beyond empty migration comment)
-          # An empty migration only has "-- This is an empty migration."
-          HAS_DRIFT=$(echo "$DRIFT_CLEAN" | grep -v "^--\|^$" | head -1 || true)
+          # An actual drift line will start with whitespace+letter (SQL DDL/DML).
+          # Empty migrations only have comment lines starting with --.
+          HAS_DRIFT=$(echo "$DRIFT_CLEAN" | grep -E "^[[:space:]]*[A-Za-z]" | grep -v "^--" | head -1 || true)
 
           if [ -n "$HAS_DRIFT" ]; then
             echo "::error::Schema drift detected! The schema.prisma file differs from the migration history."
