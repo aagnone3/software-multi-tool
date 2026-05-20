@@ -102,8 +102,14 @@ jobs:
     name: Run e2e tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    # Only run E2E tests on PRs from the same repo (not forks) since we need secrets
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # E2E needs a Vercel preview deploy + matching Neon branch, both of
+    # which are gated on the 'preview' label (see preview-deploy.yml).
+    # Without the label nothing creates the Neon branch, so the job
+    # would otherwise wait 15 minutes and skip. Skip it up front instead.
+    # Also restricted to same-repo PRs so we have secrets.
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'preview')
     env:
       BETTER_AUTH_SECRET: ci-test-secret-not-for-production
     steps:
