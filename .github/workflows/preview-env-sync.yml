@@ -31,6 +31,7 @@ concurrency:
 permissions:
   pull-requests: write
   contents: read
+  packages: read
   checks: write
 
 jobs:
@@ -63,6 +64,8 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Determine PR number, branch, and SHA
@@ -96,7 +99,7 @@ jobs:
           VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
           VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
           # GitHub API (for creating check runs)
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Post status comment

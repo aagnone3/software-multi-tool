@@ -7,6 +7,10 @@ on:
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   schema-drift:
     name: Detect schema drift
@@ -36,6 +40,8 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install
       - name: Check for schema drift
         run: |
@@ -103,6 +109,8 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install && pnpm --filter database generate
       - name: Install Playwright browsers
         run: pnpm --filter @repo/e2e exec playwright install chromium --with-deps
@@ -192,6 +200,8 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install && pnpm --filter database generate
       - name: Build content-collections
         run: pnpm --filter web build
@@ -211,6 +221,8 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install && pnpm --filter database generate
       - name: Run unit tests
         env:

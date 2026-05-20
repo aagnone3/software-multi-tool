@@ -21,14 +21,28 @@ import {
 import { Input } from "@ui/components/input";
 import { Textarea } from "@ui/components/textarea";
 import { MailCheckIcon, MailIcon } from "lucide-react";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import { TurnstileWidget } from "./TurnstileWidget";
+
+function readHubspotUtk(): string | undefined {
+	if (typeof document === "undefined") {
+		return undefined;
+	}
+	const match = document.cookie.match(/(?:^|;\s*)hubspotutk=([^;]+)/);
+	return match?.[1];
+}
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function ContactForm() {
 	const contactFormMutation = useMutation(
 		orpc.contact.submit.mutationOptions(),
 	);
 	const { track } = useProductAnalytics();
+	const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
+		undefined,
+	);
 
 	const form = useForm<ContactFormValues>({
 		resolver: zodResolver(contactFormSchema),
@@ -36,6 +50,7 @@ export function ContactForm() {
 			name: "",
 			email: "",
 			message: "",
+			website: "",
 		},
 	});
 
@@ -44,8 +59,28 @@ export function ContactForm() {
 			name: "contact_form_submitted",
 			props: { has_message: values.message.length > 0 },
 		});
+
+		if (TURNSTILE_SITE_KEY && !turnstileToken) {
+			form.setError("root", {
+				message: "Please complete the captcha before sending.",
+			});
+			return;
+		}
+
 		try {
-			await contactFormMutation.mutateAsync(values);
+			await contactFormMutation.mutateAsync({
+				...values,
+				turnstileToken,
+				hutk: readHubspotUtk(),
+				pageUri:
+					typeof window !== "undefined"
+						? window.location.href
+						: undefined,
+				pageName:
+					typeof document !== "undefined"
+						? document.title
+						: undefined,
+			});
 			track({ name: "contact_form_succeeded", props: {} });
 		} catch {
 			track({ name: "contact_form_failed", props: {} });
@@ -55,6 +90,10 @@ export function ContactForm() {
 			});
 		}
 	});
+
+	const handleTurnstileToken = useCallback((token: string | undefined) => {
+		setTurnstileToken(token);
+	}, []);
 
 	return (
 		<div>
@@ -122,6 +161,34 @@ export function ContactForm() {
 								</FormItem>
 							)}
 						/>
+
+						{/* Honeypot — hidden from real users, visible to bots */}
+						<FormField
+							control={form.control}
+							name="website"
+							render={({ field }) => (
+								<FormItem
+									className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+									aria-hidden="true"
+								>
+									<FormLabel>Website</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											tabIndex={-1}
+											autoComplete="off"
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+
+						{TURNSTILE_SITE_KEY ? (
+							<TurnstileWidget
+								siteKey={TURNSTILE_SITE_KEY}
+								onToken={handleTurnstileToken}
+							/>
+						) : null}
 
 						<Button
 							type="submit"
