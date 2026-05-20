@@ -25,6 +25,8 @@ jobs:
           node-version: lts/*
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install --frozen-lockfile
       - name: Run database migrations
         env:

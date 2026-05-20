@@ -37,6 +37,8 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
