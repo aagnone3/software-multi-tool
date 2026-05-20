@@ -30,6 +30,9 @@ vi.mock("@repo/auth", () => ({
 
 const deleteToolJobMock = vi.hoisted(() => vi.fn());
 const deleteAudioFromStorageMock = vi.hoisted(() => vi.fn());
+const findCachedJobMock = vi.hoisted(() => vi.fn(async () => null));
+const markJobFailedMock = vi.hoisted(() => vi.fn());
+const dispatchToolJobMock = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("@repo/database", () => ({
 	createToolJob: createToolJobMock,
@@ -38,6 +41,15 @@ vi.mock("@repo/database", () => ({
 	getToolJobsBySessionId: getToolJobsBySessionIdMock,
 	cancelToolJob: cancelToolJobMock,
 	deleteToolJob: deleteToolJobMock,
+	findCachedJob: findCachedJobMock,
+	markJobFailed: markJobFailedMock,
+	db: { file: { create: vi.fn() } },
+}));
+
+vi.mock("@repo/jobs", () => ({
+	dispatchToolJob: dispatchToolJobMock,
+	// Treat every slug used in this router test as known so dispatch fires.
+	isKnownToolSlug: (_slug: string) => true,
 }));
 
 vi.mock("../speaker-separation/lib/audio-storage", () => ({
