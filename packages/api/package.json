@@ -12,6 +12,7 @@
 		"@repo/auth": "workspace:*",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
+		"@repo/jobs": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"@repo/mail": "workspace:*",
 		"@repo/payments": "workspace:*",

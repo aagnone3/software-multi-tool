@@ -1,17 +1,32 @@
 import { ORPCError } from "@orpc/client";
-import { createToolJob, findCachedJob } from "@repo/database";
+import { createToolJob, findCachedJob, markJobFailed } from "@repo/database";
 import { isStorageConfigured } from "@repo/storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Hoisted so the same vi.fn is reused across vi.resetModules() in beforeEach.
+const { dispatchToolJob } = vi.hoisted(() => ({
+	dispatchToolJob: vi.fn(async () => undefined),
+}));
 
 vi.mock("@repo/database", () => ({
 	createToolJob: vi.fn(),
 	findCachedJob: vi.fn(),
+	markJobFailed: vi.fn(),
 	db: {
 		file: {
 			create: vi.fn(),
 		},
 	},
 }));
+
+vi.mock("@repo/jobs", async () => {
+	const actual =
+		await vi.importActual<typeof import("@repo/jobs")>("@repo/jobs");
+	return {
+		...actual,
+		dispatchToolJob,
+	};
+});
 
 vi.mock("@repo/logs", () => ({
 	logger: { info: vi.fn(), debug: vi.fn(), error: vi.fn() },
@@ -356,5 +371,171 @@ describe("createJob procedure", () => {
 				userId: undefined,
 			}),
 		);
+	});
+
+	it("dispatches the Inngest event after creating the job", async () => {
+		vi.mocked(findCachedJob).mockResolvedValue(null);
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-dispatch-1",
+			status: "PENDING",
+		} as never);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: null },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await handler({
+			input: {
+				toolSlug: "news-analyzer",
+				input: { url: "https://example.com" },
+				priority: undefined,
+				sessionId: undefined,
+			},
+			context: { headers: new Headers() },
+		});
+
+		expect(dispatchToolJob).toHaveBeenCalledWith(
+			"news-analyzer",
+			"job-dispatch-1",
+			{ url: "https://example.com" },
+		);
+		expect(markJobFailed).not.toHaveBeenCalled();
+	});
+
+	it("marks job FAILED and throws when dispatch fails", async () => {
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-dispatch-fail",
+			status: "PENDING",
+		} as never);
+		vi.mocked(dispatchToolJob).mockRejectedValueOnce(
+			new Error("inngest down"),
+		);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: null },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await expect(
+			handler({
+				input: {
+					toolSlug: "contract-analyzer",
+					input: { text: "..." },
+					priority: undefined,
+					sessionId: undefined,
+				},
+				context: { headers: new Headers() },
+			}),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+
+		expect(markJobFailed).toHaveBeenCalledWith(
+			"job-dispatch-fail",
+			"Failed to enqueue background processing",
+		);
+	});
+
+	it("marks job FAILED with BAD_REQUEST for unknown tool slugs", async () => {
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-unknown",
+			status: "PENDING",
+		} as never);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: null },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await expect(
+			handler({
+				input: {
+					toolSlug: "not-a-real-tool",
+					input: {},
+					priority: undefined,
+					sessionId: undefined,
+				},
+				context: { headers: new Headers() },
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+		expect(dispatchToolJob).not.toHaveBeenCalled();
+		expect(markJobFailed).toHaveBeenCalledWith(
+			"job-unknown",
+			expect.stringContaining("not-a-real-tool"),
+		);
+	});
+
+	it("does not dispatch when a cached job is returned", async () => {
+		const cachedJob = { id: "cached-2", status: "COMPLETED" };
+		vi.mocked(findCachedJob).mockResolvedValue(cachedJob as never);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: null },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await handler({
+			input: {
+				toolSlug: "news-analyzer",
+				input: { url: "https://x.com" },
+				priority: undefined,
+				sessionId: undefined,
+			},
+			context: { headers: new Headers() },
+		});
+
+		expect(dispatchToolJob).not.toHaveBeenCalled();
 	});
 });

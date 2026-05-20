@@ -1,5 +1,12 @@
 import { ORPCError } from "@orpc/client";
-import { createToolJob, db, findCachedJob, type Prisma } from "@repo/database";
+import {
+	createToolJob,
+	db,
+	findCachedJob,
+	markJobFailed,
+	type Prisma,
+} from "@repo/database";
+import { dispatchToolJob, isKnownToolSlug } from "@repo/jobs";
 import { logger } from "@repo/logs";
 import { isStorageConfigured } from "@repo/storage";
 import { publicProcedure } from "../../../orpc/procedures";
@@ -200,9 +207,45 @@ export const createJob = publicProcedure
 			`[CreateJob] Job created successfully: ${job.id} (status: ${job.status})`,
 		);
 
-		// Job processing is triggered by Inngest events from the caller
-		// The job record is created in PENDING status
-		// Inngest functions in apps/web/inngest/ will process the job
+		// Dispatch the Inngest event so the matching function in
+		// apps/web/inngest/functions/ picks up the job. Without this, the
+		// job sits in PENDING forever until the maintenance cron flips it
+		// to FAILED 30 minutes later.
+		if (!isKnownToolSlug(toolSlug)) {
+			logger.error(
+				`[CreateJob] No Inngest dispatcher registered for tool: ${toolSlug}`,
+			);
+			await markJobFailed(
+				job.id,
+				`No background processor registered for tool: ${toolSlug}`,
+			);
+			throw new ORPCError("BAD_REQUEST", {
+				message: `Unsupported tool: ${toolSlug}`,
+			});
+		}
+
+		try {
+			await dispatchToolJob(
+				toolSlug,
+				job.id,
+				processedInput as Record<string, unknown>,
+			);
+		} catch (error) {
+			logger.error(
+				`[CreateJob] Failed to dispatch ${toolSlug} for job ${job.id}`,
+				{
+					error:
+						error instanceof Error ? error.message : String(error),
+				},
+			);
+			await markJobFailed(
+				job.id,
+				"Failed to enqueue background processing",
+			);
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "Could not start job processing",
+			});
+		}
 
 		return { job };
 	});
