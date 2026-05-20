@@ -16,6 +16,7 @@ permissions:
   contents: read
   pull-requests: write
   deployments: write
+  packages: read
 
 jobs:
   # Check if the preview label is present

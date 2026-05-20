@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: deploy-prod-database
   cancel-in-progress: false

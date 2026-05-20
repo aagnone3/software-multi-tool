@@ -13,6 +13,10 @@ on:
           Software Multitool monorepo. Review AGENTS.md for repository conventions, run
           any necessary checks, and summarize the work you perform.
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   codex:
     name: Execute Codex CLI
