@@ -17,8 +17,9 @@ export const submitContactForm = publicProcedure
 	.use(localeMiddleware)
 	.handler(
 		async ({ input: { email, name, message }, context: { locale } }) => {
+			let success = false;
 			try {
-				await sendEmail({
+				success = await sendEmail({
 					to: config.contactForm.to,
 					locale,
 					subject: config.contactForm.subject,
@@ -26,6 +27,10 @@ export const submitContactForm = publicProcedure
 				});
 			} catch (error) {
 				logger.error(error);
+				throw new ORPCError("INTERNAL_SERVER_ERROR");
+			}
+
+			if (!success) {
 				throw new ORPCError("INTERNAL_SERVER_ERROR");
 			}
 		},

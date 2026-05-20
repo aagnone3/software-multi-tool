@@ -60,6 +60,22 @@ describe("mail providers", () => {
 				}),
 			).rejects.toThrow("Could not send email");
 		});
+
+		it("falls back to text when html body is empty (Plunk rejects empty body)", async () => {
+			mockFetch.mockResolvedValueOnce({ ok: true });
+			vi.stubEnv("PLUNK_API_KEY", "test-plunk-key");
+
+			const { send } = await import("./plunk");
+			await send({
+				to: "user@example.com",
+				subject: "Test",
+				html: "",
+				text: "Plain text body",
+			});
+
+			const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+			expect(requestBody.body).toBe("Plain text body");
+		});
 	});
 
 	describe("resend provider", () => {

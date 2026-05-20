@@ -98,6 +98,22 @@ describe("Contact Router", () => {
 			});
 		});
 
+		it("throws INTERNAL_SERVER_ERROR when sendEmail returns false (provider rejected)", async () => {
+			mailFixture.sendEmail.mockResolvedValueOnce(false);
+
+			const client = createClient();
+
+			await expect(
+				client({
+					email: "test@example.com",
+					name: "John Doe",
+					message: "Provider rejected the send",
+				}),
+			).rejects.toMatchObject({
+				code: "INTERNAL_SERVER_ERROR",
+			});
+		});
+
 		it("rejects invalid email format", async () => {
 			const client = createClient();
 

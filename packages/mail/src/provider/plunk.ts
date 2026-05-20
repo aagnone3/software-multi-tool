@@ -15,7 +15,7 @@ export const send: SendEmailHandler = async ({ to, subject, html, text }) => {
 			from,
 			to,
 			subject,
-			body: html,
+			body: html || text,
 			text,
 		}),
 	});
