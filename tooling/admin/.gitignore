@@ -1,0 +1,4 @@
+# Credential files — NEVER commit.
+# Filenames are deliberately chosen to NOT match the **/.env.*local glob
+# in turbo.json, so other tools won't pick them up.
+.secrets/

@@ -1,0 +1,23 @@
+{
+	"name": "@repo/admin",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Operational CLI for ad-hoc prod queries. Owns credential isolation.",
+	"scripts": {
+		"admin": "tsx ./src/cli.ts"
+	},
+	"dependencies": {
+		"chalk": "5.4.1",
+		"cli-table3": "0.6.5",
+		"commander": "13.1.0",
+		"dotenv": "16.6.1",
+		"pg": "8.13.1"
+	},
+	"devDependencies": {
+		"@repo/tsconfig": "workspace:*",
+		"@types/node": "25.0.10",
+		"@types/pg": "8.11.10",
+		"tsx": "4.21.0"
+	}
+}
