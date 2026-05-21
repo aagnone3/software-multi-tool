@@ -13,6 +13,7 @@ export {
 	grantSubscriptionCredits,
 	hasCredits,
 	refundCredits,
+	refundCreditsForJob,
 	resetBillingPeriod,
 } from "./service";
 

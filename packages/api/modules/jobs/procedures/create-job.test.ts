@@ -4,9 +4,13 @@ import { isStorageConfigured } from "@repo/storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Hoisted so the same vi.fn is reused across vi.resetModules() in beforeEach.
-const { dispatchToolJob } = vi.hoisted(() => ({
-	dispatchToolJob: vi.fn(async () => undefined),
-}));
+const { dispatchToolJob, deductCredits, refundCreditsForJob } = vi.hoisted(
+	() => ({
+		dispatchToolJob: vi.fn(async () => undefined),
+		deductCredits: vi.fn(async () => ({ id: "tx-1" })),
+		refundCreditsForJob: vi.fn(async () => null),
+	}),
+);
 
 vi.mock("@repo/database", () => ({
 	createToolJob: vi.fn(),
@@ -30,6 +34,12 @@ vi.mock("@repo/jobs", async () => {
 
 vi.mock("@repo/logs", () => ({
 	logger: { info: vi.fn(), debug: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock("../../../lib/credits", () => ({
+	deductCredits,
+	refundCreditsForJob,
+	hasCredits: vi.fn(),
 }));
 
 vi.mock("@repo/storage", () => ({
@@ -537,5 +547,176 @@ describe("createJob procedure", () => {
 		});
 
 		expect(dispatchToolJob).not.toHaveBeenCalled();
+	});
+
+	it("deducts credits when an authenticated user has an active organization", async () => {
+		vi.mocked(findCachedJob).mockResolvedValue(null);
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-credit-1",
+			status: "PENDING",
+		} as never);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: "org-1" },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await handler({
+			input: {
+				toolSlug: "news-analyzer",
+				input: { url: "https://example.com" },
+				priority: undefined,
+				sessionId: undefined,
+			},
+			context: { headers: new Headers() },
+		});
+
+		expect(deductCredits).toHaveBeenCalledWith(
+			expect.objectContaining({
+				organizationId: "org-1",
+				toolSlug: "news-analyzer",
+				jobId: "job-credit-1",
+			}),
+		);
+		expect(dispatchToolJob).toHaveBeenCalled();
+		expect(refundCreditsForJob).not.toHaveBeenCalled();
+	});
+
+	it("skips credit deduction for anonymous users with only a sessionId", async () => {
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-anon-1",
+			status: "PENDING",
+		} as never);
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue(null);
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await handler({
+			input: {
+				toolSlug: "contract-analyzer",
+				input: { text: "..." },
+				priority: undefined,
+				sessionId: "session-abc",
+			},
+			context: { headers: new Headers() },
+		});
+
+		expect(deductCredits).not.toHaveBeenCalled();
+		expect(dispatchToolJob).toHaveBeenCalled();
+	});
+
+	it("rejects with FORBIDDEN when the org has insufficient credits", async () => {
+		vi.mocked(findCachedJob).mockResolvedValue(null);
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-broke-1",
+			status: "PENDING",
+		} as never);
+		deductCredits.mockRejectedValueOnce(new Error("Insufficient credits"));
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: "org-1" },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await expect(
+			handler({
+				input: {
+					toolSlug: "news-analyzer",
+					input: { url: "https://example.com" },
+					priority: undefined,
+					sessionId: undefined,
+				},
+				context: { headers: new Headers() },
+			}),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		expect(markJobFailed).toHaveBeenCalledWith(
+			"job-broke-1",
+			"Insufficient credits",
+		);
+		expect(dispatchToolJob).not.toHaveBeenCalled();
+	});
+
+	it("refunds the deduction when dispatch fails after the deduction", async () => {
+		vi.mocked(findCachedJob).mockResolvedValue(null);
+		vi.mocked(createToolJob).mockResolvedValue({
+			id: "job-refund-1",
+			status: "PENDING",
+		} as never);
+		dispatchToolJob.mockRejectedValueOnce(new Error("inngest down"));
+
+		const authMod = await import("@repo/auth");
+		(
+			authMod.auth.api.getSession as ReturnType<typeof vi.fn>
+		).mockResolvedValue({
+			user: { id: "user-1" },
+			session: { activeOrganizationId: "org-1" },
+		});
+
+		const { createJob } = await import("./create-job");
+		const handler = (
+			createJob as unknown as {
+				"~orpc": { handler: (...args: never) => unknown };
+			}
+		)["~orpc"]?.handler;
+		if (!handler) {
+			return;
+		}
+
+		await expect(
+			handler({
+				input: {
+					toolSlug: "news-analyzer",
+					input: { url: "https://example.com" },
+					priority: undefined,
+					sessionId: undefined,
+				},
+				context: { headers: new Headers() },
+			}),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+
+		expect(deductCredits).toHaveBeenCalled();
+		expect(refundCreditsForJob).toHaveBeenCalledWith(
+			"job-refund-1",
+			expect.stringContaining("Refund"),
+		);
 	});
 });

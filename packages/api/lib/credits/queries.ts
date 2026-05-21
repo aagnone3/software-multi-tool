@@ -57,6 +57,24 @@ export async function findTransactionById(
 }
 
 /**
+ * Find the most recent USAGE/OVERAGE transaction for a tool job. Used to
+ * locate the original deduction so it can be refunded when the job fails.
+ * Returns null if no such transaction exists (e.g. anonymous job, or job
+ * created before credit deduction was wired in).
+ */
+export async function findUsageTransactionByJobId(
+	jobId: string,
+): Promise<CreditTransaction | null> {
+	return db.creditTransaction.findFirst({
+		where: {
+			jobId,
+			type: { in: ["USAGE", "OVERAGE"] },
+		},
+		orderBy: { createdAt: "desc" },
+	});
+}
+
+/**
  * Create a new credit transaction
  */
 export async function createTransaction(
