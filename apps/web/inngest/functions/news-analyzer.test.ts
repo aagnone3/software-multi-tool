@@ -7,6 +7,12 @@ const mockProcessNewsAnalyzerJob = vi.hoisted(() => vi.fn());
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 
+const mockRefundCreditsForJob = vi.hoisted(() => vi.fn(async () => null));
+
+vi.mock("@repo/api/lib/credits", () => ({
+	refundCreditsForJob: mockRefundCreditsForJob,
+}));
+
 vi.mock("@repo/database", () => ({
 	getToolJobById: mockGetToolJobById,
 	markJobCompleted: mockMarkJobCompleted,
@@ -97,6 +103,43 @@ describe("newsAnalyzer inngest function", () => {
 		});
 		expect(mockMarkJobFailed).toHaveBeenCalledWith(toolJobId, "AI error");
 		expect(result.success).toBe(false);
+	});
+
+	it("refunds credits when the job fails", async () => {
+		mockProcessNewsAnalyzerJob.mockResolvedValue({
+			success: false,
+			error: "AI error",
+		});
+		const step = {
+			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
+		};
+		await (
+			newsAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
+			event: { data: { toolJobId } },
+			step,
+		});
+		expect(mockRefundCreditsForJob).toHaveBeenCalledWith(
+			toolJobId,
+			expect.stringContaining("AI error"),
+		);
+	});
+
+	it("does not refund credits when the job succeeds", async () => {
+		const step = {
+			run: vi.fn(async (_: string, fn: () => unknown) => fn()),
+		};
+		await (
+			newsAnalyzer as unknown as (
+				...args: unknown[]
+			) => Promise<Record<string, unknown>>
+		)({
+			event: { data: { toolJobId } },
+			step,
+		});
+		expect(mockRefundCreditsForJob).not.toHaveBeenCalled();
 	});
 
 	it("throws if job not found during validate step", async () => {

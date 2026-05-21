@@ -1,3 +1,4 @@
+import { refundCreditsForJob } from "@repo/api/lib/credits";
 import { processGdprExportJob } from "@repo/api/modules/gdpr-exporter";
 import type { Prisma } from "@repo/database";
 import {
@@ -67,10 +68,23 @@ export const gdprExporter = inngest.createFunction(
 					},
 				);
 			} else {
-				await markJobFailed(
+				const reason = String(result.error ?? "Unknown error");
+				await markJobFailed(toolJobId, reason);
+				await refundCreditsForJob(
 					toolJobId,
-					String(result.error ?? "Unknown error"),
-				);
+					`Refund for failed job: ${reason}`,
+				).catch((refundError) => {
+					logger.error(
+						"[Inngest:GdprExporter] Failed to refund credits",
+						{
+							toolJobId,
+							error:
+								refundError instanceof Error
+									? refundError.message
+									: String(refundError),
+						},
+					);
+				});
 				logger.error("[Inngest:GdprExporter] Job failed", {
 					toolJobId,
 					error: result.error,

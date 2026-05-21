@@ -14,6 +14,12 @@ const mockUpload = vi.hoisted(() => vi.fn());
 const mockSubmit = vi.hoisted(() => vi.fn());
 const mockWaitUntilReady = vi.hoisted(() => vi.fn());
 
+const mockRefundCreditsForJob = vi.hoisted(() => vi.fn(async () => null));
+
+vi.mock("@repo/api/lib/credits", () => ({
+	refundCreditsForJob: mockRefundCreditsForJob,
+}));
+
 vi.mock("assemblyai", () => {
 	const AssemblyAI = vi.fn(function (this: unknown) {
 		(this as Record<string, unknown>).files = { upload: mockUpload };

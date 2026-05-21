@@ -5,10 +5,15 @@ import { handleStuckJobs, runCleanup } from "./job-runner";
 // Mock database functions
 const markStuckJobsAsFailedMock = vi.hoisted(() => vi.fn());
 const cleanupExpiredJobsMock = vi.hoisted(() => vi.fn());
+const refundCreditsForJobMock = vi.hoisted(() => vi.fn(async () => null));
 
 vi.mock("@repo/database", () => ({
 	markStuckJobsAsFailed: markStuckJobsAsFailedMock,
 	cleanupExpiredJobs: cleanupExpiredJobsMock,
+}));
+
+vi.mock("../../../lib/credits", () => ({
+	refundCreditsForJob: refundCreditsForJobMock,
 }));
 
 vi.mock("@repo/logs", () => ({
@@ -29,7 +34,10 @@ describe("Job Runner", () => {
 
 	describe("handleStuckJobs", () => {
 		it("marks stuck jobs as failed", async () => {
-			markStuckJobsAsFailedMock.mockResolvedValue({ count: 3 });
+			markStuckJobsAsFailedMock.mockResolvedValue({
+				count: 3,
+				ids: ["job-1", "job-2", "job-3"],
+			});
 
 			const result = await handleStuckJobs(30);
 
@@ -38,7 +46,7 @@ describe("Job Runner", () => {
 		});
 
 		it("uses default timeout from job-config", async () => {
-			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0, ids: [] });
 
 			await handleStuckJobs();
 
@@ -48,7 +56,10 @@ describe("Job Runner", () => {
 		});
 
 		it("logs warning when stuck jobs are found", async () => {
-			markStuckJobsAsFailedMock.mockResolvedValue({ count: 5 });
+			markStuckJobsAsFailedMock.mockResolvedValue({
+				count: 5,
+				ids: ["a", "b", "c", "d", "e"],
+			});
 
 			await handleStuckJobs(30);
 
@@ -58,11 +69,30 @@ describe("Job Runner", () => {
 		});
 
 		it("does not log when no stuck jobs found", async () => {
-			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0 });
+			markStuckJobsAsFailedMock.mockResolvedValue({ count: 0, ids: [] });
 
 			await handleStuckJobs(30);
 
 			expect(logger.warn).not.toHaveBeenCalled();
+		});
+
+		it("refunds credits for each stuck job", async () => {
+			markStuckJobsAsFailedMock.mockResolvedValue({
+				count: 2,
+				ids: ["stuck-1", "stuck-2"],
+			});
+
+			await handleStuckJobs(30);
+
+			expect(refundCreditsForJobMock).toHaveBeenCalledTimes(2);
+			expect(refundCreditsForJobMock).toHaveBeenCalledWith(
+				"stuck-1",
+				expect.stringContaining("stuck"),
+			);
+			expect(refundCreditsForJobMock).toHaveBeenCalledWith(
+				"stuck-2",
+				expect.stringContaining("stuck"),
+			);
 		});
 	});
 

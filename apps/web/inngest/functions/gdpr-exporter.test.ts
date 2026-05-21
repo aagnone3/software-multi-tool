@@ -7,6 +7,12 @@ const mockProcessGdprExportJob = vi.hoisted(() => vi.fn());
 const mockLoggerInfo = vi.hoisted(() => vi.fn());
 const mockLoggerError = vi.hoisted(() => vi.fn());
 
+const mockRefundCreditsForJob = vi.hoisted(() => vi.fn(async () => null));
+
+vi.mock("@repo/api/lib/credits", () => ({
+	refundCreditsForJob: mockRefundCreditsForJob,
+}));
+
 vi.mock("@repo/database", () => ({
 	getToolJobById: mockGetToolJobById,
 	markJobCompleted: mockMarkJobCompleted,

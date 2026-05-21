@@ -1,5 +1,6 @@
 import { cleanupExpiredJobs, markStuckJobsAsFailed } from "@repo/database";
 import { logger } from "@repo/logs";
+import { refundCreditsForJob } from "../../../lib/credits";
 import { STUCK_JOB_TIMEOUT_MINUTES } from "./job-config";
 
 /**
@@ -39,6 +40,25 @@ export async function handleStuckJobs(
 	const result = await markStuckJobsAsFailed(timeoutMinutes);
 	if (result.count > 0) {
 		logger.warn(`Marked ${result.count} stuck jobs as failed`);
+	}
+	// Refund each stuck job's up-front deduction. Sequential rather than
+	// parallel: this runs from cron, low volume expected, and lets a slow
+	// refund query not block the others. refundCreditsForJob is idempotent
+	// so a re-run of the cron won't double-refund.
+	for (const id of result.ids) {
+		await refundCreditsForJob(id, "Refund for stuck job timeout").catch(
+			(error) => {
+				logger.error(
+					`[handleStuckJobs] Failed to refund credits for job ${id}`,
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: String(error),
+					},
+				);
+			},
+		);
 	}
 	return { count: result.count };
 }
