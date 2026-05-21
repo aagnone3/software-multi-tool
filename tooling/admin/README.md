@@ -19,10 +19,22 @@ explicitly by the admin CLI when you opt in via `--env prod`.
 | Concern | Mitigation |
 |---|---|
 | Auto-loaded by other tools | Filename is `.secrets/<env>.env` — outside `**/.env.*local` glob and outside `apps/web/.env*`. Nothing else reads it. |
-| Committed by accident | `.gitignore` covers `.secrets/` |
+| Committed by accident | **Three layers:** (1) `.gitignore` at repo root blocks `**/.secrets/`, `**/prod.env`, `**/.env.production`, etc. anywhere in the tree. (2) The `no-secret-files` pre-commit hook (`tooling/admin/scripts/check-secrets.sh`) refuses any staged file whose name OR contents look like a leaked credential (Vercel env-pull header, live Stripe keys, postgres URLs with embedded creds, AWS access keys, GitHub PATs). (3) `env pull` itself fails loudly if Vercel writes the file outside the expected `.secrets/` directory. |
 | Run against prod by mistake | Default is `--env local`. Active env is printed on every command. |
 | Untraceable use | `.secrets/audit.log` (gitignored) records every command + target env + timestamp. |
 | Mutating action by mistake | Read-only `sql` subcommand by default. See "Future work" below. |
+
+### Testing the safety net
+
+```bash
+# Repo-root attempt — blocked by .gitignore
+echo "DATABASE_URL=postgres://x:y@host/db" > prod.env
+git add prod.env  # → "ignored by one of your .gitignore files"
+
+# Force-stage attempt — blocked by the pre-commit content scanner
+git add -f prod.env
+git commit -m "leak"  # → "Refusing to commit. ... contains a Postgres URL with embedded credentials."
+```
 
 ## Commands
 
