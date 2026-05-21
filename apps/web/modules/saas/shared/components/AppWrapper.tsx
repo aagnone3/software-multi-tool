@@ -101,22 +101,25 @@ export function AppWrapper({ children }: PropsWithChildren) {
 
 			<ExitIntentUpgradeModal />
 			<JobCompletionNotifier />
-			<FreeCreditsProgressBanner />
-			<CreditRunwayBanner />
 			<NavBar />
+			{/*
+			 * Content column. In sidebar layout the column is offset by the
+			 * sidebar's 280px so the credit banners (and main card) don't sit
+			 * underneath the fixed sidebar — without this, full-width banners
+			 * bleed behind the sidebar logo on the left.
+			 */}
 			<div
-				className={cn("md:pr-4 py-4 flex", [
-					useSidebarLayout ? "min-h-[calc(100vh)] md:ml-[280px]" : "",
-				])}
+				className={cn("flex min-h-screen flex-col", {
+					"md:ml-[280px]": useSidebarLayout,
+				})}
 			>
-				<main
-					className={cn(
-						"py-6 border rounded-2xl bg-card/95 backdrop-blur-sm px-4 md:p-8 min-h-full w-full shadow-sm",
-						[useSidebarLayout ? "" : ""],
-					)}
-				>
-					<div className="container px-0">{children}</div>
-				</main>
+				<FreeCreditsProgressBanner />
+				<CreditRunwayBanner />
+				<div className="flex flex-1 py-4 md:pr-4">
+					<main className="min-h-full w-full rounded-2xl border bg-card/95 px-4 py-6 shadow-sm backdrop-blur-sm md:p-8">
+						<div className="container px-0">{children}</div>
+					</main>
+				</div>
 			</div>
 		</div>
 	);
