@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/client";
+import { getToolCreditCost } from "@repo/config";
 import {
 	createToolJob,
 	db,
@@ -9,6 +10,7 @@ import {
 import { dispatchToolJob, isKnownToolSlug } from "@repo/jobs";
 import { logger } from "@repo/logs";
 import { isStorageConfigured } from "@repo/storage";
+import { deductCredits, refundCreditsForJob } from "../../../lib/credits";
 import { publicProcedure } from "../../../orpc/procedures";
 import { uploadAudioToStorage } from "../../speaker-separation/lib/audio-storage";
 import type { AudioMetadata } from "../../speaker-separation/types";
@@ -224,6 +226,42 @@ export const createJob = publicProcedure
 			});
 		}
 
+		// Deduct credits for authenticated org users. Anonymous users are
+		// metered by rate limits instead. Refund on dispatch failure so
+		// the user isn't charged for work that never started.
+		let creditsDeducted = false;
+		if (organizationId) {
+			const cost = getToolCreditCost(toolSlug) ?? 1;
+			try {
+				await deductCredits({
+					organizationId,
+					amount: cost,
+					toolSlug,
+					jobId: job.id,
+					description: `Tool usage: ${toolSlug}`,
+				});
+				creditsDeducted = true;
+				logger.info(
+					`[CreateJob] Deducted ${cost} credit(s) for org ${organizationId}, job ${job.id}`,
+				);
+			} catch (error) {
+				logger.error(
+					`[CreateJob] Failed to deduct credits for job ${job.id}`,
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: String(error),
+					},
+				);
+				await markJobFailed(job.id, "Insufficient credits");
+				throw new ORPCError("FORBIDDEN", {
+					message:
+						"You have run out of credits. Please upgrade your plan or purchase a credit pack.",
+				});
+			}
+		}
+
 		try {
 			await dispatchToolJob(
 				toolSlug,
@@ -242,6 +280,22 @@ export const createJob = publicProcedure
 				job.id,
 				"Failed to enqueue background processing",
 			);
+			if (creditsDeducted) {
+				await refundCreditsForJob(
+					job.id,
+					"Refund for failed dispatch",
+				).catch((refundError) => {
+					logger.error(
+						`[CreateJob] Failed to refund credits for job ${job.id}`,
+						{
+							error:
+								refundError instanceof Error
+									? refundError.message
+									: String(refundError),
+						},
+					);
+				});
+			}
 			throw new ORPCError("INTERNAL_SERVER_ERROR", {
 				message: "Could not start job processing",
 			});

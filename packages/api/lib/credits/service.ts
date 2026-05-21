@@ -1,4 +1,5 @@
 import { getPlanCredits } from "@repo/config";
+import { logger } from "@repo/logs";
 import {
 	executeAtomicDeduction,
 	executeAtomicGrant,
@@ -8,6 +9,7 @@ import {
 	findCreditBalanceByOrgId,
 	findPurchaseTransaction,
 	findTransactionById,
+	findUsageTransactionByJobId,
 	type GrantPurchasedCreditsParams,
 } from "./queries";
 import {
@@ -173,6 +175,27 @@ export async function deductCredits(
 		jobId,
 		description,
 	});
+}
+
+/**
+ * Refund the credit deduction tied to a specific tool job.
+ *
+ * Safe to call even when no deduction was made (anonymous jobs, free-tier
+ * tools, dev-mode bypass): logs and returns `null` instead of throwing,
+ * so the caller can run it unconditionally on failure paths.
+ */
+export async function refundCreditsForJob(
+	jobId: string,
+	reason?: string,
+): Promise<CreditTransaction | null> {
+	const tx = await findUsageTransactionByJobId(jobId);
+	if (!tx) {
+		logger.debug(
+			`[refundCreditsForJob] No deduction found for job ${jobId}; skipping refund`,
+		);
+		return null;
+	}
+	return refundCredits({ transactionId: tx.id, reason });
 }
 
 /**
