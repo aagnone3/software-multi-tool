@@ -24,7 +24,11 @@ export function envFilePath(env: AdminEnv): string {
 		// Local re-uses the existing dev env so users don't maintain two copies.
 		return path.join(REPO_ROOT, "apps", "web", ".env.local");
 	}
-	return path.join(secretsDir(), `${env}.env`);
+	// Use canonical Next.js naming (.env.<env>) so the doctor scanner has a
+	// single filename rule to enforce across the whole tree: prod creds
+	// always live in a file called .env.production, never anything else.
+	const filename = env === "prod" ? ".env.production" : `.env.${env}`;
+	return path.join(secretsDir(), filename);
 }
 
 /**
