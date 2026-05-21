@@ -285,7 +285,7 @@ Use this skill when:
 - Migrating existing files to new path conventions
 - Debugging file access issues
 
-**Activation keywords**: file upload, storage, avatar, logo, s3, bucket, signed url, multi-tenant paths
+**Activation keywords**: file upload, storage, avatar, logo, s3, s3-compatible, r2, minio, bucket, signed url, signed upload url, multi-tenant paths, image upload, document upload, file storage
 
 ## Related Skills
 

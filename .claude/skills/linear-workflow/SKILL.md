@@ -108,8 +108,8 @@ pnpm --filter @repo/scripts linear issues close --issue PRA-19
 
 When implementation is complete:
 
-1. ✅ All ticket requirements implemented
-2. ✅ All tests passing
+1. [ ] All ticket requirements implemented
+2. [ ] All tests passing
 3. [ ] Verify you're in a worktree (not main)
 4. [ ] Commit all changes
 5. [ ] Push branch
