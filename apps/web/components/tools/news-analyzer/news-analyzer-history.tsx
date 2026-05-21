@@ -6,6 +6,7 @@ import { Spinner } from "@shared/components/Spinner";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
+import { CancelJobButton } from "@tools/components/CancelJobButton";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card } from "@ui/components/card";
@@ -255,9 +256,17 @@ export function NewsAnalyzerHistory() {
 					const job = row.original;
 					const canView =
 						job.status === "COMPLETED" || job.status === "FAILED";
+					const canCancel = job.status === "PENDING";
 
 					return (
-						<div className="flex justify-end">
+						<div className="flex justify-end gap-1">
+							{canCancel && (
+								<CancelJobButton
+									jobId={job.id}
+									toolSlug="news-analyzer"
+									onCancelled={() => refetch()}
+								/>
+							)}
 							{canView && (
 								<Button variant="ghost" size="sm" asChild>
 									<Link
