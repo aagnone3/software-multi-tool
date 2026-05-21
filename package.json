@@ -34,7 +34,8 @@
 		"db:stop": "docker compose down",
 		"db:reset": "docker compose down -v && docker compose up -d",
 		"db:status": "docker compose ps",
-		"mt": "pnpm --filter @repo/cli mt"
+		"mt": "pnpm --filter @repo/cli mt",
+		"admin": "pnpm --filter @repo/admin admin"
 	},
 	"engines": {
 		"node": ">=22.22.0"
