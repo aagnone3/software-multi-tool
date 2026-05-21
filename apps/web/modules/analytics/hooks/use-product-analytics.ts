@@ -1072,6 +1072,18 @@ type ProductEvent =
 			props: { status: string };
 	  }
 	| {
+			name: "job_cancel_clicked";
+			props: { job_id: string; tool_slug: string };
+	  }
+	| {
+			name: "job_cancel_succeeded";
+			props: { job_id: string; tool_slug: string };
+	  }
+	| {
+			name: "job_cancel_failed";
+			props: { job_id: string; tool_slug: string };
+	  }
+	| {
 			name: "speaker_separation_history_job_clicked";
 			props: { job_id: string; status: string };
 	  }
