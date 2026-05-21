@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import chalk from "chalk";
 import { Command } from "commander";
+import { doctorCommand } from "./commands/doctor";
 import { envPullCommand } from "./commands/env-pull";
 import { sqlCommand } from "./commands/sql";
 import { type AdminEnv, isAdminEnv, loadEnv } from "./env";
@@ -73,6 +74,24 @@ program
 			await sqlCommand({ env: opts.env, file: opts.file, sql: inline });
 		},
 	);
+
+// -----------------------------------------------------------------------------
+// `admin doctor`
+// -----------------------------------------------------------------------------
+program
+	.command("doctor")
+	.description(
+		"Scan the working tree for misplaced production env files. " +
+			"Same check that runs as predev/prebuild.",
+	)
+	.action(async () => {
+		await doctorCommand();
+		console.log(
+			chalk.green(
+				"✓ No production env files found outside tooling/admin/.secrets/",
+			),
+		);
+	});
 
 program.parseAsync().catch((error: unknown) => {
 	console.error(
