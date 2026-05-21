@@ -24,6 +24,14 @@ import React, { useEffect, useState } from "react";
 
 const STORAGE_KEY = "first-job-celebration-shown";
 
+// Only celebrate if the user's single completed job is freshly completed —
+// not one they completed days ago and are now revisiting. Without this gate,
+// any state where `completedJobs.length === 1` re-triggers the modal whenever
+// localStorage has been wiped (incognito, different device, cleared storage,
+// Safari ITP eviction). 5 minutes is generous enough to survive slow
+// navigation after the result lands without rewarding stale revisits.
+const RECENCY_WINDOW_MS = 5 * 60 * 1000;
+
 interface FirstJobCelebrationModalProps {
 	className?: string;
 }
@@ -51,6 +59,24 @@ export function FirstJobCelebrationModal({
 		if (jobs.length !== 1) {
 			return;
 		}
+		// Require that the single completed job was *just* completed. If the
+		// user is revisiting after the celebration was already triggered
+		// yesterday (or earlier) but localStorage has since been wiped, this
+		// prevents the modal from popping up again.
+		const completedAt = jobs[0]?.completedAt;
+		if (!completedAt) {
+			return;
+		}
+		const completedMs =
+			typeof completedAt === "string" || typeof completedAt === "number"
+				? new Date(completedAt).getTime()
+				: completedAt.getTime();
+		if (Number.isNaN(completedMs)) {
+			return;
+		}
+		if (Date.now() - completedMs > RECENCY_WINDOW_MS) {
+			return;
+		}
 		const alreadyShown = localStorage.getItem(STORAGE_KEY);
 		if (alreadyShown === "true") {
 			return;
@@ -61,7 +87,7 @@ export function FirstJobCelebrationModal({
 			track({ name: "first_job_celebration_shown", props: {} });
 		}, 1500);
 		return () => clearTimeout(timer);
-	}, [jobs.length]);
+	}, [jobs]);
 
 	const handleClose = (cta?: "upgrade" | "dismiss") => {
 		localStorage.setItem(STORAGE_KEY, "true");

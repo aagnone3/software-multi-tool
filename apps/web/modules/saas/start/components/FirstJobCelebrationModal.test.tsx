@@ -48,7 +48,13 @@ describe("FirstJobCelebrationModal", () => {
 
 	it("opens after 1.5s when there is exactly 1 completed job", async () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -61,7 +67,13 @@ describe("FirstJobCelebrationModal", () => {
 	it("does not open again if already shown (localStorage)", async () => {
 		localStorage.setItem("first-job-celebration-shown", "true");
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -86,9 +98,46 @@ describe("FirstJobCelebrationModal", () => {
 		expect(screen.queryByText(/You just saved real time/)).toBeNull();
 	});
 
-	it("shows upgrade CTA and explore button with real credit count", async () => {
+	it("does not open when the single completed job is older than the recency window", async () => {
+		const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: oneHourAgo,
+				},
+			],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn() as any,
+		} as any);
+		render(<FirstJobCelebrationModal />);
+		act(() => vi.runAllTimers());
+		expect(screen.queryByText(/You just saved real time/)).toBeNull();
+	});
+
+	it("does not open when the single completed job has no completedAt", async () => {
 		mockUseJobsList.mockReturnValue({
 			jobs: [{ id: "job1", status: "COMPLETED" }],
+			isLoading: false,
+			error: null,
+			refetch: vi.fn() as any,
+		} as any);
+		render(<FirstJobCelebrationModal />);
+		act(() => vi.runAllTimers());
+		expect(screen.queryByText(/You just saved real time/)).toBeNull();
+	});
+
+	it("shows upgrade CTA and explore button with real credit count", async () => {
+		mockUseJobsList.mockReturnValue({
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -104,7 +153,13 @@ describe("FirstJobCelebrationModal", () => {
 
 	it("shows fallback text when credit balance is unavailable", async () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -117,7 +172,13 @@ describe("FirstJobCelebrationModal", () => {
 
 	it("shows singular 'credit' when exactly 1 credit remains", async () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -132,7 +193,13 @@ describe("FirstJobCelebrationModal", () => {
 
 	it("closes and saves to localStorage on dismiss", async () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
@@ -150,7 +217,13 @@ describe("FirstJobCelebrationModal", () => {
 
 	it("links to default billing path when no org", async () => {
 		mockUseJobsList.mockReturnValue({
-			jobs: [{ id: "job1", status: "COMPLETED" }],
+			jobs: [
+				{
+					id: "job1",
+					status: "COMPLETED",
+					completedAt: new Date().toISOString(),
+				},
+			],
 			isLoading: false,
 			error: null,
 			refetch: vi.fn() as any,
