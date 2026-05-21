@@ -75,6 +75,19 @@ export async function findUsageTransactionByJobId(
 }
 
 /**
+ * Check whether a refund has already been issued for this tool job. Used
+ * to make `refundCreditsForJob` idempotent under Inngest retries and
+ * repeated cron sweeps.
+ */
+export async function hasRefundForJobId(jobId: string): Promise<boolean> {
+	const refund = await db.creditTransaction.findFirst({
+		where: { jobId, type: "REFUND" },
+		select: { id: true },
+	});
+	return refund !== null;
+}
+
+/**
  * Create a new credit transaction
  */
 export async function createTransaction(

@@ -237,19 +237,31 @@ export async function getStuckJobs(timeoutMinutes = 30) {
 export async function markStuckJobsAsFailed(timeoutMinutes = 30) {
 	const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000);
 
-	return await db.toolJob.updateMany({
+	// Find first so we can return the affected job ids — the caller needs
+	// them to refund the up-front credit deductions.
+	const stuck = await db.toolJob.findMany({
 		where: {
 			status: "PROCESSING",
-			startedAt: {
-				lt: cutoff,
-			},
+			startedAt: { lt: cutoff },
 		},
+		select: { id: true },
+	});
+
+	if (stuck.length === 0) {
+		return { count: 0, ids: [] as string[] };
+	}
+
+	const ids = stuck.map((j) => j.id);
+	const result = await db.toolJob.updateMany({
+		where: { id: { in: ids } },
 		data: {
 			status: "FAILED",
 			error: "Job timed out",
 			completedAt: new Date(),
 		},
 	});
+
+	return { count: result.count, ids };
 }
 
 export async function cleanupExpiredJobs() {

@@ -1,5 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { cancelToolJob, getToolJobById } from "@repo/database";
+import { logger } from "@repo/logs";
+import { refundCreditsForJob } from "../../../lib/credits";
 import { publicProcedure } from "../../../orpc/procedures";
 import { CancelJobInputSchema } from "../types";
 
@@ -55,6 +57,23 @@ export const cancelJob = publicProcedure
 		}
 
 		const cancelledJob = await cancelToolJob(jobId);
+
+		// Refund the up-front credit deduction so the user isn't charged
+		// for work that was cancelled before it started. Safe to call for
+		// anonymous jobs (no deduction → no-op).
+		await refundCreditsForJob(jobId, "Refund for cancelled job").catch(
+			(error) => {
+				logger.error(
+					`[CancelJob] Failed to refund credits for job ${jobId}`,
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: String(error),
+					},
+				);
+			},
+		);
 
 		return { job: cancelledJob };
 	});

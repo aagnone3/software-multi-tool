@@ -1,3 +1,4 @@
+import { refundCreditsForJob } from "@repo/api/lib/credits";
 import { processFeedbackJob } from "@repo/api/modules/feedback-analyzer";
 import type { Prisma } from "@repo/database";
 import {
@@ -67,10 +68,23 @@ export const feedbackAnalyzer = inngest.createFunction(
 					},
 				);
 			} else {
-				await markJobFailed(
+				const reason = String(result.error ?? "Unknown error");
+				await markJobFailed(toolJobId, reason);
+				await refundCreditsForJob(
 					toolJobId,
-					String(result.error ?? "Unknown error"),
-				);
+					`Refund for failed job: ${reason}`,
+				).catch((refundError) => {
+					logger.error(
+						"[Inngest:FeedbackAnalyzer] Failed to refund credits",
+						{
+							toolJobId,
+							error:
+								refundError instanceof Error
+									? refundError.message
+									: String(refundError),
+						},
+					);
+				});
 				logger.error("[Inngest:FeedbackAnalyzer] Job failed", {
 					toolJobId,
 					error: result.error,

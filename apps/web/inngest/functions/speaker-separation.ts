@@ -1,3 +1,4 @@
+import { refundCreditsForJob } from "@repo/api/lib/credits";
 import {
 	calculateSpeakerStats,
 	downloadAudioFromStorage,
@@ -238,11 +239,27 @@ export const speakerSeparation = inngest.createFunction(
 
 		// Step 5: Process results and update database
 		await step.run("process-and-save", async () => {
-			if (!transcriptResult.success) {
-				await markJobFailed(
-					toolJobId,
-					transcriptResult.error ?? "Transcription failed",
+			const refundOnFailure = async (reason: string) => {
+				await refundCreditsForJob(toolJobId, reason).catch(
+					(refundError) => {
+						logger.error(
+							"[Inngest:SpeakerSeparation] Failed to refund credits",
+							{
+								toolJobId,
+								error:
+									refundError instanceof Error
+										? refundError.message
+										: String(refundError),
+							},
+						);
+					},
 				);
+			};
+
+			if (!transcriptResult.success) {
+				const reason = transcriptResult.error ?? "Transcription failed";
+				await markJobFailed(toolJobId, reason);
+				await refundOnFailure(`Refund for failed job: ${reason}`);
 				logger.error("[Inngest:SpeakerSeparation] Job failed", {
 					toolJobId,
 					error: transcriptResult.error,
@@ -255,6 +272,9 @@ export const speakerSeparation = inngest.createFunction(
 				!transcriptResult.audioDuration
 			) {
 				await markJobFailed(toolJobId, "Missing transcription data");
+				await refundOnFailure(
+					"Refund for failed job: Missing transcription data",
+				);
 				logger.error("[Inngest:SpeakerSeparation] Missing data", {
 					toolJobId,
 				});

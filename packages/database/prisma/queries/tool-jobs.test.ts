@@ -294,9 +294,15 @@ describe("tool-jobs queries", () => {
 	});
 
 	describe("markStuckJobsAsFailed", () => {
-		it("marks processing jobs beyond timeout as FAILED", async () => {
+		it("marks processing jobs beyond timeout as FAILED and returns their ids", async () => {
+			mocks.toolJobFindMany.mockResolvedValue([
+				{ id: "stuck-1" },
+				{ id: "stuck-2" },
+			]);
 			mocks.toolJobUpdateMany.mockResolvedValue({ count: 2 });
+
 			const result = await markStuckJobsAsFailed();
+
 			expect(mocks.toolJobUpdateMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					data: expect.objectContaining({
@@ -305,7 +311,14 @@ describe("tool-jobs queries", () => {
 					}),
 				}),
 			);
-			expect(result).toEqual({ count: 2 });
+			expect(result).toEqual({ count: 2, ids: ["stuck-1", "stuck-2"] });
+		});
+
+		it("returns count:0 + empty ids when nothing is stuck", async () => {
+			mocks.toolJobFindMany.mockResolvedValue([]);
+			const result = await markStuckJobsAsFailed();
+			expect(result).toEqual({ count: 0, ids: [] });
+			expect(mocks.toolJobUpdateMany).not.toHaveBeenCalled();
 		});
 	});
 

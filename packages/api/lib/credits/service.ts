@@ -11,6 +11,7 @@ import {
 	findTransactionById,
 	findUsageTransactionByJobId,
 	type GrantPurchasedCreditsParams,
+	hasRefundForJobId,
 } from "./queries";
 import {
 	type CreditBalance,
@@ -188,6 +189,16 @@ export async function refundCreditsForJob(
 	jobId: string,
 	reason?: string,
 ): Promise<CreditTransaction | null> {
+	// Idempotent: skip if this job has already been refunded. Without this
+	// check, Inngest retries and repeated cron sweeps would refund twice
+	// because the original USAGE transaction is still on file.
+	if (await hasRefundForJobId(jobId)) {
+		logger.debug(
+			`[refundCreditsForJob] Job ${jobId} already refunded; skipping`,
+		);
+		return null;
+	}
+
 	const tx = await findUsageTransactionByJobId(jobId);
 	if (!tx) {
 		logger.debug(
